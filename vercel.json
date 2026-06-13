@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/success", "destination": "/success.html" }
-  ]
+  ],
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 30
+    }
+  }
 }
