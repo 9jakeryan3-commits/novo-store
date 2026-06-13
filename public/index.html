@@ -663,7 +663,10 @@
 
       <details class="faq-item">
         <summary class="faq-q">Does it work with my broker?</summary>
-        <div class="faq-a">NoVo uses <strong>Tradier</strong> for live options execution and <strong>Alpaca</strong> for paper trading. Both are required accounts. Tradier is the live brokerage — options orders route through their official API. A minimum $5 deposit is required to activate Tradier's data stream, even in paper mode. If you already have Tradier, you're most of the way there.</div>
+        <div class="faq-a"><strong>Tradier is always required</strong> — it powers the live WebSocket tick stream that feeds all signal calculations (tape imbalance, RVOL, GEX). This stream runs regardless of whether you're in paper or live mode. A minimum $5 deposit activates it.<br><br>
+        <strong>Paper mode:</strong> trade execution routes through Alpaca (free, fully simulated — no real money).<br>
+        <strong>Live mode:</strong> trade execution routes through Tradier (real money, real fills).<br><br>
+        You start in paper mode by default. Switch to live when you're confident in how the system behaves.</div>
       </details>
 
       <details class="faq-item">
