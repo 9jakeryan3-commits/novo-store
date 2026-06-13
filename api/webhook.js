@@ -5,8 +5,10 @@ const { Resend } = require('resend');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-function generateKey() {
-  const token = crypto.randomBytes(8).toString('hex').toUpperCase();
+function generateKey(sessionId) {
+  // Deterministic: same Stripe session always produces the same key, so retries are idempotent
+  const token = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
+    .update(`key:${sessionId}`).digest('hex').substring(0, 16).toUpperCase();
   const sig = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
     .update(token).digest('hex').substring(0, 8).toUpperCase();
   return `NOVO-${token.substring(0, 8)}-${token.substring(8)}-${sig}`;
@@ -95,7 +97,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    const licenseKey = generateKey();
+    const licenseKey = generateKey(session.id);
 
     try {
       await resend.emails.send({
