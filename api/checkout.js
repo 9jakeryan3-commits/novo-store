@@ -3,7 +3,7 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', process.env.SITE_URL || '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.SITE_URL || 'https://novo-aitrading.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -15,8 +15,8 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       mode: 'payment',
-      success_url: process.env.SITE_URL + '/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: process.env.SITE_URL + '/#pricing',
+      success_url: (process.env.SITE_URL || 'https://novo-aitrading.app') + '/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: (process.env.SITE_URL || 'https://novo-aitrading.app') + '/#pricing',
       billing_address_collection: 'auto',
     });
     res.status(200).json({ url: session.url });

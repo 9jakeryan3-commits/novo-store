@@ -89,14 +89,25 @@ module.exports = async (req, res) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const email = session?.customer_details?.email;
-    if (email) {
-      const key = generateKey();
+
+    if (!email) {
+      console.error(`[webhook] No email for session ${session.id}`);
+      return res.status(200).json({ received: true });
+    }
+
+    const licenseKey = generateKey();
+
+    try {
       await resend.emails.send({
-        from: process.env.FROM_EMAIL || 'NoVo <orders@novo-trading.com>',
+        from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         to: [email],
         subject: 'NoVo v.fast — Your Files + License Key',
-        html: emailHtml(key, process.env.NOVO_ZIP_URL),
+        html: emailHtml(licenseKey, process.env.NOVO_ZIP_URL),
       });
+    } catch (err) {
+      // Key and buyer email logged here so you can resend manually via Vercel logs
+      console.error(`[webhook] Email failed — session:${session.id} email:${email} key:${licenseKey} error:${err.message}`);
+      return res.status(500).json({ error: 'Email delivery failed' });
     }
   }
 
