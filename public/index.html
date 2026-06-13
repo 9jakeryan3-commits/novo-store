@@ -14,6 +14,7 @@
     --blue:  #3b82f6;
     --amber: #f59e0b;
     --green: #10b981;
+    --red:   #ef4444;
     --txt1:  #eaf3ff;
     --txt2:  #8aacc8;
     --txt3:  #506e8f;
@@ -48,6 +49,18 @@
   .btn-secondary:hover { border-color: var(--blue); color: var(--txt1); }
   .hero-sub { margin-top: 28px; font-size: 13px; color: var(--txt3); }
 
+  /* ── Pain section ── */
+  .pain { padding: 64px 0; background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); }
+  .pain-intro { font-size: 11px; font-weight: 700; color: var(--amber); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .pain h2 { font-size: clamp(22px, 3.5vw, 30px); font-weight: 800; color: var(--txt1); letter-spacing: -0.5px; margin-bottom: 32px; }
+  .pain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .pain-item { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border: 1px solid var(--bdr); border-left: 3px solid var(--red); border-radius: 6px; padding: 16px; }
+  .pain-x { color: var(--red); font-weight: 900; font-size: 15px; flex-shrink: 0; line-height: 1.5; }
+  .pain-item p { font-size: 14px; color: var(--txt2); line-height: 1.55; }
+  .pain-item p strong { color: var(--txt1); }
+  .pain-resolve { margin-top: 28px; font-size: 15px; color: var(--txt2); line-height: 1.7; }
+  .pain-resolve strong { color: var(--blue); }
+
   /* ── Stats bar ── */
   .stats { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 28px 0; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
@@ -71,6 +84,28 @@
   .how-card h3 { font-size: 16px; font-weight: 700; color: var(--txt1); margin-bottom: 10px; }
   .how-card p { font-size: 14px; color: var(--txt2); line-height: 1.6; }
 
+  /* ── Dashboard preview ── */
+  .dp-wrap { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; max-width: 780px; margin: 48px auto 0; }
+  .dp-bar { display: flex; align-items: center; gap: 8px; background: #07101f; border-bottom: 1px solid var(--bdr); padding: 12px 20px; }
+  .dp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dp-logo { font-size: 13px; font-weight: 700; color: var(--txt1); margin-left: 8px; letter-spacing: -0.3px; }
+  .dp-live { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
+  .dp-time { font-size: 11px; color: var(--txt3); font-family: monospace; margin-left: 12px; }
+  .dp-metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--bdr); }
+  .dp-metric { padding: 16px 20px; border-right: 1px solid var(--bdr); }
+  .dp-metric:last-child { border-right: none; }
+  .dp-metric-label { font-size: 10px; color: var(--txt3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .dp-metric-val { font-size: 20px; font-weight: 700; color: var(--txt1); font-family: monospace; }
+  .dp-metric-val.green { color: var(--green); }
+  .dp-metric-val.amber { color: var(--amber); }
+  .dp-metric-val.blue { color: var(--blue); }
+  .dp-position { display: flex; align-items: center; gap: 24px; padding: 14px 20px; border-bottom: 1px solid var(--bdr); flex-wrap: wrap; }
+  .dp-pos-label { font-size: 10px; color: var(--txt3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .dp-pos-val { font-size: 13px; color: var(--txt2); font-family: monospace; }
+  .dp-pos-val.green { color: var(--green); }
+  .dp-pos-val.amber { color: var(--amber); }
+  .dp-caption { padding: 10px 20px; font-size: 11px; color: var(--txt3); text-align: center; }
+
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .feature { display: flex; gap: 14px; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 20px; }
@@ -83,6 +118,29 @@
   .included-item { display: flex; align-items: center; gap: 10px; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 6px; padding: 14px 16px; }
   .check { color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .included-item span { font-size: 14px; color: var(--txt2); }
+
+  /* ── Inline CTA ── */
+  .cta-inline { text-align: center; padding: 48px 0 0; }
+  .cta-inline p { font-size: 13px; color: var(--txt3); margin-top: 14px; }
+
+  /* ── Cost breakdown ── */
+  .cost-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
+  .cost-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 24px; }
+  .cost-card h3 { font-size: 13px; font-weight: 700; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+  .cost-card ul { list-style: none; }
+  .cost-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--bdr); display: flex; justify-content: space-between; align-items: center; }
+  .cost-card li:last-child { border-bottom: none; }
+  .cost-val { color: var(--txt3); font-size: 13px; }
+  .cost-compare { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; overflow: hidden; }
+  .cost-compare-title { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: 2px; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid var(--bdr); }
+  .cost-compare table { width: 100%; border-collapse: collapse; }
+  .cost-compare th { font-size: 12px; color: var(--txt3); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--bdr); font-weight: 600; }
+  .cost-compare th:not(:first-child) { text-align: center; }
+  .cost-compare td { font-size: 14px; color: var(--txt2); padding: 10px 20px; border-bottom: 1px solid var(--bdr); }
+  .cost-compare td:not(:first-child) { text-align: center; }
+  .cost-compare tr:last-child td { border-bottom: none; }
+  .cost-novo { color: var(--green); font-weight: 700; }
+  .cost-sub { color: var(--txt3); }
 
   /* ── Pricing ── */
   #pricing { text-align: center; }
@@ -98,16 +156,18 @@
   .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
   .price-btn { width: 100%; background: var(--blue); color: #fff; border: none; padding: 16px; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity .15s; }
   .price-btn:hover { opacity: 0.85; }
-  .price-secure { font-size: 12px; color: var(--txt3); margin-top: 16px; }
+  .price-secure { font-size: 12px; color: var(--txt3); margin-top: 12px; }
+  .price-guarantee { margin-top: 16px; background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.2); border-radius: 6px; padding: 14px 16px; font-size: 13px; color: var(--txt2); line-height: 1.6; text-align: left; }
+  .price-guarantee strong { color: var(--green); }
 
-  /* ── Requirements ── */
-  .req-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .req-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 24px; }
-  .req-card h3 { font-size: 13px; font-weight: 700; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
-  .req-card ul { list-style: none; }
-  .req-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--bdr); display: flex; justify-content: space-between; align-items: center; }
-  .req-card li:last-child { border-bottom: none; }
-  .req-cost { color: var(--txt3); font-size: 13px; }
+  /* ── FAQ ── */
+  .faq-list { max-width: 700px; }
+  details.faq-item { border: 1px solid var(--bdr); border-radius: 8px; margin-bottom: 8px; background: var(--navy2); }
+  summary.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; font-size: 15px; font-weight: 600; color: var(--txt1); cursor: pointer; list-style: none; gap: 16px; }
+  summary.faq-q::-webkit-details-marker { display: none; }
+  summary.faq-q::after { content: '+'; color: var(--blue); font-size: 20px; font-weight: 300; flex-shrink: 0; line-height: 1; }
+  details[open] summary.faq-q::after { content: '−'; }
+  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--bdr); }
 
   /* ── Disclaimer ── */
   .disclaimer { background: var(--navy2); border-top: 1px solid var(--bdr); padding: 32px 0; text-align: center; }
@@ -119,10 +179,14 @@
   @media (max-width: 640px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     .stat { border-right: none; }
+    .pain-grid { grid-template-columns: 1fr; }
     .how-grid { grid-template-columns: 1fr; }
+    .dp-metrics { grid-template-columns: repeat(2, 1fr); }
+    .dp-metric:nth-child(2) { border-right: none; }
     .features-grid { grid-template-columns: 1fr; }
     .included-grid { grid-template-columns: 1fr; }
-    .req-grid { grid-template-columns: 1fr; }
+    .cost-grid { grid-template-columns: 1fr; }
+    .cost-compare { overflow-x: auto; }
   }
 </style>
 </head>
@@ -131,7 +195,7 @@
 <nav>
   <div class="nav-inner">
     <div class="nav-logo">No<span>Vo</span> <span style="font-size:13px;font-weight:400;color:var(--txt3)">v.fast</span></div>
-    <button class="nav-buy" onclick="checkout()">Buy Now — $249</button>
+    <button class="nav-buy" onclick="checkout()" data-price-prefix="Buy Now — $">Buy Now — $249</button>
   </div>
 </nav>
 
@@ -142,23 +206,48 @@
     <h1>Trade with<br><span>machine precision.</span><br>Not emotion.</h1>
     <p>NoVo handles the execution layer — tape reading, signal scoring, order routing, and exits — the same way every session, at machine speed, without hesitation or second-guessing.</p>
     <div class="hero-cta">
-      <button class="btn-primary" onclick="checkout()">Get NoVo v.fast — $249</button>
+      <button class="btn-primary" onclick="checkout()" data-price-prefix="Get NoVo v.fast — $">Get NoVo v.fast — $249</button>
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
     </div>
     <p class="hero-sub">One-time payment &nbsp;·&nbsp; Instant delivery &nbsp;·&nbsp; Lifetime license</p>
   </div>
 </section>
 
-<hr class="divider">
+<!-- PAIN -->
+<div class="pain">
+  <div class="container">
+    <div class="pain-intro">Sound familiar?</div>
+    <h2>You know how to trade.<br>The problem is execution.</h2>
+    <div class="pain-grid">
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <p><strong>You held a loser too long</strong> because you were sure it would come back — then gave up a day's P&L in one trade.</p>
+      </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <p><strong>You missed the entry</strong> watching it move without you, then chased it at the worst possible price.</p>
+      </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <p><strong>You can't watch the screen all day</strong> — but the moment you look away, the trade moves against you.</p>
+      </div>
+      <div class="pain-item">
+        <div class="pain-x">✕</div>
+        <p><strong>You took a revenge trade</strong> after a loss, broke your own rules, and made the day significantly worse.</p>
+      </div>
+    </div>
+    <p class="pain-resolve">These aren't knowledge problems. They're execution problems. <strong>NoVo removes the execution layer from your hands entirely.</strong></p>
+  </div>
+</div>
 
 <!-- STATS -->
 <div class="stats">
   <div class="container">
     <div class="stats-grid">
-      <div class="stat"><div class="stat-val blue">3</div><div class="stat-label">Windows Services</div></div>
-      <div class="stat"><div class="stat-val amber">19</div><div class="stat-label">Protected Python Files</div></div>
-      <div class="stat"><div class="stat-val green">0.5s</div><div class="stat-label">Telemetry Interval</div></div>
-      <div class="stat"><div class="stat-val blue">SPY</div><div class="stat-label">Instrument</div></div>
+      <div class="stat"><div class="stat-val blue">5s</div><div class="stat-label">Signal Scan Cycle</div></div>
+      <div class="stat"><div class="stat-val amber">8-tier</div><div class="stat-label">Exit Hierarchy</div></div>
+      <div class="stat"><div class="stat-val green">$0</div><div class="stat-label">Monthly License Fee</div></div>
+      <div class="stat"><div class="stat-val blue">1DTE</div><div class="stat-label">SPY Options Focus</div></div>
     </div>
   </div>
 </div>
@@ -185,6 +274,44 @@
         <h3>Rules-Based Exit Engine</h3>
         <p>8-tier exit hierarchy: hard stops, trailing exits, breakeven savers, TP1/TP2, structural reversal detection, and daily circuit breakers. Math dictates exits, not emotion.</p>
       </div>
+    </div>
+
+    <!-- DASHBOARD PREVIEW -->
+    <div class="dp-wrap">
+      <div class="dp-bar">
+        <div class="dp-dot" style="background:#ef4444"></div>
+        <div class="dp-dot" style="background:#f59e0b"></div>
+        <div class="dp-dot" style="background:#10b981"></div>
+        <div class="dp-logo">NoVo v.fast &nbsp;·&nbsp; C2 Dashboard</div>
+        <div class="dp-live">● LIVE</div>
+        <div class="dp-time">10:42:17 ET</div>
+      </div>
+      <div class="dp-metrics">
+        <div class="dp-metric">
+          <div class="dp-metric-label">Apex Score</div>
+          <div class="dp-metric-val amber">7.4 / 10</div>
+        </div>
+        <div class="dp-metric">
+          <div class="dp-metric-label">Daily P&amp;L</div>
+          <div class="dp-metric-val green">+$284</div>
+        </div>
+        <div class="dp-metric">
+          <div class="dp-metric-label">Signal Bias</div>
+          <div class="dp-metric-val blue">LONG</div>
+        </div>
+        <div class="dp-metric">
+          <div class="dp-metric-label">Status</div>
+          <div class="dp-metric-val green">TRADING</div>
+        </div>
+      </div>
+      <div class="dp-position">
+        <div><div class="dp-pos-label">Position</div><div class="dp-pos-val">SPY 592C · 0DTE</div></div>
+        <div><div class="dp-pos-label">Entry</div><div class="dp-pos-val">$1.18</div></div>
+        <div><div class="dp-pos-label">Current</div><div class="dp-pos-val green">$1.41</div></div>
+        <div><div class="dp-pos-label">Unrealized</div><div class="dp-pos-val green">+$230 · +19.5%</div></div>
+        <div><div class="dp-pos-label">Exit Target</div><div class="dp-pos-val amber">TP1 at $1.53</div></div>
+      </div>
+      <div class="dp-caption">Dashboard preview — accessible from any device via Tailscale HTTPS</div>
     </div>
   </div>
 </section>
@@ -260,6 +387,77 @@
       <div class="included-item"><span class="check">✓</span><span>Start &amp; Troubleshoot Guide (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Direct support — reply to your order email</span></div>
     </div>
+    <div class="cta-inline">
+      <button class="btn-primary" onclick="checkout()" data-price-prefix="Get NoVo v.fast — $">Get NoVo v.fast — $249</button>
+      <p>One-time payment &nbsp;·&nbsp; Instant delivery &nbsp;·&nbsp; Lifetime license</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COST BREAKDOWN -->
+<section>
+  <div class="container">
+    <div class="section-label">What It Costs to Run</div>
+    <div class="section-title">Know the full picture before you buy.</div>
+    <p class="section-sub">NoVo requires a few third-party accounts for data and brokerage. Here's everything laid out.</p>
+    <div class="cost-grid">
+      <div class="cost-card">
+        <h3>Required Accounts</h3>
+        <ul>
+          <li>Tradier Brokerage <span class="cost-val">Free / $10/mo</span></li>
+          <li>MarketData.app Quant <span class="cost-val">~$125/mo</span></li>
+          <li>Alpaca (paper trading) <span class="cost-val">Free</span></li>
+          <li>AI Provider (Gemini or Claude) <span class="cost-val">~$30–60/mo</span></li>
+          <li>Tailscale <span class="cost-val">Free</span></li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <h3>Hardware &amp; OS</h3>
+        <ul>
+          <li>Windows 10 or 11 <span class="cost-val">Required</span></li>
+          <li>Python 3.12 <span class="cost-val">Free</span></li>
+          <li>8 GB RAM minimum <span class="cost-val">16 GB recommended</span></li>
+          <li>PC on during market hours <span class="cost-val">9:30 AM – 4:15 PM ET</span></li>
+          <li>Stable internet connection <span class="cost-val">Required</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="cost-compare">
+      <div class="cost-compare-title">NoVo vs. subscription-based algo tools — total cost comparison</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="cost-sub">Subscription Algo Tool</th>
+            <th class="cost-novo">NoVo v.fast</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>License fee</td>
+            <td class="cost-sub">$99–199/mo</td>
+            <td class="cost-novo">$249 once</td>
+          </tr>
+          <tr>
+            <td>Data &amp; API costs</td>
+            <td class="cost-sub">$155–200/mo (you still pay these)</td>
+            <td class="cost-novo">$155–195/mo</td>
+          </tr>
+          <tr>
+            <td>Year 1 total</td>
+            <td class="cost-sub">$3,348 – $4,788</td>
+            <td class="cost-novo">$2,109 – $2,589</td>
+          </tr>
+          <tr>
+            <td>Year 2 onward</td>
+            <td class="cost-sub">Same recurring cost every year</td>
+            <td class="cost-novo">Data costs only — no license fee ever again</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -277,7 +475,7 @@
       <div class="price-once">One-time payment &nbsp;·&nbsp; Lifetime license</div>
       <ul class="price-features">
         <li>Complete NoVo v.fast v3.2.2 system</li>
-        <li>Machine-bound license key (transferable)</li>
+        <li>Machine-bound license key (transferable on request)</li>
         <li>Automated Windows setup script</li>
         <li>Full documentation PDFs</li>
         <li>Direct email support</li>
@@ -285,39 +483,62 @@
       </ul>
       <button class="price-btn" onclick="checkout()">Buy Now — Instant Delivery</button>
       <p class="price-secure">🔒 &nbsp;Secure checkout via Stripe &nbsp;·&nbsp; Files delivered to your email</p>
+      <div class="price-guarantee">
+        <strong>7-day setup guarantee.</strong> If you follow the setup guide and can't get NoVo running within 7 days, reply to your order email and I'll work through it with you personally — or refund you in full.
+      </div>
     </div>
   </div>
 </section>
 
 <hr class="divider">
 
-<!-- REQUIREMENTS -->
+<!-- FAQ -->
 <section>
   <div class="container">
-    <div class="section-label">Requirements</div>
-    <div class="section-title">What you need before buying.</div>
-    <p class="section-sub">NoVo requires accounts with these services. Monthly operating cost is approximately $155–195/mo.</p>
-    <div class="req-grid">
-      <div class="req-card">
-        <h3>Required Accounts</h3>
-        <ul>
-          <li>Tradier Brokerage <span class="req-cost">Free / $10/mo</span></li>
-          <li>MarketData.app Quant <span class="req-cost">~$125/mo</span></li>
-          <li>Alpaca (paper trading) <span class="req-cost">Free</span></li>
-          <li>AI Provider (Gemini or Claude) <span class="req-cost">~$30–60/mo</span></li>
-          <li>Tailscale <span class="req-cost">Free</span></li>
-        </ul>
-      </div>
-      <div class="req-card">
-        <h3>Hardware &amp; OS</h3>
-        <ul>
-          <li>Windows 10 or 11 <span class="req-cost">Required</span></li>
-          <li>Python 3.12 <span class="req-cost">Free</span></li>
-          <li>8 GB RAM minimum <span class="req-cost">16 GB recommended</span></li>
-          <li>PC on during market hours <span class="req-cost">9:30 AM – 4:15 PM ET</span></li>
-          <li>Stable internet connection <span class="req-cost">Required</span></li>
-        </ul>
-      </div>
+    <div class="section-label">FAQ</div>
+    <div class="section-title">Common questions.</div>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary class="faq-q">Does it work with my broker?</summary>
+        <div class="faq-a">NoVo uses Tradier for live options execution and Alpaca for paper trading. Both are required. Tradier is the live brokerage — trades route through their official API. If you already have a Tradier account, you're most of the way there.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Do I need to watch the screen all day?</summary>
+        <div class="faq-a">No. NoVo runs as three persistent Windows services that start automatically with your PC and run in the background through market hours. You can monitor everything — positions, P&L, signal state, circuit breaker status — from your phone via the mobile dashboard. The system handles entries, exits, and position management on its own.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Can it lose money?</summary>
+        <div class="faq-a">Yes — and you should know that before buying. NoVo is an execution tool, not a guarantee. It takes trades based on configurable rules and a multi-layer signal score, and like any trading system it will have losing trades and losing days. You configure the daily max loss limit, position sizing, and stop levels. Start in paper mode, understand how the system behaves in real market conditions, and only run real capital you're prepared to risk.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">What happens if my PC restarts during market hours?</summary>
+        <div class="faq-a">All three NoVo services are registered via NSSM and configured to restart automatically. If the machine reboots, services come back up on their own within seconds. Any open position at the time of restart is picked up from your broker account on reconnect.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Is algorithmic trading via API legal?</summary>
+        <div class="faq-a">Yes. NoVo connects to your own Tradier brokerage account through their official retail API — the same API Tradier explicitly provides for automated trading. You're placing trades in your own account. Algorithmic trading via broker APIs is fully legal for retail accounts in the US.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">What does the AI actually do?</summary>
+        <div class="faq-a">The AI (Google Gemini or Anthropic Claude — your choice, configured in your .env) acts as a visual chart reader. Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider for a directional read. That read becomes one input into the entry signal — it won't take a long trade if the AI reads the structure as bearish. The AI doesn't make trading decisions; the algorithm does. The AI is one signal layer among several.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Can I adjust the risk settings?</summary>
+        <div class="faq-a">Yes — everything is adjustable from the dashboard without touching code. Daily max loss, profit goal, position size, Apex Score entry threshold, TP1/TP2 levels, trailing stop behavior — all configurable live. Changes take effect on the next scan cycle. No restart required.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">How does setup work?</summary>
+        <div class="faq-a">After purchase, your zip file and license key arrive by email. Unzip to C:\Trading Algo\NoVo v.fast, rename .env.template to .env, paste your license key and API credentials, then right-click setup.ps1 and run as Administrator. The script installs Python dependencies, Redis, NSSM, registers all three services, and starts the system. The full walkthrough is in the included PDF — most people are running in under 20 minutes.</div>
+      </details>
+
     </div>
   </div>
 </section>
@@ -336,16 +557,17 @@ async function initPrice() {
   try {
     const res = await fetch('/api/config');
     const { price } = await res.json();
-    document.querySelector('.nav-buy').textContent = `Buy Now — $${price}`;
-    document.querySelector('.btn-primary').textContent = `Get NoVo v.fast — $${price}`;
-    document.getElementById('price-amount').innerHTML = `<sup>$</sup>${price}`;
+    document.querySelectorAll('[data-price-prefix]').forEach(el => {
+      el.textContent = el.dataset.pricePrefix + price;
+    });
+    document.getElementById('price-amount').innerHTML = '<sup>$</sup>' + price;
   } catch (e) {}
 }
 document.addEventListener('DOMContentLoaded', initPrice);
 
 async function checkout() {
   const buttons = document.querySelectorAll('[onclick="checkout()"]');
-  buttons.forEach(b => { b.classList.add('btn-loading'); b.textContent = 'Redirecting...'; });
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.classList.add('btn-loading'); b.textContent = 'Redirecting...'; });
 
   try {
     const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
@@ -356,7 +578,7 @@ async function checkout() {
       throw new Error('No checkout URL returned');
     }
   } catch (err) {
-    buttons.forEach(b => { b.classList.remove('btn-loading'); b.textContent = 'Try Again'; });
+    buttons.forEach(b => { b.classList.remove('btn-loading'); b.textContent = b.dataset.orig || 'Try Again'; });
     alert('Something went wrong. Please try again or contact support.');
   }
 }
