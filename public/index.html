@@ -106,6 +106,21 @@
   .dp-pos-val.amber { color: var(--amber); }
   .dp-caption { padding: 10px 20px; font-size: 11px; color: var(--txt3); text-align: center; }
 
+  /* ── AI Engine section ── */
+  .ai-section { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 80px 0; }
+  .ai-headline { font-size: clamp(22px, 3.5vw, 32px); font-weight: 800; color: var(--txt1); letter-spacing: -1px; margin-bottom: 8px; }
+  .ai-headline span { color: var(--blue); }
+  .ai-sub { font-size: 16px; color: var(--txt2); max-width: 560px; margin-bottom: 48px; }
+  .ai-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .ai-card { background: var(--navy); border: 1px solid var(--bdr); border-top: 3px solid var(--blue); border-radius: 8px; padding: 32px; }
+  .ai-card.amber-top { border-top-color: var(--amber); }
+  .ai-card-label { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+  .ai-card.amber-top .ai-card-label { color: var(--amber); }
+  .ai-card h3 { font-size: 18px; font-weight: 800; color: var(--txt1); margin-bottom: 14px; letter-spacing: -0.3px; }
+  .ai-card p { font-size: 14px; color: var(--txt2); line-height: 1.75; }
+  .ai-card p + p { margin-top: 12px; }
+  .ai-card strong { color: var(--txt1); }
+
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .feature { display: flex; gap: 14px; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 20px; }
@@ -185,6 +200,7 @@
     .dp-metric:nth-child(2) { border-right: none; }
     .features-grid { grid-template-columns: 1fr; }
     .included-grid { grid-template-columns: 1fr; }
+    .ai-grid { grid-template-columns: 1fr; }
     .cost-grid { grid-template-columns: 1fr; }
     .cost-compare { overflow-x: auto; }
   }
@@ -204,7 +220,7 @@
   <div class="container">
     <div class="hero-badge">SPY 1DTE Options &nbsp;·&nbsp; Algorithmic Execution</div>
     <h1>Trade with<br><span>machine precision.</span><br>Not emotion.</h1>
-    <p>NoVo handles the execution layer — tape reading, signal scoring, order routing, and exits — the same way every session, at machine speed, without hesitation or second-guessing.</p>
+    <p>NoVo pairs AI market intelligence with algorithmic execution. The AI reads live charts every few minutes, adapts its own trading laws every week, and gates every single entry. The algo fires — sizing, routing, exits — without hesitation, second-guessing, or emotion. Every session. Same rules.</p>
     <div class="hero-cta">
       <button class="btn-primary" onclick="checkout()" data-price-prefix="Get NoVo v.fast — $">Get NoVo v.fast — $249</button>
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
@@ -236,7 +252,7 @@
         <p><strong>You took a revenge trade</strong> after a loss, broke your own rules, and made the day significantly worse.</p>
       </div>
     </div>
-    <p class="pain-resolve">These aren't knowledge problems. They're execution problems. <strong>NoVo removes the execution layer from your hands entirely.</strong></p>
+    <p class="pain-resolve">These aren't knowledge problems. They're execution problems. <strong>NoVo — driven by live AI market intelligence — removes the execution layer from your hands entirely.</strong></p>
   </div>
 </div>
 
@@ -315,6 +331,29 @@
     </div>
   </div>
 </section>
+
+<!-- AI ENGINE -->
+<div class="ai-section">
+  <div class="container">
+    <div class="section-label">The Intelligence Layer</div>
+    <div class="ai-headline">AI isn't a feature.<br><span>It's what makes NoVo work.</span></div>
+    <p class="ai-sub">Every trade NoVo takes is AI-gated. Every week, NoVo rewrites its own rules based on what the AI learned from real outcomes. Pull the AI and the system goes dark.</p>
+    <div class="ai-grid">
+      <div class="ai-card">
+        <div class="ai-card-label">Real-Time &nbsp;·&nbsp; Vision Sensor</div>
+        <h3>The AI reads the market so NoVo knows what side to be on.</h3>
+        <p>Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider for a structural read — momentum, key levels, directional bias. That read is a <strong>hard gate on every entry</strong>. No bullish read, no long. No bearish read, no short.</p>
+        <p>On high-volatility events, the sensor accelerates to 1-minute updates. It's not a suggestion — it's the filter that keeps NoVo from firing into the wrong side of a trend that tape data alone can't see.</p>
+      </div>
+      <div class="ai-card amber-top">
+        <div class="ai-card-label">Weekly &nbsp;·&nbsp; Mastery Loop</div>
+        <h3>NoVo rewrites its own trading laws every week based on real results.</h3>
+        <p>Every Friday, NoVo compiles the full week of trade data — entries, exits, scores, outcomes — and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why, then <strong>synthesizes those lessons into permanent trading laws</strong> that govern all future behavior.</p>
+        <p>This isn't backtesting. The system is evolving from live market experience, session after session. It doesn't repeat the same mistakes — it gets sharper.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <hr class="divider">
 
@@ -526,7 +565,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">What does the AI actually do?</summary>
-        <div class="faq-a">The AI (Google Gemini or Anthropic Claude — your choice, configured in your .env) acts as a visual chart reader. Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider for a directional read. That read becomes one input into the entry signal — it won't take a long trade if the AI reads the structure as bearish. The AI doesn't make trading decisions; the algorithm does. The AI is one signal layer among several.</div>
+        <div class="faq-a">The AI is not optional — NoVo doesn't trade without it. It plays two critical roles.<br><br><strong>Vision Sensor:</strong> Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider (Gemini or Claude) for a structural read. That directional bias is a hard gate on every entry — no AI read, no trade. On high-volatility events it accelerates to 1-minute updates. This is what keeps NoVo from firing into the wrong side of a trend the tape alone can't see.<br><br><strong>Mastery Loop:</strong> Every Friday, NoVo compiles the week's full trade history and sends it to the AI for analysis. The AI synthesizes what worked, what didn't, and why — then writes those lessons into permanent trading laws that govern future behavior. The system is literally rewriting its own rules based on real outcomes, week over week. This is how NoVo gets sharper over time instead of repeating the same mistakes.</div>
       </details>
 
       <details class="faq-item">
