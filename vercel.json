@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/*.py": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/success", "destination": "/success.html" }
+  ]
+}
