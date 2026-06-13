@@ -273,7 +273,7 @@
     <p class="section-sub" style="margin: 0 auto 40px;">Pay once and the system is yours. No monthly fees, no seat limits, no expiry.</p>
     <div class="price-card">
       <div class="price-name">NoVo v.fast — Full License</div>
-      <div class="price-amount"><sup>$</sup>650</div>
+      <div class="price-amount" id="price-amount"><sup>$</sup>249</div>
       <div class="price-once">One-time payment &nbsp;·&nbsp; Lifetime license</div>
       <ul class="price-features">
         <li>Complete NoVo v.fast v3.2.2 system</li>
@@ -332,6 +332,17 @@
 </div>
 
 <script>
+async function initPrice() {
+  try {
+    const res = await fetch('/api/config');
+    const { price } = await res.json();
+    document.querySelector('.nav-buy').textContent = `Buy Now — $${price}`;
+    document.querySelector('.btn-primary').textContent = `Get NoVo v.fast — $${price}`;
+    document.getElementById('price-amount').innerHTML = `<sup>$</sup>${price}`;
+  } catch (e) {}
+}
+document.addEventListener('DOMContentLoaded', initPrice);
+
 async function checkout() {
   const buttons = document.querySelectorAll('[onclick="checkout()"]');
   buttons.forEach(b => { b.classList.add('btn-loading'); b.textContent = 'Redirecting...'; });
