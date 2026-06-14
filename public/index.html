@@ -377,7 +377,7 @@
       <div class="how-card">
         <div class="how-num">EDGE</div>
         <h3>1DTE is the optimal scalping instrument</h3>
-        <p>1DTE options carry enough premium to make scalping worthwhile, decay fast enough to punish holding losers, and expire the same day — eliminating overnight gap risk entirely. It's the instrument class that rewards fast, disciplined execution. Which is exactly what NoVo provides.</p>
+        <p>1DTE options carry enough premium to make scalping worthwhile, decay fast enough to punish holding losers, and expire the same day — eliminating overnight gap risk entirely. The instrument class rewards fast, disciplined execution.</p>
       </div>
     </div>
   </div>
@@ -396,15 +396,13 @@
         <div class="how-num">01 &nbsp;·&nbsp; SIGNAL</div>
         <h3>Apex Score — Four Conviction Tiers</h3>
         <p>Tape imbalance (50%), RVOL (30%), and gamma proximity (20%) combine into a real-time Apex Score (0–100) every 5 seconds. Four conviction tiers — Confluence, Mid Override, High Conviction, Nuclear — each carry a different position size multiplier (0.75x to 1.5x).</p>
-        <p>Direction must hold across 3 consecutive 5-second ticks and sustain a 25-second rolling average before the system treats it as confirmed — spoofed moves that collapse after the first push are filtered at the tape level before any score calculation.</p>
-        <p>All three signals must align simultaneously: score above tier threshold, AI visual bias in the correct direction, and sustained tape confirmation. In FOMO or CHOP conditions, lower-conviction tiers are automatically suppressed. No partial alignment fires a trade.</p>
+        <p>A dual-layer tape filter blocks spoofed moves before they reach the score. All three signals must align: score above tier threshold, AI visual bias in the correct direction, and sustained directional pressure. In FOMO or CHOP regimes, lower-conviction tiers are automatically suppressed. No partial alignment fires a trade.</p>
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
         <h3>MAB Router — Learns Every Fill</h3>
-        <p>A Multi-Armed Bandit algorithm running UCB1 selection continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions. All learning lives in Redis RAM — no file writes, no restart required.</p>
-        <p>Position sizing is conviction-weighted: your Apex tier determines contract count, so Nuclear setups automatically size larger than Confluence entries from the same allocation budget.</p>
-        <p>At Nuclear conviction or extreme tape velocity, the MAB automatically bans passive fills — the move can't be missed for the sake of a slightly better price. Adapts to VIX and spread conditions dynamically. The system gets better fills the longer it runs.</p>
+        <p>A Multi-Armed Bandit algorithm running UCB1 selection continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions.</p>
+        <p>Position sizing is conviction-weighted: your Apex tier determines contract count, so Nuclear setups automatically size larger than Confluence entries from the same allocation budget. At Nuclear conviction or extreme tape velocity, passive fills are banned — the move can't be missed for the sake of price. The system gets better fills the longer it runs.</p>
       </div>
       <div class="how-card">
         <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
@@ -464,26 +462,26 @@
       <div class="ai-card">
         <div class="ai-card-label">Real-Time &nbsp;·&nbsp; Vision Sensor</div>
         <h3>The AI reads live charts and gates every single entry.</h3>
-        <p>Every 3 minutes, NoVo generates a live SPY chart — rendered with MACD, EMA 9/21, VWAP, RSI, liquidity pools, and key levels — and sends it to your AI provider for a structural read. That directional bias is a <strong>hard gate on every entry</strong>. No bullish read, no long. No bearish read, no short.</p>
+        <p>Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider for a structural read. That directional bias is a <strong>hard gate on every entry</strong>. No bullish read, no long. No bearish read, no short.</p>
         <p>On high-volatility events (RVOL ≥ 2.5x), it accelerates to 1-minute reads. A special Opening Bell Primer fires at 9:25 AM before the market opens. Bias decays automatically — stale after 20 minutes, forced neutral after 45.</p>
       </div>
       <div class="ai-card amber-top">
         <div class="ai-card-label">Weekly &nbsp;·&nbsp; Mastery Loop</div>
         <h3>NoVo rewrites its own trading laws every week from real outcomes.</h3>
-        <p>Every Friday, NoVo compiles the full week of trade data and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why — then <strong>synthesizes those lessons into permanent trading laws</strong> that govern all future behavior. These laws accumulate. They're injected into every future AI context.</p>
+        <p>Every Friday, NoVo compiles the full week of trade data and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why — then <strong>synthesizes those lessons into permanent trading laws</strong> that govern all future behavior.</p>
         <p>This isn't backtesting on historical data. The system is evolving from its own live market experience, session after session. <strong>It gets sharper every week with zero input from you.</strong></p>
       </div>
       <div class="ai-card green-top">
         <div class="ai-card-label">Every 5 Minutes &nbsp;·&nbsp; Intuition Engine</div>
         <h3>NoVo knows what retail traders are doing right now — and trades against their mistakes.</h3>
-        <p>Every 5 minutes, a dedicated AI layer synthesizes the current <strong>retail psychology state</strong>: FOMO, CAPITULATION, MOMENTUM_BUILDING, CHOP, or NEUTRAL. Each state carries a specific behavioral fingerprint that shows up in tape flow and option activity.</p>
-        <p>When retail is chasing (FOMO) or panic-selling (CAPITULATION), that state becomes a signal input. In CHOP conditions, confluence entries are suppressed 50% to avoid noise. NoVo trades with awareness of crowd psychology — not against it blindly.</p>
+        <p>Every 5 minutes, a dedicated AI layer synthesizes the current <strong>retail psychology state</strong>: FOMO, CAPITULATION, MOMENTUM_BUILDING, CHOP, or NEUTRAL.</p>
+        <p>When retail is chasing (FOMO) or panic-selling (CAPITULATION), that state becomes a signal input. In CHOP conditions, confluence entries are suppressed 50% to avoid noise. NoVo trades with awareness of crowd psychology.</p>
       </div>
       <div class="ai-card amber-top">
         <div class="ai-card-label">Continuous &nbsp;·&nbsp; Systemic Resonance</div>
-        <h3>Macro regime detection, institutional sweep monitoring, and overnight futures analysis — all live.</h3>
-        <p>A fourth AI layer runs macro regime detection continuously, integrating VIX (fear/complacency thresholds), HYG credit stress, and DXY currency pressure to classify the session as <strong>RISK-ON, RISK-OFF, CHOP, or MIXED</strong>. Each regime adjusts NoVo's behavior automatically.</p>
-        <p>The <strong>Whale Sensor</strong> detects institutional option sweeps at specific strikes and injects them into the macro thesis. Overnight ES/NQ futures drift frames the directional lean before the open. NoVo sees the market the way institutions do.</p>
+        <h3>Macro regime detection, institutional sweeps, and overnight futures — all live.</h3>
+        <p>A fourth AI layer integrates VIX, HYG credit stress, and DXY pressure to classify the session as <strong>RISK-ON, RISK-OFF, CHOP, or MIXED</strong> — each adjusting behavior automatically.</p>
+        <p>The <strong>Whale Sensor</strong> detects institutional option sweeps at specific strikes and injects them into the macro thesis. Overnight ES/NQ futures drift frames the directional lean before the open.</p>
       </div>
     </div>
   </div>
@@ -516,28 +514,28 @@
         <div class="feature-icon">🔒</div>
         <div>
           <h4>Multi-Layer Capital Protection</h4>
-          <p>Daily max loss circuit breaker halts all trading and liquidates positions instantly. Profit goal circuit breaker banks the day. Position-level hard stops. Tape spoof filter requires 3 consecutive aligned ticks AND a 25-second rolling average above threshold — spoofed moves that collapse after the first push never confirm. Automatic end-of-day liquidation.</p>
+          <p>Daily max loss circuit breaker halts all trading and liquidates instantly. Profit goal circuit breaker banks the day. Position-level hard stops, dual-layer tape spoof filter, and automatic end-of-day liquidation.</p>
         </div>
       </div>
       <div class="feature">
         <div class="feature-icon">📱</div>
         <div>
           <h4>Mobile C2 Dashboard</h4>
-          <p>Full PWA accessible from any device via Tailscale HTTPS. Three tabs: Signal &amp; Trigger (live Apex Score, regime, RVOL, GEX), Manage Risk (positions, circuit breakers, risk matrix), OPS View (trade log, AI intelligence matrix, live chart sensor feed).</p>
+          <p>Full PWA accessible from any device via Tailscale HTTPS. Monitor live signals, active positions, P&amp;L, circuit breaker status, and the AI intelligence feed — all from your phone.</p>
         </div>
       </div>
       <div class="feature">
         <div class="feature-icon">🔄</div>
         <div>
           <h4>Shadow Book + Weekly Auto-Calibration</h4>
-          <p>A parallel invisible trade log records the hypothetical opposite side of every trade — if the shadow book outperforms in a specific regime, it signals threshold drift. Every Sunday at 7 PM, a 60-day backtest auto-recalibrates Apex entry floors with no restart required.</p>
+          <p>A parallel shadow log records the hypothetical opposite of every trade. If it consistently outperforms, it flags threshold drift before it becomes a problem. Every Sunday, a 60-day backtest auto-recalibrates Apex entry floors — no restart required.</p>
         </div>
       </div>
       <div class="feature">
         <div class="feature-icon">⚙️</div>
         <div>
           <h4>Live Parameter Control</h4>
-          <p>Risk matrix, Apex thresholds, position sizing, TP/trail levels, circuit breakers — all adjustable from the dashboard without touching code. Changes apply on the next scan cycle. The Snap Vision button forces an immediate AI chart read outside the 3-minute cycle.</p>
+          <p>Risk matrix, Apex thresholds, position sizing, TP/trail levels, circuit breakers — all adjustable from the dashboard without touching code. Changes apply on the next scan cycle.</p>
         </div>
       </div>
     </div>
@@ -664,7 +662,7 @@
       <div class="price-once">One-time payment &nbsp;·&nbsp; Lifetime license</div>
       <div class="price-roi">You save $1,200+ vs. subscription tools in Year 1 alone.</div>
       <ul class="price-features">
-        <li>Complete NoVo v.fast v3.2.2 — full system</li>
+        <li>Complete NoVo v.fast v3.5.0 — full system</li>
         <li>Machine-bound license key (transferable on request)</li>
         <li>Automated Windows setup script</li>
         <li>Full documentation PDFs</li>
