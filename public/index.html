@@ -395,14 +395,16 @@
       <div class="how-card">
         <div class="how-num">01 &nbsp;·&nbsp; SIGNAL</div>
         <h3>Apex Score — Four Conviction Tiers</h3>
-        <p>Tape imbalance (50%), RVOL (30%), and gamma proximity (20%) combine into a real-time Apex Score (0–100) every 5 seconds.</p>
-        <p>Four entry tiers — Confluence, Mid Override, High Conviction, Nuclear — each with a different position size multiplier (0.75x to 1.5x). Entries only fire when score, AI bias, and tape direction all align.</p>
+        <p>Tape imbalance (50%), RVOL (30%), and gamma proximity (20%) combine into a real-time Apex Score (0–100) every 5 seconds. Four conviction tiers — Confluence, Mid Override, High Conviction, Nuclear — each carry a different position size multiplier (0.75x to 1.5x).</p>
+        <p>Direction must hold across 3 consecutive 5-second ticks and sustain a 25-second rolling average before the system treats it as confirmed — spoofed moves that collapse after the first push are filtered at the tape level before any score calculation.</p>
+        <p>All three signals must align simultaneously: score above tier threshold, AI visual bias in the correct direction, and sustained tape confirmation. In FOMO or CHOP conditions, lower-conviction tiers are automatically suppressed. No partial alignment fires a trade.</p>
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
         <h3>MAB Router — Learns Every Fill</h3>
-        <p>A Multi-Armed Bandit algorithm continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions.</p>
-        <p>Adapts to VIX and spread conditions dynamically. The system gets better fills the longer it runs.</p>
+        <p>A Multi-Armed Bandit algorithm running UCB1 selection continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions. All learning lives in Redis RAM — no file writes, no restart required.</p>
+        <p>Position sizing is conviction-weighted: your Apex tier determines contract count, so Nuclear setups automatically size larger than Confluence entries from the same allocation budget.</p>
+        <p>At Nuclear conviction or extreme tape velocity, the MAB automatically bans passive fills — the move can't be missed for the sake of a slightly better price. Adapts to VIX and spread conditions dynamically. The system gets better fills the longer it runs.</p>
       </div>
       <div class="how-card">
         <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
@@ -514,7 +516,7 @@
         <div class="feature-icon">🔒</div>
         <div>
           <h4>Multi-Layer Capital Protection</h4>
-          <p>Daily max loss circuit breaker halts all trading and liquidates positions instantly. Profit goal circuit breaker banks the day. Position-level hard stops. Tape spoof filter requires 3 consecutive aligned windows before confirming direction. Automatic end-of-day liquidation.</p>
+          <p>Daily max loss circuit breaker halts all trading and liquidates positions instantly. Profit goal circuit breaker banks the day. Position-level hard stops. Tape spoof filter requires 3 consecutive aligned ticks AND a 25-second rolling average above threshold — spoofed moves that collapse after the first push never confirm. Automatic end-of-day liquidation.</p>
         </div>
       </div>
       <div class="feature">
@@ -551,7 +553,7 @@
     <div class="section-title">Everything to get running.</div>
     <p class="section-sub">Delivered instantly to your email after purchase.</p>
     <div class="included-grid">
-      <div class="included-item"><span class="check">✓</span><span>NoVo v.fast v3.2.2 — full system</span></div>
+      <div class="included-item"><span class="check">✓</span><span>NoVo v.fast v3.5.0 — full system</span></div>
       <div class="included-item"><span class="check">✓</span><span>Automated setup script (setup.ps1)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Lifetime machine-bound license key</span></div>
       <div class="included-item"><span class="check">✓</span><span>Full Presentation Guide (PDF)</span></div>
