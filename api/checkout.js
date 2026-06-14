@@ -21,6 +21,7 @@ module.exports = async (req, res) => {
     });
     res.status(200).json({ url: session.url });
   } catch (err) {
+    console.error('[CHECKOUT ERROR]', err.message);
     res.status(500).json({ error: err.message });
   }
 };
