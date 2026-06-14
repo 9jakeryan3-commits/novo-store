@@ -109,27 +109,20 @@
   .how-card p { font-size: 14px; color: var(--txt2); line-height: 1.6; }
   .how-card p + p { margin-top: 8px; }
 
-  /* ── Dashboard preview ── */
-  .dp-wrap { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; max-width: 780px; margin: 48px auto 0; }
-  .dp-bar { display: flex; align-items: center; gap: 8px; background: #07101f; border-bottom: 1px solid var(--bdr); padding: 12px 20px; }
-  .dp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .dp-logo { font-size: 13px; font-weight: 700; color: var(--txt1); margin-left: 8px; letter-spacing: -0.3px; }
-  .dp-live { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
-  .dp-time { font-size: 11px; color: var(--txt3); font-family: monospace; margin-left: 12px; }
-  .dp-metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--bdr); }
-  .dp-metric { padding: 16px 20px; border-right: 1px solid var(--bdr); }
-  .dp-metric:last-child { border-right: none; }
-  .dp-metric-label { font-size: 10px; color: var(--txt3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-  .dp-metric-val { font-size: 20px; font-weight: 700; color: var(--txt1); font-family: monospace; }
-  .dp-metric-val.green { color: var(--green); }
-  .dp-metric-val.amber { color: var(--amber); }
-  .dp-metric-val.blue { color: var(--blue); }
-  .dp-position { display: flex; align-items: center; gap: 24px; padding: 14px 20px; border-bottom: 1px solid var(--bdr); flex-wrap: wrap; }
-  .dp-pos-label { font-size: 10px; color: var(--txt3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
-  .dp-pos-val { font-size: 13px; color: var(--txt2); font-family: monospace; }
-  .dp-pos-val.green { color: var(--green); }
-  .dp-pos-val.amber { color: var(--amber); }
-  .dp-caption { padding: 10px 20px; font-size: 12px; color: var(--txt3); text-align: center; }
+  /* ── Screenshot gallery ── */
+  .ss-wrap { margin: 52px auto 0; max-width: 960px; }
+  .ss-main { border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); }
+  .ss-bar { display: flex; align-items: center; gap: 8px; background: #07101f; border-bottom: 1px solid var(--bdr); padding: 11px 18px; }
+  .ss-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .ss-label { font-size: 11px; font-weight: 700; color: var(--txt2); margin-left: 8px; letter-spacing: 1px; }
+  .ss-live { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
+  .ss-main img { width: 100%; display: block; }
+  .ss-caption { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 12px; letter-spacing: .3px; }
+  .ss-mobile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+  .ss-mobile { border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .ss-mobile img { width: 100%; display: block; }
+  .ss-mobile-cap { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 10px; letter-spacing: .3px; }
+  @media(max-width:600px) { .ss-mobile-row { grid-template-columns: 1fr; } }
 
   /* ── AI Engine section ── */
   .ai-section { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 80px 0; }
@@ -415,42 +408,34 @@
       </div>
     </div>
 
-    <!-- DASHBOARD PREVIEW -->
-    <div class="dp-wrap">
-      <div class="dp-bar">
-        <div class="dp-dot" style="background:#ef4444"></div>
-        <div class="dp-dot" style="background:#f59e0b"></div>
-        <div class="dp-dot" style="background:#10b981"></div>
-        <div class="dp-logo">NoVo v.fast &nbsp;·&nbsp; C2 Dashboard</div>
-        <div class="dp-live">● LIVE</div>
-        <div class="dp-time">10:42:17 ET</div>
+    <!-- SCREENSHOT GALLERY -->
+    <div class="ss-wrap">
+      <div class="ss-main">
+        <div class="ss-bar">
+          <div class="ss-dot" style="background:#ef4444"></div>
+          <div class="ss-dot" style="background:#f59e0b"></div>
+          <div class="ss-dot" style="background:#10b981"></div>
+          <div class="ss-label">NoVo Apex C2 &nbsp;·&nbsp; Performance Journal</div>
+          <div class="ss-live">● LIVE</div>
+        </div>
+        <img src="/screenshots/journal.png" alt="NoVo Performance Journal — full trade audit trail with stats and daily log">
       </div>
-      <div class="dp-metrics">
-        <div class="dp-metric">
-          <div class="dp-metric-label">Apex Score</div>
-          <div class="dp-metric-val amber">82 / 100</div>
+      <div class="ss-caption">Performance Journal — full audit trail, strategy breakdown, P&amp;L history, and daily log. All accessible from the dashboard.</div>
+
+      <div class="ss-mobile-row">
+        <div>
+          <div class="ss-mobile">
+            <img src="/screenshots/mobile-trade.png" alt="NoVo mobile dashboard — TRADE tab with Tactical Override controls">
+          </div>
+          <div class="ss-mobile-cap">Mobile PWA — full control from your phone. Auth, halt, override, liquidate.</div>
         </div>
-        <div class="dp-metric">
-          <div class="dp-metric-label">Daily P&amp;L</div>
-          <div class="dp-metric-val green">+$284</div>
-        </div>
-        <div class="dp-metric">
-          <div class="dp-metric-label">Signal Bias</div>
-          <div class="dp-metric-val blue">LONG</div>
-        </div>
-        <div class="dp-metric">
-          <div class="dp-metric-label">Status</div>
-          <div class="dp-metric-val green">TRADING</div>
+        <div>
+          <div class="ss-mobile">
+            <img src="/screenshots/mobile-intel.png" alt="NoVo mobile dashboard — Intelligence Matrix live AI analysis">
+          </div>
+          <div class="ss-mobile-cap">Intelligence Matrix — live AI market analysis streamed directly to the dashboard.</div>
         </div>
       </div>
-      <div class="dp-position">
-        <div><div class="dp-pos-label">Position</div><div class="dp-pos-val">SPY 592C · 1DTE</div></div>
-        <div><div class="dp-pos-label">Entry</div><div class="dp-pos-val">$1.18</div></div>
-        <div><div class="dp-pos-label">Current</div><div class="dp-pos-val green">$1.41</div></div>
-        <div><div class="dp-pos-label">Unrealized</div><div class="dp-pos-val green">+$230 · +19.5%</div></div>
-        <div><div class="dp-pos-label">Exit Target</div><div class="dp-pos-val amber">TP1 at $1.53</div></div>
-      </div>
-      <div class="dp-caption">Dashboard preview — monitor positions, halt trading, adjust risk, or liquidate from your phone via Tailscale HTTPS</div>
     </div>
   </div>
 </section>
