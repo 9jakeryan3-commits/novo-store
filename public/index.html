@@ -9,7 +9,8 @@
 <meta property="og:url" content="https://novo-aitrading.app">
 <meta property="og:title" content="NoVo v.fast — Algorithmic Execution System for SPY Options">
 <meta property="og:description" content="Autonomous SPY options trading system. Tape imbalance, RVOL, gamma proximity — running 24/7 as Windows services with a mobile-accessible dashboard.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='16' y='23' text-anchor='middle' font-size='20' font-weight='900' fill='white' font-family='sans-serif'>N</text></svg>">
+<link rel="icon" href="/novo-icon.png">
+<meta property="og:image" content="https://novo-aitrading.app/novo-logo.png">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,10 +37,10 @@
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(11,21,39,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 900px; margin: 0 auto; }
-  .nav-logo { font-size: 22px; font-weight: 900; color: var(--txt1); letter-spacing: -0.5px; }
-  .nav-logo span { color: var(--blue); }
+  .nav-logo img { height: 44px; width: auto; display: block; }
   .nav-buy { background: #f59e0b; color: #000; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; }
   .nav-buy:hover { opacity: 0.85; }
+  @media (max-width: 480px) { .nav-buy { padding: 8px 14px; font-size: 12px; } }
 
   /* ── Hero ── */
   .hero { padding: 100px 0 80px; text-align: center; }
@@ -260,7 +261,7 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">No<span>Vo</span> <span style="font-size:13px;font-weight:400;color:var(--txt3)">v.fast</span></div>
+    <div class="nav-logo"><img src="/novo-logo.png" alt="NoVo v.fast"></div>
     <button class="nav-buy" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $497</button>
   </div>
 </nav>
