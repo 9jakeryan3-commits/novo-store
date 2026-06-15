@@ -404,7 +404,8 @@
         <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
         <h3>9-Tier Exit Hierarchy</h3>
         <p>Exits execute in strict priority: Manual Take Profit (50% sell) → Manual Liquidate (full sweep) → EOD Protocol → Structural Reversal → AI Bias Counterpressure → Hard Stop → Runner Trailing Stop → Standard Trailing Stop → Breakeven Saver → TP1 → TP2.</p>
-        <p>TP1 sells half the position and promotes the remainder to a runner — toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner at your second target — toggle it off to let the runner trail indefinitely in trending markets. Two independent trailing stops protect open profit — a tighter runner trail for extended moves and a standard trail for normal exits — both with adjustable width and activation thresholds. The breakeven saver exits if price rejects from a significant peak. Every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
+        <p>TP1 sells half the position and promotes the remainder to a runner — toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner at your second target — toggle it off to let the runner trail indefinitely in trending markets. Two independent trailing stops protect open profit — a tighter runner trail for extended moves and a standard trail for normal exits — both with adjustable width and activation thresholds. Nearly every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
+        <p>Two exits are intentionally hardcoded and not adjustable: the <strong>Breakeven Saver</strong> and the <strong>Structural Reversal</strong>. Both exist to enforce NoVo's core design principle — spend as little time in the market as possible. When the tape rejects a peak move, you exit. When the AI reads the chart against your open position, you exit. These rules cannot be turned off because the only moment a trader wants to disable them is when they're already in a losing position and hoping it turns around. That hope is exactly the behavior systematic execution was built to replace.</p>
       </div>
     </div>
 
@@ -777,7 +778,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">Can I adjust the risk settings?</summary>
-        <div class="faq-a">Yes — everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.</div>
+        <div class="faq-a">Yes — nearly everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.<br><br>Two exits are intentionally not adjustable: the <strong>Breakeven Saver</strong> and the <strong>Structural Reversal</strong>. These are hardcoded by design to enforce NoVo's core principle — minimize time in the market. When a trade peaks and rejects, you exit. When the AI reads the chart against your position after two confirmed scans, you exit. They cannot be disabled because they protect against the single most costly discretionary behavior: holding a losing position and waiting for a recovery that may not come. Everything else is yours to configure.</div>
       </details>
 
       <details class="faq-item">
