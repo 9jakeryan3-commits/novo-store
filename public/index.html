@@ -391,13 +391,13 @@
       <div class="how-card">
         <div class="how-num">01 &nbsp;·&nbsp; SIGNAL</div>
         <h3>Apex Score — Four Conviction Tiers</h3>
-        <p>Tape imbalance (50%), RVOL (30%), and gamma proximity (20%) combine into a real-time Apex Score (0–100) every 5 seconds. Four conviction tiers — Confluence, Mid Override, High Conviction, Nuclear — each carry a different position size multiplier (0.75x to 1.5x).</p>
+        <p>Three signal components — tape imbalance, RVOL, and gamma proximity — combine into a real-time Apex Score (0–100) every 5 seconds. Four conviction tiers — Confluence, Mid Override, High Conviction, Nuclear — each carry a progressively larger position size multiplier.</p>
         <p>A dual-layer tape filter blocks spoofed moves before they reach the score. All three signals must align: score above tier threshold, AI visual bias in the correct direction, and sustained directional pressure. In FOMO or CHOP regimes, lower-conviction tiers are automatically suppressed. No partial alignment fires a trade.</p>
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
         <h3>MAB Router — Learns Every Fill</h3>
-        <p>A Multi-Armed Bandit algorithm running UCB1 selection continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions.</p>
+        <p>A Multi-Armed Bandit algorithm continuously tests three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and exploits whichever produces the best fills in current conditions.</p>
         <p>Position sizing is conviction-weighted: your Apex tier determines contract count, so Nuclear setups automatically size larger than Confluence entries from the same allocation budget. At Nuclear conviction or extreme tape velocity, passive fills are banned — the move can't be missed for the sake of price. The system gets better fills the longer it runs.</p>
       </div>
       <div class="how-card">
@@ -470,7 +470,7 @@
         <div class="ai-card-label">Real-Time &nbsp;·&nbsp; Vision Sensor</div>
         <h3>The AI reads live charts and gates every single entry.</h3>
         <p>Every 3 minutes, NoVo generates a live SPY chart and sends it to your AI provider for a structural read. That directional bias is a <strong>hard gate on every entry</strong>. No bullish read, no long. No bearish read, no short.</p>
-        <p>On high-volatility events (RVOL ≥ 2.5x), it accelerates to 1-minute reads. A special Opening Bell Primer fires at 9:25 AM before the market opens. Bias decays automatically — stale after 20 minutes, forced neutral after 45.</p>
+        <p>On high-volatility tape events, it accelerates to 1-minute reads. A special Opening Bell Primer fires before the market opens to frame the session bias. Bias decays automatically — if the chart hasn't been read recently, entries are gated until a fresh read arrives.</p>
       </div>
       <div class="ai-card amber-top">
         <div class="ai-card-label">Weekly &nbsp;·&nbsp; Mastery Loop</div>
@@ -482,7 +482,7 @@
         <div class="ai-card-label">Every 5 Minutes &nbsp;·&nbsp; Intuition Engine</div>
         <h3>NoVo knows what retail traders are doing right now — and trades against their mistakes.</h3>
         <p>Every 5 minutes, a dedicated AI layer synthesizes the current <strong>retail psychology state</strong>: FOMO, CAPITULATION, MOMENTUM_BUILDING, CHOP, or NEUTRAL.</p>
-        <p>When retail is chasing (FOMO) or panic-selling (CAPITULATION), that state becomes a signal input. In CHOP conditions, confluence entries are suppressed 50% to avoid noise. NoVo trades with awareness of crowd psychology.</p>
+        <p>When retail is chasing (FOMO) or panic-selling (CAPITULATION), that state becomes a signal input. In CHOP conditions, confluence entries are suppressed to avoid noise. NoVo trades with awareness of crowd psychology.</p>
       </div>
       <div class="ai-card amber-top">
         <div class="ai-card-label">Continuous &nbsp;·&nbsp; Systemic Resonance</div>
@@ -774,12 +774,12 @@
 
       <details class="faq-item">
         <summary class="faq-q">What is the Apex Score and how does entry sizing work?</summary>
-        <div class="faq-a">The Apex Score is a 0–100 real-time measure of setup quality, updated every 5 seconds. It combines tape imbalance (50% weight), RVOL (30%), and gamma proximity (20%). Four conviction tiers determine both whether an entry fires and how large:<br><br>
-        <strong>Confluence (25–49):</strong> 0.75x base size — moderate conviction<br>
-        <strong>Mid Override (50–64):</strong> 1.0x base size — solid setup<br>
-        <strong>High Conviction (65–79):</strong> 1.25x base size — strong alignment<br>
-        <strong>Nuclear (Apex ≥ 80 or RVOL ≥ 2.5x):</strong> 1.5x base size — maximum conviction<br><br>
-        All thresholds are configurable from the dashboard.</div>
+        <div class="faq-a">The Apex Score is a 0–100 real-time measure of setup quality, updated every 5 seconds. It synthesizes three signal components — tape imbalance, RVOL, and gamma proximity — into a single conviction number. Four tiers determine both whether an entry fires and how large the position is:<br><br>
+        <strong>Confluence:</strong> Moderate conviction — smallest size<br>
+        <strong>Mid Override:</strong> Solid setup — standard size<br>
+        <strong>High Conviction:</strong> Strong alignment — elevated size<br>
+        <strong>Nuclear:</strong> Maximum conviction or extreme tape event — largest size<br><br>
+        The threshold for each tier is configurable from the dashboard.</div>
       </details>
 
       <details class="faq-item">
