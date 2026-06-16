@@ -69,8 +69,9 @@
   .pain-x { color: var(--red); font-weight: 900; font-size: 15px; flex-shrink: 0; line-height: 1.5; }
   .pain-item p { font-size: 14px; color: var(--txt2); line-height: 1.55; }
   .pain-item p strong { color: var(--txt1); }
-  .pain-resolve { margin-top: 28px; font-size: 15px; color: var(--txt2); line-height: 1.7; }
-  .pain-resolve strong { color: var(--blue); }
+  .pain-resolve { margin-top: 28px; background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(239,68,68,0.05) 100%); border: 1px solid rgba(59,130,246,0.25); border-radius: 8px; padding: 28px 32px; text-align: center; }
+  .pain-resolve p { font-size: 16px; color: var(--txt2); line-height: 1.7; }
+  .pain-resolve strong { color: var(--blue); display: block; margin-top: 8px; font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
 
   /* ── Who this is for ── */
   .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -224,6 +225,23 @@
   .disclaimer { background: var(--navy2); border-top: 1px solid var(--bdr); padding: 32px 0; text-align: center; }
   .disclaimer p { font-size: 12px; color: var(--txt3); max-width: 600px; margin: 0 auto; line-height: 1.7; }
 
+  /* ── Compounding Edge section ── */
+  .loop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+  .loop-card { background: var(--navy2); border: 1px solid var(--bdr); border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
+  .loop-card.amber-top { border-top-color: var(--amber); }
+  .loop-card.green-top { border-top-color: var(--green); }
+  .loop-freq { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; color: var(--blue); }
+  .loop-card.amber-top .loop-freq { color: var(--amber); }
+  .loop-card.green-top .loop-freq { color: var(--green); }
+  .loop-card h3 { font-size: 16px; font-weight: 800; color: var(--txt1); margin-bottom: 12px; letter-spacing: -0.3px; line-height: 1.3; }
+  .loop-card p { font-size: 14px; color: var(--txt2); line-height: 1.75; }
+  .loop-card p + p { margin-top: 10px; }
+  .loop-card strong { color: var(--txt1); }
+  .compound-callout { background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(16,185,129,0.04) 100%); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 36px 32px; text-align: center; }
+  .compound-callout p { font-size: 20px; font-weight: 800; color: var(--txt1); line-height: 1.5; letter-spacing: -0.5px; }
+  .compound-callout span { color: var(--amber); }
+  .compound-callout .compound-sub { font-size: 15px; font-weight: 400; color: var(--txt2); margin-top: 12px; letter-spacing: 0; line-height: 1.6; }
+
   /* ── Loading state ── */
   .btn-loading { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 
@@ -247,6 +265,7 @@
     .cost-compare { overflow-x: auto; }
     .hero-steps { flex-direction: column; gap: 6px; }
     .hero-step-arrow { display: none; }
+    .loop-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -262,9 +281,9 @@
 <!-- HERO -->
 <section class="hero">
   <div class="container">
-    <div class="hero-badge">SPY 1DTE Options &nbsp;·&nbsp; AI-Powered Algorithmic Execution</div>
+    <div class="hero-badge">SPY 1DTE Options &nbsp;·&nbsp; Self-Adapting Algorithmic Execution</div>
     <h1>Trade with<br><span>machine precision.</span><br>Not emotion.</h1>
-    <p>NoVo pairs AI market intelligence with algorithmic execution. The AI reads live charts, detects market regime and retail psychology, adapts its own trading laws every week, and gates every entry. The algo fires — sizing, routing, exits — without hesitation or second-guessing.</p>
+    <p>NoVo pairs AI market intelligence with algorithmic execution. Every week it rewrites its own trading laws from real outcomes — learning and getting sharper with every session, with zero input from you. The AI reads live charts, classifies regime, models retail psychology, and gates every entry. The algo fires — sizing, routing, exits — without hesitation or second-guessing.</p>
     <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Pure intraday value extraction from SPY options tape — every signal generated from scratch, in real time.</p>
     <div class="hero-cta">
       <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $497</button>
@@ -280,6 +299,53 @@
     </div>
   </div>
 </section>
+
+<!-- LEARNING SYSTEM -->
+<div class="pain">
+  <div class="container">
+    <div class="section-label">The Learning System</div>
+    <div class="section-title">Every other algo is frozen.<br>NoVo gets sharper every week.</div>
+    <p class="section-sub">Most trading systems ship with a fixed ruleset and never change. The market evolves. They degrade. NoVo runs three self-improvement loops that compound edge directly from its own live market experience — session after session, automatically.</p>
+    <div class="loop-grid">
+      <div class="loop-card amber-top">
+        <div class="loop-freq">Every Friday &nbsp;·&nbsp; Mastery Loop</div>
+        <h3>The AI rewrites the trading laws from real outcomes.</h3>
+        <p>Every Friday, NoVo compiles the full week of trade data — every entry, exit, Apex score, regime state, and outcome — and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why.</p>
+        <p>It then <strong>synthesizes those lessons into permanent trading laws</strong> that replace the old ones. New doctrine governs all future behavior — a full rewrite based on evidence from the market you just traded, not a backtest on old data.</p>
+      </div>
+      <div class="loop-card green-top">
+        <div class="loop-freq">Every Sunday &nbsp;·&nbsp; Apex Recalibration</div>
+        <h3>Entry thresholds auto-calibrate to current conditions.</h3>
+        <p>Every Sunday, a 60-day backtest runs automatically against your real signal history. It measures whether the current Apex entry floors are still producing the right trades — and recalibrates them if they've drifted from optimal.</p>
+        <p>A score of 45 might be the right bar in a trending market and too loose in chop. <strong>The system detects the drift and corrects it without you touching a setting.</strong> No restart. No input.</p>
+      </div>
+      <div class="loop-card">
+        <div class="loop-freq">Continuous &nbsp;·&nbsp; MAB Router</div>
+        <h3>Every fill teaches it which order strategy wins right now.</h3>
+        <p>A Multi-Armed Bandit algorithm tracks fill performance across three order strategies — Midpoint Passive, Chase &amp; Replace, Aggressive Sweep — and continuously shifts weight toward whichever is winning in current conditions.</p>
+        <p>On day one, it rotates evenly. After weeks of live trading, <strong>it has a learned preference built from hundreds of real fills</strong> — and exploits it on every entry.</p>
+      </div>
+    </div>
+    <div class="compound-callout">
+      <p>Most algos degrade as the market evolves.<br><span>NoVo's edge compounds.</span></p>
+      <p class="compound-sub">It is adapting from every trade you've taken — and every trade it hasn't taken yet.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-val blue">5s</div><div class="stat-label">Signal Scan Cycle</div></div>
+      <div class="stat"><div class="stat-val amber">4</div><div class="stat-label">AI Intelligence Layers</div></div>
+      <div class="stat"><div class="stat-val green">$0</div><div class="stat-label">Monthly License Fee</div></div>
+      <div class="stat"><div class="stat-val blue">1DTE</div><div class="stat-label">SPY Options Focus</div></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
 
 <!-- PAIN -->
 <div class="pain">
@@ -304,7 +370,9 @@
         <p><strong>You took a revenge trade</strong> after a loss, broke your own rules, and made the day significantly worse.</p>
       </div>
     </div>
-    <p class="pain-resolve">These aren't knowledge problems. They're execution problems. <strong>NoVo — driven by live AI market intelligence — removes the execution layer from your hands entirely.</strong></p>
+    <div class="pain-resolve">
+      <p>These aren't knowledge problems. They're execution problems.<strong>NoVo removes the execution layer from your hands entirely.</strong></p>
+    </div>
   </div>
 </div>
 
@@ -340,18 +408,6 @@
 </section>
 
 <hr class="divider">
-
-<!-- STATS -->
-<div class="stats">
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat"><div class="stat-val blue">5s</div><div class="stat-label">Signal Scan Cycle</div></div>
-      <div class="stat"><div class="stat-val amber">4</div><div class="stat-label">AI Intelligence Layers</div></div>
-      <div class="stat"><div class="stat-val green">$0</div><div class="stat-label">Monthly License Fee</div></div>
-      <div class="stat"><div class="stat-val blue">1DTE</div><div class="stat-label">SPY Options Focus</div></div>
-    </div>
-  </div>
-</div>
 
 <!-- WHY SPY -->
 <section>
@@ -458,6 +514,8 @@
     </div>
   </div>
 </section>
+
+<hr class="divider">
 
 <!-- AI ENGINE -->
 <div class="ai-section">
