@@ -82,9 +82,9 @@ function emailHtml(licenseKey, zipUrl) {
   </div>
   <p>Full walkthrough in <strong>START&amp;TROUBLESHOOT.pdf</strong> inside the zip. The presentation guide explains how the system thinks and trades.</p>
   <p>Start in paper mode (default). Watch it run before switching to live.</p>
-  <p>Any issues — reply to this email and I'll sort it out.</p>
+  <p>Any issues — email <a href="mailto:novotrades26@gmail.com">novotrades26@gmail.com</a> and I'll sort it out.</p>
   <div class="footer">
-    <p>Not financial advice. For informational and educational use only. Your license key is machine-bound — reply if you ever need to transfer to a new PC.</p>
+    <p>Not financial advice. For informational and educational use only. Your license key is machine-bound — email <a href="mailto:novotrades26@gmail.com">novotrades26@gmail.com</a> if you ever need to transfer to a new PC.</p>
   </div>
 </div>
 </body>
