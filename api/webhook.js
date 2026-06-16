@@ -5,13 +5,30 @@ const { Resend } = require('resend');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-function generateKey(sessionId) {
-  // Deterministic: same Stripe session always produces the same key, so retries are idempotent
+function deterministicKey(sessionId) {
+  // Derived from the Stripe session id so retries always compute the same value —
+  // the license server then makes the actual creation idempotent on this value.
   const token = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
     .update(`key:${sessionId}`).digest('hex').substring(0, 16).toUpperCase();
   const sig = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
     .update(token).digest('hex').substring(0, 8).toUpperCase();
   return `NOVO-${token.substring(0, 8)}-${token.substring(8)}-${sig}`;
+}
+
+async function registerKey(sessionId, email) {
+  const key = deterministicKey(sessionId);
+  const url = new URL(`${process.env.NOVO_LICENSE_SERVER_URL}/admin/keys`);
+  url.searchParams.set('key', key);
+  url.searchParams.set('note', email);
+  const resp = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY },
+  });
+  if (!resp.ok) {
+    throw new Error(`License server returned ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.key;
 }
 
 function emailHtml(licenseKey, zipUrl) {
@@ -97,7 +114,13 @@ module.exports = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    const licenseKey = generateKey(session.id);
+    let licenseKey;
+    try {
+      licenseKey = await registerKey(session.id, email);
+    } catch (err) {
+      console.error(`[webhook] License server registration failed — session:${session.id} email:${email} error:${err.message}`);
+      return res.status(500).json({ error: 'License registration failed' });
+    }
 
     try {
       await resend.emails.send({
