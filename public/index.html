@@ -904,6 +904,24 @@
 </div>
 
 <script>
+// ── SALES PAUSE SWITCH ──────────────────────────────────────────────────
+// Flip to false (or delete this block) to resume sales. Single source of
+// truth: controls both the checkout() intercept below and the notice
+// banner near the main buy button. Site stays fully visible/browsable —
+// only the actual purchase flow is paused.
+const SALES_PAUSED = true;
+const SALES_PAUSED_MESSAGE = "Sales are temporarily paused for a quick licensing update — back within a day or two. Thanks for your patience!";
+
+function applyPausedNotice() {
+  if (!SALES_PAUSED) return;
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--red); font-weight: 600; text-align: center;';
+  banner.textContent = 'Sales temporarily paused for a quick update — back within a day or two.';
+  const mainBtn = document.querySelector('.price-btn[onclick="checkout()"]');
+  if (mainBtn) mainBtn.parentNode.insertBefore(banner, mainBtn);
+}
+document.addEventListener('DOMContentLoaded', applyPausedNotice);
+
 async function initPrice() {
   try {
     const res = await fetch('/api/config');
@@ -917,6 +935,10 @@ async function initPrice() {
 document.addEventListener('DOMContentLoaded', initPrice);
 
 async function checkout() {
+  if (SALES_PAUSED) {
+    alert(SALES_PAUSED_MESSAGE);
+    return;
+  }
   const buttons = document.querySelectorAll('[onclick="checkout()"]');
   buttons.forEach(b => { b.dataset.orig = b.textContent; b.classList.add('btn-loading'); b.textContent = 'Redirecting...'; });
 
