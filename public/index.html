@@ -267,6 +267,44 @@
     .hero-step-arrow { display: none; }
     .loop-grid { grid-template-columns: 1fr; }
   }
+
+  /* QUICK SETUP GUIDE MODAL */
+  .setup-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(5,10,20,.82);
+    z-index: 1000; padding: 24px; overflow-y: auto;
+  }
+  .setup-modal-overlay.open { display: block; }
+  .setup-modal {
+    background: var(--navy2); border: 1px solid var(--bdr); border-radius: 10px;
+    max-width: 720px; margin: 32px auto; padding: 32px 36px 36px;
+    position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .setup-modal-close {
+    position: absolute; top: 18px; right: 18px; background: transparent; border: none;
+    color: var(--txt3); font-size: 26px; line-height: 1; cursor: pointer; padding: 4px 8px;
+  }
+  .setup-modal-close:hover { color: var(--txt1); }
+  .setup-modal .section-label { margin-bottom: 8px; }
+  .setup-modal h2 { font-size: 28px; font-weight: 900; color: var(--txt1); letter-spacing: -1px; margin-bottom: 8px; }
+  .setup-modal .setup-sub { color: var(--txt2); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+  .setup-steps { display: flex; flex-direction: column; gap: 18px; }
+  .setup-step { display: flex; gap: 16px; align-items: flex-start; }
+  .setup-step-num {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+    color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+  .setup-step-body h4 { color: var(--txt1); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .setup-step-body p { color: var(--txt2); font-size: 13.5px; line-height: 1.6; margin: 0; }
+  .setup-step-body code {
+    background: var(--navy); border: 1px solid var(--bdr); border-radius: 4px;
+    padding: 1px 6px; font-size: 12.5px; color: var(--txt1);
+  }
+  .setup-modal-cta { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--bdr); text-align: center; }
+  .setup-modal-cta p { color: var(--txt3); font-size: 13px; margin-bottom: 14px; }
+  @media (max-width: 600px) {
+    .setup-modal { padding: 26px 20px 28px; margin: 16px auto; }
+    .setup-modal h2 { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
@@ -288,6 +326,7 @@
     <div class="hero-cta">
       <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $497</button>
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+      <button class="btn-secondary" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
     <p class="hero-sub">Own it outright forever — before it becomes a subscription.</p>
     <div class="hero-steps">
@@ -894,7 +933,84 @@ async function checkout() {
     alert('Something went wrong. Please try again or contact support.');
   }
 }
+
+function openSetupGuide() {
+  document.getElementById('setup-guide-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSetupGuide() {
+  document.getElementById('setup-guide-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSetupGuide();
+});
 </script>
+
+<!-- QUICK SETUP GUIDE MODAL -->
+<div class="setup-modal-overlay" id="setup-guide-overlay" onclick="if(event.target===this) closeSetupGuide()">
+  <div class="setup-modal">
+    <button class="setup-modal-close" onclick="closeSetupGuide()" aria-label="Close">&times;</button>
+    <div class="section-label">Buy It → Run It → Trade It</div>
+    <h2>Quick Setup Guide</h2>
+    <p class="setup-sub">From clicking "Get Early Access" to clicking AUTH (START) on your own dashboard — most people are done in under 20 minutes, paper trading immediately with zero real money at risk.</p>
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="setup-step-num">1</div>
+        <div class="setup-step-body">
+          <h4>Buy &amp; receive your license</h4>
+          <p>The zip and your <code>NOVO_LICENSE_KEY</code> land in your inbox within about 60 seconds of checkout.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">2</div>
+        <div class="setup-step-body">
+          <h4>Unzip to the required folder</h4>
+          <p>Extract the zip to <code>C:\Trading Algo\NoVo</code> — the services and shortcuts are pre-configured for that exact path.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">3</div>
+        <div class="setup-step-body">
+          <h4>Right-click <code>setup.ps1</code> → Run as Administrator</h4>
+          <p>It walks you through a handful of quick prompts — AI provider (Anthropic is just an API key, the easiest path), your license key, a dashboard password, and your broker keys. Don't have a key yet? Just hit Enter and add it later from the dashboard. Want phone/remote access? Say yes and it sets up Tailscale; say no and it skips straight to a local dashboard — no extra accounts needed either way.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">4</div>
+        <div class="setup-step-body">
+          <h4>Let it run — about 2-5 minutes</h4>
+          <p>Redis, the three background services, the firewall rule, your desktop shortcuts — all installed and started automatically. No babysitting required.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">5</div>
+        <div class="setup-step-body">
+          <h4>Open the dashboard and log in</h4>
+          <p>Locally at <code>https://127.0.0.1:8000</code>, or your Tailscale URL if you set up remote access. Log in with the password you chose in step 3.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">6</div>
+        <div class="setup-step-body">
+          <h4>Confirm your broker keys</h4>
+          <p>Skipped any in step 3? Paste them into Settings now. NoVo ships defaulted to <strong>paper mode</strong> — simulated trades, no real money — so there's nothing to be careful about yet.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">7</div>
+        <div class="setup-step-body">
+          <h4>Hit AUTH (START)</h4>
+          <p>That's it. NoVo is now reading the tape and ready to trade — on its own, faster than you could.</p>
+        </div>
+      </div>
+    </div>
+    <div class="setup-modal-cta">
+      <p>Full written walkthrough with screenshots and troubleshooting ships inside the zip as START&amp;TROUBLESHOOT.pdf.</p>
+      <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $497</button>
+    </div>
+  </div>
+</div>
 
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
