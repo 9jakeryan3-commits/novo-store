@@ -155,16 +155,6 @@
   .check { color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .included-item span { font-size: 14px; color: var(--txt2); }
 
-  /* ── Get Running Fast ── */
-  .running-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 48px; }
-  .running-step { text-align: center; padding: 28px 20px; background: var(--navy2); border: 1px solid var(--bdr); position: relative; }
-  .running-step:first-child { border-radius: 8px 0 0 8px; }
-  .running-step:last-child { border-radius: 0 8px 8px 0; }
-  .running-step:not(:last-child) { border-right: none; }
-  .running-step:not(:last-child)::after { content: '→'; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: var(--blue); font-size: 18px; z-index: 1; }
-  .running-num { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
-  .running-step h4 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 6px; }
-  .running-step p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
   .running-time { text-align: center; margin-top: 20px; font-size: 13px; color: var(--txt3); }
   .running-time strong { color: var(--green); }
 
@@ -256,11 +246,6 @@
     .ai-grid { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
     .included-grid { grid-template-columns: 1fr; }
-    .running-grid { grid-template-columns: 1fr; }
-    .running-step { border-radius: 0; border-right: 1px solid var(--bdr); border-bottom: none; }
-    .running-step:first-child { border-radius: 8px 8px 0 0; }
-    .running-step:last-child { border-radius: 0 0 8px 8px; border-bottom: 1px solid var(--bdr); }
-    .running-step:not(:last-child)::after { display: none; }
     .cost-grid { grid-template-columns: 1fr; }
     .cost-compare { overflow-x: auto; }
     .hero-steps { flex-direction: column; gap: 6px; }
@@ -321,7 +306,7 @@
   <div class="container">
     <div class="hero-badge">SPY Options Scalping &nbsp;·&nbsp; AI-Powered, Self-Adapting Algorithmic Execution</div>
     <h1>Set your rules.<br><span>NoVo takes it from there.</span></h1>
-    <p>NoVo is built for SPY scalpers and day traders who are tired of staring at five charts at once, white-knuckling every tick, and still missing the entry. It does the heavy lifting — reading every setup, crunching the math, processing the tape in real time — and reacts in the time it takes you to blink, not the time it takes you to click. You set the risk: position size, stops, targets, conviction thresholds. NoVo handles the rest — finding the entry, sizing it, managing it, and walking away the instant your rules say to, without hesitation, without fatigue, without revenge-trading the next setup to make back the last one. And it never stops learning: it rewrites its own playbook every week from real results, but it never trades a single tick outside the boundaries you drew.</p>
+    <p>NoVo is built for SPY options scalpers and day traders — new and experienced — who are tired of staring at five charts at once, tracking every data stream, white-knuckling every tick, and still missing the entry. It does the heavy lifting: reads every setup, crunches the math, processes the tape in real time, and reacts before you can click. You set the risk — position size, stops, targets, conviction thresholds. NoVo handles the rest: finds the entry, sizes it, manages it, and exits the instant your rules say to, without hesitation, fatigue, or revenge trades. And it never stops learning — rewriting its own playbook every week from real results, while never trading a single tick outside the boundaries you set.</p>
     <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a partner that never blinks, never tires, never hesitates.</p>
     <div class="hero-cta">
       <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
@@ -573,8 +558,7 @@
       <div class="ai-card amber-top">
         <div class="ai-card-label">Weekly &nbsp;·&nbsp; Mastery Loop</div>
         <h3>NoVo rewrites its own trading laws every week from real outcomes.</h3>
-        <p>Every Friday, NoVo compiles the full week of trade data and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why — then <strong>synthesizes those lessons into permanent trading laws</strong> that govern all future behavior.</p>
-        <p>This isn't backtesting on historical data. The system is evolving from its own live market experience, session after session. <strong>It gets sharper every week with zero input from you.</strong></p>
+        <p>The same self-improvement loop covered above — this AI layer is what actually does the Friday rewrite. <strong>It gets sharper every week with zero input from you.</strong></p>
       </div>
       <div class="ai-card green-top">
         <div class="ai-card-label">Every 5 Minutes &nbsp;·&nbsp; Intuition Engine</div>
@@ -626,14 +610,14 @@
         <div class="feature-icon">📱</div>
         <div>
           <h4>Mobile C2 Dashboard</h4>
-          <p>Full PWA accessible from any device via Tailscale HTTPS. Monitor live signals, active positions, P&amp;L, circuit breaker status, and the AI intelligence feed — all from your phone.</p>
+          <p>Full PWA, works locally out of the box. Add optional Tailscale during setup to monitor live signals, active positions, P&amp;L, circuit breaker status, and the AI intelligence feed from your phone too.</p>
         </div>
       </div>
       <div class="feature">
         <div class="feature-icon">🔄</div>
         <div>
-          <h4>Shadow Book + Weekly Auto-Calibration</h4>
-          <p>A parallel shadow log records the hypothetical opposite of every trade. If it consistently outperforms, it flags threshold drift before it becomes a problem. Every Sunday, a 60-day backtest auto-recalibrates Apex entry floors — no restart required.</p>
+          <h4>Shadow Book</h4>
+          <p>A parallel shadow log records the hypothetical opposite of every trade. If it consistently outperforms, it flags threshold drift before it becomes a problem — feeding directly into the Sunday Apex recalibration covered above.</p>
         </div>
       </div>
       <div class="feature">
@@ -679,25 +663,7 @@
       <div class="included-item" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);grid-column:1/-1;"><span class="check" style="color:#f59e0b;">★</span><span style="color:var(--txt1);font-weight:600;">Early access — first in line + transition pricing when NoVo moves to subscription</span></div>
     </div>
 
-    <!-- GET RUNNING FAST -->
-    <div class="running-grid">
-      <div class="running-step">
-        <div class="running-num">1</div>
-        <h4>Unzip &amp; Configure</h4>
-        <p>Unzip to C:\Trading Algo\NoVo. Rename .env.template to .env, paste your license key and API credentials.</p>
-      </div>
-      <div class="running-step">
-        <div class="running-num">2</div>
-        <h4>Run Setup</h4>
-        <p>Right-click setup.ps1 → Run as Administrator. Installs Python deps, Redis, NSSM, registers all three services, starts the system.</p>
-      </div>
-      <div class="running-step">
-        <div class="running-num">3</div>
-        <h4>Go Live</h4>
-        <p>Open the dashboard, enter your broker and AI keys in Settings, click Auth — NoVo is running in paper mode immediately.</p>
-      </div>
-    </div>
-    <p class="running-time">Total setup time: <strong>under 20 minutes</strong></p>
+    <p class="running-time">Total setup time: <strong>under 20 minutes</strong> — <a href="javascript:void(0)" onclick="openSetupGuide()" style="color:var(--blue);text-decoration:underline;">see the full walkthrough</a>.</p>
   </div>
 </section>
 
