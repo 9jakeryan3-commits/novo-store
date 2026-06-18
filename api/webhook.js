@@ -61,7 +61,7 @@ function emailHtml(licenseKey, zipUrl) {
 <body>
 <div class="wrap">
   <div class="logo">No<span>Vo</span></div>
-  <div class="tag">v.fast &nbsp;·&nbsp; Algorithmic Execution System</div>
+  <div class="tag">Algorithmic Execution System</div>
   <hr>
   <h2>You're in. Here's everything you need.</h2>
   <p>Payment confirmed. Your license key and download are below — read this once and you'll be running in under 20 minutes.</p>
@@ -69,11 +69,11 @@ function emailHtml(licenseKey, zipUrl) {
     <div class="key-label">Your License Key</div>
     <div class="key">${licenseKey}</div>
   </div>
-  <a href="${zipUrl}" class="btn">Download NoVo v.fast</a>
+  <a href="${zipUrl}" class="btn">Download NoVo</a>
   <hr>
   <h2>Getting started</h2>
   <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo v.fast</strong></div></div>
+    <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo</strong></div></div>
     <div class="step"><div class="step-num">2</div><div class="step-text">Rename <strong>.env.template</strong> to <strong>.env</strong> — paste your license key as <strong>NOVO_LICENSE_KEY=</strong></div></div>
     <div class="step"><div class="step-num">3</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator</div></div>
     <div class="step"><div class="step-num">4</div><div class="step-text">Open Chrome → <strong>https://&lt;your-tailscale-hostname&gt;:8000</strong> and log in</div></div>
@@ -126,7 +126,7 @@ module.exports = async (req, res) => {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         to: [email],
-        subject: 'NoVo v.fast — Your Files + License Key',
+        subject: 'NoVo — Your Files + License Key',
         html: emailHtml(licenseKey, process.env.NOVO_ZIP_URL),
       });
     } catch (err) {
