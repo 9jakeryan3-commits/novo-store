@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo — AI-Powered SPY Options Scalping & Execution System</title>
-<meta name="description" content="NoVo is an autonomous algorithmic execution system for SPY options scalping and day trading. Tape analysis, RVOL, gamma proximity, and AI structural reads — reacting faster than human reflexes, running as a Windows service with a mobile C2 dashboard.">
+<meta name="description" content="NoVo is an autonomous AI-powered execution system for SPY options scalping and day trading. Multi-layer signal scoring, real-time AI structural reads, and a self-improving mastery loop — reacting faster than human reflexes, with a mobile C2 dashboard.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app">
 <meta property="og:title" content="NoVo — Algorithmic Execution System for SPY Options">
-<meta property="og:description" content="Autonomous SPY options trading system. Tape imbalance, RVOL, gamma proximity — running 24/7 as Windows services with a mobile-accessible dashboard.">
+<meta property="og:description" content="Autonomous SPY options trading system. Multi-layer signal scoring and AI-powered execution — running continuously with a mobile-accessible dashboard.">
 <link rel="icon" href="/novo-icon.png">
 <meta property="og:image" content="https://novo-aitrading.app/novo-logo.png">
 <style>
@@ -782,7 +782,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">Does it work with my broker?</summary>
-        <div class="faq-a"><strong>Tradier is always required</strong> — it powers the live WebSocket tick stream that feeds all signal calculations (tape imbalance, RVOL, GEX). This runs regardless of how you're trading. A minimum $5 deposit activates the stream.<br><br>
+        <div class="faq-a"><strong>Tradier is always required</strong> — it powers the live WebSocket tick stream that feeds all signal calculations . This runs regardless of how you're trading. A minimum $5 deposit activates the stream.<br><br>
         For trade execution you choose your broker:<br><br>
         <strong>Alpaca — paper or live:</strong> Alpaca has two sets of API keys — paper keys and live keys. Paste your paper keys in Settings for simulated trading, or swap in your live keys to trade real money. That's the only change needed to switch between the two.<br><br>
         <strong>Tradier — live only:</strong> Tradier executes real orders regardless of any setting. Never select Tradier while in paper mode — it will trade real money.<br><br>
@@ -791,15 +791,15 @@
 
       <details class="faq-item">
         <summary class="faq-q">Do I need to watch the screen all day?</summary>
-        <div class="faq-a">No. NoVo runs as three persistent Windows services that start automatically with your PC and run through market hours in the background. You can monitor everything — Apex Score, live position, P&L, regime state, circuit breaker status — from your phone via the mobile dashboard. The system handles entries, exits, and position management without you watching.</div>
+        <div class="faq-a">No. NoVo runs as persistent background services that start automatically with your PC and run through market hours in the background. You can monitor everything — Apex Score, live position, P&L, regime state, circuit breaker status — from your phone via the mobile dashboard. The system handles entries, exits, and position management without you watching.</div>
       </details>
 
       <details class="faq-item">
         <summary class="faq-q">What does the AI actually do?</summary>
         <div class="faq-a">The AI is not optional — NoVo doesn't trade without it. Four AI layers run simultaneously:<br><br>
-        <strong>Vision Sensor:</strong> Reads live SPY market structure every 3 minutes. That read gates every entry — no valid AI read, no trade.<br><br>
-        <strong>Intuition Engine:</strong> Every 5 minutes, detects the current retail psychology state (FOMO, CAPITULATION, MOMENTUM_BUILDING, CHOP, NEUTRAL) and adjusts entry aggressiveness accordingly.<br><br>
-        <strong>Systemic Resonance:</strong> Continuously classifies the macro regime (RISK-ON, RISK-OFF, CHOP, MIXED) using VIX, HYG credit stress, DXY, and the Whale Sensor (institutional sweep detection).<br><br>
+        <strong>Vision Sensor:</strong> Reads live SPY market structure on a tight continuous cycle. That read gates every entry — no valid AI read, no trade.<br><br>
+        <strong>Intuition Engine:</strong> Continuously detects the current retail psychology state — crowd behavior classified across multiple conditions — and adjusts entry aggressiveness accordingly.<br><br>
+        <strong>Systemic Resonance:</strong> Continuously classifies the macro session using volatility, credit market stress, currency pressure, and institutional sweep detection — each regime state adjusting behavior automatically.<br><br>
         <strong>Mastery Loop:</strong> Every Friday, reviews the full week of trade outcomes and rewrites permanent trading laws that govern future behavior. The system evolves every week.</div>
       </details>
 
@@ -818,7 +818,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">What happens if my PC restarts during market hours?</summary>
-        <div class="faq-a">All three NoVo services are registered via NSSM and configured to restart automatically on reboot. If the machine goes down, services come back up within seconds. Position state is persisted through the system — any open position at restart is picked up from your broker account on reconnect. No manual intervention needed.</div>
+        <div class="faq-a">All NoVo services are configured to restart automatically on reboot. If the machine goes down, services come back up within seconds. Position state is persisted through the system — any open position at restart is picked up from your broker account on reconnect. No manual intervention needed.</div>
       </details>
 
       <details class="faq-item">
@@ -828,22 +828,17 @@
 
       <details class="faq-item">
         <summary class="faq-q">What is the Apex Score and how does entry sizing work?</summary>
-        <div class="faq-a">The Apex Score is a 0–100 real-time measure of setup quality, updated every 5 seconds. It synthesizes three signal components — tape imbalance, RVOL, and gamma proximity — into a single conviction number. Four tiers determine both whether an entry fires and how large the position is:<br><br>
-        <strong>Confluence:</strong> Moderate conviction — smallest size<br>
-        <strong>Mid Override:</strong> Solid setup — standard size<br>
-        <strong>High Conviction:</strong> Strong alignment — elevated size<br>
-        <strong>Nuclear:</strong> Maximum conviction or extreme tape event — largest size<br><br>
-        The threshold for each tier is configurable from the dashboard.</div>
+        <div class="faq-a">The Apex Score is a 0–100 real-time measure of setup quality, updated continuously from multiple proprietary signal components. Four conviction tiers determine both whether an entry fires and how large the position is — from moderate conviction at the smallest size, up to maximum conviction at the largest. Each tier threshold is configurable from the dashboard.</div>
       </details>
 
       <details class="faq-item">
         <summary class="faq-q">Can I adjust the risk settings?</summary>
-        <div class="faq-a">Yes — nearly everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.<br><br>Two exits are intentionally not adjustable: the <strong>Breakeven Saver</strong> and the <strong>Structural Reversal</strong>. These are hardcoded by design to enforce NoVo's core principle — minimize time in the market. When a trade peaks and rejects, you exit. When the AI's structural read flips against your position after multiple confirmed reads, you exit. They cannot be disabled because they protect against the single most costly discretionary behavior: holding a losing position and waiting for a recovery that may not come. Everything else is yours to configure.<br><br>That doesn't mean these two stay frozen, though — every week, NoVo's validator checks how they've actually performed on your real trades and can nudge their thresholds within a tight, fixed range, logging every change to your dashboard. You can't move them. NoVo can, because it's the one being held accountable to the results.</div>
+        <div class="faq-a">Yes — nearly everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.<br><br>Two exits are intentionally not adjustable — hardcoded by design to enforce NoVo's core principle: minimize time in the market. When a trade peaks and rejects, you exit. When the AI's structural read flips against your position, you exit. They cannot be disabled because they protect against the single most costly discretionary behavior: holding a losing position and waiting for a recovery that may not come. Everything else is yours to configure.<br><br>That doesn't mean these two stay frozen — every week, NoVo's validator checks how they've actually performed on your real trades and can nudge their thresholds within a tight, fixed range, logging every change to your dashboard. You can't move them. NoVo can, because it's the one being held accountable to the results.</div>
       </details>
 
       <details class="faq-item">
         <summary class="faq-q">How does setup work?</summary>
-        <div class="faq-a">After purchase, your zip file and license key arrive by email within 60 seconds. Unzip to C:\Trading Algo\NoVo, rename .env.template to .env, paste your license key and API credentials, then right-click setup.ps1 and run as Administrator. The script installs Python dependencies, Redis, NSSM, registers all three services, and starts the system. Full walkthrough is in the included PDF. Most people are running in under 20 minutes.</div>
+        <div class="faq-a">After purchase, your zip file and license key arrive by email within 60 seconds. Unzip to the required folder, rename .env.template to .env, paste your license key and API credentials, then right-click setup.ps1 and run as Administrator. The script installs dependencies, registers all background services, and starts the system. Full walkthrough is in the included PDF. Most people are running in under 20 minutes.</div>
       </details>
 
     </div>
@@ -944,7 +939,7 @@ document.addEventListener('keydown', (e) => {
         <div class="setup-step-num">2</div>
         <div class="setup-step-body">
           <h4>Unzip to the required folder</h4>
-          <p>Extract the zip to <code>C:\Trading Algo\NoVo</code> — the services and shortcuts are pre-configured for that exact path.</p>
+          <p>Extract the zip to the required folder — setup will confirm the location during installation.</p>
         </div>
       </div>
       <div class="setup-step">
@@ -958,14 +953,14 @@ document.addEventListener('keydown', (e) => {
         <div class="setup-step-num">4</div>
         <div class="setup-step-body">
           <h4>Let it run — about 2-5 minutes</h4>
-          <p>Redis, the three background services, the firewall rule, your desktop shortcuts — all installed and started automatically. No babysitting required.</p>
+          <p>All background services, the firewall rule, and your desktop shortcuts — installed and started automatically. No babysitting required.</p>
         </div>
       </div>
       <div class="setup-step">
         <div class="setup-step-num">5</div>
         <div class="setup-step-body">
           <h4>Open the dashboard and log in</h4>
-          <p>Locally at <code>https://127.0.0.1:8000</code>, or your Tailscale URL if you set up remote access. Log in with the password you chose in step 3.</p>
+          <p>Locally via the dashboard shortcut on your desktop, or your Tailscale URL if you set up remote access. Log in with the password you chose in step 3.</p>
         </div>
       </div>
       <div class="setup-step">
