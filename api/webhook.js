@@ -125,6 +125,7 @@ module.exports = async (req, res) => {
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
+        replyTo: 'novotrades26@gmail.com',
         to: [email],
         subject: 'NoVo — Your Files + License Key',
         html: emailHtml(licenseKey, process.env.NOVO_ZIP_URL),
