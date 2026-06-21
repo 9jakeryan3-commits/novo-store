@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{ price: process.env.STRIPE_SUB_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: process.env.STRIPE_PRICE_SUB_ID, quantity: 1 }],
       mode: 'subscription',
       success_url: `${SITE}/subscribe-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/#pricing`,

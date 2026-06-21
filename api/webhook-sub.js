@@ -108,7 +108,7 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
     <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo</strong></div></div>
     <div class="step"><div class="step-num">2</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator — it handles everything and will ask for your license key</div></div>
     <div class="step"><div class="step-num">3</div><div class="step-text">Open Chrome → <strong>http://localhost:8000</strong> and log in, or use your permanent remote URL printed at the end of setup</div></div>
-    <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your Tradier, Alpaca, and AI provider keys</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your Tradier and Alpaca keys — AI is already configured, no AI provider key needed</div></div>
     <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
   </div>
   <p>Start in paper mode (default). Watch it run before switching to live.</p>

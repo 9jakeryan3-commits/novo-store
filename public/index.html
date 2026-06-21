@@ -371,7 +371,7 @@
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
       <button class="btn-secondary" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
-    <p class="hero-sub">Two editions — <strong style="color:var(--txt1);">NoVo Subscription</strong> ($139/mo, Tradier + AI) or <strong style="color:var(--txt1);">NoVo Full</strong> ($497 one-time, adds backtester, dark pool, news &amp; calendar).</p>
+    <p class="hero-sub">Two editions — <strong style="color:var(--txt1);">NoVo Subscription</strong> ($139/mo, Tradier + Alpaca only, AI included) or <strong style="color:var(--txt1);">NoVo Full</strong> ($497 one-time, adds backtester, dark pool, news &amp; calendar).</p>
     <div class="hero-steps">
       <div class="hero-step"><div class="hero-step-num">1</div>Zip + key to your email in 60s</div>
       <div class="hero-step-arrow">→</div>
@@ -482,7 +482,7 @@
         <ul>
           <li><span class="mark">✕</span>Traders with no foundational understanding of options, Greeks, or market structure — NoVo handles execution, not education</li>
           <li><span class="mark">✕</span>Anyone expecting a "set and forget" money printer — NoVo requires you to configure risk and understand what it's doing</li>
-          <li><span class="mark">✕</span>Traders not prepared to fund third-party accounts — Subscription needs AI ($20–60/mo) + Tradier; Full adds MarketData (~$125/mo additional)</li>
+          <li><span class="mark">✕</span>Traders not prepared to fund third-party accounts — Subscription needs Tradier ($5 minimum deposit) + Alpaca; Full additionally needs MarketData (~$125/mo) and your own AI provider</li>
           <li><span class="mark">✕</span>Anyone running on a Mac, Linux, or trading from a mobile device only</li>
           <li><span class="mark">✕</span>Passive investors — NoVo is an active day-trading execution tool, not a portfolio strategy</li>
         </ul>
@@ -708,11 +708,10 @@
       <div class="cost-card" style="border-top:3px solid var(--green);">
         <h3 style="color:var(--green);">NoVo Subscription — $139/mo</h3>
         <ul>
-          <li>NoVo license <span class="cost-val" style="color:var(--green);">$139/mo</span></li>
+          <li>NoVo license + AI (Gemini Vertex AI included) <span class="cost-val" style="color:var(--green);">$139/mo</span></li>
           <li>Tradier Brokerage (data + execution) <span class="cost-val">Free (or $10/mo commission-free) — requires $5 minimum deposit to activate the data stream</span></li>
           <li>Alpaca (paper or live execution) <span class="cost-val">Free</span></li>
-          <li>AI Provider (Gemini or Claude) <span class="cost-val">~$20–60/mo</span></li>
-          <li><strong style="color:var(--txt1);">Total: ~$159–199/mo</strong> <span class="cost-val">No MarketData subscription needed</span></li>
+          <li><strong style="color:var(--txt1);">Total: $139/mo</strong> <span class="cost-val">No MarketData or AI provider account needed</span></li>
         </ul>
       </div>
       <div class="cost-card" style="border-top:3px solid var(--amber);">
@@ -769,19 +768,19 @@
           <tr>
             <td>Data &amp; API costs</td>
             <td class="cost-sub">$155–200/mo (you still pay these)</td>
-            <td class="cost-novo">$20–60/mo (AI only)</td>
+            <td class="cost-novo">$0 — AI included in subscription</td>
             <td class="cost-hosted">$145–195/mo (MarketData + AI)</td>
           </tr>
           <tr>
             <td>Total monthly ongoing</td>
             <td class="cost-sub">$254–399/mo</td>
-            <td class="cost-novo">~$159–199/mo</td>
+            <td class="cost-novo">$139/mo flat</td>
             <td class="cost-hosted">$145–195/mo (no license fee)</td>
           </tr>
           <tr>
             <td>Year 1 total</td>
             <td class="cost-sub">$3,048 – $4,788</td>
-            <td class="cost-novo">$1,908 – $2,388</td>
+            <td class="cost-novo">$1,668</td>
             <td class="cost-hosted">$2,237 – $2,837</td>
           </tr>
           <tr>
@@ -807,7 +806,7 @@
   <div class="container">
     <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:14px;">Two Editions. Same Engine.</div>
     <div style="font-size:clamp(22px,3.5vw,32px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.15;margin-bottom:16px;">Start subscribing or own it outright —<br>your call.</div>
-    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 28px;line-height:1.75;"><strong style="color:var(--green);">NoVo Subscription ($139/mo)</strong> — same core stalker and execution engine, Tradier-only, no MarketData subscription needed. Cancel any time from the subscriber portal.<br><br><strong style="color:var(--amber);">NoVo Full ($497 one-time)</strong> — adds the advanced data layer: 60-day backtester, dark pool tape, live news feed, and economic calendar. Machine-bound license, yours permanently.</p>
+    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 28px;line-height:1.75;"><strong style="color:var(--green);">NoVo Subscription ($139/mo)</strong> — same core stalker and execution engine. You need Tradier and Alpaca accounts only — AI is included, no AI provider key needed. Cancel any time.<br><br><strong style="color:var(--amber);">NoVo Full ($497 one-time)</strong> — adds the advanced data layer: 60-day backtester, dark pool tape, live news feed, and economic calendar. Requires MarketData.app + your own AI provider. Machine-bound license, yours permanently.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe Now — $139/mo</button>
       <button class="btn-primary" onclick="checkout()">Buy Full — $497</button>
@@ -828,14 +827,14 @@
       <!-- Subscription card -->
       <div class="price-card" style="border-top-color:var(--green);">
         <div class="price-name" style="color:var(--green);">NoVo Subscription</div>
-        <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Tradier + Alpaca + AI</div>
+        <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Tradier + Alpaca — AI Included</div>
         <div class="price-amount"><sup>$</sup>139</div>
         <div class="price-once">per month &nbsp;·&nbsp; cancel any time</div>
-        <div class="price-roi" style="color:var(--green);">~$20–60/mo additional for AI — no data subscription needed</div>
+        <div class="price-roi" style="color:var(--green);">All-in — Tradier + Alpaca keys only. No AI provider key needed.</div>
         <ul class="price-features">
           <li>Full stalker + execution engine</li>
           <li>Tradier WebSocket — live SPY tape + options chain</li>
-          <li>4 AI intelligence layers</li>
+          <li>4 AI intelligence layers (Gemini Vertex AI — included)</li>
           <li>GEX, magnets, contract sniper</li>
           <li>MAB execution router + self-tuning</li>
           <li>Mobile C2 dashboard (PWA)</li>
@@ -848,7 +847,7 @@
           <ol>
             <li>License key + download link arrive by email</li>
             <li>Run setup.ps1 as Administrator — about 5 minutes</li>
-            <li>Enter Tradier, Alpaca + AI keys in Settings, click Auth</li>
+            <li>Enter Tradier and Alpaca keys in Settings — AI is pre-configured, click Auth</li>
           </ol>
         </div>
         <p class="price-secure">Secure checkout via Stripe &nbsp;·&nbsp; Manage at <a href="/subscriber" style="color:var(--blue);">novo-aitrading.app/subscriber</a></p>
@@ -926,8 +925,8 @@
       <details class="faq-item">
         <summary class="faq-q">What's the difference between Subscription and Full?</summary>
         <div class="faq-a">Same core engine — stalker, execution, AI layers, exit hierarchy, dashboard. The difference is the data layer.<br><br>
-        <strong>NoVo Subscription ($139/mo):</strong> Tradier-only. Tradier provides the live SPY tape, options chain data, and execution in one account. No MarketData.app subscription needed — which removes the biggest monthly cost. Cancel any time from the subscriber portal. Machine-bound license renews monthly automatically.<br><br>
-        <strong>NoVo Full ($497 one-time):</strong> Adds MarketData.app Quant plan (~$125/mo) for the advanced data layer: 60-day backtester (historical options chains + 1-minute candles), live dark pool block tape, market news feed, and economic calendar. One-time license fee, yours permanently, no recurring license cost.<br><br>
+        <strong>NoVo Subscription ($139/mo):</strong> Tradier + Alpaca only — AI is included (Gemini Vertex AI, pre-configured). No MarketData.app subscription, no AI provider account needed. The $139/mo is all-in. Cancel any time from the subscriber portal. Machine-bound license renews monthly automatically.<br><br>
+        <strong>NoVo Full ($497 one-time):</strong> Adds MarketData.app Quant plan (~$125/mo) for the advanced data layer: 60-day backtester (historical options chains + 1-minute candles), live dark pool block tape, market news feed, and economic calendar. Also requires your own AI provider key (Gemini or Claude). One-time license fee, yours permanently, no recurring license cost.<br><br>
         Upgrading from Subscription to Full is a zip swap and one additional API key — your broker accounts, license binding, remote URL, and full trade history carry over unchanged.</div>
       </details>
 
