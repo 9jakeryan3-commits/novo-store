@@ -371,7 +371,7 @@
     <div class="hero-steps">
       <div class="hero-step"><div class="hero-step-num">1</div>Zip + key to your email in 60s</div>
       <div class="hero-step-arrow">→</div>
-      <div class="hero-step"><div class="hero-step-num">2</div>Run setup.ps1 — 15 minutes</div>
+      <div class="hero-step"><div class="hero-step-num">2</div>Run setup.ps1 — ~5 minutes</div>
       <div class="hero-step-arrow">→</div>
       <div class="hero-step"><div class="hero-step-num">3</div>Dashboard live, paper trading immediately</div>
     </div>
@@ -492,7 +492,7 @@
 <!-- WHY SPY -->
 <section>
   <div class="container">
-    <div class="section-label">Why SPY, 1-5 DTE</div>
+    <div class="section-label">Why SPY, 0-5 DTE</div>
     <div class="section-title">One ticker. Mastered. Autonomous.</div>
     <p class="section-sub">Some tools trade everything. NoVo trades one thing — better than any of them. Every signal layer, every scoring weight, every exit rule is tuned specifically for SPY options and nothing else. Serious scalpers don't hop between 15 tickers. They master one tape and extract from it repeatedly. SPY is that tape.</p>
     <div class="how-grid">
@@ -607,7 +607,7 @@
   <div class="container">
     <div class="section-label">System Features</div>
     <div class="section-title">The full stack.</div>
-    <p class="section-sub">Every component purpose-built for SPY options trading, 1-5 DTE.</p>
+    <p class="section-sub">Every component purpose-built for SPY options trading, 0-5 DTE.</p>
     <div class="features-grid">
       <div class="feature">
         <div class="feature-icon">🧠</div>
@@ -812,7 +812,7 @@
         <p>After you buy</p>
         <ol>
           <li>Zip file + license key delivered to your email within 60 seconds</li>
-          <li>Run setup.ps1 as Administrator — takes about 15 minutes</li>
+          <li>Run setup.ps1 as Administrator — takes about 5 minutes</li>
           <li>Open dashboard, enter API keys, click Auth — live immediately</li>
         </ol>
       </div>
@@ -888,7 +888,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">How does setup work?</summary>
-        <div class="faq-a">After purchase, your zip file and license key arrive by email within 60 seconds. Unzip to the required folder, rename .env.template to .env, paste your license key and API credentials, then right-click setup.ps1 and run as Administrator. The script installs dependencies, registers all background services, and starts the system. Full walkthrough is in the included PDF. Most people are running in under 20 minutes.</div>
+        <div class="faq-a">After purchase, your zip file and license key arrive by email within 60 seconds. Unzip to <code>C:\Trading Algo\NoVo</code>, right-click setup.ps1 and run as Administrator. The script walks you through the prompts, installs dependencies, registers all background services, and starts everything automatically. Full walkthrough is in the included PDF. Most people are running in under 20 minutes.</div>
       </details>
 
     </div>
@@ -997,8 +997,8 @@ document.addEventListener('keydown', (e) => {
       <div class="setup-step">
         <div class="setup-step-num">2</div>
         <div class="setup-step-body">
-          <h4>Unzip to the required folder</h4>
-          <p>Extract the zip to the required folder — setup will confirm the location during installation.</p>
+          <h4>Unzip to <code>C:\Trading Algo\NoVo</code></h4>
+          <p>Extract the zip and place the NoVo folder at exactly <code>C:\Trading Algo\NoVo</code>. Create the <code>Trading Algo</code> folder first if it doesn't exist.</p>
         </div>
       </div>
       <div class="setup-step">
@@ -1038,7 +1038,7 @@ document.addEventListener('keydown', (e) => {
       </div>
     </div>
     <div class="setup-modal-cta">
-      <p>Full written walkthrough with screenshots and troubleshooting ships inside the zip as START&amp;TROUBLESHOOT.pdf.</p>
+      <p>Full written walkthrough and troubleshooting ships inside the zip as <strong>2. Start &amp; Troubleshoot.pdf</strong>.</p>
       <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
     </div>
   </div>
