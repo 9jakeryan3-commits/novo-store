@@ -680,16 +680,16 @@
   <div class="container">
     <div class="section-label">What's Included</div>
     <div class="section-title">Everything to get running.</div>
-    <p class="section-sub">Delivered instantly to your email after purchase.</p>
+    <p class="section-sub">Delivered instantly to your email after checkout. Same core system — both editions.</p>
     <div class="included-grid">
-      <div class="included-item"><span class="check">✓</span><span>NoVo 4.0.0 — full system</span></div>
+      <div class="included-item"><span class="check">✓</span><span>NoVo 4.0.0 system + all scripts</span></div>
       <div class="included-item"><span class="check">✓</span><span>Automated setup script (setup.ps1)</span></div>
-      <div class="included-item"><span class="check">✓</span><span>Lifetime machine-bound license key</span></div>
+      <div class="included-item"><span class="check">✓</span><span>Machine-bound license key (monthly for Sub, lifetime for Full)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Risk Disclaimer (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Start &amp; Troubleshoot Guide (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Full Presentation Guide (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Direct support — reply to your order email</span></div>
-      <div class="included-item" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);grid-column:1/-1;"><span class="check" style="color:#f59e0b;">★</span><span style="color:var(--txt1);font-weight:600;">Early Adopter rate — subscription launches at $150–200/mo. You lock in below that, permanently, when the hosted platform launches and your API costs disappear.</span></div>
+      <div class="included-item" style="grid-column:1/-1;background:rgba(16,185,129,0.05);border-color:rgba(16,185,129,0.2);"><span class="check">✓</span><span><strong style="color:var(--txt1);">Subscription:</strong> Gemini Vertex AI pre-configured — no AI account or key needed &nbsp;&nbsp;<strong style="color:var(--txt1);">Full:</strong> bring your own AI provider (Gemini or Claude API key)</span></div>
     </div>
 
     <p class="running-time">Total setup time: <strong>under 20 minutes</strong> — <a href="javascript:void(0)" onclick="openSetupGuide()" style="color:var(--blue);text-decoration:underline;">see the full walkthrough</a>.</p>
@@ -741,7 +741,7 @@
         <h3>Upgrading Sub → Full</h3>
         <ul>
           <li>Swap zip to Full version <span class="cost-val">One-time</span></li>
-          <li>Add MarketData.app key to .env <span class="cost-val">One line</span></li>
+          <li>Add MarketData.app key in Settings <span class="cost-val">One step</span></li>
           <li>License, broker accounts, remote URL, trade history <span class="cost-val">All carry over unchanged</span></li>
           <li>Credits from Sub months <span class="cost-val">None — separate products</span></li>
         </ul>
@@ -992,15 +992,20 @@
 // banner near the main buy button. Site stays fully visible/browsable —
 // only the actual purchase flow is paused.
 const SALES_PAUSED = true;
-const SALES_PAUSED_MESSAGE = "Sales are temporarily paused for a quick licensing update — back within a day or two. Thanks for your patience!";
+const SALES_PAUSED_MESSAGE = "Sales are temporarily paused — back within a day or two. Thanks for your patience!";
 
 function applyPausedNotice() {
   if (!SALES_PAUSED) return;
-  const banner = document.createElement('div');
-  banner.style.cssText = 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--red); font-weight: 600; text-align: center;';
-  banner.textContent = 'Sales temporarily paused for a quick update — back within a day or two.';
-  const mainBtn = document.querySelector('.price-btn[onclick="checkout()"]');
-  if (mainBtn) mainBtn.parentNode.insertBefore(banner, mainBtn);
+  function makeBanner() {
+    const b = document.createElement('div');
+    b.style.cssText = 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--red); font-weight: 600; text-align: center;';
+    b.textContent = 'Sales temporarily paused — back within a day or two.';
+    return b;
+  }
+  const fullBtn = document.querySelector('.price-btn[onclick="checkout()"]');
+  if (fullBtn) fullBtn.parentNode.insertBefore(makeBanner(), fullBtn);
+  const subBtn = document.querySelector('.price-btn[onclick="subscribeNow()"]');
+  if (subBtn) subBtn.parentNode.insertBefore(makeBanner(), subBtn);
 }
 document.addEventListener('DOMContentLoaded', applyPausedNotice);
 
@@ -1079,7 +1084,7 @@ document.addEventListener('keydown', (e) => {
     <button class="setup-modal-close" onclick="closeSetupGuide()" aria-label="Close">&times;</button>
     <div class="section-label">Buy It → Run It → Trade It</div>
     <h2>Quick Setup Guide</h2>
-    <p class="setup-sub">From clicking "Get Early Access" to clicking AUTH (START) on your own dashboard — most people are done in under 20 minutes, paper trading immediately with zero real money at risk.</p>
+    <p class="setup-sub">From checkout to clicking AUTH (START) on your own dashboard — most people are done in under 20 minutes, paper trading immediately with zero real money at risk.</p>
     <div class="setup-steps">
       <div class="setup-step">
         <div class="setup-step-num">1</div>
@@ -1099,7 +1104,7 @@ document.addEventListener('keydown', (e) => {
         <div class="setup-step-num">3</div>
         <div class="setup-step-body">
           <h4>Right-click <code>setup.ps1</code> → Run as Administrator</h4>
-          <p>It walks you through a handful of quick prompts — AI provider (Gemini or Anthropic, your choice — both support a simple API key or Vertex AI setup), your license key, a dashboard password, and your broker keys. Don't have a key yet? Just hit Enter and add it later from the dashboard. Remote access is configured automatically — no extra accounts required.</p>
+          <p>It walks you through a handful of quick prompts — your license key, a dashboard password, and your broker keys. Don't have a key yet? Just hit Enter and add it later from the dashboard Settings page. Remote access is configured automatically — no extra accounts required.</p>
         </div>
       </div>
       <div class="setup-step">
