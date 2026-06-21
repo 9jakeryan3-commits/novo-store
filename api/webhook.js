@@ -74,11 +74,10 @@ function emailHtml(licenseKey, zipUrl) {
   <h2>Getting started</h2>
   <div class="steps">
     <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo</strong></div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text">Rename <strong>.env.template</strong> to <strong>.env</strong> — paste your license key as <strong>NOVO_LICENSE_KEY=</strong></div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator</div></div>
-    <div class="step"><div class="step-num">4</div><div class="step-text">Open Chrome → <strong>https://&lt;your-tailscale-hostname&gt;:8000</strong> and log in</div></div>
-    <div class="step"><div class="step-num">5</div><div class="step-text">Go to <strong>Settings</strong> and enter your broker and AI API keys</div></div>
-    <div class="step"><div class="step-num">6</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator — it handles everything and will ask for your license key</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">Open Chrome → <strong>http://localhost:8000</strong> and log in, or use your permanent remote URL printed at the end of setup</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your broker and AI API keys</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
   </div>
   <p>Full walkthrough in <strong>START&amp;TROUBLESHOOT.pdf</strong> inside the zip. The presentation guide explains how the system thinks and trades.</p>
   <p>Start in paper mode (default). Watch it run before switching to live.</p>
