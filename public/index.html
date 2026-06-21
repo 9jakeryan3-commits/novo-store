@@ -40,7 +40,7 @@
         {
           "@type": "Question",
           "name": "Does it work with my broker?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Tradier is required for the live WebSocket tick stream. For execution you choose Alpaca (paper or live) or Tradier (live only)." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Tradier and Alpaca accounts are required. Tradier is needed for all setups — paper and live. For execution you choose Alpaca (paper or live) or Tradier (live only). Most users start on Alpaca paper, learn the system, then switch to live when ready." }
         },
         {
           "@type": "Question",
@@ -634,7 +634,7 @@
         <div class="feature-icon">📱</div>
         <div>
           <h4>Mobile C2 Dashboard</h4>
-          <p>Full PWA, works locally out of the box. Add optional Tailscale during setup to monitor live signals, active positions, P&amp;L, circuit breaker status, and the AI intelligence feed from your phone too.</p>
+          <p>Full PWA, works locally out of the box. Setup automatically configures a secure mobile URL — monitor live signals, active positions, P&amp;L, circuit breaker status, and the AI intelligence feed from your phone anywhere in the world. Bookmark it once, use it forever.</p>
         </div>
       </div>
       <div class="feature">
@@ -705,10 +705,9 @@
         <h3>Required Accounts</h3>
         <ul>
           <li>Tradier Brokerage <span class="cost-val">Free / $10/mo</span></li>
-          <li>MarketData.app Quant <span class="cost-val">~$125/mo</span></li>
+          <li>Market data subscription <span class="cost-val">~$125/mo</span></li>
           <li>Alpaca (paper trading) <span class="cost-val">Free</span></li>
           <li>AI Provider (Gemini or Claude) <span class="cost-val">~$20–60/mo</span></li>
-          <li>Tailscale <span class="cost-val">Free</span></li>
         </ul>
       </div>
       <div class="cost-card">
@@ -778,7 +777,7 @@
   <div class="container">
     <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f59e0b;margin-bottom:14px;">Early Adopter Pricing</div>
     <div style="font-size:clamp(22px,3.5vw,32px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.15;margin-bottom:16px;">Buy at $179 now.<br>When we go subscription, your deal gets better — not worse.</div>
-    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 20px;line-height:1.75;">Today you carry the API costs yourself — MarketData.app, your AI provider. When the hosted platform launches, <strong style="color:var(--txt1);">those costs go away.</strong> NoVo manages everything. Subscription pricing launches at $150–200/mo. Early Adopters lock in permanently below that — paying less for a system that's simpler to run.</p>
+    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 20px;line-height:1.75;">Today you carry the API costs yourself — your data subscription and AI provider. When the hosted platform launches, <strong style="color:var(--txt1);">those costs go away.</strong> NoVo manages everything. Subscription pricing launches at $150–200/mo. Early Adopters lock in permanently below that — paying less for a system that's simpler to run.</p>
     <p style="font-size:13px;color:var(--txt3);max-width:500px;margin:0 auto 28px;line-height:1.7;">The $179 you pay now is pre-subscription pricing. The earlier you join, the better the rate you carry in. This is the complete system — not a trial, not a lite version.</p>
     <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $" style="display:inline-block;">Get Early Access — $179</button>
   </div>
@@ -833,7 +832,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">Does it work with my broker?</summary>
-        <div class="faq-a"><strong>Tradier is always required</strong> — it powers the live WebSocket tick stream that feeds all signal calculations . This runs regardless of how you're trading. A minimum $5 deposit activates the stream.<br><br>
+        <div class="faq-a"><strong>Tradier is always required</strong> — a funded Tradier brokerage account (minimum $5 deposit) is needed for all setups, paper and live.<br><br>
         For trade execution you choose your broker:<br><br>
         <strong>Alpaca — paper or live:</strong> Alpaca has two sets of API keys — paper keys and live keys. Paste your paper keys in Settings for simulated trading, or swap in your live keys to trade real money. That's the only change needed to switch between the two.<br><br>
         <strong>Tradier — live only:</strong> Tradier executes real orders regardless of any setting. Never select Tradier while in paper mode — it will trade real money.<br><br>
@@ -857,7 +856,7 @@
       <details class="faq-item">
         <summary class="faq-q">What does "Early Adopter" pricing mean?</summary>
         <div class="faq-a">This is a limited pre-launch release of NoVo at $179 — before the platform moves to subscription. You're getting the complete, full-license system — not a trial, not a lite version.<br><br>
-        Today you carry the API costs yourself: MarketData.app (~$125/mo) and your AI provider (~$20–60/mo). A hosted platform is in development where users will only need Tradier and Alpaca keys — NoVo manages everything else. When it launches, those API costs disappear for Early Adopters.<br><br>
+        Today you carry the API costs yourself: your data subscription (~$125/mo) and AI provider (~$20–60/mo). A hosted platform is in development where users will only need their broker keys — NoVo manages everything else. When it launches, those API costs disappear for Early Adopters.<br><br>
         Subscription pricing launches at $150–200/mo — covering everything. Early Adopters lock in permanently below that rate, so you're not trading a lower setup cost for a higher monthly bill. You're paying less for a system that's simpler to run.<br><br>
         The earlier you join, the better the rate you lock in. The $179 you pay now is pre-subscription pricing, and it comes with built-in priority when the platform evolves.</div>
       </details>
@@ -1006,7 +1005,7 @@ document.addEventListener('keydown', (e) => {
         <div class="setup-step-num">3</div>
         <div class="setup-step-body">
           <h4>Right-click <code>setup.ps1</code> → Run as Administrator</h4>
-          <p>It walks you through a handful of quick prompts — AI provider (Anthropic is just an API key, the easiest path), your license key, a dashboard password, and your broker keys. Don't have a key yet? Just hit Enter and add it later from the dashboard. Want phone/remote access? Say yes and it sets up Tailscale; say no and it skips straight to a local dashboard — no extra accounts needed either way.</p>
+          <p>It walks you through a handful of quick prompts — AI provider (Anthropic is just an API key, the easiest path), your license key, a dashboard password, and your broker keys. Don't have a key yet? Just hit Enter and add it later from the dashboard. Remote access is configured automatically — no extra accounts required.</p>
         </div>
       </div>
       <div class="setup-step">
@@ -1020,7 +1019,7 @@ document.addEventListener('keydown', (e) => {
         <div class="setup-step-num">5</div>
         <div class="setup-step-body">
           <h4>Open the dashboard and log in</h4>
-          <p>Locally via the dashboard shortcut on your desktop, or your Tailscale URL if you set up remote access. Log in with the password you chose in step 3.</p>
+          <p>Locally via the dashboard shortcut on your desktop, or your permanent mobile URL shown at the end of setup. Log in with the password you chose in step 3.</p>
         </div>
       </div>
       <div class="setup-step">
