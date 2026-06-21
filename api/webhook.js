@@ -71,7 +71,15 @@ function emailHtml(licenseKey, zipUrl) {
   </div>
   <a href="${zipUrl}" class="btn">Download NoVo</a>
   <hr>
-  <h2>Getting started</h2>
+  <h2>Read these first</h2>
+  <p>Open the zip and read the three PDFs before running anything:</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><strong>1. Risk Disclaimer.pdf</strong> — required reading before using the system</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><strong>2. Start &amp; Troubleshoot.pdf</strong> — full setup walkthrough, account requirements, and troubleshooting</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><strong>3. Presentation Guide.pdf</strong> — how NoVo thinks, trades, and every dashboard panel explained</div></div>
+  </div>
+  <hr>
+  <h2>Setup</h2>
   <div class="steps">
     <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo</strong></div></div>
     <div class="step"><div class="step-num">2</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator — it handles everything and will ask for your license key</div></div>
@@ -79,7 +87,6 @@ function emailHtml(licenseKey, zipUrl) {
     <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your broker and AI API keys</div></div>
     <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
   </div>
-  <p>Full walkthrough in <strong>START&amp;TROUBLESHOOT.pdf</strong> inside the zip. The presentation guide explains how the system thinks and trades.</p>
   <p>Start in paper mode (default). Watch it run before switching to live.</p>
   <p>Any issues — email <a href="mailto:novotrades26@gmail.com">novotrades26@gmail.com</a> and I'll sort it out.</p>
   <div class="footer">
