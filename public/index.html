@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo — AI-Powered SPY Options Scalping & Execution System</title>
-<meta name="description" content="NoVo autonomously trades SPY options — AI signal scoring, adaptive execution, and a 10-tier exit system. Windows-based, $179 one-time. No subscription.">
+<meta name="description" content="NoVo autonomously trades SPY options — AI signal scoring, adaptive execution, and a 10-tier exit system. Windows-based. Subscribe from $139/mo or own outright for $497.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app">
 <meta property="og:title" content="NoVo — Algorithmic Execution System for SPY Options">
@@ -13,7 +13,7 @@
 <meta property="og:image" content="https://novo-aitrading.app/novo-logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NoVo — Algorithmic Execution System for SPY Options">
-<meta name="twitter:description" content="Autonomous SPY options trading system. AI signal scoring, adaptive execution, 10-tier exit system. $179 one-time.">
+<meta name="twitter:description" content="Autonomous SPY options trading system. AI signal scoring, adaptive execution, 10-tier exit system. Subscribe $139/mo or own outright $497.">
 <meta name="twitter:image" content="https://novo-aitrading.app/novo-logo.png">
 <link rel="canonical" href="https://novo-aitrading.app/">
 <script type="application/ld+json">
@@ -28,7 +28,7 @@
       "description": "Autonomous AI-powered SPY options execution system with multi-layer signal scoring, adaptive MAB execution routing, and a 10-tier exit hierarchy.",
       "offers": {
         "@type": "Offer",
-        "price": "179",
+        "price": "497",
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock"
       },
@@ -349,7 +349,10 @@
 <nav>
   <div class="nav-inner">
     <div class="nav-logo"><img src="/novo-logo.png" alt="NoVo"></div>
-    <button class="nav-buy" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="nav-buy" style="background:var(--green);color:#fff;" onclick="subscribeNow()">Subscribe — $139/mo</button>
+      <button class="nav-buy" onclick="checkout()">Buy Full — $497</button>
+    </div>
   </div>
 </nav>
 
@@ -363,11 +366,12 @@
     <p>NoVo does the heavy lifting. Finds the entry, sizes the position, manages the trade, and exits the instant your rules dictate. Zero hesitation. Zero fatigue. Zero revenge trades. Even rewrites its own entry playbook every week using real market results, while never executing a single tick outside the risk boundaries you set.</p>
     <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a partner that never blinks, never tires, never hesitates.</p>
     <div class="hero-cta">
-      <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
+      <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe — $139/mo</button>
+      <button class="btn-primary" onclick="checkout()">Buy Full — $497</button>
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
       <button class="btn-secondary" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
-    <p class="hero-sub">$179 one-time — own it outright. A future hosted platform launches at $150–200/mo. Buy now and your rate locks in below that permanently.</p>
+    <p class="hero-sub">Two editions — <strong style="color:var(--txt1);">NoVo Subscription</strong> ($139/mo, Tradier + AI) or <strong style="color:var(--txt1);">NoVo Full</strong> ($497 one-time, adds backtester, dark pool, news &amp; calendar).</p>
     <div class="hero-steps">
       <div class="hero-step"><div class="hero-step-num">1</div>Zip + key to your email in 60s</div>
       <div class="hero-step-arrow">→</div>
@@ -417,7 +421,7 @@
     <div class="stats-grid">
       <div class="stat"><div class="stat-val blue">Live</div><div class="stat-label">Signal Scan — Continuous</div></div>
       <div class="stat"><div class="stat-val amber">4</div><div class="stat-label">AI Intelligence Layers</div></div>
-      <div class="stat"><div class="stat-val green">$0</div><div class="stat-label">Monthly License Fee</div></div>
+      <div class="stat"><div class="stat-val green">2</div><div class="stat-label">Editions — Sub or Full</div></div>
       <div class="stat"><div class="stat-val blue">0-5</div><div class="stat-label">DTE, Your Risk Dial</div></div>
     </div>
   </div>
@@ -478,7 +482,7 @@
         <ul>
           <li><span class="mark">✕</span>Traders with no foundational understanding of options, Greeks, or market structure — NoVo handles execution, not education</li>
           <li><span class="mark">✕</span>Anyone expecting a "set and forget" money printer — NoVo requires you to configure risk and understand what it's doing</li>
-          <li><span class="mark">✕</span>Traders not prepared to fund the required third-party accounts (~$145–195/mo operating cost)</li>
+          <li><span class="mark">✕</span>Traders not prepared to fund third-party accounts — Subscription needs AI ($20–60/mo) + Tradier; Full adds MarketData (~$125/mo additional)</li>
           <li><span class="mark">✕</span>Anyone running on a Mac, Linux, or trading from a mobile device only</li>
           <li><span class="mark">✕</span>Passive investors — NoVo is an active day-trading execution tool, not a portfolio strategy</li>
         </ul>
@@ -699,19 +703,33 @@
   <div class="container">
     <div class="section-label">What It Costs to Run</div>
     <div class="section-title">Know the full picture before you buy.</div>
-    <p class="section-sub">NoVo requires a few third-party accounts for data and brokerage. Here's everything laid out.</p>
+    <p class="section-sub">Both editions use the same core engine. The difference is the data layer — and whether you want to own it outright or subscribe monthly.</p>
     <div class="cost-grid">
-      <div class="cost-card">
-        <h3>Required Accounts</h3>
+      <div class="cost-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green);">NoVo Subscription — $139/mo</h3>
         <ul>
-          <li>Tradier Brokerage <span class="cost-val">Free / $10/mo</span></li>
-          <li>Market data subscription <span class="cost-val">~$125/mo</span></li>
-          <li>Alpaca (paper trading) <span class="cost-val">Free</span></li>
+          <li>NoVo license <span class="cost-val" style="color:var(--green);">$139/mo</span></li>
+          <li>Tradier Brokerage (data + execution) <span class="cost-val">Free (or $10/mo commission-free) — requires $5 minimum deposit to activate the data stream</span></li>
+          <li>Alpaca (paper or live execution) <span class="cost-val">Free</span></li>
           <li>AI Provider (Gemini or Claude) <span class="cost-val">~$20–60/mo</span></li>
+          <li><strong style="color:var(--txt1);">Total: ~$159–199/mo</strong> <span class="cost-val">No MarketData subscription needed</span></li>
         </ul>
       </div>
+      <div class="cost-card" style="border-top:3px solid var(--amber);">
+        <h3 style="color:var(--amber);">NoVo Full — $497 one-time</h3>
+        <ul>
+          <li>NoVo Full license <span class="cost-val" style="color:var(--amber);">$497 once — no recurring fee</span></li>
+          <li>Tradier Brokerage (data + execution) <span class="cost-val">Free (or $10/mo commission-free) — requires $5 minimum deposit to activate the data stream</span></li>
+          <li>Alpaca (paper or live execution) <span class="cost-val">Free</span></li>
+          <li>MarketData.app Quant plan (backtester, dark pool, news) <span class="cost-val">~$125/mo</span></li>
+          <li>AI Provider (Gemini or Claude) <span class="cost-val">~$20–60/mo</span></li>
+          <li><strong style="color:var(--txt1);">Total: ~$145–195/mo ongoing</strong> <span class="cost-val">after one-time $497</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="cost-grid" style="margin-top:16px;">
       <div class="cost-card">
-        <h3>Hardware &amp; OS</h3>
+        <h3>Hardware &amp; OS (both editions)</h3>
         <ul>
           <li>Windows 10 or 11 <span class="cost-val">Required</span></li>
           <li>Python 3.12 <span class="cost-val">Free</span></li>
@@ -720,66 +738,80 @@
           <li>Stable internet connection <span class="cost-val">Required</span></li>
         </ul>
       </div>
+      <div class="cost-card">
+        <h3>Upgrading Sub → Full</h3>
+        <ul>
+          <li>Swap zip to Full version <span class="cost-val">One-time</span></li>
+          <li>Add MarketData.app key to .env <span class="cost-val">One line</span></li>
+          <li>License, broker accounts, remote URL, trade history <span class="cost-val">All carry over unchanged</span></li>
+          <li>Credits from Sub months <span class="cost-val">None — separate products</span></li>
+        </ul>
+      </div>
     </div>
     <div class="cost-compare">
-      <div class="cost-compare-title">NoVo vs. subscription-based algo tools — total cost comparison</div>
+      <div class="cost-compare-title">Edition comparison — Sub vs Full vs third-party algo tools</div>
       <table>
         <thead>
           <tr>
             <th></th>
-            <th class="cost-sub">Subscription Algo Tool</th>
-            <th class="cost-novo">NoVo — Now</th>
-            <th class="cost-hosted">NoVo Hosted ★</th>
+            <th class="cost-sub">Other Algo Tools</th>
+            <th class="cost-novo">NoVo Subscription</th>
+            <th class="cost-hosted">NoVo Full</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>License / entry cost</td>
+            <td>License cost</td>
             <td class="cost-sub">$99–199/mo</td>
-            <td class="cost-novo">$179 once</td>
-            <td class="cost-hosted">Included</td>
+            <td class="cost-novo">$139/mo</td>
+            <td class="cost-hosted">$497 once</td>
           </tr>
           <tr>
             <td>Data &amp; API costs</td>
             <td class="cost-sub">$155–200/mo (you still pay these)</td>
-            <td class="cost-novo">$145–195/mo</td>
-            <td class="cost-hosted">Included — nothing extra</td>
+            <td class="cost-novo">$20–60/mo (AI only)</td>
+            <td class="cost-hosted">$145–195/mo (MarketData + AI)</td>
           </tr>
           <tr>
             <td>Total monthly ongoing</td>
             <td class="cost-sub">$254–399/mo</td>
-            <td class="cost-novo">$145–195/mo</td>
-            <td class="cost-hosted">$150–200/mo · EA rate lower</td>
+            <td class="cost-novo">~$159–199/mo</td>
+            <td class="cost-hosted">$145–195/mo (no license fee)</td>
           </tr>
           <tr>
             <td>Year 1 total</td>
-            <td class="cost-sub">$3,348 – $4,788</td>
-            <td class="cost-novo">$1,919 – $2,519</td>
-            <td class="cost-hosted">Less than your API costs today</td>
+            <td class="cost-sub">$3,048 – $4,788</td>
+            <td class="cost-novo">$1,908 – $2,388</td>
+            <td class="cost-hosted">$2,237 – $2,837</td>
           </tr>
           <tr>
-            <td>Year 2 onward</td>
-            <td class="cost-sub">Same recurring cost every year</td>
-            <td class="cost-novo">Data costs only — no license fee ever again</td>
-            <td class="cost-hosted">Same low rate — everything included</td>
+            <td>Year 2+</td>
+            <td class="cost-sub">Same recurring every year</td>
+            <td class="cost-novo">$139/mo license + AI only</td>
+            <td class="cost-hosted">Data costs only — no license fee ever</td>
+          </tr>
+          <tr>
+            <td>Backtester, dark pool, news</td>
+            <td class="cost-sub">Sometimes (hidden in fee)</td>
+            <td class="cost-novo">Not included</td>
+            <td class="cost-hosted">Included</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div style="margin-top:12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:14px 18px;font-size:13px;color:var(--txt2);line-height:1.7;">
-      <strong style="color:var(--amber);">★ NoVo Hosted — coming soon.</strong> One monthly fee of $150–200/mo covers everything: NoVo, all data feeds, AI — fully managed, no separate accounts. <strong style="color:var(--txt1);">Early Adopters who buy at $179 today lock in a rate below the standard subscription</strong> — and below what they currently spend on APIs alone. The earlier you join, the better the deal you carry in.
-    </div>
   </div>
 </section>
 
-<!-- EARLY ACCESS BANNER -->
-<div style="background:rgba(245,158,11,0.05);border-top:1px solid rgba(245,158,11,0.18);border-bottom:1px solid rgba(245,158,11,0.18);padding:52px 0;text-align:center;">
+<!-- TWO-PRODUCT CTA BANNER -->
+<div style="background:rgba(16,185,129,0.04);border-top:1px solid rgba(16,185,129,0.15);border-bottom:1px solid rgba(16,185,129,0.15);padding:52px 0;text-align:center;">
   <div class="container">
-    <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f59e0b;margin-bottom:14px;">Early Adopter Pricing</div>
-    <div style="font-size:clamp(22px,3.5vw,32px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.15;margin-bottom:16px;">Buy at $179 now.<br>When we go subscription, your deal gets better — not worse.</div>
-    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 20px;line-height:1.75;">Today you carry the API costs yourself — your data subscription and AI provider. When the hosted platform launches, <strong style="color:var(--txt1);">those costs go away.</strong> NoVo manages everything. Subscription pricing launches at $150–200/mo. Early Adopters lock in permanently below that — paying less for a system that's simpler to run.</p>
-    <p style="font-size:13px;color:var(--txt3);max-width:500px;margin:0 auto 28px;line-height:1.7;">The $179 you pay now is pre-subscription pricing. The earlier you join, the better the rate you carry in. This is the complete system — not a trial, not a lite version.</p>
-    <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $" style="display:inline-block;">Get Early Access — $179</button>
+    <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:14px;">Two Editions. Same Engine.</div>
+    <div style="font-size:clamp(22px,3.5vw,32px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.15;margin-bottom:16px;">Start subscribing or own it outright —<br>your call.</div>
+    <p style="font-size:15px;color:var(--txt2);max-width:580px;margin:0 auto 28px;line-height:1.75;"><strong style="color:var(--green);">NoVo Subscription ($139/mo)</strong> — same core stalker and execution engine, Tradier-only, no MarketData subscription needed. Cancel any time from the subscriber portal.<br><br><strong style="color:var(--amber);">NoVo Full ($497 one-time)</strong> — adds the advanced data layer: 60-day backtester, dark pool tape, live news feed, and economic calendar. Machine-bound license, yours permanently.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe Now — $139/mo</button>
+      <button class="btn-primary" onclick="checkout()">Buy Full — $497</button>
+    </div>
   </div>
 </div>
 
@@ -789,34 +821,72 @@
 <section id="pricing">
   <div class="container">
     <div class="section-label">Pricing</div>
-    <div class="section-title">Pre-subscription pricing. Own it now.</div>
-    <p class="section-sub" style="margin: 0 auto 40px;">Pay $179 once. Own the full system outright — no recurring fees, no expiry. Subscription launches at $150–200/mo. Early Adopters lock in below that permanently when the platform launches.</p>
-    <div class="price-card">
-      <div class="price-name">NoVo — Early Adopter License</div>
-      <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Simple tool. High intelligence. One ticker. Mastered.</div>
-      <div class="price-amount" id="price-amount"><sup>$</sup>179</div>
-      <div class="price-once">Pre-subscription price &nbsp;·&nbsp; Own it outright</div>
-      <div class="price-roi">Saves $1,429+ vs. subscription algo tools in Year 1 alone.</div>
-      <ul class="price-features">
-        <li>Complete NoVo 4.0.0 — full system</li>
-        <li>Machine-bound license key (transferable on request)</li>
-        <li>Automated Windows setup script</li>
-        <li>Full documentation PDFs</li>
-        <li>Direct email support</li>
-        <li>All future v4.x updates</li>
-        <li>Early Adopter rate — subscription launches at $150–200/mo, you lock in below that permanently</li>
-      </ul>
-      <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: #f59e0b; font-weight: 600; text-align: center;">Pre-subscription pricing — the earlier you join, the better the deal you lock in.</div>
-      <button class="price-btn" onclick="checkout()">Get Early Access — Instant Delivery</button>
-      <div class="price-next-steps">
-        <p>After you buy</p>
-        <ol>
-          <li>Zip file + license key delivered to your email within 60 seconds</li>
-          <li>Run setup.ps1 as Administrator — takes about 5 minutes</li>
-          <li>Open dashboard, enter API keys, click Auth — live immediately</li>
-        </ol>
+    <div class="section-title" style="text-align:center;">Choose your edition.</div>
+    <p class="section-sub" style="margin: 0 auto 40px; text-align:center;">Same core engine. NoVo Subscription is Tradier-only with no data subscription needed. NoVo Full adds the advanced data layer — backtester, dark pool, news, and calendar — via MarketData.app.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px;max-width:860px;margin:0 auto;">
+
+      <!-- Subscription card -->
+      <div class="price-card" style="border-top-color:var(--green);">
+        <div class="price-name" style="color:var(--green);">NoVo Subscription</div>
+        <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Tradier + Alpaca + AI</div>
+        <div class="price-amount"><sup>$</sup>139</div>
+        <div class="price-once">per month &nbsp;·&nbsp; cancel any time</div>
+        <div class="price-roi" style="color:var(--green);">~$20–60/mo additional for AI — no data subscription needed</div>
+        <ul class="price-features">
+          <li>Full stalker + execution engine</li>
+          <li>Tradier WebSocket — live SPY tape + options chain</li>
+          <li>4 AI intelligence layers</li>
+          <li>GEX, magnets, contract sniper</li>
+          <li>MAB execution router + self-tuning</li>
+          <li>Mobile C2 dashboard (PWA)</li>
+          <li>Monthly machine-bound license (auto-renews)</li>
+          <li>All 3 setup + reference PDFs</li>
+        </ul>
+        <button class="price-btn" style="background:var(--green);" onclick="subscribeNow()">Subscribe Now — $139/mo</button>
+        <div class="price-next-steps">
+          <p>After subscribing</p>
+          <ol>
+            <li>License key + download link arrive by email</li>
+            <li>Run setup.ps1 as Administrator — about 5 minutes</li>
+            <li>Enter Tradier, Alpaca + AI keys in Settings, click Auth</li>
+          </ol>
+        </div>
+        <p class="price-secure">Secure checkout via Stripe &nbsp;·&nbsp; Manage at <a href="/subscriber" style="color:var(--blue);">novo-aitrading.app/subscriber</a></p>
       </div>
-      <p class="price-secure">🔒 &nbsp;Secure checkout via Stripe &nbsp;·&nbsp; Files delivered to your email</p>
+
+      <!-- Full card -->
+      <div class="price-card" style="border-top-color:var(--amber);">
+        <div class="price-name" style="color:var(--amber);">NoVo Full</div>
+        <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Tradier + Alpaca + AI + MarketData</div>
+        <div class="price-amount" id="price-amount"><sup>$</sup>497</div>
+        <div class="price-once">one-time &nbsp;·&nbsp; lifetime license</div>
+        <div class="price-roi">~$145–185/mo ongoing (MarketData + AI) — no recurring license fee</div>
+        <ul class="price-features">
+          <li>Everything in Subscription, plus:</li>
+          <li>60-day backtester (historical options chains + 1-min candles)</li>
+          <li>Dark pool block tape — institutional prints live</li>
+          <li>Live market news feed</li>
+          <li>Economic calendar integration</li>
+          <li>MarketData.app Quant plan required (~$125/mo)</li>
+          <li>Machine-bound license — transfers on request</li>
+          <li>All future v4.x updates</li>
+        </ul>
+        <button class="price-btn" onclick="checkout()">Buy Full — Instant Delivery</button>
+        <div class="price-next-steps">
+          <p>After you buy</p>
+          <ol>
+            <li>License key + zip delivered to your email within 60 seconds</li>
+            <li>Run setup.ps1 as Administrator — about 5 minutes</li>
+            <li>Enter Tradier, Alpaca, MarketData + AI keys, click Auth</li>
+          </ol>
+        </div>
+        <p class="price-secure">Secure checkout via Stripe &nbsp;·&nbsp; Files delivered to your email</p>
+      </div>
+
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--txt3);">Upgrading from Subscription to Full is a zip swap + one additional .env key — your license, broker accounts, remote URL, and trade history carry over unchanged.</p>
+    <div style="margin-top:12px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:6px;padding:14px 18px;font-size:13px;color:var(--txt2);line-height:1.7;max-width:860px;margin-left:auto;margin-right:auto;">
+      <strong style="color:var(--blue);">Already subscribed?</strong> Re-download your files or manage billing at <a href="/subscriber" style="color:var(--blue);">novo-aitrading.app/subscriber</a> — enter your email to get a fresh download link or open the Stripe billing portal.
     </div>
   </div>
 </section>
@@ -854,11 +924,11 @@
       </details>
 
       <details class="faq-item">
-        <summary class="faq-q">What does "Early Adopter" pricing mean?</summary>
-        <div class="faq-a">This is a limited pre-launch release of NoVo at $179 — before the platform moves to subscription. You're getting the complete, full-license system — not a trial, not a lite version.<br><br>
-        Today you carry the API costs yourself: your data subscription (~$125/mo) and AI provider (~$20–60/mo). A hosted platform is in development where users will only need their broker keys — NoVo manages everything else. When it launches, those API costs disappear for Early Adopters.<br><br>
-        Subscription pricing launches at $150–200/mo — covering everything. Early Adopters lock in permanently below that rate, so you're not trading a lower setup cost for a higher monthly bill. You're paying less for a system that's simpler to run.<br><br>
-        The earlier you join, the better the rate you lock in. The $179 you pay now is pre-subscription pricing, and it comes with built-in priority when the platform evolves.</div>
+        <summary class="faq-q">What's the difference between Subscription and Full?</summary>
+        <div class="faq-a">Same core engine — stalker, execution, AI layers, exit hierarchy, dashboard. The difference is the data layer.<br><br>
+        <strong>NoVo Subscription ($139/mo):</strong> Tradier-only. Tradier provides the live SPY tape, options chain data, and execution in one account. No MarketData.app subscription needed — which removes the biggest monthly cost. Cancel any time from the subscriber portal. Machine-bound license renews monthly automatically.<br><br>
+        <strong>NoVo Full ($497 one-time):</strong> Adds MarketData.app Quant plan (~$125/mo) for the advanced data layer: 60-day backtester (historical options chains + 1-minute candles), live dark pool block tape, market news feed, and economic calendar. One-time license fee, yours permanently, no recurring license cost.<br><br>
+        Upgrading from Subscription to Full is a zip swap and one additional API key — your broker accounts, license binding, remote URL, and full trade history carry over unchanged.</div>
       </details>
 
       <details class="faq-item">
@@ -895,11 +965,14 @@
   </div>
 </section>
 
-<div style="background:rgba(245,158,11,0.05);border-top:1px solid rgba(245,158,11,0.18);border-bottom:1px solid rgba(245,158,11,0.18);padding:40px 0;text-align:center;">
+<div style="background:rgba(16,185,129,0.04);border-top:1px solid rgba(16,185,129,0.15);border-bottom:1px solid rgba(16,185,129,0.15);padding:40px 0;text-align:center;">
   <div class="container">
     <div style="font-size:clamp(18px,2.5vw,24px);font-weight:800;color:var(--txt1);letter-spacing:-0.5px;margin-bottom:12px;">Ready to stop trading manually?</div>
-    <p style="font-size:15px;color:var(--txt2);max-width:480px;margin:0 auto 20px;line-height:1.7;">$179 one-time. Instant delivery. Running in under 20 minutes.</p>
-    <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
+    <p style="font-size:15px;color:var(--txt2);max-width:520px;margin:0 auto 20px;line-height:1.7;">Subscribe for $139/mo and cancel any time — or own it outright for $497. Both deliver the full execution engine. Running in under 20 minutes.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe Now — $139/mo</button>
+      <button class="btn-primary" onclick="checkout()">Buy Full — $497</button>
+    </div>
   </div>
 </div>
 
@@ -962,6 +1035,28 @@ async function checkout() {
     }
   } catch (err) {
     buttons.forEach(b => { b.classList.remove('btn-loading'); b.textContent = b.dataset.orig || 'Try Again'; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+async function subscribeNow() {
+  if (SALES_PAUSED) {
+    alert(SALES_PAUSED_MESSAGE);
+    return;
+  }
+  const buttons = document.querySelectorAll('[onclick="subscribeNow()"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+
+  try {
+    const res = await fetch('/api/checkout-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No checkout URL');
+    }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
     alert('Something went wrong. Please try again or contact support.');
   }
 }
@@ -1039,7 +1134,10 @@ document.addEventListener('keydown', (e) => {
     </div>
     <div class="setup-modal-cta">
       <p>Full written walkthrough and troubleshooting ships inside the zip as <strong>2. Start &amp; Troubleshoot.pdf</strong>.</p>
-      <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe — $139/mo</button>
+        <button class="btn-primary" onclick="checkout()">Buy Full — $497</button>
+      </div>
     </div>
   </div>
 </div>

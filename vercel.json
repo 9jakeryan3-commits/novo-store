@@ -1,10 +1,11 @@
 {
   "rewrites": [
-    { "source": "/success", "destination": "/success.html" }
+    { "source": "/success", "destination": "/success.html" },
+    { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
+    { "source": "/subscriber", "destination": "/subscriber.html" }
   ],
   "functions": {
-    "api/webhook.js": {
-      "maxDuration": 30
-    }
+    "api/webhook.js": { "maxDuration": 30 },
+    "api/webhook-sub.js": { "maxDuration": 30 }
   }
 }

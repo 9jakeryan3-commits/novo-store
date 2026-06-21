@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>NoVo — Subscription Confirmed</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0b1527; color: #8aacc8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .card { background: #0e1c35; border: 1px solid #1b2e4e; border-radius: 12px; max-width: 480px; width: 100%; padding: 48px 40px; text-align: center; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #10b981; }
+  .icon { font-size: 48px; margin-bottom: 20px; }
+  .logo { font-size: 22px; font-weight: 900; color: #eaf3ff; margin-bottom: 24px; }
+  .logo span { color: #10b981; }
+  h1 { font-size: 26px; font-weight: 800; color: #eaf3ff; margin-bottom: 12px; letter-spacing: -0.5px; }
+  p { font-size: 15px; color: #8aacc8; line-height: 1.7; margin-bottom: 16px; }
+  .highlight { color: #10b981; font-weight: 600; }
+  hr { border: none; border-top: 1px solid #1b2e4e; margin: 28px 0; }
+  .steps { text-align: left; }
+  .step { display: flex; gap: 12px; margin-bottom: 12px; }
+  .step-num { background: #10b981; color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-text { font-size: 14px; color: #8aacc8; line-height: 1.5; }
+  .step-text strong { color: #eaf3ff; }
+  .manage-link { display: inline-block; margin-top: 16px; background: transparent; border: 1px solid #1b2e4e; color: #3b82f6; text-decoration: none; padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; }
+  .manage-link:hover { border-color: #3b82f6; }
+  .footer-note { font-size: 12px; color: #506e8f; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">✅</div>
+  <div class="logo">No<span>Vo</span></div>
+  <h1>Subscription Active</h1>
+  <p>Your NoVo Subscription is confirmed. Your license key and download link are on their way — <span class="highlight">check your email</span>. Delivery is automatic and usually arrives within a minute.</p>
+  <p>Check your spam folder if nothing shows up after a few minutes.</p>
+  <hr>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-text">Open the email from NoVo — your <strong>license key</strong> and <strong>download link</strong> are inside</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">Unzip to <strong>C:\Trading Algo\NoVo</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">Right-click <strong>setup.ps1</strong> → Run as Administrator — it handles everything</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">Enter your Tradier, Alpaca, and AI keys in Settings — then click <strong>Auth (Start)</strong></div></div>
+  </div>
+  <a href="/subscriber" class="manage-link">Manage Subscription</a>
+  <p class="footer-note">Questions or email not showing up after 5 minutes? Check spam or email <a href="mailto:novotrades26@gmail.com" style="color:#3b82f6">novotrades26@gmail.com</a></p>
+</div>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
