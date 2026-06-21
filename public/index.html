@@ -994,20 +994,6 @@
 const SALES_PAUSED = true;
 const SALES_PAUSED_MESSAGE = "Sales are temporarily paused — back within a day or two. Thanks for your patience!";
 
-function applyPausedNotice() {
-  if (!SALES_PAUSED) return;
-  function makeBanner() {
-    const b = document.createElement('div');
-    b.style.cssText = 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--red); font-weight: 600; text-align: center;';
-    b.textContent = 'Sales temporarily paused — back within a day or two.';
-    return b;
-  }
-  const fullBtn = document.querySelector('.price-btn[onclick="checkout()"]');
-  if (fullBtn) fullBtn.parentNode.insertBefore(makeBanner(), fullBtn);
-  const subBtn = document.querySelector('.price-btn[onclick="subscribeNow()"]');
-  if (subBtn) subBtn.parentNode.insertBefore(makeBanner(), subBtn);
-}
-document.addEventListener('DOMContentLoaded', applyPausedNotice);
 
 async function initPrice() {
   try {
