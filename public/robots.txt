@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://novo-aitrading.app/sitemap.xml

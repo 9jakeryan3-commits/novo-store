@@ -4,13 +4,64 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo — AI-Powered SPY Options Scalping & Execution System</title>
-<meta name="description" content="NoVo is an autonomous AI-powered execution system for SPY options scalping and day trading. Multi-layer signal scoring, real-time AI structural reads, and a self-improving mastery loop — reacting faster than human reflexes, with a mobile C2 dashboard.">
+<meta name="description" content="NoVo autonomously trades SPY options — AI signal scoring, adaptive execution, and a 10-tier exit system. Windows-based, $179 one-time. No subscription.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app">
 <meta property="og:title" content="NoVo — Algorithmic Execution System for SPY Options">
 <meta property="og:description" content="Autonomous SPY options trading system. Multi-layer signal scoring and AI-powered execution — running continuously with a mobile-accessible dashboard.">
 <link rel="icon" href="/novo-icon.png">
 <meta property="og:image" content="https://novo-aitrading.app/novo-logo.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NoVo — Algorithmic Execution System for SPY Options">
+<meta name="twitter:description" content="Autonomous SPY options trading system. AI signal scoring, adaptive execution, 10-tier exit system. $179 one-time.">
+<meta name="twitter:image" content="https://novo-aitrading.app/novo-logo.png">
+<link rel="canonical" href="https://novo-aitrading.app/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "NoVo",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Windows 10, Windows 11",
+      "description": "Autonomous AI-powered SPY options execution system with multi-layer signal scoring, adaptive MAB execution routing, and a 10-tier exit hierarchy.",
+      "offers": {
+        "@type": "Offer",
+        "price": "179",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "url": "https://novo-aitrading.app"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does it work with my broker?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Tradier is required for the live WebSocket tick stream. For execution you choose Alpaca (paper or live) or Tradier (live only)." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does the AI actually do?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Four AI layers run simultaneously: Vision Sensor reads SPY market structure, Intuition Engine detects retail psychology, Systemic Resonance classifies the macro session, and the Mastery Loop rewrites trading laws weekly from outcomes." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can it lose money?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Options trading involves significant risk. NoVo is an execution tool, not a guarantee. Run in paper mode first." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is algorithmic trading via API legal?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. NoVo connects to your own brokerage account through official retail APIs. Algorithmic trading via broker APIs is fully legal for retail accounts in the US." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -314,7 +365,7 @@
       <a href="#how-it-works" class="btn-secondary">See How It Works</a>
       <button class="btn-secondary" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
-    <p class="hero-sub">Pre-subscription pricing — $179 now. Subscription launches at $150–200/mo. Early Adopters lock in below that — permanently.</p>
+    <p class="hero-sub">$179 one-time — own it outright. A future hosted platform launches at $150–200/mo. Buy now and your rate locks in below that permanently.</p>
     <div class="hero-steps">
       <div class="hero-step"><div class="hero-step-num">1</div>Zip + key to your email in 60s</div>
       <div class="hero-step-arrow">→</div>
@@ -630,8 +681,9 @@
       <div class="included-item"><span class="check">✓</span><span>NoVo 4.0.0 — full system</span></div>
       <div class="included-item"><span class="check">✓</span><span>Automated setup script (setup.ps1)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Lifetime machine-bound license key</span></div>
-      <div class="included-item"><span class="check">✓</span><span>Full Presentation Guide (PDF)</span></div>
+      <div class="included-item"><span class="check">✓</span><span>Risk Disclaimer (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Start &amp; Troubleshoot Guide (PDF)</span></div>
+      <div class="included-item"><span class="check">✓</span><span>Full Presentation Guide (PDF)</span></div>
       <div class="included-item"><span class="check">✓</span><span>Direct support — reply to your order email</span></div>
       <div class="included-item" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05);grid-column:1/-1;"><span class="check" style="color:#f59e0b;">★</span><span style="color:var(--txt1);font-weight:600;">Early Adopter rate — subscription launches at $150–200/mo. You lock in below that, permanently, when the hosted platform launches and your API costs disappear.</span></div>
     </div>
@@ -752,7 +804,7 @@
         <li>Automated Windows setup script</li>
         <li>Full documentation PDFs</li>
         <li>Direct email support</li>
-        <li>All future v3.x updates</li>
+        <li>All future v4.x updates</li>
         <li>Early Adopter rate — subscription launches at $150–200/mo, you lock in below that permanently</li>
       </ul>
       <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: #f59e0b; font-weight: 600; text-align: center;">Pre-subscription pricing — the earlier you join, the better the deal you lock in.</div>
@@ -843,6 +895,14 @@
     </div>
   </div>
 </section>
+
+<div style="background:rgba(245,158,11,0.05);border-top:1px solid rgba(245,158,11,0.18);border-bottom:1px solid rgba(245,158,11,0.18);padding:40px 0;text-align:center;">
+  <div class="container">
+    <div style="font-size:clamp(18px,2.5vw,24px);font-weight:800;color:var(--txt1);letter-spacing:-0.5px;margin-bottom:12px;">Ready to stop trading manually?</div>
+    <p style="font-size:15px;color:var(--txt2);max-width:480px;margin:0 auto 20px;line-height:1.7;">$179 one-time. Instant delivery. Running in under 20 minutes.</p>
+    <button class="btn-primary" onclick="checkout()" data-price-prefix="Get Early Access — $">Get Early Access — $179</button>
+  </div>
+</div>
 
 <hr class="divider">
 

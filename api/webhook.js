@@ -91,9 +91,7 @@ function emailHtml(licenseKey, zipUrl) {
 </html>`;
 }
 
-module.exports.config = { api: { bodyParser: false } };
-
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
 
   const sig = req.headers['stripe-signature'];
@@ -122,13 +120,19 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: 'License registration failed' });
     }
 
+    const zipUrl = process.env.NOVO_ZIP_URL;
+    if (!zipUrl) {
+      console.error(`[webhook] NOVO_ZIP_URL not set — session:${session.id} email:${email} key:${licenseKey}`);
+      return res.status(500).json({ error: 'Download URL not configured' });
+    }
+
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         replyTo: 'novotrades26@gmail.com',
         to: [email],
         subject: 'NoVo — Your Files + License Key',
-        html: emailHtml(licenseKey, process.env.NOVO_ZIP_URL),
+        html: emailHtml(licenseKey, zipUrl),
       });
     } catch (err) {
       // Key and buyer email logged here so you can resend manually via Vercel logs
@@ -139,3 +143,6 @@ module.exports = async (req, res) => {
 
   res.status(200).json({ received: true });
 };
+
+handler.config = { api: { bodyParser: false } };
+module.exports = handler;
