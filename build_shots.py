@@ -13,7 +13,7 @@ def blur_region(img, box, radius):
 
 # 1. dashboard.png — blur Apex Signal Tuner + Entry Trigger Floors (right column, lower).
 #    Keeps Market Intel / Live Signal / NoVo Status visible above.
-d = Image.open(os.path.join(SRC, "Screenshot 2026-06-22 175717.png")).convert("RGB")
+d = Image.open(os.path.join(SRC, "Screenshot 2026-06-22 180648.png")).convert("RGB")
 blur_region(d, (1522, 672, 1920, 1080), 16)
 # Also blur Conviction Sizing (left panel) — its field labels re-expose the apex bands
 # (55/75) and the size-multiplier ladder. Keeps the "CONVICTION SIZING" title visible.
