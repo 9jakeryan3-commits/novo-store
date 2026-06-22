@@ -128,13 +128,31 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
 </html>`;
 }
 
+// Stripe signature verification needs the EXACT raw bytes. req.body may arrive as a
+// Buffer, a string, or (with bodyParser:false honored) be absent with the stream still
+// readable — resolve all three so verification works regardless of Vercel's delivery.
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+async function rawBodyOf(req) {
+  if (Buffer.isBuffer(req.body)) return req.body;
+  if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8');
+  return await readRawBody(req);
+}
+
 const handler = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
 
   const sig = req.headers['stripe-signature'];
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_SUB_WEBHOOK_SECRET);
+    const rawBody = await rawBodyOf(req);
+    event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_SUB_WEBHOOK_SECRET);
   } catch (err) {
     return res.status(400).json({ error: `Webhook error: ${err.message}` });
   }
@@ -183,9 +201,12 @@ const handler = async (req, res) => {
   // ── Monthly renewal payment succeeded → re-activate if suspended ─────────
   else if (event.type === 'invoice.payment_succeeded') {
     const subscriptionId = invoiceSubId(obj);
-    const billingReason = obj?.billing_reason;
-    // subscription_create is already handled by checkout.session.completed above
-    if (subscriptionId && billingReason === 'subscription_cycle') {
+    // Reactivate on ANY successful invoice payment (not just billing_reason ===
+    // 'subscription_cycle') — a recovered past-due payment can carry a different
+    // reason, and gating on it could leave a paying customer suspended forever.
+    // activateSub is idempotent: a no-op on the initial create / already-active keys,
+    // and the license row may not exist yet on the very first invoice (404, swallowed).
+    if (subscriptionId) {
       try {
         await activateSub(subscriptionId);
       } catch (err) {

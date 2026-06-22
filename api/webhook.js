@@ -97,6 +97,24 @@ function emailHtml(licenseKey, zipUrl) {
 </html>`;
 }
 
+// Stripe signature verification needs the EXACT raw bytes. Depending on how Vercel
+// delivers the body, req.body may be a Buffer, a string, or (if bodyParser:false is
+// honored) absent with the stream still readable. Resolve all three; only a parsed
+// object would be unrecoverable, in which case constructEvent fails loudly anyway.
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+async function rawBodyOf(req) {
+  if (Buffer.isBuffer(req.body)) return req.body;
+  if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8');
+  return await readRawBody(req);
+}
+
 const handler = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -104,7 +122,8 @@ const handler = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    const rawBody = await rawBodyOf(req);
+    event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     return res.status(400).json({ error: `Webhook error: ${err.message}` });
   }
