@@ -15,13 +15,16 @@ def blur_region(img, box, radius):
 #    Keeps Market Intel / Live Signal / NoVo Status visible above.
 d = Image.open(os.path.join(SRC, "Screenshot 2026-06-22 115524.png")).convert("RGB")
 blur_region(d, (1522, 672, 1920, 1080), 16)
+# Also blur Conviction Sizing (left panel) — its field labels re-expose the apex bands
+# (55/75) and the size-multiplier ladder. Keeps the "CONVICTION SIZING" title visible.
+blur_region(d, (6, 933, 390, 1051), 13)
 d.save(os.path.join(OUT, "dashboard.png"))
 print("dashboard.png done")
 
 # 2. journal.png — blur the By-Strategy panel (strategy names + per-strategy edge) and the
 #    STRAT + EXIT REASON columns of the trade log (exit ladder / thresholds).
 j = Image.open(os.path.join(SRC, "Screenshot 2026-06-22 120030.png")).convert("RGB")
-blur_region(j, (645, 90, 1078, 240), 14)     # By Strategy panel
+blur_region(j, (645, 90, 1278, 242), 14)     # By Strategy panel (full width: names..P&L/APEX/SLIP)
 blur_region(j, (918, 758, 1362, 1080), 13)   # STRAT + EXIT REASON columns
 j.save(os.path.join(OUT, "journal.png"))
 print("journal.png done")
