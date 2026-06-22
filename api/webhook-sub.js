@@ -18,6 +18,13 @@ function deterministicKey(subscriptionId) {
   return `NOVS-${token.substring(0, 8)}-${token.substring(8)}-${sig}`;
 }
 
+// Stripe moved the invoice's subscription id to invoice.parent.subscription_details.subscription
+// in its 2025 API versions; older versions use the top-level invoice.subscription. Read whichever
+// is present so suspend-on-failure / reactivate-on-payment always fire regardless of API version.
+function invoiceSubId(inv) {
+  return inv?.subscription || inv?.parent?.subscription_details?.subscription || null;
+}
+
 async function licensePost(path, body) {
   const res = await fetch(`${LICENSE_SERVER}${path}`, {
     method: 'POST',
@@ -175,7 +182,7 @@ const handler = async (req, res) => {
 
   // ── Monthly renewal payment succeeded → re-activate if suspended ─────────
   else if (event.type === 'invoice.payment_succeeded') {
-    const subscriptionId = obj?.subscription;
+    const subscriptionId = invoiceSubId(obj);
     const billingReason = obj?.billing_reason;
     // subscription_create is already handled by checkout.session.completed above
     if (subscriptionId && billingReason === 'subscription_cycle') {
@@ -189,7 +196,7 @@ const handler = async (req, res) => {
 
   // ── Payment failed → suspend access ──────────────────────────────────────
   else if (event.type === 'invoice.payment_failed') {
-    const subscriptionId = obj?.subscription;
+    const subscriptionId = invoiceSubId(obj);
     if (subscriptionId) {
       try {
         await suspendSub(subscriptionId);
