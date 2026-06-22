@@ -5,8 +5,27 @@
 // Idempotent: same license key always returns the same permanent URL.
 
 const { list, put } = require('@vercel/blob');
-const { createHash }  = require('crypto');
+const { createHash, createHmac, timingSafeEqual } = require('crypto');
 const https           = require('https');
+
+// Self-contained authenticity check — no license-server round-trip needed.
+// Both NOVO- (one-time) and NOVS- (subscription) keys embed an HMAC signature of
+// their own body: sig = HMAC(NOVO_LICENSE_SECRET, token)[0:8], where token is the
+// two middle segments. A random or forged string can't produce a valid signature
+// without the secret, so this rejects abuse before we ever create a CF tunnel.
+// (Note: this proves the key was issued by us, not that the subscription is still
+// active — license_check.py blocks suspended/cancelled keys at app runtime.)
+function verifyLicenseKey(key) {
+  const secret = process.env.NOVO_LICENSE_SECRET;
+  if (!secret) return false;
+  const m = /^(NOVO|NOVS)-([0-9A-F]{8})-([0-9A-F]{8})-([0-9A-F]{8})$/.exec(key);
+  if (!m) return false;
+  const token = m[2] + m[3];
+  const expected = createHmac('sha256', secret).update(token).digest('hex').substring(0, 8).toUpperCase();
+  const a = Buffer.from(expected);
+  const b = Buffer.from(m[4]);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 const CF_ACCOUNT_ID = 'c90a8582c3a3bb842a63f5499be94010';
 const DOMAIN        = 'novo-aitrading.app';
@@ -62,7 +81,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Valid license key required' });
   }
 
-  const cleanKey  = key.trim();
+  const cleanKey  = key.trim().toUpperCase();
+  if (!verifyLicenseKey(cleanKey)) {
+    console.warn(`[provision-tunnel] rejected key with invalid signature from ${ip}`);
+    return res.status(403).json({ error: 'Invalid license key.' });
+  }
+
   const keyHash   = createHash('sha256').update(cleanKey).digest('hex').slice(0, 32);
   const blobPath  = `tunnel-map/${keyHash}.json`;
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
