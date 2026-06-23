@@ -67,7 +67,7 @@ function emailHtml(licenseKey, zipUrl) {
     <div class="key">${licenseKey}</div>
   </div>
   <a href="${zipUrl}" class="btn">Download NoVo Subscription</a>
-  <p style="margin-top:20px;">Unzip to <strong style="color:#eaf3ff;">C:\\Trading Algo\\NoVo</strong>, double-click <strong style="color:#eaf3ff;">Install NoVo.bat</strong> and click Yes on the Windows prompt. Full walkthrough in <strong style="color:#eaf3ff;">2. Start &amp; Troubleshoot.pdf</strong>.</p>
+  <p style="margin-top:20px;">Unzip to <strong style="color:#eaf3ff;">C:\\NoVo</strong>, double-click <strong style="color:#eaf3ff;">Install NoVo.bat</strong> and click Yes on the Windows prompt. Full walkthrough in <strong style="color:#eaf3ff;">2. Start &amp; Troubleshoot.pdf</strong>.</p>
   <hr>
   <div class="footer"><p>Manage or cancel your subscription at <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a>. Questions? Reply to this email or contact novotrades26@gmail.com.</p></div>
 </div>

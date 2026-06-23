@@ -112,7 +112,7 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
   <hr>
   <h2>Setup</h2>
   <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\Trading Algo\\NoVo</strong></div></div>
+    <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\NoVo</strong></div></div>
     <div class="step"><div class="step-num">2</div><div class="step-text">Double-click <strong>Install NoVo.bat</strong> → click Yes on the Windows prompt — it handles everything and will ask for your license key</div></div>
     <div class="step"><div class="step-num">3</div><div class="step-text">Open Chrome → <strong>http://localhost:8000</strong> and log in, or use your permanent remote URL printed at the end of setup</div></div>
     <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your Tradier and Alpaca keys — AI is already configured, no AI provider key needed</div></div>
