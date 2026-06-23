@@ -61,13 +61,13 @@
   <div class="card blue">
     <div class="card-label">Billing</div>
     <h2>Manage Your Subscription</h2>
-    <p>Update payment method, view invoices, or cancel. Enter your email to open the Stripe billing portal.</p>
+    <p>Update payment method, view invoices, or cancel. Enter your email and we'll send you a secure link to your Stripe billing portal.</p>
     <hr class="divider">
     <div class="field">
       <label for="portal-email">Your email address</label>
       <input type="email" id="portal-email" placeholder="you@example.com" autocomplete="email">
     </div>
-    <button class="btn btn-blue" id="portal-btn" onclick="openPortal()">Open Billing Portal</button>
+    <button class="btn btn-blue" id="portal-btn" onclick="openPortal()">Email me a portal link</button>
     <div class="msg" id="portal-msg"></div>
   </div>
 
@@ -121,22 +121,22 @@ async function openPortal() {
     msg.className = 'msg err'; msg.textContent = 'Enter a valid email address.'; return;
   }
 
-  btn.disabled = true; btn.textContent = 'Opening portal...';
+  btn.disabled = true; btn.textContent = 'Sending link...';
   try {
     const res = await fetch('/api/subscriber-portal', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
     const data = await res.json();
-    if (res.ok && data.url) {
-      window.location.href = data.url;
+    if (res.ok) {
+      msg.className = 'msg ok'; msg.textContent = data.message || 'Check your email for a secure link to manage your subscription.';
     } else {
       msg.className = 'msg err'; msg.textContent = data.error || 'Something went wrong. Try again.';
-      btn.disabled = false; btn.textContent = 'Open Billing Portal';
     }
+    btn.disabled = false; btn.textContent = 'Email me a portal link';
   } catch {
     msg.className = 'msg err'; msg.textContent = 'Network error — please try again.';
-    btn.disabled = false; btn.textContent = 'Open Billing Portal';
+    btn.disabled = false; btn.textContent = 'Email me a portal link';
   }
 }
 

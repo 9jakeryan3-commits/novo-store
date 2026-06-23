@@ -17,12 +17,11 @@ function deterministicKey(sessionId) {
 
 async function registerKey(sessionId, email) {
   const key = deterministicKey(sessionId);
-  const url = new URL(`${process.env.NOVO_LICENSE_SERVER_URL}/admin/keys`);
-  url.searchParams.set('key', key);
-  url.searchParams.set('note', email);
-  const resp = await fetch(url.toString(), {
+  // Send key/note in a JSON body (not query params) so the buyer's email never lands in access logs.
+  const resp = await fetch(`${process.env.NOVO_LICENSE_SERVER_URL}/admin/keys`, {
     method: 'POST',
-    headers: { 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY },
+    headers: { 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, note: email }),
   });
   if (!resp.ok) {
     throw new Error(`License server returned ${resp.status}`);
