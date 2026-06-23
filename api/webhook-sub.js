@@ -91,12 +91,12 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
   <div class="tag">Subscription — Algorithmic Execution System</div>
   <hr>
   <h2>Subscription active. Here's everything you need.</h2>
-  <p>Your NoVo Subscription is live. License key, download link, and setup steps are all below — you can be running in under 20 minutes.</p>
+  <p>Your NoVo Pulse is live. License key, download link, and setup steps are all below — you can be running in under 20 minutes.</p>
   <div class="key-box">
     <div class="key-label">Your License Key</div>
     <div class="key">${licenseKey}</div>
   </div>
-  <a href="${zipUrl}" class="btn">Download NoVo Subscription</a>
+  <a href="${zipUrl}" class="btn">Download NoVo Pulse</a>
   <a href="${SITE}/subscriber" class="btn-outline">Manage Subscription</a>
   <div class="notice">
     <strong>Monthly billing:</strong> Your subscription renews automatically each month. To update your payment method, cancel, or re-download at any time, visit <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a> and enter this email address.
@@ -189,7 +189,7 @@ const handler = async (req, res) => {
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         replyTo: 'novotrades26@gmail.com',
         to: [email],
-        subject: 'NoVo Subscription — Your Files + License Key',
+        subject: 'NoVo Pulse — Your Files + License Key',
         html: welcomeEmailHtml(licenseKey, zipUrl),
       });
     } catch (err) {
