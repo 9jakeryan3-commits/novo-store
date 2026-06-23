@@ -1080,17 +1080,7 @@ const SALES_PAUSED = true;
 const SALES_PAUSED_MESSAGE = "NoVo launches early July — checkout isn't open quite yet. Thanks for your patience!";
 
 
-async function initPrice() {
-  try {
-    const res = await fetch('/api/config');
-    const { price } = await res.json();
-    document.querySelectorAll('[data-price-prefix]').forEach(el => {
-      el.textContent = el.dataset.pricePrefix + price;
-    });
-    document.getElementById('price-amount').innerHTML = '<sup>$</sup>' + price;
-  } catch (e) {}
-}
-document.addEventListener('DOMContentLoaded', initPrice);
+// Prices are hardcoded in the markup ($179 / $2,199) — no dynamic PRICE_DISPLAY override.
 
 async function checkout() {
   if (SALES_PAUSED) {
