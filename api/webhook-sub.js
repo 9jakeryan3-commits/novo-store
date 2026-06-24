@@ -99,7 +99,7 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
   <a href="${zipUrl}" class="btn">Download NoVo Pulse</a>
   <a href="${SITE}/subscriber" class="btn-outline">Manage Subscription</a>
   <div class="notice">
-    <strong>Monthly billing:</strong> Your subscription renews automatically each month. To update your payment method, cancel, or re-download at any time, visit <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a> and enter this email address.
+    <strong>Auto-renewing:</strong> Your subscription renews automatically on your billing cycle (monthly or yearly, whichever you chose). To update your payment method, cancel, or re-download at any time, visit <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a> and enter this email address.
   </div>
   <hr>
   <h2>Read these first</h2>
