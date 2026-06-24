@@ -174,13 +174,13 @@ const handler = async (req, res) => {
     try {
       await createSubLicense(licenseKey, subscriptionId, email);
     } catch (err) {
-      console.error(`[webhook-sub] License create failed — sub:${subscriptionId} email:${email} error:${err.message}`);
+      console.error(`[webhook-sub] License create failed — sub:${subscriptionId} error:${err.message}`);
       return res.status(500).json({ error: 'License creation failed' });
     }
 
     const zipUrl = process.env.NOVO_SUB_ZIP_URL;
     if (!zipUrl) {
-      console.error(`[webhook-sub] NOVO_SUB_ZIP_URL not set — sub:${subscriptionId} email:${email} key:${licenseKey}`);
+      console.error(`[webhook-sub] NOVO_SUB_ZIP_URL not set — sub:${subscriptionId}`);
       return res.status(500).json({ error: 'Download URL not configured' });
     }
 
@@ -193,7 +193,7 @@ const handler = async (req, res) => {
         html: welcomeEmailHtml(licenseKey, zipUrl),
       });
     } catch (err) {
-      console.error(`[webhook-sub] Email failed — sub:${subscriptionId} email:${email} key:${licenseKey} error:${err.message}`);
+      console.error(`[webhook-sub] Email failed — sub:${subscriptionId} error:${err.message}`);
       return res.status(500).json({ error: 'Email delivery failed' });
     }
   }

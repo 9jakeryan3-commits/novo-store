@@ -140,13 +140,13 @@ const handler = async (req, res) => {
     try {
       licenseKey = await registerKey(session.id, email);
     } catch (err) {
-      console.error(`[webhook] License server registration failed — session:${session.id} email:${email} error:${err.message}`);
+      console.error(`[webhook] License server registration failed — session:${session.id} error:${err.message}`);
       return res.status(500).json({ error: 'License registration failed' });
     }
 
     const zipUrl = process.env.NOVO_ZIP_URL;
     if (!zipUrl) {
-      console.error(`[webhook] NOVO_ZIP_URL not set — session:${session.id} email:${email} key:${licenseKey}`);
+      console.error(`[webhook] NOVO_ZIP_URL not set — session:${session.id}`);
       return res.status(500).json({ error: 'Download URL not configured' });
     }
 
@@ -160,7 +160,7 @@ const handler = async (req, res) => {
       });
     } catch (err) {
       // Key and buyer email logged here so you can resend manually via Vercel logs
-      console.error(`[webhook] Email failed — session:${session.id} email:${email} key:${licenseKey} error:${err.message}`);
+      console.error(`[webhook] Email failed — session:${session.id} error:${err.message}`);
       return res.status(500).json({ error: 'Email delivery failed' });
     }
   }

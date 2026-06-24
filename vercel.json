@@ -6,6 +6,10 @@
   ],
   "functions": {
     "api/webhook.js": { "maxDuration": 30 },
-    "api/webhook-sub.js": { "maxDuration": 30 }
-  }
+    "api/webhook-sub.js": { "maxDuration": 30 },
+    "api/reconcile-subs.js": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/reconcile-subs", "schedule": "0 6 * * *" }
+  ]
 }
