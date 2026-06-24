@@ -87,6 +87,27 @@ module.exports = async (req, res) => {
     return res.status(403).json({ error: 'Invalid license key.' });
   }
 
+  // Gate on license STATUS (not just signature) — a cancelled/suspended/revoked key must not be able to
+  // mint a Cloudflare tunnel + DNS record (infra/cost abuse). FAIL OPEN on any license-server error so a
+  // transient LS outage never breaks a legitimate buyer's install.
+  try {
+    const LS = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
+    if (LS && process.env.LICENSE_ADMIN_KEY) {
+      const sr = await fetch(`${LS}/admin/key-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY },
+        body: JSON.stringify({ key: cleanKey }),
+      });
+      if (sr.ok) {
+        const st = await sr.json();
+        if (st.found && st.status !== 'active') {
+          console.warn(`[provision-tunnel] refused: key status=${st.status} from ${ip}`);
+          return res.status(403).json({ error: 'License is not active. Reactivate it, then re-run setup.' });
+        }
+      }
+    }
+  } catch (_e) { /* fail-open: LS unreachable -> proceed so installs never break on a blip */ }
+
   const keyHash   = createHash('sha256').update(cleanKey).digest('hex').slice(0, 32);
   const blobPath  = `tunnel-map/${keyHash}.json`;
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN;

@@ -101,14 +101,16 @@ module.exports = async (req, res) => {
     // Find Stripe customer
     const customers = await stripe.customers.list({ email, limit: 1 });
     if (!customers.data.length) {
-      return res.status(404).json({ error: 'No subscription found for that email. Check for typos, or contact novotrades26@gmail.com.' });
+      // Anti-enumeration: identical generic response whether or not the email is a customer.
+      return res.status(200).json({ sent: true });
     }
     const customerId = customers.data[0].id;
 
     // Confirm active subscription
     const subs = await stripe.subscriptions.list({ customer: customerId, status: 'active', limit: 1 });
     if (!subs.data.length) {
-      return res.status(403).json({ error: 'No active subscription found for that email. If you believe this is an error, contact novotrades26@gmail.com.' });
+      // Anti-enumeration: don't reveal subscription status; identical generic response.
+      return res.status(200).json({ sent: true });
     }
 
     const subId = subs.data[0].id;

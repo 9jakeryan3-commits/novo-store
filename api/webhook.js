@@ -127,7 +127,7 @@ const handler = async (req, res) => {
     return res.status(400).json({ error: `Webhook error: ${err.message}` });
   }
 
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed' && event.data.object?.mode === 'payment') {
     const session = event.data.object;
     const email = session?.customer_details?.email;
 
