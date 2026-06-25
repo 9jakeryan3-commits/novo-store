@@ -11,8 +11,7 @@
   .card { background: #0e1c35; border: 1px solid #1b2e4e; border-radius: 12px; max-width: 480px; width: 100%; padding: 48px 40px; text-align: center; position: relative; overflow: hidden; }
   .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #10b981; }
   .icon { font-size: 48px; margin-bottom: 20px; }
-  .logo { font-size: 22px; font-weight: 900; color: #eaf3ff; margin-bottom: 24px; }
-  .logo span { color: #10b981; }
+  .logo { height: 42px; width: auto; display: block; margin: 0 auto 24px; }
   h1 { font-size: 26px; font-weight: 800; color: #eaf3ff; margin-bottom: 12px; letter-spacing: -0.5px; }
   p { font-size: 15px; color: #8aacc8; line-height: 1.7; margin-bottom: 16px; }
   .highlight { color: #10b981; font-weight: 600; }
@@ -30,7 +29,8 @@
 <body>
 <div class="card">
   <div class="icon">✅</div>
-  <div class="logo">No<span>Vo</span></div>
+  <img src="/novo-logo.png" alt="NoVo" class="logo">
+
   <h1>Subscription Active</h1>
   <p>Your NoVo Pulse is confirmed. Your license key and download link are on their way — <span class="highlight">check your email</span>. Delivery is automatic and usually arrives within a minute.</p>
   <p>Check your spam folder if nothing shows up after a few minutes.</p>
