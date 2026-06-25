@@ -388,7 +388,7 @@
       <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe — $179/mo</button>
     </div>
     <div style="margin-bottom:16px;">
-      <button type="button" onclick="subscribeYearly()" style="background:transparent;border:1px solid var(--green);color:var(--green);font-weight:700;font-size:13.5px;padding:8px 20px;border-radius:999px;cursor:pointer;letter-spacing:0.02em;">Or subscribe yearly — $1,788/yr · save $30/mo</button>
+      <button type="button" onclick="subscribeYearly()" style="background:transparent;border:1px solid var(--amber);color:var(--amber);font-weight:700;font-size:13.5px;padding:8px 20px;border-radius:999px;cursor:pointer;letter-spacing:0.02em;">Or subscribe yearly — $1,788/yr · save $30/mo</button>
     </div>
     <div class="hero-links">
       <a href="#how-it-works" class="hero-link">See How It Works</a>
@@ -764,21 +764,21 @@
     <div class="section-label">What It Costs to Run</div>
     <div class="section-title">Know the full picture before you buy.</div>
     <p class="section-sub">One all-in price covers everything — NoVo, AI, and updates. Here's the full picture before you subscribe.</p>
-    <div class="cost-grid">
+    <div class="cost-grid" style="grid-template-columns:1fr;">
       <div class="cost-card" style="border-top:3px solid var(--green);">
         <h3 style="color:var(--green);">NoVo Pulse — $179/mo or $1,788/yr</h3>
-        <ul>
+        <ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));column-gap:40px;">
           <li>NoVo license + AI included <span class="cost-val" style="color:var(--green);">$179/mo</span></li>
           <li>Or pay yearly — 2 months free <span class="cost-val" style="color:var(--green);">$1,788/yr · save $30/mo</span></li>
           <li>Tradier Brokerage (data + execution) <span class="cost-val">Free (or $10/mo commission-free) — requires $5 minimum deposit to activate the data stream</span></li>
           <li>Alpaca (paper or live execution) <span class="cost-val">Free</span></li>
-          <li><strong style="color:var(--txt1);">Total: $179/mo or $1,788/yr</strong> <span class="cost-val">AI included — no extra subscriptions needed</span></li>
+          <li style="grid-column:1 / -1;"><strong style="color:var(--txt1);">Total: $179/mo or $1,788/yr</strong> <span class="cost-val">AI included — no extra subscriptions needed</span></li>
         </ul>
       </div>
     </div>
     <div class="cost-grid" style="margin-top:16px;">
       <div class="cost-card">
-        <h3>Hardware &amp; OS (both editions)</h3>
+        <h3>Hardware &amp; OS</h3>
         <ul>
           <li>Windows 10 or 11 <span class="cost-val">Required</span></li>
           <li>Python 3.12 <span class="cost-val">Free</span></li>
@@ -894,7 +894,7 @@
           <li>Desktop icons + setup &amp; reference guides</li>
         </ul>
         <button class="price-btn" style="background:var(--green);" onclick="subscribeNow()">Subscribe Now — $179/mo</button>
-        <button class="price-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);margin-top:10px;font-weight:700;" onclick="subscribeYearly()">Or pay yearly — $1,788/yr &nbsp;·&nbsp; save $30/mo</button>
+        <button class="price-btn" style="background:transparent;border:1px solid var(--amber);color:var(--amber);margin-top:10px;font-weight:700;" onclick="subscribeYearly()">Or pay yearly — $1,788/yr &nbsp;·&nbsp; save $30/mo</button>
         <div class="price-next-steps">
           <p>After subscribing</p>
           <ol>
