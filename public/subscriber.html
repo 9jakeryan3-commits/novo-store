@@ -9,8 +9,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0b1527; color: #8aacc8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
   .wrap { max-width: 480px; width: 100%; }
-  .logo { font-size: 28px; font-weight: 900; color: #eaf3ff; letter-spacing: -1px; text-align: center; margin-bottom: 4px; }
-  .logo span { color: #10b981; }
+  .logo { height: 42px; width: auto; display: block; margin: 0 auto 8px; }
   .tag { font-size: 11px; color: #506e8f; letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 32px; }
   .card { background: #0e1c35; border: 1px solid #1b2e4e; border-radius: 12px; padding: 32px; margin-bottom: 16px; position: relative; overflow: hidden; }
   .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
@@ -40,7 +39,8 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">No<span>Vo</span></div>
+  <img src="/novo-logo.png" alt="NoVo" class="logo">
+
   <div class="tag">Subscriber Portal</div>
 
   <!-- Re-download -->
