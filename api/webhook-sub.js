@@ -103,11 +103,11 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
   </div>
   <hr>
   <h2>Read these first</h2>
-  <p>Open the zip and read the three PDFs before running anything:</p>
+  <p>Open the zip and read the included guides before running anything:</p>
   <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text"><strong>1. Risk Disclaimer.pdf</strong> — required reading before using the system</div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text"><strong>2. Start &amp; Troubleshoot.pdf</strong> — full setup walkthrough, account requirements, and troubleshooting</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text"><strong>3. Presentation Guide.pdf</strong> — how NoVo thinks, trades, and every dashboard panel explained</div></div>
+    <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Risk Disclaimer</strong> — required reading before using the system</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Start &amp; Troubleshoot</strong> — full setup walkthrough, account requirements, and troubleshooting</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Presentation Guide</strong> — how NoVo thinks, trades, and every dashboard panel explained</div></div>
   </div>
   <hr>
   <h2>Setup</h2>
