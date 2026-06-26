@@ -584,19 +584,10 @@
       <div class="how-card">
         <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
         <h3>Multi-Tier Exit Hierarchy</h3>
-        <p>Exits execute in strict priority order across multiple tiers — from manual overrides and EOD protocols down through structural reversal cuts, hard stops, trailing exits, and profit-taking targets. Higher-priority exits always win. The system never hesitates between competing exit conditions.</p>
+        <p>Exits execute in strict priority order across multiple tiers — from manual overrides and EOD protocols down through hard stops, trailing exits, and profit-taking targets. Higher-priority exits always win. The system never hesitates between competing exit conditions.</p>
         <p>TP1 sells half the position at your first target and promotes the remainder to a runner. Toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner — or toggle it off to let the runner trail indefinitely in trending markets.</p>
         <p>Two independent trailing stops protect open profit: a tighter runner trail for extended moves and a standard trail for normal exits, both with adjustable width and activation thresholds. Nearly every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
       </div>
-    </div>
-
-    <!-- HARDCODED EXIT PHILOSOPHY -->
-    <div class="how-card" style="margin-top:16px;border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.05);">
-      <div class="how-num" style="color:var(--indigo,#6366f1)">CORE PRINCIPLE</div>
-      <h3>One Exit Is Hardcoded — By Design</h3>
-      <p>Structural Reversal cannot be adjusted from the dashboard. It exists to enforce one principle: spend as little time in the market as possible. When the AI's structural read flips against your open position, you exit.</p>
-      <p>This rule cannot be turned off — because the one moment you'd want to disable it is exactly the moment you're hoping a losing position turns around, and a good partner doesn't let you talk it into that. Everything else is yours to configure. This one is not.</p>
-      <p><strong>You can't adjust it — but NoVo can.</strong> Every week, the same validator that recalibrates entry floors nudges its threshold within a tight, bounded range based on your real results, logging every change to your dashboard. Same self-improving philosophy as the rest of the system — just applied to the one rule you're not allowed to touch yourself.</p>
     </div>
 
     <!-- SCREENSHOT GALLERY — restored 2026-06-26 with v4.3 blurred shots (rebuilt by build_shots.py). -->
@@ -990,7 +981,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">Can I adjust the risk settings?</summary>
-        <div class="faq-a">Yes — nearly everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.<br><br>One exit is intentionally not adjustable — Structural Reversal, hardcoded by design to enforce NoVo's core principle: minimize time in the market. When the AI's structural read flips against your position, you exit. It cannot be disabled because it protects against the single most costly discretionary behavior: holding a losing position and waiting for a recovery that may not come. Everything else is yours to configure.<br><br>That doesn't mean it stays frozen — every week, NoVo's validator checks how it's actually performed on your real trades and can nudge its threshold within a tight, fixed range, logging every change to your dashboard. You can't move it. NoVo can, because it's the one being held accountable to the results.</div>
+        <div class="faq-a">Yes — everything is adjustable from the dashboard Risk &amp; Allocation Matrix without touching code. Daily max loss, profit goal, position size, Apex Score entry thresholds, TP1/TP2 levels, trailing stop behavior, hard stop %, strike OTM offset — all configurable live. Changes take effect on the next scan cycle. No restart required.<br><br>Nothing is hidden or hardcoded. Your stops and targets run every trade — NoVo never overrides them with a discretionary exit. The hard stop you set is the hard stop NoVo respects.</div>
       </details>
 
       <details class="faq-item">
