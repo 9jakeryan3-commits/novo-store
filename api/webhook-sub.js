@@ -171,11 +171,17 @@ const handler = async (req, res) => {
 
     const licenseKey = deterministicKey(subscriptionId);
 
+    let subReg;
     try {
-      await createSubLicense(licenseKey, subscriptionId, email);
+      subReg = await createSubLicense(licenseKey, subscriptionId, email);
     } catch (err) {
       console.error(`[webhook-sub] License create failed — sub:${subscriptionId} error:${err.message}`);
       return res.status(500).json({ error: 'License creation failed' });
+    }
+    // Dedupe on event replay: created:false means the key already existed — don't re-send the email.
+    if (subReg && subReg.created === false) {
+      console.log(`[webhook-sub] Duplicate checkout event for sub ${subscriptionId} — key already issued; skipping email.`);
+      return res.status(200).json({ received: true, deduped: true });
     }
 
     const zipUrl = process.env.NOVO_SUB_ZIP_URL;

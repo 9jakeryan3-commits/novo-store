@@ -27,7 +27,9 @@ async function registerKey(sessionId, email) {
     throw new Error(`License server returned ${resp.status}`);
   }
   const data = await resp.json();
-  return data.key;
+  // created !== false: a brand-new key returns created:true; a replay (key already exists) returns
+  // created:false. Default to true if an older server omits the field, so we never suppress a real email.
+  return { key: data.key, created: data.created !== false };
 }
 
 function emailHtml(licenseKey, zipUrl) {
@@ -136,12 +138,19 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    let licenseKey;
+    let reg;
     try {
-      licenseKey = await registerKey(session.id, email);
+      reg = await registerKey(session.id, email);
     } catch (err) {
       console.error(`[webhook] License server registration failed — session:${session.id} error:${err.message}`);
       return res.status(500).json({ error: 'License registration failed' });
+    }
+    const licenseKey = reg.key;
+    // Stripe delivers events at-least-once; on a replay the key already exists (created:false) and we
+    // must NOT re-send the welcome email. The key registration above is idempotent regardless.
+    if (!reg.created) {
+      console.log(`[webhook] Duplicate checkout event for session ${session.id} — key already issued; skipping email.`);
+      return res.status(200).json({ received: true, deduped: true });
     }
 
     const zipUrl = process.env.NOVO_ZIP_URL;
