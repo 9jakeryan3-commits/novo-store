@@ -89,9 +89,9 @@ function emailHtml(licenseKey, zipUrl) {
     <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
   </div>
   <p>Start in paper mode (default). Watch it run before switching to live.</p>
-  <p>Any issues — email <a href="mailto:novotrades26@gmail.com">novotrades26@gmail.com</a> and I'll sort it out.</p>
+  <p>Any issues — email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a> and I'll sort it out.</p>
   <div class="footer">
-    <p>Not financial advice. For informational and educational use only. Your license key is machine-bound — email <a href="mailto:novotrades26@gmail.com">novotrades26@gmail.com</a> if you ever need to transfer to a new PC.</p>
+    <p>Not financial advice. For informational and educational use only. Your license key is machine-bound — email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a> if you ever need to transfer to a new PC.</p>
   </div>
 </div>
 </body>
@@ -162,7 +162,7 @@ const handler = async (req, res) => {
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
-        replyTo: 'novotrades26@gmail.com',
+        replyTo: 'support@novo-aitrading.app',
         to: [email],
         subject: 'NoVo — Your Files + License Key',
         html: emailHtml(licenseKey, zipUrl),

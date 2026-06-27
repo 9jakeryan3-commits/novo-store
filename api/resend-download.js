@@ -69,7 +69,7 @@ function emailHtml(licenseKey, zipUrl) {
   <a href="${zipUrl}" class="btn">Download NoVo Pulse</a>
   <p style="margin-top:20px;">Unzip to <strong style="color:#eaf3ff;">C:\\NoVo</strong>, double-click <strong style="color:#eaf3ff;">Install NoVo</strong> and click Yes on the Windows prompt. Full walkthrough in the <strong style="color:#eaf3ff;">Start &amp; Troubleshoot</strong> guide.</p>
   <hr>
-  <div class="footer"><p>Manage or cancel your subscription at <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a>. Questions? Reply to this email or contact novotrades26@gmail.com.</p></div>
+  <div class="footer"><p>Manage or cancel your subscription at <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a>. Questions? Reply to this email or contact support@novo-aitrading.app.</p></div>
 </div>
 </body>
 </html>`;
@@ -119,12 +119,12 @@ module.exports = async (req, res) => {
 
     if (!zipUrl) {
       console.error('[resend-download] NOVO_SUB_ZIP_URL not configured');
-      return res.status(500).json({ error: 'Download URL not configured — contact novotrades26@gmail.com.' });
+      return res.status(500).json({ error: 'Download URL not configured — contact support@novo-aitrading.app.' });
     }
 
     await resend.emails.send({
       from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
-      replyTo: 'novotrades26@gmail.com',
+      replyTo: 'support@novo-aitrading.app',
       to: [email],
       subject: 'NoVo — Your Download Link',
       html: emailHtml(licenseKey, zipUrl),
@@ -133,6 +133,6 @@ module.exports = async (req, res) => {
     return res.status(200).json({ sent: true });
   } catch (err) {
     console.error('[resend-download] Error:', err.message);
-    return res.status(500).json({ error: 'Something went wrong. Please try again or contact novotrades26@gmail.com.' });
+    return res.status(500).json({ error: 'Something went wrong. Please try again or contact support@novo-aitrading.app.' });
   }
 };
