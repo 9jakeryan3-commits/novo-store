@@ -178,10 +178,11 @@ const handler = async (req, res) => {
       console.error(`[webhook-sub] License create failed — sub:${subscriptionId} error:${err.message}`);
       return res.status(500).json({ error: 'License creation failed' });
     }
-    // Dedupe on event replay: created:false means the key already existed — don't re-send the email.
+    // Do NOT skip the email when created:false. If a prior delivery created the license but the email
+    // send threw (returned 500 → Stripe retries), skipping here would mean the buyer NEVER gets their
+    // key. Re-sending a welcome on a rare duplicate event is harmless; a missing welcome is not.
     if (subReg && subReg.created === false) {
-      console.log(`[webhook-sub] Duplicate checkout event for sub ${subscriptionId} — key already issued; skipping email.`);
-      return res.status(200).json({ received: true, deduped: true });
+      console.log(`[webhook-sub] Sub ${subscriptionId} key already existed (event replay) — re-sending welcome to be safe.`);
     }
 
     const zipUrl = process.env.NOVO_SUB_ZIP_URL;
