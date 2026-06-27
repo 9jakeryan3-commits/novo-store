@@ -168,6 +168,7 @@
 
   /* ── How it works ── */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .how-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
   .how-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 28px; }
   .how-num { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 2px; margin-bottom: 12px; }
   .how-card h3 { font-size: 16px; font-weight: 700; color: var(--txt1); margin-bottom: 10px; }
@@ -305,7 +306,7 @@
     .stat { border-right: none; }
     .pain-grid { grid-template-columns: 1fr; }
     .for-grid { grid-template-columns: 1fr; }
-    .how-grid { grid-template-columns: 1fr; }
+    .how-grid, .how-grid-2 { grid-template-columns: 1fr; }
     .dp-metrics { grid-template-columns: repeat(2, 1fr); }
     .dp-metric:nth-child(2) { border-right: none; }
     .ai-grid { grid-template-columns: 1fr; }
@@ -578,7 +579,7 @@
       <h3>You set the boundaries. NoVo trades inside them.</h3>
       <p>Your main input is DTE Target — how many days to expiration NoVo trades, which sets the whole risk profile. At 0–1 DTE: maximum decay and the tightest risk, everything force-flattened before the close — nothing held overnight. At 2–5 DTE: more premium cushion and room for a trade to breathe, in exchange for overnight exposure. The finer risk controls ship pre-tuned and stay adjustable any time. You draw the lines; NoVo scores, sizes, and exits within them.</p>
     </div>
-    <div class="how-grid">
+    <div class="how-grid-2">
       <div class="how-card">
         <div class="how-num">01 &nbsp;·&nbsp; SIGNAL</div>
         <h3>Apex Score — Four Conviction Tiers</h3>
@@ -591,13 +592,13 @@
         <p>A Multi-Armed Bandit algorithm continuously tests multiple order execution strategies — spanning passive, adaptive, and aggressive approaches — and exploits whichever produces the best fills in current conditions.</p>
         <p>Position sizing is conviction-weighted: your Apex tier determines contract count, so the highest-conviction setups automatically size larger from the same allocation budget. At peak conviction or extreme tape velocity, passive fills are banned — the move can't be missed for the sake of price. The system gets better fills the longer it runs.</p>
       </div>
-      <div class="how-card">
-        <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
-        <h3>Multi-Tier Exit Hierarchy</h3>
-        <p>Exits execute in strict priority order across multiple tiers — from manual overrides and EOD protocols down through hard stops, trailing exits, and profit-taking targets. Higher-priority exits always win. The system never hesitates between competing exit conditions.</p>
-        <p>TP1 sells half the position at your first target and promotes the remainder to a runner. Toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner — or toggle it off to let the runner trail indefinitely in trending markets.</p>
-        <p>Two independent trailing stops protect open profit: a tighter runner trail for extended moves and a standard trail for normal exits, both with adjustable width and activation thresholds. Nearly every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
-      </div>
+    </div>
+    <div class="how-card" style="margin-top:20px;">
+      <div class="how-num">03 &nbsp;·&nbsp; MANAGE</div>
+      <h3>Multi-Tier Exit Hierarchy</h3>
+      <p>Exits execute in strict priority order across multiple tiers — from manual overrides and EOD protocols down through hard stops, trailing exits, and profit-taking targets. Higher-priority exits always win. The system never hesitates between competing exit conditions.</p>
+      <p>TP1 sells half the position at your first target and promotes the remainder to a runner. Toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner — or toggle it off to let the runner trail indefinitely in trending markets.</p>
+      <p>Two independent trailing stops protect open profit: a tighter runner trail for extended moves and a standard trail for normal exits, both with adjustable width and activation thresholds. Nearly every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
     </div>
 
     <!-- SCREENSHOT GALLERY — restored 2026-06-26 with v4.3 blurred shots (rebuilt by build_shots.py). -->
