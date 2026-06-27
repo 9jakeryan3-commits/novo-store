@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How NoVo Decides, Executes &amp; Exits | The NoVo Journal</title>
+<meta name="description" content="From a confirmed signal to a filled order to a disciplined exit — and the daily circuit breakers that protect your capital. How NoVo turns a read into a managed trade.">
+<link rel="canonical" href="https://novo-aitrading.app/blog/how-novo-decides-executes-exits.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://novo-aitrading.app/blog/how-novo-decides-executes-exits.html">
+<meta property="og:title" content="How NoVo Decides, Executes & Exits">
+<meta property="og:description" content="A multi-stage entry gate, adaptive execution, a strict exit hierarchy, and hard daily circuit breakers.">
+<meta property="og:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How NoVo Decides, Executes & Exits">
+<meta name="twitter:description" content="From a confirmed signal to a disciplined, capital-protected exit.">
+<meta name="twitter:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
+<link rel="icon" href="/novo-icon.png?v=2">
+<link rel="stylesheet" href="/blog/blog.css">
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo.png?v=2" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/blog/">Blog</a>
+    <a class="nav-buy" href="/">Subscribe</a>
+  </div>
+</div></nav>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/blog/">← All articles</a>
+  <header class="article-head">
+    <div class="kicker">Execution</div>
+    <h1>How NoVo Decides, Executes &amp; Exits</h1>
+    <p class="standfirst">A read is worthless without disciplined execution behind it. Here's how NoVo turns a confirmed signal into a filled order — and a filled order into a managed, capital-protected trade.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading · 2026</div>
+
+  <div class="article-body">
+    <p>Plenty of systems can spot a setup. The hard part — the part that actually decides whether you keep your money — is everything that happens <em>after</em>: confirming the entry is real, getting filled without bleeding edge, and managing the exit with zero emotion. NoVo treats all three as first-class problems.</p>
+
+    <h2>Deciding: a gate, not a trigger</h2>
+    <p>NoVo never enters on a single condition. An entry has to pass through a multi-stage gate, and every stage can veto the trade:</p>
+    <ul>
+      <li><strong>Is the move real?</strong> The tape has to confirm sustained directional pressure, not a one-tick spike that immediately reverses.</li>
+      <li><strong>Does the structure agree?</strong> The AI's directional bias has to align with the trade. A long needs a constructive structural read; a short needs the opposite. A stale read gets discounted automatically.</li>
+      <li><strong>How strong is it?</strong> Different strengths of setup open different entry paths — from a carefully filtered, lower-conviction entry to a high-urgency one when the tape is genuinely exploding. Stronger conviction earns more size; weaker conviction earns less.</li>
+      <li><strong>Is it chasing a wall?</strong> If price has already been rejected from a key level, NoVo won't chase a breakout right into it — it waits for price to actually clear the level instead of buying the top of a failed push.</li>
+    </ul>
+    <p>The exact strength bands and floors that govern these paths are tunable by you and stay under the hood. The principle is what matters: <strong>conviction sizing</strong> — risk the most only when the evidence is strongest, and let weak setups pass.</p>
+
+    <h2>Executing: getting filled without leaking edge</h2>
+    <p>Once a trade is approved, NoVo doesn't just blast a market order and eat the slippage. It picks among several execution styles — some patient and price-sensitive, some aggressive when getting in <em>now</em> matters more than a penny of price. And it doesn't guess forever: NoVo learns from its own fills which approach works best in which conditions, and routes accordingly. It also enforces hard rules — in fast or volatile conditions, the approaches most likely to bleed slippage are simply taken off the table.</p>
+
+    <p class="pull">A good entry filled badly is a bad entry. NoVo treats execution quality as part of the edge, not an afterthought.</p>
+
+    <h2>Exiting: a strict hierarchy, all yours to set</h2>
+    <p>This is where most traders fall apart, so NoVo makes it mechanical. Every open position is re-evaluated continuously against a strict priority ladder, where higher rules always override lower ones:</p>
+    <ul>
+      <li><strong>Your manual controls</strong> — take partial profit or liquidate everything, instantly, whenever you want.</li>
+      <li><strong>End-of-day protection</strong> — positions are flattened before expiry risk becomes a problem, so a trade never gets "stuck" into the close.</li>
+      <li><strong>A hard stop</strong> — a fixed maximum loss per trade. When it's hit, the trade is closed. No negotiation, no "give it room."</li>
+      <li><strong>Trailing stops</strong> — once a trade is working, NoVo trails the gain to lock in profit if it reverses.</li>
+      <li><strong>Staged take-profits</strong> — bank a portion at a first target and let the rest run, or cap the whole position — your choice.</li>
+    </ul>
+    <p>Every one of those levels is a number <em>you</em> set, live, from the dashboard. Nothing is hidden or hardcoded. Earlier versions of NoVo had a discretionary exit that could cut a trade when the AI bias flipped mid-position — that was deliberately <strong>removed</strong>, because a momentary bias flip wasn't reliable enough to justify overriding the stop you set. Your risk rules run the show.</p>
+
+    <h2>The capital protections that never sleep</h2>
+    <p>Around all of it sit hard daily circuit breakers. You set a maximum daily loss and a daily profit goal. Hit the loss limit and NoVo halts and stands down for the day — it stops you from revenge-trading a bad morning into a disastrous afternoon. Hit the profit goal and it banks the day rather than giving gains back by overtrading. There are also enforced cooldowns between trades so it never machine-guns into a chop. And if the system ever restarts while a position is open, it re-adopts that position with safe assumptions and keeps managing it without missing a beat.</p>
+
+    <p>Entry, execution, exit, and the guardrails around them — all mechanical, all consistent, all under your configured limits. That's the difference between a plan and a system that actually follows one.</p>
+  </div>
+
+  <div class="cta">
+    <h3>Run the machine yourself</h3>
+    <p>NoVo Pulse — $169/mo or $1,668/yr. Your broker, your keys, AI included.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/">Start your subscription</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+
+<nav class="more">
+  <div class="label">Keep reading</div>
+  <a href="/blog/how-novo-thinks-and-learns.html">How NoVo Thinks &amp; Learns <span>The AI layers, the memory, and the weekly self-tuning.</span></a>
+  <a href="/blog/how-novo-reads-the-market.html">How NoVo Reads the Market <span>The data streams behind every decision.</span></a>
+</nav>
+</main>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> · <a href="/blog/">Blog</a> · <a href="/license.html">License</a></div>
+  <div>© 2026 NoVo AI Trading. All rights reserved. Not financial advice — trading involves risk of loss.</div>
+</footer>
+</body>
+</html>
