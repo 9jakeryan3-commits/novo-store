@@ -4,150 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>NoVo — Subscriber Portal</title>
+<meta http-equiv="refresh" content="3; url=https://app.novo-aitrading.app">
+<title>NoVo — Member Portal</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0b1527; color: #8aacc8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-  .wrap { max-width: 480px; width: 100%; }
+  .wrap { max-width: 460px; width: 100%; }
   .logo { height: 42px; width: auto; display: block; margin: 0 auto 8px; }
   .tag { font-size: 11px; color: #506e8f; letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 32px; }
-  .card { background: #0e1c35; border: 1px solid #1b2e4e; border-radius: 12px; padding: 32px; margin-bottom: 16px; position: relative; overflow: hidden; }
-  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .card.green::before { background: #10b981; }
-  .card.blue::before { background: #3b82f6; }
-  .card-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
-  .card.green .card-label { color: #10b981; }
-  .card.blue .card-label { color: #3b82f6; }
-  h2 { font-size: 18px; font-weight: 800; color: #eaf3ff; margin-bottom: 8px; letter-spacing: -0.3px; }
-  p { font-size: 14px; color: #8aacc8; line-height: 1.6; margin-bottom: 16px; }
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 12px; font-weight: 600; color: #8aacc8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .field input { width: 100%; background: #0b1527; border: 1px solid #1b2e4e; border-radius: 6px; padding: 11px 14px; font-size: 15px; color: #eaf3ff; outline: none; transition: border-color .15s; }
-  .field input:focus { border-color: #3b82f6; }
-  .btn { width: 100%; border: none; padding: 13px; border-radius: 6px; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity .15s; }
+  .card { background: #0e1c35; border: 1px solid #1b2e4e; border-radius: 12px; padding: 32px; text-align: center; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #3b82f6; }
+  h2 { font-size: 20px; font-weight: 800; color: #eaf3ff; margin-bottom: 10px; letter-spacing: -0.3px; }
+  p { font-size: 14px; color: #8aacc8; line-height: 1.6; margin-bottom: 20px; }
+  .btn { display: block; background: #3b82f6; color: #fff; text-decoration: none; padding: 14px; border-radius: 6px; font-weight: 700; font-size: 15px; }
   .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-green { background: #10b981; color: #fff; }
-  .btn-blue { background: #3b82f6; color: #fff; }
-  .msg { margin-top: 10px; font-size: 13px; line-height: 1.5; padding: 10px 14px; border-radius: 6px; display: none; }
-  .msg.ok { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: #10b981; display: block; }
-  .msg.err { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #ef4444; display: block; }
-  .divider { border: none; border-top: 1px solid #1b2e4e; margin: 8px 0 16px; }
-  .footer { text-align: center; font-size: 12px; color: #506e8f; margin-top: 8px; }
+  .footer { text-align: center; font-size: 12px; color: #506e8f; margin-top: 16px; }
   .footer a { color: #3b82f6; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <img src="/novo-logo.png" alt="NoVo" class="logo">
-
-  <div class="tag">Subscriber Portal</div>
-
-  <!-- Re-download -->
-  <div class="card green">
-    <div class="card-label">Download</div>
-    <h2>Re-download NoVo</h2>
-    <p>Enter the email address you used when subscribing. We'll email your license key and a fresh download link.</p>
-    <hr class="divider">
-    <div class="field">
-      <label for="dl-email">Your email address</label>
-      <input type="email" id="dl-email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <button class="btn btn-green" id="dl-btn" onclick="requestDownload()">Send Download Link</button>
-    <div class="msg" id="dl-msg"></div>
+  <div class="tag">Member Portal</div>
+  <div class="card">
+    <h2>Your portal has moved</h2>
+    <p>Manage your subscription and open your NoVo dashboard from your member portal. Redirecting you now&hellip;</p>
+    <a class="btn" href="https://app.novo-aitrading.app">Go to your portal &rarr;</a>
   </div>
-
-  <!-- Manage subscription -->
-  <div class="card blue">
-    <div class="card-label">Billing</div>
-    <h2>Manage Your Subscription</h2>
-    <p>Update payment method, view invoices, or cancel. Enter your email and we'll send you a secure link to your Stripe billing portal.</p>
-    <hr class="divider">
-    <div class="field">
-      <label for="portal-email">Your email address</label>
-      <input type="email" id="portal-email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <button class="btn btn-blue" id="portal-btn" onclick="openPortal()">Email me a portal link</button>
-    <div class="msg" id="portal-msg"></div>
-  </div>
-
   <div class="footer">
-    <p>Questions? Email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a></p>
+    <p style="margin-top:16px;">Questions? Email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a></p>
     <p style="margin-top:6px;"><a href="/">Back to novo-aitrading.app</a></p>
   </div>
 </div>
-
-<script>
-async function requestDownload() {
-  const emailEl = document.getElementById('dl-email');
-  const btn = document.getElementById('dl-btn');
-  const msg = document.getElementById('dl-msg');
-  const email = emailEl.value.trim();
-  msg.className = 'msg'; msg.textContent = '';
-
-  if (!email || !email.includes('@')) {
-    msg.className = 'msg err'; msg.textContent = 'Enter a valid email address.'; return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('/api/resend-download', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (res.ok && data.sent) {
-      msg.className = 'msg ok';
-      msg.textContent = 'Email sent — check your inbox (and spam). Link is valid for download immediately.';
-      btn.textContent = 'Sent';
-    } else {
-      msg.className = 'msg err'; msg.textContent = data.error || 'Something went wrong. Try again.';
-      btn.disabled = false; btn.textContent = 'Send Download Link';
-    }
-  } catch {
-    msg.className = 'msg err'; msg.textContent = 'Network error — please try again.';
-    btn.disabled = false; btn.textContent = 'Send Download Link';
-  }
-}
-
-async function openPortal() {
-  const emailEl = document.getElementById('portal-email');
-  const btn = document.getElementById('portal-btn');
-  const msg = document.getElementById('portal-msg');
-  const email = emailEl.value.trim();
-  msg.className = 'msg'; msg.textContent = '';
-
-  if (!email || !email.includes('@')) {
-    msg.className = 'msg err'; msg.textContent = 'Enter a valid email address.'; return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Sending link...';
-  try {
-    const res = await fetch('/api/subscriber-portal', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      msg.className = 'msg ok'; msg.textContent = data.message || 'Check your email for a secure link to manage your subscription.';
-    } else {
-      msg.className = 'msg err'; msg.textContent = data.error || 'Something went wrong. Try again.';
-    }
-    btn.disabled = false; btn.textContent = 'Email me a portal link';
-  } catch {
-    msg.className = 'msg err'; msg.textContent = 'Network error — please try again.';
-    btn.disabled = false; btn.textContent = 'Email me a portal link';
-  }
-}
-
-// Allow Enter key to submit from either input
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const t = e.target;
-  if (t.id === 'dl-email') requestDownload();
-  else if (t.id === 'portal-email') openPortal();
-});
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
