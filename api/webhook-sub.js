@@ -1,5 +1,4 @@
 const Stripe = require('stripe');
-const crypto = require('crypto');
 const { Resend } = require('resend');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -8,15 +7,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const LICENSE_SERVER = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
 const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
 const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
-
-// NOVS- prefix distinguishes subscription keys from NOVO- one-time keys
-function deterministicKey(subscriptionId) {
-  const token = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
-    .update(`sub:${subscriptionId}`).digest('hex').substring(0, 16).toUpperCase();
-  const sig = crypto.createHmac('sha256', process.env.NOVO_LICENSE_SECRET)
-    .update(token).digest('hex').substring(0, 8).toUpperCase();
-  return `NOVS-${token.substring(0, 8)}-${token.substring(8)}-${sig}`;
-}
 
 // Stripe moved the invoice's subscription id to invoice.parent.subscription_details.subscription
 // in its 2025 API versions; older versions use the top-level invoice.subscription. Read whichever
@@ -33,14 +23,6 @@ async function licensePost(path, body) {
   });
   if (!res.ok) throw new Error(`License server ${path} → ${res.status}`);
   return res.json();
-}
-
-async function createSubLicense(key, subscriptionId, email) {
-  return licensePost('/admin/keys/sub', {
-    key,
-    stripe_subscription_id: subscriptionId,
-    note: email,
-  });
 }
 
 async function activateSub(subscriptionId) {
