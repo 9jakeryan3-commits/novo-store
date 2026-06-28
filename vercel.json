@@ -6,7 +6,6 @@
     { "source": "/license", "destination": "/license.html" }
   ],
   "functions": {
-    "api/webhook.js": { "maxDuration": 30 },
     "api/webhook-sub.js": { "maxDuration": 30 },
     "api/reconcile-subs.js": { "maxDuration": 60 }
   },
