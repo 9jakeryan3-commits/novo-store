@@ -42,50 +42,47 @@ function welcomeEmailHtml() {
 <html>
 <head>
 <meta charset="utf-8">
-<style>
-  body{margin:0;padding:0;background:#0b1527;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  .wrap{max-width:600px;margin:0 auto;padding:40px 20px}
-  .logo{font-size:36px;font-weight:900;color:#eaf3ff;letter-spacing:-1px}
-  .logo span{color:#10b981}
-  .tag{font-size:11px;color:#8aacc8;letter-spacing:3px;text-transform:uppercase;margin-top:4px}
-  hr{border:none;border-top:1px solid #1b2e4e;margin:28px 0}
-  h2{color:#eaf3ff;font-size:20px;margin:0 0 8px}
-  p{color:#8aacc8;font-size:15px;line-height:1.6;margin:0 0 16px}
-  .steps{background:#0e1c35;border:1px solid #1b2e4e;border-radius:6px;padding:20px 24px;margin:24px 0}
-  .step{display:flex;align-items:flex-start;margin-bottom:14px}
-  .step-num{background:#10b981;color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:12px;margin-top:2px}
-  .step-text{color:#8aacc8;font-size:14px;line-height:1.5}
-  .step-text strong{color:#eaf3ff}
-  .btn{display:inline-block;background:#10b981;color:#fff!important;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;margin:8px 4px}
-  .notice{background:#0e1c35;border:1px solid #1b2e4e;border-left:3px solid #f59e0b;border-radius:6px;padding:14px 18px;margin:20px 0;font-size:13px;color:#8aacc8;line-height:1.6}
-  .notice strong{color:#f59e0b}
-  .footer{margin-top:40px;padding-top:20px;border-top:1px solid #1b2e4e}
-  .footer p{font-size:12px;color:#506e8f;margin:0}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body>
-<div class="wrap">
-  <div class="logo">No<span>Vo</span></div>
-  <div class="tag">NoVo Pulse — Autonomous Trading</div>
-  <hr>
-  <h2>Welcome to NoVo Pulse — you're all set.</h2>
-  <p>Your subscription is active. Head to your portal to finish setup and open your dashboard — you'll be up and running in minutes.</p>
-  <a href="https://app.novo-aitrading.app" class="btn">Open Your Portal</a>
-  <hr>
-  <h2>Getting started</h2>
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text">Go to <strong>app.novo-aitrading.app</strong> and create your account using <strong>this email address</strong></div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text">Connect your <strong>Tradier + Alpaca</strong> keys — validated against the brokers and encrypted</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text">Your private dashboard goes live automatically — AI pre-configured, <strong>paper trading immediately</strong></div></div>
-    <div class="step"><div class="step-num">4</div><div class="step-text">Open it in any browser, or install it as an app on your desktop or phone</div></div>
-  </div>
-  <p>Start in paper mode (the default) and watch it run before switching to live.</p>
-  <div class="notice">
-    <strong>Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage your billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#3b82f6;">app.novo-aitrading.app</a>.
-  </div>
-  <p>Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a>.</p>
-  <div class="footer">
-    <p>Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
+<body style="margin:0;padding:0;background:#eef2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:30px 16px;">
+  <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:34px 32px;">
+    <div style="text-align:center;">
+      <img src="https://novo-aitrading.app/novo-logo.png" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
+      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Pulse &mdash; Autonomous Trading</div>
+    </div>
+
+    <h1 style="color:#0b1527;font-size:22px;margin:0 0 10px;">Welcome to NoVo Pulse &mdash; you're all set.</h1>
+    <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. Head to your portal to finish setup and open your dashboard &mdash; you'll be up and running in minutes.</p>
+
+    <div style="text-align:center;margin:0 0 26px;">
+      <a href="https://app.novo-aitrading.app" style="display:inline-block;background:#10b981;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Open Your Portal</a>
+    </div>
+
+    <div style="border-top:1px solid #e2e8f0;margin:0 0 20px;"></div>
+    <h2 style="color:#0b1527;font-size:16px;margin:0 0 14px;">Getting started</h2>
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">1</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Go to <strong style="color:#0b1527;">app.novo-aitrading.app</strong> and create your account using <strong style="color:#0b1527;">this email address</strong>.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">2</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Connect your <strong style="color:#0b1527;">Tradier + Alpaca</strong> keys &mdash; validated against the brokers and encrypted.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">3</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Your private dashboard goes live automatically &mdash; AI pre-configured, <strong style="color:#0b1527;">paper trading immediately</strong>.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 0 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">4</div></td>
+          <td style="vertical-align:top;color:#334155;font-size:14px;line-height:1.55;">Open it in any browser, or install it as an app on your desktop or phone.</td></tr>
+    </table>
+
+    <p style="color:#475569;font-size:14px;line-height:1.6;margin:22px 0 0;">Start in paper mode (the default) and watch it run before switching to live.</p>
+
+    <div style="background:#fff8ec;border:1px solid #f5d9a8;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#7c5e1e;line-height:1.6;">
+      <strong style="color:#b45309;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#1a4a8a;">app.novo-aitrading.app</a>.
+    </div>
+
+    <p style="color:#475569;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app" style="color:#1a4a8a;">support@novo-aitrading.app</a>.</p>
+
+    <div style="border-top:1px solid #e2e8f0;margin-top:24px;padding-top:16px;">
+      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.5;">Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
+    </div>
   </div>
 </div>
 </body>
