@@ -55,7 +55,7 @@ async function cancelSub(subscriptionId) {
   return licensePost(`/admin/subscription/${subscriptionId}/cancel`, {});
 }
 
-function welcomeEmailHtml(licenseKey, zipUrl) {
+function welcomeEmailHtml() {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -69,16 +69,12 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
   hr{border:none;border-top:1px solid #1b2e4e;margin:28px 0}
   h2{color:#eaf3ff;font-size:20px;margin:0 0 8px}
   p{color:#8aacc8;font-size:15px;line-height:1.6;margin:0 0 16px}
-  .key-box{background:#0e1c35;border:1px solid #1b2e4e;border-left:3px solid #10b981;border-radius:6px;padding:20px 24px;margin:24px 0}
-  .key-label{font-size:11px;color:#8aacc8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-  .key{font-family:'Courier New',monospace;font-size:20px;font-weight:700;color:#f59e0b;letter-spacing:2px}
   .steps{background:#0e1c35;border:1px solid #1b2e4e;border-radius:6px;padding:20px 24px;margin:24px 0}
   .step{display:flex;align-items:flex-start;margin-bottom:14px}
   .step-num{background:#10b981;color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:12px;margin-top:2px}
   .step-text{color:#8aacc8;font-size:14px;line-height:1.5}
   .step-text strong{color:#eaf3ff}
   .btn{display:inline-block;background:#10b981;color:#fff!important;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;margin:8px 4px}
-  .btn-outline{display:inline-block;background:transparent;color:#3b82f6!important;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1px solid #1b2e4e;margin:8px 4px}
   .notice{background:#0e1c35;border:1px solid #1b2e4e;border-left:3px solid #f59e0b;border-radius:6px;padding:14px 18px;margin:20px 0;font-size:13px;color:#8aacc8;line-height:1.6}
   .notice strong{color:#f59e0b}
   .footer{margin-top:40px;padding-top:20px;border-top:1px solid #1b2e4e}
@@ -88,40 +84,26 @@ function welcomeEmailHtml(licenseKey, zipUrl) {
 <body>
 <div class="wrap">
   <div class="logo">No<span>Vo</span></div>
-  <div class="tag">Subscription — Algorithmic Execution System</div>
+  <div class="tag">NoVo Pulse — Autonomous Trading</div>
   <hr>
-  <h2>Subscription active. Here's everything you need.</h2>
-  <p>Your NoVo Pulse is live. License key, download link, and setup steps are all below — you can be running in under 20 minutes.</p>
-  <div class="key-box">
-    <div class="key-label">Your License Key</div>
-    <div class="key">${licenseKey}</div>
+  <h2>Welcome to NoVo Pulse — you're all set.</h2>
+  <p>Your subscription is active. Head to your portal to finish setup and open your dashboard. You can be running in minutes — nothing to install.</p>
+  <a href="https://app.novo-aitrading.app" class="btn">Open Your Portal</a>
+  <hr>
+  <h2>Getting started</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-text">Go to <strong>app.novo-aitrading.app</strong> and create your account using <strong>this email address</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">Connect your <strong>Tradier + Alpaca</strong> keys — validated against the brokers and encrypted</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">Your private dashboard goes live automatically — AI pre-configured, <strong>paper trading immediately</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">Open it in any browser, or install it as an app on your desktop or phone</div></div>
   </div>
-  <a href="${zipUrl}" class="btn">Download NoVo Pulse</a>
-  <a href="${SITE}/subscriber" class="btn-outline">Manage Subscription</a>
+  <p>Start in paper mode (the default) and watch it run before switching to live.</p>
   <div class="notice">
-    <strong>Auto-renewing:</strong> Your subscription renews automatically on your billing cycle (monthly or yearly, whichever you chose). To update your payment method, cancel, or re-download at any time, visit <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a> and enter this email address.
+    <strong>Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage your billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#3b82f6;">app.novo-aitrading.app</a>.
   </div>
-  <hr>
-  <h2>Read these first</h2>
-  <p>Open the zip and read the included guides before running anything:</p>
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Risk Disclaimer</strong> — required reading before using the system</div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Start &amp; Troubleshoot</strong> — full setup walkthrough, account requirements, and troubleshooting</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Presentation Guide</strong> — how NoVo thinks, trades, and every dashboard panel explained</div></div>
-  </div>
-  <hr>
-  <h2>Setup</h2>
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text">Unzip to exactly <strong>C:\\NoVo</strong></div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text">Double-click <strong>Install NoVo</strong> → click Yes on the Windows prompt — it handles everything and will ask for your license key</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text">Open Chrome → <strong>http://localhost:8000</strong> and log in, or use your permanent remote URL printed at the end of setup</div></div>
-    <div class="step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings</strong> and enter your Tradier and Alpaca keys — AI is already configured, no AI provider key needed</div></div>
-    <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>Auth (Start)</strong> — NoVo is live</div></div>
-  </div>
-  <p>Start in paper mode (default). Watch it run before switching to live.</p>
-  <p>Any issues — email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a> and I'll sort it out.</p>
+  <p>Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app">support@novo-aitrading.app</a>.</p>
   <div class="footer">
-    <p>Not financial advice. For informational and educational use only. Your license key is machine-bound and active while your subscription is current. Manage or cancel at <a href="${SITE}/subscriber" style="color:#3b82f6;">${SITE}/subscriber</a>.</p>
+    <p>Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
   </div>
 </div>
 </body>
@@ -162,45 +144,23 @@ const handler = async (req, res) => {
   // ── New subscription checkout completed ───────────────────────────────────
   if (event.type === 'checkout.session.completed' && obj.mode === 'subscription') {
     const email = obj?.customer_details?.email;
-    const subscriptionId = obj?.subscription;
-
-    if (!email || !subscriptionId) {
-      console.error(`[webhook-sub] Missing email or subscription ID — session:${obj.id}`);
+    if (!email) {
+      console.error(`[webhook-sub] Missing email — session:${obj.id}`);
       return res.status(200).json({ received: true });
     }
 
-    const licenseKey = deterministicKey(subscriptionId);
-
-    let subReg;
-    try {
-      subReg = await createSubLicense(licenseKey, subscriptionId, email);
-    } catch (err) {
-      console.error(`[webhook-sub] License create failed — sub:${subscriptionId} error:${err.message}`);
-      return res.status(500).json({ error: 'License creation failed' });
-    }
-    // Do NOT skip the email when created:false. If a prior delivery created the license but the email
-    // send threw (returned 500 → Stripe retries), skipping here would mean the buyer NEVER gets their
-    // key. Re-sending a welcome on a rare duplicate event is harmless; a missing welcome is not.
-    if (subReg && subReg.created === false) {
-      console.log(`[webhook-sub] Sub ${subscriptionId} key already existed (event replay) — re-sending welcome to be safe.`);
-    }
-
-    const zipUrl = process.env.NOVO_SUB_ZIP_URL;
-    if (!zipUrl) {
-      console.error(`[webhook-sub] NOVO_SUB_ZIP_URL not set — sub:${subscriptionId}`);
-      return res.status(500).json({ error: 'Download URL not configured' });
-    }
-
+    // Hosted model: no license key, no download. The control plane recognizes the subscription by the
+    // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         replyTo: 'support@novo-aitrading.app',
         to: [email],
-        subject: 'NoVo Pulse — Your Files + License Key',
-        html: welcomeEmailHtml(licenseKey, zipUrl),
+        subject: 'Welcome to NoVo Pulse — open your portal',
+        html: welcomeEmailHtml(),
       });
     } catch (err) {
-      console.error(`[webhook-sub] Email failed — sub:${subscriptionId} error:${err.message}`);
+      console.error(`[webhook-sub] Welcome email failed — error:${err.message}`);
       return res.status(500).json({ error: 'Email delivery failed' });
     }
   }
