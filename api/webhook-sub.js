@@ -87,7 +87,7 @@ function welcomeEmailHtml() {
   <div class="tag">NoVo Pulse — Autonomous Trading</div>
   <hr>
   <h2>Welcome to NoVo Pulse — you're all set.</h2>
-  <p>Your subscription is active. Head to your portal to finish setup and open your dashboard. You can be running in minutes — nothing to install.</p>
+  <p>Your subscription is active. Head to your portal to finish setup and open your dashboard — you'll be up and running in minutes.</p>
   <a href="https://app.novo-aitrading.app" class="btn">Open Your Portal</a>
   <hr>
   <h2>Getting started</h2>
