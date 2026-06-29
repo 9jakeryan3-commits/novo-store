@@ -105,14 +105,20 @@
   }
 
   /* ── Hero ── */
-  .hero { padding: 100px 0 80px; text-align: center; }
-  .hero-badge { display: inline-block; background: var(--navy2); border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 28px; }
-  .hero h1 { font-size: clamp(38px, 6vw, 64px); font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1.05; margin-bottom: 20px; }
-  .hero h1 span { color: var(--blue); }
-  .hero p { font-size: 18px; color: var(--txt2); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; }
+  .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -160px; left: 50%; transform: translateX(-50%); width: 1050px; height: 580px; background: radial-gradient(ellipse at center, rgba(59,130,246,0.22), rgba(34,211,238,0.08) 42%, transparent 72%); pointer-events: none; z-index: 0; }
+  .hero .container { position: relative; z-index: 1; }
+  .hero-badge { display: inline-block; background: var(--navy2); border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 24px; }
+  .hero h1 { font-size: clamp(40px, 6.4vw, 70px); font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1.03; margin-bottom: 14px; }
+  .hero h1 span { background: linear-gradient(92deg, #22d3ee, #3b82f6 65%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  .hero-tagline { font-size: clamp(15px, 2vw, 19px); font-weight: 900; color: var(--txt1); letter-spacing: 0.16em; text-transform: uppercase; margin: 0 auto 22px; }
+  .hero-tagline b { color: var(--green); }
+  .hero p { font-size: 18px; color: var(--txt2); max-width: 600px; margin: 0 auto 26px; line-height: 1.7; }
+  .hero-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 720px; margin: 0 auto 30px; }
+  .hero-chips span { font-size: 13px; font-weight: 600; color: var(--txt1); background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.22); border-radius: 999px; padding: 8px 15px; white-space: nowrap; }
   .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-  .btn-primary { background: #f59e0b; color: #000; border: none; padding: 16px 40px; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity .15s; }
-  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary { background: #f59e0b; color: #000; border: none; padding: 16px 40px; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity .15s, transform .15s; }
+  .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
   .btn-secondary { background: transparent; color: var(--txt2); border: 1px solid var(--bdr); padding: 16px 40px; border-radius: 6px; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color .15s, color .15s; text-decoration: none; display: inline-block; }
   .btn-secondary:hover { border-color: var(--blue); color: var(--txt1); }
   .hero-links { display: flex; gap: 16px; justify-content: center; align-items: center; margin-top: 18px; flex-wrap: wrap; }
@@ -379,14 +385,18 @@
   <div class="container">
     <div class="hero-badge">AI-Powered &nbsp;·&nbsp; Structure. Speed. Intelligence.<br>Trade differently, Trade simply.</div>
     <h1>Set your rules.<br><span>NoVo takes it from there.</span></h1>
+    <p class="hero-tagline">One Ticker. <b>Mastered.</b> Autonomous.</p>
     <p>NoVo is a simple tool with high intelligence — built for SPY options scalpers and day traders tired of staring at five charts, tracking every data stream, white-knuckling every tick, and still missing the entry.</p>
-    <p style="font-size:22px;font-weight:900;color:var(--txt1);letter-spacing:0.08em;margin:28px auto;max-width:600px;">ONE TICKER. MASTERED. AUTONOMOUS.</p>
-    <p>NoVo does the heavy lifting. Finds the entry, sizes the position, manages the trade, and exits the instant your rules dictate. Zero hesitation. Zero fatigue. Zero revenge trades. Feeding off the markets data and rewriting his own entry playbook every week using real market results, while never executing a single tick outside the risk boundaries you set.</p>
-    <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a partner that never blinks, never tires, never hesitates.</p>
-    <div class="hero-cta" style="margin-bottom:14px;">
+    <div class="hero-chips">
+      <span>Autonomous execution</span>
+      <span>Your broker, your keys</span>
+      <span>AI included</span>
+      <span>Runs 24/7, hands-off</span>
+    </div>
+    <div class="hero-cta">
       <button class="btn-primary" style="background:var(--green);" onclick="subscribeNow()">Subscribe — $169/mo</button>
     </div>
-    <div style="margin-bottom:16px;">
+    <div style="margin-top:14px;">
       <button type="button" onclick="subscribeYearly()" style="background:transparent;border:1px solid var(--amber);color:var(--amber);font-weight:700;font-size:13.5px;padding:8px 20px;border-radius:999px;cursor:pointer;letter-spacing:0.02em;">Or subscribe yearly — $1,668/yr · save $30/mo</button>
     </div>
     <div class="hero-links">
@@ -395,6 +405,8 @@
       <button type="button" class="hero-link" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
     <p class="hero-sub"><strong style="color:var(--txt1);">NoVo Pulse</strong> — $169/mo or $1,668/yr. Bring your Tradier + Alpaca keys, AI included, all-in. Cancel any time.</p>
+    <p style="margin-top:44px;">NoVo does the heavy lifting. Finds the entry, sizes the position, manages the trade, and exits the instant your rules dictate. Zero hesitation. Zero fatigue. Zero revenge trades. Feeding off the markets data and rewriting his own entry playbook every week using real market results, while never executing a single tick outside the risk boundaries you set.</p>
+    <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a partner that never blinks, never tires, never hesitates.</p>
     <div class="hero-steps">
       <div class="hero-step"><div class="hero-step-num">1</div>Subscribe — instant access</div>
       <div class="hero-step-arrow">→</div>
