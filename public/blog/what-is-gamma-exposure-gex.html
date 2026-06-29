@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Is Gamma Exposure (GEX)? A Plain-English Guide for SPY Traders | The NoVo Journal</title>
+<meta name="description" content="Gamma exposure (GEX) is one of the most useful — and most misunderstood — concepts in options trading. Here's what GEX is, why dealer hedging moves SPY, what the gamma flip means, and why it matters intraday.">
+<link rel="canonical" href="https://novo-aitrading.app/blog/what-is-gamma-exposure-gex.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://novo-aitrading.app/blog/what-is-gamma-exposure-gex.html">
+<meta property="og:title" content="What Is Gamma Exposure (GEX)? A Plain-English Guide">
+<meta property="og:description" content="What GEX is, why dealer hedging moves SPY, what the gamma flip means, and why it matters intraday — no jargon.">
+<meta property="og:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="What Is Gamma Exposure (GEX)?">
+<meta name="twitter:description" content="Dealer gamma, the gamma flip, and why it moves SPY — explained simply.">
+<meta name="twitter:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
+<link rel="icon" href="/novo-icon.png?v=2">
+<link rel="stylesheet" href="/blog/blog.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"What Is Gamma Exposure (GEX)? A Plain-English Guide for SPY Traders","description":"Gamma exposure (GEX) explained: what it is, why dealer hedging moves SPY, what the gamma flip means, and why it matters intraday.","image":"https://novo-aitrading.app/novo-logo.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-06-28","mainEntityOfPage":"https://novo-aitrading.app/blog/what-is-gamma-exposure-gex.html"}
+</script>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo.png?v=2" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/blog/">Blog</a>
+    <a class="nav-buy" href="/">Subscribe</a>
+  </div>
+</div></nav>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/blog/">← All articles</a>
+  <header class="article-head">
+    <div class="kicker">Plain English</div>
+    <h1>What Is Gamma Exposure (GEX)?</h1>
+    <p class="standfirst">GEX is one of the most useful ideas in modern options trading — and one of the most badly explained. Here's what it actually is, and why it quietly shapes how SPY moves all day.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading · 2026</div>
+
+  <div class="article-body">
+    <p>To understand gamma exposure, start one step back, with the people on the other side of your options trade: the market makers (dealers). When you buy an option, a dealer is usually selling it to you — and they don't want a directional bet, they want to stay neutral and earn the spread. To stay neutral as the market moves, they constantly buy and sell the underlying (here, SPY). That hedging is mechanical, it's enormous, and it leaves footprints. GEX is how you read those footprints.</p>
+
+    <h2>First, what gamma is</h2>
+    <p>Two quick terms. <strong>Delta</strong> is how much an option's price moves when the underlying moves a dollar. <strong>Gamma</strong> is how fast that delta itself changes as the underlying moves. High gamma means a dealer's exposure shifts quickly as price moves — so they have to re-hedge more aggressively. You don't need the math; you need the consequence: gamma decides <em>how much</em> dealers must buy or sell to stay neutral as SPY ticks around.</p>
+
+    <h2>Gamma exposure: the whole market's position, netted</h2>
+    <p><strong>Gamma exposure (GEX)</strong> is the aggregate gamma position of all those dealers across the options chain, netted into one picture of which way — and how hard — they'll have to hedge. The key insight is that the <em>sign</em> of that net position flips the market's behavior:</p>
+    <ul>
+      <li><strong>Positive GEX (dealers are "long gamma").</strong> To stay neutral, dealers sell into rallies and buy into dips. That's stabilizing — it dampens moves. Markets in strong positive-gamma zones tend to grind, pin near big strikes, and mean-revert. Volatility gets suppressed.</li>
+      <li><strong>Negative GEX (dealers are "short gamma").</strong> Now the hedging flips: dealers must buy into rallies and sell into dips. That's destabilizing — it <em>amplifies</em> moves. A push gets accelerated instead of absorbed, which is how you get fast, trendy, sometimes violent sessions.</li>
+    </ul>
+
+    <p class="pull">In positive gamma, the market acts like it has shock absorbers. In negative gamma, it acts like it's on ice.</p>
+
+    <h2>The gamma flip</h2>
+    <p>Between those two worlds is a level often called the <strong>gamma flip</strong> — the price where net dealer gamma crosses from positive to negative. It matters because the market's <em>character</em> changes as price moves across it: the same breakout that would get absorbed above the flip can accelerate below it. Knowing roughly where that line sits tells you what kind of session you're likely in — a fade-the-extremes day or a chase-the-trend day — before the tape makes it obvious.</p>
+
+    <h2>Why this matters most for SPY (and 0DTE)</h2>
+    <p>SPY and the S&P 500 complex carry some of the largest options open interest in the world, and a huge share of it now sits in very short-dated contracts. That concentration makes dealer hedging a genuinely market-moving force intraday — which is exactly why GEX has become such a watched concept for <a href="/blog/what-is-0dte-options-trading.html">0DTE and same-day SPY trading</a>. It's not a crystal ball; it's a map of the terrain — where price is likely to stall, accelerate, or reverse.</p>
+
+    <h2>How NoVo uses it</h2>
+    <p>Reading dealer positioning is one of the streams <a href="/blog/how-novo-reads-the-market.html">NoVo fuses into its market read</a>. It continuously estimates net gamma exposure and tracks where the behavior is likely to flip, then uses that as structural context — knowing the terrain, not just the direction — alongside the live tape, the macro backdrop, and an AI structural read. The specific calculations and thresholds are the part that took the longest to calibrate and stay under the hood; the principle is the point: <strong>direction is the easy part — context is the edge.</strong></p>
+  </div>
+
+  <div class="cta">
+    <h3>Put NoVo to work</h3>
+    <p>NoVo Pulse — $169/mo or $1,668/yr. Your broker, your keys, AI included.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/">Start your subscription</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+</main>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> · <a href="/blog/">Blog</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>© 2026 NoVo AI Trading. All rights reserved. Not financial advice — trading involves risk of loss.</div>
+</footer>
+</body>
+</html>
