@@ -49,7 +49,7 @@ function welcomeEmailHtml() {
   <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
       <img src="https://novo-aitrading.app/novo-logo.png" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
-      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Pulse &mdash; Autonomous Trading</div>
+      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Pulse &mdash; Autonomous Execution</div>
     </div>
 
     <h1 style="color:#0b1527;font-size:22px;margin:0 0 10px;">Welcome to NoVo Pulse &mdash; you're all set.</h1>
