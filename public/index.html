@@ -123,7 +123,7 @@
   .hero-tagline { font-size: clamp(15px, 2vw, 19px); font-weight: 900; color: var(--txt1); letter-spacing: 0.16em; text-transform: uppercase; margin: 0 auto 22px; }
   .hero-tagline b { color: var(--green); }
   .hero p { font-size: 18px; color: var(--txt2); max-width: 600px; margin: 0 auto 26px; line-height: 1.7; }
-  .hero-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 720px; margin: 0 auto 30px; }
+  .hero-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 520px; margin: 0 auto 30px; }
   .hero-chips span { font-size: 13px; font-weight: 600; color: var(--txt1); background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.22); border-radius: 999px; padding: 8px 15px; white-space: nowrap; }
   .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .btn-primary { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px 42px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 8px 28px rgba(16,185,129,0.35); }
@@ -430,7 +430,7 @@
       <button class="btn-primary" style="background:linear-gradient(180deg,#34d399,#10b981);" onclick="subscribeNow()">Subscribe — $199/mo</button>
     </div>
     <div style="margin-top:14px;">
-      <button type="button" onclick="subscribeYearly()" style="background:transparent;border:1px solid var(--amber);color:var(--amber);font-weight:700;font-size:13.5px;padding:8px 20px;border-radius:999px;cursor:pointer;letter-spacing:0.02em;">Or subscribe yearly — $1,990/yr · save $33/mo</button>
+      <button type="button" onclick="subscribeYearly()" style="background:rgba(16,185,129,0.08);border:1px solid #10b981;color:#34d399;font-weight:700;font-size:13.5px;padding:8px 20px;border-radius:999px;cursor:pointer;letter-spacing:0.02em;box-shadow:0 0 20px rgba(16,185,129,0.28);">Or subscribe yearly — $1,990/yr · save $33/mo</button>
     </div>
     <div class="hero-links">
       <a href="#how-it-works" class="hero-link">See How It Works</a>
@@ -899,7 +899,7 @@
     <div class="cost-grid" style="grid-template-columns:1fr;">
       <div class="cost-card" style="border-top:3px solid var(--green);">
         <h3 style="color:var(--green);">NoVo Pulse — $199/mo or $1,990/yr</h3>
-        <ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));column-gap:40px;">
+        <ul style="display:grid;grid-template-columns:1fr;">
           <li>NoVo + AI included <span class="cost-val" style="color:var(--green);">$199/mo</span></li>
           <li>Or pay yearly — 2 months free <span class="cost-val" style="color:var(--green);">$1,990/yr · save $33/mo</span></li>
           <li>Tradier Brokerage (data + live trading) <span class="cost-val">Free (or $10/mo commission-free) — requires $5 minimum deposit to activate the data stream</span></li>
@@ -1027,7 +1027,7 @@
           <li>Guided setup + email support</li>
         </ul>
         <button class="price-btn" style="background:linear-gradient(180deg,#34d399,#10b981);" onclick="subscribeNow()">Subscribe Now — $199/mo</button>
-        <button class="price-btn" style="background:transparent;border:1px solid var(--amber);color:var(--amber);margin-top:10px;font-weight:700;" onclick="subscribeYearly()">Or pay yearly — $1,990/yr &nbsp;·&nbsp; save $33/mo</button>
+        <button class="price-btn" style="background:rgba(16,185,129,0.08);border:1px solid #10b981;color:#34d399;box-shadow:0 0 22px rgba(16,185,129,0.28);margin-top:10px;font-weight:800;" onclick="subscribeYearly()">Or pay yearly — $1,990/yr &nbsp;·&nbsp; save $33/mo</button>
         <div class="price-next-steps">
           <p>After subscribing</p>
           <ol>
