@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script>if(!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('reveal-ready');}</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -261,8 +262,8 @@
 
   /* ── Pricing ── */
   #pricing { text-align: center; }
-  .price-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; max-width: 480px; margin: 0 auto; padding: 40px; position: relative; }
-  .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--blue); border-radius: 12px 12px 0 0; }
+  .price-card { background: linear-gradient(180deg, rgba(16,185,129,0.05), var(--navy2) 42%); border: 1px solid rgba(16,185,129,0.28); border-radius: 16px; max-width: 480px; margin: 0 auto; padding: 40px; position: relative; box-shadow: 0 24px 70px rgba(0,0,0,0.5), 0 0 44px rgba(16,185,129,0.07); }
+  .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #34d399, #10b981); border-radius: 16px 16px 0 0; }
   .price-name { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
   .price-amount { font-size: 56px; font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1; }
   .price-amount sup { font-size: 24px; vertical-align: top; margin-top: 10px; }
@@ -389,6 +390,14 @@
     box-shadow: 0 14px 40px rgba(0,0,0,0.4);
     border-color: rgba(59,130,246,0.32);
   }
+
+  /* ── Scroll-in reveal (only active when JS adds .reveal-ready; no-JS + reduced-motion stay fully visible) ── */
+  .reveal-ready section:not(.hero), .reveal-ready .ai-section, .reveal-ready .pain, .reveal-ready .stats {
+    opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.16,.84,.44,1); will-change: opacity, transform;
+  }
+  .reveal-ready section.in, .reveal-ready .ai-section.in, .reveal-ready .pain.in, .reveal-ready .stats.in {
+    opacity: 1; transform: none;
+  }
 </style>
 </head>
 <body>
@@ -484,6 +493,17 @@
     </div>
   </div>
 </section>
+
+<!-- BROKER TRUST STRIP -->
+<div style="border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:rgba(255,255,255,0.015);padding:22px 0;">
+  <div class="container" style="display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;">
+    <span style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--txt3);">Works with</span>
+    <span style="font-size:21px;font-weight:700;color:var(--txt1);font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em;">Tradier</span>
+    <span style="width:4px;height:4px;border-radius:50%;background:var(--txt3);display:inline-block;"></span>
+    <span style="font-size:21px;font-weight:700;color:var(--txt1);font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em;">Alpaca</span>
+    <span style="font-size:12px;color:var(--txt3);letter-spacing:0.02em;">· more on the way</span>
+  </div>
+</div>
 
 <!-- THE DIFFERENCE (teaser) -->
 <div style="background:rgba(16,185,129,0.04);border-top:1px solid rgba(16,185,129,0.15);border-bottom:1px solid rgba(16,185,129,0.15);padding:44px 0;text-align:center;">
@@ -1333,6 +1353,16 @@ document.addEventListener('keydown', (e) => {
   </div>
 </div>
 
+<script>
+(function(){
+  var els=document.querySelectorAll('section:not(.hero), .ai-section, .pain, .stats');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold:0.08, rootMargin:'0px 0px -8% 0px'});
+  els.forEach(function(e){ io.observe(e); });
+})();
+</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
