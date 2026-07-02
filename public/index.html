@@ -18,6 +18,9 @@
 <meta name="twitter:description" content="A SPY options execution tool — connect your own broker, set your risk parameters, and NoVo executes your rules. AI scoring, multi-tier exits, non-custodial. Subscribe $199/mo.">
 <meta name="twitter:image" content="https://novo-aitrading.app/og-hero.png?v=1">
 <link rel="canonical" href="https://novo-aitrading.app/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -30,7 +33,7 @@
       "description": "Autonomous AI-powered SPY options execution system with multi-layer signal scoring, adaptive MAB execution routing, and a multi-tier exit hierarchy.",
       "offers": {
         "@type": "Offer",
-        "price": "2189",
+        "price": "199",
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock"
       },
@@ -78,10 +81,15 @@
     --txt1:  #eaf3ff;
     --txt2:  #8aacc8;
     --txt3:  #506e8f;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.35);
+    --shadow-md: 0 10px 34px rgba(3,8,18,0.55);
+    --shadow-lg: 0 24px 70px rgba(3,8,18,0.65);
+    --glow: 0 0 50px rgba(59,130,246,0.22);
   }
 
   html { scroll-behavior: smooth; }
-  body { background: var(--navy); color: var(--txt2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; line-height: 1.6; }
+  body { background: var(--navy); color: var(--txt2); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  h1, h2, h3, .hero h1, .hero-tagline, .section-title, .ai-headline, .pain h2, .stat-val { font-family: 'Space Grotesk', 'Inter', -apple-system, sans-serif; }
 
   .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
   section { padding: 80px 0; }
@@ -92,8 +100,8 @@
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 900px; margin: 0 auto; }
   .nav-logo img { height: 52px; width: auto; display: block; }
   .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-  .nav-buy { background: #f59e0b; color: #000; border: none; padding: 10px 22px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
-  .nav-buy:hover { opacity: 0.85; }
+  .nav-buy { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #0b0f18; border: none; padding: 11px 24px; border-radius: 9px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+  .nav-buy:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(245,158,11,0.45); }
   .nav-portal { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.07); color: var(--blue); border: 1px solid rgba(59,130,246,0.35); padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; }
   .nav-portal:hover { border-color: var(--blue); background: rgba(59,130,246,0.16); }
   .nav-portal svg { width: 15px; height: 15px; }
@@ -117,10 +125,10 @@
   .hero-chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 720px; margin: 0 auto 30px; }
   .hero-chips span { font-size: 13px; font-weight: 600; color: var(--txt1); background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.22); border-radius: 999px; padding: 8px 15px; white-space: nowrap; }
   .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-  .btn-primary { background: #f59e0b; color: #000; border: none; padding: 16px 40px; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity .15s, transform .15s; }
-  .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
-  .btn-secondary { background: transparent; color: var(--txt2); border: 1px solid var(--bdr); padding: 16px 40px; border-radius: 6px; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color .15s, color .15s; text-decoration: none; display: inline-block; }
-  .btn-secondary:hover { border-color: var(--blue); color: var(--txt1); }
+  .btn-primary { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #0b0f18; border: none; padding: 16px 42px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 8px 28px rgba(245,158,11,0.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(245,158,11,0.5); }
+  .btn-secondary { background: rgba(255,255,255,0.03); color: var(--txt1); border: 1px solid var(--bdr); padding: 16px 42px; border-radius: 11px; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; text-decoration: none; display: inline-block; }
+  .btn-secondary:hover { border-color: var(--blue); background: rgba(59,130,246,0.08); transform: translateY(-2px); }
   .hero-links { display: flex; gap: 16px; justify-content: center; align-items: center; margin-top: 18px; flex-wrap: wrap; }
   .hero-link { background: none; border: none; color: var(--txt2); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(138,172,200,0.35); padding: 0; font-family: inherit; transition: color .15s, text-decoration-color .15s; }
   .hero-link:hover { color: var(--blue); text-decoration-color: var(--blue); }
@@ -264,8 +272,8 @@
   .price-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); }
   .price-features li:last-child { border-bottom: none; }
   .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
-  .price-btn { width: 100%; background: #f59e0b; color: #000; border: none; padding: 16px; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity .15s; margin-bottom: 12px; }
-  .price-btn:hover { opacity: 0.85; }
+  .price-btn { width: 100%; background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #0b0f18; border: none; padding: 16px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px; box-shadow: 0 8px 26px rgba(245,158,11,0.32); }
+  .price-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(245,158,11,0.48); }
   .price-next-steps { background: var(--navy); border: 1px solid var(--bdr); border-radius: 6px; padding: 14px 16px; text-align: left; margin-bottom: 12px; }
   .price-next-steps p { font-size: 12px; color: var(--txt3); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
   .price-next-steps ol { list-style: none; }
@@ -365,6 +373,22 @@
     .setup-modal { padding: 26px 20px 28px; margin: 16px auto; }
     .setup-modal h2 { font-size: 22px; }
   }
+
+  /* ── Premium depth pass (placed last so it wins the cascade) ── */
+  .for-card, .how-card, .ai-card, .feature, .cost-card, .cost-compare, .loop-card,
+  details.faq-item, .pain-resolve, .compound-callout {
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.28);
+  }
+  .pain-item, .included-item, .price-next-steps, .price-guarantee, .nav-portal {
+    border-radius: 10px;
+  }
+  .for-card, .how-card, .ai-card, .feature, .cost-card, .loop-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
+  .for-card:hover, .how-card:hover, .ai-card:hover, .feature:hover, .loop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.4);
+    border-color: rgba(59,130,246,0.32);
+  }
 </style>
 </head>
 <body>
@@ -405,6 +429,50 @@
       <button type="button" class="hero-link" onclick="openSetupGuide()">Quick Setup Guide</button>
     </div>
     <p class="hero-sub"><strong style="color:var(--txt1);">NoVo Pulse</strong> — $199/mo or $1,990/yr. Test free on Alpaca, go live on Tradier — AI included, all-in. Cancel any time.</p>
+
+    <!-- HERO PRODUCT SHOT -->
+    <div style="max-width:880px;margin:52px auto 0;position:relative;">
+      <div style="position:relative;z-index:1;background:#0a1322;border:1px solid var(--bdr);border-radius:16px;box-shadow:var(--shadow-lg), var(--glow);overflow:hidden;text-align:left;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bdr);">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--txt1);"><span style="color:var(--green);">▲</span> NoVo <span style="color:var(--txt3);font-weight:500;">// Trading Dashboard</span></div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span>LIVE</span>
+            <span style="font-size:13px;font-weight:800;color:var(--txt1);">SPY <span style="color:var(--green);">$743.10</span></span>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--bdr);">
+          <div style="flex:1 1 340px;background:#0a1322;padding:18px;">
+            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;">SPY · 1-min</div>
+            <svg viewBox="0 0 320 90" preserveAspectRatio="none" style="width:100%;height:90px;display:block;">
+              <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(59,130,246,0.35)"/><stop offset="1" stop-color="rgba(59,130,246,0)"/></linearGradient></defs>
+              <path d="M0,64 L30,56 L60,60 L90,46 L120,52 L150,38 L180,44 L210,28 L240,34 L270,20 L300,26 L320,14 L320,90 L0,90 Z" fill="url(#cg)"/>
+              <path d="M0,64 L30,56 L60,60 L90,46 L120,52 L150,38 L180,44 L210,28 L240,34 L270,20 L300,26 L320,14" fill="none" stroke="#3b82f6" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;">
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Apex</div><div style="font-size:17px;font-weight:800;color:var(--txt1);">62</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">RVOL</div><div style="font-size:17px;font-weight:800;color:var(--txt1);">1.8×</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Bias</div><div style="font-size:15px;font-weight:800;color:var(--green);">BULL</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">VIX</div><div style="font-size:17px;font-weight:800;color:var(--txt1);">16.9</div></div>
+            </div>
+          </div>
+          <div style="flex:1 1 260px;background:#0a1322;padding:18px;">
+            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;">Analysis Feed</div>
+            <div style="margin-bottom:12px;"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Structural Bias</span><br><span style="font-weight:800;color:var(--green);font-size:14px;letter-spacing:1px;">BULLISH</span></div>
+            <div style="font-size:12px;line-height:1.6;color:var(--txt2);border-left:2px solid var(--bdr);padding-left:12px;">Price reclaimed the 15-min VWAP and is holding above the EMA stack with the tape leaning to buyers — structure favors continuation higher while VWAP holds as support.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:4px;">Exit Ladder</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:4px 10px;">TP1</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:4px 10px;">TP2</span>
+          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:4px 10px;">TS1</span>
+          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:4px 10px;">TS2</span>
+          <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 16px;">● TRADING</span>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:12px auto 0;">Live dashboard preview — illustrative. Signal readouts and analysis update in real time.</p>
+
     <p style="margin-top:44px;">NoVo does the execution heavy lifting — finds the entry, sizes the position, manages the trade, and exits the instant your rules dictate. Zero hesitation. Zero fatigue. Zero revenge trades. It feeds off the market's data and rewrites its own entry playbook every week using real results, while never executing a single tick outside the risk boundaries you set.</p>
     <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a tool that never blinks, never tires, never hesitates.</p>
     <div class="hero-steps">
