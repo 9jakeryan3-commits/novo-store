@@ -6,132 +6,132 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/</loc>
+    <loc>https://novo-aitrading.app/journal/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/why-novo-exists.html</loc>
+    <loc>https://novo-aitrading.app/journal/why-novo-exists.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-novo-is.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-novo-is.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/how-novo-reads-the-market.html</loc>
+    <loc>https://novo-aitrading.app/journal/how-novo-reads-the-market.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/how-novo-decides-executes-exits.html</loc>
+    <loc>https://novo-aitrading.app/journal/how-novo-decides-executes-exits.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/how-novo-thinks-and-learns.html</loc>
+    <loc>https://novo-aitrading.app/journal/how-novo-thinks-and-learns.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/your-money-your-keys.html</loc>
+    <loc>https://novo-aitrading.app/journal/your-money-your-keys.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/why-spy-and-the-dte-dial.html</loc>
+    <loc>https://novo-aitrading.app/journal/why-spy-and-the-dte-dial.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/the-goal.html</loc>
+    <loc>https://novo-aitrading.app/journal/the-goal.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/pdt-rule-2026-day-trade-under-25k.html</loc>
+    <loc>https://novo-aitrading.app/journal/pdt-rule-2026-day-trade-under-25k.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-is-0dte-options-trading.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-is-0dte-options-trading.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/trading-bot-vs-signal-service.html</loc>
+    <loc>https://novo-aitrading.app/journal/trading-bot-vs-signal-service.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-is-gamma-exposure-gex.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-is-gamma-exposure-gex.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/why-i-built-novo.html</loc>
+    <loc>https://novo-aitrading.app/journal/why-i-built-novo.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-autonomous-really-means.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-autonomous-really-means.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/low-vix-does-not-mean-low-risk.html</loc>
+    <loc>https://novo-aitrading.app/journal/low-vix-does-not-mean-low-risk.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/options-greeks-explained.html</loc>
+    <loc>https://novo-aitrading.app/journal/options-greeks-explained.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/theta-decay-explained.html</loc>
+    <loc>https://novo-aitrading.app/journal/theta-decay-explained.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-is-implied-volatility.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-is-implied-volatility.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/vwap-explained.html</loc>
+    <loc>https://novo-aitrading.app/journal/vwap-explained.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/opening-range-first-30-minutes.html</loc>
+    <loc>https://novo-aitrading.app/journal/opening-range-first-30-minutes.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/what-market-makers-do.html</loc>
+    <loc>https://novo-aitrading.app/journal/what-market-makers-do.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/the-gamma-flip.html</loc>
+    <loc>https://novo-aitrading.app/journal/the-gamma-flip.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/position-sizing-risk.html</loc>
+    <loc>https://novo-aitrading.app/journal/position-sizing-risk.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/why-most-day-traders-lose.html</loc>
+    <loc>https://novo-aitrading.app/journal/why-most-day-traders-lose.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://novo-aitrading.app/blog/overtrading-account-killer.html</loc>
+    <loc>https://novo-aitrading.app/journal/overtrading-account-killer.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -5,38 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega) | The NoVo Journal</title>
 <meta name="description" content="Delta, gamma, theta, and vega without the math. A plain-English guide to the options Greeks — what each one measures, what it costs you, and why they matter most on short-dated SPY options.">
-<link rel="canonical" href="https://novo-aitrading.app/blog/options-greeks-explained.html">
+<link rel="canonical" href="https://novo-aitrading.app/journal/options-greeks-explained.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-aitrading.app/blog/options-greeks-explained.html">
+<meta property="og:url" content="https://novo-aitrading.app/journal/options-greeks-explained.html">
 <meta property="og:title" content="The Options Greeks in Plain English">
 <meta property="og:description" content="Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.">
-<meta property="og:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Options Greeks in Plain English">
 <meta name="twitter:description" content="Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.">
-<meta name="twitter:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/novo-icon.png?v=4">
-<link rel="stylesheet" href="/blog/blog.css">
+<link rel="stylesheet" href="/journal/blog.css">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega)","description":"Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.","image":"https://novo-aitrading.app/blog/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-03","dateModified":"2026-07-03","mainEntityOfPage":"https://novo-aitrading.app/blog/options-greeks-explained.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega)","description":"Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-03","dateModified":"2026-07-03","mainEntityOfPage":"https://novo-aitrading.app/journal/options-greeks-explained.html"}
 </script>
 </head>
 <body>
 <nav><div class="nav-inner">
   <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
   <div class="nav-actions">
-    <a class="nav-link" href="/blog/">The Journal</a>
+    <a class="nav-link" href="/journal/">The Journal</a>
     <a class="nav-buy" href="/">Subscribe</a>
   </div>
 </div></nav>
 
 <main class="wrap">
 <article class="article">
-  <a class="back" href="/blog/">← All articles</a>
+  <a class="back" href="/journal/">← All articles</a>
   <header class="article-head">
     <div class="kicker">Options 101</div>
     <h1>The Options Greeks in Plain English</h1>
@@ -51,15 +51,15 @@
     <p><strong>Delta</strong> is how much your option's price moves when the underlying moves one dollar. A 0.40-delta call gains roughly $0.40 for every $1 SPY rises. It doubles as a rough probability the option finishes in the money. Delta is the Greek most beginners think about — the directional bet — but it's only one of four.</p>
 
     <h2>Gamma — how fast delta changes</h2>
-    <p><strong>Gamma</strong> measures how quickly delta itself shifts as price moves. High gamma means your position's directional exposure ramps up fast — great when you're right, brutal when you're wrong. Gamma is highest for at-the-money, near-expiry options, which is exactly why short-dated contracts feel so violent. It's also the force behind <a href="/blog/what-is-gamma-exposure-gex.html">dealer gamma exposure</a>, which moves the whole tape.</p>
+    <p><strong>Gamma</strong> measures how quickly delta itself shifts as price moves. High gamma means your position's directional exposure ramps up fast — great when you're right, brutal when you're wrong. Gamma is highest for at-the-money, near-expiry options, which is exactly why short-dated contracts feel so violent. It's also the force behind <a href="/journal/what-is-gamma-exposure-gex.html">dealer gamma exposure</a>, which moves the whole tape.</p>
 
     <h2>Theta — the cost of time</h2>
-    <p><strong>Theta</strong> is how much value your option bleeds each day just from time passing. If you own options, theta is the rent you pay to hold them — and it accelerates as expiration approaches. On same-day options it's the dominant force. We break it down in <a href="/blog/theta-decay-explained.html">Theta Decay: Why Options Lose Value Every Day</a>.</p>
+    <p><strong>Theta</strong> is how much value your option bleeds each day just from time passing. If you own options, theta is the rent you pay to hold them — and it accelerates as expiration approaches. On same-day options it's the dominant force. We break it down in <a href="/journal/theta-decay-explained.html">Theta Decay: Why Options Lose Value Every Day</a>.</p>
 
     <p class="pull">Delta is what beginners watch. Theta is what quietly empties their account.</p>
 
     <h2>Vega — sensitivity to fear</h2>
-    <p><strong>Vega</strong> measures how much your option's price moves when <a href="/blog/what-is-implied-volatility.html">implied volatility</a> changes. Buy options when volatility is high and you've overpaid; if that fear drains out, vega works against you even when direction is right. This is the mechanism behind “IV crush” after a scheduled event.</p>
+    <p><strong>Vega</strong> measures how much your option's price moves when <a href="/journal/what-is-implied-volatility.html">implied volatility</a> changes. Buy options when volatility is high and you've overpaid; if that fear drains out, vega works against you even when direction is right. This is the mechanism behind “IV crush” after a scheduled event.</p>
 
     <h2>They don't act alone</h2>
     <p>The trap is treating the Greeks in isolation. A short-dated option can be right on delta and still lose because theta and vega drained it faster than the move paid. Real option risk is the <em>interaction</em> — direction, speed, time, and volatility all pulling at once. That's why disciplined sizing and exit rules matter more than picking a direction.</p>
@@ -98,7 +98,7 @@
 
 <footer class="foot">
   <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
-  <div class="links"><a href="/">Home</a> · <a href="/blog/">The Journal</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div class="links"><a href="/">Home</a> · <a href="/journal/">The Journal</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
   <div>© 2026 NoVo AI Trading. Editorial content is for education only — not financial advice. Trading involves substantial risk of loss.</div>
 </footer>
 </body>
