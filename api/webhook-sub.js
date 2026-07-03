@@ -139,8 +139,10 @@ const handler = async (req, res) => {
         html: welcomeEmailHtml(),
       });
     } catch (err) {
-      console.error(`[webhook-sub] Welcome email failed — error:${err.message}`);
-      return res.status(500).json({ error: 'Email delivery failed' });
+      // Don't 500 here: a 500 makes Stripe retry the whole webhook (re-attempting the email) in a loop.
+      // The subscription is already active and subscribe-success.html shows the portal link + next steps,
+      // so a Resend blip never blocks onboarding. Log and fall through to the 200 ack below.
+      console.error(`[webhook-sub] Welcome email failed (non-fatal, acking) — error:${err.message}`);
     }
   }
 
