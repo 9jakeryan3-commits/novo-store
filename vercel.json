@@ -1,6 +1,7 @@
 {
   "redirects": [
     { "source": "/blog", "destination": "/journal", "permanent": true },
+    { "source": "/blog/", "destination": "/journal/", "permanent": true },
     { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true }
   ],
   "rewrites": [
