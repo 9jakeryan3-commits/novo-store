@@ -3,135 +3,228 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The NoVo Journal | How an Autonomous SPY Options Tool Actually Works</title>
-<meta name="description" content="The story behind NoVo — why it was built, what it actually does, and how an autonomous, non-custodial SPY options execution system thinks, trades, and learns. No hype, no performance claims.">
+<title>The NoVo Journal — Markets, Options &amp; Systematic Execution</title>
+<meta name="description" content="The NoVo Journal: no-hype analysis of market structure, options, dealer gamma, and trading discipline — plus an honest look at how an autonomous, non-custodial SPY options tool actually works.">
 <link rel="canonical" href="https://novo-aitrading.app/blog/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app/blog/">
-<meta property="og:title" content="The NoVo Journal — how an autonomous SPY options tool works">
-<meta property="og:description" content="Why NoVo was built, what it does, and how it thinks, trades, and learns. Your broker, your keys, full transparency.">
-<meta property="og:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
-<meta name="twitter:card" content="summary">
+<meta property="og:title" content="The NoVo Journal — Markets, Options & Systematic Execution">
+<meta property="og:description" content="No-hype analysis of market structure, options, dealer gamma, and trading discipline.">
+<meta property="og:image" content="https://novo-aitrading.app/og-home.png?v=1">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The NoVo Journal">
-<meta name="twitter:description" content="How an autonomous, non-custodial SPY options tool actually works.">
-<meta name="twitter:image" content="https://novo-aitrading.app/novo-logo.png?v=2">
-<link rel="icon" href="/novo-icon.png?v=2">
+<meta name="twitter:image" content="https://novo-aitrading.app/og-home.png?v=1">
+<link rel="icon" href="/novo-icon.png?v=3">
 <link rel="stylesheet" href="/blog/blog.css">
 </head>
 <body>
+
+<!-- SVG defs: reusable sparklines -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="sgUp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee" stop-opacity=".45"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></linearGradient>
+  <linearGradient id="sgGrn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981" stop-opacity=".45"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient>
+  <linearGradient id="sgAmb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity=".4"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></linearGradient>
+  <linearGradient id="sgBlu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6" stop-opacity=".4"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></linearGradient>
+</defs></svg>
+
 <nav><div class="nav-inner">
   <a class="nav-logo" href="/"><img src="/novo-logo.png?v=2" alt="NoVo"></a>
   <div class="nav-actions">
-    <a class="nav-link" href="/blog/">Blog</a>
+    <a class="nav-link" href="/blog/">The Journal</a>
     <a class="nav-buy" href="/">Subscribe</a>
   </div>
 </div></nav>
 
-<main class="wrap">
-  <header class="blog-hero">
-    <span class="eyebrow">The NoVo Journal</span>
-    <h1>How an autonomous tool actually works</h1>
-    <p>No hype, no performance claims — just clear writing on options, market structure, and the discipline most accounts lose to, plus an honest look at exactly how NoVo works.</p>
-  </header>
+<!-- ===== MARKETS TICKER ===== -->
+<div class="ticker"><div class="ticker-inner" id="ticker">
+  <span class="ticker-tag"><span class="dot"></span>US Markets</span>
+  <span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span>
+  <span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span>
+  <span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span>
+  <span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span>
+  <span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span>
+  <span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span>
+  <span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span>
+  <span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span>
+</div></div>
 
-  <div class="post-list">
-    <a class="post-card feature" href="/blog/why-i-built-novo.html">
-      <div class="kicker">The Founder · Start Here</div>
-      <h2>Why I Built NoVo</h2>
-      <p>The honest founder story. I didn't build NoVo because I found a magic strategy — I built it because I finally admitted the strategy was never the problem. I was: the hesitation, the moved stop, the revenge trade after a red morning. So I built the disciplined, autonomous system I wished existed — and made it non-custodial, because I'd never hand my own money to a black box.</p>
-    </a>
-    <a class="post-card" href="/blog/low-vix-does-not-mean-low-risk.html">
-      <div class="kicker">Plain English</div>
-      <h2>Low VIX Doesn't Mean Low Risk</h2>
-      <p>A calm VIX feels like a green light. For a same-day options trader it's often the opposite — the VIX measures the wrong thing on the wrong timeframe, and its calm is exactly what makes the tape fragile. Implied vs. realized vol, VIX1D, skew, and the gamma trap.</p>
-    </a>
-    <a class="post-card" href="/blog/why-novo-exists.html">
-      <div class="kicker">The Manifesto</div>
-      <h2>The Discipline Problem</h2>
-      <p>The best trading plan in the world fails the moment a human has to execute it under pressure. NoVo was built to remove the human from the part where humans break.</p>
-    </a>
-    <a class="post-card" href="/blog/pdt-rule-2026-day-trade-under-25k.html">
-      <div class="kicker">The Rules Changed</div>
-      <h2>The $25,000 Day-Trading Rule Is Gone (2026)</h2>
-      <p>The SEC's 2026 amendment to FINRA Rule 4210 removed the Pattern Day Trader designation and the $25k minimum. What it means for small accounts — and why discipline matters more now, not less.</p>
-    </a>
-    <a class="post-card" href="/blog/what-is-0dte-options-trading.html">
-      <div class="kicker">Plain English</div>
-      <h2>What Is 0DTE Options Trading?</h2>
-      <p>Zero days to expiration, explained simply: how 0DTE options work, why they exploded on SPY, the honest version of the risk, and how automation handles the speed.</p>
-    </a>
-    <a class="post-card" href="/blog/trading-bot-vs-signal-service.html">
-      <div class="kicker">Know the Difference</div>
-      <h2>Trading Bot vs. Signal Service</h2>
-      <p>Bots, copy bots, and signal services compared — what each actually does, where each one leaves you exposed, and the category that does the whole job (and never holds your money).</p>
-    </a>
-    <a class="post-card" href="/blog/what-autonomous-really-means.html">
-      <div class="kicker">What It Means</div>
-      <h2>What "Autonomous" Really Means</h2>
-      <p>Most software calls itself autonomous. Strip the hype and it's a specific list of jobs — sizing, managing, exiting, holding the line — that get done inside the rules you set, and that a signal feed hands right back to you.</p>
-    </a>
-    <a class="post-card" href="/blog/what-is-gamma-exposure-gex.html">
-      <div class="kicker">Plain English</div>
-      <h2>What Is Gamma Exposure (GEX)?</h2>
-      <p>Why dealer hedging quietly moves SPY all day — positive vs. negative gamma, the gamma flip, and why GEX matters most for 0DTE. No jargon.</p>
-    </a>
-    <a class="post-card" href="/blog/what-novo-is.html">
-      <div class="kicker">The System</div>
-      <h2>What NoVo Actually Is</h2>
-      <p>Not a 0DTE bot. Not a signal feed. A multi-layer SPY options execution system with a DTE dial — here's the whole machine in plain English.</p>
-    </a>
-    <a class="post-card" href="/blog/how-novo-reads-the-market.html">
-      <div class="kicker">Perception</div>
-      <h2>How NoVo Reads the Market</h2>
-      <p>The tape, dealer gamma, the macro backdrop, and a live structural read — many streams at once, fused into a single conviction score.</p>
-    </a>
-    <a class="post-card" href="/blog/how-novo-decides-executes-exits.html">
-      <div class="kicker">Execution</div>
-      <h2>How NoVo Decides, Executes &amp; Exits</h2>
-      <p>From a confirmed signal to a filled order to a disciplined exit — and the circuit breakers that protect your capital along the way.</p>
-    </a>
-    <a class="post-card" href="/blog/how-novo-thinks-and-learns.html">
-      <div class="kicker">Cognition</div>
-      <h2>How NoVo Thinks &amp; Learns</h2>
-      <p>Four AI layers, a permanent memory, a shadow book that second-guesses every trade, and a system that rewrites its own rules every week.</p>
-    </a>
-    <a class="post-card" href="/blog/your-money-your-keys.html">
-      <div class="kicker">Trust</div>
-      <h2>Your Money, Your Keys</h2>
-      <p>Most "AI trading" is a black box you wire money into. NoVo never touches your funds and never hides what it's doing. Here's why that matters.</p>
-    </a>
-    <a class="post-card" href="/blog/why-spy-and-the-dte-dial.html">
-      <div class="kicker">Focus</div>
-      <h2>Why SPY — and the DTE Dial</h2>
-      <p>One instrument, mastered, with a decay curve you control. Why specialization is the edge — and why "0DTE" is just one setting.</p>
-    </a>
-    <a class="post-card" href="/blog/the-goal.html">
-      <div class="kicker">The Road Ahead</div>
-      <h2>The Goal</h2>
-      <p>Where NoVo is headed — and why the rules changed in 2026 in a way that opens the door for everyone.</p>
-    </a>
-  </div>
-</main>
+<!-- ===== SECTION NAV ===== -->
+<div class="secnav"><div class="secnav-inner">
+  <a href="#market">Market Structure</a>
+  <a href="#discipline">Discipline</a>
+  <a href="#inside">Inside NoVo</a>
+  <a href="#system">The System</a>
+</div></div>
 
-<!-- NEWSLETTER SIGNUP -->
-<div style="max-width:560px;margin:0 auto;padding:34px 20px;text-align:center;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#10b981;margin-bottom:10px;">The NoVo Journal</div>
-  <div style="font-size:18px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">Get NoVo's market notes</div>
-  <p style="font-size:13.5px;color:#8aacc8;line-height:1.6;margin:0 0 16px;">Occasional, no-hype notes on trading discipline, market structure, and what NoVo is building. No spam, unsubscribe any time.</p>
-  <form id="np-subscribe" style="display:flex;gap:8px;max-width:430px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
-    <input id="np-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;border-radius:8px;border:1px solid #2c3a4e;background:#0c1320;color:#eaf3ff;font-size:14px;">
-    <button type="submit" style="padding:11px 22px;border-radius:8px;border:0;background:#10b981;color:#04130c;font-weight:800;font-size:14px;cursor:pointer;">Subscribe</button>
-  </form>
-  <div id="np-sub-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+<div class="brandline">
+  <h1>The NoVo <span class="accent">Journal</span></h1>
+  <span class="tag">Markets · Options · Dealer Flow · Systematic Execution</span>
 </div>
-<script>
-(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
-</script>
+
+<main class="wrap">
+<div class="portal">
+  <!-- ===== MAIN COLUMN ===== -->
+  <div class="main-col">
+
+    <a class="lead2" href="/blog/why-i-built-novo.html">
+      <div class="cover founder">
+        <div class="glyph">NoVo</div>
+        <svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg>
+        <img class="coin" src="/novo-icon.png?v=3" alt="">
+        <span class="clabel">The Founder</span>
+      </div>
+      <div class="kicker">Start Here · Feature</div>
+      <h2>Why I Built NoVo</h2>
+      <p class="deck">The honest founder story. Not a magic strategy — an admission that the strategy was never the problem. The hesitation, the moved stop, the revenge trade after a red morning were. So I built the disciplined, autonomous system I wished existed, and made it non-custodial — because I'd never hand my own money to a black box.</p>
+      <div class="meta">The NoVo Desk · 7 min read</div>
+    </a>
+
+    <div class="subrow">
+      <a class="pcard" href="/blog/pdt-rule-2026-day-trade-under-25k.html">
+        <div class="cover disc"><div class="glyph">2026</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,26 20,24 40,18 60,20 80,12 100,8 100,40 0,40 Z" fill="url(#sgAmb)"/><polyline fill="none" stroke="#f59e0b" stroke-width="1.6" points="0,26 20,24 40,18 60,20 80,12 100,8"/></svg><span class="clabel">The Rules Changed</span></div>
+        <div class="kicker">Regulation</div>
+        <h3>The $25,000 Day-Trading Rule Is Gone</h3>
+        <p class="deck">The SEC's 2026 amendment to FINRA Rule 4210 removed the Pattern Day Trader designation and the $25k minimum. What it means for small accounts.</p>
+        <div class="meta">Analysis · 5 min</div>
+      </a>
+      <a class="pcard" href="/blog/low-vix-does-not-mean-low-risk.html">
+        <div class="cover market"><div class="glyph">VIX</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,12 20,16 40,14 60,22 80,26 100,32 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,12 20,16 40,14 60,22 80,26 100,32"/></svg><span class="clabel">Volatility</span></div>
+        <div class="kicker">Analysis</div>
+        <h3>Low VIX Doesn't Mean Low Risk</h3>
+        <p class="deck">A calm VIX feels like a green light. For a same-day options trader it's often the opposite — its calm is exactly what makes the tape fragile.</p>
+        <div class="meta">Analysis · 6 min</div>
+      </a>
+    </div>
+
+    <!-- MARKET STRUCTURE & OPTIONS -->
+    <section id="market"><div class="secrow"><span class="bar"></span><h3>Market Structure &amp; Options</h3></div>
+    <div class="pgrid">
+      <a class="pcard" href="/blog/what-is-gamma-exposure-gex.html">
+        <div class="cover market"><div class="glyph">Γ</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,28 20,22 40,26 60,16 80,20 100,10 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,28 20,22 40,26 60,16 80,20 100,10"/></svg><span class="clabel">Dealer Flow</span></div>
+        <div class="kicker">Plain English</div>
+        <h3>What Is Gamma Exposure (GEX)?</h3>
+        <p class="deck">Why dealer hedging quietly moves SPY all day — positive vs. negative gamma, the gamma flip, and why GEX matters most for 0DTE.</p>
+      </a>
+      <a class="pcard" href="/blog/what-is-0dte-options-trading.html">
+        <div class="cover options"><div class="glyph">0DTE</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,24 20,26 40,18 60,22 80,12 100,14 100,40 0,40 Z" fill="url(#sgGrn)"/><polyline fill="none" stroke="#10b981" stroke-width="1.6" points="0,24 20,26 40,18 60,22 80,12 100,14"/></svg><span class="clabel">Options 101</span></div>
+        <div class="kicker">Options 101</div>
+        <h3>What Is 0DTE Options Trading?</h3>
+        <p class="deck">Zero days to expiration, explained simply: how they work, why they exploded on SPY, and the honest version of the risk.</p>
+      </a>
+      <a class="pcard" href="/blog/why-spy-and-the-dte-dial.html">
+        <div class="cover market"><div class="glyph">SPY</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,26 20,22 40,24 60,18 80,16 100,10 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,26 20,22 40,24 60,18 80,16 100,10"/></svg><span class="clabel">Focus</span></div>
+        <div class="kicker">Focus</div>
+        <h3>Why SPY — and the DTE Dial</h3>
+        <p class="deck">One instrument, mastered, with a decay curve you control. Why specialization is the edge — and why "0DTE" is just one setting.</p>
+      </a>
+    </div></section>
+
+    <!-- DISCIPLINE -->
+    <section id="discipline"><div class="secrow"><span class="bar"></span><h3>Discipline &amp; Philosophy</h3></div>
+    <div class="pgrid">
+      <a class="pcard" href="/blog/why-novo-exists.html">
+        <div class="cover disc"><div class="glyph">⟳</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,24 20,20 40,22 60,16 80,18 100,12 100,40 0,40 Z" fill="url(#sgAmb)"/><polyline fill="none" stroke="#f59e0b" stroke-width="1.6" points="0,24 20,20 40,22 60,16 80,18 100,12"/></svg><span class="clabel">Manifesto</span></div>
+        <div class="kicker">The Manifesto</div>
+        <h3>The Discipline Problem</h3>
+        <p class="deck">The best trading plan fails the moment a human executes it under pressure. NoVo removes the human from the part where humans break.</p>
+      </a>
+      <a class="pcard" href="/blog/what-autonomous-really-means.html">
+        <div class="cover disc"><div class="glyph">AUTO</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,22 20,24 40,18 60,20 80,14 100,16 100,40 0,40 Z" fill="url(#sgAmb)"/><polyline fill="none" stroke="#f59e0b" stroke-width="1.6" points="0,22 20,24 40,18 60,20 80,14 100,16"/></svg><span class="clabel">Definitions</span></div>
+        <div class="kicker">What It Means</div>
+        <h3>What "Autonomous" Really Means</h3>
+        <p class="deck">Strip the hype and it's a specific list of jobs — sizing, managing, exiting, holding the line — done inside the rules you set.</p>
+      </a>
+      <a class="pcard" href="/blog/your-money-your-keys.html">
+        <div class="cover inside"><div class="glyph">KEYS</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,20 20,22 40,16 60,18 80,12 100,14 100,40 0,40 Z" fill="url(#sgBlu)"/><polyline fill="none" stroke="#3b82f6" stroke-width="1.6" points="0,20 20,22 40,16 60,18 80,12 100,14"/></svg><span class="clabel">Trust</span></div>
+        <div class="kicker">Trust</div>
+        <h3>Your Money, Your Keys</h3>
+        <p class="deck">Most "AI trading" is a black box you wire money into. NoVo never touches your funds and never hides what it's doing.</p>
+      </a>
+    </div></section>
+
+    <!-- INSIDE NOVO -->
+    <section id="inside"><div class="secrow"><span class="bar"></span><h3>Inside NoVo</h3></div>
+    <div class="pgrid">
+      <a class="pcard" href="/blog/what-novo-is.html">
+        <div class="cover inside"><div class="glyph">◈</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,26 20,20 40,24 60,16 80,18 100,10 100,40 0,40 Z" fill="url(#sgBlu)"/><polyline fill="none" stroke="#3b82f6" stroke-width="1.6" points="0,26 20,20 40,24 60,16 80,18 100,10"/></svg><span class="clabel">The System</span></div>
+        <div class="kicker">The System</div>
+        <h3>What NoVo Actually Is</h3>
+        <p class="deck">Not a 0DTE bot. Not a signal feed. A multi-layer SPY options execution system with a DTE dial — the whole machine in plain English.</p>
+      </a>
+      <a class="pcard" href="/blog/how-novo-reads-the-market.html">
+        <div class="cover inside"><div class="glyph">◎</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,22 20,18 40,20 60,14 80,16 100,9 100,40 0,40 Z" fill="url(#sgBlu)"/><polyline fill="none" stroke="#3b82f6" stroke-width="1.6" points="0,22 20,18 40,20 60,14 80,16 100,9"/></svg><span class="clabel">Perception</span></div>
+        <div class="kicker">Perception</div>
+        <h3>How NoVo Reads the Market</h3>
+        <p class="deck">The tape, dealer gamma, the macro backdrop, and a live structural read — many streams fused into a single conviction score.</p>
+      </a>
+      <a class="pcard" href="/blog/how-novo-decides-executes-exits.html">
+        <div class="cover inside"><div class="glyph">▸</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,24 20,26 40,18 60,20 80,12 100,14 100,40 0,40 Z" fill="url(#sgBlu)"/><polyline fill="none" stroke="#3b82f6" stroke-width="1.6" points="0,24 20,26 40,18 60,20 80,12 100,14"/></svg><span class="clabel">Execution</span></div>
+        <div class="kicker">Execution</div>
+        <h3>How NoVo Decides, Executes &amp; Exits</h3>
+        <p class="deck">From a confirmed signal to a filled order to a disciplined exit — and the circuit breakers that protect your capital.</p>
+      </a>
+    </div></section>
+
+    <!-- THE SYSTEM & ROAD -->
+    <section id="system"><div class="secrow"><span class="bar"></span><h3>The System &amp; The Road Ahead</h3></div>
+    <div class="pgrid">
+      <a class="pcard" href="/blog/how-novo-thinks-and-learns.html">
+        <div class="cover inside"><div class="glyph">AI</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,28 20,22 40,24 60,16 80,18 100,8 100,40 0,40 Z" fill="url(#sgBlu)"/><polyline fill="none" stroke="#3b82f6" stroke-width="1.6" points="0,28 20,22 40,24 60,16 80,18 100,8"/></svg><span class="clabel">Cognition</span></div>
+        <div class="kicker">Cognition</div>
+        <h3>How NoVo Thinks &amp; Learns</h3>
+        <p class="deck">Four AI layers, a permanent memory, a shadow book that second-guesses every trade, and a system that rewrites its own rules weekly.</p>
+      </a>
+      <a class="pcard" href="/blog/trading-bot-vs-signal-service.html">
+        <div class="cover market"><div class="glyph">VS</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,20 20,24 40,18 60,22 80,14 100,18 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,20 20,24 40,18 60,22 80,14 100,18"/></svg><span class="clabel">Compare</span></div>
+        <div class="kicker">Know the Difference</div>
+        <h3>Trading Bot vs. Signal Service</h3>
+        <p class="deck">Bots, copy bots, and signal services compared — what each does, where each leaves you exposed, and who does the whole job.</p>
+      </a>
+      <a class="pcard" href="/blog/the-goal.html">
+        <div class="cover founder"><div class="glyph">→</div><svg class="spark" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0,30 20,24 40,26 60,16 80,14 100,6 100,40 0,40 Z" fill="url(#sgUp)"/><polyline fill="none" stroke="#22d3ee" stroke-width="1.6" points="0,30 20,24 40,26 60,16 80,14 100,6"/></svg><span class="clabel">Road Ahead</span></div>
+        <div class="kicker">The Road Ahead</div>
+        <h3>The Goal</h3>
+        <p class="deck">Where NoVo is headed — and why the rules changed in 2026 in a way that opens the door for everyone.</p>
+      </a>
+    </div></section>
+
+  </div>
+
+  <!-- ===== RAIL ===== -->
+  <aside>
+    <div class="rail2">
+      <div class="rail-h">Most Popular</div>
+      <a class="rail-item" href="/blog/what-is-gamma-exposure-gex.html"><div class="rk">Dealer Flow</div><h4>What Is Gamma Exposure (GEX)?</h4><div class="t">Plain English · 6 min</div></a>
+      <a class="rail-item" href="/blog/low-vix-does-not-mean-low-risk.html"><div class="rk">Volatility</div><h4>Low VIX Doesn't Mean Low Risk</h4><div class="t">Analysis · 6 min</div></a>
+      <a class="rail-item" href="/blog/pdt-rule-2026-day-trade-under-25k.html"><div class="rk">Regulation</div><h4>The $25,000 Day-Trading Rule Is Gone</h4><div class="t">Analysis · 5 min</div></a>
+      <a class="rail-item" href="/blog/what-is-0dte-options-trading.html"><div class="rk">Options 101</div><h4>What Is 0DTE Options Trading?</h4><div class="t">Explainer · 7 min</div></a>
+      <a class="rail-item" href="/blog/trading-bot-vs-signal-service.html"><div class="rk">Compare</div><h4>Trading Bot vs. Signal Service</h4><div class="t">Guide · 6 min</div></a>
+
+      <div class="adslot"><span class="lbl">Advertisement</span><span class="sub">300 × 250</span></div>
+
+      <div class="rail-news">
+        <div class="eyebrow">The NoVo Journal</div>
+        <h4>Get NoVo's market notes</h4>
+        <p>No-hype notes on discipline, market structure, and what NoVo is building. No spam.</p>
+        <form id="np-subscribe">
+          <input id="np-email" type="email" required placeholder="you@email.com">
+          <button type="submit">Subscribe</button>
+        </form>
+        <div id="np-sub-msg"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+</main>
 
 <footer class="foot">
   <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
-  <div class="links"><a href="/">Home</a> · <a href="/blog/">Blog</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
-  <div>© 2026 NoVo AI Trading. All rights reserved. Not financial advice — trading involves risk of loss.</div>
+  <div class="links"><a href="/">Home</a> · <a href="/blog/">The Journal</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>© 2026 NoVo AI Trading. Editorial content is for education only — not financial advice. Trading involves substantial risk of loss. Market data shown is delayed/illustrative.</div>
 </footer>
+
+<script>
+(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
+</script>
 </body>
 </html>
