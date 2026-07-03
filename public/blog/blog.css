@@ -74,6 +74,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(10,17,32,.94);backdrop-fil
 .cover .spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:52%;opacity:.85;}
 .cover .clabel{position:relative;z-index:2;margin:0 0 12px 14px;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.35);padding:4px 9px;border-radius:4px;backdrop-filter:blur(2px);}
 .cover .coin{position:absolute;top:10px;right:10px;width:24px;height:24px;opacity:.9;z-index:2;}
+.cover .wm{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);width:50%;max-width:430px;opacity:.92;z-index:2;filter:drop-shadow(0 6px 22px rgba(0,0,0,.45));}
 /* section color washes */
 .cover.market  {background:radial-gradient(120% 120% at 15% 10%,#0b3a52,var(--navy2));}
 .cover.options {background:radial-gradient(120% 120% at 15% 10%,#0b4a3a,var(--navy2));}
