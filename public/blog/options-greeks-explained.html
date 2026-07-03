@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega) | The NoVo Journal</title>
+<meta name="description" content="Delta, gamma, theta, and vega without the math. A plain-English guide to the options Greeks — what each one measures, what it costs you, and why they matter most on short-dated SPY options.">
+<link rel="canonical" href="https://novo-aitrading.app/blog/options-greeks-explained.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="The NoVo Journal">
+<meta property="og:url" content="https://novo-aitrading.app/blog/options-greeks-explained.html">
+<meta property="og:title" content="The Options Greeks in Plain English">
+<meta property="og:description" content="Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.">
+<meta property="og:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="600">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Options Greeks in Plain English">
+<meta name="twitter:description" content="Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.">
+<meta name="twitter:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<link rel="icon" href="/novo-icon.png?v=4">
+<link rel="stylesheet" href="/blog/blog.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega)","description":"Delta, gamma, theta, vega — what each Greek measures and what it actually costs you, no math required.","image":"https://novo-aitrading.app/blog/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-03","dateModified":"2026-07-03","mainEntityOfPage":"https://novo-aitrading.app/blog/options-greeks-explained.html"}
+</script>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/blog/">The Journal</a>
+    <a class="nav-buy" href="/">Subscribe</a>
+  </div>
+</div></nav>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/blog/">← All articles</a>
+  <header class="article-head">
+    <div class="kicker">Options 101</div>
+    <h1>The Options Greeks in Plain English</h1>
+    <p class="standfirst">Delta, gamma, theta, vega. Four Greek letters that decide whether your option makes money — explained without a single equation.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading · 2026</div>
+
+  <div class="article-body">
+    <p>Every option's price is pushed and pulled by a handful of forces at once: which way the underlying moves, how fast, how much time is left, and how nervous the market is. The “Greeks” are just the names traders give to each of those forces. You don't need the calculus — you need to know which lever is working for you and which is working against you.</p>
+
+    <h2>Delta — direction</h2>
+    <p><strong>Delta</strong> is how much your option's price moves when the underlying moves one dollar. A 0.40-delta call gains roughly $0.40 for every $1 SPY rises. It doubles as a rough probability the option finishes in the money. Delta is the Greek most beginners think about — the directional bet — but it's only one of four.</p>
+
+    <h2>Gamma — how fast delta changes</h2>
+    <p><strong>Gamma</strong> measures how quickly delta itself shifts as price moves. High gamma means your position's directional exposure ramps up fast — great when you're right, brutal when you're wrong. Gamma is highest for at-the-money, near-expiry options, which is exactly why short-dated contracts feel so violent. It's also the force behind <a href="/blog/what-is-gamma-exposure-gex.html">dealer gamma exposure</a>, which moves the whole tape.</p>
+
+    <h2>Theta — the cost of time</h2>
+    <p><strong>Theta</strong> is how much value your option bleeds each day just from time passing. If you own options, theta is the rent you pay to hold them — and it accelerates as expiration approaches. On same-day options it's the dominant force. We break it down in <a href="/blog/theta-decay-explained.html">Theta Decay: Why Options Lose Value Every Day</a>.</p>
+
+    <p class="pull">Delta is what beginners watch. Theta is what quietly empties their account.</p>
+
+    <h2>Vega — sensitivity to fear</h2>
+    <p><strong>Vega</strong> measures how much your option's price moves when <a href="/blog/what-is-implied-volatility.html">implied volatility</a> changes. Buy options when volatility is high and you've overpaid; if that fear drains out, vega works against you even when direction is right. This is the mechanism behind “IV crush” after a scheduled event.</p>
+
+    <h2>They don't act alone</h2>
+    <p>The trap is treating the Greeks in isolation. A short-dated option can be right on delta and still lose because theta and vega drained it faster than the move paid. Real option risk is the <em>interaction</em> — direction, speed, time, and volatility all pulling at once. That's why disciplined sizing and exit rules matter more than picking a direction.</p>
+
+    <h2>Where NoVo fits</h2>
+    <p>NoVo doesn't hand you a Greek to interpret in the heat of the moment. It executes your strategy inside the risk boundaries you set — sizing the position, managing the trade, and exiting on rules rather than on nerves — so the Greeks are accounted for by the system instead of stared at on a screen. You define the risk; it does the mechanical work.</p>
+  </div>
+
+  <div class="cta">
+    <h3>Put NoVo to work</h3>
+    <p>NoVo Pulse — $199/mo or $1,990/yr. Your broker, your keys, AI included.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/">Start your subscription</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+</main>
+
+<!-- NEWSLETTER SIGNUP -->
+<div style="max-width:560px;margin:0 auto;padding:34px 20px;text-align:center;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#10b981;margin-bottom:10px;">The NoVo Journal</div>
+  <div style="font-size:18px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">Get NoVo's market notes</div>
+  <p style="font-size:13.5px;color:#8aacc8;line-height:1.6;margin:0 0 16px;">Occasional, no-hype notes on trading discipline, market structure, and what NoVo is building. No spam, unsubscribe any time.</p>
+  <form id="np-subscribe" style="display:flex;gap:8px;max-width:430px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+    <input id="np-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;border-radius:8px;border:1px solid #2c3a4e;background:#0c1320;color:#eaf3ff;font-size:14px;">
+    <button type="submit" style="padding:11px 22px;border-radius:8px;border:0;background:#10b981;color:#04130c;font-weight:800;font-size:14px;cursor:pointer;">Subscribe</button>
+  </form>
+  <div id="np-sub-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+</div>
+<script>
+(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
+</script>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> · <a href="/blog/">The Journal</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>© 2026 NoVo AI Trading. Editorial content is for education only — not financial advice. Trading involves substantial risk of loss.</div>
+</footer>
+</body>
+</html>

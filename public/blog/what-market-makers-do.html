@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Market Makers Actually Do (and Why It Moves Your Trade) | The NoVo Journal</title>
+<meta name="description" content="Market makers are the counterparty to most of your trades. Here's what they actually do, why they hedge instead of betting on direction, and how their mechanical hedging quietly shapes price and your fills.">
+<link rel="canonical" href="https://novo-aitrading.app/blog/what-market-makers-do.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="The NoVo Journal">
+<meta property="og:url" content="https://novo-aitrading.app/blog/what-market-makers-do.html">
+<meta property="og:title" content="What Market Makers Actually Do">
+<meta property="og:description" content="Your counterparty explained — why market makers hedge instead of betting on direction, and how it moves price.">
+<meta property="og:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="600">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What Market Makers Actually Do">
+<meta name="twitter:description" content="Your counterparty explained — why market makers hedge instead of betting on direction, and how it moves price.">
+<meta name="twitter:image" content="https://novo-aitrading.app/blog/covers/novo-cover.png">
+<link rel="icon" href="/novo-icon.png?v=4">
+<link rel="stylesheet" href="/blog/blog.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"What Market Makers Actually Do (and Why It Moves Your Trade)","description":"Your counterparty explained — why market makers hedge instead of betting on direction, and how it moves price.","image":"https://novo-aitrading.app/blog/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-03","dateModified":"2026-07-03","mainEntityOfPage":"https://novo-aitrading.app/blog/what-market-makers-do.html"}
+</script>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/blog/">The Journal</a>
+    <a class="nav-buy" href="/">Subscribe</a>
+  </div>
+</div></nav>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/blog/">← All articles</a>
+  <header class="article-head">
+    <div class="kicker">Dealer Flow</div>
+    <h1>What Market Makers Actually Do</h1>
+    <p class="standfirst">Someone is on the other side of every trade you make. Usually it's a market maker — and understanding their job explains a lot of what price does.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading · 2026</div>
+
+  <div class="article-body">
+    <p>When you buy an option or a share and it fills instantly, you're rarely trading against another retail trader. You're trading against a <strong>market maker</strong> (or dealer) — a firm whose entire business is providing liquidity: quoting a price to buy and a price to sell, always ready to take the other side.</p>
+
+    <h2>The spread business, not the direction business</h2>
+    <p>Here's the key misunderstanding to drop: market makers generally don't want a directional bet. They make money on the <em>spread</em> — the small gap between their buy and sell quotes — across enormous volume. Their goal is to stay roughly neutral and collect that edge millions of times, not to guess whether SPY goes up or down. That single fact explains most of their behavior.</p>
+
+    <h2>Why they hedge</h2>
+    <p>The problem: when a market maker sells you a call, it now has a directional position it didn't want. To neutralize it, the dealer buys or sells the underlying to offset the exposure — <strong>delta hedging</strong>. As price moves, that hedge has to be adjusted continuously. Multiply this across the whole market and dealer hedging becomes a massive, mechanical flow of buying and selling that has nothing to do with opinion and everything to do with staying neutral.</p>
+
+    <p class="pull">The biggest, most predictable flow in the market isn't a view. It's a hedge.</p>
+
+    <h2>How it shapes your trade</h2>
+    <p>That hedging flow is why price sometimes stalls at big option strikes, why it can pin near expiration, and why some days absorb moves while others amplify them. It also shapes your fills: liquidity, spread width, and how price reacts to size are all downstream of what dealers are doing to stay balanced.</p>
+
+    <h2>The retail myth</h2>
+    <p>It's tempting to believe “they're hunting my stop.” Almost always, they're not — you're not big enough to matter individually. What feels personal is usually just mechanical hedging and liquidity dynamics playing out at scale. Trading gets clearer the moment you stop personalizing the tape and start reading it as flow.</p>
+
+    <h2>From counterparty to context</h2>
+    <p>Aggregate dealer positioning is measurable — it's the basis of <a href="/blog/what-is-gamma-exposure-gex.html">gamma exposure</a> and the <a href="/blog/the-gamma-flip.html">gamma flip</a>. NoVo reads that positioning as structural context: knowing the terrain the counterparty creates, then executing inside your defined risk rather than guessing at intentions.</p>
+  </div>
+
+  <div class="cta">
+    <h3>Put NoVo to work</h3>
+    <p>NoVo Pulse — $199/mo or $1,990/yr. Your broker, your keys, AI included.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/">Start your subscription</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+</main>
+
+<!-- NEWSLETTER SIGNUP -->
+<div style="max-width:560px;margin:0 auto;padding:34px 20px;text-align:center;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#10b981;margin-bottom:10px;">The NoVo Journal</div>
+  <div style="font-size:18px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">Get NoVo's market notes</div>
+  <p style="font-size:13.5px;color:#8aacc8;line-height:1.6;margin:0 0 16px;">Occasional, no-hype notes on trading discipline, market structure, and what NoVo is building. No spam, unsubscribe any time.</p>
+  <form id="np-subscribe" style="display:flex;gap:8px;max-width:430px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+    <input id="np-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;border-radius:8px;border:1px solid #2c3a4e;background:#0c1320;color:#eaf3ff;font-size:14px;">
+    <button type="submit" style="padding:11px 22px;border-radius:8px;border:0;background:#10b981;color:#04130c;font-weight:800;font-size:14px;cursor:pointer;">Subscribe</button>
+  </form>
+  <div id="np-sub-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+</div>
+<script>
+(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
+</script>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> · <a href="/blog/">The Journal</a> · <a href="/license.html">Terms</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>© 2026 NoVo AI Trading. Editorial content is for education only — not financial advice. Trading involves substantial risk of loss.</div>
+</footer>
+</body>
+</html>
