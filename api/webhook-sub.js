@@ -63,7 +63,7 @@ function analystWelcomeHtml() {
     </div>
     <div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
       <h1 style="color:#0b2942;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; NoVo Analyst is live.</h1>
-      <p style="color:#334155;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll now get NoVo's market reads by email &mdash; <b>The Open</b> and <b>The Close</b> each session, the <b>Week Ahead</b> on Sundays, and <b>intraday alerts</b> when the regime shifts. The same market-structure &amp; dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
+      <p style="color:#334155;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll now get NoVo's market reads by email &mdash; <b>The Open</b> and <b>The Close</b> each session, the <b>Week Ahead</b> on Sundays, and <b>intraday alerts</b> when the structural regime shifts or dealers flip the <b>gamma regime</b> from absorbing to amplifying. Every read carries the <b>actual levels</b> &mdash; real support, resistance, and structure &mdash; not vague prose. The same dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
       <p style="color:#334155;line-height:1.65;font-size:15px;margin:0 0 14px;">Your first read arrives with the next market session.</p>
       <div style="margin-top:22px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">
         <div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
