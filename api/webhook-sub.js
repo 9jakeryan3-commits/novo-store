@@ -37,6 +37,33 @@ async function cancelSub(subscriptionId) {
   return licensePost(`/admin/subscription/${subscriptionId}/cancel`, {});
 }
 
+// ── NoVo Analyst ($17 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
+// license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
+const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
+async function isAnalystSub(subscriptionId) {
+  try { const s = await stripe.subscriptions.retrieve(subscriptionId); return s?.metadata?.tier === 'analyst'; }
+  catch { return false; }
+}
+async function analystAdd(email) {
+  if (!ANALYST_AUDIENCE || !email) return;
+  try { await resend.contacts.create({ audienceId: ANALYST_AUDIENCE, email, unsubscribed: false }); }
+  catch (e) { console.error(`[webhook-sub] analyst add failed: ${e.message}`); }
+}
+async function analystRemove(email) {
+  if (!ANALYST_AUDIENCE || !email) return;
+  try { await resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }); }
+  catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
+}
+function analystWelcomeHtml() {
+  return `<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;color:#14181d;padding:24px">
+  <div style="font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#b7132a">The NoVo Journal &middot; Analyst</div>
+  <h2 style="color:#0b2942;margin:8px 0 12px">You're in — NoVo Analyst is live.</h2>
+  <p style="color:#3d4652;line-height:1.6;margin:0 0 14px">You'll now get NoVo's scheduled market reads and analysis by email &mdash; the same market-structure &amp; dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
+  <p style="color:#3d4652;line-height:1.6;margin:0 0 14px">Want it <b>raw &amp; live</b>, executing in your own broker account within your rules? That's <a href="https://novo-aitrading.app" style="color:#0b2942">NoVo Pulse</a>.</p>
+  <p style="font-size:12px;color:#6b7480;line-height:1.6;margin:0">Market analysis &amp; education only — not financial advice, not trade signals. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
+  </div>`;
+}
+
 function welcomeEmailHtml() {
   return `<!DOCTYPE html>
 <html>
@@ -128,6 +155,20 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
+    // NoVo Analyst ($17 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
+    // no portal, no provisioning.
+    if (obj?.metadata?.tier === 'analyst') {
+      await analystAdd(email);
+      try {
+        await resend.emails.send({
+          from: process.env.FROM_EMAIL || 'The NoVo Journal <orders@novo-aitrading.app>',
+          replyTo: 'support@novo-aitrading.app', to: [email],
+          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(),
+        });
+      } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
+      return res.status(200).json({ received: true });
+    }
+
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
     try {
@@ -154,7 +195,7 @@ const handler = async (req, res) => {
     // reason, and gating on it could leave a paying customer suspended forever.
     // activateSub is idempotent: a no-op on the initial create / already-active keys,
     // and the license row may not exist yet on the very first invoice (404, swallowed).
-    if (subscriptionId) {
+    if (subscriptionId && !(await isAnalystSub(subscriptionId))) {  // Analyst subs have no license to activate
       try {
         await activateSub(subscriptionId);
       } catch (err) {
@@ -166,7 +207,7 @@ const handler = async (req, res) => {
   // ── Payment failed → suspend access ──────────────────────────────────────
   else if (event.type === 'invoice.payment_failed') {
     const subscriptionId = invoiceSubId(obj);
-    if (subscriptionId) {
+    if (subscriptionId && !(await isAnalystSub(subscriptionId))) {  // Analyst subs have no license to suspend
       try {
         await suspendSub(subscriptionId);
       } catch (err) {
@@ -178,7 +219,14 @@ const handler = async (req, res) => {
   // ── Subscription cancelled → revoke access ────────────────────────────────
   else if (event.type === 'customer.subscription.deleted') {
     const subscriptionId = obj?.id;
-    if (subscriptionId) {
+    if (obj?.metadata?.tier === 'analyst') {   // Analyst cancel → drop from the audience (no license to cancel)
+      try {
+        const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
+        await analystRemove(cust?.email);
+      } catch (err) {
+        console.error(`[webhook-sub] analyst remove failed — sub:${subscriptionId} error:${err.message}`);
+      }
+    } else if (subscriptionId) {
       try {
         await cancelSub(subscriptionId);
       } catch (err) {

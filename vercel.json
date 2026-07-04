@@ -5,6 +5,7 @@
     { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/analyst", "destination": "/analyst.html" },
     { "source": "/success", "destination": "/success.html" },
     { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
     { "source": "/subscriber", "destination": "/subscriber.html" },
