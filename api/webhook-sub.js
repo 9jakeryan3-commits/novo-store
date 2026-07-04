@@ -78,6 +78,7 @@ function analystWelcomeHtml(connectUrl) {
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Prefer Discord?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Get every read and alert in the members-only Analyst channels. Link your Discord account to unlock them.</div>
         <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Connect your Discord &rarr;</a>
+        <div style="font-size:12px;color:#6f8bab;line-height:1.5;margin-top:12px;">Want Discord only? Once it's linked, just hit <b style="color:#9fb6d1;">unsubscribe</b> on any email &mdash; your reads keep flowing in the private channels, and your subscription stays active.</div>
       </div>` : ''}
       <div style="margin-top:22px;border:1px solid #1c2c47;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
