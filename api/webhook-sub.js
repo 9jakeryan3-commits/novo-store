@@ -41,7 +41,7 @@ async function cancelSub(subscriptionId) {
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
-const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522973509565943982';
+const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 async function discordRevokeRole(discordId) {
   if (!discordId || !process.env.DISCORD_BOT_TOKEN) return;
   try {

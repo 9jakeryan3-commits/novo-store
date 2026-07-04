@@ -5,7 +5,7 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
-const ROLE = process.env.DISCORD_ROLE_ID || '1522973509565943982';
+const ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 
 module.exports = async (req, res) => {
   const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
