@@ -188,7 +188,7 @@ const handler = async (req, res) => {
         await resend.emails.send({
           from: process.env.FROM_EMAIL || 'The NoVo Journal <orders@novo-aitrading.app>',
           replyTo: 'support@novo-aitrading.app', to: [email],
-          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord-connect?cs=${obj.id}`),
+          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
         });
       } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
       return res.status(200).json({ received: true });
