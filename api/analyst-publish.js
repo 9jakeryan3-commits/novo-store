@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { put } from '@vercel/blob';
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
   const audience = (body.audience || 'analyst').toString().toLowerCase(); // 'analyst' | 'free' | 'both'
   const label = (body.label || 'NoVo Analyst').toString();             // dark-header sub-label
   const upsell = (body.upsell || 'pulse').toString().toLowerCase();    // 'pulse' | 'analyst'
+  const chartB64 = (body.chart_b64 || '').toString().trim();           // optional session-chart PNG (base64)
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
   // Resolve target Resend audience(s): analyst = paid list, free = the newsletter list, both = each.
@@ -43,6 +45,16 @@ export default async function handler(req, res) {
 
   // send=false → archive-only (reserved for the /analyst web feed, phase 2). No-op email for now.
   if (!send) return res.status(200).json({ ok: true, archived: true, emailed: false });
+
+  // Optional session chart → upload to Blob for a public URL (email clients need hosted images, not data URIs).
+  let chartUrl = '';
+  if (chartB64 && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { url } = await put(`analyst/chart-${Date.now()}.png`, Buffer.from(chartB64, 'base64'),
+        { access: 'public', contentType: 'image/png', token: process.env.BLOB_READ_WRITE_TOKEN });
+      chartUrl = url;
+    } catch (e) { console.error('[analyst-publish] chart upload failed:', e.message); }
+  }
 
   // Institutional, NoVo-branded HTML email. Absolute image URL (email clients require it); dark header bar
   // with the light wordmark logo, light content, bolded desk-note section labels, audience-aware upsell, unsub.
@@ -61,6 +73,7 @@ export default async function handler(req, res) {
           `<div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${esc(label)}</div>` +
         '</div>' +
         '<div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
+          (chartUrl ? `<img src="${chartUrl}" width="552" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #cfd8e3;display:block;margin:0 0 20px;" alt="SPY session chart — levels &amp; structure">` : '') +
           `<h1 style="font-size:20px;font-weight:800;color:#0b2942;letter-spacing:-.3px;margin:0 0 16px;line-height:1.25;">${esc(title)}</h1>` +
           `<div style="font-size:15px;line-height:1.7;color:#1f2937;white-space:pre-wrap;">${bodyText}</div>` +
           `<div style="margin-top:26px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">${upsellHtml}</div>` +
