@@ -89,7 +89,7 @@ function analystWelcomeHtml(connectUrl) {
 </div>`;
 }
 
-function welcomeEmailHtml() {
+function welcomeEmailHtml(connectUrl) {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -110,6 +110,12 @@ function welcomeEmailHtml() {
     <div style="text-align:center;margin:0 0 26px;">
       <a href="https://app.novo-aitrading.app" style="display:inline-block;background:#10b981;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Open Your Portal</a>
     </div>
+
+    ${connectUrl ? `<div style="background:#f4f5ff;border:1px solid #d9ddfb;border-radius:10px;padding:16px 18px;margin:0 0 24px;text-align:center;">
+      <div style="font-size:14px;color:#0b1527;font-weight:700;margin-bottom:6px;">Join the members Discord</div>
+      <div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:12px;">Your subscription includes the private NoVo Discord &mdash; the daily reads, alerts, and the members community. Link your account to unlock it.</div>
+      <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:14px;">Connect your Discord &rarr;</a>
+    </div>` : ''}
 
     <div style="border-top:1px solid #e2e8f0;margin:0 0 20px;"></div>
     <h2 style="color:#0b1527;font-size:16px;margin:0 0 14px;">Getting started</h2>
@@ -202,7 +208,7 @@ const handler = async (req, res) => {
         replyTo: 'support@novo-aitrading.app',
         to: [email],
         subject: 'Welcome to NoVo Pulse — open your portal',
-        html: welcomeEmailHtml(),
+        html: welcomeEmailHtml(`${SITE}/api/discord?cs=${obj.id}`),
       });
     } catch (err) {
       // Don't 500 here: a 500 makes Stripe retry the whole webhook (re-attempting the email) in a loop.
@@ -258,6 +264,10 @@ const handler = async (req, res) => {
       } catch (err) {
         console.error(`[webhook-sub] Cancel failed — sub:${subscriptionId} error:${err.message}`);
       }
+      try {   // Pulse cancel → also drop the paid-Discord role
+        const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
+        await discordRevokeRole(cust?.metadata?.discord_id);
+      } catch (e) {}
     }
   }
 

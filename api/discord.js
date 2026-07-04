@@ -20,8 +20,11 @@ module.exports = async (req, res) => {
     try {
       if (!state) return back('error');
       const sess = await stripe.checkout.sessions.retrieve(state);
-      if (!sess || sess.payment_status !== 'paid' || sess.metadata?.tier !== 'analyst') return back('error');
+      // Any PAID NoVo subscription (Analyst OR Pulse) earns the paid-Discord role. A valid paid session id
+      // is unguessable, so this can't be forged without actually subscribing.
+      if (!sess || sess.payment_status !== 'paid' || sess.mode !== 'subscription') return back('error');
       const customerId = sess.customer;
+      const isAnalyst = sess.metadata?.tier === 'analyst';
 
       const tokRes = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -55,7 +58,8 @@ module.exports = async (req, res) => {
           });
         } catch (e) {}
       }
-      return back('connected');
+      res.writeHead(302, { Location: isAnalyst ? `${SITE}/analyst?welcome=1&discord=connected` : `${SITE}/analyst?discord=connected` });
+      return res.end();
     } catch (e) { console.error('[discord cb]', e.message); return back('error'); }
   }
 

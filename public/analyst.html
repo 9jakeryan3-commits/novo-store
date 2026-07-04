@@ -530,7 +530,7 @@ async function analystCheckout(){
   var _cs=_p.get('cs');
   if(_cs){var _w=document.getElementById('dc-wrap'),_b=document.getElementById('dc-btn');if(_b)_b.href='/api/discord?cs='+encodeURIComponent(_cs);if(_w)_w.style.display='block';}
   var _dc=_p.get('discord'),_m=document.getElementById('dc-msg');
-  if(_m&&_dc==='connected'){_m.style.color='#34d399';_m.textContent='✓ Discord connected — the Analyst channels are unlocked.';var _w2=document.getElementById('dc-wrap');if(_w2)_w2.style.display='none';}
+  if(_m&&_dc==='connected'){_m.style.color='#34d399';_m.textContent='✓ Discord connected — the members-only channels are unlocked.';var _w2=document.getElementById('dc-wrap');if(_w2)_w2.style.display='none';}
   else if(_m&&_dc==='error'){_m.style.color='#f43f5e';_m.textContent='Couldn’t link Discord — try Connect again, or just use email.';}
   var els=document.querySelectorAll('section:not(.hero)');
   if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
