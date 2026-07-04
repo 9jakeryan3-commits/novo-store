@@ -80,6 +80,40 @@ export default async function handler(req, res) {
     levelsTable = `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${colCell('Resistance',res,'#f87171')}${colCell('Support',sup,'#34d399')}</tr></table>`;
   }
 
+  // ── Also fan out the read to Discord (best-effort) as a rich embed — same content as the email.
+  if (process.env.DISCORD_ANALYST_WEBHOOK) {
+    try {
+      const biasColor = { BULLISH: 0x10b981, BEARISH: 0xf43f5e, NEUTRAL: 0x9fb6d1 };
+      const pillColor = { amplify: 0xf43f5e, absorb: 0x2962ff, warn: 0xf59e0b, calm: 0x10b981 };
+      let color = 0x22d3ee;
+      if (bias && biasColor[bias.toUpperCase()] != null) color = biasColor[bias.toUpperCase()];
+      else if (pill && pillColor[pillKind] != null) color = pillColor[pillKind];
+      let desc = text.replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g, '$1**$2**');
+      if (desc.length > 4000) desc = desc.slice(0, 3990) + '…';
+      const fields = [];
+      if (bias) fields.push({ name: 'Structural Bias', value: bias.toUpperCase(), inline: true });
+      if (pill) fields.push({ name: 'Regime', value: pill, inline: true });
+      if (Array.isArray(levels) && levels.length) {
+        const line = arr => arr.map(l => `${l.label} — **${Number(l.price).toFixed(2)}**`).join('\n');
+        const res = line(levels.filter(l => l.kind === 'resistance').sort((a, b) => a.price - b.price));
+        const sup = line(levels.filter(l => l.kind === 'support').sort((a, b) => b.price - a.price));
+        if (res) fields.push({ name: '🔴 Resistance', value: res, inline: true });
+        if (sup) fields.push({ name: '🟢 Support', value: sup, inline: true });
+      }
+      const embed = {
+        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-aitrading.app/novo-icon.png?v=4' },
+        title, description: desc, color, fields,
+        footer: { text: 'NoVo — market analysis & education, not trade signals.' },
+        timestamp: new Date().toISOString(),
+      };
+      if (chartUrl) embed.image = { url: chartUrl };
+      await fetch(process.env.DISCORD_ANALYST_WEBHOOK, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds: [embed] }),
+      });
+    } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
+  }
+
   // Institutional, NoVo-branded DARK HTML email. Absolute image URL (email clients require it); the dark
   // session chart blends into the dark card. Bolded desk-note labels, audience-aware upsell, unsubscribe.
   const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g,
