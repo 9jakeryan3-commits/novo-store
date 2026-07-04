@@ -112,8 +112,11 @@
   @media (max-width: 560px) {
     .nav-inner { flex-direction: column; gap: 10px; padding: 10px 14px; }
     .nav-logo img { height: 38px; }
-    .nav-actions { justify-content: center; gap: 8px 14px; width: 100%; }
-    .nav-buy, .nav-portal { padding: 8px 14px; font-size: 12.5px; }
+    .nav-actions { justify-content: center; gap: 6px; width: 100%; flex-wrap: nowrap; }
+    .nav-actions > a:not(.nav-portal) { font-size: 11.5px !important; padding: 6px 3px !important; }
+    .nav-buy, .nav-portal { padding: 7px 10px; font-size: 11.5px; }
+    .nav-portal { gap: 4px; }
+    .nav-portal svg { width: 13px; height: 13px; }
     .nav-price { display: none; }
   }
 
