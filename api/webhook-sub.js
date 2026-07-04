@@ -271,6 +271,29 @@ const handler = async (req, res) => {
     }
   }
 
+  // ── Customer email changed → keep the Analyst Resend audience in sync ──────
+  // Reads are broadcast BY EMAIL, so a billing-email change (Stripe portal or manual edit) must move the
+  // audience contact — otherwise the reads keep going to the old address. Gated to ACTIVE Analyst customers
+  // so a Pulse/other customer changing their email is never swept into the Analyst reads.
+  else if (event.type === 'customer.updated') {
+    const oldEmail = event.data?.previous_attributes?.email;
+    const newEmail = obj?.email;
+    if (oldEmail && newEmail && oldEmail !== newEmail) {
+      try {
+        const subs = await stripe.subscriptions.list({ customer: obj.id, status: 'all', limit: 20 });
+        const isActiveAnalyst = subs.data.some(s =>
+          s?.metadata?.tier === 'analyst' && ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status));
+        if (isActiveAnalyst) {
+          await analystRemove(oldEmail);
+          await analystAdd(newEmail);
+          console.log(`[webhook-sub] analyst audience email synced: ${oldEmail} → ${newEmail}`);
+        }
+      } catch (err) {
+        console.error(`[webhook-sub] analyst email sync failed: ${err.message}`);
+      }
+    }
+  }
+
   return res.status(200).json({ received: true });
 };
 
