@@ -267,7 +267,7 @@
   /* ── Pricing ── */
   #pricing { text-align: center; }
   .price-card { background: linear-gradient(180deg, rgba(16,185,129,0.05), var(--navy2) 42%); border: 1px solid rgba(16,185,129,0.28); border-radius: 16px; max-width: 480px; margin: 0 auto; padding: 40px; position: relative; box-shadow: 0 24px 70px rgba(0,0,0,0.5), 0 0 44px rgba(16,185,129,0.07); }
-  .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #34d399, #10b981); border-radius: 16px 16px 0 0; }
+  .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-bar, linear-gradient(90deg, #34d399, #10b981)); border-radius: 16px 16px 0 0; }
   .price-name { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
   .price-amount { font-size: 68px; font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1; }
   .price-amount sup { font-size: 30px; vertical-align: top; margin-top: 12px; }
@@ -1038,7 +1038,7 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:820px;margin:0 auto;align-items:stretch;">
 
       <!-- Free card -->
-      <div class="price-card" style="border-top-color:#f59e0b;position:relative;background:linear-gradient(180deg,rgba(245,158,11,0.05),var(--navy2) 42%);border-color:rgba(245,158,11,0.22);box-shadow:0 24px 70px rgba(0,0,0,0.5);">
+      <div class="price-card" style="--accent-bar:linear-gradient(90deg,#f59e0b,#fbbf24);border-top-color:#f59e0b;position:relative;background:linear-gradient(180deg,rgba(245,158,11,0.05),var(--navy2) 42%);border-color:rgba(245,158,11,0.22);box-shadow:0 24px 70px rgba(0,0,0,0.5);">
         <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#0b1220;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">New</div>
         <div class="price-name" style="color:#f59e0b;">Free</div>
         <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Market Notes + Community</div>
@@ -1061,8 +1061,8 @@
       </div>
 
       <!-- Analyst card -->
-      <div class="price-card" style="border-top-color:#22d3ee;position:relative;background:linear-gradient(180deg,rgba(34,211,238,0.05),var(--navy2) 42%);border-color:rgba(34,211,238,0.28);box-shadow:0 24px 70px rgba(0,0,0,0.5),0 0 44px rgba(34,211,238,0.07);">
-        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#22d3ee;color:#04121a;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">The Read</div>
+      <div class="price-card" style="--accent-bar:linear-gradient(90deg,#22d3ee,#3b82f6);border-top-color:#22d3ee;position:relative;background:linear-gradient(180deg,rgba(34,211,238,0.05),var(--navy2) 42%);border-color:rgba(34,211,238,0.28);box-shadow:0 24px 70px rgba(0,0,0,0.5),0 0 44px rgba(34,211,238,0.07);">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#22d3ee;color:#04121a;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">★ Most Popular</div>
         <div class="price-name" style="color:#22d3ee;">NoVo Analyst</div>
         <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Market analysis by email · no broker needed</div>
         <div class="price-amount"><sup>$</sup>29<span style="font-size:28px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
@@ -1085,7 +1085,7 @@
 
     <!-- Pulse — flagship, full width below the two -->
     <div class="price-card" style="border-top-color:var(--green);position:relative;max-width:820px;margin:22px auto 0;">
-      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">★ Most Popular</div>
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">NoVo Algo Tool</div>
       <div class="price-name" style="color:var(--green);">NoVo Pulse</div>
       <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Tradier &amp; Alpaca integrations · AI Included · The full execution engine</div>
       <div class="price-amount"><sup>$</sup>199<span style="font-size:28px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
