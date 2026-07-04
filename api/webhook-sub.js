@@ -55,13 +55,24 @@ async function analystRemove(email) {
   catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
 }
 function analystWelcomeHtml() {
-  return `<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;color:#14181d;padding:24px">
-  <div style="font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#b7132a">The NoVo Journal &middot; Analyst</div>
-  <h2 style="color:#0b2942;margin:8px 0 12px">You're in — NoVo Analyst is live.</h2>
-  <p style="color:#3d4652;line-height:1.6;margin:0 0 14px">You'll now get NoVo's scheduled market reads and analysis by email &mdash; the same market-structure &amp; dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
-  <p style="color:#3d4652;line-height:1.6;margin:0 0 14px">Want it <b>raw &amp; live</b>, executing in your own broker account within your rules? That's <a href="https://novo-aitrading.app" style="color:#0b2942">NoVo Pulse</a>.</p>
-  <p style="font-size:12px;color:#6b7480;line-height:1.6;margin:0">Market analysis &amp; education only — not financial advice, not trade signals. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
-  </div>`;
+  return `<div style="margin:0;padding:0;background:#eef2f7;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="background:#0a1120;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
+      <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
+      <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">NoVo Analyst</div>
+    </div>
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
+      <h1 style="color:#0b2942;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; NoVo Analyst is live.</h1>
+      <p style="color:#334155;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll now get NoVo's market reads by email &mdash; <b>The Open</b> and <b>The Close</b> each session, the <b>Week Ahead</b> on Sundays, and <b>intraday alerts</b> when the regime shifts. The same market-structure &amp; dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
+      <p style="color:#334155;line-height:1.65;font-size:15px;margin:0 0 14px;">Your first read arrives with the next market session.</p>
+      <div style="margin-top:22px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">
+        <div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
+        <div style="font-size:13.5px;color:#475569;line-height:1.55;">This is the read. <b>NoVo Pulse</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#0b9d6f;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>
+      </div>
+      <p style="font-size:11.5px;color:#94a3b8;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice, not trade signals. Trading involves substantial risk of loss. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
+    </div>
+  </div>
+</div>`;
 }
 
 function welcomeEmailHtml() {

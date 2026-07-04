@@ -36,16 +36,28 @@ export default async function handler(req, res) {
   // send=false → archive-only (reserved for the /analyst web feed, phase 2). No-op email for now.
   if (!send) return res.status(200).json({ ok: true, archived: true, emailed: false });
 
-  // Render the scrubbed report as a clean email (preserve line breaks; the report is plain text).
+  // Institutional, NoVo-branded HTML email. Absolute image URL (email clients require it); dark header bar
+  // with the light wordmark logo, light content area, bolded desk-note section labels, Pulse upsell, unsub.
+  const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH)/g,
+    '$1<b style="color:#0b2942">$2</b>');
   const bodyHtml = html || (
-    '<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:600px;margin:0 auto;color:#14181d">' +
-    `<div style="font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#b7132a">The NoVo Journal · Analyst</div>` +
-    `<h2 style="font-size:20px;color:#0b2942;margin:6px 0 14px">${esc(title)}</h2>` +
-    `<pre style="white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13.5px;line-height:1.6;color:#3d4652;margin:0">${esc(text)}</pre>` +
-    '<hr style="border:none;border-top:1px solid #e4ded4;margin:22px 0">' +
-    '<p style="font-size:12px;color:#6b7480;line-height:1.6">Market analysis & education only — not financial advice, not trade signals. Trading involves substantial risk of loss. ' +
-    'Want this raw and live, executed in your own account? <a href="https://novo-aitrading.app" style="color:#0b2942">NoVo Pulse →</a></p>' +
-    '<p style="font-size:11px;color:#9aa6b2">You get this because you subscribe to NoVo Analyst. {{{RESEND_UNSUBSCRIBE_URL}}}</p>' +
+    '<div style="margin:0;padding:0;background:#eef2f7;">' +
+      '<div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
+        '<div style="background:#0a1120;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">' +
+          '<img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">' +
+          '<div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">NoVo Analyst</div>' +
+        '</div>' +
+        '<div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
+          `<h1 style="font-size:20px;font-weight:800;color:#0b2942;letter-spacing:-.3px;margin:0 0 16px;line-height:1.25;">${esc(title)}</h1>` +
+          `<div style="font-size:15px;line-height:1.7;color:#1f2937;white-space:pre-wrap;">${bodyText}</div>` +
+          '<div style="margin-top:26px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">' +
+            '<div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
+            '<div style="font-size:13.5px;color:#475569;line-height:1.55;">This is the read. <b>NoVo Pulse</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#0b9d6f;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>' +
+          '</div>' +
+          '<p style="font-size:11.5px;color:#94a3b8;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only — not financial advice, and not trade signals. Trading involves substantial risk of loss.</p>' +
+        '</div>' +
+        '<div style="text-align:center;font-size:11px;color:#9aa6b2;padding:14px 8px;">You receive this as a NoVo Analyst subscriber. <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#9aa6b2;text-decoration:underline;">Unsubscribe</a></div>' +
+      '</div>' +
     '</div>'
   );
 
