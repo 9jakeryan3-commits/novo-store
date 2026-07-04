@@ -62,7 +62,7 @@ export default async function handler(req, res) {
           await resend.emails.send({
             from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
             subject: 'Welcome to NoVo Market Notes',
-            html: freeWelcomeHtml(process.env.DISCORD_INVITE_URL || ''),
+            html: freeWelcomeHtml(process.env.DISCORD_INVITE_URL || 'https://discord.gg/hr5GKzsU'),
           });
         } catch (_) { /* welcome email is non-fatal */ }
       }
