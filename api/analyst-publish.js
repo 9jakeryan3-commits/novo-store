@@ -31,6 +31,8 @@ export default async function handler(req, res) {
   const label = (body.label || 'NoVo Analyst').toString();             // dark-header sub-label
   const upsell = (body.upsell || 'pulse').toString().toLowerCase();    // 'pulse' | 'analyst'
   const chartB64 = (body.chart_b64 || '').toString().trim();           // optional session-chart PNG (base64)
+  const bias = (body.bias || '').toString().trim();                    // BULLISH | BEARISH | NEUTRAL
+  const levels = Array.isArray(body.levels) ? body.levels : [];        // [{label, price, kind}]
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
   // Resolve target Resend audience(s): analyst = paid list, free = the newsletter list, both = each.
@@ -56,6 +58,23 @@ export default async function handler(req, res) {
     } catch (e) { console.error('[analyst-publish] chart upload failed:', e.message); }
   }
 
+  // Structural-bias pill (colored) + a support/resistance levels table (replaces the old text KEY LEVELS).
+  const _biasMap = { BULLISH:{bg:'#e6f6f0',fg:'#0b7a5b',bd:'#10b981'}, BEARISH:{bg:'#fdecec',fg:'#c0392b',bd:'#ef5350'}, NEUTRAL:{bg:'#eef1f5',fg:'#5a6472',bd:'#9aa6b2'} };
+  const _bc = _biasMap[bias.toUpperCase()];
+  const biasPill = _bc ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_bc.bg};color:${_bc.fg};border:1px solid ${_bc.bd};font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">Structural Bias &middot; ${esc(bias.toUpperCase())}</span></div>` : '';
+  let levelsTable = '';
+  if (levels.length) {
+    const fmt = p => Number(p).toFixed(2);
+    const res = levels.filter(l => l.kind === 'resistance').sort((a,b)=>a.price-b.price);
+    const sup = levels.filter(l => l.kind === 'support').sort((a,b)=>b.price-a.price);
+    const rowsHtml = (items, col) => (items.length ? items : [null]).map(l =>
+      l ? `<tr><td style="padding:6px 12px;color:#475569;font-size:13px;border-top:1px solid #eef1f5;">${esc(l.label)}</td><td style="padding:6px 12px;text-align:right;font-weight:700;color:${col};font-size:13px;border-top:1px solid #eef1f5;">${fmt(l.price)}</td></tr>`
+        : `<tr><td style="padding:6px 12px;color:#94a3b8;font-size:13px;">&mdash;</td><td></td></tr>`).join('');
+    const colCell = (t, items, col, bd) =>
+      `<td style="vertical-align:top;width:50%;padding:0 5px;"><div style="border:1px solid #e2e8f0;border-top:2px solid ${bd};border-radius:8px;overflow:hidden;"><div style="background:#f6f8fb;padding:7px 12px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${col};">${t}</div><table style="width:100%;border-collapse:collapse;">${rowsHtml(items,col)}</table></div></td>`;
+    levelsTable = `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0b2942;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${colCell('Resistance',res,'#c0392b','#ef5350')}${colCell('Support',sup,'#0b7a5b','#10b981')}</tr></table>`;
+  }
+
   // Institutional, NoVo-branded HTML email. Absolute image URL (email clients require it); dark header bar
   // with the light wordmark logo, light content, bolded desk-note section labels, audience-aware upsell, unsub.
   const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH)/g,
@@ -74,8 +93,10 @@ export default async function handler(req, res) {
         '</div>' +
         '<div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
           (chartUrl ? `<img src="${chartUrl}" width="552" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #cfd8e3;display:block;margin:0 0 20px;" alt="SPY session chart — levels &amp; structure">` : '') +
-          `<h1 style="font-size:20px;font-weight:800;color:#0b2942;letter-spacing:-.3px;margin:0 0 16px;line-height:1.25;">${esc(title)}</h1>` +
+          `<h1 style="font-size:20px;font-weight:800;color:#0b2942;letter-spacing:-.3px;margin:0 0 12px;line-height:1.25;">${esc(title)}</h1>` +
+          biasPill +
           `<div style="font-size:15px;line-height:1.7;color:#1f2937;white-space:pre-wrap;">${bodyText}</div>` +
+          levelsTable +
           `<div style="margin-top:26px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">${upsellHtml}</div>` +
           '<p style="font-size:11.5px;color:#94a3b8;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only — not financial advice, and not trade signals. Trading involves substantial risk of loss.</p>' +
         '</div>' +
