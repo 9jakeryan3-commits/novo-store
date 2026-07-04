@@ -33,6 +33,8 @@ export default async function handler(req, res) {
   const chartB64 = (body.chart_b64 || '').toString().trim();           // optional session-chart PNG (base64)
   const bias = (body.bias || '').toString().trim();                    // BULLISH | BEARISH | NEUTRAL
   const levels = Array.isArray(body.levels) ? body.levels : [];        // [{label, price, kind}]
+  const pill = (body.pill || '').toString().trim();                    // regime-alert pill text
+  const pillKind = (body.pill_kind || '').toString().toLowerCase();    // amplify | absorb | warn | calm
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
   // Resolve target Resend audience(s): analyst = paid list, free = the newsletter list, both = each.
@@ -62,6 +64,9 @@ export default async function handler(req, res) {
   const _biasMap = { BULLISH:{bg:'#e6f6f0',fg:'#0b7a5b',bd:'#10b981'}, BEARISH:{bg:'#fdecec',fg:'#c0392b',bd:'#ef5350'}, NEUTRAL:{bg:'#eef1f5',fg:'#5a6472',bd:'#9aa6b2'} };
   const _bc = _biasMap[bias.toUpperCase()];
   const biasPill = _bc ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_bc.bg};color:${_bc.fg};border:1px solid ${_bc.bd};font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">Structural Bias &middot; ${esc(bias.toUpperCase())}</span></div>` : '';
+  const _pillMap = { amplify:{bg:'#fdecec',fg:'#c0392b',bd:'#ef5350'}, warn:{bg:'#fdf3e6',fg:'#b45309',bd:'#f59e0b'}, absorb:{bg:'#eaf1fb',fg:'#1d4ed8',bd:'#2962ff'}, calm:{bg:'#e6f6f0',fg:'#0b7a5b',bd:'#10b981'} };
+  const _pc = _pillMap[pillKind] || _pillMap.warn;
+  const alertPill = pill ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_pc.bg};color:${_pc.fg};border:1px solid ${_pc.bd};font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px;">&#9889; Regime &middot; ${esc(pill)}</span></div>` : '';
   let levelsTable = '';
   if (levels.length) {
     const fmt = p => Number(p).toFixed(2);
@@ -77,7 +82,7 @@ export default async function handler(req, res) {
 
   // Institutional, NoVo-branded HTML email. Absolute image URL (email clients require it); dark header bar
   // with the light wordmark logo, light content, bolded desk-note section labels, audience-aware upsell, unsub.
-  const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH)/g,
+  const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g,
     '$1<b style="color:#0b2942">$2</b>');
   const upsellHtml = upsell === 'analyst'
     ? '<div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want the daily read?</div>' +
@@ -94,7 +99,7 @@ export default async function handler(req, res) {
         '<div style="background:#ffffff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
           (chartUrl ? `<img src="${chartUrl}" width="552" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #cfd8e3;display:block;margin:0 0 20px;" alt="SPY session chart — levels &amp; structure">` : '') +
           `<h1 style="font-size:20px;font-weight:800;color:#0b2942;letter-spacing:-.3px;margin:0 0 12px;line-height:1.25;">${esc(title)}</h1>` +
-          biasPill +
+          biasPill + alertPill +
           `<div style="font-size:15px;line-height:1.7;color:#1f2937;white-space:pre-wrap;">${bodyText}</div>` +
           levelsTable +
           `<div style="margin-top:26px;border:1px solid #d7e0ea;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:#f6fbf8;">${upsellHtml}</div>` +
