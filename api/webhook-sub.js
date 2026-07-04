@@ -40,6 +40,15 @@ async function cancelSub(subscriptionId) {
 // ── NoVo Analyst ($29 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
+const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
+const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522973509565943982';
+async function discordRevokeRole(discordId) {
+  if (!discordId || !process.env.DISCORD_BOT_TOKEN) return;
+  try {
+    await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD}/members/${discordId}/roles/${DISCORD_ROLE}`,
+      { method: 'DELETE', headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` } });
+  } catch (e) { console.error(`[webhook-sub] discord role revoke failed: ${e.message}`); }
+}
 async function isAnalystSub(subscriptionId) {
   try { const s = await stripe.subscriptions.retrieve(subscriptionId); return s?.metadata?.tier === 'analyst'; }
   catch { return false; }
@@ -54,7 +63,7 @@ async function analystRemove(email) {
   try { await resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }); }
   catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
 }
-function analystWelcomeHtml() {
+function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#070b12;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="background:#0a1120;border:1px solid #1c2c47;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
@@ -65,6 +74,11 @@ function analystWelcomeHtml() {
       <h1 style="color:#eaf3ff;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; NoVo Analyst is live.</h1>
       <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll now get NoVo's market reads by email &mdash; <b style="color:#eaf3ff">The Open</b> and <b style="color:#eaf3ff">The Close</b> each session, the <b style="color:#eaf3ff">Week Ahead</b> on Sundays, and <b style="color:#eaf3ff">intraday alerts</b> when the structural regime shifts or dealers flip the <b style="color:#eaf3ff">gamma regime</b> from absorbing to amplifying. Every read carries the <b style="color:#eaf3ff">actual levels</b> &mdash; real support, resistance, and structure &mdash; not vague prose. The same dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
       <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">Your first read arrives with the next market session.</p>
+      ${connectUrl ? `<div style="margin:18px 0 6px;border:1px solid #2b2f57;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Prefer Discord?</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Get every read and alert in the members-only Analyst channels. Link your Discord account to unlock them.</div>
+        <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Connect your Discord &rarr;</a>
+      </div>` : ''}
       <div style="margin-top:22px;border:1px solid #1c2c47;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Pulse</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>
@@ -174,7 +188,7 @@ const handler = async (req, res) => {
         await resend.emails.send({
           from: process.env.FROM_EMAIL || 'The NoVo Journal <orders@novo-aitrading.app>',
           replyTo: 'support@novo-aitrading.app', to: [email],
-          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(),
+          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord-connect?cs=${obj.id}`),
         });
       } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
       return res.status(200).json({ received: true });
@@ -234,6 +248,7 @@ const handler = async (req, res) => {
       try {
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         await analystRemove(cust?.email);
+        await discordRevokeRole(cust?.metadata?.discord_id);   // drop the Analyst role too
       } catch (err) {
         console.error(`[webhook-sub] analyst remove failed — sub:${subscriptionId} error:${err.message}`);
       }

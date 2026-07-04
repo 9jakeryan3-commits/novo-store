@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       mode: 'subscription',
       metadata: { tier: 'analyst' },
       subscription_data: { metadata: { tier: 'analyst' } },
-      success_url: `${SITE}/analyst?welcome=1`,
+      success_url: `${SITE}/analyst?welcome=1&cs={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/analyst`,
       billing_address_collection: 'auto',
     });
