@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     '$1<b style="color:#0b2942">$2</b>');
   const upsellHtml = upsell === 'analyst'
     ? '<div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want the daily read?</div>' +
-      '<div style="font-size:13.5px;color:#475569;line-height:1.55;">This weekly outlook is the taste. <b>NoVo Analyst</b> adds the daily <b>Open</b> &amp; <b>Close</b> desk notes plus intraday regime-shift alerts — $17/mo. <a href="https://novo-aitrading.app/analyst" style="color:#0b9d6f;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
+      '<div style="font-size:13.5px;color:#475569;line-height:1.55;">This weekly outlook is the taste. <b>NoVo Analyst</b> adds the daily <b>Open</b> &amp; <b>Close</b> desk notes plus intraday regime-shift alerts — $29/mo. <a href="https://novo-aitrading.app/analyst" style="color:#0b9d6f;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
     : '<div style="font-size:14px;color:#0b2942;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
       '<div style="font-size:13.5px;color:#475569;line-height:1.55;">This is the read. <b>NoVo Pulse</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#0b9d6f;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>';
   const bodyHtml = html || (
