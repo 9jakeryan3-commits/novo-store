@@ -8,7 +8,7 @@
 
   var data = [], ready = false;
 
-  fetch('/journal/search-index.json?v=2')
+  fetch('/journal/search-index.json?v=3')
     .then(function (r) { return r.json(); })
     .then(function (j) {
       data = j; ready = true;
