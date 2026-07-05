@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Structure &amp; Dealer Flow - The Complete Guide to How SPY Moves | The NoVo Journal</title>
+<meta name="description" content="The forces under the tape: VWAP, dealer gamma, the order book, volume, the catalysts, and the patterns - what actually moves price intraday.">
+<link rel="canonical" href="https://novo-aitrading.app/journal/guide-market-structure-dealer-flow.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://novo-aitrading.app/journal/guide-market-structure-dealer-flow.html">
+<meta property="og:title" content="Market Structure &amp; Dealer Flow - How SPY Really Moves">
+<meta property="og:description" content="The forces under the tape: VWAP, dealer gamma, the order book, volume, the catalysts, and the patterns - what actually moves price intraday.">
+<meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="600">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Market Structure &amp; Dealer Flow - The Complete Guide to How SPY Moves">
+<meta name="twitter:description" content="The forces under the tape: VWAP, dealer gamma, the order book, volume, the catalysts, and the patterns - what actually moves price intraday.">
+<meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
+<link rel="icon" href="/novo-icon.png?v=2">
+<link rel="stylesheet" href="/journal/blog.css?v=8">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Market Structure & Dealer Flow - How SPY Really Moves","description":"The forces under the tape: VWAP, dealer gamma, the order book, volume, the catalysts, and the patterns - what actually moves price intraday.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-05","mainEntityOfPage":"https://novo-aitrading.app/journal/guide-market-structure-dealer-flow.html"}
+</script>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/">NoVo Pulse</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
+    <a class="nav-buy" href="/">Subscribe</a><a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+  </div>
+</div></nav>
+<!--sitewide-ticker--><div class="ticker"><div class="ticker-row"><span class="ticker-tag"><span class="dot"></span>US Markets</span><div class="ticker-track"><div class="ticker-inner"><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span></div></div></div></div><script src="/ticker-live.js" defer></script>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/journal/">&larr; All articles</a>
+  <header class="article-head">
+    <div class="kicker">Start Here &amp;middot; Guide</div>
+    <h1>Market Structure &amp; Dealer Flow - How SPY Really Moves</h1>
+    <p class="standfirst">The forces under the tape: VWAP, dealer gamma, the order book, volume, the catalysts, and the patterns - what actually moves price intraday.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading &middot; 2026</div>
+
+  <div class="article-body">
+<p>Price does not move at random - it is pushed by structure and by the forced hedging of options dealers. This guide maps the forces under the tape: VWAP and the session, dealer gamma and the flip, the order book and its illusions, volume, the scheduled catalysts, and the chart patterns worth (and not worth) watching.</p>
+<p>This is the layer NoVo reads all session - where the flows are, not where the crowd is guessing.</p>
+<div style="background:linear-gradient(180deg,rgba(34,211,238,0.08),rgba(11,15,24,0));border:1px solid rgba(34,211,238,0.25);border-radius:12px;padding:20px 22px;margin:22px 0;"><p style="margin:0 0 10px;font-size:15px;color:var(--txt1);"><strong>Do not want to read the whole market yourself every day?</strong> NoVo Analyst sends you the machine&rsquo;s read - structure, levels, and dealer flow - by email &amp; Discord, for $29/mo. Analysis, not signals.</p><a href="/analyst" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:11px 22px;border-radius:9px;text-decoration:none;">Get NoVo Analyst &rarr; $29/mo</a></div>
+<p style="color:var(--txt3);font-size:13px;">100 guides in this pillar &middot; grouped by topic.</p>
+    <h2>Catalysts</h2>
+    <ul>
+      <li><a href="/journal/consumer-sentiment-index.html">Consumer Sentiment &amp; Confidence Indexes, Explained</a> &mdash; <span style="color:var(--txt3);">Consumer sentiment and confidence surveys gauge how optimistic households feel — a soft,&amp;hellip;</span></li>
+      <li><a href="/journal/cpi-and-the-market.html">CPI &amp; Inflation Prints: The Market Reaction, Explained</a> &mdash; <span style="color:var(--txt3);">The CPI report measures inflation and can swing the market hard because it shapes what the Fed does&amp;hellip;</span></li>
+      <li><a href="/journal/earnings-season-explained.html">Earnings Season, Explained</a> &mdash; <span style="color:var(--txt3);">Four times a year, companies report results in a concentrated wave — earnings season — spiking&amp;hellip;</span></li>
+      <li><a href="/journal/fomc-and-the-market.html">FOMC Days: Why the Market Holds Its Breath</a> &mdash; <span style="color:var(--txt3);">FOMC meetings set interest-rate policy and routinely move the whole market in minutes. Here is why&amp;hellip;</span></li>
+      <li><a href="/journal/gdp-and-the-market.html">GDP &amp; the Market, Explained</a> &mdash; <span style="color:var(--txt3);">GDP measures the total output of the economy — the broadest growth gauge. Here is why markets react&amp;hellip;</span></li>
+      <li><a href="/journal/ism-pmi-explained.html">ISM &amp; PMI Data, Explained</a> &mdash; <span style="color:var(--txt3);">ISM and PMI surveys gauge whether the manufacturing and services economy is expanding or&amp;hellip;</span></li>
+      <li><a href="/journal/jobless-claims.html">Jobless Claims &amp; the Market, Explained</a> &mdash; <span style="color:var(--txt3);">Weekly jobless claims are a high-frequency read on the labor market that can move markets,&amp;hellip;</span></li>
+      <li><a href="/journal/pce-inflation-gauge.html">PCE: The Fed's Preferred Inflation Gauge, Explained</a> &mdash; <span style="color:var(--txt3);">PCE is the inflation measure the Federal Reserve watches most closely - often more than CPI. Here&amp;hellip;</span></li>
+      <li><a href="/journal/quantitative-tightening.html">Quantitative Tightening &amp; Easing (QT/QE), Explained</a> &mdash; <span style="color:var(--txt3);">Beyond rates, the Fed moves markets by expanding (QE) or shrinking (QT) its balance sheet —&amp;hellip;</span></li>
+      <li><a href="/journal/the-fed-dot-plot.html">The Fed Dot Plot, Explained</a> &mdash; <span style="color:var(--txt3);">The dot plot is the Fed's chart of where each official thinks interest rates are headed. Here is&amp;hellip;</span></li>
+      <li><a href="/journal/the-jobs-report-nfp.html">The Jobs Report (NFP) &amp; the Market, Explained</a> &mdash; <span style="color:var(--txt3);">Non-farm payrolls (NFP) is the monthly employment report that routinely moves markets at 8:30 AM on&amp;hellip;</span></li>
+      <li><a href="/journal/retail-sales-report.html">The Retail Sales Report &amp; the Market, Explained</a> &mdash; <span style="color:var(--txt3);">Retail sales measure consumer spending — the engine of the US economy. Here is why the monthly&amp;hellip;</span></li>
+      <li><a href="/journal/yield-curve-inversion.html">The Yield Curve &amp; Inversion, Explained</a> &mdash; <span style="color:var(--txt3);">The yield curve plots interest rates across maturities; when short rates exceed long rates, it&amp;hellip;</span></li>
+      <li><a href="/journal/trading-around-earnings.html">Trading Around Earnings &amp; the IV Crush</a> &mdash; <span style="color:var(--txt3);">Earnings releases are binary events that inflate option prices beforehand and crush them after.&amp;hellip;</span></li>
+      <li><a href="/journal/trading-the-economic-calendar.html">Trading Around the Economic Calendar (CPI, FOMC, Jobs)</a> &mdash; <span style="color:var(--txt3);">Scheduled data like CPI, the Fed decision, and jobs reports move markets on a known clock. Here is&amp;hellip;</span></li>
+      <li><a href="/journal/treasury-auctions.html">Treasury Auctions &amp; Why Traders Watch Them</a> &mdash; <span style="color:var(--txt3);">The US Treasury regularly auctions bonds to fund the government, and the demand at those auctions&amp;hellip;</span></li>
+      <li><a href="/journal/triple-witching.html">Triple Witching &amp; OpEx, Explained</a> &mdash; <span style="color:var(--txt3);">Triple witching is the quarterly expiration of stock options, index options, and futures at once -&amp;hellip;</span></li>
+    </ul>
+    <h2>Chart Patterns</h2>
+    <ul>
+      <li><a href="/journal/bull-flag-pattern.html">Bull Flags &amp; Bear Flags, Explained</a> &mdash; <span style="color:var(--txt3);">A flag is a brief pause inside a strong trend before it continues. Here is how bull and bear flags&amp;hellip;</span></li>
+      <li><a href="/journal/double-top-double-bottom.html">Double Tops &amp; Double Bottoms, Explained</a> &mdash; <span style="color:var(--txt3);">A double top is two failed attempts at the same high; a double bottom, two held lows. Here is how&amp;hellip;</span></li>
+      <li><a href="/journal/wedge-patterns.html">Rising &amp; Falling Wedge Patterns, Explained</a> &mdash; <span style="color:var(--txt3);">Wedges are converging trendlines that tilt with the trend — and they often signal reversals. Here&amp;hellip;</span></li>
+      <li><a href="/journal/cup-and-handle.html">The Cup &amp; Handle Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">The cup and handle is a bullish continuation pattern shaped like a rounded base followed by a small&amp;hellip;</span></li>
+      <li><a href="/journal/head-and-shoulders-pattern.html">The Head &amp; Shoulders Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">Head and shoulders is a classic reversal pattern - three peaks with a neckline. Here is how it&amp;hellip;</span></li>
+      <li><a href="/journal/pennant-pattern.html">The Pennant Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">A pennant is a small symmetrical consolidation after a sharp move — a brief pause before&amp;hellip;</span></li>
+      <li><a href="/journal/rectangle-range-pattern.html">The Rectangle (Range) Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">A rectangle forms when price bounces between horizontal support and resistance — a range. Here is&amp;hellip;</span></li>
+      <li><a href="/journal/rounding-bottom-pattern.html">The Rounding Bottom (Saucer) Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">A rounding bottom is a slow, U-shaped base that signals a gradual shift from selling to buying.&amp;hellip;</span></li>
+      <li><a href="/journal/triangle-patterns.html">Triangle Patterns: Ascending, Descending &amp; Symmetrical</a> &mdash; <span style="color:var(--txt3);">Triangles form as price coils into a tightening range before a breakout. Here is how ascending,&amp;hellip;</span></li>
+    </ul>
+    <h2>Charting</h2>
+    <ul>
+      <li><a href="/journal/engulfing-candlestick.html">Engulfing Candlestick Patterns, Explained</a> &mdash; <span style="color:var(--txt3);">A bullish or bearish engulfing candle fully swallows the prior candle's body — a visible shift in&amp;hellip;</span></li>
+      <li><a href="/journal/hammer-and-hanging-man.html">Hammer &amp; Hanging Man Candlesticks, Explained</a> &mdash; <span style="color:var(--txt3);">The hammer and hanging man look identical — a small body with a long lower wick — but mean opposite&amp;hellip;</span></li>
+      <li><a href="/journal/candlestick-basics.html">How to Read a Candlestick Chart</a> &mdash; <span style="color:var(--txt3);">Each candlestick shows four prices - open, high, low, close - in one shape. Here is how to read&amp;hellip;</span></li>
+      <li><a href="/journal/morning-and-evening-star.html">Morning Star &amp; Evening Star Patterns, Explained</a> &mdash; <span style="color:var(--txt3);">The morning star and evening star are three-candle reversal patterns built around a small-bodied&amp;hellip;</span></li>
+      <li><a href="/journal/spinning-top-and-marubozu.html">Spinning Tops &amp; Marubozu Candles, Explained</a> &mdash; <span style="color:var(--txt3);">A spinning top has a small body with long wicks (indecision); a marubozu is all body with no wicks&amp;hellip;</span></li>
+      <li><a href="/journal/doji-candlestick.html">The Doji Candlestick: Indecision, Explained</a> &mdash; <span style="color:var(--txt3);">A doji forms when a candle opens and closes at nearly the same price — a snapshot of indecision.&amp;hellip;</span></li>
+      <li><a href="/journal/harami-candlestick.html">The Harami Candlestick Pattern, Explained</a> &mdash; <span style="color:var(--txt3);">A harami is a two-candle pattern where a small candle sits inside the prior large one — a sign&amp;hellip;</span></li>
+      <li><a href="/journal/three-white-soldiers-black-crows.html">Three White Soldiers &amp; Three Black Crows, Explained</a> &mdash; <span style="color:var(--txt3);">These three-candle patterns show sustained, one-sided momentum — three strong closes in a row. Here&amp;hellip;</span></li>
+      <li><a href="/journal/tweezer-tops-and-bottoms.html">Tweezer Tops &amp; Bottoms, Explained</a> &mdash; <span style="color:var(--txt3);">Tweezer patterns are two candles that share almost the same high (top) or low (bottom) — a double&amp;hellip;</span></li>
+    </ul>
+    <h2>Dealer Flow</h2>
+    <ul>
+      <li><a href="/journal/charm-and-vanna.html">Charm &amp; Vanna: The Second-Order Greeks That Move the Tape</a> &mdash; <span style="color:var(--txt3);">Charm and vanna are second-order greeks that drive dealer hedging flows - and can quietly push the&amp;hellip;</span></li>
+      <li><a href="/journal/options-pinning-max-pain.html">Options Pinning and 'Max Pain,' Explained</a> &mdash; <span style="color:var(--txt3);">Options pinning is when a stock gravitates toward a heavily-traded strike into expiration. Here is&amp;hellip;</span></li>
+      <li><a href="/journal/pin-risk-explained.html">Pin Risk: Why Price Sticks to Strikes at Expiration</a> &mdash; <span style="color:var(--txt3);">Pin risk is the tendency for price to gravitate toward big option strikes near expiration - and the&amp;hellip;</span></li>
+      <li><a href="/journal/the-gamma-flip.html">The Gamma Flip: Where the Market's Behavior Inverts</a> &mdash; <span style="color:var(--txt3);">The gamma flip — the zero-gamma level — is the price where dealer hedging switches from stabilizing&amp;hellip;</span></li>
+      <li><a href="/journal/put-call-ratio-explained.html">The Put/Call Ratio: A Sentiment Gauge, Explained</a> &mdash; <span style="color:var(--txt3);">The put/call ratio compares put volume to call volume as a read on fear versus greed. Here is how&amp;hellip;</span></li>
+      <li><a href="/journal/gamma-squeeze-explained.html">What Is a Gamma Squeeze?</a> &mdash; <span style="color:var(--txt3);">A gamma squeeze happens when heavy call buying forces dealers to buy the stock to hedge, pushing it&amp;hellip;</span></li>
+      <li><a href="/journal/what-market-makers-do.html">What Market Makers Actually Do (and Why It Moves Your Trade)</a> &mdash; <span style="color:var(--txt3);">Market makers are the counterparty to most of your trades. Here's what they actually do, why they&amp;hellip;</span></li>
+    </ul>
+    <h2>Discipline</h2>
+    <ul>
+      <li><a href="/journal/what-is-a-trading-plan.html">Why You Need a Trading Plan (and What Goes In One)</a> &mdash; <span style="color:var(--txt3);">A trading plan defines your setups, risk, sizing, and exits before you ever click - so decisions&amp;hellip;</span></li>
+    </ul>
+    <h2>Exits</h2>
+    <ul>
+      <li><a href="/journal/trailing-stop-explained.html">What Is a Trailing Stop? Locking In Gains Without Guessing</a> &mdash; <span style="color:var(--txt3);">A trailing stop moves your exit up as the trade goes your way, locking in profit while leaving room&amp;hellip;</span></li>
+    </ul>
+    <h2>How It Works</h2>
+    <ul>
+      <li><a href="/journal/what-is-algorithmic-trading.html">What Is Algorithmic Trading? (And Is It Legal for Retail?)</a> &mdash; <span style="color:var(--txt3);">Algorithmic trading means software executes trades by predefined rules instead of a human clicking.&amp;hellip;</span></li>
+    </ul>
+    <h2>Indicators</h2>
+    <ul>
+      <li><a href="/journal/adx-trend-strength.html">ADX: Measuring Trend Strength, Explained</a> &mdash; <span style="color:var(--txt3);">The ADX measures how strong a trend is — not its direction — on a 0-100 scale. Here is how to read&amp;hellip;</span></li>
+      <li><a href="/journal/anchored-vwap.html">Anchored VWAP, Explained</a> &mdash; <span style="color:var(--txt3);">Anchored VWAP measures the volume-weighted average price from a specific event you choose — an&amp;hellip;</span></li>
+      <li><a href="/journal/bollinger-bands.html">Bollinger Bands, Explained</a> &mdash; <span style="color:var(--txt3);">Bollinger Bands wrap a moving average in volatility-based envelopes that expand and contract. Here&amp;hellip;</span></li>
+      <li><a href="/journal/donchian-channels.html">Donchian Channels, Explained</a> &mdash; <span style="color:var(--txt3);">Donchian Channels plot the highest high and lowest low over a lookback period — the original&amp;hellip;</span></li>
+      <li><a href="/journal/keltner-channels.html">Keltner Channels, Explained</a> &mdash; <span style="color:var(--txt3);">Keltner Channels wrap a moving average in bands set by ATR (true range), not standard deviation.&amp;hellip;</span></li>
+      <li><a href="/journal/moving-averages-day-trading.html">Moving Averages for Day Trading: EMA vs. SMA</a> &mdash; <span style="color:var(--txt3);">A moving average smooths price into a trend line. Here is the difference between simple and&amp;hellip;</span></li>
+      <li><a href="/journal/on-balance-volume.html">On-Balance Volume (OBV), Explained</a> &mdash; <span style="color:var(--txt3);">OBV is a running total that adds volume on up-days and subtracts it on down-days to track buying vs&amp;hellip;</span></li>
+      <li><a href="/journal/pivot-points.html">Pivot Points, Explained</a> &mdash; <span style="color:var(--txt3);">Pivot points are pre-calculated support and resistance levels derived from the prior period's high,&amp;hellip;</span></li>
+      <li><a href="/journal/commodity-channel-index-cci.html">The Commodity Channel Index (CCI), Explained</a> &mdash; <span style="color:var(--txt3);">Despite the name, the CCI is a momentum oscillator used on any market to flag overbought/oversold&amp;hellip;</span></li>
+      <li><a href="/journal/ichimoku-cloud.html">The Ichimoku Cloud, Explained</a> &mdash; <span style="color:var(--txt3);">Ichimoku is an all-in-one system that maps trend, momentum, and support/resistance with a shaded&amp;hellip;</span></li>
+      <li><a href="/journal/money-flow-index.html">The Money Flow Index (MFI), Explained</a> &mdash; <span style="color:var(--txt3);">The MFI is like RSI but volume-weighted — a momentum oscillator that factors in how much money&amp;hellip;</span></li>
+      <li><a href="/journal/parabolic-sar.html">The Parabolic SAR, Explained</a> &mdash; <span style="color:var(--txt3);">The Parabolic SAR plots trailing dots above or below price to signal trend direction and potential&amp;hellip;</span></li>
+      <li><a href="/journal/stochastic-oscillator.html">The Stochastic Oscillator, Explained</a> &mdash; <span style="color:var(--txt3);">The stochastic oscillator measures where price closes within its recent range on a 0-100 scale.&amp;hellip;</span></li>
+      <li><a href="/journal/bollinger-bands-explained.html">What Are Bollinger Bands?</a> &mdash; <span style="color:var(--txt3);">Bollinger Bands wrap a moving average in two volatility-based bands that expand and contract with&amp;hellip;</span></li>
+      <li><a href="/journal/atr-average-true-range.html">What Is ATR? Average True Range, Explained</a> &mdash; <span style="color:var(--txt3);">Average True Range measures how much an instrument typically moves in a period. Here is how it's&amp;hellip;</span></li>
+      <li><a href="/journal/macd-explained.html">What Is MACD? Moving Average Convergence Divergence, Explained</a> &mdash; <span style="color:var(--txt3);">MACD tracks the relationship between two moving averages to show momentum shifts. Here is how the&amp;hellip;</span></li>
+      <li><a href="/journal/rsi-explained.html">What Is RSI? The Relative Strength Index, Explained</a> &mdash; <span style="color:var(--txt3);">RSI measures the speed and size of recent price moves on a 0-100 scale to flag overbought and&amp;hellip;</span></li>
+    </ul>
+    <h2>Instruments</h2>
+    <ul>
+      <li><a href="/journal/what-is-an-etf-spy.html">What Is an ETF? (And Why Traders Live on SPY)</a> &mdash; <span style="color:var(--txt3);">An ETF is a basket of assets that trades like a single stock. Here is how ETFs work, why SPY - the&amp;hellip;</span></li>
+    </ul>
+    <h2>Know the Difference</h2>
+    <ul>
+      <li><a href="/journal/trading-bot-vs-signal-service.html">Trading Bot vs. Signal Service: What's the Difference?</a> &mdash; <span style="color:var(--txt3);">Trading bots, copy bots, and signal services all promise to help you trade — but they work in very&amp;hellip;</span></li>
+    </ul>
+    <h2>Market Hours</h2>
+    <ul>
+      <li><a href="/journal/premarket-afterhours-trading.html">Pre-Market and After-Hours Trading, Explained</a> &mdash; <span style="color:var(--txt3);">Extended-hours trading lets you trade before the open and after the close - with thinner liquidity&amp;hellip;</span></li>
+    </ul>
+    <h2>Market Structure</h2>
+    <ul>
+      <li><a href="/journal/circuit-breakers-market-halts.html">Circuit Breakers and Market Halts, Explained</a> &mdash; <span style="color:var(--txt3);">Circuit breakers pause trading when prices fall too far, too fast, to curb panic. Here is how&amp;hellip;</span></li>
+      <li><a href="/journal/dark-pools-explained.html">Dark Pools, Explained (And Why the Prints Matter)</a> &mdash; <span style="color:var(--txt3);">Dark pools are private venues where large orders trade away from public exchanges. Here is why they&amp;hellip;</span></li>
+      <li><a href="/journal/fibonacci-retracements.html">Do Fibonacci Retracements Actually Work?</a> &mdash; <span style="color:var(--txt3);">Fibonacci retracements mark potential pullback levels using ratios like 38.2% and 61.8%. Here is&amp;hellip;</span></li>
+      <li><a href="/journal/fair-value-gaps.html">Fair Value Gaps, Explained</a> &mdash; <span style="color:var(--txt3);">A fair value gap is a price imbalance left by a fast move that skipped levels. Here is how they&amp;hellip;</span></li>
+      <li><a href="/journal/high-frequency-trading-explained.html">High-Frequency Trading (HFT), Explained</a> &mdash; <span style="color:var(--txt3);">HFT firms use speed and co-location to trade in microseconds, providing liquidity and arbitraging&amp;hellip;</span></li>
+      <li><a href="/journal/iceberg-and-hidden-orders.html">Iceberg &amp; Hidden Orders, Explained</a> &mdash; <span style="color:var(--txt3);">Iceberg and hidden orders let large traders hide their true size from the order book, showing only&amp;hellip;</span></li>
+      <li><a href="/journal/level-2-and-the-order-book.html">Level 2 &amp; the Order Book, Explained</a> &mdash; <span style="color:var(--txt3);">The order book (Level 2) shows resting buy and sell orders beyond the best bid and ask. Here is how&amp;hellip;</span></li>
+      <li><a href="/journal/market-breadth-explained.html">Market Breadth, Explained (Is the Rally Real?)</a> &mdash; <span style="color:var(--txt3);">Breadth measures how many stocks are participating in a market move, not just the index level. Here&amp;hellip;</span></li>
+      <li><a href="/journal/market-profile-explained.html">Market Profile &amp; Auction Theory, Explained</a> &mdash; <span style="color:var(--txt3);">Market Profile organizes a session by price and time to reveal where the market found acceptance&amp;hellip;</span></li>
+      <li><a href="/journal/momentum-vs-mean-reversion.html">Momentum vs. Mean Reversion: Two Ways Markets Move</a> &mdash; <span style="color:var(--txt3);">Markets either trend (momentum) or snap back to an average (mean reversion) - and strategies that&amp;hellip;</span></li>
+      <li><a href="/journal/what-is-open-interest.html">Open Interest, Explained (and Why It Is Not Volume)</a> &mdash; <span style="color:var(--txt3);">Open interest is the number of options contracts that exist and remain open. Here is how it differs&amp;hellip;</span></li>
+      <li><a href="/journal/order-flow-imbalance.html">Order-Flow Imbalance, Explained</a> &mdash; <span style="color:var(--txt3);">Order-flow imbalance measures whether aggressive buyers or sellers are dominating the tape in real&amp;hellip;</span></li>
+      <li><a href="/journal/what-is-pfof.html">Payment for Order Flow (PFOF), Explained</a> &mdash; <span style="color:var(--txt3);">PFOF is how commission-free brokers get paid: they route your orders to market makers who pay for&amp;hellip;</span></li>
+      <li><a href="/journal/sector-rotation.html">Sector Rotation, Explained</a> &mdash; <span style="color:var(--txt3);">Sector rotation is how money flows between market sectors as the economic cycle turns. Here is what&amp;hellip;</span></li>
+      <li><a href="/journal/short-interest-and-float.html">Short Interest &amp; Float, Explained</a> &mdash; <span style="color:var(--txt3);">Float is the tradable share supply; short interest is how much of it is sold short. Here is why the&amp;hellip;</span></li>
+      <li><a href="/journal/spoofing-and-layering.html">Spoofing &amp; Layering, Explained</a> &mdash; <span style="color:var(--txt3);">Spoofing and layering are illegal manipulation tactics that place fake orders to create a false&amp;hellip;</span></li>
+      <li><a href="/journal/stop-hunts-liquidity-grabs.html">Stop Hunts &amp; Liquidity Grabs, Explained</a> &mdash; <span style="color:var(--txt3);">A stop hunt is a sharp move that triggers clustered stop orders before reversing. Here is why it&amp;hellip;</span></li>
+      <li><a href="/journal/support-and-resistance-explained.html">Support and Resistance, Explained (Without the Hand-Waving)</a> &mdash; <span style="color:var(--txt3);">Support is where buyers tend to step in; resistance is where sellers do. Here is why these levels&amp;hellip;</span></li>
+      <li><a href="/journal/tape-reading-time-and-sales.html">Tape Reading &amp; Time and Sales, Explained</a> &mdash; <span style="color:var(--txt3);">The 'tape' - time and sales - is the live feed of every trade as it prints. Here is what tape&amp;hellip;</span></li>
+      <li><a href="/journal/bid-ask-spread-explained.html">The Bid-Ask Spread, Explained (Your Real Cost to Trade)</a> &mdash; <span style="color:var(--txt3);">The bid-ask spread is the gap between what buyers offer and sellers want - and it is a cost you pay&amp;hellip;</span></li>
+      <li><a href="/journal/the-closing-auction-moc.html">The Closing Auction &amp; MOC Orders, Explained</a> &mdash; <span style="color:var(--txt3);">The closing auction sets the official closing price with a huge burst of volume — and MOC&amp;hellip;</span></li>
+      <li><a href="/journal/gap-types-explained.html">The Four Types of Price Gaps, Explained</a> &mdash; <span style="color:var(--txt3);">Not all gaps are the same — common, breakaway, runaway, and exhaustion gaps each tell a different&amp;hellip;</span></li>
+      <li><a href="/journal/index-rebalancing-effect.html">The Index Rebalancing Effect, Explained</a> &mdash; <span style="color:var(--txt3);">When an index adds or drops a stock, the trillions tracking it must buy or sell — creating&amp;hellip;</span></li>
+      <li><a href="/journal/nbbo-and-reg-nms.html">The NBBO &amp; Reg NMS, Explained</a> &mdash; <span style="color:var(--txt3);">The NBBO is the best available bid and ask across all exchanges, and Reg NMS is the rule that&amp;hellip;</span></li>
+      <li><a href="/journal/opening-range-first-30-minutes.html">The Opening Range: Why the First 30 Minutes Set the Day</a> &mdash; <span style="color:var(--txt3);">The opening range — the high and low of the first minutes of trading — frames the entire session.&amp;hellip;</span></li>
+      <li><a href="/journal/short-sale-restriction-ssr.html">The Short-Sale Restriction (SSR), Explained</a> &mdash; <span style="color:var(--txt3);">SSR (the uptick rule) kicks in after a stock drops 10% in a day and limits how shorts can be&amp;hellip;</span></li>
+      <li><a href="/journal/tick-size-and-liquidity.html">Tick Size &amp; Why It Shapes Liquidity</a> &mdash; <span style="color:var(--txt3);">Tick size — the minimum price increment — quietly shapes spreads, liquidity, and how easy an&amp;hellip;</span></li>
+      <li><a href="/journal/volume-profile-explained.html">Volume Profile &amp; Point of Control, Explained</a> &mdash; <span style="color:var(--txt3);">Volume profile shows how much trading happened at each price, not each time. Here is how to read&amp;hellip;</span></li>
+      <li><a href="/journal/vwap-explained.html">VWAP Explained: The Volume-Weighted Average Price and Why It Matters</a> &mdash; <span style="color:var(--txt3);">VWAP is the line institutions trade around all day. Here's what the volume-weighted average price&amp;hellip;</span></li>
+      <li><a href="/journal/what-moves-spy.html">What Actually Moves SPY?</a> &mdash; <span style="color:var(--txt3);">SPY tracks the S&amp;P 500, so it moves on everything from Fed policy to earnings to dealer hedging.&amp;hellip;</span></li>
+      <li><a href="/journal/gap-and-gap-fill.html">What Is a Gap? (And Do Gaps Really 'Fill'?)</a> &mdash; <span style="color:var(--txt3);">A gap is a jump between one session's close and the next session's open with no trading in between.&amp;hellip;</span></li>
+      <li><a href="/journal/what-is-a-short-squeeze.html">What Is a Short Squeeze? (And How It Differs From a Gamma Squeeze)</a> &mdash; <span style="color:var(--txt3);">A short squeeze is a violent rally driven by short sellers forced to buy back. Here is the&amp;hellip;</span></li>
+      <li><a href="/journal/what-is-liquidity.html">What Is Liquidity? (And Why It Decides Your Fills)</a> &mdash; <span style="color:var(--txt3);">Liquidity is how easily you can trade an asset without moving its price. Here is why liquidity&amp;hellip;</span></li>
+    </ul>
+    <h2>Products</h2>
+    <ul>
+      <li><a href="/journal/spx-vs-spy.html">SPX vs SPY: Which S&amp;P 500 Options to Trade?</a> &mdash; <span style="color:var(--txt3);">SPX and SPY both track the S&amp;P 500 but differ in size, settlement, exercise style, and taxes. Here&amp;hellip;</span></li>
+    </ul>
+    <h2>The Greeks</h2>
+    <ul>
+      <li><a href="/journal/what-is-delta-options.html">What Is Delta in Options Trading?</a> &mdash; <span style="color:var(--txt3);">Delta measures how much an option's price moves when the stock moves $1 - and doubles as a rough&amp;hellip;</span></li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <h3>Want the machine's read, not just the theory?</h3>
+    <p>NoVo Analyst delivers the daily market read — structure, levels, and dealer positioning — to your inbox for $29/mo. NoVo Pulse is the full system, executing your rules live in your own broker account.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/analyst">Get NoVo Analyst — $29/mo</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+</main>
+
+<!-- NEWSLETTER SIGNUP -->
+<div style="max-width:560px;margin:0 auto;padding:34px 20px;text-align:center;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#10b981;margin-bottom:10px;">The NoVo Journal</div>
+  <div style="font-size:18px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">Get NoVo's market notes — free</div>
+  <p style="font-size:13.5px;color:#8aacc8;line-height:1.6;margin:0 0 16px;">A weekly market read plus new articles as they drop. No hype, no spam. Want the daily reads + alerts? That's <a href="/analyst" style="color:#22d3ee">NoVo Analyst</a>.</p>
+  <form id="np-subscribe" style="display:flex;gap:8px;max-width:430px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+    <input id="np-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;border-radius:8px;border:1px solid #2c3a4e;background:#0c1320;color:#eaf3ff;font-size:14px;">
+    <button type="submit" style="padding:11px 22px;border-radius:8px;border:0;background:#10b981;color:#04130c;font-weight:800;font-size:14px;cursor:pointer;">Subscribe</button>
+  </form>
+  <div id="np-sub-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+</div>
+<script>
+(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='...';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You are in - thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong - try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error - try again.';}});})();
+</script>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> &middot; <a href="/journal/">The Journal</a> &middot; <a href="/license.html">Terms</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="https://discord.gg/hr5GKzsU" target="_blank" rel="noopener">Discord</a> &middot; <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>&copy; 2026 NoVo AI Trading. Editorial content is for education only - not financial advice. Trading involves substantial risk of loss.</div>
+</footer>
+</body>
+</html>

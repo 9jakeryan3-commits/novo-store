@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1DTE SPY Options Scalping &amp; Automated Execution - The Complete Guide | The NoVo Journal</title>
+<meta name="description" content="Everything on short-dated SPY options, the execution problem, and the AI/infra behind a systematic scalper - and why the fill, not the signal, decides the trade">
+<link rel="canonical" href="https://novo-aitrading.app/journal/guide-1dte-spy-options-scalping.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://novo-aitrading.app/journal/guide-1dte-spy-options-scalping.html">
+<meta property="og:title" content="The Complete Guide to 1DTE SPY Options Scalping">
+<meta property="og:description" content="Everything on short-dated SPY options, the execution problem, and the AI/infra behind a systematic scalper - and why the fill, not the signal, decides the trade">
+<meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="600">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="1DTE SPY Options Scalping &amp; Automated Execution - The Complete Guide">
+<meta name="twitter:description" content="Everything on short-dated SPY options, the execution problem, and the AI/infra behind a systematic scalper - and why the fill, not the signal, decides the trade">
+<meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
+<link rel="icon" href="/novo-icon.png?v=2">
+<link rel="stylesheet" href="/journal/blog.css?v=8">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"The Complete Guide to 1DTE SPY Options Scalping","description":"Everything on short-dated SPY options, the execution problem, and the AI/infra behind a systematic scalper - and why the fill, not the signal, decides the trade","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-05","mainEntityOfPage":"https://novo-aitrading.app/journal/guide-1dte-spy-options-scalping.html"}
+</script>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/">NoVo Pulse</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
+    <a class="nav-buy" href="/">Subscribe</a><a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+  </div>
+</div></nav>
+<!--sitewide-ticker--><div class="ticker"><div class="ticker-row"><span class="ticker-tag"><span class="dot"></span>US Markets</span><div class="ticker-track"><div class="ticker-inner"><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span></div></div></div></div><script src="/ticker-live.js" defer></script>
+
+<main class="wrap">
+<article class="article">
+  <a class="back" href="/journal/">&larr; All articles</a>
+  <header class="article-head">
+    <div class="kicker">Start Here &amp;middot; Guide</div>
+    <h1>The Complete Guide to 1DTE SPY Options Scalping</h1>
+    <p class="standfirst">Everything on short-dated SPY options, the execution problem, and the AI/infra behind a systematic scalper - and why the fill, not the signal, decides the trade.</p>
+  </header>
+  <div class="article-meta">NoVo AI Trading &middot; 2026</div>
+
+  <div class="article-body">
+<p>NoVo trades one thing: short-dated SPY options - the 0-5 DTE window, defaulting to 1DTE. It is the most leveraged, most time-sensitive, most execution-dependent corner of retail trading, and it is exactly where a systematic tool earns its keep. This guide collects everything the Journal has written on the mechanics of the trade, the brutal reality of the fill, and the AI and infrastructure that let a machine do consistently what a human can only do in flashes.</p>
+<p>Read it top to bottom and you will understand not just <em>what</em> a 1DTE scalp is, but <em>why</em> execution - not the entry signal - is where the edge lives or dies.</p>
+<div style="background:linear-gradient(180deg,rgba(34,211,238,0.08),rgba(11,15,24,0));border:1px solid rgba(34,211,238,0.25);border-radius:12px;padding:20px 22px;margin:22px 0;"><p style="margin:0 0 10px;font-size:15px;color:var(--txt1);"><strong>Do not want to read the whole market yourself every day?</strong> NoVo Analyst sends you the machine&rsquo;s read - structure, levels, and dealer flow - by email &amp; Discord, for $29/mo. Analysis, not signals.</p><a href="/analyst" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:11px 22px;border-radius:9px;text-decoration:none;">Get NoVo Analyst &rarr; $29/mo</a></div>
+<p style="color:var(--txt3);font-size:13px;">45 guides in this pillar &middot; grouped by topic.</p>
+    <h2>AI in Trading</h2>
+    <ul>
+      <li><a href="/journal/ai-signal-vs-ai-execution.html">AI Signal vs AI Execution: The Difference That Matters</a> &mdash; <span style="color:var(--txt3);">Most 'AI trading' products stop at generating a signal — leaving you to execute. The harder, more&amp;hellip;</span></li>
+      <li><a href="/journal/ai-vs-rules-engine.html">AI vs a Rules Engine in Trading: What's the Difference?</a> &mdash; <span style="color:var(--txt3);">A rules engine follows fixed if-then logic; an AI layer interprets context. Here is how they differ&amp;hellip;</span></li>
+      <li><a href="/journal/vision-models-reading-charts.html">Can a Vision Model Read a Chart?</a> &mdash; <span style="color:var(--txt3);">Modern vision-capable AI models can interpret chart images — but what does that actually add to&amp;hellip;</span></li>
+      <li><a href="/journal/llm-in-trading-loop.html">Where an LLM Helps in a Trading Loop (and Where It Doesn't)</a> &mdash; <span style="color:var(--txt3);">Large language models are powerful at synthesis and explanation but wrong for millisecond&amp;hellip;</span></li>
+      <li><a href="/journal/why-a-raw-llm-cant-trade.html">Why a Raw LLM Can't Trade For You</a> &mdash; <span style="color:var(--txt3);">Asking ChatGPT to 'trade for me' fails for concrete reasons: no real-time data, no execution,&amp;hellip;</span></li>
+      <li><a href="/journal/ai-needs-guardrails.html">Why an AI Trader Needs Hard Guardrails</a> &mdash; <span style="color:var(--txt3);">An AI that can place trades without hard limits is a liability, not an asset. Here is why&amp;hellip;</span></li>
+    </ul>
+    <h2>Cognition</h2>
+    <ul>
+      <li><a href="/journal/how-novo-thinks-and-learns.html">How NoVo Thinks &amp; Learns</a> &mdash; <span style="color:var(--txt3);">Four AI layers, a permanent two-tier memory, a shadow book that tracks the opposite of every trade,&amp;hellip;</span></li>
+    </ul>
+    <h2>Discipline &amp; Risk</h2>
+    <ul>
+      <li><a href="/journal/chasing-the-entry.html">Chasing the Entry: The Scalper's Costliest Habit</a> &mdash; <span style="color:var(--txt3);">Chasing — jumping into a move after it's already run because you're afraid to miss it — is one of&amp;hellip;</span></li>
+    </ul>
+    <h2>Execution</h2>
+    <ul>
+      <li><a href="/journal/execution-speed-as-edge.html">Execution Speed as an Edge</a> &mdash; <span style="color:var(--txt3);">On short-term trades, how fast and consistently you execute is itself an edge — often bigger than&amp;hellip;</span></li>
+      <li><a href="/journal/how-novo-decides-executes-exits.html">How NoVo Decides, Executes &amp; Exits</a> &mdash; <span style="color:var(--txt3);">From a confirmed signal to a filled order to a disciplined exit — and the daily circuit breakers&amp;hellip;</span></li>
+      <li><a href="/journal/marketable-limit-orders.html">Marketable Limit Orders: Speed Without a Blank Check</a> &mdash; <span style="color:var(--txt3);">A marketable limit order fills fast like a market order but caps the price you'll pay — the&amp;hellip;</span></li>
+      <li><a href="/journal/partial-fills-explained.html">Partial Fills: Why They Happen &amp; How to Handle Them</a> &mdash; <span style="color:var(--txt3);">A partial fill is when only some of your order executes. On thin options books it's common — and&amp;hellip;</span></li>
+      <li><a href="/journal/slippage-on-1dte-options.html">Slippage on 1DTE Options: The Real Cost of a Fast Fill</a> &mdash; <span style="color:var(--txt3);">On 1DTE SPY options, slippage is amplified by wide spreads, thin depth, and fast gamma. Here is why&amp;hellip;</span></li>
+      <li><a href="/journal/what-is-slippage.html">What Is Slippage? The Hidden Cost of Every Trade</a> &mdash; <span style="color:var(--txt3);">Slippage is the gap between the price you expected and the price you got. Here is why it happens,&amp;hellip;</span></li>
+      <li><a href="/journal/why-0dte-fills-are-hard.html">Why 0DTE &amp; 1DTE Fills Are the Hardest in Options</a> &mdash; <span style="color:var(--txt3);">Filling a 0DTE or 1DTE option cleanly is one of the hardest problems in retail trading. Here is why&amp;hellip;</span></li>
+    </ul>
+    <h2>Focus</h2>
+    <ul>
+      <li><a href="/journal/why-spy-and-the-dte-dial.html">Why SPY — and the DTE Dial</a> &mdash; <span style="color:var(--txt3);">NoVo trades one instrument on purpose. Why SPY options are the ideal ground for an autonomous&amp;hellip;</span></li>
+    </ul>
+    <h2>Getting Started</h2>
+    <ul>
+      <li><a href="/journal/desktop-setup-low-latency.html">Optimizing a Desktop for Low-Latency Trading</a> &mdash; <span style="color:var(--txt3);">Serious short-term trading runs on a proper desktop, not a phone. Here is how to set one up for&amp;hellip;</span></li>
+      <li><a href="/journal/why-scalping-isnt-mobile.html">Why Serious Scalping Isn't a Mobile Activity</a> &mdash; <span style="color:var(--txt3);">Trading apps make it feel like you can scalp from anywhere, but serious short-term execution and a&amp;hellip;</span></li>
+    </ul>
+    <h2>Market Structure</h2>
+    <ul>
+      <li><a href="/journal/reading-spy-tape-for-entries.html">Reading the SPY Tape for an Entry</a> &mdash; <span style="color:var(--txt3);">'Reading the tape' means interpreting the live flow of trades and quotes to judge short-term&amp;hellip;</span></li>
+    </ul>
+    <h2>Options Strategy</h2>
+    <ul>
+      <li><a href="/journal/gamma-risk-1dte.html">Gamma Risk on 1DTE: When Delta Moves Fast</a> &mdash; <span style="color:var(--txt3);">On 1DTE options, gamma is high — meaning delta, and your directional exposure, changes rapidly with&amp;hellip;</span></li>
+      <li><a href="/journal/1dte-spy-scalp-mechanics.html">The Mechanics of a 1DTE SPY Scalp</a> &mdash; <span style="color:var(--txt3);">A 1DTE SPY options scalp is a fast, high-leverage trade with a brutal decay clock. Here is how the&amp;hellip;</span></li>
+      <li><a href="/journal/theta-vs-gamma-expiration-week.html">Theta vs Gamma in Expiration Week</a> &mdash; <span style="color:var(--txt3);">As expiration nears, both theta (decay) and gamma (delta sensitivity) intensify — and they pull in&amp;hellip;</span></li>
+    </ul>
+    <h2>Perception</h2>
+    <ul>
+      <li><a href="/journal/how-novo-reads-the-market.html">How NoVo Reads the Market</a> &mdash; <span style="color:var(--txt3);">NoVo doesn't trade off one indicator. It fuses the live tape, options-dealer positioning, the macro&amp;hellip;</span></li>
+    </ul>
+    <h2>Plain English</h2>
+    <ul>
+      <li><a href="/journal/what-is-0dte-options-trading.html">What Is 0DTE Options Trading? A Plain-English Guide</a> &mdash; <span style="color:var(--txt3);">0DTE means zero days to expiration — options that expire the same day you trade them. Here's how&amp;hellip;</span></li>
+    </ul>
+    <h2>The Founder</h2>
+    <ul>
+      <li><a href="/journal/why-i-built-novo.html">Why I Built NoVo</a> &mdash; <span style="color:var(--txt3);">The honest story behind NoVo — built by a trader who realized the strategy was never the problem.&amp;hellip;</span></li>
+    </ul>
+    <h2>The Manifesto</h2>
+    <ul>
+      <li><a href="/journal/why-novo-exists.html">The Discipline Problem</a> &mdash; <span style="color:var(--txt3);">The best trading plan in the world fails the moment a human executes it under pressure. NoVo was&amp;hellip;</span></li>
+    </ul>
+    <h2>The Road Ahead</h2>
+    <ul>
+      <li><a href="/journal/the-goal.html">The Goal</a> &mdash; <span style="color:var(--txt3);">Where NoVo is headed — and why the 2026 removal of the pattern-day-trader minimum opens the door&amp;hellip;</span></li>
+    </ul>
+    <h2>The System</h2>
+    <ul>
+      <li><a href="/journal/backtest-vs-forward-test.html">Backtesting vs Forward-Testing: The Reality Gap</a> &mdash; <span style="color:var(--txt3);">A backtest shows how a strategy would have done on past data; a forward-test shows how it does on&amp;hellip;</span></li>
+      <li><a href="/journal/kill-switch-fail-safes.html">Kill Switches &amp; Fail-Safes in Automated Trading</a> &mdash; <span style="color:var(--txt3);">An automated system that can't be stopped or that keeps trading through a malfunction is a hazard.&amp;hellip;</span></li>
+      <li><a href="/journal/look-ahead-bias.html">Look-Ahead Bias in Backtesting, Explained</a> &mdash; <span style="color:var(--txt3);">Look-ahead bias is when a backtest accidentally uses information that wouldn't have been available&amp;hellip;</span></li>
+      <li><a href="/journal/manual-vs-automated-execution.html">Manual vs Automated Execution: The Consistency Gap</a> &mdash; <span style="color:var(--txt3);">The real difference between a manual trader and an automated system isn't intelligence — it's&amp;hellip;</span></li>
+      <li><a href="/journal/survivorship-bias-backtesting.html">Survivorship Bias in Backtesting, Explained</a> &mdash; <span style="color:var(--txt3);">If your backtest only includes stocks that still exist today, it's ignoring every company that&amp;hellip;</span></li>
+      <li><a href="/journal/walk-forward-optimization.html">Walk-Forward Optimization, Explained</a> &mdash; <span style="color:var(--txt3);">Walk-forward optimization tests a strategy by tuning it on one slice of data and validating on the&amp;hellip;</span></li>
+      <li><a href="/journal/what-novo-is.html">What NoVo Actually Is</a> &mdash; <span style="color:var(--txt3);">NoVo is not a 0DTE bot and not a signal feed. It's a multi-layer autonomous SPY options execution&amp;hellip;</span></li>
+    </ul>
+    <h2>Trading Infrastructure</h2>
+    <ul>
+      <li><a href="/journal/alpaca-vs-tradier-options.html">Alpaca vs Tradier for Options: A Practical Comparison</a> &mdash; <span style="color:var(--txt3);">Alpaca and Tradier are two popular API-first brokers, but they serve different roles for an options&amp;hellip;</span></li>
+      <li><a href="/journal/broker-api-rate-limits.html">Broker API Rate Limits: The Hidden Constraint</a> &mdash; <span style="color:var(--txt3);">Every broker API caps how many requests you can send per second. Ignore it and your orders get&amp;hellip;</span></li>
+      <li><a href="/journal/resilient-trading-loop.html">Building a Trading Loop That Survives a Dropped Feed</a> &mdash; <span style="color:var(--txt3);">The real test of a trading system isn't the happy path — it's what happens when the data feed&amp;hellip;</span></li>
+      <li><a href="/journal/options-order-routing.html">How an Options Order Actually Reaches the Market</a> &mdash; <span style="color:var(--txt3);">Between clicking 'buy' and getting filled, your options order travels through a routing chain most&amp;hellip;</span></li>
+      <li><a href="/journal/idempotency-order-submission.html">Idempotency: How Systems Avoid Duplicate Orders</a> &mdash; <span style="color:var(--txt3);">When a network hiccup leaves an order's status unknown, a naive retry can submit it twice.&amp;hellip;</span></li>
+      <li><a href="/journal/in-memory-state-trading.html">In-Memory State: Why Real-Time Trading Lives in RAM</a> &mdash; <span style="color:var(--txt3);">Fast trading systems keep their live state in memory (RAM), not on disk, so reads and writes happen&amp;hellip;</span></li>
+      <li><a href="/journal/latency-in-retail-trading.html">Latency: How Milliseconds Cost Retail Traders</a> &mdash; <span style="color:var(--txt3);">Latency — the delay between a decision and its execution — quietly erodes short-term trading edges.&amp;hellip;</span></li>
+      <li><a href="/journal/polling-vs-streaming-data.html">Polling vs Streaming Market Data</a> &mdash; <span style="color:var(--txt3);">A trading system can pull market data on a timer (polling) or receive it pushed in real time&amp;hellip;</span></li>
+      <li><a href="/journal/async-event-loops-trading.html">Why Trading Systems Run on Event Loops</a> &mdash; <span style="color:var(--txt3);">Real-time trading systems are built on asynchronous event loops so they can react the instant data&amp;hellip;</span></li>
+    </ul>
+    <h2>Trust</h2>
+    <ul>
+      <li><a href="/journal/your-money-your-keys.html">Your Money, Your Keys</a> &mdash; <span style="color:var(--txt3);">Most 'AI trading' is a black box you wire money into and hope. NoVo is the opposite: it executes&amp;hellip;</span></li>
+    </ul>
+    <h2>What It Means</h2>
+    <ul>
+      <li><a href="/journal/what-autonomous-really-means.html">What 'Autonomous' Really Means in Trading Software</a> &mdash; <span style="color:var(--txt3);">'Autonomous' is the most abused word in trading software. Stripped of the hype, it means a specific&amp;hellip;</span></li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <h3>Want the machine's read, not just the theory?</h3>
+    <p>NoVo Analyst delivers the daily market read — structure, levels, and dealer positioning — to your inbox for $29/mo. NoVo Pulse is the full system, executing your rules live in your own broker account.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/analyst">Get NoVo Analyst — $29/mo</a>
+      <a class="btn-ghost" href="https://x.com/novo_trades" target="_blank" rel="noopener">Follow @novo_trades</a>
+    </div>
+  </div>
+
+  <p class="nfa">NoVo is a software tool for automated trade execution, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
+</article>
+</main>
+
+<!-- NEWSLETTER SIGNUP -->
+<div style="max-width:560px;margin:0 auto;padding:34px 20px;text-align:center;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#10b981;margin-bottom:10px;">The NoVo Journal</div>
+  <div style="font-size:18px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">Get NoVo's market notes — free</div>
+  <p style="font-size:13.5px;color:#8aacc8;line-height:1.6;margin:0 0 16px;">A weekly market read plus new articles as they drop. No hype, no spam. Want the daily reads + alerts? That's <a href="/analyst" style="color:#22d3ee">NoVo Analyst</a>.</p>
+  <form id="np-subscribe" style="display:flex;gap:8px;max-width:430px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+    <input id="np-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;border-radius:8px;border:1px solid #2c3a4e;background:#0c1320;color:#eaf3ff;font-size:14px;">
+    <button type="submit" style="padding:11px 22px;border-radius:8px;border:0;background:#10b981;color:#04130c;font-weight:800;font-size:14px;cursor:pointer;">Subscribe</button>
+  </form>
+  <div id="np-sub-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+</div>
+<script>
+(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='...';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You are in - thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong - try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error - try again.';}});})();
+</script>
+
+<footer class="foot">
+  <a class="x" href="https://x.com/novo_trades" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>@novo_trades</a>
+  <div class="links"><a href="/">Home</a> &middot; <a href="/journal/">The Journal</a> &middot; <a href="/license.html">Terms</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="https://discord.gg/hr5GKzsU" target="_blank" rel="noopener">Discord</a> &middot; <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>&copy; 2026 NoVo AI Trading. Editorial content is for education only - not financial advice. Trading involves substantial risk of loss.</div>
+</footer>
+</body>
+</html>
