@@ -53,9 +53,10 @@
   .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
   .nav-buy { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 11px 24px; border-radius: 9px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
   .nav-buy:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(16,185,129,0.45); }
-  .nav-portal { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.07); color: var(--blue); border: 1px solid rgba(59,130,246,0.35); padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; }
+  .nav-portal { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.07); color: var(--blue); border: 1px solid rgba(59,130,246,0.35); padding: 9px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; }
   .nav-portal:hover { border-color: var(--blue); background: rgba(59,130,246,0.16); }
-  .nav-portal svg { width: 15px; height: 15px; }
+  .nav-portal svg { width: 17px; height: 17px; }
+  .nav-portal-txt { display: none; }   /* Portal is icon-only — the person glyph says it all (title tooltip retained) */
   @media (max-width: 560px) {
     .nav-inner { flex-direction: column; gap: 10px; padding: 10px 14px; }
     .nav-logo img { height: 38px; }
@@ -63,13 +64,8 @@
     .nav-actions > a:not(.nav-portal) { font-size: 11px !important; padding: 5px 2px !important; }
     .nav-buy, .nav-portal { padding: 6px 9px; font-size: 11px; }
     .nav-portal { gap: 3px; }
-    .nav-portal svg { width: 12px; height: 12px; }
+    .nav-portal svg { width: 16px; height: 16px; }
     .nav-price { display: none; }
-  }
-  @media (max-width: 400px) {
-    .nav-portal-txt { display: none; }              /* icon-only Portal on the narrowest folds */
-    .nav-portal { padding: 6px 9px; gap: 0; }
-    .nav-portal svg { width: 15px; height: 15px; }
   }
 
   /* ── Hero ── */
