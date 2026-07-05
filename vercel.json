@@ -2,7 +2,8 @@
   "redirects": [
     { "source": "/blog", "destination": "/journal", "permanent": true },
     { "source": "/blog/", "destination": "/journal/", "permanent": true },
-    { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true }
+    { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true },
+    { "source": "/journal/guide-1dte-spy-options-scalping.html", "destination": "/journal/guide-0dte-spy-options-scalping.html", "permanent": true }
   ],
   "rewrites": [
     { "source": "/analyst", "destination": "/analyst.html" },

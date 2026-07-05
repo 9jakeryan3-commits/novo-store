@@ -90,8 +90,8 @@
 <div class="guides-band" style="margin:0 0 30px;">
   <div style="font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;">Start here &middot; The complete guides</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;">
-    <a href="/journal/guide-1dte-spy-options-scalping.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
-      <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">1DTE SPY Options Scalping</div>
+    <a href="/journal/guide-0dte-spy-options-scalping.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
+      <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">0DTE SPY Options Scalping</div>
       <div style="font-size:13px;color:var(--txt2);line-height:1.5;">Short-dated options, the fill, and the machine that executes.</div></a>
     <a href="/journal/guide-options-trading-explained.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
       <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">Options, Explained</div>
@@ -638,6 +638,6 @@
 <script>
 (function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
 </script>
-<script src="/journal/search.js?v=7" defer></script>
+<script src="/journal/search.js?v=8" defer></script>
 </body>
 </html>
