@@ -325,10 +325,10 @@
       <div class="rail-news">
         <div class="eyebrow">The NoVo Journal</div>
         <h4>Get NoVo's market notes — free</h4>
-        <p>A weekly market read (NoVo's Week Ahead) plus new articles as they drop. No hype, no spam. Want the daily reads + alerts? That's <a href="/analyst" style="color:var(--cyan)">NoVo Analyst</a>.</p>
+        <p>A weekly market read (NoVo's Week Ahead) plus new articles as they drop, and the free <a href="https://discord.gg/hr5GKzsU" target="_blank" rel="noopener" style="color:#8aa0f0;font-weight:700;">NoVo Discord</a>. No hype, no spam. Want the daily reads + alerts? That's <a href="/analyst" style="color:var(--cyan)">NoVo Analyst</a> (email &amp; Discord).</p>
         <form id="np-subscribe">
           <input id="np-email" type="email" required placeholder="you@email.com">
-          <button type="submit">Subscribe</button>
+          <button type="submit" style="background:#5865F2;color:#fff;border-color:#5865F2;">Get free notes</button>
         </form>
         <div id="np-sub-msg"></div>
       </div>
@@ -567,6 +567,7 @@
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/look-ahead-bias.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Look-Ahead Bias</a> <span style="color:var(--txt3);font-size:11px;">&middot; The System</span></li>
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/walk-forward-optimization.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Walk-Forward Optimization</a> <span style="color:var(--txt3);font-size:11px;">&middot; The System</span></li>
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/why-a-raw-llm-cant-trade.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Why a Raw LLM Can't Trade</a> <span style="color:var(--txt3);font-size:11px;">&middot; AI in Trading</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/the-mechanics-of-zero-day-scalping-and-the-role-of-algorithmic-executi.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Mechanics of Zero-Day Scalping and the Role of Algorithmic Execution</a> <span style="color:var(--txt3);font-size:11px;">&middot; Market Structure</span></li>
     </ul>
   </div>
 </section>
@@ -638,6 +639,6 @@
 <script>
 (function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
 </script>
-<script src="/journal/search.js?v=8" defer></script>
+<script src="/journal/search.js?v=9" defer></script>
 </body>
 </html>
