@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="The NoVo Journal">
 <meta name="twitter:image" content="https://novo-aitrading.app/og-home.png?v=1">
 <link rel="icon" href="/novo-icon.png?v=4">
-<link rel="stylesheet" href="/journal/blog.css?v=7">
+<link rel="stylesheet" href="/journal/blog.css?v=8">
 </head>
 <body>
 
@@ -70,6 +70,16 @@
 <div class="brandline">
   <h1>The NoVo <span class="accent">Journal</span></h1>
   <span class="tag">Markets · Options · Dealer Flow · Systematic Execution</span>
+</div>
+
+<div class="kb-wrap">
+  <div class="kb-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input id="kb-input" type="search" autocomplete="off" spellcheck="false" placeholder="Search the Journal — gamma, IV crush, stop loss, VWAP…" aria-label="Search the NoVo Journal">
+    <button id="kb-clear" type="button" aria-label="Clear search" hidden>&times;</button>
+  </div>
+  <div id="kb-meta" class="kb-meta">A searchable knowledge base — options, market structure, dealer flow, risk &amp; discipline.</div>
+  <div id="kb-results" class="kb-results" role="listbox" aria-label="Search results"></div>
 </div>
 
 <main class="wrap">
@@ -404,6 +414,31 @@
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/trading-around-earnings.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Trading Around Earnings &amp; IV Crush</a> <span style="color:var(--txt3);font-size:11px;">&middot; Catalysts</span></li>
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/risk-of-ruin.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Risk of Ruin: The Math That Ends Accounts</a> <span style="color:var(--txt3);font-size:11px;">&middot; Discipline &amp; Risk</span></li>
         <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/expected-value-in-trading.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Expected Value: How Pros Think About Trades</a> <span style="color:var(--txt3);font-size:11px;">&middot; Discipline &amp; Risk</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/bull-flag-pattern.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Bull Flags &amp; Bear Flags</a> <span style="color:var(--txt3);font-size:11px;">&middot; Chart Patterns</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/head-and-shoulders-pattern.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Head &amp; Shoulders Pattern</a> <span style="color:var(--txt3);font-size:11px;">&middot; Chart Patterns</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/double-top-double-bottom.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Double Tops &amp; Double Bottoms</a> <span style="color:var(--txt3);font-size:11px;">&middot; Chart Patterns</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/triangle-patterns.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Triangle Patterns, Explained</a> <span style="color:var(--txt3);font-size:11px;">&middot; Chart Patterns</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/what-is-vega.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">What Is Vega?</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options 101</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/what-is-rho.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">What Is Rho?</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options 101</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/charm-and-vanna.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Charm &amp; Vanna: Second-Order Greeks</a> <span style="color:var(--txt3);font-size:11px;">&middot; Dealer Flow</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/moneyness-itm-atm-otm.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Moneyness: ITM, ATM &amp; OTM</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options 101</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/what-are-leaps.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">What Are LEAPS?</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options 101</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/weekly-options-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Weekly Options, Explained</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options 101</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/vertical-spreads-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Vertical Spreads: Debit vs Credit</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options Strategy</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/iron-condor-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Iron Condor, Explained</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options Strategy</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/straddles-and-strangles.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Straddles &amp; Strangles</a> <span style="color:var(--txt3);font-size:11px;">&middot; Options Strategy</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/pin-risk-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Pin Risk at Expiration</a> <span style="color:var(--txt3);font-size:11px;">&middot; Dealer Flow</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/triple-witching.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Triple Witching &amp; OpEx</a> <span style="color:var(--txt3);font-size:11px;">&middot; Catalysts</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/what-is-pfof.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Payment for Order Flow (PFOF)</a> <span style="color:var(--txt3);font-size:11px;">&middot; Market Structure</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/margin-vs-cash-account.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Margin vs Cash Accounts</a> <span style="color:var(--txt3);font-size:11px;">&middot; Getting Started</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/the-jobs-report-nfp.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Jobs Report (NFP) &amp; the Market</a> <span style="color:var(--txt3);font-size:11px;">&middot; Catalysts</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/pce-inflation-gauge.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">PCE: The Fed's Preferred Inflation Gauge</a> <span style="color:var(--txt3);font-size:11px;">&middot; Catalysts</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/vix-term-structure.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">VIX Term Structure: Contango &amp; Backwardation</a> <span style="color:var(--txt3);font-size:11px;">&middot; Volatility</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/realized-vs-implied-volatility.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Realized vs Implied Volatility</a> <span style="color:var(--txt3);font-size:11px;">&middot; Volatility</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/sharpe-ratio-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Sharpe Ratio, Explained</a> <span style="color:var(--txt3);font-size:11px;">&middot; Discipline &amp; Risk</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/r-multiples-explained.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">R-Multiples: Trades in Units of Risk</a> <span style="color:var(--txt3);font-size:11px;">&middot; Discipline &amp; Risk</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/kelly-criterion.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">The Kelly Criterion &amp; Bet Sizing</a> <span style="color:var(--txt3);font-size:11px;">&middot; Discipline &amp; Risk</span></li>
+        <li style="break-inside:avoid;margin:0 0 11px;"><a href="/journal/sector-rotation.html" style="color:var(--txt1);text-decoration:none;font-size:14px;line-height:1.4;font-weight:600;">Sector Rotation, Explained</a> <span style="color:var(--txt3);font-size:11px;">&middot; Market Structure</span></li>
     </ul>
   </div>
 </section>
@@ -453,5 +488,6 @@
 <script>
 (function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
 </script>
+<script src="/journal/search.js?v=2" defer></script>
 </body>
 </html>
