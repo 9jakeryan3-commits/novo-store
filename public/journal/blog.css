@@ -148,6 +148,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(10,17,32,.94);backdrop-fil
 .housead .ha-note{display:block;font-size:10px;color:var(--txt3);letter-spacing:.16em;text-transform:uppercase;margin-top:13px;font-weight:700;}
 /* rail newsletter */
 .rail-news{margin-top:22px;background:var(--navy2);border:1px solid var(--bdr);border-radius:10px;padding:20px;}
+@media(max-width:900px){.rail-cta{display:none;}}   /* redundant on mobile — the bottom CTA + archive cover it */
 .rail-news .eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);}
 .rail-news h4{font-size:17px;font-weight:800;color:var(--txt1);margin:6px 0 5px;}
 .rail-news p{font-size:13px;color:var(--txt2);margin:0 0 14px;line-height:1.55;}
