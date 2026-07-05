@@ -151,6 +151,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(10,17,32,.94);backdrop-fil
 @media(max-width:900px){.rail-cta{display:none;}}   /* redundant on mobile — the bottom CTA + archive cover it */
 
 /* ---------- KNOWLEDGE-BASE SEARCH ---------- */
+/* Journal header: title left, search right (side by side); stacks on mobile */
+.jhead{max-width:1200px;margin:0 auto;padding:16px 22px 10px;display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap;}
+.jhead .brandline{margin:0;padding:8px 0 0;max-width:none;flex:1 1 240px;}
+.jhead .kb-wrap{margin:0;padding:0;max-width:none;flex:2 1 440px;}
+@media(max-width:760px){
+  .jhead{flex-direction:column;gap:12px;padding:14px 16px 6px;}
+  .jhead .brandline,.jhead .kb-wrap{flex:1 1 auto;width:100%;}
+  .jhead .kb-meta{text-align:left;}
+}
 .kb-wrap{max-width:720px;margin:2px auto 30px;padding:0 22px;}
 .kb-box{display:flex;align-items:center;gap:11px;background:var(--navy2);border:1px solid var(--bdr2);border-radius:12px;padding:13px 16px;transition:border-color .15s,box-shadow .15s;}
 .kb-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.13);}
