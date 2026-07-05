@@ -119,6 +119,11 @@
     .nav-portal svg { width: 12px; height: 12px; }
     .nav-price { display: none; }
   }
+  @media (max-width: 400px) {
+    .nav-portal-txt { display: none; }              /* icon-only Portal on the narrowest folds */
+    .nav-portal { padding: 6px 9px; gap: 0; }
+    .nav-portal svg { width: 15px; height: 15px; }
+  }
 
   /* ── Hero ── */
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
@@ -435,7 +440,7 @@
       <a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a>
       <a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a>
       <button class="nav-buy" style="background:linear-gradient(180deg,#34d399,#10b981);color:#0b0f18;" onclick="subscribeNow()">Subscribe<span class="nav-price"> — $199/mo</span></button>
-      <a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Portal</a>
+      <a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
     </div>
   </div>
 </nav>

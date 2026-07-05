@@ -66,6 +66,11 @@
     .nav-portal svg { width: 12px; height: 12px; }
     .nav-price { display: none; }
   }
+  @media (max-width: 400px) {
+    .nav-portal-txt { display: none; }              /* icon-only Portal on the narrowest folds */
+    .nav-portal { padding: 6px 9px; gap: 0; }
+    .nav-portal svg { width: 15px; height: 15px; }
+  }
 
   /* ── Hero ── */
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
