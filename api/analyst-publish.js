@@ -35,6 +35,7 @@ export default async function handler(req, res) {
   const levels = Array.isArray(body.levels) ? body.levels : [];        // [{label, price, kind}]
   const pill = (body.pill || '').toString().trim();                    // regime-alert pill text
   const pillKind = (body.pill_kind || '').toString().toLowerCase();    // amplify | absorb | warn | calm
+  const kind = (body.kind || 'read').toString().toLowerCase();          // 'read' (full desk note) | 'alert' (intraday)
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
   // Resolve target Resend audience(s): analyst = paid list, free = the newsletter list, both = each.
@@ -80,8 +81,11 @@ export default async function handler(req, res) {
     levelsTable = `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${colCell('Resistance',res,'#f87171')}${colCell('Support',sup,'#34d399')}</tr></table>`;
   }
 
-  // ── Also fan out the read to Discord (best-effort) as a rich embed — same content as the email.
-  if (process.env.DISCORD_ANALYST_WEBHOOK) {
+  // ── Also fan out to Discord (best-effort) as a rich embed. Alerts -> #novo-alerts, full reads -> #novo-analysis.
+  const discordWebhook = (kind === 'alert' && process.env.DISCORD_ALERTS_WEBHOOK)
+    ? process.env.DISCORD_ALERTS_WEBHOOK
+    : process.env.DISCORD_ANALYST_WEBHOOK;
+  if (discordWebhook) {
     try {
       const biasColor = { BULLISH: 0x10b981, BEARISH: 0xf43f5e, NEUTRAL: 0x9fb6d1 };
       const pillColor = { amplify: 0xf43f5e, absorb: 0x2962ff, warn: 0xf59e0b, calm: 0x10b981 };
@@ -107,7 +111,7 @@ export default async function handler(req, res) {
         timestamp: new Date().toISOString(),
       };
       if (chartUrl) embed.image = { url: chartUrl };
-      await fetch(process.env.DISCORD_ANALYST_WEBHOOK, {
+      await fetch(discordWebhook, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds: [embed] }),
       });
