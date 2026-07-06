@@ -201,6 +201,11 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
+    // Pulse INCLUDES Analyst — add the Pulse subscriber to the Analyst email audience too, so they receive
+    // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
+    // via /api/discord, which already accepts any paid sub — Analyst OR Pulse.)
+    await analystAdd(email);
+
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
     try {
@@ -265,26 +270,27 @@ const handler = async (req, res) => {
       } catch (err) {
         console.error(`[webhook-sub] Cancel failed — sub:${subscriptionId} error:${err.message}`);
       }
-      try {   // Pulse cancel → also drop the paid-Discord role
+      try {   // Pulse cancel → also drop the paid-Discord role + the Analyst email audience (Pulse included it)
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         await discordRevokeRole(cust?.metadata?.discord_id);
+        await analystRemove(cust?.email);
       } catch (e) {}
     }
   }
 
   // ── Customer email changed → keep the Analyst Resend audience in sync ──────
   // Reads are broadcast BY EMAIL, so a billing-email change (Stripe portal or manual edit) must move the
-  // audience contact — otherwise the reads keep going to the old address. Gated to ACTIVE Analyst customers
-  // so a Pulse/other customer changing their email is never swept into the Analyst reads.
+  // audience contact — otherwise the reads keep going to the old address. Gated to ACTIVE PAID customers
+  // (Analyst OR Pulse — both live in the Analyst audience now) so a free/unpaid change is never swept in.
   else if (event.type === 'customer.updated') {
     const oldEmail = event.data?.previous_attributes?.email;
     const newEmail = obj?.email;
     if (oldEmail && newEmail && oldEmail !== newEmail) {
       try {
         const subs = await stripe.subscriptions.list({ customer: obj.id, status: 'all', limit: 20 });
-        const isActiveAnalyst = subs.data.some(s =>
-          s?.metadata?.tier === 'analyst' && ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status));
-        if (isActiveAnalyst) {
+        const isActivePaid = subs.data.some(s =>
+          ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status));
+        if (isActivePaid) {
           await analystRemove(oldEmail);
           await analystAdd(newEmail);
           console.log(`[webhook-sub] analyst audience email synced: ${oldEmail} → ${newEmail}`);
