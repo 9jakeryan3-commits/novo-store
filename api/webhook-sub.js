@@ -40,6 +40,7 @@ async function cancelSub(subscriptionId) {
 // ── NoVo Analyst ($29 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
+const FREE_AUDIENCE = process.env.RESEND_AUDIENCE_ID;   // the free "Market Notes" list — kept DISJOINT from Analyst
 const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
 const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 async function discordRevokeRole(discordId) {
@@ -62,6 +63,18 @@ async function analystRemove(email) {
   if (!ANALYST_AUDIENCE || !email) return;
   try { await resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }); }
   catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
+}
+// The free + Analyst lists are kept DISJOINT so no one gets the 'both' broadcasts (Weekly, articles) twice. A paid
+// sub lives ONLY on the Analyst list; on upgrade we pull them off the free list, on a real cancel we add them back.
+async function freeRemove(email) {
+  if (!FREE_AUDIENCE || !email) return;
+  try { await resend.contacts.remove({ audienceId: FREE_AUDIENCE, email }); }
+  catch (e) { console.error(`[webhook-sub] free-list remove failed: ${e.message}`); }
+}
+async function freeAdd(email) {
+  if (!FREE_AUDIENCE || !email) return;
+  try { await resend.contacts.create({ audienceId: FREE_AUDIENCE, email, unsubscribed: false }); }
+  catch (e) { console.error(`[webhook-sub] free-list add failed: ${e.message}`); }
 }
 // True if this EMAIL still has ANY OTHER active paid sub (Analyst or Pulse). Stripe mints a separate customer
 // per checkout, so a dual-tier user's subs live on different customer objects that share one email — checking
@@ -206,6 +219,7 @@ const handler = async (req, res) => {
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
       await analystAdd(email);
+      await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
       try {
         await resend.emails.send({
           from: process.env.FROM_EMAIL || 'The NoVo Journal <orders@novo-aitrading.app>',
@@ -220,6 +234,7 @@ const handler = async (req, res) => {
     // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
     // via /api/discord, which already accepts any paid sub — Analyst OR Pulse.)
     await analystAdd(email);
+    await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
 
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
@@ -278,6 +293,7 @@ const handler = async (req, res) => {
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await analystRemove(cust?.email);
           await discordRevokeRole(cust?.metadata?.discord_id);
+          await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
         }
       } catch (err) {
         console.error(`[webhook-sub] analyst remove failed — sub:${subscriptionId} error:${err.message}`);
@@ -293,6 +309,7 @@ const handler = async (req, res) => {
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await discordRevokeRole(cust?.metadata?.discord_id);
           await analystRemove(cust?.email);
+          await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
         }
       } catch (e) {}
     }
