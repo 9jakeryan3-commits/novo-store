@@ -122,12 +122,15 @@ export default async function handler(req, res) {
   // session chart blends into the dark card. Bolded desk-note labels, audience-aware upsell, unsubscribe.
   const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g,
     '$1<b style="color:#22d3ee">$2</b>');
-  const upsellHtml = upsell === 'analyst'
+  // Audience-aware upsell. The FREE list gets the requested upsell (Analyst for the Weekly); the PAID Analyst
+  // list already HAS Analyst, so it's never pitched back to them — they get the Pulse upsell instead. Chosen
+  // per-audience inside the send loop below (the Weekly goes to 'both'), so no one is sold what they own.
+  const buildUpsell = (u) => u === 'analyst'
     ? '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>' +
       '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This weekly outlook is the taste. <b style="color:#eaf3ff">NoVo Analyst</b> adds the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes plus intraday regime-shift alerts — $29/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
     : '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
       '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Pulse</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>';
-  const bodyHtml = html || (
+  const renderBody = (upsellHtml) => html || (
     '<div style="margin:0;padding:0;background:#070b12;">' +
       '<div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
         '<div style="background:#0a1120;border:1px solid #1c2c47;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">' +
@@ -151,6 +154,9 @@ export default async function handler(req, res) {
   try {
     const ids = [];
     for (const aud of targets) {
+      // Paid Analyst subscribers already HAVE Analyst — never pitch it back; upsell them to Pulse instead.
+      const effUpsell = (aud === ANALYST_AUD) ? 'pulse' : upsell;
+      const bodyHtml = renderBody(buildUpsell(effUpsell));
       const bc = await resend.broadcasts.create({ audienceId: aud, from: FROM, subject: title, html: bodyHtml });
       const bcId = bc?.data?.id || bc?.id;
       if (bcId) { await resend.broadcasts.send(bcId); ids.push(bcId); }
