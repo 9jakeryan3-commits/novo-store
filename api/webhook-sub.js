@@ -63,6 +63,21 @@ async function analystRemove(email) {
   try { await resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }); }
   catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
 }
+// True if this EMAIL still has ANY OTHER active paid sub (Analyst or Pulse). Stripe mints a separate customer
+// per checkout, so a dual-tier user's subs live on different customer objects that share one email — checking
+// only obj.customer would miss the other sub. Prevents cancelling one paid sub from stripping entitlements the
+// user still pays for via another (e.g. cancel a redundant Analyst sub while an active Pulse sub still includes it).
+async function hasOtherActivePaidSub(email, excludeSubId) {
+  if (!email) return false;
+  try {
+    const custs = await stripe.customers.list({ email, limit: 100 });
+    for (const c of custs.data) {
+      const subs = await stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 20 });
+      if (subs.data.some(s => s.id !== excludeSubId && ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status))) return true;
+    }
+  } catch (e) { console.error(`[webhook-sub] other-active-sub check failed: ${e.message}`); }
+  return false;
+}
 function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#070b12;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
@@ -259,8 +274,11 @@ const handler = async (req, res) => {
     if (obj?.metadata?.tier === 'analyst') {   // Analyst cancel → drop from the audience (no license to cancel)
       try {
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        await analystRemove(cust?.email);
-        await discordRevokeRole(cust?.metadata?.discord_id);   // drop the Analyst role too
+        // Only strip entitlements if NO other active paid sub (e.g. an active Pulse) still includes them.
+        if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
+          await analystRemove(cust?.email);
+          await discordRevokeRole(cust?.metadata?.discord_id);
+        }
       } catch (err) {
         console.error(`[webhook-sub] analyst remove failed — sub:${subscriptionId} error:${err.message}`);
       }
@@ -270,10 +288,12 @@ const handler = async (req, res) => {
       } catch (err) {
         console.error(`[webhook-sub] Cancel failed — sub:${subscriptionId} error:${err.message}`);
       }
-      try {   // Pulse cancel → also drop the paid-Discord role + the Analyst email audience (Pulse included it)
+      try {   // Pulse cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        await discordRevokeRole(cust?.metadata?.discord_id);
-        await analystRemove(cust?.email);
+        if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
+          await discordRevokeRole(cust?.metadata?.discord_id);
+          await analystRemove(cust?.email);
+        }
       } catch (e) {}
     }
   }

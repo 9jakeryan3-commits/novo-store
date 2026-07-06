@@ -23,6 +23,15 @@ module.exports = async (req, res) => {
       // Any PAID NoVo subscription (Analyst OR Pulse) earns the paid-Discord role. A valid paid session id
       // is unguessable, so this can't be forged without actually subscribing.
       if (!sess || sess.payment_status !== 'paid' || sess.mode !== 'subscription') return back('error');
+      // A completed session's payment_status is permanently 'paid' and the session stays retrievable, so ALSO
+      // confirm the underlying subscription is STILL active — otherwise a cancelled user could re-click their
+      // old welcome link and re-grant the role, defeating the revoke.
+      if (sess.subscription) {
+        try {
+          const _sub = await stripe.subscriptions.retrieve(sess.subscription);
+          if (!_sub || !['active', 'trialing', 'past_due'].includes(_sub.status)) return back('expired');
+        } catch (e) { return back('error'); }
+      }
       const customerId = sess.customer;
       const isAnalyst = sess.metadata?.tier === 'analyst';
 
@@ -42,7 +51,15 @@ module.exports = async (req, res) => {
       const uid = (await meRes.json()).id;
       if (!uid) return back('error');
 
-      if (customerId) { try { await stripe.customers.update(customerId, { metadata: { discord_id: uid } }); } catch (e) {} }
+      if (customerId) {
+        try {
+          const _c = await stripe.customers.retrieve(customerId);
+          // A shared/forwarded cs link can't attach a SECOND Discord account: if one is already linked, only
+          // the same account may re-link (idempotent); a different account is rejected.
+          if (_c?.metadata?.discord_id && _c.metadata.discord_id !== uid) return back('error');
+          await stripe.customers.update(customerId, { metadata: { discord_id: uid } });
+        } catch (e) {}
+      }
 
       const bot = process.env.DISCORD_BOT_TOKEN;
       if (bot) {
