@@ -492,7 +492,6 @@
               <line x1="0" y1="68" x2="320" y2="68" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
               <!-- JS live-simulates this group (streaming candles + ping); the static candles below are the no-JS fallback. -->
               <g id="mockCandles">
-                <line x1="0" y1="82" x2="320" y2="32" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.55" vector-effect="non-scaling-stroke"/>
                 <g stroke-width="1.4">
                   <line x1="12" y1="72" x2="12" y2="83" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="7.5" y="74" width="9" height="6" fill="#26d07a"/>
                   <line x1="38" y1="60" x2="38" y2="77" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="33.5" y="63" width="9" height="11" fill="#26d07a"/>
@@ -1488,7 +1487,7 @@ document.addEventListener('keydown', (e) => {
       var pad=(hi-lo)*0.14||0.12;lo-=pad;hi+=pad;var rng=hi-lo||1;
       var py=function(v){return BOT-((v-lo)/rng)*(BOT-TOP);};
       var last=candles[N-1],lx=X0+(N-1)*DX,ly=py(last.c),lc=last.c>=last.o?'#26d07a':'#f43f5e';
-      var s='<line x1="'+X0+'" y1="'+py(candles[0].c).toFixed(1)+'" x2="'+lx+'" y2="'+ly.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.5" vector-effect="non-scaling-stroke"/>';
+      var s='';
       for(k=0;k<N;k++){var cd=candles[k],x=X0+k*DX,col=cd.c>=cd.o?'#26d07a':'#f43f5e',bt=py(Math.max(cd.o,cd.c)),bh=Math.max(py(Math.min(cd.o,cd.c))-bt,1.4);
         s+='<line x1="'+x+'" y1="'+py(cd.h).toFixed(1)+'" x2="'+x+'" y2="'+py(cd.l).toFixed(1)+'" stroke="'+col+'" stroke-width="1.4" vector-effect="non-scaling-stroke"/><rect x="'+(x-4.5)+'" y="'+bt.toFixed(1)+'" width="9" height="'+bh.toFixed(1)+'" fill="'+col+'"/>';}
       s+='<circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="2.3" fill="'+lc+'"/><circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="'+(2.3+pingT*6.5).toFixed(1)+'" fill="none" stroke="'+lc+'" stroke-width="1.2" opacity="'+(0.7*(1-pingT)).toFixed(2)+'"/>';
