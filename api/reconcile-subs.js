@@ -46,7 +46,16 @@ module.exports = async (req, res) => {
       try {
         sub = await stripe.subscriptions.retrieve(k.stripe_subscription_id);
       } catch (e) {
-        skipped++; continue;  // can't confirm with Stripe -> leave it alone (fail safe)
+        // resource_missing (404) = the subscription no longer exists in Stripe (deleted/purged). Treat it as
+        // GONE and cancel it locally so it's cleaned up and stops re-erroring in the Stripe API-health panel
+        // on every run. Any OTHER error (network/transient/rate-limit) stays fail-safe: leave it alone.
+        const missing = e && (e.code === 'resource_missing' || e.statusCode === 404 || (e.raw && e.raw.code === 'resource_missing'));
+        if (missing) {
+          if (await lsPost(`/admin/subscription/${k.stripe_subscription_id}/cancel`)) cancelled++; else skipped++;
+        } else {
+          skipped++;
+        }
+        continue;
       }
       const s = sub.status;  // active | trialing | past_due | unpaid | canceled | incomplete | incomplete_expired
       if (s === 'canceled' || s === 'incomplete_expired') {
