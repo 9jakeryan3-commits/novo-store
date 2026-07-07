@@ -480,40 +480,40 @@
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--txt1);"><span style="color:var(--green);">▲</span> NoVo <span style="color:var(--txt3);font-weight:500;">// Trading Dashboard</span></div>
           <div style="display:flex;align-items:center;gap:14px;">
             <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span>LIVE</span>
-            <span style="font-size:13px;font-weight:800;color:var(--txt1);">SPY <span style="color:var(--green);">$743.10</span></span>
+            <span style="font-size:13px;font-weight:800;color:var(--txt1);">SPY <span id="mockPrice" style="color:var(--green);">$743.10</span></span>
           </div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--bdr);">
           <div style="flex:1 1 340px;background:#0a1322;padding:18px;">
             <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;">SPY · 1-min</div>
-            <svg viewBox="0 0 320 92" preserveAspectRatio="none" style="width:100%;height:92px;display:block;">
+            <svg id="mockChart" viewBox="0 0 320 92" preserveAspectRatio="none" style="width:100%;height:92px;display:block;">
               <line x1="0" y1="22" x2="320" y2="22" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
               <line x1="0" y1="45" x2="320" y2="45" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
               <line x1="0" y1="68" x2="320" y2="68" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-              <line x1="0" y1="82" x2="320" y2="32" stroke="#f59e0b" stroke-width="1.4" stroke-dasharray="4 3" opacity="0.7" vector-effect="non-scaling-stroke"/>
-              <g stroke-width="1.4">
-                <line x1="12" y1="72" x2="12" y2="83" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="7.5" y="74" width="9" height="6" fill="#26d07a"/>
-                <line x1="38" y1="60" x2="38" y2="77" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="33.5" y="63" width="9" height="11" fill="#26d07a"/>
-                <line x1="64" y1="57" x2="64" y2="66" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="59.5" y="60" width="9" height="3" fill="#26d07a"/>
-                <line x1="90" y1="57" x2="90" y2="69" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="85.5" y="60" width="9" height="6" fill="#f43f5e"/>
-                <line x1="116" y1="62" x2="116" y2="74" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="111.5" y="66" width="9" height="4" fill="#f43f5e"/>
-                <line x1="142" y1="60" x2="142" y2="73" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="137.5" y="64" width="9" height="6" fill="#26d07a"/>
-                <line x1="168" y1="51" x2="168" y2="67" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="163.5" y="55" width="9" height="9" fill="#26d07a"/>
-                <line x1="194" y1="41" x2="194" y2="58" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="189.5" y="45" width="9" height="10" fill="#26d07a"/>
-                <line x1="220" y1="43" x2="220" y2="52" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="215.5" y="45" width="9" height="4" fill="#f43f5e"/>
-                <line x1="246" y1="36" x2="246" y2="52" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="241.5" y="40" width="9" height="9" fill="#26d07a"/>
-                <line x1="272" y1="24" x2="272" y2="43" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="267.5" y="28" width="9" height="12" fill="#26d07a"/>
-                <line x1="298" y1="14" x2="298" y2="31" stroke="#26d07a" vector-effect="non-scaling-stroke"><animate attributeName="y1" values="14;11;16;13;14" dur="3.6s" repeatCount="indefinite"/></line><rect x="293.5" y="18" width="9" height="10" fill="#26d07a"><animate attributeName="y" values="18;15;20;17;18" dur="3.6s" repeatCount="indefinite"/><animate attributeName="height" values="10;13;8;11;10" dur="3.6s" repeatCount="indefinite"/></rect>
+              <!-- JS live-simulates this group (streaming candles + ping); the static candles below are the no-JS fallback. -->
+              <g id="mockCandles">
+                <line x1="0" y1="82" x2="320" y2="32" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.55" vector-effect="non-scaling-stroke"/>
+                <g stroke-width="1.4">
+                  <line x1="12" y1="72" x2="12" y2="83" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="7.5" y="74" width="9" height="6" fill="#26d07a"/>
+                  <line x1="38" y1="60" x2="38" y2="77" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="33.5" y="63" width="9" height="11" fill="#26d07a"/>
+                  <line x1="64" y1="57" x2="64" y2="66" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="59.5" y="60" width="9" height="3" fill="#26d07a"/>
+                  <line x1="90" y1="57" x2="90" y2="69" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="85.5" y="60" width="9" height="6" fill="#f43f5e"/>
+                  <line x1="116" y1="62" x2="116" y2="74" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="111.5" y="66" width="9" height="4" fill="#f43f5e"/>
+                  <line x1="142" y1="60" x2="142" y2="73" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="137.5" y="64" width="9" height="6" fill="#26d07a"/>
+                  <line x1="168" y1="51" x2="168" y2="67" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="163.5" y="55" width="9" height="9" fill="#26d07a"/>
+                  <line x1="194" y1="41" x2="194" y2="58" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="189.5" y="45" width="9" height="10" fill="#26d07a"/>
+                  <line x1="220" y1="43" x2="220" y2="52" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="215.5" y="45" width="9" height="4" fill="#f43f5e"/>
+                  <line x1="246" y1="36" x2="246" y2="52" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="241.5" y="40" width="9" height="9" fill="#26d07a"/>
+                  <line x1="272" y1="24" x2="272" y2="43" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="267.5" y="28" width="9" height="12" fill="#26d07a"/>
+                  <line x1="298" y1="14" x2="298" y2="31" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="293.5" y="18" width="9" height="10" fill="#26d07a"/>
+                </g>
               </g>
-              <!-- live-price ping (subtle live cue) -->
-              <circle cx="298" cy="16" r="2.3" fill="#26d07a"/>
-              <circle cx="298" cy="16" r="2.3" fill="none" stroke="#26d07a" stroke-width="1.2"><animate attributeName="r" values="2.3;8;2.3" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.75;0;0.75" dur="2.4s" repeatCount="indefinite"/></circle>
             </svg>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;">
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Apex</div><div style="font-size:17px;font-weight:800;color:#22d3ee;">62</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">RVOL</div><div style="font-size:17px;font-weight:800;color:var(--txt1);">1.8×</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Apex</div><div id="mockApex" style="font-size:17px;font-weight:800;color:#22d3ee;">62</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">RVOL</div><div id="mockRvol" style="font-size:17px;font-weight:800;color:var(--txt1);">1.8×</div></div>
               <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Bias</div><div style="font-size:15px;font-weight:800;color:var(--green);">BULL</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">VIX</div><div style="font-size:17px;font-weight:800;color:var(--txt1);">16.9</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">VIX</div><div id="mockVix" style="font-size:17px;font-weight:800;color:var(--txt1);">16.9</div></div>
             </div>
           </div>
           <div style="flex:1 1 260px;background:#0a1322;padding:18px;">
@@ -1471,5 +1471,41 @@ document.addEventListener('keydown', (e) => {
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
   <script src="/ticker-live.js" defer></script>
+  <script>
+  /* Hero dashboard preview — live simulation: streaming SPY 1-min candles + ticking price/stats.
+     Illustrative only. Static candles in #mockCandles are the no-JS / reduced-motion fallback. */
+  (function(){try{
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var g=document.getElementById('mockCandles'); if(!g) return;
+    var priceEl=document.getElementById('mockPrice'),apexEl=document.getElementById('mockApex'),
+        rvolEl=document.getElementById('mockRvol'),vixEl=document.getElementById('mockVix');
+    var N=13,X0=12,DX=24,TOP=10,BOT=82,MID=743.10,R=function(a,b){return a+Math.random()*(b-a);};
+    var candles=[],seed=741.5,i;
+    for(i=0;i<N;i++){var o=seed,c=o+R(-0.09,0.22),h=Math.max(o,c)+R(0.02,0.14),l=Math.min(o,c)-R(0.02,0.14);candles.push({o:o,c:c,h:h,l:l});seed=c;}
+    var frame=0,pingT=0;
+    function draw(){
+      var lo=1e9,hi=-1e9,k;for(k=0;k<N;k++){if(candles[k].l<lo)lo=candles[k].l;if(candles[k].h>hi)hi=candles[k].h;}
+      var pad=(hi-lo)*0.14||0.12;lo-=pad;hi+=pad;var rng=hi-lo||1;
+      var py=function(v){return BOT-((v-lo)/rng)*(BOT-TOP);};
+      var last=candles[N-1],lx=X0+(N-1)*DX,ly=py(last.c),lc=last.c>=last.o?'#26d07a':'#f43f5e';
+      var s='<line x1="'+X0+'" y1="'+py(candles[0].c).toFixed(1)+'" x2="'+lx+'" y2="'+ly.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.5" vector-effect="non-scaling-stroke"/>';
+      for(k=0;k<N;k++){var cd=candles[k],x=X0+k*DX,col=cd.c>=cd.o?'#26d07a':'#f43f5e',bt=py(Math.max(cd.o,cd.c)),bh=Math.max(py(Math.min(cd.o,cd.c))-bt,1.4);
+        s+='<line x1="'+x+'" y1="'+py(cd.h).toFixed(1)+'" x2="'+x+'" y2="'+py(cd.l).toFixed(1)+'" stroke="'+col+'" stroke-width="1.4" vector-effect="non-scaling-stroke"/><rect x="'+(x-4.5)+'" y="'+bt.toFixed(1)+'" width="9" height="'+bh.toFixed(1)+'" fill="'+col+'"/>';}
+      s+='<circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="2.3" fill="'+lc+'"/><circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="'+(2.3+pingT*6.5).toFixed(1)+'" fill="none" stroke="'+lc+'" stroke-width="1.2" opacity="'+(0.7*(1-pingT)).toFixed(2)+'"/>';
+      g.innerHTML=s;
+      if(priceEl)priceEl.textContent='$'+last.c.toFixed(2);
+    }
+    function tick(){
+      var last=candles[N-1];
+      last.c+=R(-0.055,0.055)+(MID-last.c)*0.02;
+      if(last.c>last.h)last.h=last.c; if(last.c<last.l)last.l=last.c;
+      frame++;pingT+=0.085;if(pingT>1)pingT=0;
+      if(frame%13===0){var o=last.c,c=o+R(-0.16,0.20),h=Math.max(o,c)+R(0.02,0.13),l=Math.min(o,c)-R(0.02,0.13);candles.push({o:o,c:c,h:h,l:l});candles.shift();}
+      if(frame%19===0){if(apexEl)apexEl.textContent=Math.round(R(58,67));if(rvolEl)rvolEl.textContent=R(1.5,2.1).toFixed(1)+'×';if(vixEl)vixEl.textContent=R(16.4,17.3).toFixed(1);}
+      draw();
+    }
+    draw();setInterval(tick,140);
+  }catch(e){}})();
+  </script>
 </body>
 </html>
