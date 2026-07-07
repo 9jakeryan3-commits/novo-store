@@ -54,7 +54,7 @@
         {
           "@type": "Question",
           "name": "What does the AI actually do?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Four AI layers run simultaneously: Vision Sensor reads SPY market structure, Intuition Engine detects retail psychology, Systemic Resonance classifies the macro session, and the Mastery Loop rewrites trading laws weekly from outcomes." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Four AI layers run simultaneously: Vision Sensor reads SPY market structure, Intuition Engine detects retail psychology, Systemic Resonance classifies the macro session, and the AI-Driven Backtester runs every Sunday to backtest the real signal history and recommend entry-trigger recalibrations." }
         },
         {
           "@type": "Question",
@@ -569,14 +569,8 @@
   <div class="container">
     <div class="section-label">The Learning System</div>
     <div class="section-title">A frozen ruleset decays.<br>NoVo gets sharper every week.</div>
-    <p class="section-sub">Most trading systems ship with a fixed ruleset and never change. The market evolves. They degrade. NoVo runs three self-improvement loops that compound edge directly from its own live market experience — session after session, automatically.</p>
+    <p class="section-sub">Most trading systems ship with a fixed ruleset and never change. The market evolves. They degrade. NoVo runs two self-improvement loops that compound edge directly from its own live market experience — session after session, automatically.</p>
     <div class="loop-grid">
-      <div class="loop-card">
-        <div class="loop-freq">Every Friday &nbsp;·&nbsp; Mastery Loop</div>
-        <h3>The AI rewrites the trading laws from real outcomes.</h3>
-        <p>Every Friday, NoVo compiles the full week of trade data — every entry, exit, Apex score, regime state, and outcome — and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why.</p>
-        <p>It then <strong>synthesizes those lessons into permanent trading laws</strong> that replace the old ones. New doctrine governs all future behavior — a full rewrite based on evidence from the market you just traded, not a backtest on old data.</p>
-      </div>
       <div class="loop-card">
         <div class="loop-freq">Every Sunday &nbsp;·&nbsp; AI-Driven Backtester</div>
         <h3>Entry thresholds auto-calibrate to current conditions.</h3>
@@ -793,19 +787,13 @@
   <div class="container">
     <div class="section-label">The Intelligence Layer</div>
     <div class="ai-headline">AI isn't a feature.<br><span>It's what gives NoVo judgment, not just a fixed rule sheet.</span></div>
-    <p class="ai-sub">NoVo doesn't trade without it. Four intelligence layers work for you simultaneously — reading the market, modeling human trader psychology, detecting macro regime shifts, and rewriting its own rules every week based on real outcomes. Take the AI away and you're left with rules and no judgment behind them.</p>
+    <p class="ai-sub">NoVo doesn't trade without it. Four intelligence layers work for you simultaneously — reading the market, modeling human trader psychology, detecting macro regime shifts, and backtesting its own signal history every Sunday to re-tune the entry triggers. Take the AI away and you're left with rules and no judgment behind them.</p>
     <div class="ai-grid">
       <div class="ai-card">
         <div class="ai-card-label">Real-Time &nbsp;·&nbsp; Vision Sensor</div>
         <h3>The AI reads live market structure and gates every single entry.</h3>
         <p>On a tight continuous cycle, NoVo computes a live structural readout — key levels, momentum indicators, and recent price action — and sends it to the AI for a structural read. That directional bias is a <strong>hard gate on every entry</strong>. No bullish read, no long. No bearish read, no short.</p>
         <p>On high-volatility tape events, reads accelerate automatically. A special Opening Bell Primer fires before the market opens to frame the session bias. Bias decays automatically — if structure hasn't been read recently, entries are gated until a fresh read arrives.</p>
-      </div>
-      <div class="ai-card">
-        <div class="ai-card-label">Weekly &nbsp;·&nbsp; Mastery Loop</div>
-        <h3>NoVo rewrites its own trading laws every week from real outcomes.</h3>
-        <p>Every Friday, NoVo compiles the full week of trade data — every entry, exit, Apex score, regime state, and outcome — and sends it to the AI for deep analysis. The AI identifies what worked, what failed, and why — then <strong>synthesizes those lessons into permanent trading laws</strong> that replace the old ones.</p>
-        <p>This goes beyond a one-time backtest — NoVo keeps evolving from its own live market experience, session after session. <strong>Every week it trades, it gets sharper — with zero input from you.</strong></p>
       </div>
       <div class="ai-card">
         <div class="ai-card-label">Continuous &nbsp;·&nbsp; Intuition Engine</div>
@@ -816,8 +804,14 @@
       <div class="ai-card">
         <div class="ai-card-label">Continuous &nbsp;·&nbsp; Systemic Resonance</div>
         <h3>Macro regime detection, institutional sweeps, and overnight futures — all live.</h3>
-        <p>A fourth AI layer integrates volatility, credit market stress, and currency pressure to classify the macro session — <strong>Risk-On, Risk-Off, Chop, or Mixed</strong> — each adjusting behavior automatically.</p>
+        <p>A third AI layer integrates volatility, credit market stress, and currency pressure to classify the macro session — <strong>Risk-On, Risk-Off, Chop, or Mixed</strong> — each adjusting behavior automatically.</p>
         <p>The <strong>Whale Sensor</strong> detects institutional option sweeps and injects them into the macro thesis. Overnight futures drift frames the directional lean before the open.</p>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-label">Weekly &nbsp;·&nbsp; AI-Driven Backtester</div>
+        <h3>NoVo does its own backtesting — and re-tunes the entry triggers from real outcomes.</h3>
+        <p>Every Sunday, a fourth AI layer backtests NoVo's real signal history and checks whether the Apex-score <strong>entry-trigger thresholds</strong> are still producing the right trades. When they've drifted from what the outcomes support, it <strong>recommends the calibration</strong> — no spreadsheets, no manual strategy-testing, no restart.</p>
+        <p>This is real backtesting on your own live results, not a one-time test on stale data — so the triggers stay matched to current conditions as the market evolves.</p>
       </div>
     </div>
   </div>
@@ -866,7 +860,7 @@
       <div class="feature">
         <div>
           <h4>Persistent Memory — Two-Tier Architecture</h4>
-          <p>A high-performance in-memory cache handles live-session state; a persistent local database stores permanent trade history, mastery rules, and weekly reports. Every trade recorded — entry, exit, scores, market context. Survives restarts.</p>
+          <p>A high-performance in-memory cache handles live-session state; a persistent local database stores permanent trade history, tuned entry thresholds, and weekly reports. Every trade recorded — entry, exit, scores, market context. Survives restarts.</p>
         </div>
       </div>
       <div class="feature">
@@ -1174,7 +1168,7 @@
         <strong>Vision Sensor:</strong> Reads live SPY market structure on a tight continuous cycle. That read gates every entry — no valid AI read, no trade.<br><br>
         <strong>Intuition Engine:</strong> Continuously detects the current retail psychology state — crowd behavior classified across multiple conditions — and adjusts entry aggressiveness accordingly.<br><br>
         <strong>Systemic Resonance:</strong> Continuously classifies the macro session using volatility, credit market stress, currency pressure, and institutional sweep detection — each regime state adjusting behavior automatically.<br><br>
-        <strong>Mastery Loop:</strong> Every Friday, reviews the full week of trade outcomes and rewrites permanent trading laws that govern future behavior. The system evolves every week.</div>
+        <strong>AI-Driven Backtester:</strong> Every Sunday, backtests your real signal history and recommends recalibrations to the Apex entry-trigger thresholds when they've drifted from optimal — real backtesting on your own results, so the triggers keep pace with the market.</div>
       </details>
 
       <details class="faq-item">
