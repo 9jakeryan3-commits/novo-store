@@ -37,7 +37,11 @@ module.exports = async (req, res) => {
     const keys = await lsGet('/admin/keys');
     const subs = (Array.isArray(keys) ? keys : []).filter(k =>
       String(k.type || '').toLowerCase().startsWith('sub') &&
-      k.status === 'active' && k.stripe_subscription_id);
+      k.status === 'active' && k.stripe_subscription_id &&
+      // Only reconcile REAL Stripe subscriptions. Manually-issued/admin/comp keys carry a synthetic
+      // `manual-…` (or other non-`sub_`) id that will always be resource_missing in Stripe — they are
+      // NOT Stripe-billed and must never be reconciled against it. (This is the admin-key incident guard.)
+      String(k.stripe_subscription_id).startsWith('sub_'));
 
     let checked = 0, suspended = 0, cancelled = 0, skipped = 0;
     for (const k of subs) {
