@@ -11,6 +11,11 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://novo-aitrading.app/analyst/archive</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://novo-aitrading.app/journal/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>

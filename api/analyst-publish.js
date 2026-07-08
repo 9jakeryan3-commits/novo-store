@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { put } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -115,6 +115,43 @@ export default async function handler(req, res) {
         body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds: [embed] }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
+  }
+
+  // ── PUBLIC ARCHIVE (delayed) ──────────────────────────────────────────────────────────────────────
+  // Save full desk-note READS (kind='read' — Open/Close/Week-Ahead/Mid-Day, NOT intraday alerts) to Blob
+  // with a publishAfter timestamp. The /analyst/archive page filters by that timestamp, so today's read
+  // stays subscriber-exclusive (email/Discord) and only lands in the PUBLIC archive after its session —
+  // self-releasing, no cron. Runs for send=true AND send=false reads (Mid-Day is archive-only). Best-effort.
+  if (kind === 'read' && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const BT = process.env.BLOB_READ_WRITE_TOKEN;
+      const nowMs = Date.now();
+      const etDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
+      const t = title.toLowerCase();
+      let kslug = 'read', delayH = 12;
+      if (/pre-?market primer|the open/.test(t))     { kslug = 'the-open';       delayH = 9; }   // public after the close
+      else if (/closing bell|the close/.test(t))     { kslug = 'the-close';      delayH = 16; }  // public next morning
+      else if (/mid-?day/.test(t))                   { kslug = 'mid-day';        delayH = 18; }
+      else if (/week ahead|weekly|the week/.test(t)) { kslug = 'the-week-ahead'; delayH = 16; }
+      const slug = `${etDate}-${kslug}`;
+      const publishAfter = nowMs + delayH * 3600 * 1000;
+      const readObj = { slug, title, text, bias, levels, chartUrl, label, dateLabel: etDate, publishAfter, createdAt: nowMs };
+      await put(`analyst-archive/reads/${slug}.json`, JSON.stringify(readObj),
+        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N
+      let idx = [];
+      try {
+        const { blobs } = await list({ prefix: 'analyst-archive/index.json', token: BT });
+        if (blobs && blobs[0]) { const r = await fetch(blobs[0].url); if (r.ok) idx = await r.json(); }
+      } catch (_) {}
+      if (!Array.isArray(idx)) idx = [];
+      const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g, '').trim().slice(0, 180);
+      idx = idx.filter(e => e.slug !== slug);
+      idx.unshift({ slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter });
+      idx = idx.slice(0, 400);
+      await put('analyst-archive/index.json', JSON.stringify(idx),
+        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+    } catch (e) { console.error('[analyst-publish] archive save failed:', e.message); }
   }
 
   // Email gate: alerts are DISCORD-ONLY (engine sends them send=false); archive-only reads also skip email.
