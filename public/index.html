@@ -1470,7 +1470,6 @@ document.addEventListener('keydown', (e) => {
         s+='<line x1="'+x+'" y1="'+py(cd.h).toFixed(1)+'" x2="'+x+'" y2="'+py(cd.l).toFixed(1)+'" stroke="'+col+'" stroke-width="1.4" vector-effect="non-scaling-stroke"/><rect x="'+(x-4.5)+'" y="'+bt.toFixed(1)+'" width="9" height="'+bh.toFixed(1)+'" fill="'+col+'"/>';}
       s+='<circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="2.3" fill="'+lc+'"/><circle cx="'+lx+'" cy="'+ly.toFixed(1)+'" r="'+(2.3+pingT*6.5).toFixed(1)+'" fill="none" stroke="'+lc+'" stroke-width="1.2" opacity="'+(0.7*(1-pingT)).toFixed(2)+'"/>';
       g.innerHTML=s;
-      if(priceEl)priceEl.textContent='$'+last.c.toFixed(2);
     }
     function tick(){
       var last=candles[N-1];
@@ -1479,6 +1478,8 @@ document.addEventListener('keydown', (e) => {
       frame++;pingT+=0.085;if(pingT>1)pingT=0;
       if(frame%13===0){var o=last.c,c=o+R(-0.16,0.20),h=Math.max(o,c)+R(0.02,0.13),l=Math.min(o,c)-R(0.02,0.13);candles.push({o:o,c:c,h:h,l:l});candles.shift();}
       if(frame%19===0){if(apexEl)apexEl.textContent=Math.round(R(58,67));if(rvolEl)rvolEl.textContent=R(1.5,2.1).toFixed(1)+'×';if(vixEl)vixEl.textContent=R(16.4,17.3).toFixed(1);}
+      // SPY price refreshes calmly (~every 1.7s), NOT every 140ms frame — otherwise the number flickers up/down constantly (esp. on mobile).
+      if(frame%12===0&&priceEl)priceEl.textContent='$'+last.c.toFixed(2);
       draw();
     }
     draw();setInterval(tick,140);
