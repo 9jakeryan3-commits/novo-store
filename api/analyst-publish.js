@@ -48,9 +48,6 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'delivery not configured (RESEND_API_KEY / audience ids)' });
   }
 
-  // send=false → archive-only (reserved for the /analyst web feed, phase 2). No-op email for now.
-  if (!send) return res.status(200).json({ ok: true, archived: true, emailed: false });
-
   // Optional session chart → upload to Blob for a public URL (email clients need hosted images, not data URIs).
   let chartUrl = '';
   if (chartB64 && process.env.BLOB_READ_WRITE_TOKEN) {
@@ -85,7 +82,9 @@ export default async function handler(req, res) {
   const discordWebhook = (kind === 'alert' && process.env.DISCORD_ALERTS_WEBHOOK)
     ? process.env.DISCORD_ALERTS_WEBHOOK
     : process.env.DISCORD_ANALYST_WEBHOOK;
-  if (discordWebhook) {
+  // Alerts (kind=alert) ALWAYS fan out to Discord — they're Discord-only now (engine sends them send=false).
+  // Full reads only hit Discord when they're also emailed (send=true); archive-only reads stay silent.
+  if (discordWebhook && (kind === 'alert' || send)) {
     try {
       const biasColor = { BULLISH: 0x10b981, BEARISH: 0xf43f5e, NEUTRAL: 0x9fb6d1 };
       const pillColor = { amplify: 0xf43f5e, absorb: 0x2962ff, warn: 0xf59e0b, calm: 0x10b981 };
@@ -118,6 +117,19 @@ export default async function handler(req, res) {
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
   }
 
+  // Email gate: alerts are DISCORD-ONLY (engine sends them send=false); archive-only reads also skip email.
+  // Only send=true reports — the Open/Close desk notes and the Weekly — go to the inbox.
+  if (!send) return res.status(200).json({ ok: true, discorded: kind === 'alert', emailed: false });
+
+  // The Open primer is the daily on-ramp — tell email subs the live intraday alerts now fire in Discord.
+  const isOpenPrimer = /pre-?market primer/i.test(title);
+  const discordCta = isOpenPrimer
+    ? '<div style="margin-top:22px;border:1px solid #2c3a58;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">' +
+        '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">&#128276; Intraday alerts are live in Discord</div>' +
+        '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> level-break playbooks and dealer-regime shifts fire the moment they happen &mdash; in the members-only Analyst Discord, not email. <a href="https://discord.gg/hr5GKzsU" style="color:#7f8cff;font-weight:700;text-decoration:none;">Join the Analyst Discord &rarr;</a> <span style="color:#6f8bab;">(link your account on <a href="https://novo-aitrading.app/analyst" style="color:#7f8cff;text-decoration:none;">/analyst</a> to unlock the channels).</span></div>' +
+      '</div>'
+    : '';
+
   // Institutional, NoVo-branded DARK HTML email. Absolute image URL (email clients require it); the dark
   // session chart blends into the dark card. Bolded desk-note labels, audience-aware upsell, unsubscribe.
   const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS)/g,
@@ -143,6 +155,7 @@ export default async function handler(req, res) {
           biasPill + alertPill +
           `<div style="font-size:15px;line-height:1.7;color:#c2d2e6;white-space:pre-wrap;">${bodyText}</div>` +
           levelsTable +
+          discordCta +
           `<div style="margin-top:26px;border:1px solid #1c2c47;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">${upsellHtml}</div>` +
           '<p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only — not financial advice, and not trade signals. Trading involves substantial risk of loss.</p>' +
         '</div>' +
