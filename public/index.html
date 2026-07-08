@@ -209,11 +209,12 @@
   .ss-live { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
   .ss-main img { width: 100%; display: block; }
   .ss-caption { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 12px; letter-spacing: .3px; }
-  .ss-mobile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+  .ss-mobile-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; margin-top: 24px; }
+  .ss-mobile-row > div { flex: 0 1 300px; max-width: 300px; }
   .ss-mobile { border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
   .ss-mobile img { width: 100%; display: block; }
   .ss-mobile-cap { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 10px; letter-spacing: .3px; }
-  @media(max-width:600px) { .ss-mobile-row { grid-template-columns: 1fr; } }
+  @media(max-width:600px) { .ss-mobile-row > div { flex-basis: 82%; max-width: 82%; } }
 
   /* ── AI Engine section ── */
   .ai-section { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 80px 0; }
@@ -744,29 +745,7 @@
 
     <!-- SCREENSHOT GALLERY — restored 2026-06-26 with v4.3 blurred shots (rebuilt by build_shots.py). -->
     <div class="ss-wrap">
-      <div class="ss-main">
-        <div class="ss-bar">
-          <span class="ss-dot" style="background:#ff5f56"></span>
-          <span class="ss-dot" style="background:#ffbd2e"></span>
-          <span class="ss-dot" style="background:#27c93f"></span>
-          <span class="ss-label">NoVo Command Dashboard</span>
-          <span class="ss-live">● LIVE</span>
-        </div>
-        <img src="/screenshots/dashboard.png?v=5" alt="NoVo desktop command dashboard — live tape, AI analysis, trade log and risk controls" loading="lazy">
-      </div>
-      <p class="ss-caption">The full command deck — live tape, AI structural read, trade log, and one-click risk controls.</p>
-
-      <div class="ss-main" style="margin-top:34px;">
-        <div class="ss-bar">
-          <span class="ss-dot" style="background:#ff5f56"></span>
-          <span class="ss-dot" style="background:#ffbd2e"></span>
-          <span class="ss-dot" style="background:#27c93f"></span>
-          <span class="ss-label">Performance Journal</span>
-          <span class="ss-live">● LIVE</span>
-        </div>
-        <img src="/screenshots/journal.png?v=5" alt="NoVo performance journal — win rate, profit factor, equity curve and full trade history" loading="lazy">
-      </div>
-      <p class="ss-caption">Your own live trade journal from day one — every fill, win rate, profit factor, and equity curve.</p>
+      <p style="text-align:center;font-size:13px;color:var(--txt2);margin:0 0 28px;letter-spacing:.4px;font-weight:600;">Hosted in the cloud — nothing to install. Run the entire system from your phone.</p>
 
       <div class="ss-mobile-row">
         <div>
