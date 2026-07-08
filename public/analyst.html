@@ -284,6 +284,7 @@
     .pain-grid { grid-template-columns: 1fr; }
     .for-grid { grid-template-columns: 1fr; }
     .how-grid, .how-grid-2 { grid-template-columns: 1fr; }
+    .how-grid > .how-card { grid-column: auto !important; }   /* reset The Line's span-2 so it stacks cleanly on mobile */
     .dp-metrics { grid-template-columns: repeat(2, 1fr); }
     .dp-metric:nth-child(2) { border-right: none; }
     .ai-grid { grid-template-columns: 1fr; }
@@ -419,12 +420,10 @@
     <h2 class="section-title">A research desk, in your inbox</h2>
     <p class="section-sub">Not one email &mdash; a full daily rhythm. Every read is the machine's structural view, in plain language.</p>
     <div class="how-grid">
-      <div class="how-card"><div class="how-num">MORNING</div><h3>The Open</h3><p>A desk note before/into the session: bias, the key levels in play, and the day's setup.</p></div>
+      <div class="how-card"><div class="how-num">MORNING</div><h3>The Open</h3><p>A desk note before/into the session: a plain-English bottom line, the bias, the key levels in play, and the day's setup.</p></div>
       <div class="how-card"><div class="how-num">CLOSE</div><h3>The Close</h3><p>An end-of-day read &mdash; what the structure did, the levels that mattered, and tomorrow's setup.</p></div>
-      <div class="how-card"><div class="how-num">SUNDAY</div><h3>The Week Ahead</h3><p>A weekly outlook: the week's key levels, the macro catalysts, and the prevailing regime.</p></div>
-    </div>
-    <div class="how-grid-2" style="margin-top:20px;">
-      <div class="how-card"><div class="how-num">INTRADAY &middot; WHEN IT MATTERS</div><h3>&lsquo;The Line&rsquo; &mdash; level-break playbooks</h3><p>The moment SPY breaks or reclaims a level that matters &mdash; the prior-day high/low, the opening range, VWAP, the <b style="color:var(--txt1)">gamma flip</b> &mdash; you get a real-time playbook: the line in play, what a hold sets up, what a break sets up, and the 15-min close that confirms it. Plus a ping when dealers cross the gamma regime from absorbing moves to amplifying them. Actionable and level-anchored &mdash; one per level a day, never hourly noise.</p></div>
+      <div class="how-card"><div class="how-num">SUNDAY</div><h3>The Week Ahead</h3><p>A weekly game plan: the week's catalyst calendar, the key levels, and bull / base / bear scenarios for the days ahead.</p></div>
+      <div class="how-card" style="grid-column:span 2;"><div class="how-num">INTRADAY &middot; WHEN IT MATTERS</div><h3>&lsquo;The Line&rsquo; &mdash; level-break playbooks</h3><p>The moment SPY breaks or reclaims a level that matters &mdash; the prior-day high/low, the opening range, VWAP, the <b style="color:var(--txt1)">gamma flip</b> &mdash; you get a real-time playbook: the line in play, what a hold sets up, what a break sets up, and the 15-min close that confirms it. Plus a ping when dealers cross the gamma regime from absorbing moves to amplifying them. Curated and level-anchored &mdash; a handful a day, never a firehose.</p></div>
       <div class="how-card"><div class="how-num">EVERY READ</div><h3>Real levels, plain language</h3><p>Actual support &amp; resistance with numbers, VWAP, the opening range &mdash; the concrete levels in play and how the tape is really behaving, not a narrative. No hype, no signals to blindly copy: the read; you decide the trade.</p></div>
     </div>
   </div>
