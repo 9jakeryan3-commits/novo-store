@@ -46,16 +46,12 @@ module.exports = async (req, res) => {
       try {
         sub = await stripe.subscriptions.retrieve(k.stripe_subscription_id);
       } catch (e) {
-        // resource_missing (404) = the subscription no longer exists in Stripe (deleted/purged). Treat it as
-        // GONE and cancel it locally so it's cleaned up and stops re-erroring in the Stripe API-health panel
-        // on every run. Any OTHER error (network/transient/rate-limit) stays fail-safe: leave it alone.
-        const missing = e && (e.code === 'resource_missing' || e.statusCode === 404 || (e.raw && e.raw.code === 'resource_missing'));
-        if (missing) {
-          if (await lsPost(`/admin/subscription/${k.stripe_subscription_id}/cancel`)) cancelled++; else skipped++;
-        } else {
-          skipped++;
-        }
-        continue;
+        // Can't confirm with Stripe -> leave it alone (FAIL SAFE), including resource_missing on a
+        // deleted/purged sub. A GENUINE customer cancellation comes back as status 'canceled' below
+        // (handled) — not as a deleted subscription. Deleting a Stripe sub is a manual/test action, so
+        // cancelling a license off resource_missing revoked the owner's own dev key (2026-07-08 incident).
+        // Never cancel on an ambiguous retrieve error; the recurring Stripe-health noise is cosmetic.
+        skipped++; continue;
       }
       const s = sub.status;  // active | trialing | past_due | unpaid | canceled | incomplete | incomplete_expired
       if (s === 'canceled' || s === 'incomplete_expired') {
