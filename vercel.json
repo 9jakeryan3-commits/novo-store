@@ -6,8 +6,8 @@
     { "source": "/journal/guide-1dte-spy-options-scalping.html", "destination": "/journal/guide-0dte-spy-options-scalping.html", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/analyst/archive/:slug", "destination": "/api/analyst-archive?slug=:slug" },
-    { "source": "/analyst/archive", "destination": "/api/analyst-archive" },
+    { "source": "/analyst/archive/:slug", "destination": "/api/analyst-publish?slug=:slug" },
+    { "source": "/analyst/archive", "destination": "/api/analyst-publish" },
     { "source": "/analyst", "destination": "/analyst.html" },
     { "source": "/success", "destination": "/success.html" },
     { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
