@@ -1,7 +1,7 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// NoVo Analyst — $29/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
+// NoVo Analyst — $39/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
 // to the Analyst Resend audience (NOT the Pulse license/provision path). 503 until STRIPE_PRICE_ANALYST set.
 
 const _rl = new Map();
