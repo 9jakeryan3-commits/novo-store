@@ -384,7 +384,7 @@
   <div class="nav-actions">
     <a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Pulse</a>
     <a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a>
-    <button class="nav-buy" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.32);" onclick="analystCheckout()">Subscribe<span class="nav-price"> &mdash; $39/mo</span></button>
+    <button class="nav-buy" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.32);" onclick="analystCheckout()">Start Free<span class="nav-price"> &mdash; 7-day trial</span></button>
     <a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal &mdash; manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
   </div>
 </div></nav>
@@ -397,6 +397,7 @@
     <h1>The machine's market read &mdash; <span>in your inbox.</span></h1>
     <div class="hero-tagline">Market Structure &middot; Dealer Flow &middot; <b>The Read</b></div>
     <p>NoVo scans SPY's tape, dealer positioning, and structure all session. NoVo Analyst sends you that read &mdash; a morning desk note, an end-of-day close, a Sunday week-ahead, and real-time &lsquo;The Line&rsquo; alerts the moment a key level breaks or reclaims &mdash; in plain language. No hype, no &ldquo;buy calls here.&rdquo; Just the structural read most traders never see.</p>
+    <p style="font-size:15px;color:var(--txt2);max-width:620px;margin:16px auto 0;line-height:1.6;">Institutional dealer-positioning &mdash; net GEX, the gamma flip, the levels that matter &mdash; <b style="color:var(--txt1);">interpreted and written up for you</b>, not a raw data terminal you decode yourself. The read desks pay hundreds for, at <b style="color:#22d3ee;">$39</b>.</p>
     <div class="hero-chips">
       <span>Opening-bell read</span><span>End-of-day close</span><span>Sunday week-ahead</span>
     </div>
@@ -404,10 +405,10 @@
       <span>&lsquo;The Line&rsquo; level-break alerts</span><span>Real levels + dealer flow</span>
     </div>
     <div class="hero-cta">
-      <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 8px 26px rgba(34,211,238,0.32);" onclick="analystCheckout()">Subscribe &mdash; $39/mo</button>
+      <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 8px 26px rgba(34,211,238,0.32);" onclick="analystCheckout()">Start 7-day free trial</button>
       <a class="btn-secondary" href="#sample">See a sample read &darr;</a>
     </div>
-    <div class="hero-sub">Analysis &amp; education, by email &middot; not trade signals &middot; cancel anytime</div>
+    <div class="hero-sub">7-day free trial, then $39/mo (or $390/yr) &middot; analysis &amp; education, not trade signals &middot; cancel anytime</div>
     <div id="msg" style="font-size:13px;margin-top:10px;min-height:16px;color:var(--txt3);"></div>
   </div>
 </section>
@@ -453,8 +454,13 @@
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#22d3ee;color:#04121a;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">The Read</div>
       <div class="price-name" style="color:#22d3ee;">NoVo Analyst</div>
       <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">Market analysis by email &amp; Discord &middot; no broker needed</div>
-      <div class="price-amount"><sup>$</sup>39<span style="font-size:26px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
-      <div class="price-once">per month &middot; cancel any time</div>
+      <div class="plan-toggle" style="display:inline-flex;gap:0;background:rgba(255,255,255,0.04);border:1px solid rgba(34,211,238,0.25);border-radius:999px;padding:4px;margin-bottom:18px;">
+        <button type="button" id="pt-mo" onclick="setAnalystPlan('monthly')" style="border:none;background:#22d3ee;color:#04121a;font-weight:800;font-size:13px;padding:7px 18px;border-radius:999px;cursor:pointer;">Monthly</button>
+        <button type="button" id="pt-yr" onclick="setAnalystPlan('yearly')" style="border:none;background:transparent;color:var(--txt2);font-weight:800;font-size:13px;padding:7px 18px;border-radius:999px;cursor:pointer;">Annual &middot; 2 months free</button>
+      </div>
+      <div class="price-amount"><sup>$</sup><span id="pa-num">39</span><span id="pa-per" style="font-size:26px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
+      <div class="price-once" id="pa-note">per month &middot; cancel any time</div>
+      <div style="font-size:13.5px;color:#22d3ee;font-weight:800;margin-top:8px;">&starf; 7-day free trial &middot; cancel anytime</div>
       <div class="price-roi" style="color:#22d3ee;">Not ready to automate? Get the machine's read.</div>
       <ul class="price-features">
         <li>The Open &mdash; daily morning desk note</li>
@@ -465,7 +471,7 @@
         <li>Private Analyst channels in the NoVo Discord</li>
         <li>Analysis &amp; education &mdash; never blind signals</li>
       </ul>
-      <button class="price-btn" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;" onclick="analystCheckout()">Subscribe to NoVo Analyst</button>
+      <button class="price-btn" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;" onclick="analystCheckout()">Start 7-day free trial</button>
       <div class="price-secure">Secure checkout via Stripe &middot; cancel anytime from your receipts</div>
     </div>
   </div>
@@ -543,11 +549,26 @@
 </div>
 
 <script>
-async function analystCheckout(){
+window._analystPlan='monthly';
+function setAnalystPlan(p){
+  window._analystPlan=(p==='yearly')?'yearly':'monthly';
+  var mo=document.getElementById('pt-mo'),yr=document.getElementById('pt-yr');
+  var num=document.getElementById('pa-num'),per=document.getElementById('pa-per'),note=document.getElementById('pa-note');
+  var base='border:none;font-weight:800;font-size:13px;padding:7px 18px;border-radius:999px;cursor:pointer;';
+  var on='background:#22d3ee;color:#04121a;',off='background:transparent;color:var(--txt2);';
+  if(window._analystPlan==='yearly'){
+    if(num)num.textContent='390';if(per)per.textContent='/yr';if(note)note.innerHTML='per year &middot; 2 months free vs monthly &middot; cancel any time';
+    if(yr)yr.style.cssText=base+on;if(mo)mo.style.cssText=base+off;
+  }else{
+    if(num)num.textContent='39';if(per)per.textContent='/mo';if(note)note.innerHTML='per month &middot; cancel any time';
+    if(mo)mo.style.cssText=base+on;if(yr)yr.style.cssText=base+off;
+  }
+}
+async function analystCheckout(plan){
   var msg=document.getElementById('msg');
   if(msg){msg.style.color='var(--txt3)';msg.textContent='Opening secure checkout…';}
   try{
-    var r=await fetch('/api/checkout-analyst',{method:'POST',headers:{'Content-Type':'application/json'}});
+    var r=await fetch('/api/checkout-analyst',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:plan||window._analystPlan||'monthly'})});
     var d=await r.json();
     if(d&&d.url){location.href=d.url;}
     else if(msg){msg.style.color='var(--red)';msg.textContent=(d&&d.error)||'Could not start checkout — try again.';}

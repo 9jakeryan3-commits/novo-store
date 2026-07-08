@@ -29,13 +29,24 @@ module.exports = async (req, res) => {
     return res.status(503).json({ error: 'Analyst tier not configured yet' });
   }
 
+  // plan: 'yearly' picks the annual price ($390/yr); anything else = monthly ($39/mo).
+  let plan = 'monthly';
+  try {
+    const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (b && b.plan === 'yearly') plan = 'yearly';
+  } catch (_) {}
+  const yearlyId = process.env.STRIPE_PRICE_ANALYST_YEARLY;
+  const priceId = (plan === 'yearly' && yearlyId) ? yearlyId : process.env.STRIPE_PRICE_ANALYST;
+  if (plan === 'yearly' && !yearlyId) plan = 'monthly';  // no annual price configured → fall back
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{ price: process.env.STRIPE_PRICE_ANALYST, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      metadata: { tier: 'analyst' },
-      subscription_data: { metadata: { tier: 'analyst' } },
+      metadata: { tier: 'analyst', plan },
+      // 7-day free trial — card collected upfront so it auto-converts (highest-converting trial in this category).
+      subscription_data: { metadata: { tier: 'analyst', plan }, trial_period_days: 7 },
       success_url: `${SITE}/analyst?welcome=1&cs={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/analyst`,
       billing_address_collection: 'auto',
