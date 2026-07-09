@@ -11,7 +11,7 @@ function _rateLimited(ip) {
   return rec.n > 5;
 }
 
-// Pulse YEARLY subscription ($1,668/yr, auto-renew). Identical to checkout-sub.js except the price.
+// Trader YEARLY subscription ($1,668/yr, auto-renew). Identical to checkout-sub.js except the price.
 module.exports = async (req, res) => {
   const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
   res.setHeader('Access-Control-Allow-Origin', SITE);

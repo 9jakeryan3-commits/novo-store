@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     try {
       if (!state) return back('error');
       const sess = await stripe.checkout.sessions.retrieve(state);
-      // Any PAID NoVo subscription (Analyst OR Pulse) earns the paid-Discord role. A valid paid session id
+      // Any PAID NoVo subscription (Analyst OR Trader) earns the paid-Discord role. A valid paid session id
       // is unguessable, so this can't be forged without actually subscribing.
       if (!sess || sess.payment_status !== 'paid' || sess.mode !== 'subscription') return back('error');
       // A completed session's payment_status is permanently 'paid' and the session stays retrievable, so ALSO

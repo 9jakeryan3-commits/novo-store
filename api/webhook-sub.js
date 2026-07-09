@@ -76,10 +76,10 @@ async function freeAdd(email) {
   try { await resend.contacts.create({ audienceId: FREE_AUDIENCE, email, unsubscribed: false }); }
   catch (e) { console.error(`[webhook-sub] free-list add failed: ${e.message}`); }
 }
-// True if this EMAIL still has ANY OTHER active paid sub (Analyst or Pulse). Stripe mints a separate customer
+// True if this EMAIL still has ANY OTHER active paid sub (Analyst or Trader). Stripe mints a separate customer
 // per checkout, so a dual-tier user's subs live on different customer objects that share one email — checking
 // only obj.customer would miss the other sub. Prevents cancelling one paid sub from stripping entitlements the
-// user still pays for via another (e.g. cancel a redundant Analyst sub while an active Pulse sub still includes it).
+// user still pays for via another (e.g. cancel a redundant Analyst sub while an active Trader sub still includes it).
 async function hasOtherActivePaidSub(email, excludeSubId) {
   if (!email) return false;
   try {
@@ -110,7 +110,7 @@ function analystWelcomeHtml(connectUrl) {
       </div>` : ''}
       <div style="margin-top:22px;border:1px solid #1c2c47;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Pulse</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Pulse &rarr;</a></div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
       </div>
       <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice, not trade signals. Trading involves substantial risk of loss. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
     </div>
@@ -130,10 +130,10 @@ function welcomeEmailHtml(connectUrl) {
   <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
       <img src="https://novo-aitrading.app/novo-logo.png" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
-      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Pulse &mdash; Autonomous Execution</div>
+      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; Autonomous Execution</div>
     </div>
 
-    <h1 style="color:#0b1527;font-size:22px;margin:0 0 10px;">Welcome to NoVo Pulse &mdash; you're all set.</h1>
+    <h1 style="color:#0b1527;font-size:22px;margin:0 0 10px;">Welcome to NoVo Trader &mdash; you're all set.</h1>
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. Head to your portal to finish setup and open your dashboard &mdash; you'll be up and running in minutes.</p>
 
     <div style="text-align:center;margin:0 0 26px;">
@@ -230,9 +230,9 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    // Pulse INCLUDES Analyst — add the Pulse subscriber to the Analyst email audience too, so they receive
+    // Trader INCLUDES Analyst — add the Trader subscriber to the Analyst email audience too, so they receive
     // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
-    // via /api/discord, which already accepts any paid sub — Analyst OR Pulse.)
+    // via /api/discord, which already accepts any paid sub — Analyst OR Trader.)
     await analystAdd(email);
     await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
 
@@ -243,7 +243,7 @@ const handler = async (req, res) => {
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
         replyTo: 'support@novo-aitrading.app',
         to: [email],
-        subject: 'Welcome to NoVo Pulse — open your portal',
+        subject: 'Welcome to NoVo Trader — open your portal',
         html: welcomeEmailHtml(`${SITE}/api/discord?cs=${obj.id}`),
       });
     } catch (err) {
@@ -289,7 +289,7 @@ const handler = async (req, res) => {
     if (obj?.metadata?.tier === 'analyst') {   // Analyst cancel → drop from the audience (no license to cancel)
       try {
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        // Only strip entitlements if NO other active paid sub (e.g. an active Pulse) still includes them.
+        // Only strip entitlements if NO other active paid sub (e.g. an active Trader) still includes them.
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await analystRemove(cust?.email);
           await discordRevokeRole(cust?.metadata?.discord_id);
@@ -304,7 +304,7 @@ const handler = async (req, res) => {
       } catch (err) {
         console.error(`[webhook-sub] Cancel failed — sub:${subscriptionId} error:${err.message}`);
       }
-      try {   // Pulse cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them
+      try {   // Trader cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await discordRevokeRole(cust?.metadata?.discord_id);
@@ -318,7 +318,7 @@ const handler = async (req, res) => {
   // ── Customer email changed → keep the Analyst Resend audience in sync ──────
   // Reads are broadcast BY EMAIL, so a billing-email change (Stripe portal or manual edit) must move the
   // audience contact — otherwise the reads keep going to the old address. Gated to ACTIVE PAID customers
-  // (Analyst OR Pulse — both live in the Analyst audience now) so a free/unpaid change is never swept in.
+  // (Analyst OR Trader — both live in the Analyst audience now) so a free/unpaid change is never swept in.
   else if (event.type === 'customer.updated') {
     const oldEmail = event.data?.previous_attributes?.email;
     const newEmail = obj?.email;
