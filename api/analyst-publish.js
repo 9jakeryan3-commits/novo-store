@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { put, list } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -82,6 +82,39 @@ async function handleArchive(req, res) {
 
 export default async function handler(req, res) {
   if (req.method === 'GET') return handleArchive(req, res);
+
+  // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
+  //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
+  if (req.method === 'DELETE') {
+    const secret = process.env.ANALYST_PUBLISH_SECRET;
+    if (!secret || req.headers['x-analyst-secret'] !== secret) return res.status(401).json({ error: 'unauthorized' });
+    const BT = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!BT) return res.status(500).json({ error: 'no blob token' });
+    const slug = (req.query && req.query.slug ? String(req.query.slug) : '').replace(/[^a-z0-9-]/gi, '').slice(0, 80);
+    if (!slug) return res.status(400).json({ error: 'slug required' });
+    try {
+      let blobsDeleted = 0;
+      const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
+      if (blobs && blobs.length) { await del(blobs.map(b => b.url), { token: BT }); blobsDeleted = blobs.length; }
+      let idx = [];
+      try {
+        const { blobs: ib } = await list({ prefix: 'analyst-archive/index.json', token: BT });
+        if (ib && ib[0]) { const r = await fetch(ib[0].url); if (r.ok) idx = await r.json(); }
+      } catch (_) {}
+      let removed = 0;
+      if (Array.isArray(idx)) {
+        const before = idx.length;
+        idx = idx.filter(e => e.slug !== slug);
+        removed = before - idx.length;
+        await put('analyst-archive/index.json', JSON.stringify(idx),
+          { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      }
+      return res.status(200).json({ ok: true, deleted: slug, blobsDeleted, removedFromIndex: removed });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const secret = process.env.ANALYST_PUBLISH_SECRET;
