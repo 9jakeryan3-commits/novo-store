@@ -93,22 +93,29 @@ export default async function handler(req, res) {
     const slug = (req.query && req.query.slug ? String(req.query.slug) : '').replace(/[^a-z0-9-]/gi, '').slice(0, 80);
     if (!slug) return res.status(400).json({ error: 'slug required' });
     try {
-      let blobsDeleted = 0;
-      const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
-      if (blobs && blobs.length) { await del(blobs.map(b => b.url), { token: BT }); blobsDeleted = blobs.length; }
-      let idx = [];
+      // #2/#4 fix (2026-07-10): update the INDEX FIRST (and only if we genuinely loaded it), THEN delete the
+      // read blob. Two guards:
+      //  - idxLoaded gates the index rewrite so a transient index-fetch failure can't write an empty [] and
+      //    WIPE the whole archive listing (the old code initialized idx=[] and wrote it back on any fetch throw).
+      //  - deleting the blob AFTER the successful index put means a mid-op failure leaves a live blob with no
+      //    index entry (invisible-but-harmless), never a dangling index link to a deleted read.
+      let idx = null, idxLoaded = false;
       try {
         const { blobs: ib } = await list({ prefix: 'analyst-archive/index.json', token: BT });
-        if (ib && ib[0]) { const r = await fetch(ib[0].url); if (r.ok) idx = await r.json(); }
-      } catch (_) {}
+        if (ib && ib[0]) { const r = await fetch(ib[0].url); if (r.ok) { idx = await r.json(); idxLoaded = true; } }
+        else { idx = []; idxLoaded = true; }   // no index blob yet = empty is the true state, safe to write
+      } catch (_) { idxLoaded = false; }
       let removed = 0;
-      if (Array.isArray(idx)) {
+      if (idxLoaded && Array.isArray(idx)) {
         const before = idx.length;
         idx = idx.filter(e => e.slug !== slug);
         removed = before - idx.length;
         await put('analyst-archive/index.json', JSON.stringify(idx),
           { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       }
+      let blobsDeleted = 0;
+      const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
+      if (blobs && blobs.length) { await del(blobs.map(b => b.url), { token: BT }); blobsDeleted = blobs.length; }
       return res.status(200).json({ ok: true, deleted: slug, blobsDeleted, removedFromIndex: removed });
     } catch (e) {
       return res.status(500).json({ error: e.message });
