@@ -13,7 +13,8 @@
     { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
     { "source": "/subscriber", "destination": "/subscriber.html" },
     { "source": "/license", "destination": "/license.html" },
-    { "source": "/options-101", "destination": "/options-101.html" }
+    { "source": "/options-101", "destination": "/options-101.html" },
+    { "source": "/analyst/methodology", "destination": "/analyst-methodology.html" }
   ],
   "functions": {
     "api/webhook-sub.js": { "maxDuration": 30 },
