@@ -227,8 +227,19 @@ export default async function handler(req, res) {
       let color = 0x22d3ee;
       if (bias && biasColor[bias.toUpperCase()] != null) color = biasColor[bias.toUpperCase()];
       else if (pill && pillColor[pillKind] != null) color = pillColor[pillKind];
-      let desc = text.replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|FLOW DYNAMICS|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1**$2**');
-      if (desc.length > 4000) desc = desc.slice(0, 3990) + '…';
+      const _boldRe = /(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|FLOW DYNAMICS|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g;
+      const _bold = s => s.replace(_boldRe, '$1**$2**');
+      const _cap = s => (s.length > 4096 ? s.slice(0, 4086) + '…' : s);
+      // Split the LLM prose from the appended DETERMINISTIC blocks (Event Playbook / Dealer Map / Flow) into two
+      // embeds so a long read (Weekly / OPEX) can never truncate the exact figures — each embed gets its own
+      // 4096 budget. Alerts have no appended data → single embed (unchanged).
+      let _splitAt = -1;
+      for (const _mk of ['\nEVENT PLAYBOOK', '\nDEALER POSITIONING MAP']) {
+        const _i = text.indexOf(_mk);
+        if (_i >= 0 && (_splitAt < 0 || _i < _splitAt)) _splitAt = _i;
+      }
+      const _prose = _splitAt >= 0 ? text.slice(0, _splitAt).trim() : text;
+      const _data = _splitAt >= 0 ? text.slice(_splitAt).trim() : '';
       const fields = [];
       if (bias) fields.push({ name: 'Structural Bias', value: bias.toUpperCase(), inline: true });
       if (pill) fields.push({ name: 'Regime', value: pill, inline: true });
@@ -239,16 +250,17 @@ export default async function handler(req, res) {
         if (res) fields.push({ name: '🔴 Resistance', value: res, inline: true });
         if (sup) fields.push({ name: '🟢 Support', value: sup, inline: true });
       }
-      const embed = {
+      const embeds = [{
         author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-aitrading.app/novo-icon.png?v=4' },
-        title, description: desc, color, fields,
+        title, description: _cap(_bold(_prose)), color, fields,
         footer: { text: 'NoVo — market analysis & education, not trade signals.' },
         timestamp: new Date().toISOString(),
-      };
-      if (chartUrl) embed.image = { url: chartUrl };
+      }];
+      if (chartUrl) embeds[0].image = { url: chartUrl };
+      if (_data) embeds.push({ description: _cap(_bold(_data)), color: 0x22d3ee, footer: { text: 'NoVo — analysis & education, not signals.' } });
       await fetch(discordWebhook, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds: [embed] }),
+        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
   }
