@@ -1,6 +1,9 @@
 import { Resend } from 'resend';
 import { put, list, del } from '@vercel/blob';
 import crypto from 'node:crypto';
+import Stripe from 'stripe';
+
+const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -34,6 +37,47 @@ function _rateLimited(ip, max = 60) {
   if (now > rec.reset) { _rl.set(ip, { n: 1, reset: now + 60000 }); return false; }
   rec.n++; _rl.set(ip, rec);
   return rec.n > max;
+}
+
+// ── Members live-view: stateless HMAC access token + an unguessable live-state blob path + a Stripe sub check ──
+const _LIVE_SECRET = () => process.env.ANALYST_LIVE_SECRET || process.env.ANALYST_PUBLISH_SECRET || '';
+// The live state is a PUBLIC Vercel blob (Hobby has no private blobs), so its PATH is derived from the secret
+// (SHA-256) — deterministic for the server, unguessable for anyone else → the raw URL can't be scraped.
+function _liveBlobKey() {
+  const s = _LIVE_SECRET();
+  if (!s) return 'analyst-live/state.json';
+  return 'analyst-live/' + crypto.createHash('sha256').update('livestate:' + s).digest('hex').slice(0, 40) + '.json';
+}
+function _signToken(email, days = 30) {
+  const secret = _LIVE_SECRET();
+  if (!secret || !email) return '';
+  const payload = Buffer.from(JSON.stringify({ e: String(email).toLowerCase(), x: Date.now() + days * 86400000 })).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${sig}`;
+}
+function _verifyToken(token) {
+  try {
+    const secret = _LIVE_SECRET();
+    if (!secret || !token) return null;
+    const [payload, sig] = String(token).split('.');
+    if (!payload || !sig) return null;
+    const expect = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+    const a = Buffer.from(sig), b = Buffer.from(expect);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+    const obj = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    if (!obj || !obj.x || Date.now() > obj.x) return null;
+    return obj.e;
+  } catch { return null; }
+}
+async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub (Analyst OR Trader) → member access
+  try {
+    const custs = await _stripe.customers.list({ email, limit: 100 });
+    for (const c of custs.data) {
+      const subs = await _stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 20 });
+      if (subs.data.some(s => ['active', 'trialing', 'past_due'].includes(s.status))) return true;
+    }
+  } catch (e) { console.error('[analyst-live] sub check:', e.message); }
+  return false;
 }
 
 // ── PUBLIC ARCHIVE (served here as GET so it doesn't add a 13th serverless function — Hobby cap is 12) ──
@@ -101,11 +145,38 @@ async function handleArchive(req, res) {
 }
 
 export default async function handler(req, res) {
+  // Members live-view feed (token-gated) — the /analyst/live dashboard polls this every few seconds.
+  if (req.method === 'GET' && req.query && 'live' in req.query) {
+    const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    res.setHeader('Cache-Control', 'no-store');
+    const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN);
+    return res.status(200).json(state || { updated_at: 0, indices: [], stale: true });
+  }
   if (req.method === 'GET') return handleArchive(req, res);
 
   // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
   const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'rate limited' });
+
+  // Magic-link login for the members live view — verify an active sub, email a signed access link. ALWAYS
+  // returns ok (never reveals whether an email has a sub); only sends the link when a paid sub is active.
+  if (req.method === 'POST' && req.query && 'login' in req.query) {
+    let email = '';
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); email = String(b.email || '').trim().toLowerCase(); } catch (_) {}
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return res.status(400).json({ error: 'Enter a valid email.' });
+    try {
+      if (await _activePaidSub(email)) {
+        const link = `${SITE}/analyst/live?t=${encodeURIComponent(_signToken(email))}`;
+        await resend.emails.send({
+          from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
+          subject: 'Your NoVo Analyst live dashboard link',
+          html: `<div style="margin:0;padding:0;background:#070b12;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#0f1a2e;border:1px solid #1c2c47;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 30 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice, not trade signals.</p></div></div></div>`,
+        });
+      }
+    } catch (e) { console.error('[analyst-live] login:', e.message); }
+    return res.status(200).json({ ok: true });
+  }
 
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
   //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
@@ -149,6 +220,18 @@ export default async function handler(req, res) {
 
   if (!_secretOk(req.headers['x-analyst-secret'])) {
     return res.status(401).json({ error: 'unauthorized' });
+  }
+
+  // Live-state save — the engine POSTs the current SPY/QQQ/SPX dealer state (secret-auth) for the members
+  // dashboard. Stored at the unguessable, secret-derived blob path; overwrites each cycle.
+  if (req.body && typeof req.body === 'object' && req.body.kind === 'live-state') {
+    const BT = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!BT) return res.status(500).json({ error: 'no blob token' });
+    try {
+      await put(_liveBlobKey(), JSON.stringify(req.body.state || {}),
+        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   const body = req.body || {};

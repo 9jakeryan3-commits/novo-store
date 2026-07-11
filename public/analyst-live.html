@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoVo Analyst — Live Dealer Map</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/novo-icon.png?v=4">
+<link rel="stylesheet" href="/journal/blog.css?v=10">
+<style>
+  body { background: #070b12; }
+  .lv-wrap { max-width: 1200px; margin: 0 auto; padding: 14px 16px 60px; }
+  /* login */
+  .lv-login { max-width: 440px; margin: 8vh auto; text-align: center; }
+  .lv-login h1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 30px; color: var(--txt1); letter-spacing: -1px; margin: 0 0 8px; }
+  .lv-login h1 .accent { color: #22d3ee; }
+  .lv-login p { color: var(--txt2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
+  .lv-login form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .lv-login input { flex: 1; min-width: 220px; padding: 12px 14px; border-radius: 9px; border: 1px solid #2c3a4e; background: #0c1320; color: #eaf3ff; font-size: 14px; }
+  .lv-login button { padding: 12px 22px; border-radius: 9px; border: 0; background: linear-gradient(180deg,#22d3ee,#3b82f6); color: #04121a; font-weight: 800; font-size: 14px; cursor: pointer; }
+  .lv-msg { font-size: 13px; min-height: 18px; margin-top: 14px; }
+  /* topbar */
+  .lv-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--bdr); padding: 4px 2px 14px; margin-bottom: 16px; }
+  .lv-brand { display: flex; align-items: center; gap: 10px; }
+  .lv-brand img { height: 26px; }
+  .lv-live { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #34d399; }
+  .lv-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; animation: lvpulse 2s infinite; }
+  @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .lv-live.closed { color: #6f8bab; } .lv-live.closed .dot { background: #6f8bab; box-shadow: none; animation: none; }
+  .lv-sess { color: var(--txt3); font-size: 12.5px; }
+  .lv-tabs { margin-left: auto; display: inline-flex; gap: 0; background: rgba(255,255,255,.04); border: 1px solid var(--bdr); border-radius: 999px; padding: 4px; }
+  .lv-tabs button { border: 0; background: transparent; color: var(--txt2); font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
+  .lv-tabs button.on { background: #22d3ee; color: #04121a; }
+  /* grid */
+  .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .lv-grid { grid-template-columns: 1fr; } }
+  .lv-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 16px 18px; }
+  .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
+  .lv-card img.chart { width: 100%; border-radius: 8px; border: 1px solid var(--bdr); display: block; }
+  /* dealer tiles */
+  .lv-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lv-tile { background: var(--navy); border: 1px solid var(--bdr); border-radius: 10px; padding: 12px 14px; }
+  .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
+  .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 3px; }
+  .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
+  .grn { color: #34d399 !important; } .red { color: #f87171 !important; } .cyn { color: #22d3ee !important; } .amb { color: #fbbf24 !important; }
+  .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
+  .lv-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 16px 0; }
+  .lv-mini { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
+  .lv-mini.on { border-color: rgba(34,211,238,.5); }
+  .lv-mini .t { font-weight: 800; color: var(--txt1); font-size: 14px; }
+  .lv-mini .r { font-size: 11.5px; color: var(--txt2); margin-top: 4px; line-height: 1.4; }
+  .lv-feed li, .lv-read { list-style: none; }
+  .lv-feed { padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
+  .lv-feed li { border-top: 1px solid var(--bdr); padding: 9px 0; font-size: 13px; color: var(--txt2); line-height: 1.5; }
+  .lv-feed li .ts { color: #22d3ee; font-weight: 700; font-size: 11.5px; margin-right: 6px; }
+  .lv-read .rt { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 16px; font-weight: 800; color: var(--txt1); }
+  .lv-read .rb { white-space: pre-wrap; font-size: 13.5px; color: var(--txt2); line-height: 1.6; margin-top: 8px; max-height: 340px; overflow-y: auto; }
+  .lv-vol { font-size: 12.5px; color: var(--txt2); margin-top: 10px; padding: 10px 12px; background: var(--navy); border: 1px solid var(--bdr); border-radius: 8px; }
+  .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
+  .lv-foot a { color: #22d3ee; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="lv-wrap">
+
+  <!-- ===== LOGIN GATE ===== -->
+  <div id="login" class="lv-login hidden">
+    <h1>NoVo Analyst <span class="accent">Live</span></h1>
+    <p>The live SPY / QQQ / SPX dealer map — updating through the session. Enter the email on your subscription and we'll send you a sign-in link.</p>
+    <form id="lform">
+      <input id="lemail" type="email" required placeholder="you@email.com" autocomplete="email">
+      <button type="submit">Send my link</button>
+    </form>
+    <div id="lmsg" class="lv-msg"></div>
+    <p style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Not a subscriber yet? <a href="/analyst" style="color:#22d3ee;">Start a free 7-day trial →</a></p>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="dash" class="hidden">
+    <div class="lv-top">
+      <div class="lv-brand"><img src="/novo-logo-light.png?v=1" alt="NoVo"></div>
+      <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
+      <span id="sess" class="lv-sess"></span>
+      <div class="lv-tabs" id="tabs">
+        <button data-tk="SPY" class="on">SPY</button><button data-tk="QQQ">QQQ</button><button data-tk="SPX">SPX</button>
+      </div>
+    </div>
+
+    <div class="lv-grid">
+      <!-- LEFT: chart + strike profile -->
+      <div>
+        <div class="lv-card"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels"></div>
+        <div class="lv-card" style="margin-top:16px;"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
+      </div>
+      <!-- RIGHT: dealer tiles + vol -->
+      <div>
+        <div class="lv-card">
+          <h2 id="dealer-h">SPY · Dealer positioning</h2>
+          <div style="margin-bottom:12px;"><span class="lv-spot" id="d-spot">—</span> <span id="d-reg" class="s" style="font-size:12px;"></span></div>
+          <div class="lv-tiles">
+            <div class="lv-tile"><div class="k">Net GEX</div><div class="v" id="d-gex">—</div><div class="s" id="d-gex-s"></div></div>
+            <div class="lv-tile"><div class="k">Zero-Gamma</div><div class="v cyn" id="d-flip">—</div><div class="s">the regime line</div></div>
+            <div class="lv-tile"><div class="k">Call Wall</div><div class="v amb" id="d-cw">—</div><div class="s">resistance / pin</div></div>
+            <div class="lv-tile"><div class="k">Put Wall</div><div class="v amb" id="d-pw">—</div><div class="s">support</div></div>
+            <div class="lv-tile"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
+            <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
+          </div>
+          <div class="lv-vol" id="d-vol"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- multi-index strip -->
+    <div class="lv-strip" id="strip"></div>
+
+    <div class="lv-grid">
+      <div class="lv-card lv-read"><h2>Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
+      <div class="lv-card"><h2>'The Line' — live feed</h2><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next level event…</li></ul></div>
+    </div>
+
+    <div class="lv-foot">Updated <span id="upd">—</span> · NoVo Analyst is market analysis &amp; education only — not financial advice, and not trade signals. <a href="/analyst/methodology">Methodology</a></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var TOKEN = null, STATE = null, CUR = "SPY";
+  var qs = new URLSearchParams(location.search);
+  // token from URL (magic link) → persist; else from storage
+  if (qs.get('t')) { TOKEN = qs.get('t'); try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}; history.replaceState(null,'', '/analyst/live'); }
+  if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
+  var $ = function(id){ return document.getElementById(id); };
+  function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
+  function showDash(){ $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); }
+
+  // ---- login form ----
+  $('lform').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var em = $('lemail').value.trim(), m = $('lmsg');
+    m.style.color = 'var(--txt2)'; m.textContent = 'Checking…';
+    try {
+      var r = await fetch('/api/analyst-publish?login=1', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: em }) });
+      if (r.ok) { m.style.color = '#34d399'; m.textContent = 'If that email has an active subscription, a sign-in link is on its way — check your inbox.'; }
+      else { var d = await r.json().catch(function(){return{};}); m.style.color = '#f87171'; m.textContent = d.error || 'Something went wrong — try again.'; }
+    } catch(_) { m.style.color = '#f87171'; m.textContent = 'Network error — try again.'; }
+  });
+
+  var _gexMoney = function(v){ if(v==null) return 'n/a'; var a=Math.abs(v), s=v>=0?'+':'-'; return a>=1e9?(s+'$'+(a/1e9).toFixed(1)+'B'):a>=1e6?(s+'$'+Math.round(a/1e6)+'M'):(s+'$'+Math.round(a).toLocaleString()); };
+  var _f = function(n,d){ return (n==null)?'—':('$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})); };
+
+  function idx(tk){ return (STATE && STATE.indices || []).find(function(x){ return x.ticker===tk; }); }
+
+  function renderDealer(){
+    var d = idx(CUR); if(!d) return;
+    $('dealer-h').textContent = CUR + ' · Dealer positioning';
+    $('chart-h').textContent = CUR + ' · Session & dealer levels';
+    $('d-spot').textContent = _f(d.spot);
+    var pos = (d.net_gex||0) >= 0;
+    $('d-reg').innerHTML = '<span class="'+(pos?'grn':'red')+'">'+(pos?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)')+'</span>';
+    $('d-gex').textContent = _gexMoney(d.net_gex); $('d-gex').className = 'v '+(pos?'grn':'red');
+    $('d-gex-s').textContent = pos?'long gamma':'short gamma';
+    $('d-flip').textContent = d.flip?_f(d.flip):'—';
+    $('d-cw').textContent = d.call_wall?_f(d.call_wall):'—';
+    $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
+    if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); }
+    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); $('d-sk-s').textContent = sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'+(d.atm_iv?('  ·  ATM IV '+d.atm_iv+'%'):''); }
+    // chart
+    if (STATE.chart_b64){ $('chart').src = 'data:image/png;base64,'+STATE.chart_b64; $('chart').style.display='block'; } else { $('chart').style.display='none'; }
+    $('d-vol').textContent = STATE.vol_env || '';
+    drawProfile(d);
+    // tabs
+    Array.prototype.forEach.call($('tabs').children, function(b){ b.classList.toggle('on', b.getAttribute('data-tk')===CUR); });
+  }
+
+  function drawProfile(d){
+    var cv = $('profile'); if(!cv || !d.profile || !d.profile.length) { if(cv){var c=cv.getContext('2d');cv.width=cv.offsetWidth;c.clearRect(0,0,cv.width,cv.height);} return; }
+    var dpr = window.devicePixelRatio||1, W = cv.offsetWidth, H = 200;
+    cv.width = W*dpr; cv.height = H*dpr; var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
+    var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
+    var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.g)||0; })) || 1;
+    var mid = W*0.5, bh = Math.max(2, (H-8)/rows.length - 2), y = 4;
+    var spot = d.spot;
+    rows.forEach(function(r){
+      var w = (Math.abs(r.g)/maxAbs) * (W*0.46);
+      c.fillStyle = r.g>=0 ? 'rgba(52,211,153,0.75)' : 'rgba(248,113,113,0.75)';
+      if (r.g>=0) c.fillRect(mid, y, w, bh); else c.fillRect(mid-w, y, w, bh);
+      y += bh + 2;
+    });
+    // spot + flip lines
+    c.strokeStyle='rgba(255,255,255,0.35)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,0); c.lineTo(mid,H); c.stroke(); c.setLineDash([]);
+    c.fillStyle='#6f8bab'; c.font='9px sans-serif'; c.textAlign='left';
+    c.fillText('puts / support', 4, H-3); c.textAlign='right'; c.fillText('calls / resistance', W-4, H-3);
+  }
+
+  function renderStrip(){
+    var el = $('strip'); el.innerHTML = '';
+    (STATE.indices||[]).forEach(function(d){
+      var pos=(d.net_gex||0)>=0;
+      var div = document.createElement('div'); div.className='lv-mini'+(d.ticker===CUR?' on':'');
+      div.innerHTML = '<div class="t">'+d.ticker+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
+        '<div class="r"><span class="'+(pos?'grn':'red')+'">'+(pos?'dampening':'amplifying')+'</span> · GEX '+_gexMoney(d.net_gex)+(d.em_daily!=null?(' · EM ±'+(d.em_daily_pct||0).toFixed(1)+'%'):'')+(d.skew_pts!=null?(' · skew '+(d.skew_pts>=0?'+':'')+d.skew_pts.toFixed(1)):'')+'</div>';
+      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); });
+      el.appendChild(div);
+    });
+  }
+
+  function renderMeta(){
+    var sess = STATE.session||'closed';
+    var open = sess==='open';
+    $('live').className = 'lv-live'+(open?'':' closed');
+    $('live-t').textContent = open?'LIVE':'MARKET '+sess.toUpperCase();
+    $('sess').textContent = ({open:'Regular session',premarket:'Pre-market',afterhours:'After hours',closed:'Market closed'})[sess]||'';
+    if (STATE.updated_at){ try{ $('upd').textContent = new Date(STATE.updated_at).toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'; }catch(_){ $('upd').textContent='—'; } }
+    if (STATE.read){ $('read-t').textContent = STATE.read.title||'Today’s read'; $('read-b').textContent = STATE.read.text||''; }
+    var feed = $('feed');
+    if (STATE.line_feed && STATE.line_feed.length){ feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+(f.ts||'')+'</span>'+String(f.text||'').replace(/</g,'&lt;')+'</li>'; }).join(''); }
+  }
+
+  function render(){ if(!STATE) return; renderDealer(); renderStrip(); renderMeta(); }
+
+  async function poll(){
+    if (!TOKEN) { showLogin(); return; }
+    try {
+      var r = await fetch('/api/analyst-publish?live=1&t='+encodeURIComponent(TOKEN), { cache:'no-store' });
+      if (r.status===401) { try{ localStorage.removeItem('novo_live_t'); }catch(_){}; TOKEN=null; showLogin(); return; }
+      if (r.ok) { STATE = await r.json(); showDash(); render(); }
+    } catch(_) {}
+  }
+
+  document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); } });
+
+  if (!TOKEN) showLogin(); else { poll(); setInterval(poll, 15000); }
+})();
+</script>
+</body>
+</html>
