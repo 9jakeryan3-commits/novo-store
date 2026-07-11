@@ -22,7 +22,9 @@ module.exports = async (req, res) => {
       const sess = await stripe.checkout.sessions.retrieve(state);
       // Any PAID NoVo subscription (Analyst OR Trader) earns the paid-Discord role. A valid paid session id
       // is unguessable, so this can't be forged without actually subscribing.
-      if (!sess || sess.payment_status !== 'paid' || sess.mode !== 'subscription') return back('error');
+      // Trial checkouts are 'no_payment_required' (card collected, $0 due), not 'paid' — accept both.
+      // The real entitlement gate is the live subscription-status check just below (active/trialing/past_due).
+      if (!sess || sess.mode !== 'subscription' || !['paid', 'no_payment_required'].includes(sess.payment_status)) return back('error');
       // A completed session's payment_status is permanently 'paid' and the session stays retrievable, so ALSO
       // confirm the underlying subscription is STILL active — otherwise a cancelled user could re-click their
       // old welcome link and re-grant the role, defeating the revoke.

@@ -54,27 +54,39 @@ async function isAnalystSub(subscriptionId) {
   try { const s = await stripe.subscriptions.retrieve(subscriptionId); return s?.metadata?.tier === 'analyst'; }
   catch { return false; }
 }
+// Small retry so a single transient Resend blip doesn't leave an audience move half-done (e.g. removed from
+// Analyst but never re-added to the free list on cancel → subscriber silently on NEITHER list).
+async function _retry(fn, n = 2) {
+  for (let i = 0; ; i++) { try { return await fn(); } catch (e) { if (i >= n) throw e; } }
+}
+// Returns {added, existed}: `existed` is true only when Resend reports the contact is ALREADY on the list
+// (a Stripe retry / re-processed event) — the welcome-email gate uses that to skip genuine duplicates while
+// still sending on a first-time-but-flaky add, so a transient error never silently swallows the welcome.
 async function analystAdd(email) {
-  if (!ANALYST_AUDIENCE || !email) return;
-  try { await resend.contacts.create({ audienceId: ANALYST_AUDIENCE, email, unsubscribed: false }); }
-  catch (e) { console.error(`[webhook-sub] analyst add failed: ${e.message}`); }
+  if (!ANALYST_AUDIENCE || !email) return { added: false, existed: false };
+  try { await resend.contacts.create({ audienceId: ANALYST_AUDIENCE, email, unsubscribed: false }); return { added: true, existed: false }; }
+  catch (e) {
+    const existed = /exist|already|duplicat|conflict/i.test(String(e?.message || ''));
+    if (!existed) console.error(`[webhook-sub] analyst add failed: ${e.message}`);
+    return { added: false, existed };
+  }
 }
 async function analystRemove(email) {
   if (!ANALYST_AUDIENCE || !email) return;
-  try { await resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }); }
-  catch (e) { console.error(`[webhook-sub] analyst remove failed: ${e.message}`); }
+  try { await _retry(() => resend.contacts.remove({ audienceId: ANALYST_AUDIENCE, email }), 2); }
+  catch (e) { console.error(`[webhook-sub] analyst remove failed after retries: ${e.message}`); }
 }
 // The free + Analyst lists are kept DISJOINT so no one gets the 'both' broadcasts (Weekly, articles) twice. A paid
 // sub lives ONLY on the Analyst list; on upgrade we pull them off the free list, on a real cancel we add them back.
 async function freeRemove(email) {
   if (!FREE_AUDIENCE || !email) return;
-  try { await resend.contacts.remove({ audienceId: FREE_AUDIENCE, email }); }
-  catch (e) { console.error(`[webhook-sub] free-list remove failed: ${e.message}`); }
+  try { await _retry(() => resend.contacts.remove({ audienceId: FREE_AUDIENCE, email }), 2); }
+  catch (e) { console.error(`[webhook-sub] free-list remove failed after retries: ${e.message}`); }
 }
 async function freeAdd(email) {
   if (!FREE_AUDIENCE || !email) return;
-  try { await resend.contacts.create({ audienceId: FREE_AUDIENCE, email, unsubscribed: false }); }
-  catch (e) { console.error(`[webhook-sub] free-list add failed: ${e.message}`); }
+  try { await _retry(() => resend.contacts.create({ audienceId: FREE_AUDIENCE, email, unsubscribed: false }), 2); }
+  catch (e) { console.error(`[webhook-sub] free-list add failed after retries: ${e.message}`); }
 }
 // True if this EMAIL still has ANY OTHER active paid sub (Analyst or Trader). Stripe mints a separate customer
 // per checkout, so a dual-tier user's subs live on different customer objects that share one email — checking
@@ -218,29 +230,32 @@ const handler = async (req, res) => {
     // NoVo Analyst ($49 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
-      await analystAdd(email);
+      const _r = await analystAdd(email);
       await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
-      try {
-        await resend.emails.send({
-          from: process.env.FROM_EMAIL || 'The NoVo Journal <orders@novo-aitrading.app>',
-          replyTo: 'support@novo-aitrading.app', to: [email],
-          subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
-        });
-      } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
+      if (!_r.existed) {         // skip re-welcoming on a Stripe retry of the same event (they were already added)
+        try {
+          await resend.emails.send({
+            from: 'The NoVo Journal <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
+            replyTo: 'support@novo-aitrading.app', to: [email],
+            subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
+          });
+        } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
+      }
       return res.status(200).json({ received: true });
     }
 
     // Trader INCLUDES Analyst — add the Trader subscriber to the Analyst email audience too, so they receive
     // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
     // via /api/discord, which already accepts any paid sub — Analyst OR Trader.)
-    await analystAdd(email);
+    const _rt = await analystAdd(email);
     await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
 
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
+    if (_rt.existed) return res.status(200).json({ received: true });   // Stripe retry of the same event → don't re-welcome
     try {
       await resend.emails.send({
-        from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
+        from: 'NoVo <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
         replyTo: 'support@novo-aitrading.app',
         to: [email],
         subject: 'Welcome to NoVo Trader — open your portal',

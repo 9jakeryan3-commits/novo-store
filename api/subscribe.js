@@ -8,6 +8,18 @@ const FROM = 'NoVo <orders@novo-aitrading.app>';
 const OWNER = 'novotrades26@gmail.com';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+// Per-IP rate limit — each signup fires a Resend contact-create + a welcome email, so an unthrottled endpoint
+// is an email-bomb / quota-burn vector (a tripped Resend quota silently kills ALL broadcasts). 5/min/IP is
+// ample for real humans (they sign up once).
+const _rl = new Map();
+function _rateLimited(ip, max = 5) {
+  const now = Date.now();
+  const rec = _rl.get(ip) || { n: 0, reset: now + 60000 };
+  if (now > rec.reset) { _rl.set(ip, { n: 1, reset: now + 60000 }); return false; }
+  rec.n++; _rl.set(ip, rec);
+  return rec.n > max;
+}
+
 // Free Market Notes welcome — confirms the signup, invites them to the free Discord community, and upsells
 // Analyst (private read channels). The Discord block only renders when DISCORD_INVITE_URL is set.
 function freeWelcomeHtml(invite) {
@@ -37,6 +49,9 @@ function freeWelcomeHtml(invite) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (_rateLimited(_ip)) return res.status(429).json({ error: 'Too many requests — try again in a minute.' });
 
   let email = '';
   try { email = (req.body && req.body.email ? String(req.body.email) : '').trim().toLowerCase(); } catch { email = ''; }

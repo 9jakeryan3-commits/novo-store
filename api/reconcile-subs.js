@@ -7,8 +7,47 @@
 
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const { Resend } = require('resend');
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const ANALYST_AUD = process.env.RESEND_ANALYST_AUDIENCE_ID;
+const FREE_AUD = process.env.RESEND_AUDIENCE_ID;
 const LS = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
 const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
+
+// Analyst subs carry NO license/instance, so the license-key reconcile below never sees them — a MISSED
+// customer.subscription.deleted webhook would leave a canceller on the paid Analyst audience forever (paid
+// reads for free). This pass reconciles the Analyst Resend audience against Stripe. FAIL SAFE like the
+// license pass: it only removes a contact when Stripe gives POSITIVE evidence of a dead sub AND no active
+// paid sub — a contact with NO Stripe sub at all (a possible manual/comp add) is always left alone.
+async function reconcileAnalyst() {
+  if (!resend || !ANALYST_AUD) return { checked: 0, removed: 0, kept: 0, skipped: 0 };
+  let contacts = [];
+  try {
+    const r = await resend.contacts.list({ audienceId: ANALYST_AUD });
+    contacts = Array.isArray(r?.data?.data) ? r.data.data : (Array.isArray(r?.data) ? r.data : []);
+  } catch (e) { console.error('[reconcile-subs] analyst list failed:', e.message); return { checked: 0, removed: 0, kept: 0, skipped: 0, error: e.message }; }
+  let checked = 0, removed = 0, kept = 0, skipped = 0;
+  for (const c of contacts) {
+    const email = c && c.email; if (!email) continue;
+    checked++;
+    let subs = [];
+    try {
+      const custs = await stripe.customers.list({ email, limit: 100 });
+      for (const cu of custs.data) {
+        const s = await stripe.subscriptions.list({ customer: cu.id, status: 'all', limit: 20 });
+        subs.push(...s.data);
+      }
+    } catch (e) { skipped++; continue; }              // can't confirm with Stripe → leave alone (fail safe)
+    if (subs.length === 0) { skipped++; continue; }    // no Stripe sub at all → possible manual/comp contact; never auto-remove
+    if (subs.some(s => ['active', 'trialing', 'past_due'].includes(s.status))) { kept++; continue; }  // still paying (incl. Trader)
+    if (subs.some(s => ['canceled', 'unpaid', 'incomplete_expired'].includes(s.status))) {
+      try { await resend.contacts.remove({ audienceId: ANALYST_AUD, email }); } catch (_) {}
+      if (FREE_AUD) { try { await resend.contacts.create({ audienceId: FREE_AUD, email, unsubscribed: false }); } catch (_) {} }
+      removed++;
+    } else { skipped++; }
+  }
+  return { checked, removed, kept, skipped };
+}
 
 async function lsGet(path) {
   const r = await fetch(`${LS}${path}`, { headers: { 'X-Admin-Key': ADMIN_KEY } });
@@ -66,8 +105,11 @@ module.exports = async (req, res) => {
       // active / trialing / incomplete -> healthy or pending: leave alone
     }
 
-    console.log(`[reconcile-subs] checked=${checked} suspended=${suspended} cancelled=${cancelled} skipped=${skipped}`);
-    return res.status(200).json({ checked, suspended, cancelled, skipped });
+    let analyst = { checked: 0, removed: 0, kept: 0, skipped: 0 };
+    try { analyst = await reconcileAnalyst(); } catch (e) { console.error('[reconcile-subs] analyst pass error:', e.message); }
+
+    console.log(`[reconcile-subs] licenses checked=${checked} suspended=${suspended} cancelled=${cancelled} skipped=${skipped} | analyst checked=${analyst.checked} removed=${analyst.removed} kept=${analyst.kept} skipped=${analyst.skipped}`);
+    return res.status(200).json({ checked, suspended, cancelled, skipped, analyst });
   } catch (err) {
     console.error('[reconcile-subs] error:', err.message);
     return res.status(500).json({ error: 'Reconcile failed' });

@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { put, list, del } from '@vercel/blob';
+import crypto from 'node:crypto';
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -15,6 +16,25 @@ const FROM = process.env.ANALYST_FROM_EMAIL || 'The NoVo Journal <analyst@novo-a
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+
+// Constant-time secret check for the owner-only publish/delete auth (avoids a timing side-channel; also the
+// single source of truth for the header check on both POST and DELETE).
+function _secretOk(provided) {
+  const secret = process.env.ANALYST_PUBLISH_SECRET;
+  if (!secret || !provided) return false;
+  const a = Buffer.from(String(provided)); const b = Buffer.from(secret);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+// Per-instance IP rate limiter — a backstop on the write endpoints so a leaked secret can't fan out unlimited
+// broadcasts/archive-deletes in a burst. Generous (60/min) so the engine's own publishes + Line alerts never trip it.
+const _rl = new Map();
+function _rateLimited(ip, max = 60) {
+  const now = Date.now();
+  const rec = _rl.get(ip) || { n: 0, reset: now + 60000 };
+  if (now > rec.reset) { _rl.set(ip, { n: 1, reset: now + 60000 }); return false; }
+  rec.n++; _rl.set(ip, rec);
+  return rec.n > max;
+}
 
 // ── PUBLIC ARCHIVE (served here as GET so it doesn't add a 13th serverless function — Hobby cap is 12) ──
 async function _loadJson(prefix, token) {
@@ -67,7 +87,7 @@ async function handleArchive(req, res) {
     }
     const bt = esc(rd.text || '').replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING)/g, '$1<b>$2</b>');
     const desc = (rd.text || '').replace(/\s+/g, ' ').slice(0, 155);
-    const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
+    const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure" onerror="this.style.display='none'">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
     return res.status(200).send(_page(`${rd.title} — NoVo Analyst`, desc, `${SITE}/analyst/archive/${slug}`, inner));
   }
   let idx = await _loadJson('analyst-archive/index.json', token);
@@ -83,11 +103,14 @@ async function handleArchive(req, res) {
 export default async function handler(req, res) {
   if (req.method === 'GET') return handleArchive(req, res);
 
+  // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
+  const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (_rateLimited(_ip)) return res.status(429).json({ error: 'rate limited' });
+
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
   //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
   if (req.method === 'DELETE') {
-    const secret = process.env.ANALYST_PUBLISH_SECRET;
-    if (!secret || req.headers['x-analyst-secret'] !== secret) return res.status(401).json({ error: 'unauthorized' });
+    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(500).json({ error: 'no blob token' });
     const slug = (req.query && req.query.slug ? String(req.query.slug) : '').replace(/[^a-z0-9-]/gi, '').slice(0, 80);
@@ -124,15 +147,17 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const secret = process.env.ANALYST_PUBLISH_SECRET;
-  if (!secret || req.headers['x-analyst-secret'] !== secret) {
+  if (!_secretOk(req.headers['x-analyst-secret'])) {
     return res.status(401).json({ error: 'unauthorized' });
   }
 
   const body = req.body || {};
   const title = (body.title || '').trim();
   const text = (body.text || '').trim();
-  const html = (body.html || '').trim();
+  // SECURITY: never render client-supplied HTML. The engine only ever sends `text` (already scrubbed) and
+  // relies on the server template below. Accepting body.html would let a leaked secret broadcast arbitrary
+  // markup to the whole audience, bypassing the scrub/format contract — so it is deliberately ignored.
+  const html = '';
   const send = body.send !== false;                                    // default true
   const audience = (body.audience || 'analyst').toString().toLowerCase(); // 'analyst' | 'free' | 'both'
   const label = (body.label || 'NoVo Analyst').toString();             // dark-header sub-label
@@ -246,19 +271,24 @@ export default async function handler(req, res) {
       const readObj = { slug, title, text, bias, levels, chartUrl, label, dateLabel: etDate, publishAfter, createdAt: nowMs };
       await put(`analyst-archive/reads/${slug}.json`, JSON.stringify(readObj),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
-      // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N
-      let idx = [];
+      // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N.
+      // idxLoaded guard (mirrors the DELETE path, 2026-07-11): only rewrite the index if we GENUINELY loaded it
+      // (or it genuinely doesn't exist). A transient blob list/fetch failure must NOT overwrite the archive with
+      // just today's entry and wipe all history — the read blob is already saved, so it self-heals next publish.
+      let idx = null, idxLoaded = false;
       try {
         const { blobs } = await list({ prefix: 'analyst-archive/index.json', token: BT });
-        if (blobs && blobs[0]) { const r = await fetch(blobs[0].url); if (r.ok) idx = await r.json(); }
-      } catch (_) {}
-      if (!Array.isArray(idx)) idx = [];
-      const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING)/g, '').trim().slice(0, 180);
-      idx = idx.filter(e => e.slug !== slug);
-      idx.unshift({ slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter });
-      idx = idx.slice(0, 400);
-      await put('analyst-archive/index.json', JSON.stringify(idx),
-        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+        if (blobs && blobs[0]) { const r = await fetch(blobs[0].url); if (r.ok) { idx = await r.json(); idxLoaded = true; } }
+        else { idx = []; idxLoaded = true; }   // no index blob yet = empty is the true state, safe to write
+      } catch (_) { idxLoaded = false; }
+      if (idxLoaded && Array.isArray(idx)) {
+        const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING)/g, '').trim().slice(0, 180);
+        idx = idx.filter(e => e.slug !== slug);
+        idx.unshift({ slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter });
+        idx = idx.slice(0, 400);
+        await put('analyst-archive/index.json', JSON.stringify(idx),
+          { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      }
     } catch (e) { console.error('[analyst-publish] archive save failed:', e.message); }
   }
 
