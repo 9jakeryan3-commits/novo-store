@@ -178,23 +178,53 @@
   }
 
   function drawProfile(d){
-    var cv = $('profile'); if(!cv || !d.profile || !d.profile.length) { if(cv){var c=cv.getContext('2d');cv.width=cv.offsetWidth;c.clearRect(0,0,cv.width,cv.height);} return; }
-    var dpr = window.devicePixelRatio||1, W = cv.offsetWidth, H = 200;
-    cv.width = W*dpr; cv.height = H*dpr; var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
+    var cv = $('profile');
+    if(!cv || !d.profile || !d.profile.length) { if(cv){var c0=cv.getContext('2d');cv.width=cv.offsetWidth;c0.clearRect(0,0,cv.width,cv.height);} return; }
+    var dpr = window.devicePixelRatio||1, W = cv.offsetWidth, H = 220;
+    cv.style.height = H+'px'; cv.width = W*dpr; cv.height = H*dpr;
+    var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
     var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
+    var n = rows.length;
     var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.g)||0; })) || 1;
-    var mid = W*0.5, bh = Math.max(2, (H-8)/rows.length - 2), y = 4;
-    var spot = d.spot;
+    var padT=8, padB=16, axisW=46;                 // left gutter reserved for strike-price labels
+    var plotL = axisW, plotW = W - axisW - 6, mid = plotL + plotW*0.5;
+    var rowH = (H-padT-padB)/n, bh = Math.max(2, rowH - 1.5);
+    function yOfIndex(i){ return padT + i*rowH + rowH/2; }
+    function yOfStrike(k){                          // interpolate a price onto the (ascending) strike ladder
+      if(k<=rows[0].k) return yOfIndex(0);
+      if(k>=rows[n-1].k) return yOfIndex(n-1);
+      for(var i=0;i<n-1;i++){ if(k>=rows[i].k && k<=rows[i+1].k){ var t=(k-rows[i].k)/((rows[i+1].k-rows[i].k)||1); return yOfIndex(i)+t*(yOfIndex(i+1)-yOfIndex(i)); } }
+      return yOfIndex(n-1);
+    }
+    // gamma bars (green = net long gamma / positive, red = net short)
+    var y = padT;
     rows.forEach(function(r){
-      var w = (Math.abs(r.g)/maxAbs) * (W*0.46);
-      c.fillStyle = r.g>=0 ? 'rgba(52,211,153,0.75)' : 'rgba(248,113,113,0.75)';
+      var w = (Math.abs(r.g)/maxAbs) * (plotW*0.46);
+      c.fillStyle = r.g>=0 ? 'rgba(52,211,153,0.78)' : 'rgba(248,113,113,0.78)';
       if (r.g>=0) c.fillRect(mid, y, w, bh); else c.fillRect(mid-w, y, w, bh);
-      y += bh + 2;
+      y += rowH;
     });
-    // spot + flip lines
-    c.strokeStyle='rgba(255,255,255,0.35)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,0); c.lineTo(mid,H); c.stroke(); c.setLineDash([]);
-    c.fillStyle='#6f8bab'; c.font='9px sans-serif'; c.textAlign='left';
-    c.fillText('puts / support', 4, H-3); c.textAlign='right'; c.fillText('calls / resistance', W-4, H-3);
+    // zero-GEX centerline
+    c.strokeStyle='rgba(255,255,255,0.28)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,padT); c.lineTo(mid,H-padB); c.stroke(); c.setLineDash([]);
+    // strike-price axis (~7 evenly-spaced ticks in the left gutter)
+    c.font='9.5px ui-monospace,SFMono-Regular,Menlo,monospace'; c.textAlign='right'; c.textBaseline='middle'; c.fillStyle='#5b708c';
+    var step = Math.max(1, Math.round(n/7));
+    for(var i=0;i<n;i+=step){ c.fillText(rows[i].k.toFixed(0), axisW-6, yOfIndex(i)); }
+    // key-level guides across the plot, labelled with the price
+    function guide(k,color,label){
+      if(k==null || !isFinite(+k)) return;
+      var yy = yOfStrike(+k);
+      c.strokeStyle=color; c.setLineDash([2,2]); c.beginPath(); c.moveTo(plotL,yy); c.lineTo(W-4,yy); c.stroke(); c.setLineDash([]);
+      c.fillStyle=color; c.textAlign='left'; c.textBaseline='alphabetic'; c.font='9px ui-monospace,Menlo,monospace';
+      c.fillText(label+' '+(+k).toFixed(2), plotL+5, yy-4); c.textBaseline='middle';
+    }
+    guide(d.put_wall, '#fbbf24', 'PUT WALL');
+    guide(d.call_wall, '#fbbf24', 'CALL WALL');
+    guide(d.flip, '#22d3ee', '0-GAMMA');
+    guide(d.spot, 'rgba(234,243,255,0.9)', 'SPOT');
+    // polarity labels
+    c.fillStyle='#6f8bab'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
+    c.fillText('← net short gamma', plotL+2, H-4); c.textAlign='right'; c.fillText('net long gamma →', W-4, H-4);
   }
 
   function renderStrip(){
