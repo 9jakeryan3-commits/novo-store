@@ -190,6 +190,8 @@
   .feature h4 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }
   .feature p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
 
+  /* ── firehose-vs-read contrast ── */
+  .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; max-width: 900px; margin-left: auto; margin-right: auto; }
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .included-item { display: flex; align-items: center; gap: 10px; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 6px; padding: 14px 16px; }
@@ -291,6 +293,7 @@
     .ai-grid { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
     .included-grid { grid-template-columns: 1fr; }
+    .vs-grid { grid-template-columns: 1fr; }
     .cost-grid { grid-template-columns: 1fr; }
     .cost-card li { flex-direction: column; gap: 4px; }
     .cost-compare { overflow-x: auto; }
@@ -398,7 +401,7 @@
     <div class="hero-badge">NoVo Analyst &middot; Market Intelligence</div>
     <h1>The machine's market read &mdash; <span>in your inbox.</span></h1>
     <div class="hero-tagline">Market Structure &middot; Dealer Flow &middot; <b>The Read</b></div>
-    <p>NoVo reads the tape, dealer positioning, and structure all session &mdash; net GEX, the gamma flip, the <b style="color:var(--txt1);">dealer gamma walls</b>, and the <b style="color:var(--txt1);">expected move</b> across <b style="color:#22d3ee;">SPY, QQQ &amp; SPX</b> &mdash; and writes it up for you in plain English: a morning desk note, a closing read, a Sunday week-ahead, real-time &lsquo;The Line&rsquo; alerts when a level breaks, and a <b style="color:#22d3ee;">live members dashboard</b> you can watch through the session. <b style="color:var(--txt1);">Interpreted, not a raw data terminal you decode yourself</b> &mdash; the dealer-positioning read desks pay hundreds for, at <b style="color:#22d3ee;">$49</b>. No hype, no &ldquo;buy calls here.&rdquo;</p>
+    <p>NoVo reads the tape, dealer positioning, and structure all session &mdash; net GEX, the gamma flip, the <b style="color:var(--txt1);">dealer gamma walls</b>, and the <b style="color:var(--txt1);">expected move</b> across <b style="color:#22d3ee;">SPY, QQQ &amp; SPX</b> &mdash; and writes it up for you in plain English: a morning desk note, a closing read, a Sunday week-ahead, real-time &lsquo;The Line&rsquo; alerts when a level breaks, and a <b style="color:#22d3ee;">live members dashboard</b> you can watch through the session. The flow feeds and GEX terminals hand you the raw data and make <b style="color:var(--txt1);">you</b> the analyst &mdash; <b style="color:var(--txt1);">NoVo hands you the read.</b> The dealer-positioning intelligence desks pay hundreds for, interpreted, at <b style="color:#22d3ee;">$49</b>. No hype, no &ldquo;buy calls here.&rdquo;</p>
     <div class="hero-chips">
       <span>Opening-bell read</span><span>End-of-day close</span><span>Sunday week-ahead</span>
     </div>
@@ -414,6 +417,39 @@
       <button type="button" class="hero-link" onclick="document.getElementById('free').scrollIntoView({behavior:'smooth'});return false;">Not ready to subscribe? Start free &mdash; notes + Discord &darr;</button>
     </div>
     <div id="msg" style="font-size:13px;margin-top:10px;min-height:16px;color:var(--txt3);"></div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ── Positioning: the firehose vs the read ── -->
+<section>
+  <div class="container">
+    <div class="section-label">Why NoVo</div>
+    <h2 class="section-title">Everyone else hands you the <span style="color:#f87171;">firehose</span>.</h2>
+    <p class="section-sub">Flow feeds, screeners, walls of GEX numbers &mdash; the terminals give you the raw data and quietly make <b style="color:var(--txt1);">you</b> the analyst. NoVo does the reading for you.</p>
+    <div class="vs-grid">
+      <div style="background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid rgba(248,113,113,0.55);border-radius:12px;padding:22px 24px;text-align:left;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#f87171;margin-bottom:8px;">Raw-data terminals &amp; flow feeds</div>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="font-size:13.5px;color:var(--txt2);line-height:1.5;padding:9px 0;"><span style="color:#f87171;font-weight:800;margin-right:8px;">&times;</span>Walls of GEX numbers &mdash; no &ldquo;so what&rdquo;</li>
+          <li style="font-size:13.5px;color:var(--txt2);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#f87171;font-weight:800;margin-right:8px;">&times;</span>Flow alerts firehosed with zero context</li>
+          <li style="font-size:13.5px;color:var(--txt2);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#f87171;font-weight:800;margin-right:8px;">&times;</span>Screeners you configure &amp; interpret yourself</li>
+          <li style="font-size:13.5px;color:var(--txt2);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#f87171;font-weight:800;margin-right:8px;">&times;</span>&ldquo;Here&rsquo;s the data&rdquo; &mdash; you&rsquo;re the analyst</li>
+          <li style="font-size:13.5px;color:var(--txt2);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#f87171;font-weight:800;margin-right:8px;">&times;</span>More dashboards to drown in</li>
+        </ul>
+      </div>
+      <div style="background:linear-gradient(180deg,rgba(34,211,238,0.06),var(--navy2) 62%);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:22px 24px;text-align:left;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#22d3ee;margin-bottom:8px;">NoVo Analyst &mdash; the read</div>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="font-size:13.5px;color:var(--txt1);line-height:1.5;padding:9px 0;"><span style="color:#34d399;font-weight:800;margin-right:8px;">&check;</span>The dealer map, <b>interpreted</b> &mdash; a plain-English bottom line</li>
+          <li style="font-size:13.5px;color:var(--txt1);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#34d399;font-weight:800;margin-right:8px;">&check;</span>The levels that matter + what a hold / break sets up</li>
+          <li style="font-size:13.5px;color:var(--txt1);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#34d399;font-weight:800;margin-right:8px;">&check;</span>A handful of curated alerts &mdash; never a firehose</li>
+          <li style="font-size:13.5px;color:var(--txt1);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#34d399;font-weight:800;margin-right:8px;">&check;</span>Written for you: the &ldquo;so what,&rdquo; every term explained</li>
+          <li style="font-size:13.5px;color:var(--txt1);line-height:1.5;padding:9px 0;border-top:1px solid var(--bdr);"><span style="color:#34d399;font-weight:800;margin-right:8px;">&check;</span>One read &mdash; not ten dashboards to decode</li>
+        </ul>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:18px;font-weight:800;color:var(--txt1);margin:30px auto 0;max-width:640px;letter-spacing:-.3px;">You don&rsquo;t need more data. You need to know what it means.</p>
   </div>
 </section>
 <hr class="divider">
