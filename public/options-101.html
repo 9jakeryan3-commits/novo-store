@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Options Trading 101 — A Beginner's Path | NoVo</title>
+<meta name="description" content="New to options? Options Trading 101 is a free, guided beginner path — calls & puts, the Greeks, 0DTE, risk and reading the market — built from the NoVo Journal. Start at zero, then go deep.">
+<link rel="canonical" href="https://novo-aitrading.app/options-101">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://novo-aitrading.app/options-101">
+<meta property="og:title" content="Options Trading 101 — A Beginner's Path">
+<meta property="og:description" content="A free, guided path for new options traders — from calls & puts to the Greeks, 0DTE, risk, and reading the tape. Then the full NoVo Journal for deep dives.">
+<meta property="og:image" content="https://novo-aitrading.app/og-hero.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Options Trading 101 — A Beginner's Path">
+<meta name="twitter:image" content="https://novo-aitrading.app/og-hero.png?v=2">
+<link rel="icon" href="/novo-icon.png?v=4">
+<link rel="stylesheet" href="/journal/blog.css?v=10">
+<style>
+  /* ── Options 101 curriculum — scoped, uses blog.css palette vars ── */
+  .learn-intro { max-width: 760px; margin: 0 auto 8px; padding: 0 24px; text-align: center; }
+  .learn-intro p { font-size: 16px; color: var(--txt2); line-height: 1.7; }
+  .learn-intro .lead-note { font-size: 13px; color: var(--txt3); margin-top: 12px; }
+  .learn-wrap { max-width: 1000px; margin: 0 auto; padding: 8px 24px 8px; }
+
+  .mod { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 16px; padding: 26px 26px 12px; margin: 0 0 20px; box-shadow: 0 6px 24px rgba(3,8,18,.28); }
+  .mod-head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+  .mod-num { flex-shrink: 0; font-family: 'Space Grotesk','Inter',sans-serif; font-size: 30px; font-weight: 800; color: #22d3ee; line-height: 1; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(34,211,238,.3); border-radius: 12px; background: rgba(34,211,238,.06); }
+  .mod-head h2 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 21px; font-weight: 800; color: var(--txt1); letter-spacing: -.4px; margin: 4px 0 4px; }
+  .mod-head p { font-size: 14px; color: var(--txt2); line-height: 1.55; margin: 0; }
+  .mod-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .mod-steps li { margin: 0; }
+  .mod-steps a { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border: 1px solid var(--bdr); border-radius: 10px; padding: 13px 15px; text-decoration: none; transition: border-color .15s, transform .15s, background .15s; height: 100%; }
+  .mod-steps a:hover { border-color: rgba(34,211,238,.45); transform: translateY(-2px); background: #0f1a2e; }
+  .step-n { flex-shrink: 0; font-size: 11px; font-weight: 800; color: var(--txt3); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 2px; min-width: 20px; }
+  .step-body { min-width: 0; }
+  .step-t { display: block; font-size: 14.5px; font-weight: 700; color: var(--txt1); line-height: 1.3; }
+  .step-d { display: block; font-size: 12.5px; color: var(--txt2); line-height: 1.45; margin-top: 3px; }
+
+  .learn-secnav a.active { color: var(--cyan); }
+  .path-handoff { max-width: 1000px; margin: 8px auto 0; padding: 0 24px; }
+  .path-handoff a { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: center; text-align: center; background: linear-gradient(180deg, rgba(34,211,238,.07), var(--navy2) 60%); border: 1px solid rgba(34,211,238,.3); border-radius: 14px; padding: 24px; text-decoration: none; }
+  .path-handoff .ph-t { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 19px; font-weight: 800; color: var(--txt1); letter-spacing: -.3px; }
+  .path-handoff .ph-s { font-size: 14px; color: var(--txt2); }
+  .path-handoff .ph-go { font-size: 14px; font-weight: 800; color: #22d3ee; }
+  @media (max-width: 560px) {
+    .mod { padding: 20px 16px 10px; }
+    .mod-num { width: 44px; height: 44px; font-size: 24px; }
+    .mod-steps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav><div class="nav-inner">
+  <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
+  <div class="nav-actions">
+    <a class="nav-link" href="/options-101" style="color:var(--cyan);">Options 101</a> <a class="nav-link" href="/journal/">The Journal</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
+    <a class="nav-buy" href="/">Subscribe</a><a class="nav-portal" href="https://app.novo-aitrading.app" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+  </div>
+</div></nav>
+
+<!-- ===== MARKETS TICKER ===== -->
+<div class="ticker"><div class="ticker-row">
+  <span class="ticker-tag"><span class="dot"></span>US Markets</span>
+  <div class="ticker-track"><div class="ticker-inner" id="ticker">
+    <span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span>
+  <span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span>
+  <span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span>
+  <span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span>
+  <span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span>
+  <span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span>
+  <span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span>
+  <span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span>
+    <span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span>
+  <span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span>
+  <span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span>
+  <span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span>
+  <span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span>
+  <span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span>
+  <span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span>
+  <span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span>
+  </div></div>
+</div></div>
+
+<!-- ===== SECTION NAV ===== -->
+<div class="secnav learn-secnav"><div class="secnav-inner">
+  <a href="#m1">Basics</a>
+  <a href="#m2">The Greeks</a>
+  <a href="#m3">0DTE</a>
+  <a href="#m4">Risk</a>
+  <a href="#m5">The Market</a>
+  <a href="#m6">Psychology</a>
+</div></div>
+
+<div class="jhead">
+<div class="brandline">
+  <h1>Options Trading <span class="accent">101</span></h1>
+  <span class="tag">A beginner's path · From zero to reading the tape</span>
+</div>
+</div>
+
+<div class="learn-intro">
+  <p>New to options? Start here. This is a <strong style="color:var(--txt1);">free, guided path</strong> — six short modules that take you from "what's a call?" to reading how SPY actually moves, each step a plain-English lesson from the NoVo Journal. Work through it in order, or jump to what you need.</p>
+  <div class="lead-note">Education only — not financial advice, and not trade signals. Options trading involves substantial risk of loss.</div>
+</div>
+
+<main class="learn-wrap">
+
+  <!-- MODULE 1 -->
+  <section id="m1" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">01</span>
+      <div>
+        <h2>Options, from zero</h2>
+        <p>The vocabulary you need before anything else — what an option is and how it's priced.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/what-is-an-etf-spy.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">What Is SPY?</span><span class="step-d">The one instrument NoVo trades — and why focus wins.</span></span></a></li>
+      <li><a href="/journal/call-vs-put-options.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">Calls vs. Puts</span><span class="step-d">The two building blocks of every options trade.</span></span></a></li>
+      <li><a href="/journal/moneyness-itm-atm-otm.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">ITM, ATM &amp; OTM</span><span class="step-d">Moneyness — and why the strike you pick matters.</span></span></a></li>
+      <li><a href="/journal/how-to-read-an-options-chain.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">Reading an Options Chain</span><span class="step-d">Decode the grid of strikes, bids and expirations.</span></span></a></li>
+      <li><a href="/journal/intrinsic-vs-extrinsic-value.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">Intrinsic vs. Extrinsic Value</span><span class="step-d">What you're actually paying for in a premium.</span></span></a></li>
+      <li><a href="/journal/options-expiration-explained.html"><span class="step-n">6</span><span class="step-body"><span class="step-t">Expiration, Explained</span><span class="step-d">What happens at expiry — and assignment.</span></span></a></li>
+      <li><a href="/journal/weekly-options-explained.html"><span class="step-n">7</span><span class="step-body"><span class="step-t">Weekly Options</span><span class="step-d">Shorter-dated contracts and why they exploded.</span></span></a></li>
+    </ol>
+  </section>
+
+  <!-- MODULE 2 -->
+  <section id="m2" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">02</span>
+      <div>
+        <h2>The Greeks, in plain English</h2>
+        <p>The four forces that move an option's price — direction, decay, and volatility — no math required.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/options-greeks-explained.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">The Greeks Overview</span><span class="step-d">Delta, gamma, theta, vega — what each one costs you.</span></span></a></li>
+      <li><a href="/journal/what-is-delta-options.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">Delta</span><span class="step-d">Direction — and your effective share count.</span></span></a></li>
+      <li><a href="/journal/delta-and-gamma-together.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">Gamma</span><span class="step-d">How delta itself changes as price moves.</span></span></a></li>
+      <li><a href="/journal/theta-decay-explained.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">Theta Decay</span><span class="step-d">The clock working against every long option.</span></span></a></li>
+      <li><a href="/journal/what-is-vega.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">Vega</span><span class="step-d">Your exposure to volatility itself.</span></span></a></li>
+      <li><a href="/journal/what-is-implied-volatility.html"><span class="step-n">6</span><span class="step-body"><span class="step-t">Implied Volatility &amp; IV Crush</span><span class="step-d">Why the same option is "cheap" or "expensive."</span></span></a></li>
+      <li><a href="/journal/what-is-the-vix.html"><span class="step-n">7</span><span class="step-body"><span class="step-t">The VIX</span><span class="step-d">The market's fear gauge, and what it signals.</span></span></a></li>
+    </ol>
+  </section>
+
+  <!-- MODULE 3 -->
+  <section id="m3" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">03</span>
+      <div>
+        <h2>0DTE &amp; 1DTE — NoVo's world</h2>
+        <p>Short-dated options are where NoVo lives. The honest version of how they work and where they bite.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/what-is-0dte-options-trading.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">What Is 0DTE?</span><span class="step-d">Same-day options, explained simply — and honestly.</span></span></a></li>
+      <li><a href="/journal/why-gamma-matters-for-0dte.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">Why Gamma Matters for 0DTE</span><span class="step-d">The force that makes same-day options so sharp.</span></span></a></li>
+      <li><a href="/journal/0dte-vs-1dte-options.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">0DTE vs. 1DTE</span><span class="step-d">One extra day changes the whole risk picture.</span></span></a></li>
+      <li><a href="/journal/why-0dte-fills-are-hard.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">Why 0DTE Fills Are Hard</span><span class="step-d">Spreads, speed, and slippage on the fast tape.</span></span></a></li>
+      <li><a href="/journal/slippage-on-1dte-options.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">Slippage on Short-Dated Options</span><span class="step-d">The hidden cost between your click and your fill.</span></span></a></li>
+      <li><a href="/journal/best-time-of-day-to-trade-0dte.html"><span class="step-n">6</span><span class="step-body"><span class="step-t">The Best Time of Day to Trade</span><span class="step-d">Why the open and close behave nothing alike.</span></span></a></li>
+    </ol>
+  </section>
+
+  <!-- MODULE 4 -->
+  <section id="m4" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">04</span>
+      <div>
+        <h2>Risk first — survive before you thrive</h2>
+        <p>The part that actually keeps you in the game. Learn this before you ever go live.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/risk-reward-ratio.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">Risk/Reward</span><span class="step-d">The ratio behind every trade worth taking.</span></span></a></li>
+      <li><a href="/journal/position-sizing-risk.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">Position Sizing</span><span class="step-d">The single biggest lever on whether you survive.</span></span></a></li>
+      <li><a href="/journal/stop-loss-orders-explained.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">Stop Losses</span><span class="step-d">Deciding where you're wrong — before you enter.</span></span></a></li>
+      <li><a href="/journal/r-multiples-explained.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">R-Multiples</span><span class="step-d">Measure trades in risk, not dollars.</span></span></a></li>
+      <li><a href="/journal/risk-of-ruin.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">Risk of Ruin</span><span class="step-d">The math of how accounts actually blow up.</span></span></a></li>
+      <li><a href="/journal/paper-trading-explained.html"><span class="step-n">6</span><span class="step-body"><span class="step-t">Paper Trading First</span><span class="step-d">Prove the process before real money is on it.</span></span></a></li>
+    </ol>
+  </section>
+
+  <!-- MODULE 5 -->
+  <section id="m5" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">05</span>
+      <div>
+        <h2>Reading the market</h2>
+        <p>The structure underneath the price — the levels and players that decide where SPY goes.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/what-moves-spy.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">What Moves SPY</span><span class="step-d">The forces behind the index's every tick.</span></span></a></li>
+      <li><a href="/journal/vwap-explained.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">VWAP</span><span class="step-d">The line institutions trade around all day.</span></span></a></li>
+      <li><a href="/journal/support-and-resistance-explained.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">Support &amp; Resistance</span><span class="step-d">The levels where moves stall, break, or reverse.</span></span></a></li>
+      <li><a href="/journal/opening-range-first-30-minutes.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">The Opening Range</span><span class="step-d">Why the first 30 minutes frame the whole day.</span></span></a></li>
+      <li><a href="/journal/what-market-makers-do.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">What Market Makers Do</span><span class="step-d">Your counterparty on almost every trade.</span></span></a></li>
+      <li><a href="/journal/how-dealer-hedging-moves-price.html"><span class="step-n">6</span><span class="step-body"><span class="step-t">How Dealer Hedging Moves Price</span><span class="step-d">The quiet force behind intraday drift and pins.</span></span></a></li>
+    </ol>
+  </section>
+
+  <!-- MODULE 6 -->
+  <section id="m6" class="mod">
+    <div class="mod-head">
+      <span class="mod-num">06</span>
+      <div>
+        <h2>Psychology &amp; discipline</h2>
+        <p>The real edge isn't a setup — it's the discipline to follow one. Where most new traders lose.</p>
+      </div>
+    </div>
+    <ol class="mod-steps">
+      <li><a href="/journal/trading-psychology-basics.html"><span class="step-n">1</span><span class="step-body"><span class="step-t">Trading Psychology Basics</span><span class="step-d">The mental game that decides most outcomes.</span></span></a></li>
+      <li><a href="/journal/fomo-and-revenge-trading.html"><span class="step-n">2</span><span class="step-body"><span class="step-t">FOMO &amp; Revenge Trading</span><span class="step-d">The two impulses that wreck good accounts.</span></span></a></li>
+      <li><a href="/journal/how-to-take-a-loss.html"><span class="step-n">3</span><span class="step-body"><span class="step-t">How to Take a Loss</span><span class="step-d">The skill that separates traders who last.</span></span></a></li>
+      <li><a href="/journal/process-vs-outcome-in-trading.html"><span class="step-n">4</span><span class="step-body"><span class="step-t">Process Over Outcome</span><span class="step-d">Why a good trade can lose and a bad one can win.</span></span></a></li>
+      <li><a href="/journal/the-discipline-of-sitting-out.html"><span class="step-n">5</span><span class="step-body"><span class="step-t">The Discipline of Sitting Out</span><span class="step-d">No trade is a position. Patience is an edge.</span></span></a></li>
+    </ol>
+  </section>
+
+</main>
+
+<!-- ===== GO DEEPER: PILLAR GUIDES ===== -->
+<div class="learn-wrap" style="padding-top:16px;">
+  <div class="guides-band" style="margin:0;">
+    <div style="font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;">Go deeper &middot; The complete guides</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;">
+      <a href="/journal/guide-options-trading-explained.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
+        <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">Options, Explained</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5;">Calls, puts, every Greek, IV, and the strategies built on top.</div></a>
+      <a href="/journal/guide-0dte-spy-options-scalping.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
+        <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">0DTE SPY Options Scalping</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5;">Short-dated options, the fill, and the machine that executes.</div></a>
+      <a href="/journal/guide-market-structure-dealer-flow.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
+        <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">Market Structure &amp; Dealer Flow</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5;">VWAP, dealer gamma, the order book &mdash; how SPY really moves.</div></a>
+      <a href="/journal/guide-trading-discipline-risk.html" style="display:block;background:var(--navy2);border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:12px;padding:18px 18px;text-decoration:none;">
+        <div style="font-size:16px;font-weight:800;color:var(--txt1);line-height:1.25;margin-bottom:6px;">Discipline &amp; Risk</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5;">Sizing, the metrics that matter, and why most traders lose.</div></a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HANDOFF TO THE FULL JOURNAL ===== -->
+<div class="path-handoff">
+  <a href="/journal/">
+    <span class="ph-t">Ready for the whole library?</span>
+    <span class="ph-s">The NoVo Journal &mdash; 340+ articles on options, market structure, dealer flow &amp; discipline.</span>
+    <span class="ph-go">Open the Journal &rarr;</span>
+  </a>
+</div>
+
+<!-- ===== GET STARTED: FREE / ANALYST / TRADER ===== -->
+<section class="cta-dual" style="max-width:1120px;margin:0 auto;padding:36px 24px 44px;">
+  <div style="border-top:1px solid var(--bdr);padding-top:36px;">
+    <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:6px;">Get started</div>
+    <h2 style="text-align:center;font-family:'Space Grotesk','Inter',sans-serif;font-size:24px;font-weight:800;color:var(--txt1);letter-spacing:-.5px;margin:0 0 26px;">Free notes, the daily read, or the machine itself.</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:stretch;">
+      <div style="flex:1 1 280px;display:flex;flex-direction:column;background:#0f1a2e;border:1px solid var(--bdr);border-top:2px solid #8aacc8;border-radius:14px;padding:28px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#9fb6d1;margin-bottom:8px;">Market Notes &middot; Free</div>
+        <h3 style="font-family:'Space Grotesk','Inter',sans-serif;font-size:20px;font-weight:800;color:var(--txt1);margin:0 0 8px;letter-spacing:-.3px;">Keep learning, free.</h3>
+        <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin:0 0 14px;">A weekly market read by email &mdash; and the free NoVo Discord. No hype, no spam.</p>
+        <div style="flex:1;font-size:13.5px;color:var(--txt2);line-height:1.45;">
+          <div style="margin-bottom:7px;"><span style="color:#9fb6d1;font-weight:800;">&#10003;</span> The Week Ahead &mdash; Sunday market read, by email</div>
+          <div style="margin-bottom:7px;"><span style="color:#9fb6d1;font-weight:800;">&#10003;</span> New Journal articles as they drop</div>
+          <div style="margin-bottom:7px;"><span style="color:#9fb6d1;font-weight:800;">&#10003;</span> The free NoVo Discord community</div>
+          <div style="margin-bottom:0;"><span style="color:#9fb6d1;font-weight:800;">&#10003;</span> Public trade tips in the NoVo Discord</div>
+        </div>
+        <form id="cta-sub" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+          <input id="cta-email" type="email" required placeholder="you@email.com" style="padding:11px 14px;border-radius:8px;border:1px solid var(--bdr2);background:var(--navy);color:var(--txt1);font-size:14px;width:100%;box-sizing:border-box;">
+          <button type="submit" style="background:rgba(138,172,200,0.1);color:var(--txt1);font-weight:800;font-size:14px;padding:12px 22px;border-radius:9px;border:1px solid var(--bdr2);cursor:pointer;">Get free notes</button>
+        </form>
+        <div id="cta-sub-msg" style="font-size:12.5px;margin:8px 0;min-height:16px;"></div>
+        <a href="https://discord.gg/hr5GKzsU" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#5865F2;color:#fff;font-weight:800;font-size:14px;padding:11px 20px;border-radius:9px;text-decoration:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.79 19.79 0 0016.558 3.2a.074.074 0 00-.079.037c-.34.607-.719 1.4-.984 2.02a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.997-2.02.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.369a.07.07 0 00-.032.027C1.533 7.55.943 10.65 1.09 13.712a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.055c.5-3.177-.838-6.246-2.549-9.317a.061.061 0 00-.031-.027zM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>Join the free Discord</a>
+      </div>
+      <div style="flex:1 1 280px;display:flex;flex-direction:column;background:#0f1a2e;border:1px solid var(--bdr);border-top:2px solid #22d3ee;border-radius:14px;padding:28px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#22d3ee;margin-bottom:8px;">NoVo Analyst &middot; $49/mo or $499/yr</div>
+        <h3 style="font-family:'Space Grotesk','Inter',sans-serif;font-size:20px;font-weight:800;color:var(--txt1);margin:0 0 8px;letter-spacing:-.3px;">The daily read &mdash; email &amp; Discord.</h3>
+        <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin:0 0 14px;">The machine's market read, delivered to your inbox <strong style="color:var(--txt1);">and live in the private Analyst Discord</strong>. Analysis, not signals.</p>
+        <div style="flex:1;font-size:13.5px;color:var(--txt2);line-height:1.45;">
+          <div style="margin-bottom:7px;"><span style="color:#22d3ee;font-weight:800;">&#10003;</span> The Open &mdash; daily morning desk note</div>
+          <div style="margin-bottom:7px;"><span style="color:#22d3ee;font-weight:800;">&#10003;</span> The Close &mdash; end-of-day read + tomorrow's setup</div>
+          <div style="margin-bottom:7px;"><span style="color:#22d3ee;font-weight:800;">&#10003;</span> The Week Ahead &mdash; Sunday game plan &amp; scenarios</div>
+          <div style="margin-bottom:7px;"><span style="color:#22d3ee;font-weight:800;">&#10003;</span> Curated &lsquo;The Line&rsquo; + gamma-regime alerts</div>
+          <div style="margin-bottom:0;"><span style="color:#22d3ee;font-weight:800;">&#10003;</span> <strong style="color:var(--txt1);">Private Analyst Discord</strong> &mdash; every read &amp; alert</div>
+        </div>
+        <a href="/analyst" style="display:block;text-align:center;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;margin-top:18px;">Start free &mdash; 7-day trial &rarr;</a>
+      </div>
+      <div style="flex:1 1 280px;display:flex;flex-direction:column;background:#0f1a2e;border:1px solid var(--bdr);border-top:2px solid #10b981;border-radius:14px;padding:28px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#10b981;margin-bottom:8px;">NoVo Trader &middot; $199/mo</div>
+        <h3 style="font-family:'Space Grotesk','Inter',sans-serif;font-size:20px;font-weight:800;color:var(--txt1);margin:0 0 8px;letter-spacing:-.3px;">The machine, executing live.</h3>
+        <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin:0 0 14px;">The full autonomous system, trading your own broker account. Non-custodial.</p>
+        <div style="flex:1;font-size:13.5px;color:var(--txt2);line-height:1.45;">
+          <div style="margin-bottom:7px;"><span style="color:#10b981;font-weight:800;">&#10003;</span> Finds, sizes, executes &amp; exits &mdash; fully autonomous</div>
+          <div style="margin-bottom:7px;"><span style="color:#10b981;font-weight:800;">&#10003;</span> Runs in your own broker (Tradier + Alpaca)</div>
+          <div style="margin-bottom:7px;"><span style="color:#10b981;font-weight:800;">&#10003;</span> You set the risk, allocation &amp; the DTE dial</div>
+          <div style="margin-bottom:7px;"><span style="color:#10b981;font-weight:800;">&#10003;</span> Non-custodial &mdash; it never holds your money</div>
+          <div style="margin-bottom:7px;"><span style="color:#10b981;font-weight:800;">&#10003;</span> AI included</div>
+          <div style="margin-bottom:0;"><span style="color:#10b981;font-weight:800;">&#10003;</span> Try it free for 3 days</div>
+        </div>
+        <a href="/" style="display:block;text-align:center;background:linear-gradient(180deg,#34d399,#10b981);color:#04130c;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;margin-top:18px;">Get NoVo Trader &rarr;</a>
+      </div>
+    </div>
+  </div>
+  <script>(function(){var f=document.getElementById('cta-sub');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('cta-email').value.trim();var m=document.getElementById('cta-sub-msg');m.style.color='#8aacc8';m.textContent='...';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You are in - thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong - try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error - try again.';}});})();</script>
+</section>
+
+<footer class="foot">
+  <div class="links"><a href="/">Home</a> · <a href="/options-101">Options 101</a> · <a href="/journal/">The Journal</a> · <a href="/license.html">Terms</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="https://discord.gg/hr5GKzsU" target="_blank" rel="noopener">Discord</a> · <a href="mailto:general@novo-aitrading.app">Contact</a></div>
+  <div>© 2026 NoVo AI Trading. Educational content only — not financial advice, and not trade signals. Options trading involves substantial risk of loss. Market data shown is delayed/illustrative.</div>
+</footer>
+
+<script src="/ticker-live.js" defer></script>
+</body>
+</html>
