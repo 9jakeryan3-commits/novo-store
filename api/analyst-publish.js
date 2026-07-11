@@ -111,8 +111,13 @@ async function _latestArchivedRead(token) {
   try {
     const idx = await _loadJson('analyst-archive/index.json', token);
     if (!Array.isArray(idx) || !idx.length) return null;
-    // members see the most recent read regardless of the public-archive publishAfter delay
-    const top = idx.slice().sort((a, b) => (b.createdAt || b.publishAfter || 0) - (a.createdAt || a.publishAfter || 0))[0];
+    // ONLY fall back to real PAID desk notes (The Open / Close / Week Ahead). NEVER the Mid-Day Tape Review —
+    // it's a conversion/sales email to the FREE list (upsell framing, no full dealer map), not paid content.
+    const DESK = /-(the-open|the-close|the-week-ahead)$/;
+    const desks = idx.filter(e => e && typeof e.slug === 'string' && DESK.test(e.slug));
+    if (!desks.length) return null;
+    // members see the most recent desk note regardless of the public-archive publishAfter delay
+    const top = desks.slice().sort((a, b) => (b.createdAt || b.publishAfter || 0) - (a.createdAt || a.publishAfter || 0))[0];
     const rd = await _loadJson(`analyst-archive/reads/${top.slug}.json`, token);
     const read = rd ? { title: rd.title, text: rd.text, dateLabel: rd.dateLabel, stale: true } : null;
     _latestReadCache = { at: now, read };
