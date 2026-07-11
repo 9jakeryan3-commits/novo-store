@@ -174,8 +174,16 @@ export default async function handler(req, res) {
   // Magic-link login for the members live view — verify an active sub, email a signed access link. ALWAYS
   // returns ok (never reveals whether an email has a sub); only sends the link when a paid sub is active.
   if (req.method === 'POST' && req.query && 'login' in req.query) {
-    let email = '';
-    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); email = String(b.email || '').trim().toLowerCase(); } catch (_) {}
+    let email = '', cs = '';
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); email = String(b.email || '').trim().toLowerCase(); cs = String(b.cs || '').trim(); } catch (_) {}
+    // Post-checkout welcome flow: resolve the paid email from a Stripe Checkout Session id instead of
+    // asking the just-subscribed user to re-type it, so the magic link is waiting in their inbox.
+    if (!email && cs && /^cs_[A-Za-z0-9_]+$/.test(cs)) {
+      try {
+        const sess = await _stripe.checkout.sessions.retrieve(cs);
+        email = String(sess?.customer_details?.email || sess?.customer_email || '').trim().toLowerCase();
+      } catch (_) {}
+    }
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return res.status(400).json({ error: 'Enter a valid email.' });
     try {
       if (await _activePaidSub(email)) {
@@ -432,7 +440,9 @@ export default async function handler(req, res) {
       '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This weekly outlook is the taste. <b style="color:#eaf3ff">NoVo Analyst</b> adds the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes plus intraday regime-shift alerts — $49/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
     : '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
       '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>';
-  const renderBody = (upsellHtml) => html || (
+  // Paid-only reminder that the live web dashboard exists (the free list never sees it — it's a paid feature).
+  const LIVE_CTA = `<a href="${SITE}/analyst/live" style="display:block;text-align:center;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;text-decoration:none;padding:12px 18px;border-radius:9px;margin:0 0 20px;">&#9673; Open your live dealer dashboard &rarr;</a>`;
+  const renderBody = (upsellHtml, liveCta) => html || (
     '<div style="margin:0;padding:0;background:#070b12;">' +
       '<div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
         '<div style="background:#0a1120;border:1px solid #1c2c47;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">' +
@@ -440,6 +450,7 @@ export default async function handler(req, res) {
           `<div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${esc(label)}</div>` +
         '</div>' +
         '<div style="background:#0f1a2e;border:1px solid #1c2c47;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
+          (liveCta || '') +
           (chartUrl ? `<img src="${chartUrl}" width="552" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #1c2c47;display:block;margin:0 0 20px;" alt="SPY session chart — levels &amp; structure">` : '') +
           `<h1 style="font-size:20px;font-weight:800;color:#eaf3ff;letter-spacing:-.3px;margin:0 0 12px;line-height:1.25;">${esc(title)}</h1>` +
           biasPill + alertPill +
@@ -462,9 +473,11 @@ export default async function handler(req, res) {
   try {
     const ids = [];
     for (const aud of targets) {
-      // Paid Analyst subscribers already HAVE Analyst — never pitch it back; upsell them to Trader instead.
-      const effUpsell = (aud === ANALYST_AUD) ? 'pulse' : upsell;
-      const bodyHtml = renderBody(buildUpsell(effUpsell));
+      // Paid Analyst subscribers already HAVE Analyst — never pitch it back; upsell them to Trader instead,
+      // and give them the live-dashboard button (a paid-only feature the free list never sees).
+      const isPaid = (aud === ANALYST_AUD);
+      const effUpsell = isPaid ? 'pulse' : upsell;
+      const bodyHtml = renderBody(buildUpsell(effUpsell), isPaid ? LIVE_CTA : '');
       const bc = await resend.broadcasts.create({ audienceId: aud, from: FROM, subject: title, html: bodyHtml });
       const bcId = bc?.data?.id || bc?.id;
       if (bcId) { await resend.broadcasts.send(bcId); ids.push(bcId); }
