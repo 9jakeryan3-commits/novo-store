@@ -164,6 +164,12 @@ function welcomeEmailHtml(connectUrl) {
       <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:14px;">Connect your Discord &rarr;</a>
     </div>` : ''}
 
+    <div style="background:#eefcff;border:1px solid #b9e9f2;border-left:3px solid #06b6d4;border-radius:10px;padding:16px 18px;margin:0 0 24px;">
+      <div style="font-size:14px;color:#0b1527;font-weight:700;margin-bottom:6px;">Included: the NoVo Analyst live dashboard</div>
+      <div style="font-size:13px;color:#475569;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#0b1527;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#0b1527;">live SPY / QQQ / SPX dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
+      <a href="https://novo-aitrading.app/analyst/live" style="display:inline-block;background:#06b6d4;color:#04121a;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:800;font-size:14px;">Open the live dashboard &rarr;</a>
+    </div>
+
     <div style="border-top:1px solid #e2e8f0;margin:0 0 20px;"></div>
     <h2 style="color:#0b1527;font-size:16px;margin:0 0 14px;">Getting started</h2>
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
