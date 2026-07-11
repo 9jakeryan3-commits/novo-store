@@ -168,8 +168,9 @@
     $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
     if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); }
     if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); $('d-sk-s').textContent = sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'+(d.atm_iv?('  ·  ATM IV '+d.atm_iv+'%'):''); }
-    // chart
-    if (STATE.chart_b64){ $('chart').src = 'data:image/png;base64,'+STATE.chart_b64; $('chart').style.display='block'; } else { $('chart').style.display='none'; }
+    // chart — per-index (each ticker carries its own rendered chart)
+    var _cb = d.chart_b64 || null;
+    if (_cb){ $('chart').src = 'data:image/png;base64,'+_cb; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; } else { $('chart').style.display='none'; }
     $('d-vol').textContent = STATE.vol_env || '';
     drawProfile(d);
     // tabs

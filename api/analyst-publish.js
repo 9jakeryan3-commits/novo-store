@@ -70,12 +70,24 @@ function _verifyToken(token) {
   } catch { return null; }
 }
 async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub (Analyst OR Trader) → member access
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return false;
+  const hasSub = async (custId) => {
+    const subs = await _stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    return subs.data.some(s => ['active', 'trialing', 'past_due'].includes(s.status));
+  };
   try {
-    const custs = await _stripe.customers.list({ email, limit: 100 });
-    for (const c of custs.data) {
-      const subs = await _stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 20 });
-      if (subs.data.some(s => ['active', 'trialing', 'past_due'].includes(s.status))) return true;
-    }
+    // NOTE: customers.list({email}) matches the email EXACTLY (case-sensitive), but customers are
+    // routinely stored with different casing than the login input (e.g. "Novotrades26@gmail.com" vs a
+    // lowercased "novotrades26@..."). Stripe Search's email index IS case-insensitive, so use it as the
+    // primary lookup; fall back to list() for a customer created seconds ago (Search is eventually consistent).
+    const seen = new Set();
+    try {
+      const sr = await _stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); if (await hasSub(c.id)) return true; }
+    } catch (_) { /* search index warming up or unavailable — fall through to list() */ }
+    const custs = await _stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id) && await hasSub(c.id)) return true; }
   } catch (e) { console.error('[analyst-live] sub check:', e.message); }
   return false;
 }
