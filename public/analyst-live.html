@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo Analyst — Live Dealer Map</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070b12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NoVo Analyst">
 <link rel="icon" href="/novo-icon.png?v=4">
+<link rel="apple-touch-icon" href="/icon-192.png?v=4">
+<link rel="manifest" href="/analyst-live.webmanifest">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <style>
   body { background: #070b12; }
@@ -265,6 +272,53 @@
   document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); } });
 
   if (!TOKEN) showLogin(); else { poll(); setInterval(poll, 15000); }
+})();
+</script>
+<script>
+// ===== PWA: install prompt + Web Push (mirrors the Trader dashboard) =====
+(function(){
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('/analyst/sw.js',{scope:'/analyst/'}).catch(function(){}); }
+  // Install-App pill — appears once the browser deems the page installable (auto-hides when standalone/installed).
+  (function(){
+    var dp=null;
+    function standalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+    function pill(){var b=document.getElementById('novoInstall');if(b||standalone())return b;b=document.createElement('button');b.id='novoInstall';b.textContent='⤓  Install App';b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;border:none;padding:11px 16px;border-radius:9px;font:700 12px/1 system-ui,sans-serif;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';b.onclick=async function(){if(!dp)return;dp.prompt();try{await dp.userChoice;}catch(e){}dp=null;b.style.display='none';};document.body.appendChild(b);return b;}
+    window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;var b=pill();if(b&&!standalone())b.style.display='block';});
+    window.addEventListener('appinstalled',function(){var b=document.getElementById('novoInstall');if(b)b.style.display='none';});
+  })();
+  // Enable-alerts button — signed-in members only; stays hidden until Web Push is configured server-side (VAPID).
+  (function(){
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)) return;
+    function tok(){try{return localStorage.getItem('novo_live_t')||'';}catch(_){return '';}}
+    function u2a(s){var p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/');var r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+    async function subscribe(){
+      try{
+        var t=tok(); if(!t) return false;
+        var perm=await Notification.requestPermission(); if(perm!=='granted') return false;
+        var kr=await fetch('/api/analyst-publish?push=key').then(function(r){return r.json();}); if(!kr.key) return false;
+        var reg=await navigator.serviceWorker.ready;
+        var sub=await reg.pushManager.getSubscription() || await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u2a(kr.key)});
+        var res=await fetch('/api/analyst-publish?push=subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:t,sub:sub})});
+        if(res.ok) localStorage.setItem('novo_analyst_push','1');
+        return res.ok;
+      }catch(e){return false;}
+    }
+    function mkBtn(){
+      if(document.getElementById('novoNotif'))return;
+      var b=document.createElement('button');b.id='novoNotif';b.textContent='🔔 Enable alerts';
+      b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#0f1a2e;color:#eaf3ff;border:1px solid #22d3ee;border-radius:9px;padding:9px 14px;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+      b.onclick=async function(){b.disabled=true;b.textContent='Enabling…';var ok=await subscribe();if(ok){b.textContent='🔔 Alerts on';setTimeout(function(){b.remove();},1800);}else{b.disabled=false;b.textContent='🔔 Enable alerts';}};
+      document.body.appendChild(b);
+    }
+    async function ready(){
+      if(!tok())return;                                            // members only (dashboard, not the login screen)
+      var kr; try{ kr=await fetch('/api/analyst-publish?push=key').then(function(r){return r.json();}); }catch(_){ return; }
+      if(!kr||!kr.key)return;                                       // push not configured yet -> don't show a dead button
+      if(Notification.permission==='granted' && localStorage.getItem('novo_analyst_push')==='1'){ subscribe(); return; }
+      if(Notification.permission!=='denied') mkBtn();
+    }
+    window.addEventListener('load',function(){ setTimeout(ready,1400); });
+  })();
 })();
 </script>
 </body>

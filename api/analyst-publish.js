@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { put, list, del } from '@vercel/blob';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
+import webpush from 'web-push';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
@@ -165,6 +166,12 @@ export default async function handler(req, res) {
     const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN);
     return res.status(200).json(state || { updated_at: 0, indices: [], stale: true });
   }
+  // VAPID public key for the members dashboard to subscribe to Web Push (empty until configured → button stays hidden).
+  if (req.method === 'GET' && req.query && req.query.push === 'key') {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ key: process.env.ANALYST_VAPID_PUBLIC || '' });
+  }
+
   if (req.method === 'GET') return handleArchive(req, res);
 
   // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
@@ -196,6 +203,23 @@ export default async function handler(req, res) {
       }
     } catch (e) { console.error('[analyst-live] login:', e.message); }
     return res.status(200).json({ ok: true });
+  }
+
+  // Save a signed-in member's device push subscription (member-token auth, NOT the owner secret). Stored at an
+  // unguessable (endpoint-hashed) public blob path; the send fan-out lists them by prefix (server-token only).
+  if (req.method === 'POST' && req.query && req.query.push === 'subscribe') {
+    let tokenV = '', sub = null;
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); tokenV = String(b.token || ''); sub = b.sub || null; } catch (_) {}
+    if (!_verifyToken(tokenV)) return res.status(401).json({ error: 'unauthorized' });
+    if (!sub || !sub.endpoint) return res.status(400).json({ error: 'bad subscription' });
+    const BT = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!BT) return res.status(200).json({ ok: true });   // nothing to persist to yet — don't error the client
+    try {
+      const key = 'analyst-push/' + crypto.createHash('sha256').update(String(sub.endpoint)).digest('hex').slice(0, 40) + '.json';
+      await put(key, JSON.stringify({ sub, at: Date.now() }),
+        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
@@ -366,6 +390,32 @@ export default async function handler(req, res) {
         body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
+  }
+
+  // ── WEB PUSH — fan 'The Line' (kind='alert') out to installed PWA members. Best-effort; DORMANT until the
+  // ANALYST_VAPID_PUBLIC / ANALYST_VAPID_PRIVATE env keys are set (mirrors the Trader dashboard's dormant push).
+  if (kind === 'alert' && process.env.ANALYST_VAPID_PUBLIC && process.env.ANALYST_VAPID_PRIVATE && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      webpush.setVapidDetails(process.env.ANALYST_VAPID_SUBJECT || 'mailto:support@novo-aitrading.app',
+        process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
+      const BT = process.env.BLOB_READ_WRITE_TOKEN;
+      const { blobs } = await list({ prefix: 'analyst-push/', token: BT });
+      const payload = JSON.stringify({
+        title: title || 'NoVo Analyst',
+        body: String(text || '').replace(/\s+/g, ' ').trim().slice(0, 160),
+        url: `${SITE}/analyst/live`, tag: 'novo-analyst-line',
+      });
+      const stale = [];
+      await Promise.all((blobs || []).map(async (b) => {
+        try {
+          const rec = await fetch(b.url).then(r => r.json());
+          if (rec && rec.sub) await webpush.sendNotification(rec.sub, payload);
+        } catch (err) {
+          if (err && (err.statusCode === 404 || err.statusCode === 410)) stale.push(b.url);  // expired sub → prune
+        }
+      }));
+      if (stale.length) { try { await del(stale, { token: BT }); } catch (_) {} }
+    } catch (e) { console.error('[analyst-publish] push send failed:', e.message); }
   }
 
   // ── PUBLIC ARCHIVE (delayed) ──────────────────────────────────────────────────────────────────────
