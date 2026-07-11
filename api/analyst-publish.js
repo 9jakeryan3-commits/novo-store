@@ -177,7 +177,10 @@ export default async function handler(req, res) {
   const targets = [];
   if ((audience === 'analyst' || audience === 'both') && ANALYST_AUD) targets.push(ANALYST_AUD);
   if ((audience === 'free' || audience === 'both') && FREE_AUD) targets.push(FREE_AUD);
-  if (!process.env.RESEND_API_KEY || targets.length === 0) {
+  // Only block on missing EMAIL config when we're actually emailing (send=true). Discord-only alerts
+  // ('The Line', kind='alert', send=false) and archive-only reads must still reach Discord / the archive even
+  // if the Resend audience is ever unset — the Discord webhook is configured independently of Resend.
+  if (send && (!process.env.RESEND_API_KEY || targets.length === 0)) {
     return res.status(503).json({ error: 'delivery not configured (RESEND_API_KEY / audience ids)' });
   }
 
