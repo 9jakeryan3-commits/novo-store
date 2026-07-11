@@ -37,7 +37,7 @@ async function cancelSub(subscriptionId) {
   return licensePost(`/admin/subscription/${subscriptionId}/cancel`, {});
 }
 
-// ── NoVo Analyst ($39 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
+// ── NoVo Analyst ($49 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const FREE_AUDIENCE = process.env.RESEND_AUDIENCE_ID;   // the free "Market Notes" list — kept DISJOINT from Analyst
@@ -215,7 +215,7 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    // NoVo Analyst ($39 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
+    // NoVo Analyst ($49 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
       await analystAdd(email);

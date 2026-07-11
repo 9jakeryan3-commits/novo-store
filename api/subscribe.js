@@ -27,7 +27,7 @@ function freeWelcomeHtml(invite) {
       </div>` : ''}
       <div style="margin-top:16px;border:1px solid #1c2c47;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($39/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-aitrading.app/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($49/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-aitrading.app/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
       </div>
       <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice, not trade signals. Unsubscribe anytime from any email.</p>
     </div>
