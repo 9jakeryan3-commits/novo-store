@@ -143,6 +143,7 @@ export default async function handler(req, res) {
   const pill = (body.pill || '').toString().trim();                    // regime-alert pill text
   const pillKind = (body.pill_kind || '').toString().toLowerCase();    // amplify | absorb | warn | calm
   const kind = (body.kind || 'read').toString().toLowerCase();          // 'read' (full desk note) | 'alert' (intraday)
+  const archive = body.archive !== false;                               // false = don't add to the public reads archive (e.g. the Mid-Day sales email)
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
   // Resolve target Resend audience(s): analyst = paid list, free = the newsletter list, both = each.
@@ -229,7 +230,7 @@ export default async function handler(req, res) {
   // with a publishAfter timestamp. The /analyst/archive page filters by that timestamp, so today's read
   // stays subscriber-exclusive (email/Discord) and only lands in the PUBLIC archive after its session —
   // self-releasing, no cron. Runs for send=true AND send=false reads (Mid-Day is archive-only). Best-effort.
-  if (kind === 'read' && process.env.BLOB_READ_WRITE_TOKEN) {
+  if (kind === 'read' && archive && process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       const BT = process.env.BLOB_READ_WRITE_TOKEN;
       const nowMs = Date.now();
