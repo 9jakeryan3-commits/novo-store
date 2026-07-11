@@ -281,7 +281,12 @@ export default async function handler(req, res) {
   // Audience-aware upsell. The FREE list gets the requested upsell (Analyst for the Weekly); the PAID Analyst
   // list already HAS Analyst, so it's never pitched back to them — they get the Trader upsell instead. Chosen
   // per-audience inside the send loop below (the Weekly goes to 'both'), so no one is sold what they own.
-  const buildUpsell = (u) => u === 'analyst'
+  const buildUpsell = (u) => u === 'both'
+    // Conversion pitch for the FREE list (the Mid-Day sales email) — offer BOTH paid tiers, let them choose.
+    ? '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:8px;">Ready for more than the taste?</div>' +
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:11px;"><b style="color:#eaf3ff">NoVo Analyst</b> &mdash; the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes plus real-time level-break alerts, $39/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>' +
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Trader</b> &mdash; the machine: the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>'
+    : u === 'analyst'
     ? '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>' +
       '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This weekly outlook is the taste. <b style="color:#eaf3ff">NoVo Analyst</b> adds the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes plus intraday regime-shift alerts — $39/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
     : '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
