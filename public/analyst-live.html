@@ -250,8 +250,9 @@
     var sess = STATE.session||'closed';
     var open = sess==='open';
     $('live').className = 'lv-live'+(open?'':' closed');
-    $('live-t').textContent = open?'LIVE':'MARKET '+sess.toUpperCase();
-    $('sess').textContent = ({open:'Regular session',premarket:'Pre-market',afterhours:'After hours',closed:'Market closed'})[sess]||'';
+    $('live-t').textContent = ({open:'LIVE',premarket:'PRE-MARKET',afterhours:'AFTER HOURS',closed:'MARKET CLOSED'})[sess]||'MARKET CLOSED';
+    // Secondary line ADDS context (data cadence) instead of repeating the pill's status word.
+    $('sess').textContent = (sess==='closed') ? 'Dealer data holds overnight · refreshes ~10 min' : 'Updating through the session · ~60s';
     if (STATE.updated_at){ try{ $('upd').textContent = new Date(STATE.updated_at).toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'; }catch(_){ $('upd').textContent='—'; } }
     if (STATE.read){ $('read-t').textContent = STATE.read.title||'Today’s read'; $('read-b').textContent = STATE.read.text||''; }
     var feed = $('feed');
