@@ -101,6 +101,24 @@ async function _loadJson(prefix, token) {
   } catch (_) {}
   return null;
 }
+// Fallback for the members live view when there's no fresh live read (weekends / between sessions): serve the
+// most recent archived desk note so "Today's read" is never a blank card. Cached ~5 min to avoid per-poll blob reads.
+let _latestReadCache = { at: 0, read: null };
+async function _latestArchivedRead(token) {
+  const now = Date.now();
+  if (_latestReadCache.read && (now - _latestReadCache.at) < 300000) return _latestReadCache.read;
+  if (!token) return null;
+  try {
+    const idx = await _loadJson('analyst-archive/index.json', token);
+    if (!Array.isArray(idx) || !idx.length) return null;
+    // members see the most recent read regardless of the public-archive publishAfter delay
+    const top = idx.slice().sort((a, b) => (b.createdAt || b.publishAfter || 0) - (a.createdAt || a.publishAfter || 0))[0];
+    const rd = await _loadJson(`analyst-archive/reads/${top.slug}.json`, token);
+    const read = rd ? { title: rd.title, text: rd.text, dateLabel: rd.dateLabel, stale: true } : null;
+    _latestReadCache = { at: now, read };
+    return read;
+  } catch (_) { return null; }
+}
 function _biasPill(bias) {
   if (!bias) return '';
   const m = { BULLISH: ['rgba(16,185,129,0.12)', '#34d399', 'rgba(16,185,129,0.45)'], BEARISH: ['rgba(239,68,68,0.12)', '#f87171', 'rgba(239,68,68,0.45)'], NEUTRAL: ['rgba(148,163,184,0.12)', '#b3c2d6', 'rgba(148,163,184,0.4)'] }[String(bias).toUpperCase()];
@@ -163,8 +181,13 @@ export default async function handler(req, res) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
     if (!email) return res.status(401).json({ error: 'unauthorized' });
     res.setHeader('Cache-Control', 'no-store');
-    const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN);
-    return res.status(200).json(state || { updated_at: 0, indices: [], stale: true });
+    const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN) || { updated_at: 0, indices: [], stale: true };
+    // Never show a blank "Today's read": fall back to the most recent archived desk note when there's no live one.
+    if (!state.read || !state.read.text) {
+      const fb = await _latestArchivedRead(process.env.BLOB_READ_WRITE_TOKEN);
+      if (fb) state.read = fb;
+    }
+    return res.status(200).json(state);
   }
   // VAPID public key for the members dashboard to subscribe to Web Push (empty until configured → button stays hidden).
   if (req.method === 'GET' && req.query && req.query.push === 'key') {

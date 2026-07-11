@@ -124,7 +124,7 @@
     <div class="lv-strip" id="strip"></div>
 
     <!-- today's read (full-width prose) -->
-    <div class="lv-card lv-read"><h2>Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
+    <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
 
     <div class="lv-foot">Updated <span id="upd">—</span> · NoVo Analyst is market analysis &amp; education only — not financial advice, and not trade signals. <a href="/analyst/methodology">Methodology</a></div>
   </div>
@@ -254,7 +254,16 @@
     // Secondary line ADDS context (data cadence) instead of repeating the pill's status word.
     $('sess').textContent = (sess==='closed') ? 'Dealer data holds overnight · refreshes ~10 min' : 'Updating through the session · ~60s';
     if (STATE.updated_at){ try{ $('upd').textContent = new Date(STATE.updated_at).toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'; }catch(_){ $('upd').textContent='—'; } }
-    if (STATE.read){ $('read-t').textContent = STATE.read.title||'Today’s read'; $('read-b').textContent = STATE.read.text||''; }
+    if (STATE.read && STATE.read.text){
+      $('read-t').textContent = STATE.read.title || 'Latest read';
+      $('read-b').textContent = STATE.read.text || '';
+      // when it's a fallback (most recent archived read, not today's), label it as such
+      $('read-h').textContent = STATE.read.stale ? ('Latest read' + (STATE.read.dateLabel ? ' · ' + STATE.read.dateLabel : '')) : 'Today’s read';
+    } else {
+      $('read-h').textContent = 'Today’s read';
+      $('read-t').textContent = 'Next read publishes before the bell.';
+      $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
+    }
     var feed = $('feed');
     if (STATE.line_feed && STATE.line_feed.length){ feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+(f.ts||'')+'</span>'+String(f.text||'').replace(/</g,'&lt;')+'</li>'; }).join(''); }
   }
