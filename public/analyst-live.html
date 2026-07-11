@@ -186,23 +186,23 @@
     var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
     var n = rows.length;
     var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.g)||0; })) || 1;
-    var padT=8, padB=16, axisW=46;                 // left gutter reserved for strike-price labels
+    var padT=10, padB=16, axisW=46;                // left gutter reserved for strike-price labels
     var plotL = axisW, plotW = W - axisW - 6, mid = plotL + plotW*0.5;
     var rowH = (H-padT-padB)/n, bh = Math.max(2, rowH - 1.5);
-    function yOfIndex(i){ return padT + i*rowH + rowH/2; }
-    function yOfStrike(k){                          // interpolate a price onto the (ascending) strike ladder
+    // strikes ascending, but drawn HIGH-at-top to match the price chart (index 0 = lowest = bottom)
+    function yOfIndex(i){ return padT + (n-1-i)*rowH + rowH/2; }
+    function yOfStrike(k){                          // interpolate a price onto the strike ladder
       if(k<=rows[0].k) return yOfIndex(0);
       if(k>=rows[n-1].k) return yOfIndex(n-1);
       for(var i=0;i<n-1;i++){ if(k>=rows[i].k && k<=rows[i+1].k){ var t=(k-rows[i].k)/((rows[i+1].k-rows[i].k)||1); return yOfIndex(i)+t*(yOfIndex(i+1)-yOfIndex(i)); } }
       return yOfIndex(n-1);
     }
     // gamma bars (green = net long gamma / positive, red = net short)
-    var y = padT;
-    rows.forEach(function(r){
+    rows.forEach(function(r,i){
+      var yy = yOfIndex(i) - bh/2;
       var w = (Math.abs(r.g)/maxAbs) * (plotW*0.46);
       c.fillStyle = r.g>=0 ? 'rgba(52,211,153,0.78)' : 'rgba(248,113,113,0.78)';
-      if (r.g>=0) c.fillRect(mid, y, w, bh); else c.fillRect(mid-w, y, w, bh);
-      y += rowH;
+      if (r.g>=0) c.fillRect(mid, yy, w, bh); else c.fillRect(mid-w, yy, w, bh);
     });
     // zero-GEX centerline
     c.strokeStyle='rgba(255,255,255,0.28)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,padT); c.lineTo(mid,H-padB); c.stroke(); c.setLineDash([]);
@@ -210,18 +210,18 @@
     c.font='9.5px ui-monospace,SFMono-Regular,Menlo,monospace'; c.textAlign='right'; c.textBaseline='middle'; c.fillStyle='#5b708c';
     var step = Math.max(1, Math.round(n/7));
     for(var i=0;i<n;i+=step){ c.fillText(rows[i].k.toFixed(0), axisW-6, yOfIndex(i)); }
-    // key-level guides across the plot, labelled with the price
-    function guide(k,color,label){
-      if(k==null || !isFinite(+k)) return;
-      var yy = yOfStrike(+k);
-      c.strokeStyle=color; c.setLineDash([2,2]); c.beginPath(); c.moveTo(plotL,yy); c.lineTo(W-4,yy); c.stroke(); c.setLineDash([]);
-      c.fillStyle=color; c.textAlign='left'; c.textBaseline='alphabetic'; c.font='9px ui-monospace,Menlo,monospace';
-      c.fillText(label+' '+(+k).toFixed(2), plotL+5, yy-4); c.textBaseline='middle';
-    }
-    guide(d.put_wall, '#fbbf24', 'PUT WALL');
-    guide(d.call_wall, '#fbbf24', 'CALL WALL');
-    guide(d.flip, '#22d3ee', '0-GAMMA');
-    guide(d.spot, 'rgba(234,243,255,0.9)', 'SPOT');
+    // key-level guide lines, then labels with vertical collision-avoidance so clustered levels stay readable
+    var guides = [];
+    [[d.put_wall,'#fbbf24','PUT WALL'],[d.call_wall,'#fbbf24','CALL WALL'],[d.flip,'#22d3ee','0-GAMMA'],[d.spot,'rgba(234,243,255,0.92)','SPOT']]
+      .forEach(function(g){ if(g[0]!=null && isFinite(+g[0])) guides.push({k:+g[0],color:g[1],label:g[2],y:yOfStrike(+g[0])}); });
+    guides.forEach(function(g){ c.strokeStyle=g.color; c.setLineDash([2,2]); c.beginPath(); c.moveTo(plotL,g.y); c.lineTo(W-4,g.y); c.stroke(); });
+    c.setLineDash([]); c.textAlign='left'; c.textBaseline='middle'; c.font='9px ui-monospace,Menlo,monospace';
+    guides.slice().sort(function(a,b){ return a.y-b.y; }).forEach(function(g,idx,arr){
+      var ly = g.y; if(idx>0 && ly < arr[idx-1]._ly + 11) ly = arr[idx-1]._ly + 11; g._ly = ly;
+      var txt = g.label+' '+g.k.toFixed(2), tw = c.measureText(txt).width;
+      c.fillStyle='rgba(7,11,18,0.74)'; c.fillRect(plotL+3, ly-6, tw+5, 12);
+      c.fillStyle=g.color; c.fillText(txt, plotL+5, ly);
+    });
     // polarity labels
     c.fillStyle='#6f8bab'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
     c.fillText('← net short gamma', plotL+2, H-4); c.textAlign='right'; c.fillText('net long gamma →', W-4, H-4);
