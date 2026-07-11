@@ -85,7 +85,7 @@ async function handleArchive(req, res) {
       return res.status(404).send(_page('Not available yet — NoVo Analyst', 'This read has not been released to the public archive yet.', `${SITE}/analyst/archive`,
         '<div class="kicker">NoVo Analyst</div><h1>Not released yet.</h1><p class="lead">This read hasn\'t hit the public archive yet &mdash; subscribers already have it live. <a href="' + SITE + '/analyst">Start a free 7-day trial &rarr;</a></p><p style="margin-top:20px;"><a href="' + SITE + '/analyst/archive">&larr; Browse released reads</a></p>'));
     }
-    const bt = esc(rd.text || '').replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1<b>$2</b>');
+    const bt = esc(rd.text || '').replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1<b>$2</b>');
     const desc = (rd.text || '').replace(/\s+/g, ' ').slice(0, 155);
     const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure" onerror="this.style.display='none'">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
     return res.status(200).send(_page(`${rd.title} — NoVo Analyst`, desc, `${SITE}/analyst/archive/${slug}`, inner));
@@ -227,7 +227,7 @@ export default async function handler(req, res) {
       let color = 0x22d3ee;
       if (bias && biasColor[bias.toUpperCase()] != null) color = biasColor[bias.toUpperCase()];
       else if (pill && pillColor[pillKind] != null) color = pillColor[pillKind];
-      let desc = text.replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1**$2**');
+      let desc = text.replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1**$2**');
       if (desc.length > 4000) desc = desc.slice(0, 3990) + '…';
       const fields = [];
       if (bias) fields.push({ name: 'Structural Bias', value: bias.toUpperCase(), inline: true });
@@ -285,7 +285,7 @@ export default async function handler(req, res) {
         else { idx = []; idxLoaded = true; }   // no index blob yet = empty is the true state, safe to write
       } catch (_) { idxLoaded = false; }
       if (idxLoaded && Array.isArray(idx)) {
-        const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '').trim().slice(0, 180);
+        const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '').trim().slice(0, 180);
         idx = idx.filter(e => e.slug !== slug);
         idx.unshift({ slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter });
         idx = idx.slice(0, 400);
@@ -310,7 +310,7 @@ export default async function handler(req, res) {
 
   // Institutional, NoVo-branded DARK HTML email. Absolute image URL (email clients require it); the dark
   // session chart blends into the dark card. Bolded desk-note labels, audience-aware upsell, unsubscribe.
-  const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|DEALER POSITIONING MAP|DEALER POSITIONING)/g,
+  const bodyText = esc(text).replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g,
     '$1<b style="color:#22d3ee">$2</b>');
   // Audience-aware upsell. The FREE list gets the requested upsell (Analyst for the Weekly); the PAID Analyst
   // list already HAS Analyst, so it's never pitched back to them — they get the Trader upsell instead. Chosen
