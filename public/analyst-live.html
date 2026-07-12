@@ -251,8 +251,8 @@
     var open = sess==='open';
     $('live').className = 'lv-live'+(open?'':' closed');
     $('live-t').textContent = ({open:'LIVE',premarket:'PRE-MARKET',afterhours:'AFTER HOURS',closed:'MARKET CLOSED'})[sess]||'MARKET CLOSED';
-    // Secondary line ADDS context (data cadence) instead of repeating the pill's status word.
-    $('sess').textContent = (sess==='closed') ? 'Dealer data holds overnight · refreshes ~10 min' : 'Updating through the session · ~60s';
+    // Secondary line: only during live sessions (adds cadence). Closed is self-explanatory — no extra line.
+    $('sess').textContent = (sess==='closed') ? '' : 'Updating through the session · ~60s';
     if (STATE.updated_at){ try{ $('upd').textContent = new Date(STATE.updated_at).toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'; }catch(_){ $('upd').textContent='—'; } }
     if (STATE.read && STATE.read.text){
       $('read-t').textContent = STATE.read.title || 'Latest read';
