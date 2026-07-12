@@ -3,8 +3,18 @@ import { put, list, del } from '@vercel/blob';
 import crypto from 'node:crypto';
 import Stripe from 'stripe';
 import webpush from 'web-push';
+import { Redis } from '@upstash/redis';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+
+// Live-state store — Upstash Redis, moved OFF Vercel Blob. Blob's free tier is 2,000 advanced ops per MONTH
+// (put/list count), and the dashboard's 60s publish + 15s poll-list() blew through it in ~2 days. Redis is
+// built for this tiny hot value (free tier ~10k cmds/day = huge headroom). Uses the Vercel-injected REST vars.
+const _redis = new Redis({
+  url: process.env.livedashboard_KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '',
+  token: process.env.livedashboard_KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '',
+});
+const _LIVE_KEY = 'analyst_live_state';
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -186,11 +196,12 @@ export default async function handler(req, res) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
     if (!email) return res.status(401).json({ error: 'unauthorized' });
     res.setHeader('Cache-Control', 'no-store');
-    const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN) || { updated_at: 0, indices: [], stale: true };
+    let state = null;
+    try { state = await _redis.get(_LIVE_KEY); } catch (_) {}   // Redis read — no per-poll Blob list()
+    if (!state || typeof state !== 'object') state = { updated_at: 0, indices: [], stale: true };
     // Never show a blank "Today's read": fall back to the most recent archived desk note when there's no live one.
     if (!state.read || !state.read.text) {
-      const fb = await _latestArchivedRead(process.env.BLOB_READ_WRITE_TOKEN);
-      if (fb) state.read = fb;
+      try { const fb = await _latestArchivedRead(process.env.BLOB_READ_WRITE_TOKEN); if (fb) state.read = fb; } catch (_) {}
     }
     return res.status(200).json(state);
   }
@@ -297,11 +308,8 @@ export default async function handler(req, res) {
   // Live-state save — the engine POSTs the current SPY/QQQ/SPX dealer state (secret-auth) for the members
   // dashboard. Stored at the unguessable, secret-derived blob path; overwrites each cycle.
   if (req.body && typeof req.body === 'object' && req.body.kind === 'live-state') {
-    const BT = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!BT) return res.status(500).json({ error: 'no blob token' });
     try {
-      await put(_liveBlobKey(), JSON.stringify(req.body.state || {}),
-        { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      await _redis.set(_LIVE_KEY, req.body.state || {});   // Redis SET (was a Blob put every 60s — the quota killer)
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }
