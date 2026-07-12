@@ -63,6 +63,18 @@
   .grn { color: #10b981 !important; } .red { color: #f43f5e !important; } .cyn { color: #22d3ee !important; } .amb { color: #f59e0b !important; }
   .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
   .lv-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 16px 0; }
+  /* bottom block: desktop = gamma | The Line on top row, index strip full-width below.
+     mobile reflow = gamma → strip (3 ticker boxes) → The Line, so The Line sits UNDER the boxes. */
+  .lv-bottom { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+  .lv-bottom .b-gamma { grid-column: 1; grid-row: 1; }
+  .lv-bottom .b-line  { grid-column: 2; grid-row: 1; }
+  .lv-bottom .b-strip { grid-column: 1 / -1; grid-row: 2; margin: 0; }
+  @media (max-width: 900px) {
+    .lv-bottom { grid-template-columns: 1fr; }
+    .lv-bottom .b-gamma { grid-column: 1; grid-row: auto; order: 1; }
+    .lv-bottom .b-strip { grid-column: 1; grid-row: auto; order: 2; }
+    .lv-bottom .b-line  { grid-column: 1; grid-row: auto; order: 3; }
+  }
   .lv-mini { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
   .lv-mini.on { border-color: rgba(34,211,238,.5); }
   .lv-mini .t { font-weight: 800; color: var(--txt1); font-size: 14px; }
@@ -147,14 +159,13 @@
       </div>
     </div>
 
-    <!-- gamma profile | The Line feed -->
-    <div class="lv-grid" style="margin-top:16px;">
-      <div class="lv-card"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
-      <div class="lv-card"><h2>'The Line' — SPY level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time SPY level-break playbooks &mdash; QQQ &amp; SPX typically move in close correlation.</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li></ul></div>
+    <!-- gamma profile · The Line · index strip — desktop: gamma|line row then strip full-width;
+         mobile reflow: gamma → strip (3 ticker boxes) → The Line (so The Line sits under the boxes) -->
+    <div class="lv-bottom">
+      <div class="lv-card b-gamma"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
+      <div class="lv-card b-line"><h2>'The Line' — SPY level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time SPY level-break playbooks &mdash; QQQ &amp; SPX typically move in close correlation.</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li></ul></div>
+      <div class="lv-strip b-strip" id="strip"></div>
     </div>
-
-    <!-- multi-index strip -->
-    <div class="lv-strip" id="strip"></div>
 
     <!-- today's read (full-width prose) -->
     <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
