@@ -278,7 +278,7 @@
   .price-once { font-size: 14px; color: var(--txt3); margin: 8px 0 6px; }
   .price-roi { font-size: 13px; color: var(--green); font-weight: 600; margin-bottom: 24px; }
   .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
-  .price-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); }
+  .price-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
   .price-features li:last-child { border-bottom: none; }
   .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
   .price-btn { width: 100%; background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px; box-shadow: 0 8px 26px rgba(16,185,129,0.32); }
