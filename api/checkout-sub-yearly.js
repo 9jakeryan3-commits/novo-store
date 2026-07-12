@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: process.env.STRIPE_PRICE_SUB_YEARLY_ID, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${SITE}/subscribe-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
     });
