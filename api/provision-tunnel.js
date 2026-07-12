@@ -169,6 +169,12 @@ module.exports = async (req, res) => {
       if (existing.length > 0) {
         const data = await fetch(existing[0].url).then(r => r.json());
         await cfFetch('DELETE', `/accounts/${CF_ACCOUNT_ID}/cfd_tunnel/${tunnelId}`).catch(() => {});
+        // also delete the CNAME we created for this now-discarded tdCode, or it orphans in the zone
+        try {
+          const rec = await cfFetch('GET', `/zones/${zoneId}/dns_records?type=CNAME&name=${tdCode}.${DOMAIN}`);
+          const recId = rec.result?.[0]?.id;
+          if (recId) await cfFetch('DELETE', `/zones/${zoneId}/dns_records/${recId}`).catch(() => {});
+        } catch (_) {}
         console.log(`[provision-tunnel] concurrent provision detected — returning existing: ${data.hostname}`);
         return res.status(200).json({ hostname: data.hostname, token: data.token });
       }

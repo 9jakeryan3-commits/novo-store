@@ -286,9 +286,14 @@ export default async function handler(req, res) {
         }
       }
       let blobsDeleted = 0;
-      const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
-      if (blobs && blobs.length) { await del(blobs.map(b => b.url), { token: BT }); blobsDeleted = blobs.length; }
-      return res.status(200).json({ ok: true, deleted: slug, blobsDeleted, removedFromIndex: removed });
+      // Only delete the read blob if the index was actually updated (idxLoaded). If a transient index fetch/list
+      // failure skipped the rewrite, deleting the blob would leave the slug in the index pointing at a missing read
+      // (a dangling 404) — so leave the blob in place; the delete self-heals on a retry once the index loads.
+      if (idxLoaded) {
+        const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
+        if (blobs && blobs.length) { await del(blobs.map(b => b.url), { token: BT }); blobsDeleted = blobs.length; }
+      }
+      return res.status(200).json({ ok: true, deleted: slug, blobsDeleted, removedFromIndex: removed, indexUpdated: idxLoaded });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }

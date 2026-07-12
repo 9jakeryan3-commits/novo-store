@@ -139,6 +139,7 @@
   if (qs.get('t')) { TOKEN = qs.get('t'); try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}; history.replaceState(null,'', '/analyst/live'); }
   if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
   var $ = function(id){ return document.getElementById(id); };
+  var _escH = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
   function showDash(){ $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); }
 
@@ -180,8 +181,8 @@
     $('d-flip').textContent = d.flip?_f(d.flip):'—';
     $('d-cw').textContent = d.call_wall?_f(d.call_wall):'—';
     $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
-    if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); }
-    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); $('d-sk-s').textContent = sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'+(d.atm_iv?('  ·  ATM IV '+d.atm_iv+'%'):''); }
+    if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); } else { $('d-em').textContent='—'; $('d-em-s').textContent=''; }
+    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); $('d-sk-s').textContent = sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'+(d.atm_iv?('  ·  ATM IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/SPX, which would mislabel), so the card isn't blank until the new engine restarts.
@@ -246,7 +247,7 @@
     (STATE.indices||[]).forEach(function(d){
       var pos=(d.net_gex||0)>=0;
       var div = document.createElement('div'); div.className='lv-mini'+(d.ticker===CUR?' on':'');
-      div.innerHTML = '<div class="t">'+d.ticker+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
+      div.innerHTML = '<div class="t">'+_escH(d.ticker)+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
         '<div class="r"><span class="'+(pos?'grn':'red')+'">'+(pos?'dampening':'amplifying')+'</span> · GEX '+_gexMoney(d.net_gex)+(d.em_daily!=null?(' · EM ±'+(d.em_daily_pct||0).toFixed(1)+'%'):'')+(d.skew_pts!=null?(' · skew '+(d.skew_pts>=0?'+':'')+d.skew_pts.toFixed(1)):'')+'</div>';
       div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); });
       el.appendChild(div);
@@ -272,7 +273,8 @@
       $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
     }
     var feed = $('feed');
-    if (STATE.line_feed && STATE.line_feed.length){ var _esc=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}; feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+_esc(f.ts)+'</span>'+_esc(f.text)+'</li>'; }).join(''); }
+    if (STATE.line_feed && STATE.line_feed.length){ feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+_escH(f.ts)+'</span>'+_escH(f.text)+'</li>'; }).join(''); }
+    else { feed.innerHTML = '<li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li>'; }   // clear stale entries when the feed is empty/new-session
   }
 
   function render(){ if(!STATE) return; renderDealer(); renderStrip(); renderMeta(); }
