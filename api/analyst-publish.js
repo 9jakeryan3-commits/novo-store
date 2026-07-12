@@ -497,7 +497,7 @@ export default async function handler(req, res) {
   const discordCta = isOpenPrimer
     ? '<div style="margin-top:22px;border:1px solid #2c3a58;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">' +
         '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">&#128276; Intraday alerts are live in Discord</div>' +
-        '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> level-break playbooks and dealer-regime shifts fire the moment they happen &mdash; in the members-only Analyst Discord, not email. <a href="https://discord.gg/hr5GKzsU" style="color:#7f8cff;font-weight:700;text-decoration:none;">Join the Analyst Discord &rarr;</a> <span style="color:#6f8bab;">(link your account on <a href="https://novo-aitrading.app/analyst" style="color:#7f8cff;text-decoration:none;">/analyst</a> to unlock the channels).</span></div>' +
+        '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> level-break playbooks and dealer-regime shifts fire the moment they happen &mdash; in the members-only Analyst Discord, not email. <a href="https://discord.gg/EfnPJ5gC5w" style="color:#7f8cff;font-weight:700;text-decoration:none;">Join the Analyst Discord &rarr;</a> <span style="color:#6f8bab;">(link your account on <a href="https://novo-aitrading.app/analyst" style="color:#7f8cff;text-decoration:none;">/analyst</a> to unlock the channels).</span></div>' +
       '</div>'
     : '';
 
