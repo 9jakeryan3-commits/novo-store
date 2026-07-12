@@ -84,6 +84,18 @@
   .lv-feed li { border-top: 1px solid var(--bdr); padding: 9px 0; font-size: 13px; color: var(--txt2); line-height: 1.5; }
   .lv-feed li .ts { color: #22d3ee; font-weight: 700; font-size: 11.5px; margin-right: 6px; }
   .lv-read { margin-top: 16px; }   /* space between The Line (mobile) / the strip (desktop) and the Latest Read */
+  /* notifications switchboard */
+  .lv-notif { margin-top: 16px; }
+  .lv-notif h2 { margin-bottom: 2px; }
+  .nf-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--bdr); }
+  .nf-row:first-of-type { border-top: 0; padding-top: 4px; }
+  .nf-k { font-size: 13.5px; font-weight: 700; color: var(--txt1); }
+  .nf-s { font-size: 11.5px; color: var(--txt3); margin-top: 2px; line-height: 1.4; }
+  .nf-btn { flex-shrink: 0; border: 1px solid var(--bdr); background: transparent; color: var(--txt2); font-weight: 800; font-size: 12.5px; padding: 7px 16px; border-radius: 999px; cursor: pointer; text-decoration: none; min-width: 66px; text-align: center; }
+  .nf-btn:hover { border-color: var(--txt2); color: var(--txt1); }
+  .nf-btn.on { background: #22d3ee; color: #04121a; border-color: #22d3ee; }
+  .nf-btn.on:hover { color: #04121a; }
+  .nf-note { font-size: 11px; color: var(--txt3); margin-top: 10px; line-height: 1.5; }
   .lv-read .rt { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 16px; font-weight: 800; color: var(--txt1); }
   .lv-read .rb { white-space: pre-wrap; font-size: 13.5px; color: var(--txt2); line-height: 1.6; margin-top: 8px; max-height: 340px; overflow-y: auto; }
   .lv-vol { font-size: 12.5px; color: var(--txt2); margin-top: 10px; padding: 10px 12px; background: var(--navy); border: 1px solid var(--bdr); border-radius: 8px; }
@@ -170,6 +182,24 @@
 
     <!-- today's read (full-width prose) -->
     <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
+
+    <!-- notifications switchboard -->
+    <div class="lv-card lv-notif hidden" id="notif">
+      <h2>Notifications</h2>
+      <div class="nf-row">
+        <div><div class="nf-k">Live push alerts</div><div class="nf-s">‘The Line’ level-breaks to your home screen — install the app first</div></div>
+        <button class="nf-btn" id="nf-push" type="button">Enable</button>
+      </div>
+      <div class="nf-row">
+        <div><div class="nf-k">Email reads</div><div class="nf-s">The Open, The Close &amp; the Sunday Week-Ahead</div></div>
+        <button class="nf-btn" id="nf-email" type="button">On</button>
+      </div>
+      <div class="nf-row">
+        <div><div class="nf-k">Discord community</div><div class="nf-s">Live discussion, ‘The Line’ alerts &amp; daily tips</div></div>
+        <a class="nf-btn" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join &rarr;</a>
+      </div>
+      <div class="nf-note">Turn any channel off without touching your subscription — the dashboard is always your home base.</div>
+    </div>
 
     <div class="lv-foot">Updated <span id="upd">—</span> · NoVo Analyst is market analysis &amp; education only — not financial advice, and not trade signals. <a href="/analyst/methodology">Methodology</a></div>
   </div>
@@ -411,9 +441,26 @@
       var kr; try{ kr=await fetch('/api/analyst-publish?push=key').then(function(r){return r.json();}); }catch(_){ return; }
       if(!kr||!kr.key)return;                                       // push not configured yet -> don't show a dead button
       if(Notification.permission==='granted' && localStorage.getItem('novo_analyst_push')==='1'){ subscribe(); return; }
-      if(Notification.permission!=='denied') mkBtn();
     }
-    window.addEventListener('load',function(){ setTimeout(ready,1400); });
+    async function unsubscribePush(){
+      try{ var reg=await navigator.serviceWorker.ready; var s=await reg.pushManager.getSubscription(); if(s) await s.unsubscribe(); }catch(_){}
+      try{ localStorage.removeItem('novo_analyst_push'); }catch(_){}
+    }
+    // Notifications switchboard (footer): one place to toggle push / email / Discord.
+    async function initNotif(){
+      var box=document.getElementById('notif'); if(!box||!tok())return;
+      box.classList.remove('hidden');
+      var pb=document.getElementById('nf-push');
+      function setPush(on){ pb.textContent=on?'On':'Enable'; pb.classList.toggle('on',!!on); pb.dataset.on=on?'1':''; }
+      setPush(('Notification' in window) && Notification.permission==='granted' && localStorage.getItem('novo_analyst_push')==='1');
+      pb.onclick=async function(){ pb.disabled=true; if(pb.dataset.on){ await unsubscribePush(); setPush(false); } else { var ok=await subscribe(); setPush(ok); } pb.disabled=false; };
+      var eb=document.getElementById('nf-email');
+      function setEmail(on){ eb.textContent=on?'On':'Off'; eb.classList.toggle('on',!!on); eb.dataset.on=on?'1':''; }
+      setEmail(true);
+      try{ var r=await fetch('/api/analyst-publish?prefs=1&t='+encodeURIComponent(tok())); if(r.ok){ var d=await r.json(); setEmail(d.email_optin!==false); } }catch(_){}
+      eb.onclick=async function(){ eb.disabled=true; var want=!eb.dataset.on; try{ var rr=await fetch('/api/analyst-publish?prefs=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok(),email_optin:want})}); if(rr.ok){ var dd=await rr.json(); setEmail(dd.email_optin!==false); } }catch(_){} eb.disabled=false; };
+    }
+    window.addEventListener('load',function(){ setTimeout(ready,1400); setTimeout(initNotif,1500); });
   })();
 })();
 </script>

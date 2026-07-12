@@ -199,12 +199,47 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ key: process.env.ANALYST_VAPID_PUBLIC || '' });
   }
+  // Members' email-reads preference (token-gated): is the signed-in member subscribed to the Analyst
+  // broadcast audience? Returns { email_optin }. Defaults to opted-in when it can't be determined.
+  if (req.method === 'GET' && req.query && 'prefs' in req.query) {
+    const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    res.setHeader('Cache-Control', 'no-store');
+    let email_optin = true;
+    try {
+      const aud = process.env.RESEND_ANALYST_AUDIENCE_ID;
+      if (aud) {
+        const g = await resend.contacts.get({ audienceId: aud, email });
+        const d = g && g.data;
+        if (d && typeof d.unsubscribed === 'boolean') email_optin = !d.unsubscribed;
+      }
+    } catch (_) {}
+    return res.status(200).json({ email_optin });
+  }
 
   if (req.method === 'GET') return handleArchive(req, res);
 
   // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
   const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'rate limited' });
+
+  // Toggle the signed-in member's email-reads subscription (token-gated). Flips the Resend contact's
+  // `unsubscribed` flag; adds them to the audience if opting in and not already present. Best-effort.
+  if (req.method === 'POST' && req.query && 'prefs' in req.query) {
+    let email = '', want = true;
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); email = _verifyToken(String(b.token || '')); want = !!b.email_optin; } catch (_) {}
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    const aud = process.env.RESEND_ANALYST_AUDIENCE_ID;
+    if (aud) {
+      try {
+        let id = null;
+        try { const g = await resend.contacts.get({ audienceId: aud, email }); id = g && g.data && g.data.id; } catch (_) {}
+        if (id) await resend.contacts.update({ audienceId: aud, id, unsubscribed: !want });
+        else if (want) await resend.contacts.create({ audienceId: aud, email, unsubscribed: false });
+      } catch (e) { console.error('[prefs] email toggle:', e.message); }
+    }
+    return res.status(200).json({ ok: true, email_optin: want });
+  }
 
   // Magic-link login for the members live view — verify an active sub, email a signed access link. ALWAYS
   // returns ok (never reveals whether an email has a sub); only sends the link when a paid sub is active.
