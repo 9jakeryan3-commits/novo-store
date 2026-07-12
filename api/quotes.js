@@ -17,15 +17,26 @@ function fmt(name, p) {
 
 async function one(name, sym) {
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
+    // range=5d (not 1d): a 1d range mis-reports chartPreviousClose == regularMarketPrice for FUTURES
+    // (GC=F / CL=F) → their change zeroed out. Derive the prior close from the daily-closes array instead.
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
     const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!r.ok) return null;
     const j = await r.json();
-    const m = j?.chart?.result?.[0]?.meta;
-    if (!m) return null;
+    const res = j?.chart?.result?.[0];
+    const m = res?.meta;
+    if (!m || m.regularMarketPrice == null) return null;
     const price = m.regularMarketPrice;
-    const prev = m.chartPreviousClose ?? m.previousClose;
-    if (price == null || prev == null || !prev) return null;
+    const closes = (res?.indicators?.quote?.[0]?.close || []).filter(c => c != null);
+    // Prior close: if the last daily bar is essentially today's live price, the settled prior close is the bar
+    // before it; otherwise the live tick isn't in the array yet, so the last daily close IS the prior close.
+    let prev = null;
+    if (closes.length >= 2) {
+      const last = closes[closes.length - 1];
+      prev = (Math.abs(last - price) / price < 0.0005) ? closes[closes.length - 2] : last;
+    }
+    if (prev == null) prev = m.chartPreviousClose ?? m.previousClose;
+    if (prev == null || !prev) return null;
     return { name, price: fmt(name, price), chg: Math.round(((price - prev) / prev) * 10000) / 100 };
   } catch { return null; }
 }
