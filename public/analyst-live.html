@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo Analyst — Live Dealer Map</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#070b12">
+<meta name="theme-color" content="#09090b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,17 @@
 <link rel="manifest" href="/analyst-live.webmanifest">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <style>
-  body { background: #070b12; }
+  /* Match the Trader dashboard's palette — neutral near-black (was navy). Card SHAPE/spacing unchanged
+     (rounded + spaced, as-is). Only the hue moves: page/tile/card shades + text go neutral gray. */
+  :root {
+    --navy:  #0e0e10;   /* nested tile / inset bg (darkest usable shade) */
+    --navy2: #17171a;   /* card bg */
+    --bdr:   #2c2c30;   /* borders */
+    --txt1:  #f0f0ee;   /* headline text */
+    --txt2:  #a8a8a8;   /* body text */
+    --txt3:  #6e6e6e;   /* muted labels */
+  }
+  body { background: #09090b; }
   .lv-wrap { max-width: 1200px; margin: 0 auto; padding: 14px 16px 60px; }
   /* login */
   .lv-login { max-width: 440px; margin: 8vh auto; text-align: center; }
@@ -23,7 +33,7 @@
   .lv-login h1 .accent { color: #22d3ee; }
   .lv-login p { color: var(--txt2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
   .lv-login form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-  .lv-login input { flex: 1; min-width: 220px; padding: 12px 14px; border-radius: 9px; border: 1px solid #2c3a4e; background: #0c1320; color: #eaf3ff; font-size: 14px; }
+  .lv-login input { flex: 1; min-width: 220px; padding: 12px 14px; border-radius: 9px; border: 1px solid #2c2c30; background: #111113; color: #f0f0ee; font-size: 14px; }
   .lv-login button { padding: 12px 22px; border-radius: 9px; border: 0; background: linear-gradient(180deg,#22d3ee,#3b82f6); color: #04121a; font-weight: 800; font-size: 14px; cursor: pointer; }
   .lv-msg { font-size: 13px; min-height: 18px; margin-top: 14px; }
   /* topbar */
@@ -33,7 +43,7 @@
   .lv-live { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #34d399; }
   .lv-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; animation: lvpulse 2s infinite; }
   @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-  .lv-live.closed { color: #6f8bab; } .lv-live.closed .dot { background: #6f8bab; box-shadow: none; animation: none; }
+  .lv-live.closed { color: #6e6e6e; } .lv-live.closed .dot { background: #6e6e6e; box-shadow: none; animation: none; }
   .lv-sess { color: var(--txt3); font-size: 12.5px; }
   .lv-tabs { margin-left: auto; display: inline-flex; gap: 0; background: rgba(255,255,255,.04); border: 1px solid var(--bdr); border-radius: 999px; padding: 4px; }
   .lv-tabs button { border: 0; background: transparent; color: var(--txt2); font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
@@ -50,7 +60,7 @@
   .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 3px; }
   .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
-  .grn { color: #34d399 !important; } .red { color: #f87171 !important; } .cyn { color: #22d3ee !important; } .amb { color: #fbbf24 !important; }
+  .grn { color: #10b981 !important; } .red { color: #f43f5e !important; } .cyn { color: #22d3ee !important; } .amb { color: #f59e0b !important; }
   .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
   .lv-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 16px 0; }
   .lv-mini { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
@@ -232,7 +242,7 @@
       c.fillStyle=g.color; c.fillText(txt, plotL+5, ly);
     });
     // polarity labels
-    c.fillStyle='#6f8bab'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
+    c.fillStyle='#6e6e6e'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
     c.fillText('← net short gamma', plotL+2, H-4); c.textAlign='right'; c.fillText('net long gamma →', W-4, H-4);
   }
 
@@ -325,7 +335,7 @@
     function mkBtn(){
       if(document.getElementById('novoNotif'))return;
       var b=document.createElement('button');b.id='novoNotif';b.textContent='🔔 Enable alerts';
-      b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#0f1a2e;color:#eaf3ff;border:1px solid #22d3ee;border-radius:9px;padding:9px 14px;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+      b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#17171a;color:#f0f0ee;border:1px solid #22d3ee;border-radius:9px;padding:9px 14px;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
       b.onclick=async function(){b.disabled=true;b.textContent='Enabling…';var ok=await subscribe();if(ok){b.textContent='🔔 Alerts on';setTimeout(function(){b.remove();},1800);}else{b.disabled=false;b.textContent='🔔 Enable alerts';}};
       document.body.appendChild(b);
     }
