@@ -5,13 +5,16 @@
 const SYMBOLS = [
   ["SPY", "SPY"], ["VIX", "^VIX"], ["S&P 500", "^GSPC"], ["Nasdaq", "^IXIC"],
   ["Russell", "^RUT"], ["Gold", "GC=F"], ["BTC", "BTC-USD"], ["Crude", "CL=F"],
+  ["Dow", "^DJI"], ["Dollar", "DX-Y.NYB"], ["10Y", "^TNX"],
 ];
 
 function fmt(name, p) {
-  if (["S&P 500", "Nasdaq", "Russell", "BTC"].includes(name))
+  if (["S&P 500", "Nasdaq", "Russell", "BTC", "Dow"].includes(name))
     return Math.round(p).toLocaleString("en-US");
   if (name === "Gold")
     return p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (name === "10Y")
+    return p.toFixed(2) + "%";   // ^TNX is the 10-year yield in percent (e.g. 4.57%)
   return p.toFixed(2);
 }
 

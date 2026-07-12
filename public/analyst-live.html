@@ -326,7 +326,7 @@
   async function loadRibbon(){
     try {
       var r = await fetch('/api/quotes', { cache: 'no-store' }); if (!r.ok) return;
-      var d = await r.json(), order = ['BTC','Gold','Crude','Nasdaq','Russell'];
+      var d = await r.json(), order = ['Dow','Nasdaq','Russell','Gold','Crude','BTC','Dollar','10Y'];
       var html = order.filter(function(n){ return d[n]; }).map(function(n){
         var q = d[n], up = (q.chg || 0) >= 0;
         return '<div class="rib"><span class="rib-n">'+n+'</span><span class="rib-p">'+_escH(q.price)+'</span>'
