@@ -9,6 +9,7 @@
     { "source": "/analyst/archive/:slug", "destination": "/api/analyst-publish?slug=:slug" },
     { "source": "/analyst/archive", "destination": "/api/analyst-publish" },
     { "source": "/analyst", "destination": "/analyst.html" },
+    { "source": "/plans", "destination": "/plans.html" },
     { "source": "/success", "destination": "/success.html" },
     { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
     { "source": "/subscriber", "destination": "/subscriber.html" },
