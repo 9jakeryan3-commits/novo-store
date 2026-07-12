@@ -93,6 +93,55 @@ async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub 
   return false;
 }
 
+// Resolve the Stripe PRODUCT ids for each tier from the configured price ids (cached ~1h). Classifying by
+// product (not price) means grandfathered/renamed prices still map to the right tier.
+let _tierProdCache = { at: 0, trader: null, analyst: null };
+async function _tierProducts() {
+  if (Date.now() - _tierProdCache.at < 3600000 && (_tierProdCache.trader || _tierProdCache.analyst)) return _tierProdCache;
+  const resolve = async (pid) => {
+    if (!pid) return null;
+    try { const p = await _stripe.prices.retrieve(pid); return typeof p.product === 'string' ? p.product : (p.product && p.product.id) || null; }
+    catch { return null; }
+  };
+  const trader = (await resolve(process.env.STRIPE_PRICE_SUB_ID)) || (await resolve(process.env.STRIPE_PRICE_SUB_YEARLY_ID));
+  const analyst = (await resolve(process.env.STRIPE_PRICE_ANALYST)) || (await resolve(process.env.STRIPE_PRICE_ANALYST_YEARLY));
+  // Only cache a COMPLETE resolution — caching a partial (one tier null after a transient Stripe error) would
+  // mis-classify every Trader sub as Analyst-only for up to an hour. at:0 forces a retry on the next call.
+  _tierProdCache = { at: (trader && analyst) ? Date.now() : 0, trader, analyst };
+  return _tierProdCache;
+}
+
+// Which tiers an email actively holds → { trader, analyst }. Trader INCLUDES Analyst. Only the confirmed Trader
+// product grants Trader; any other active paid sub (Analyst product, or an unknown/grandfathered one) grants at
+// least Analyst — so we never over-entitle someone to the Trader dashboard.
+async function _entitlements(email) {
+  const norm = String(email || '').trim().toLowerCase();
+  const out = { trader: false, analyst: false };
+  if (!norm) return out;
+  const prods = await _tierProducts();
+  const scan = async (custId) => {
+    // no expand: subscription items already carry a `price` object whose `.product` is the product id string
+    // (expanding an already-expanded field is rejected by Stripe and would throw for every customer)
+    const subs = await _stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    for (const s of subs.data) {
+      if (!['active', 'trialing', 'past_due'].includes(s.status)) continue;
+      for (const it of ((s.items && s.items.data) || [])) {
+        const prod = it.price && (typeof it.price.product === 'string' ? it.price.product : (it.price.product && it.price.product.id));
+        if (prods.trader && prod === prods.trader) out.trader = true;
+        else out.analyst = true;
+      }
+    }
+  };
+  try {
+    const seen = new Set();
+    try { const sr = await _stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 }); for (const c of sr.data) { seen.add(c.id); await scan(c.id); } } catch (_) {}
+    const custs = await _stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id)) await scan(c.id); }
+  } catch (e) { console.error('[portal] entitlements:', e.message); }
+  if (out.trader) out.analyst = true;   // Trader includes Analyst
+  return out;
+}
+
 // ── PUBLIC ARCHIVE (served here as GET so it doesn't add a 13th serverless function — Hobby cap is 12) ──
 async function _loadJson(prefix, token) {
   try {
@@ -205,6 +254,24 @@ export default async function handler(req, res) {
   // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
   const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'rate limited' });
+
+  // Portal sign-in (instant, no magic link): verify the email's active Stripe subs and return which dashboards
+  // they can open (trader/analyst) + a signed Analyst token. Accepts {email} or {token} (returning member).
+  if (req.method === 'POST' && req.query && 'portal' in req.query) {
+    let email = '', token = '';
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); email = String(b.email || '').trim().toLowerCase(); token = String(b.token || ''); } catch (_) {}
+    if (!email && token) { const e = _verifyToken(token); if (e) email = e; }
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return res.status(400).json({ error: 'Enter the email on your subscription.' });
+    try {
+      const ent = await _entitlements(email);
+      const resp = { ok: true, trader: ent.trader, analyst: ent.analyst, email };
+      if (ent.analyst) resp.token = _signToken(email);   // grants /analyst/live
+      return res.status(200).json(resp);
+    } catch (e) {
+      console.error('[portal] sign-in:', e.message);
+      return res.status(500).json({ error: 'Something went wrong — try again.' });
+    }
+  }
 
   // Magic-link login for the members live view — verify an active sub, email a signed access link. ALWAYS
   // returns ok (never reveals whether an email has a sub); only sends the link when a paid sub is active.
