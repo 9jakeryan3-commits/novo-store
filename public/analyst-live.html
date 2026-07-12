@@ -76,11 +76,8 @@
   <!-- ===== LOGIN GATE ===== -->
   <div id="login" class="lv-login hidden">
     <h1>NoVo Analyst <span class="accent">Live</span></h1>
-    <p>The live SPY / QQQ / SPX dealer map — updating through the session. Enter the email on your subscription to sign in.</p>
-    <form id="lform">
-      <input id="lemail" type="email" required placeholder="you@email.com" autocomplete="email">
-      <button type="submit">Sign in</button>
-    </form>
+    <p>The live SPY / QQQ / SPX dealer map — updating through the session. Sign in to your member portal, then open the Analyst dashboard from there.</p>
+    <a href="https://app.novo-aitrading.app" style="display:inline-block;padding:12px 26px;border-radius:9px;border:0;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;text-decoration:none;">Go to the member portal →</a>
     <div id="lmsg" class="lv-msg"></div>
     <p style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Not a subscriber yet? <a href="/analyst" style="color:#22d3ee;">Start a free 7-day trial →</a></p>
   </div>
@@ -143,25 +140,8 @@
   function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
   function showDash(){ $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); }
 
-  // ---- login form ----
-  $('lform').addEventListener('submit', async function(e){
-    e.preventDefault();
-    var em = $('lemail').value.trim(), m = $('lmsg');
-    m.style.color = 'var(--txt2)'; m.textContent = 'Checking…';
-    try {
-      // instant sign-in: verify the sub and get a token back — no magic-link email round-trip
-      var r = await fetch('/api/analyst-publish?portal=1', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: em }) });
-      var d = await r.json().catch(function(){return{};});
-      if (!r.ok) { m.style.color = '#f87171'; m.textContent = d.error || 'Something went wrong — try again.'; return; }
-      if (d.token && (d.analyst || d.trader)) {
-        try{ localStorage.setItem('novo_live_t', d.token); }catch(_){}
-        TOKEN = d.token; m.textContent = ''; startPolling();
-      } else {
-        m.style.color = '#f87171';
-        m.innerHTML = 'No active subscription found for that email. <a href="/plans" style="color:#22d3ee;font-weight:700;">See the plans &rarr;</a>';
-      }
-    } catch(_) { m.style.color = '#f87171'; m.textContent = 'Network error — try again.'; }
-  });
+  // Sign-in happens at the member portal (app.novo-aitrading.app) — it deep-links back here with a ?t= token.
+  // The login gate here is just a link to that portal (see the LOGIN GATE markup above).
 
   var _gexMoney = function(v){ if(v==null) return 'n/a'; var a=Math.abs(v), s=v>=0?'+':'-'; return a>=9.995e8?(s+'$'+(a/1e9).toFixed(1)+'B'):a>=1e6?(s+'$'+(a/1e6).toFixed(1)+'M'):(s+'$'+Math.round(a).toLocaleString()); };
   var _f = function(n,d){ return (n==null)?'—':('$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})); };
