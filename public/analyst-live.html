@@ -160,9 +160,18 @@
   function idx(tk){ return (STATE && STATE.indices || []).find(function(x){ return x.ticker===tk; }); }
 
   function renderDealer(){
-    var d = idx(CUR); if(!d) return;
+    // keep the tab highlight in sync FIRST, even when the selected ticker has no data yet
+    Array.prototype.forEach.call($('tabs').children, function(b){ b.classList.toggle('on', b.getAttribute('data-tk')===CUR); });
     $('dealer-h').textContent = CUR + ' · Dealer positioning';
     $('chart-h').textContent = CUR + ' · Session & dealer levels';
+    var d = idx(CUR);
+    if(!d){   // no data for this index yet — clear tiles/chart so the PREVIOUS ticker's numbers don't linger
+      ['d-spot','d-gex','d-flip','d-cw','d-pw','d-em','d-sk'].forEach(function(id){ $(id).textContent='—'; });
+      $('d-reg').textContent=''; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
+      $('chart').style.display='none';
+      var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
+      return;
+    }
     $('d-spot').textContent = _f(d.spot);
     var pos = (d.net_gex||0) >= 0;
     $('d-reg').innerHTML = '<span class="'+(pos?'grn':'red')+'">'+(pos?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)')+'</span>';
@@ -180,8 +189,6 @@
     if (_cb){ $('chart').src = 'data:image/png;base64,'+_cb; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; } else { $('chart').style.display='none'; }
     $('d-vol').textContent = STATE.vol_env || '';
     drawProfile(d);
-    // tabs
-    Array.prototype.forEach.call($('tabs').children, function(b){ b.classList.toggle('on', b.getAttribute('data-tk')===CUR); });
   }
 
   function drawProfile(d){
@@ -265,18 +272,21 @@
       $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
     }
     var feed = $('feed');
-    if (STATE.line_feed && STATE.line_feed.length){ feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+(f.ts||'')+'</span>'+String(f.text||'').replace(/</g,'&lt;')+'</li>'; }).join(''); }
+    if (STATE.line_feed && STATE.line_feed.length){ var _esc=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}; feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+_esc(f.ts)+'</span>'+_esc(f.text)+'</li>'; }).join(''); }
   }
 
   function render(){ if(!STATE) return; renderDealer(); renderStrip(); renderMeta(); }
 
+  var _everShown = false;
+  function _neverBlank(){ if(!_everShown){ showLogin(); _everShown = true; } }   // first-load failure → show login, not a blank page
   async function poll(){
-    if (!TOKEN) { showLogin(); return; }
+    if (!TOKEN) { showLogin(); _everShown = true; return; }
     try {
       var r = await fetch('/api/analyst-publish?live=1&t='+encodeURIComponent(TOKEN), { cache:'no-store' });
-      if (r.status===401) { try{ localStorage.removeItem('novo_live_t'); }catch(_){}; TOKEN=null; showLogin(); return; }
-      if (r.ok) { STATE = await r.json(); showDash(); render(); }
-    } catch(_) {}
+      if (r.status===401) { try{ localStorage.removeItem('novo_live_t'); }catch(_){}; TOKEN=null; showLogin(); _everShown = true; return; }
+      if (r.ok) { STATE = await r.json(); showDash(); render(); _everShown = true; return; }
+      _neverBlank();   // 5xx / offline-504: don't sit on a blank page (later successful polls flip to the dashboard)
+    } catch(_) { _neverBlank(); }
   }
 
   document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); } });

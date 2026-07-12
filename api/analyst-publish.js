@@ -49,7 +49,7 @@ function _liveBlobKey() {
   if (!s) return 'analyst-live/state.json';
   return 'analyst-live/' + crypto.createHash('sha256').update('livestate:' + s).digest('hex').slice(0, 40) + '.json';
 }
-function _signToken(email, days = 30) {
+function _signToken(email, days = 7) {   // 7-day TTL bounds post-cancel access (was 30); re-login is a one-click magic link
   const secret = _LIVE_SECRET();
   if (!secret || !email) return '';
   const payload = Buffer.from(JSON.stringify({ e: String(email).toLowerCase(), x: Date.now() + days * 86400000 })).toString('base64url');
@@ -226,7 +226,7 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
           subject: 'Your NoVo Analyst live dashboard link',
-          html: `<div style="margin:0;padding:0;background:#070b12;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#0f1a2e;border:1px solid #1c2c47;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 30 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice, not trade signals.</p></div></div></div>`,
+          html: `<div style="margin:0;padding:0;background:#070b12;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#0f1a2e;border:1px solid #1c2c47;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 7 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice, not trade signals.</p></div></div></div>`,
         });
       }
     } catch (e) { console.error('[analyst-live] login:', e.message); }
@@ -273,11 +273,17 @@ export default async function handler(req, res) {
       } catch (_) { idxLoaded = false; }
       let removed = 0;
       if (idxLoaded && Array.isArray(idx)) {
-        const before = idx.length;
-        idx = idx.filter(e => e.slug !== slug);
-        removed = before - idx.length;
-        await put('analyst-archive/index.json', JSON.stringify(idx),
-          { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+        removed = idx.some(e => e.slug === slug) ? 1 : 0;
+        // Verify-and-retry to survive a concurrent index write (the lost-update race): remove → write → re-read;
+        // if a concurrent writer clobbered us and the slug reappeared, re-apply. Bounded to 3 attempts.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          idx = idx.filter(e => e.slug !== slug);
+          await put('analyst-archive/index.json', JSON.stringify(idx),
+            { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+          const check = await _loadJson('analyst-archive/index.json', BT);
+          if (!Array.isArray(check) || !check.some(e => e.slug === slug)) break;   // gone → done
+          idx = check;   // a concurrent writer re-added it; loop and remove again
+        }
       }
       let blobsDeleted = 0;
       const { blobs } = await list({ prefix: `analyst-archive/reads/${slug}.json`, token: BT });
@@ -479,11 +485,20 @@ export default async function handler(req, res) {
       } catch (_) { idxLoaded = false; }
       if (idxLoaded && Array.isArray(idx)) {
         const excerpt = text.replace(/\s+/g, ' ').replace(/(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|FLOW DYNAMICS|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '').trim().slice(0, 180);
-        idx = idx.filter(e => e.slug !== slug);
-        idx.unshift({ slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter });
-        idx = idx.slice(0, 400);
-        await put('analyst-archive/index.json', JSON.stringify(idx),
-          { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+        const entry = { slug, title, dateLabel: etDate, kslug, bias, excerpt, publishAfter };
+        // Verify-and-retry (mirrors the DELETE path): add → write → re-read; if a concurrent writer dropped our
+        // entry (lost-update race), re-apply onto the fresh index. Entry is unshifted to the front so slice(0,400)
+        // never drops it. Bounded to 3 attempts.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          idx = idx.filter(e => e.slug !== slug);
+          idx.unshift(entry);
+          idx = idx.slice(0, 400);
+          await put('analyst-archive/index.json', JSON.stringify(idx),
+            { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+          const check = await _loadJson('analyst-archive/index.json', BT);
+          if (!Array.isArray(check) || check.some(e => e.slug === slug)) break;   // our entry survived → done
+          idx = check;   // clobbered by a concurrent writer; loop and re-add
+        }
       }
     } catch (e) { console.error('[analyst-publish] archive save failed:', e.message); }
   }

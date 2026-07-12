@@ -161,6 +161,19 @@ module.exports = async (req, res) => {
       await cfFetch('DELETE', `/accounts/${CF_ACCOUNT_ID}/cfd_tunnel/${tunnelId}`).catch(() => {});
     }
 
+    // Re-check just before persist: if a concurrent install of the SAME key already provisioned (the idempotency
+    // race), tear down the duplicate tunnel we just made and return the existing mapping instead of creating a
+    // second one. Shrinks the race window from the whole handler to just the final blob write.
+    try {
+      const { blobs: existing } = await list({ prefix: `tunnel-map/${keyHash}`, token: blobToken });
+      if (existing.length > 0) {
+        const data = await fetch(existing[0].url).then(r => r.json());
+        await cfFetch('DELETE', `/accounts/${CF_ACCOUNT_ID}/cfd_tunnel/${tunnelId}`).catch(() => {});
+        console.log(`[provision-tunnel] concurrent provision detected — returning existing: ${data.hostname}`);
+        return res.status(200).json({ hostname: data.hostname, token: data.token });
+      }
+    } catch (_) {}
+
     // --- Persist mapping in Vercel Blob ---
     const mapping = { hostname, tunnelId, token, keyHash, createdAt: new Date().toISOString() };
     await put(blobPath, JSON.stringify(mapping), {

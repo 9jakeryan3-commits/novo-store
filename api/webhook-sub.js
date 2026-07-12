@@ -93,13 +93,23 @@ async function freeAdd(email) {
 // only obj.customer would miss the other sub. Prevents cancelling one paid sub from stripping entitlements the
 // user still pays for via another (e.g. cancel a redundant Analyst sub while an active Trader sub still includes it).
 async function hasOtherActivePaidSub(email, excludeSubId) {
-  if (!email) return false;
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return false;
+  const hasSub = async (custId) => {
+    const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    return subs.data.some(s => s.id !== excludeSubId && ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status));
+  };
   try {
-    const custs = await stripe.customers.list({ email, limit: 100 });
-    for (const c of custs.data) {
-      const subs = await stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 20 });
-      if (subs.data.some(s => s.id !== excludeSubId && ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status))) return true;
-    }
+    // customers.list({email}) is a case-SENSITIVE exact match, so a dual-tier user who checked out with different
+    // email casing would be missed and wrongly stripped of entitlements. Stripe Search's email index is
+    // case-insensitive — use it as primary, with list() as a fallback (mirrors _activePaidSub in analyst-publish.js).
+    const seen = new Set();
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); if (await hasSub(c.id)) return true; }
+    } catch (_) { /* search index warming up / unavailable — fall through to list() */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id) && await hasSub(c.id)) return true; }
   } catch (e) { console.error(`[webhook-sub] other-active-sub check failed: ${e.message}`); }
   return false;
 }
