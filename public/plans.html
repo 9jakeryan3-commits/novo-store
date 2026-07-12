@@ -56,7 +56,7 @@
   .head p { max-width: 620px; margin: 0 auto; color: var(--txt2); font-size: 16.5px; }
 
   /* Cards */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 20px 0 34px; align-items: stretch; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 20px 0 34px; align-items: start; }
   @media (max-width: 940px) { .grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; } }
   .card { position: relative; display: flex; flex-direction: column; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 26px 24px; }
   .card.feat-cyan { border-color: rgba(34,211,238,0.55); box-shadow: 0 18px 50px rgba(34,211,238,0.10); }
@@ -73,9 +73,20 @@
   .price .num { font-size: 44px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk', sans-serif; line-height: 1; }
   .price .per { font-size: 15px; color: var(--txt2); font-weight: 600; }
   .subnote { font-size: 12.5px; color: var(--txt3); min-height: 18px; margin-bottom: 14px; }
-  .trialpill { display: inline-block; font-size: 12.5px; font-weight: 800; margin: 2px 0 14px; }
+  .trialpill { display: inline-block; font-size: 12.5px; font-weight: 800; margin: 2px 0 10px; }
   .card.feat-cyan .trialpill { color: var(--cyan); }
   .card.feat-green .trialpill { color: var(--green); }
+  .roi { font-size: 13.5px; font-weight: 700; line-height: 1.4; margin: 2px 0 16px; color: #9fb6d1; }
+  .card.feat-cyan .roi { color: var(--cyan); }
+  .card.feat-green .roi { color: var(--green); }
+
+  .np-form { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 8px; }
+  .np-form input { width: 100%; box-sizing: border-box; padding: 13px 14px; border-radius: 9px; border: 1px solid #2c3a4e; background: #0c1320; color: #eaf3ff; font-size: 15px; }
+  .np-form input::placeholder { color: #5f7793; }
+  .np-msg { font-size: 13px; margin: 0 0 8px; min-height: 16px; }
+  .btn-discord { background: #5865F2; color: #fff; box-shadow: 0 8px 26px rgba(88,101,242,0.28); }
+  .btn-notes { background: rgba(138,172,200,0.14); color: var(--txt1); border: 1px solid #2c3a4e; }
+  .btn-notes:hover { border-color: #3d5170; }
 
   /* toggle */
   .toggle { display: inline-flex; background: rgba(0,0,0,0.25); border: 1px solid var(--bdr); border-radius: 999px; padding: 3px; margin-bottom: 14px; }
@@ -139,27 +150,35 @@
 
     <!-- FREE -->
     <div class="card">
-      <div class="kicker">Learn the game</div>
+      <div class="kicker">Market notes + community</div>
       <h2>Free</h2>
       <div class="price"><span class="cur">$</span><span class="num">0</span><span class="per">/forever</span></div>
-      <div class="subnote">No account, no card — just start reading.</div>
-      <span class="trialpill" style="color:var(--txt3);">Always free</span>
+      <div class="subnote">always free · no card</div>
+      <div class="roi">Get on the radar — the weekly read + the community.</div>
       <ul class="feats">
-        <li class="chk"><b>Options 101</b> — the full beginner course</li>
-        <li class="chk"><b>The NoVo Journal</b> — 100+ trading &amp; market-structure articles</li>
-        <li class="chk">Learn levels, gamma, risk &amp; discipline at your pace</li>
-        <li class="chk">The on-ramp to reading the market like a desk</li>
+        <li class="chk"><b>The Week Ahead</b> — Sunday market read, by email</li>
+        <li class="chk">New Journal articles as they drop</li>
+        <li class="chk"><b>The NoVo Journal</b> — 350+ free articles on options &amp; dealer flow</li>
+        <li class="chk"><b>Options 101</b> — the full beginner course, free</li>
+        <li class="chk">The public read archive — every desk note, after its session</li>
+        <li class="chk"><b>The NoVo Discord</b> — live discussion + community</li>
+        <li class="chk">Daily trading tips in the NoVo Discord</li>
+        <li class="chk">No hype, no spam — unsubscribe any time</li>
       </ul>
       <div class="cta-wrap">
-        <a class="btn btn-ghost" href="/journal/">Start reading free</a>
-        <div class="undercta">Or begin with <a href="/options-101">Options 101</a></div>
+        <form class="np-form" id="np-subscribe">
+          <input id="np-email" type="email" required placeholder="you@email.com">
+          <button type="submit" class="btn btn-notes">Get free Market Notes</button>
+        </form>
+        <div class="np-msg" id="np-sub-msg"></div>
+        <a class="btn btn-discord" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join the Discord &rarr;</a>
       </div>
     </div>
 
     <!-- ANALYST -->
     <div class="card feat-cyan">
-      <div class="tag cyan">Most popular</div>
-      <div class="kicker">Get the read</div>
+      <div class="tag cyan">★ Most popular</div>
+      <div class="kicker">Analysis by email, web &amp; Discord · no broker needed</div>
       <h2>NoVo Analyst</h2>
       <div class="toggle" id="an-toggle">
         <button type="button" id="an-mo" class="on-cyan" onclick="setAnalystPlan('monthly')">Monthly</button>
@@ -167,13 +186,18 @@
       </div>
       <div class="price"><span class="cur">$</span><span class="num" id="an-num">49</span><span class="per" id="an-per">/mo</span></div>
       <div class="subnote" id="an-note">per month · cancel any time</div>
-      <span class="trialpill">★ 7-day free trial</span>
+      <span class="trialpill">★ 7-day free trial · cancel anytime</span>
+      <div class="roi">You don't need more data — you need the read.</div>
       <ul class="feats">
-        <li class="chk">Morning, closing &amp; Sunday <b>desk notes</b> by email</li>
-        <li class="chk">Real-time <b>'The Line'</b> level-break alerts</li>
-        <li class="chk">Live <b>SPY / QQQ / SPX dealer dashboard</b></li>
-        <li class="chk">Net GEX, gamma flip, walls &amp; expected move — in plain English</li>
-        <li class="chk">Analysis &amp; education — never trade signals</li>
+        <li class="chk"><b>The Open</b> — daily morning desk note</li>
+        <li class="chk"><b>The Close</b> — end-of-day read + tomorrow's setup</li>
+        <li class="chk"><b>The Week Ahead</b> — Sunday game plan: catalyst calendar + bull/base/bear scenarios</li>
+        <li class="chk">Curated ‘The Line’ + gamma-regime alerts — never a firehose</li>
+        <li class="chk"><b>Dealer Positioning Map</b> — SPY/QQQ/SPX: net GEX, walls, Zero-Gamma, expected move, skew &amp; IV rank</li>
+        <li class="chk"><b>Live members dashboard</b> — real-time SPY/QQQ/SPX dealer map, installable app + push alerts</li>
+        <li class="chk">Dealer-flow read in plain English — a bottom line + every term explained</li>
+        <li class="chk">Private Analyst channels in the NoVo Discord</li>
+        <li class="chk">Analysis &amp; education — never blind signals</li>
       </ul>
       <div class="cta-wrap">
         <button class="btn btn-cyan" onclick="analystCheckout()">Start 7-day free trial</button>
@@ -184,7 +208,7 @@
     <!-- TRADER -->
     <div class="card feat-green">
       <div class="tag green">The full machine</div>
-      <div class="kicker">Let NoVo trade it</div>
+      <div class="kicker">Tradier &amp; Alpaca · AI included · includes NoVo Analyst</div>
       <h2>NoVo Trader</h2>
       <div class="toggle" id="tr-toggle">
         <button type="button" id="tr-mo" class="on-green" onclick="setTraderPlan('monthly')">Monthly</button>
@@ -193,12 +217,25 @@
       <div class="price"><span class="cur">$</span><span class="num" id="tr-num">199</span><span class="per" id="tr-per">/mo</span></div>
       <div class="subnote" id="tr-note">per month · cancel any time</div>
       <span class="trialpill">Includes Analyst · 3-day paper trial</span>
+      <div class="roi">All-in — Tradier + Alpaca keys only. No AI provider key needed.</div>
       <ul class="feats">
-        <li class="chk">Full <b>autonomous execution</b> in your own broker account</li>
-        <li class="chk">AI signal scoring + <b>multi-tier exit system</b></li>
-        <li class="chk">You set the risk &amp; rules — NoVo executes within them</li>
-        <li class="chk"><b>Includes NoVo Analyst</b> access, at no extra cost</li>
-        <li class="chk"><b>Non-custodial</b> — it never touches your money</li>
+        <li class="chk">NoVo Algorithmic Options Trader</li>
+        <li class="chk"><b>Includes NoVo Analyst</b> — daily reads + the live SPY/QQQ/SPX dealer dashboard</li>
+        <li class="chk">Real-time Analyst Score — conviction-sized entries</li>
+        <li class="chk">Live SPY tape + full options chain</li>
+        <li class="chk">Conviction-weighted position sizing</li>
+        <li class="chk">GEX, gamma-flip &amp; dealer-flow reads</li>
+        <li class="chk">Paper-trade first — go live when you're ready</li>
+        <li class="chk">Multi-tier exit ladder — TP1, TP2, trailing stops</li>
+        <li class="chk">Hard stops + end-of-day auto-flatten</li>
+        <li class="chk">DTE dial — 0DTE to multi-day, you set the risk</li>
+        <li class="chk">4 AI intelligence layers (included)</li>
+        <li class="chk">Adaptive execution router — learns from every fill</li>
+        <li class="chk">Private Analyst read channels in the NoVo Discord</li>
+        <li class="chk">Live trade journal + performance analytics</li>
+        <li class="chk">Trade alerts to your phone</li>
+        <li class="chk">Runs 24/7, hands-off · non-custodial</li>
+        <li class="chk">Guided setup + email support</li>
       </ul>
       <div class="cta-wrap">
         <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $199/mo</button>
@@ -354,6 +391,23 @@ async function analystCheckout() {
     alert('Could not start checkout — please try again.');
   }
 }
+
+// Free "Market Notes" signup — same /api/subscribe endpoint as the homepage
+(function () {
+  var f = document.getElementById('np-subscribe');
+  if (!f) return;
+  f.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var em = document.getElementById('np-email').value.trim();
+    var m = document.getElementById('np-sub-msg');
+    m.style.color = '#8aacc8'; m.textContent = '…';
+    try {
+      var r = await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em }) });
+      if (r.ok) { m.style.color = '#10b981'; m.textContent = 'You’re in — thanks for subscribing.'; f.reset(); }
+      else { var d = await r.json().catch(function () { return {}; }); m.style.color = '#f43f5e'; m.textContent = d.error || 'Something went wrong — try again.'; }
+    } catch (_) { m.style.color = '#f43f5e'; m.textContent = 'Network error — try again.'; }
+  });
+})();
 
 // Deep-link support: /plans?plan=trader|analyst|trader-yearly|analyst-yearly preselects a toggle
 (function () {
