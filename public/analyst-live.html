@@ -160,7 +160,7 @@
           <div class="lv-tile"><div class="k">Zero-Gamma</div><div class="v cyn" id="d-flip">—</div><div class="s">the regime line</div></div>
           <div class="lv-tile"><div class="k">Call Wall</div><div class="v amb" id="d-cw">—</div><div class="s">resistance / pin</div></div>
           <div class="lv-tile"><div class="k">Put Wall</div><div class="v amb" id="d-pw">—</div><div class="s">support</div></div>
-          <div class="lv-tile"><div class="k">Gravity</div><div class="v cyn" id="d-grav">—</div><div class="s">magnet / mean-revert</div></div>
+          <div class="lv-tile"><div class="k">Gravity</div><div class="v" id="d-grav" style="color:#a78bfa">—</div><div class="s">magnet / mean-revert</div></div>
           <div class="lv-tile"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
           <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
           <div class="lv-tile"><div class="k">MM Skew</div><div class="v" id="d-mm">—</div><div class="s" id="d-mm-s">fast / slow expiry</div></div>
@@ -261,7 +261,7 @@
     $('d-grav').textContent = d.gravity?_f(d.gravity):'—';
     if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); } else { $('d-em').textContent='—'; $('d-em-s').textContent=''; }
     if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
-    if (d.mm_skew){ var mf=d.mm_skew.fast, ms=d.mm_skew.slow, msp=d.mm_skew.spread; $('d-mm').textContent=(mf>=0?'+':'')+mf+' / '+(ms>=0?'+':'')+ms; $('d-mm').className='v '+(msp>=0.3?'red':msp<=-0.3?'grn':''); $('d-mm-s').textContent=(msp>=0.3?'near-term fear building':msp<=-0.3?'near-term complacency':'term structure flat'); } else { $('d-mm').textContent='—'; $('d-mm').className='v'; $('d-mm-s').textContent='fast / slow expiry'; }
+    if (d.mm_skew){ var mf=d.mm_skew.fast, ms=d.mm_skew.slow, msp=d.mm_skew.spread; $('d-mm').textContent=(mf>=0?'+':'')+mf.toFixed(1)+' / '+(ms>=0?'+':'')+ms.toFixed(1); $('d-mm').className='v '+(msp>=0.3?'red':msp<=-0.3?'grn':''); $('d-mm-s').textContent=(msp>=0.3?'near-term fear building':msp<=-0.3?'near-term complacency':'term structure flat'); } else { $('d-mm').textContent='—'; $('d-mm').className='v'; $('d-mm-s').textContent='fast / slow expiry'; }
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/SPX, which would mislabel), so the card isn't blank until the new engine restarts.
