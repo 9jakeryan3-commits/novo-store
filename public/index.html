@@ -487,7 +487,7 @@
                 <defs><linearGradient id="gexArc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f43f5e"/><stop offset="0.5" stop-color="#f59e0b"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
                 <path d="M16 98 A84 84 0 0 1 184 98" fill="none" stroke="#16233c" stroke-width="14" stroke-linecap="round"/>
                 <path d="M16 98 A84 84 0 0 1 184 98" fill="none" stroke="url(#gexArc)" stroke-width="14" stroke-linecap="round" opacity="0.92"/>
-                <line x1="100" y1="98" x2="148" y2="48" stroke="#eaf3ff" stroke-width="3.5" stroke-linecap="round"/>
+                <line id="mg-needle" x1="100" y1="98" x2="148" y2="48" stroke="#eaf3ff" stroke-width="3.5" stroke-linecap="round"/>
                 <circle cx="100" cy="98" r="5.5" fill="#eaf3ff"/>
               </svg>
             </div>
@@ -495,12 +495,14 @@
               <span style="font-size:9px;font-weight:700;letter-spacing:0.6px;color:#f43f5e;font-family:'Space Grotesk',Inter,sans-serif;">NEG &middot; TREND</span>
               <span style="font-size:9px;font-weight:700;letter-spacing:0.6px;color:#10b981;font-family:'Space Grotesk',Inter,sans-serif;">POS &middot; CHOP</span>
             </div>
-            <div style="text-align:center;margin:14px 0 16px;"><span style="font-size:23px;font-weight:900;color:#10b981;font-family:'Space Grotesk',Inter,sans-serif;letter-spacing:-0.5px;">+$2.0B</span> <span style="font-size:11px;color:var(--txt3);">net GEX &middot; dealers dampen</span></div>
+            <div style="text-align:center;margin:14px 0 16px;"><span id="mg-gex" style="font-size:23px;font-weight:900;color:#10b981;font-family:'Space Grotesk',Inter,sans-serif;letter-spacing:-0.5px;">+$2.0B</span> <span style="font-size:11px;color:var(--txt3);">net GEX &middot; dealers dampen</span></div>
             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
               <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Zero-Gamma</div><div style="font-size:16px;font-weight:800;color:var(--txt1);">752.48</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Expected Move</div><div style="font-size:16px;font-weight:800;color:var(--txt1);">&plusmn;$7.6</div></div>
+              <div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.28);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Gravity</div><div style="font-size:16px;font-weight:800;color:#a78bfa;">752.34</div></div>
               <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.28);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Call Wall</div><div style="font-size:16px;font-weight:800;color:var(--green);">759.00</div></div>
               <div style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.28);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Put Wall</div><div style="font-size:16px;font-weight:800;color:#f43f5e;">740.00</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Expected Move</div><div style="font-size:16px;font-weight:800;color:var(--txt1);">&plusmn;$16</div></div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 11px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">MM Skew f/s</div><div style="font-size:16px;font-weight:800;color:#f43f5e;">+2.1 / +1.4</div></div>
             </div>
           </div>
           <!-- right: the read -->
@@ -545,6 +547,8 @@
       <div class="feature"><div class="feature-icon">📐</div><div><h4>Expected move</h4><p>The &plusmn;1&sigma; range the options market is pricing for the day and the week &mdash; your realistic playing field, VIX/VXN-anchored.</p></div></div>
       <div class="feature"><div class="feature-icon">⚖️</div><div><h4>Put/Call skew</h4><p>Are traders paying up for downside protection or chasing upside? The market's fear-vs-greed tell, in vol points.</p></div></div>
       <div class="feature"><div class="feature-icon">📊</div><div><h4>ATM IV &amp; IV rank</h4><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
+      <div class="feature"><div class="feature-icon">🪐</div><div><h4>Gravity &middot; the magnet</h4><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
+      <div class="feature"><div class="feature-icon">🌡️</div><div><h4>Fast / Slow MM skew</h4><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
     </div>
   </div>
 </section>
@@ -1095,6 +1099,24 @@ document.addEventListener('keydown', (e) => {
       draw();
     }
     draw();setInterval(tick,140);
+  }catch(e){}})();
+
+  // Analyst dealer-map mock — bring the gauge to life: the needle gently sweeps, net GEX + SPY tick.
+  (function(){try{
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var needle=document.getElementById('mg-needle'), gexEl=document.getElementById('mg-gex'), priceEl=document.getElementById('mockPrice');
+    if(!needle) return;
+    var cx=100, cy=98, L=69, base=46, price=755.07, f=0, t=0;
+    function frame(){
+      t+=0.09; f++;
+      var wob=Math.sin(t)*4.2 + Math.sin(t*0.41)*2.1;                 // gentle sweep in degrees (stays POS side)
+      var ang=(base+wob)*Math.PI/180;
+      needle.setAttribute('x2',(cx+L*Math.cos(ang)).toFixed(1));
+      needle.setAttribute('y2',(cy-L*Math.sin(ang)).toFixed(1));
+      if(gexEl && f%9===0){ gexEl.textContent='+$'+(2.0+wob/9).toFixed(1)+'B'; }   // net GEX ticks with the sweep
+      if(priceEl && f%15===0){ price+=(Math.random()-0.5)*0.17; priceEl.textContent='$'+price.toFixed(2); }
+    }
+    frame(); setInterval(frame,95);
   }catch(e){}})();
   </script>
 </body>
