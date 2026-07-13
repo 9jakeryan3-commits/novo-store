@@ -163,6 +163,7 @@
           <div class="lv-tile"><div class="k">Gravity</div><div class="v cyn" id="d-grav">—</div><div class="s">magnet / mean-revert</div></div>
           <div class="lv-tile"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
           <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
+          <div class="lv-tile"><div class="k">MM Skew</div><div class="v" id="d-mm">—</div><div class="s" id="d-mm-s">fast / slow expiry</div></div>
         </div>
         <div class="lv-fear" id="d-fear">
           <div class="fear-hd"><span class="fear-lbl">Fear gauge · VIX</span><span class="fear-tag" id="fear-tag">&mdash;</span></div>
@@ -237,7 +238,7 @@
       // distinguish "unavailable this session" (a payload arrived but this index was skipped) from "loading"
       // (no payload yet) so an empty tab can't read as a silent coverage gap (audit #5).
       var _msg = (STATE && STATE.updated_at) ? '— unavailable this session' : '— loading…';
-      ['d-spot','d-gex','d-flip','d-cw','d-pw','d-grav','d-em','d-sk'].forEach(function(id){ $(id).textContent='—'; });
+      ['d-spot','d-gex','d-flip','d-cw','d-pw','d-grav','d-em','d-sk','d-mm'].forEach(function(id){ $(id).textContent='—'; });
       $('d-reg').innerHTML='<span style="color:var(--txt3)">'+_msg+'</span>'; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
       $('chart').style.display='none';
       var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
@@ -259,7 +260,8 @@
     $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
     $('d-grav').textContent = d.gravity?_f(d.gravity):'—';
     if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); } else { $('d-em').textContent='—'; $('d-em-s').textContent=''; }
-    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.mm_skew?('  ·  f/s '+(d.mm_skew.fast>=0?'+':'')+d.mm_skew.fast+'/'+(d.mm_skew.slow>=0?'+':'')+d.mm_skew.slow):'')+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
+    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
+    if (d.mm_skew){ var mf=d.mm_skew.fast, ms=d.mm_skew.slow, msp=d.mm_skew.spread; $('d-mm').textContent=(mf>=0?'+':'')+mf+' / '+(ms>=0?'+':'')+ms; $('d-mm').className='v '+(msp>=0.3?'red':msp<=-0.3?'grn':''); $('d-mm-s').textContent=(msp>=0.3?'near-term fear building':msp<=-0.3?'near-term complacency':'term structure flat'); } else { $('d-mm').textContent='—'; $('d-mm').className='v'; $('d-mm-s').textContent='fast / slow expiry'; }
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/SPX, which would mislabel), so the card isn't blank until the new engine restarts.
