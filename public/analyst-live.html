@@ -305,10 +305,12 @@
     });
     // zero-GEX centerline
     c.strokeStyle='rgba(255,255,255,0.28)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,padT); c.lineTo(mid,H-padB); c.stroke(); c.setLineDash([]);
-    // strike-price axis (~7 evenly-spaced ticks in the left gutter)
+    // strike-price axis — ROUND strikes (…730/740/750…) at a nice increment, not the raw ladder values
     c.font='9.5px ui-monospace,SFMono-Regular,Menlo,monospace'; c.textAlign='right'; c.textBaseline='middle'; c.fillStyle='#5b708c';
-    var step = Math.max(1, Math.round(n/7));
-    for(var i=0;i<n;i+=step){ c.fillText(rows[i].k.toFixed(0), axisW-6, yOfIndex(i)); }
+    var minK=rows[0].k, maxK=rows[n-1].k, rng=(maxK-minK)||1;
+    var raw=rng/6, pw=Math.pow(10,Math.floor(Math.log10(raw))), m=raw/pw;
+    var stepK=(m<1.5?1:m<3.5?2:m<7.5?5:10)*pw;       // 1/2/5/10 × power-of-ten → clean, range-adaptive
+    for(var kk=Math.ceil(minK/stepK)*stepK; kk<=maxK+0.001; kk+=stepK){ c.fillText(kk.toFixed(0), axisW-6, yOfStrike(kk)); }
     // key-level guide lines, then labels with vertical collision-avoidance so clustered levels stay readable
     var guides = [];
     [[d.put_wall,'#fbbf24','PUT WALL'],[d.call_wall,'#fbbf24','CALL WALL'],[d.flip,'#22d3ee','0-GAMMA'],[d.spot,'rgba(234,243,255,0.92)','SPOT']]
@@ -365,7 +367,7 @@
     var feed = $('feed');
     if (STATE.line_feed && STATE.line_feed.length){
       feed.innerHTML = STATE.line_feed.map(function(f){
-        var head = '<span class="ts">'+_escH(f.ts)+'</span>SPY '+_escH(f.text)+(f.now!=null ? ' <span class="now">(now '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
+        var head = '<span class="ts">'+_escH(f.ts)+'</span>SPY '+_escH(f.text)+(f.now!=null ? ' <span class="now">(&rarr; '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
         if (f.bias){ var bc = f.bias==='BULLISH' ? ['rgba(16,185,129,.14)','#34d399'] : (f.bias==='BEARISH' ? ['rgba(239,68,68,.14)','#f87171'] : ['rgba(148,163,184,.14)','#b3c2d6']); head += '<span class="lbias" style="background:'+bc[0]+';color:'+bc[1]+';">'+_escH(f.bias)+'</span>'; }
         var body = '';
         if (f.hold)  body += '<span class="ln">'+_escH(f.hold)+'</span>';
