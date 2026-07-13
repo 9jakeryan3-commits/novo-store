@@ -83,6 +83,10 @@
   .lv-feed { padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
   .lv-feed li { border-top: 1px solid var(--bdr); padding: 9px 0; font-size: 13px; color: var(--txt2); line-height: 1.5; }
   .lv-feed li .ts { color: #22d3ee; font-weight: 700; font-size: 11.5px; margin-right: 6px; }
+  .lv-feed li .now { color: var(--txt3); }
+  .lv-feed li .lbias { font-size: 9.5px; font-weight: 800; letter-spacing: .07em; padding: 2px 7px; border-radius: 999px; margin-left: 7px; vertical-align: 1px; }
+  .lv-feed li .ln { display: block; margin: 5px 0 0 4px; padding-left: 9px; border-left: 2px solid var(--bdr); font-size: 12.5px; color: var(--txt2); }
+  .lv-feed li .ln.watch { border-left-color: #22d3ee; color: #cfe6f2; }
   .lv-read { margin-top: 16px; }   /* space between The Line (mobile) / the strip (desktop) and the Latest Read */
   /* notifications switchboard */
   .lv-notif { margin-top: 16px; }
@@ -358,7 +362,17 @@
       $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
     }
     var feed = $('feed');
-    if (STATE.line_feed && STATE.line_feed.length){ feed.innerHTML = STATE.line_feed.map(function(f){ return '<li><span class="ts">'+_escH(f.ts)+'</span>'+_escH(f.text)+'</li>'; }).join(''); }
+    if (STATE.line_feed && STATE.line_feed.length){
+      feed.innerHTML = STATE.line_feed.map(function(f){
+        var head = '<span class="ts">'+_escH(f.ts)+'</span>SPY '+_escH(f.text)+(f.now!=null ? ' <span class="now">(now '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
+        if (f.bias){ var bc = f.bias==='BULLISH' ? ['rgba(16,185,129,.14)','#34d399'] : (f.bias==='BEARISH' ? ['rgba(239,68,68,.14)','#f87171'] : ['rgba(148,163,184,.14)','#b3c2d6']); head += '<span class="lbias" style="background:'+bc[0]+';color:'+bc[1]+';">'+_escH(f.bias)+'</span>'; }
+        var body = '';
+        if (f.hold)  body += '<span class="ln">'+_escH(f.hold)+'</span>';
+        if (f.brk)   body += '<span class="ln">'+_escH(f.brk)+'</span>';
+        if (f.watch) body += '<span class="ln watch">'+_escH(f.watch)+'</span>';
+        return '<li>'+head+body+'</li>';
+      }).join('');
+    }
     else { feed.innerHTML = '<li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li>'; }   // clear stale entries when the feed is empty/new-session
   }
 
