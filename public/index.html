@@ -131,6 +131,9 @@
   .hero h1 span { background: linear-gradient(92deg, #22d3ee, #3b82f6 65%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
   .hero-tagline { font-size: clamp(15px, 2vw, 19px); font-weight: 900; color: var(--txt1); letter-spacing: 0.16em; text-transform: uppercase; margin: 0 auto 22px; }
   .hero-tagline b { color: var(--green); }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 680px; margin: 0 auto 30px; }
+  .hero-chip { display: inline-block; font-size: 12px; font-weight: 700; color: var(--txt2); background: var(--navy2); border: 1px solid var(--bdr); border-radius: 999px; padding: 6px 13px; letter-spacing: 0.2px; }
+  .hero-chip b { color: #22d3ee; }
   .hero p { font-size: 18px; color: var(--txt2); max-width: 600px; margin: 0 auto 26px; line-height: 1.7; }
   .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .btn-primary { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px 42px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 8px 28px rgba(16,185,129,0.35); }
@@ -456,8 +459,18 @@
     <div class="hero-badge">NoVo Analyst &nbsp;·&nbsp; Dealer Positioning &nbsp;·&nbsp; The Read</div>
     <h1>Stop guessing.<br><span>Read the&nbsp;dealers.</span></h1>
     <p class="hero-tagline">Live Dealer Map &middot; <b>SPY / QQQ / SPX</b> &middot; The Read</p>
-    <p>The market isn't random. Dealers hedge around the same gamma levels every session &mdash; the walls that pin price, the flip that flips chop into trend. NoVo maps it <b style="color:#22d3ee;">live</b>, and tells you what it means <b style="color:var(--txt1);">before the open</b>.</p>
-    <p style="max-width:720px;margin:22px auto 34px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">The flow terminals hand you raw data and make <b style="color:#22d3ee;">you</b> the analyst. <b style="color:var(--green);">NoVo hands you the read.</b></p>
+    <p>The market isn't random. Dealers hedge around the same gamma levels every session &mdash; the walls that pin price, the <b style="color:var(--txt1);">regime that says chop or trend</b>, the magnet price snaps back to, and the flip that turns one into the other. NoVo maps it <b style="color:#22d3ee;">live</b>, and tells you what it means <b style="color:var(--txt1);">before the open</b>.</p>
+    <p style="max-width:720px;margin:22px auto 28px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">The flow terminals hand you raw data and make <b style="color:#22d3ee;">you</b> the analyst. <b style="color:var(--green);">NoVo hands you the read.</b></p>
+    <div class="hero-chips" aria-label="What the dealer map shows">
+      <span class="hero-chip">Net GEX regime</span>
+      <span class="hero-chip">Zero-Gamma flip</span>
+      <span class="hero-chip">Call / Put walls</span>
+      <span class="hero-chip"><b>Gravity</b></span>
+      <span class="hero-chip">Expected move</span>
+      <span class="hero-chip">Put / Call skew</span>
+      <span class="hero-chip">Fast / slow MM skew</span>
+      <span class="hero-chip">IV rank</span>
+    </div>
     <div class="hero-cta">
       <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);box-shadow:0 8px 28px rgba(34,211,238,0.35);" onclick="startAnalystTrial('monthly')">Start 7-day free trial</button>
       <a href="/analyst/archive" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See a sample read &rarr;</a>
