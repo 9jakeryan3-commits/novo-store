@@ -1,7 +1,7 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// NoVo Analyst — $49/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
+// NoVo Analyst — $69/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
 // to the Analyst Resend audience (NOT the Trader license/provision path). 503 until STRIPE_PRICE_ANALYST set.
 
 const _rl = new Map();
@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
     return res.status(503).json({ error: 'Analyst tier not configured yet' });
   }
 
-  // plan: 'yearly' picks the annual price ($499/yr); anything else = monthly ($49/mo).
+  // plan: 'yearly' picks the annual price ($690/yr); anything else = monthly ($69/mo).
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
