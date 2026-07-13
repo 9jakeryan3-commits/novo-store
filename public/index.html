@@ -459,7 +459,7 @@
     <p style="max-width:720px;margin:22px auto 34px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">The flow terminals hand you raw data and make <b style="color:#22d3ee;">you</b> the analyst. <b style="color:var(--green);">NoVo hands you the read.</b></p>
     <div class="hero-cta">
       <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);box-shadow:0 8px 28px rgba(34,211,238,0.35);" onclick="startAnalystTrial('monthly')">Start 7-day free trial</button>
-      <a href="/analyst/live" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See a live read &rarr;</a>
+      <a href="/analyst/archive" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See a sample read &rarr;</a>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button type="button" onclick="startAnalystTrial('yearly')" style="background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-weight:700;font-size:13px;padding:10px 22px;border-radius:999px;cursor:pointer;">Analyst yearly &mdash; $690/yr, 2 months free</button>
@@ -564,6 +564,23 @@
   </div>
 </div>
 
+<!-- THE ARCHIVE -->
+<section>
+  <div class="container">
+    <div class="section-label" style="color:#22d3ee;">The read archive</div>
+    <h2 class="section-title">Every read &mdash; public after its session.</h2>
+    <p class="section-sub">Members get each read live; the world sees it once the session is over. Browse the growing library of desk notes and see exactly what landed in members' inboxes that morning &mdash; it's also how NoVo's read gets found on Google.</p>
+    <div class="how-grid">
+      <div class="how-card"><div class="how-num" style="color:#22d3ee;">Before the bell</div><h3>The Open</h3><p>The morning desk note &mdash; the setup into the open, the dealer positioning, and the levels that matter today.</p></div>
+      <div class="how-card"><div class="how-num" style="color:#22d3ee;">After the close</div><h3>The Close</h3><p>What the session actually did versus the levels, and the read into the next session.</p></div>
+      <div class="how-card"><div class="how-num" style="color:#22d3ee;">Sundays</div><h3>The Week Ahead</h3><p>The multi-day structural picture, the week's real catalysts, and the scenarios that would define it.</p></div>
+    </div>
+    <div style="text-align:center;margin-top:34px;">
+      <a href="/analyst/archive" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;">Browse the full read archive &rarr;</a>
+    </div>
+  </div>
+</section>
+
 <!-- THE DASHBOARD -->
 <section>
   <div class="container" style="text-align:center;">
@@ -576,7 +593,7 @@
       <span style="font-size:13px;font-weight:700;color:var(--txt2);background:var(--navy2);border:1px solid var(--bdr);border-radius:999px;padding:8px 16px;">VIX fear gauge</span>
       <span style="font-size:13px;font-weight:700;color:var(--txt2);background:var(--navy2);border:1px solid var(--bdr);border-radius:999px;padding:8px 16px;">24/5 futures ribbon</span>
     </div>
-    <a href="/analyst/live" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;">Open a live read &rarr;</a>
+    <a href="/analyst/live" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;">Open the live dashboard &rarr;</a>
   </div>
 </section>
 
@@ -776,7 +793,7 @@
     <p style="font-size:15px;color:var(--txt2);max-width:520px;margin:0 auto 20px;line-height:1.7;">Start the 7-day free trial — then $69/mo or $690/yr, cancel any time. The live dealer map + the read every session. Analysis, not signals.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
       <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);box-shadow:0 8px 28px rgba(34,211,238,0.35);" onclick="startAnalystTrial('monthly')">Start 7-day free trial</button>
-      <a href="/analyst/live" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;">See a live read &rarr;</a>
+      <a href="/analyst/archive" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;">Browse the read archive &rarr;</a>
     </div>
   </div>
 </div>
@@ -790,7 +807,7 @@
 <!-- DISCLAIMER -->
 <!-- FREE: Market Notes + the new Discord -->
 <hr class="divider">
-<section>
+<section id="free">
   <div style="max-width:620px;margin:0 auto;padding:8px 24px;text-align:center;">
     <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">Free &middot; Market Notes + Community</div>
     <h2 style="font-size:24px;font-weight:800;color:#eaf3ff;letter-spacing:-.4px;margin:0 0 8px;">Get NoVo's market notes &mdash; free</h2>
