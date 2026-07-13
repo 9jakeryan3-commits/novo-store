@@ -33,14 +33,23 @@ async function one(name, sym) {
     const res = j?.chart?.result?.[0];
     const m = res?.meta;
     if (!m || m.regularMarketPrice == null) return null;
-    const price = m.regularMarketPrice;
+    const rmp = m.regularMarketPrice;
+    // Live price, extended-hours aware: during pre/after-hours a CASH instrument's regularMarketPrice freezes at
+    // the last regular close, so it drifts stale while the 24/5 futures keep moving (SPY reading green while the
+    // S&P future is red). Use the pre/post-market print when the regular session is closed. Futures report
+    // marketState 'REGULAR' around the clock, so this is a no-op for them.
+    const st = m.marketState;
+    let price = rmp;
+    if ((st === "PRE" || st === "PREPRE") && m.preMarketPrice != null) price = m.preMarketPrice;
+    else if ((st === "POST" || st === "POSTPOST" || st === "CLOSED") && m.postMarketPrice != null) price = m.postMarketPrice;
     const closes = (res?.indicators?.quote?.[0]?.close || []).filter(c => c != null);
-    // Prior close: if the last daily bar is essentially today's live price, the settled prior close is the bar
-    // before it; otherwise the live tick isn't in the array yet, so the last daily close IS the prior close.
+    // Prior settled close: referenced to the DAILY bar (rmp), independent of the extended-hours price above. If
+    // the last daily bar is essentially the regular price, the settled prior close is the bar before it;
+    // otherwise the live tick isn't in the array yet, so the last daily close IS the prior close.
     let prev = null;
     if (closes.length >= 2) {
       const last = closes[closes.length - 1];
-      prev = (Math.abs(last - price) / price < 0.0005) ? closes[closes.length - 2] : last;
+      prev = (Math.abs(last - rmp) / rmp < 0.0005) ? closes[closes.length - 2] : last;
     }
     if (prev == null) prev = m.chartPreviousClose ?? m.previousClose;
     if (prev == null || !prev) return null;
