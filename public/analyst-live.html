@@ -259,7 +259,7 @@
     $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
     $('d-grav').textContent = d.gravity?_f(d.gravity):'—';
     if (d.em_daily!=null){ $('d-em').textContent = '±'+_f(d.em_daily); $('d-em-s').textContent = '±'+(d.em_daily_pct||0).toFixed(1)+'% today'+(d.em_weekly!=null?('  ·  ±'+_f(d.em_weekly)+' wk'):''); } else { $('d-em').textContent='—'; $('d-em-s').textContent=''; }
-    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.atm_iv?('  ·  ATM IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
+    if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.mm_skew?('  ·  f/s '+(d.mm_skew.fast>=0?'+':'')+d.mm_skew.fast+'/'+(d.mm_skew.slow>=0?'+':'')+d.mm_skew.slow):'')+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/SPX, which would mislabel), so the card isn't blank until the new engine restarts.
