@@ -232,9 +232,12 @@
     $('dealer-h').textContent = CUR + ' · Dealer positioning';
     $('chart-h').textContent = CUR + ' · Session & dealer levels';
     var d = idx(CUR);
-    if(!d){   // no data for this index yet — clear tiles/chart so the PREVIOUS ticker's numbers don't linger
+    if(!d){   // no data for this index — clear tiles/chart so the PREVIOUS ticker's numbers don't linger, and
+      // distinguish "unavailable this session" (a payload arrived but this index was skipped) from "loading"
+      // (no payload yet) so an empty tab can't read as a silent coverage gap (audit #5).
+      var _msg = (STATE && STATE.updated_at) ? '— unavailable this session' : '— loading…';
       ['d-spot','d-gex','d-flip','d-cw','d-pw','d-em','d-sk'].forEach(function(id){ $(id).textContent='—'; });
-      $('d-reg').textContent=''; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
+      $('d-reg').innerHTML='<span style="color:var(--txt3)">'+_msg+'</span>'; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
       $('chart').style.display='none';
       var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
       return;
@@ -328,11 +331,17 @@
 
   function renderMeta(){
     var sess = STATE.session||'closed';
-    var open = sess==='open';
+    // Staleness guard: 'session' is frozen at publish time, so a halted publisher would keep the badge saying
+    // LIVE over hours-old tiles. Compare updated_at to now — no publish in >5min (open) / >25min (off-hours)
+    // means the data is NOT live no matter what 'session' claims. 'closed' is an intentional static snapshot.
+    var ageMs = STATE.updated_at ? (Date.now() - new Date(STATE.updated_at).getTime()) : Infinity;
+    var stale = (sess!=='closed') && ageMs > (sess==='open' ? 300000 : 1500000);
+    var open = sess==='open' && !stale;
     $('live').className = 'lv-live'+(open?'':' closed');
-    $('live-t').textContent = ({open:'LIVE',premarket:'PRE-MARKET',afterhours:'AFTER HOURS',closed:'MARKET CLOSED'})[sess]||'MARKET CLOSED';
-    // Secondary line: only during live sessions (adds cadence). Closed is self-explanatory — no extra line.
-    $('sess').textContent = (sess==='closed') ? '' : 'Updating through the session · ~60s';
+    var _lbl = ({open:'LIVE',premarket:'PRE-MARKET',afterhours:'AFTER HOURS',closed:'MARKET CLOSED'})[sess]||'MARKET CLOSED';
+    $('live-t').textContent = stale ? 'RECONNECTING…' : _lbl;
+    // Secondary line: only during a live session that's actually publishing. Closed/stale get no cadence line.
+    $('sess').textContent = (sess==='closed' || stale) ? '' : 'Updating through the session · ~60s';
     if (STATE.updated_at){ try{ $('upd').textContent = new Date(STATE.updated_at).toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'; }catch(_){ $('upd').textContent='—'; } }
     if (STATE.read && STATE.read.text){
       $('read-t').textContent = STATE.read.title || 'Latest read';
