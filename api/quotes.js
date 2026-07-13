@@ -2,10 +2,14 @@
 // returns { "SPY": {price, chg}, ... } keyed by the ticker's display names. CDN-cached 60s.
 // Best-effort: any symbol that fails is omitted, and the client keeps its last/static value.
 
+// Equity indices use their E-mini FUTURES (ES/NQ/YM/RTY) so they update ~24/5 (Sun 6pm → Fri 5pm ET) instead
+// of freezing at the 4pm cash close. Gold/Crude are already futures (24/5); BTC is 24/7; Dollar (ICE index)
+// trades extended hours; 10Y stays the cash yield (no clean 24/5 yield on Yahoo). Nasdaq futures = the
+// Nasdaq-100 (NQ), so it reads higher than the cash Composite — expected.
 const SYMBOLS = [
-  ["SPY", "SPY"], ["VIX", "^VIX"], ["S&P 500", "^GSPC"], ["Nasdaq", "^IXIC"],
-  ["Russell", "^RUT"], ["Gold", "GC=F"], ["BTC", "BTC-USD"], ["Crude", "CL=F"],
-  ["Dow", "^DJI"], ["Dollar", "DX-Y.NYB"], ["10Y", "^TNX"],
+  ["SPY", "SPY"], ["VIX", "^VIX"], ["S&P 500", "ES=F"], ["Nasdaq", "NQ=F"],
+  ["Russell", "RTY=F"], ["Gold", "GC=F"], ["BTC", "BTC-USD"], ["Crude", "CL=F"],
+  ["Dow", "YM=F"], ["Dollar", "DX-Y.NYB"], ["10Y", "^TNX"],
 ];
 
 function fmt(name, p) {
