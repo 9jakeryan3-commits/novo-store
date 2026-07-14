@@ -279,8 +279,11 @@
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/SPX, which would mislabel), so the card isn't blank until the new engine restarts.
+    var _cu = d.chart_url || (CUR==='SPY' ? (STATE.chart_url||null) : null);
     var _cb = d.chart_b64 || (CUR==='SPY' ? (STATE.chart_b64||null) : null);
-    if (_cb){ $('chart').src = 'data:image/png;base64,'+_cb; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; } else { $('chart').style.display='none'; }
+    if (_cu){ if($('chart').getAttribute('src') !== _cu) $('chart').src = _cu; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; }   // hosted URL: browser caches, only re-downloads when ?v=hash changes
+    else if (_cb){ $('chart').src = 'data:image/png;base64,'+_cb; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; }   // fallback while the store rolls out / if an upload fails
+    else { $('chart').style.display='none'; }
     renderFear();
     drawProfile(d);
   }
@@ -433,8 +436,14 @@
 
   document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); } });
 
-  var _pollTimer = null, _ribTimer = null;
-  function startPolling(){ poll(); loadRibbon(); if(!_pollTimer){ _pollTimer = setInterval(poll, 15000); } if(!_ribTimer){ _ribTimer = setInterval(loadRibbon, 60000); } }
+  var _pollTimer = null, _ribTimer = null, _polling = false;
+  async function _pollGuarded(){ if(_polling) return; _polling = true; try { await poll(); } finally { _polling = false; } }  // in-flight guard: a slow (mobile) poll can't stack on the next tick
+  function startPolling(){ _pollGuarded(); loadRibbon(); if(!_pollTimer){ _pollTimer = setInterval(_pollGuarded, 15000); } if(!_ribTimer){ _ribTimer = setInterval(loadRibbon, 60000); } }
+  function stopPolling(){ if(_pollTimer){ clearInterval(_pollTimer); _pollTimer=null; } if(_ribTimer){ clearInterval(_ribTimer); _ribTimer=null; } }
+  document.addEventListener('visibilitychange', function(){   // don't poll (or re-download the payload) in a hidden/background tab
+    if(document.hidden){ stopPolling(); }
+    else if(TOKEN){ startPolling(); }   // back to visible → resume + an immediate refresh
+  });
 
   if (!TOKEN) showLogin(); else { startPolling(); }
 })();

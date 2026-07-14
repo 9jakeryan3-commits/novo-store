@@ -346,7 +346,29 @@ export default async function handler(req, res) {
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(500).json({ error: 'no blob token' });
     try {
-      await put(_liveBlobKey(), JSON.stringify(req.body.state || {}),
+      const state = req.body.state || {};
+      // Host each chart PNG at a STABLE url with a content-hash version (?v=…) instead of shipping base64 inside
+      // the JSON — shrinks the 15s poll payload from ~250KB to a few KB, and the browser caches the image so it
+      // only re-downloads when the chart actually changes. Keeps chart_b64 as a fallback if an upload fails.
+      const _hostChart = async (b64, name) => {
+        try {
+          const h = crypto.createHash('sha256').update(b64).digest('hex').slice(0, 12);
+          const { url } = await put(`analyst-live/chart-${name}.png`, Buffer.from(b64, 'base64'),
+            { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'image/png', token: BT });
+          return url + '?v=' + h;
+        } catch (_) { return null; }
+      };
+      for (const idx of (Array.isArray(state.indices) ? state.indices : [])) {
+        if (idx && idx.chart_b64) {
+          const u = await _hostChart(idx.chart_b64, String(idx.ticker || 'x').replace(/[^A-Za-z0-9]/g, ''));
+          if (u) { idx.chart_url = u; delete idx.chart_b64; }
+        }
+      }
+      if (state.chart_b64) {
+        const u = await _hostChart(state.chart_b64, 'top');
+        if (u) { state.chart_url = u; delete state.chart_b64; }
+      }
+      await put(_liveBlobKey(), JSON.stringify(state),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
