@@ -723,7 +723,7 @@
         <div class="how-num">01 &nbsp;·&nbsp; SIGNAL</div>
         <h3>Analyst Score — grades every setup</h3>
         <p>Multiple proprietary signal components combine into a real-time Analyst Score (0–100), updated on every scan cycle. It <strong>grades the quality</strong> of each setup — and your conviction-sizing bands map that grade to position size, larger on the strongest setups from the same allocation budget.</p>
-        <p>A dual-layer tape filter blocks spoofed moves before a setup can fire. A trade only triggers on a real structure setup — a VWAP or level reaction, a swept level, a confirmed continuation — with the tape confirmed and gamma permission in agreement. No partial alignment fires a trade, and in low-quality windows (the lunch lull, the late-session pin) the lowest-conviction setups are automatically suppressed.</p>
+        <p>A dual-layer tape filter blocks spoofed moves before a setup can fire. A trade only triggers on a real structure setup — a level reaction, a swept level, or a confirmed continuation once price breaks clear of the levels — with the tape confirmed. No partial alignment fires a trade, and in low-quality windows (the lunch lull, the late-session pin) the lowest-conviction setups are automatically suppressed.</p>
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
@@ -862,7 +862,7 @@
       <div class="feature">
         <div>
           <h4>Per-Setup Edge Tracking</h4>
-          <p>Every trade is logged and scored by setup — VWAP reactions, level reactions, sweeps, continuations — so each setup's edge is measured on real, live results, never assumed. When a setup stops paying, the data shows it.</p>
+          <p>Every trade is logged and scored by setup — level reactions, swept levels, continuations — and by which level fired it, so each setup's edge is measured on real, live results, never assumed. When a setup stops paying, the data shows it.</p>
         </div>
       </div>
       <div class="feature">
@@ -1215,7 +1215,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">What is the Analyst Score and how does entry sizing work?</summary>
-        <div class="faq-a">The Analyst Score is a 0–100 real-time <strong>grade of each setup's quality</strong>, updated continuously from multiple proprietary signal components. It doesn't decide whether a trade fires — your setups (structure + tape + gamma permission) do — it grades the entry so your conviction-sizing bands allocate size. You set three bands: the middle band is your full allocation, sized up when the grade is high and down when it's low. Every band is configurable from the dashboard.</div>
+        <div class="faq-a">The Analyst Score is a 0–100 real-time <strong>grade of each setup's quality</strong>, updated continuously from multiple proprietary signal components. It doesn't decide whether a trade fires — your setups (structure + tape) do — it grades the entry so your conviction-sizing bands allocate size. You set three bands: the middle band is your full allocation, sized up when the grade is high and down when it's low. Every band is configurable from the dashboard.</div>
       </details>
 
       <details class="faq-item">
