@@ -4,12 +4,12 @@
     { "source": "/blog/", "destination": "/journal/", "permanent": true },
     { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true },
     { "source": "/journal/guide-1dte-spy-options-scalping.html", "destination": "/journal/guide-0dte-spy-options-scalping.html", "permanent": true },
-    { "source": "/analyst", "destination": "/", "permanent": true }
+    { "source": "/trader", "destination": "/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/analyst/archive/:slug", "destination": "/api/analyst-publish?slug=:slug" },
     { "source": "/analyst/archive", "destination": "/api/analyst-publish" },
-    { "source": "/trader", "destination": "/trader.html" },
+    { "source": "/analyst", "destination": "/analyst.html" },
     { "source": "/plans", "destination": "/plans.html" },
     { "source": "/success", "destination": "/success.html" },
     { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
