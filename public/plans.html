@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Choose your plan — NoVo AI Trading</title>
-<meta name="description" content="Pick how you join NoVo: read the market free with the Journal, get the desk's read with NoVo Analyst ($69/mo), or let NoVo trade it in your own broker with NoVo Trader ($249/mo). Cancel any time.">
+<meta name="description" content="Pick how you join NoVo: read the market free with the Journal, get the desk's read with NoVo Analyst ($69/mo), or let NoVo trade it in your own broker with NoVo Trader ($179/mo). Cancel any time.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://novo-aitrading.app/plans">
 <meta property="og:type" content="website">
@@ -210,9 +210,9 @@
       <h2>NoVo Trader</h2>
       <div class="toggle" id="tr-toggle">
         <button type="button" id="tr-mo" class="on-green" onclick="setTraderPlan('monthly')">Monthly</button>
-        <button type="button" id="tr-yr" onclick="setTraderPlan('yearly')">Annual · save $41/mo</button>
+        <button type="button" id="tr-yr" onclick="setTraderPlan('yearly')">Annual · save $30/mo</button>
       </div>
-      <div class="price"><span class="cur">$</span><span class="num" id="tr-num">249</span><span class="per" id="tr-per">/mo</span></div>
+      <div class="price"><span class="cur">$</span><span class="num" id="tr-num">179</span><span class="per" id="tr-per">/mo</span></div>
       <div class="subnote" id="tr-note">per month · cancel any time</div>
       <span class="trialpill">Includes Analyst · 3-day paper trial</span>
       <div class="roi">All-in — Tradier + Alpaca keys only. No AI provider key needed.</div>
@@ -236,7 +236,7 @@
         <li class="chk">Guided setup + email support</li>
       </ul>
       <div class="cta-wrap">
-        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $249/mo</button>
+        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $179/mo</button>
         <div class="undercta">Or <a href="https://app.novo-aitrading.app/signup">try free — 3-day paper trial, no card</a></div>
       </div>
     </div>
@@ -284,11 +284,11 @@ function setTraderPlan(p) {
   var mo = document.getElementById('tr-mo'), yr = document.getElementById('tr-yr');
   var num = document.getElementById('tr-num'), per = document.getElementById('tr-per'), note = document.getElementById('tr-note'), btn = document.getElementById('tr-btn');
   if (window._traderPlan === 'yearly') {
-    num.textContent = '2,499'; per.textContent = '/yr'; note.innerHTML = 'per year · save $41/mo vs monthly · cancel any time';
-    btn.textContent = 'Subscribe — $2,499/yr'; yr.className = 'on-green'; mo.className = '';
+    num.textContent = '1,790'; per.textContent = '/yr'; note.innerHTML = 'per year · save $30/mo vs monthly · cancel any time';
+    btn.textContent = 'Subscribe — $1,790/yr'; yr.className = 'on-green'; mo.className = '';
   } else {
-    num.textContent = '249'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
-    btn.textContent = 'Subscribe — $249/mo'; mo.className = 'on-green'; yr.className = '';
+    num.textContent = '179'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
+    btn.textContent = 'Subscribe — $179/mo'; mo.className = 'on-green'; yr.className = '';
   }
 }
 

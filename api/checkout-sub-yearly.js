@@ -27,7 +27,9 @@ module.exports = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{ price: process.env.STRIPE_PRICE_SUB_YEARLY_ID, quantity: 1 }],
+      // Trader $1,790/yr (2026-07-17). Hardcoded to the new price ID — see checkout-sub.js for why (the
+      // Vercel env still points at the old $2,499 price and can't be updated from here). Price ID is not a secret.
+      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_YEARLY_ID_1790 || 'price_1TuKflApyfMAkbeELbeDhYLC'), quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,
