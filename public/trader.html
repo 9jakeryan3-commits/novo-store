@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo Trader | AI-Powered Algorithmic SPY Options Trading & Execution System</title>
-<meta name="description" content="NoVo is a SPY options execution tool — connect your own broker, set your risk parameters, and it executes your rules automatically with AI signal scoring and a multi-tier exit system. Subscribe from $249/mo.">
+<meta name="description" content="NoVo is a SPY options execution tool — connect your own broker, set your risk parameters, and it executes your rules automatically. Or take the trade yourself: two buttons, you see it, NoVo fills it — same sizing, same stop, same exits. Subscribe from $249/mo.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app/trader">
 <meta property="og:title" content="NoVo | AI-Powered Algorithmic SPY Option Trading">
-<meta property="og:description" content="A SPY options execution tool you connect to your own brokerage. You set the risk parameters; NoVo executes your rules within them — disciplined, automatic, non-custodial.">
+<meta property="og:description" content="A SPY options execution tool you connect to your own brokerage. You set the risk parameters; NoVo executes your rules within them — or takes the trade on your command. You see it, NoVo fills it.">
 <link rel="icon" href="/novo-icon.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -18,7 +18,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NoVo | AI-Powered Algorithmic SPY Option Trading">
-<meta name="twitter:description" content="A SPY options execution tool — connect your own broker, set your risk parameters, and NoVo executes your rules. AI scoring, multi-tier exits, non-custodial. Subscribe $249/mo.">
+<meta name="twitter:description" content="A SPY options execution tool — connect your broker, set your rules, and NoVo executes them. Or hit Buy Calls / Buy Puts and it takes the trade for you. Non-custodial.">
 <meta name="twitter:image" content="https://novo-aitrading.app/og-trader.png?v=2">
 <link rel="canonical" href="https://novo-aitrading.app/trader">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -738,6 +738,19 @@
       <p>Exits execute in strict priority order across multiple tiers — from manual overrides and EOD protocols down through hard stops, trailing exits, and profit-taking targets. Higher-priority exits always win. The system never hesitates between competing exit conditions.</p>
       <p>TP1 sells half the position at your first target and promotes the remainder to a runner. Toggle it off to skip the partial and hold the full position into TP2. TP2 closes the runner — or toggle it off to let the runner trail indefinitely in trending markets.</p>
       <p>Two independent trailing stops protect open profit: a tighter runner trail for extended moves and a standard trail for normal exits, both with adjustable width and activation thresholds. Nearly every threshold is configurable live from the dashboard without a restart. Math dictates exits — not emotion.</p>
+    </div>
+
+    <!-- MANUAL ENTRY (2026-07-16) — the teammate pivot. NoVo is no longer only autonomous: the operator
+         can take the trade himself THROUGH NoVo's execution engine. Accuracy notes, deliberate:
+         * NOT described as "instant"/"lightning" — it fires on the next scan tick (<=5s). The FILL is fast
+           (same execution router), the click-to-order is not, and that is not a claim to make on a public page.
+         * No thresholds named (premium floor / spread gate) — "can't fill cleanly" per the no-secrets rule. -->
+    <div class="how-card" style="margin-top:20px;">
+      <div class="how-num">04 &nbsp;·&nbsp; YOUR CALL</div>
+      <h3>Buy Calls. Buy Puts. Your read, NoVo's hands.</h3>
+      <p>Two buttons on the dashboard. You spot a setup NoVo hasn't taken &mdash; hit <strong>Buy Calls</strong> or <strong>Buy Puts</strong> and it takes the trade for you: same strike selection, same conviction sizing, same broker-side stop, same multi-tier exit ladder. Not a bolted-on "manual mode" running its own code &mdash; it's NoVo's own execution engine, pointed where you tell it.</p>
+      <p><strong>Leave it running and you're both on the tape &mdash; whoever sees it first takes it.</strong> Or hit Stop: NoVo keeps reading the market and keeps naming the setups it <em>would</em> have taken, and only trades when you say so. Your call, your finger, its execution.</p>
+      <p>The guardrails don't move either way. It still won't take a contract it can't fill cleanly, and never more than one position at a time.</p>
     </div>
 
     <!-- SCREENSHOT GALLERY — restored 2026-06-26 with v4.3 blurred shots (rebuilt by build_shots.py). -->
