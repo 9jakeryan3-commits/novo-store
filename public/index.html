@@ -142,6 +142,11 @@
   .analyst-glow { animation: analystGlow 2.6s ease-in-out infinite; }
   .analyst-glow:hover { border-color: #22d3ee !important; background: rgba(34,211,238,0.08) !important; }
   @media (prefers-reduced-motion: reduce) { .analyst-glow { animation: none; box-shadow: 0 0 22px rgba(34,211,238,0.42); } }
+  /* Matching green pulse on the Trader CTA */
+  @keyframes traderGlow { 0%,100% { box-shadow: 0 0 14px rgba(16,185,129,0.22); } 50% { box-shadow: 0 0 30px rgba(16,185,129,0.55); } }
+  .trader-glow { animation: traderGlow 2.6s ease-in-out infinite; }
+  .trader-glow:hover { border-color: #10b981 !important; background: rgba(16,185,129,0.08) !important; }
+  @media (prefers-reduced-motion: reduce) { .trader-glow { animation: none; box-shadow: 0 0 22px rgba(16,185,129,0.42); } }
   .hero-links { display: flex; gap: 16px; justify-content: center; align-items: center; margin-top: 18px; flex-wrap: wrap; }
   .hero-link { background: none; border: none; color: var(--txt2); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(138,172,200,0.35); padding: 0; font-family: inherit; transition: color .15s, text-decoration-color .15s; }
   .hero-link:hover { color: var(--blue); text-decoration-color: var(--blue); }
@@ -459,7 +464,7 @@
     <p>NoVo is a SPY options scalper's dream tool — built for scalpers and day traders tired of staring at five charts, tracking every data stream, white-knuckling every tick, and still missing the entry.</p>
     <p style="max-width:720px;margin:22px auto 34px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">Your <b style="color:#22d3ee;">unfair advantage</b>. AI market-intelligence tracks the raw tape and live dealer positioning you cannot process manually. Trade with <b style="color:var(--green);">one-click execution</b>, or turn on auto and watch NoVo work.</p>
     <div class="hero-cta">
-      <button class="btn-secondary" style="border-color:#10b981;color:#10b981;" onclick="subscribeNow()">NoVo Trader — $179/mo</button>
+      <button class="btn-secondary trader-glow" style="border-color:#10b981;color:#10b981;" onclick="subscribeNow()">NoVo Trader — $179/mo</button>
       <a href="/analyst" class="btn-secondary analyst-glow" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">NoVo Analyst — $69/mo · free trial</a>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
