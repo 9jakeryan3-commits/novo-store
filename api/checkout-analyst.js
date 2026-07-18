@@ -25,19 +25,17 @@ module.exports = async (req, res) => {
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
 
-  if (!process.env.STRIPE_PRICE_ANALYST) {
-    return res.status(503).json({ error: 'Analyst tier not configured yet' });
-  }
-
-  // plan: 'yearly' picks the annual price ($690/yr); anything else = monthly ($69/mo).
+  // plan: 'yearly' picks the annual price ($790/yr); anything else = monthly ($79/mo).
+  // Hardcoded to the $79/$790 price IDs (created 2026-07-18). The old $69/$690 prices stay live in Stripe so
+  // existing Analyst subscribers keep their rate for life — only new checkouts hit $79/$790. Env overrides win.
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
-  const yearlyId = process.env.STRIPE_PRICE_ANALYST_YEARLY;
-  const priceId = (plan === 'yearly' && yearlyId) ? yearlyId : process.env.STRIPE_PRICE_ANALYST;
-  if (plan === 'yearly' && !yearlyId) plan = 'monthly';  // no annual price configured → fall back
+  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1TugYAApyfMAkbeEarl2ULSv';        // $79/mo
+  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1TugYAApyfMAkbeE9c3Rdypj'; // $790/yr
+  const priceId = (plan === 'yearly') ? YEARLY_790 : MONTHLY_79;
 
   try {
     const session = await stripe.checkout.sessions.create({

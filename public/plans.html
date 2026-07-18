@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Choose your plan — NoVo AI Trading</title>
-<meta name="description" content="Pick how you join NoVo: read the market free with the Journal, get the desk's read with NoVo Analyst ($69/mo), or let NoVo trade it in your own broker with NoVo Trader ($179/mo). Cancel any time.">
+<meta name="description" content="Pick how you join NoVo: read the market free with the Journal, get the desk's read with NoVo Analyst ($79/mo), or let NoVo trade it in your own broker with NoVo Trader ($199/mo). Cancel any time.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://novo-aitrading.app/plans">
 <meta property="og:type" content="website">
@@ -185,12 +185,13 @@
         <button type="button" id="an-mo" class="on-cyan" onclick="setAnalystPlan('monthly')">Monthly</button>
         <button type="button" id="an-yr" onclick="setAnalystPlan('yearly')">Annual · 2mo free</button>
       </div>
-      <div class="price"><span class="cur">$</span><span class="num" id="an-num">69</span><span class="per" id="an-per">/mo</span></div>
+      <div class="price"><span class="cur">$</span><span class="num" id="an-num">79</span><span class="per" id="an-per">/mo</span></div>
       <div class="subnote" id="an-note">per month · cancel any time</div>
       <span class="trialpill">★ 7-day free trial · cancel anytime</span>
       <div class="roi">You don't need more data — you need the read.</div>
       <ul class="feats">
         <li class="chk"><b>Live members dashboard</b> — real-time SPY/QQQ/SPX dealer map, installable app + push alerts</li>
+        <li class="chk"><b>Lock in your price for life</b> — subscribe now and your rate never rises, even when the price does</li>
         <li class="chk"><b>Dealer Positioning Map</b> — net GEX, Gamma Flip, walls, Gravity, expected move, skew, fast/slow MM skew &amp; IV rank</li>
         <li class="chk">Real-time ‘The Line’ level-break alerts — in the app + NoVo Discord</li>
         <li class="chk">Private Analyst channels in the NoVo Discord</li>
@@ -200,7 +201,7 @@
       </ul>
       <div class="cta-wrap">
         <button class="btn btn-cyan" onclick="analystCheckout()">Start 7-day free trial</button>
-        <div class="undercta">Then $69/mo or $690/yr · cancel any time</div>
+        <div class="undercta">Then $79/mo or $790/yr · cancel any time</div>
       </div>
     </div>
 
@@ -211,13 +212,13 @@
       <h2>NoVo Trader</h2>
       <div class="toggle" id="tr-toggle">
         <button type="button" id="tr-mo" class="on-green" onclick="setTraderPlan('monthly')">Monthly</button>
-        <button type="button" id="tr-yr" onclick="setTraderPlan('yearly')">Annual · save $30/mo</button>
+        <button type="button" id="tr-yr" onclick="setTraderPlan('yearly')">Annual · 2mo free</button>
       </div>
-      <div class="price"><span class="cur">$</span><span class="num" id="tr-num">179</span><span class="per" id="tr-per">/mo</span></div>
+      <div class="price"><span class="cur">$</span><span class="num" id="tr-num">199</span><span class="per" id="tr-per">/mo</span></div>
       <div class="subnote" id="tr-note">per month · cancel any time</div>
       <span class="trialpill">Includes Analyst · 3-day paper trial</span>
       <div class="roi">All-in — Tradier + Alpaca keys only. No AI provider key needed.</div>
-      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Assemble it piecemeal elsewhere: a gamma/GEX subscription <b style="color:var(--txt1);">~$99</b> (SpotGamma Essential) + an execution &amp; automation layer <b style="color:var(--txt1);">~$149</b> = <s style="color:var(--txt3);">~$248/mo</s> — and two tools that still don't talk to each other. <b style="color:var(--green);">NoVo is both, in one house, for $179.</b></div>
+      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Assemble it piecemeal elsewhere: a gamma/GEX subscription <b style="color:var(--txt1);">~$99</b> (SpotGamma Essential) + an execution &amp; automation layer <b style="color:var(--txt1);">~$149</b> = <s style="color:var(--txt3);">~$248/mo</s> — and two tools that still don't talk to each other. <b style="color:var(--green);">NoVo is both, in one house, for $199.</b></div>
       <ul class="feats">
         <li class="chk">NoVo Algorithmic Options Trader</li>
         <li class="chk"><b>Lock in your price for life</b> — subscribe now and your rate never rises, even when the price does</li>
@@ -239,7 +240,7 @@
         <li class="chk">Guided setup + email support</li>
       </ul>
       <div class="cta-wrap">
-        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $179/mo</button>
+        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $199/mo</button>
         <div class="undercta">Or <a href="https://app.novo-aitrading.app/signup">try free — 3-day paper trial, no card</a></div>
       </div>
     </div>
@@ -273,10 +274,10 @@ function setAnalystPlan(p) {
   var mo = document.getElementById('an-mo'), yr = document.getElementById('an-yr');
   var num = document.getElementById('an-num'), per = document.getElementById('an-per'), note = document.getElementById('an-note');
   if (window._analystPlan === 'yearly') {
-    num.textContent = '690'; per.textContent = '/yr'; note.innerHTML = 'per year · 2 months free vs monthly · cancel any time';
+    num.textContent = '790'; per.textContent = '/yr'; note.innerHTML = 'per year · 2 months free vs monthly · cancel any time';
     yr.className = 'on-cyan'; mo.className = '';
   } else {
-    num.textContent = '69'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
+    num.textContent = '79'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
     mo.className = 'on-cyan'; yr.className = '';
   }
 }
@@ -287,11 +288,11 @@ function setTraderPlan(p) {
   var mo = document.getElementById('tr-mo'), yr = document.getElementById('tr-yr');
   var num = document.getElementById('tr-num'), per = document.getElementById('tr-per'), note = document.getElementById('tr-note'), btn = document.getElementById('tr-btn');
   if (window._traderPlan === 'yearly') {
-    num.textContent = '1,790'; per.textContent = '/yr'; note.innerHTML = 'per year · save $30/mo vs monthly · cancel any time';
-    btn.textContent = 'Subscribe — $1,790/yr'; yr.className = 'on-green'; mo.className = '';
+    num.textContent = '1,990'; per.textContent = '/yr'; note.innerHTML = 'per year · 2 months free vs monthly · cancel any time';
+    btn.textContent = 'Subscribe — $1,990/yr'; yr.className = 'on-green'; mo.className = '';
   } else {
-    num.textContent = '179'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
-    btn.textContent = 'Subscribe — $179/mo'; mo.className = 'on-green'; yr.className = '';
+    num.textContent = '199'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
+    btn.textContent = 'Subscribe — $199/mo'; mo.className = 'on-green'; yr.className = '';
   }
 }
 
