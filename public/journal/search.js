@@ -12,7 +12,7 @@
     .then(function (r) { return r.json(); })
     .then(function (j) {
       data = j; ready = true;
-      if (meta) meta.textContent = 'Search 100s of guides — options, dealer flow, market structure, risk & discipline.';
+      if (meta) meta.textContent = 'Search 1,000+ guides — options, dealer flow, market structure, risk & discipline.';
       var q = (new URLSearchParams(location.search)).get('q');
       if (q) { input.value = q; run(q); input.focus(); }
     })

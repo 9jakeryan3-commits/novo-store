@@ -81,7 +81,7 @@
     <input id="kb-input" type="search" autocomplete="off" spellcheck="false" placeholder="Search the Journal — gamma, IV crush, stop loss, VWAP…" aria-label="Search the NoVo Journal">
     <button id="kb-clear" type="button" aria-label="Clear search" hidden>&times;</button>
   </div>
-  <div id="kb-meta" class="kb-meta">Search 1,000+ guides — options, market structure, dealer flow, risk &amp; discipline.</div>
+  <div id="kb-meta" class="kb-meta">Search 1,000+ guides — options, dealer flow, market structure, risk &amp; discipline.</div>
   <div id="kb-results" class="kb-results" role="listbox" aria-label="Search results"></div>
 </div>
 </div>
@@ -1454,6 +1454,6 @@
 <script>
 (function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
 </script>
-<script src="/journal/search.js?v=11" defer></script>
+<script src="/journal/search.js?v=12" defer></script>
 </body>
 </html>
