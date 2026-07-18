@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Methodology — How NoVo Reads Dealer Positioning | NoVo Analyst</title>
-<meta name="description" content="How NoVo Analyst computes the dealer-positioning read — net GEX, the gamma flip (Zero-Gamma), call/put walls, expected move, and put/call skew. Standard, transparent market-structure analytics for SPY, QQQ & SPX.">
+<meta name="description" content="How NoVo Analyst computes the dealer-positioning read — net GEX, the gamma flip, call/put walls, gravity, expected move, and put/call skew. Standard, transparent market-structure analytics for SPY, QQQ & SPX.">
 <link rel="canonical" href="https://novo-aitrading.app/analyst/methodology">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://novo-aitrading.app/analyst/methodology">
@@ -86,7 +86,7 @@
 
   <div class="m-card">
     <div class="m-tag">The Regime Line</div>
-    <h2>Gamma Flip (Zero-Gamma)</h2>
+    <h2>Gamma Flip</h2>
     <p>The <b>gamma flip</b> is the price where net GEX crosses zero &mdash; the dividing line between the two regimes above. <b>Above it</b>, dealers dampen; <b>below it</b>, they amplify. It's the single most important level on the map: when price crosses the flip, the market's whole character can change. We solve for it across the full strike surface, not a single point.</p>
   </div>
 
@@ -94,6 +94,12 @@
     <div class="m-tag">Magnets &amp; Barriers</div>
     <h2>Call Wall &amp; Put Wall</h2>
     <p>Gamma isn't spread evenly &mdash; it clusters at the strikes with the most open interest. The <b>Call Wall</b> is the strike above spot carrying the largest call-gamma concentration; the <b>Put Wall</b> is the largest put-gamma concentration below. In a positive-gamma regime the Call Wall tends to act as a <b>magnet / resistance</b> (a pin) and the Put Wall as <b>support</b> &mdash; the levels dealer hedging defends hardest.</p>
+  </div>
+
+  <div class="m-card">
+    <div class="m-tag">The Magnet</div>
+    <h2>Gravity</h2>
+    <p><b>Gravity</b> is the |gamma|-weighted center of the dealer book &mdash; the balance point of all that hedging pressure. In a positive-gamma regime it behaves like a <b>magnet / mean-reversion target</b>: when price stretches away from it, the aggregate of dealer hedging tends to lean price back toward the center. It differs from the gamma flip (a boundary) and from VWAP (built from realized volume) &mdash; and when Gravity and VWAP line up, that shared level is unusually sticky. In negative gamma the pull weakens and price can accelerate away from it.</p>
   </div>
 
   <div class="m-card">

@@ -43,7 +43,7 @@
 
     <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p>Most losing trades aren't wrong about direction. They're wrong about <em>context</em> — taking a clean-looking setup at the exact moment the broader environment makes it a trap. NoVo's answer is to never look at any one signal in isolation. It reads several independent streams continuously and only acts when they agree.</p>
+    <p>Most losing trades aren't wrong about direction. They're wrong about <em>context</em> — taking a clean-looking setup at the exact moment the broader environment makes it a trap. NoVo's answer is to never look at any one read in isolation. It reads several independent streams continuously and fuses them into one honest picture of the context — so when you go to take a trade, you're seeing the whole environment, not a single clean-looking setup.</p>
 
     <h2>The live tape</h2>
     <p>NoVo keeps a constant connection to the live options tape, capturing the flow of trades as they happen — not a delayed chart, but the actual order flow. From that raw stream it builds a picture of where real money is being aggressive: whether buyers or sellers are leaning on the market, how the current pace of volume compares to normal, and whether a burst of activity is a genuine move or a head-fake that immediately reverses. Reading the tape this way filters out a large share of false signals before anything else even runs.</p>
@@ -60,12 +60,12 @@
     <h2>An AI that reads the chart</h2>
     <p>On a regular rhythm, NoVo hands a live structural picture of SPY — trend, momentum, and the key levels a seasoned chartist would mark — to an AI model and asks it for a directional bias. Notably, no chart <em>image</em> is ever rendered; the AI reasons over the underlying numbers. That bias acts as a gate: it has to agree with the trade's direction, and if the read goes stale, NoVo automatically discounts it rather than betting on an old view of the market.</p>
 
-    <p class="pull">Direction is the easy part. Context is the edge. NoVo refuses to act until the tape, the structure, and the backdrop tell the same story.</p>
+    <p class="pull">Direction is your call. Context is the edge NoVo adds — it won't grade a setup high-conviction until the tape, the structure, and the backdrop tell the same story (and in opt-in auto mode, won't fire until then either).</p>
 
     <h2>One number out the other side</h2>
     <p>All of that perception collapses into a single, continuously updated read of setup strength — a conviction score. A low read means noise and no trade. A high read means the streams are aligned and the opportunity is real. That score doesn't just decide <em>whether</em> to trade; it also influences <em>how much</em> conviction to put behind it. It's the system's way of saying, in one number, "how good is this, right now?" — and acting accordingly.</p>
 
-    <p>The specific weightings and thresholds behind that score are the part of NoVo that took the longest to calibrate, and they stay under the hood. What matters for understanding it is the principle: many honest reads, fused into one, with no single signal ever allowed to fire a trade alone.</p>
+    <p>The specific weightings and thresholds behind that score are the part of NoVo that took the longest to calibrate, and they stay under the hood. What matters for understanding it is the principle: many honest reads, fused into one picture of the context — with no single read ever allowed to stand in for the whole, and (if you've turned auto-entry on) no single read allowed to fire a trade alone.</p>
   </div>
 
   <div class="cta">
