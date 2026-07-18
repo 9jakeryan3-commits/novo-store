@@ -491,11 +491,16 @@
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--bdr);">
           <div style="flex:1 1 340px;background:#161719;padding:18px;">
-            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;">SPY · 1-min</div>
+            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;">SPY · 1-min <span style="color:var(--txt2);font-weight:600;text-transform:none;letter-spacing:0;">· dealer levels mapped live</span></div>
+            <div style="position:relative;">
             <svg id="mockChart" viewBox="0 0 320 92" preserveAspectRatio="none" style="width:100%;height:92px;display:block;">
               <line x1="0" y1="22" x2="320" y2="22" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
               <line x1="0" y1="45" x2="320" y2="45" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
               <line x1="0" y1="68" x2="320" y2="68" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+              <!-- dealer levels mapped onto the chart -->
+              <line x1="0" y1="14" x2="320" y2="14" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
+              <line x1="0" y1="46" x2="320" y2="46" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
+              <line x1="0" y1="82" x2="320" y2="82" stroke="#f43f5e" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
               <!-- JS live-simulates this group (streaming candles + ping); the static candles below are the no-JS fallback. -->
               <g id="mockCandles">
                 <g stroke-width="1.4">
@@ -514,6 +519,10 @@
                 </g>
               </g>
             </svg>
+            <span style="position:absolute;right:5px;top:1px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#10b981;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">CALL WALL 746</span>
+            <span style="position:absolute;right:5px;top:37px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#f59e0b;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">GAMMA FLIP 743</span>
+            <span style="position:absolute;right:5px;top:73px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#f43f5e;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">PUT WALL 740</span>
+            </div>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;">
               <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Analyst</div><div id="mockApex" style="font-size:17px;font-weight:800;color:#22d3ee;">62</div></div>
               <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">RVOL</div><div id="mockRvol" style="font-size:17px;font-weight:800;color:var(--txt1);">1.8×</div></div>
@@ -524,16 +533,28 @@
           <div style="flex:1 1 260px;background:#161719;padding:18px;">
             <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;">Analysis Feed</div>
             <div style="margin-bottom:12px;"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Structural Bias</span><br><span style="display:inline-block;margin-top:5px;font-weight:800;color:#26d07a;font-size:13px;letter-spacing:1px;background:rgba(38,208,122,0.1);border:1px solid rgba(38,208,122,0.32);border-radius:999px;padding:3px 13px;">BULLISH &#9652;</span></div>
-            <div style="font-size:12px;line-height:1.6;color:var(--txt2);border-left:2px solid var(--bdr);padding-left:12px;">Price reclaimed the 15-min VWAP and is holding above the EMA stack with the tape leaning to buyers — structure favors continuation higher while VWAP holds as support.</div>
+            <div style="font-size:12px;line-height:1.6;color:var(--txt2);border-left:2px solid var(--bdr);padding-left:12px;">Price reclaimed the 15-min VWAP and is holding above the <b style="color:var(--txt1);">gamma flip at 743</b> — the <b style="color:var(--txt1);">call wall at 746</b> caps the first push, but structure favors continuation while VWAP holds as support.</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
-          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:4px;">Exit Ladder</span>
-          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:4px 10px;">TP1</span>
-          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:4px 10px;">TP2</span>
-          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:4px 10px;">TS1</span>
-          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:4px 10px;">TS2</span>
-          <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 16px;">● TRADING</span>
+        <!-- one-click execution -->
+        <div style="display:flex;align-items:center;gap:9px;padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:2px;">One-Click</span>
+          <span style="font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 13px;">▲ Buy Calls</span>
+          <span style="font-size:11px;font-weight:800;color:#f43f5e;border:1px solid rgba(244,63,94,0.4);border-radius:7px;padding:4px 13px;">▼ Buy Puts</span>
+          <span style="font-size:10px;color:var(--txt3);">picks the strike, sizes it, sets the stop</span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#22d3ee;letter-spacing:0.5px;">AUTO<span style="width:26px;height:15px;border-radius:999px;background:rgba(34,211,238,0.22);border:1px solid rgba(34,211,238,0.5);position:relative;display:inline-block;"><span style="position:absolute;right:1px;top:1px;width:11px;height:11px;border-radius:50%;background:#22d3ee;box-shadow:0 0 6px rgba(34,211,238,0.7);"></span></span></span>
+        </div>
+        <!-- open position + managed exit ladder -->
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:2px;">Position</span>
+          <span style="font-size:11px;font-weight:700;color:var(--txt1);white-space:nowrap;">SPY 744C ×5 · avg $1.28 · <b style="color:var(--green);">+21%</b></span>
+          <span style="font-size:11px;color:var(--txt3);margin:0 3px;">·</span>
+          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;">Exit</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:3px 9px;">TP1</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:3px 9px;">TP2</span>
+          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:3px 9px;">TS1</span>
+          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:3px 9px;">TS2</span>
+          <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 14px;">● TRADING</span>
         </div>
       </div>
     </div>
