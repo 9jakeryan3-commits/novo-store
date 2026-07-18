@@ -1,7 +1,7 @@
 {
   "name": "NoVo Analyst — Live Dealer Map",
   "short_name": "NoVo Analyst",
-  "description": "Live SPY / QQQ / SPX dealer positioning — net GEX, walls, Zero-Gamma, expected move & skew, updating through the session.",
+  "description": "Live SPY / QQQ / SPX dealer positioning — net GEX, walls, Gamma Flip, expected move & skew, updating through the session.",
   "start_url": "/analyst/live",
   "scope": "/analyst/",
   "display": "standalone",
