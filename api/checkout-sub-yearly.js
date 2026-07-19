@@ -23,6 +23,8 @@ module.exports = async (req, res) => {
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+  // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
+  if (!(await require('./_kv').rateOk('ckt_yr:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
   try {
     const session = await stripe.checkout.sessions.create({

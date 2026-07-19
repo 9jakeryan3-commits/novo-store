@@ -24,6 +24,8 @@ module.exports = async (req, res) => {
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+  // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
+  if (!(await require('./_kv').rateOk('ckt_an:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
   // plan: 'yearly' picks the annual price ($790/yr); anything else = monthly ($79/mo).
   // Hardcoded to the $79/$790 price IDs (created 2026-07-18). The old $69/$690 prices stay live in Stripe so

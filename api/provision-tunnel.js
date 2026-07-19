@@ -75,6 +75,8 @@ module.exports = async (req, res) => {
 
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+  // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
+  if (!(await require('./_kv').rateOk('prov:' + ip, 5, 60))) return res.status(429).json({ error: 'Too many requests' });
 
   const { key } = req.body || {};
   if (!key || typeof key !== 'string' || key.trim().length < 8) {
