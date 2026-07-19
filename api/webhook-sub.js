@@ -114,6 +114,47 @@ async function hasOtherActivePaidSub(email, excludeSubId) {
   } catch (e) { console.error(`[webhook-sub] other-active-sub check failed: ${e.message}`); }
   return false;
 }
+// Trader INCLUDES Analyst, so holding both bills $79 + $199 for ONE entitlement. On a Trader checkout, retire
+// any Analyst subscription this email still holds. Stripe mints a SEPARATE customer per checkout, so an
+// upgrader's Analyst sub usually sits on a DIFFERENT customer object that merely shares the email — hence the
+// search()+list() sweep (same shape as hasOtherActivePaidSub).
+//   trialing -> cancel NOW (never charged; nothing to preserve)
+//   active   -> cancel_at_period_end (they already paid for this period — let it run out, just don't renew)
+// Deliberately NOT an immediate prorated refund: that credit lands on the OTHER customer object and the Trader
+// subscription could never spend it. Non-fatal by design — onboarding must not fail on a Stripe hiccup.
+async function retireAnalystOnTraderUpgrade(email, newTraderSubId) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return [];
+  const done = [];
+  const sweep = async (custId) => {
+    const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    for (const s of subs.data) {
+      if (s.id === newTraderSubId) continue;                 // never touch the sub we just created
+      if (s.metadata?.tier !== 'analyst') continue;          // Trader subs carry no tier metadata
+      if (!['active', 'trialing', 'past_due', 'unpaid'].includes(s.status)) continue;
+      if (s.cancel_at_period_end) { done.push(`${s.id}:already-ending`); continue; }   // idempotent on retry
+      try {
+        if (s.status === 'trialing') {
+          await stripe.subscriptions.cancel(s.id);
+          done.push(`${s.id}:cancelled-now`);
+        } else {
+          await stripe.subscriptions.update(s.id, { cancel_at_period_end: true });
+          done.push(`${s.id}:ends-at-period-end`);
+        }
+      } catch (e) { console.error(`[webhook-sub] could not retire analyst sub ${s.id}: ${e.message}`); }
+    }
+  };
+  try {
+    const seen = new Set();
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); await sweep(c.id); }
+    } catch (_) { /* search index warming up — fall through to list() */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id)) await sweep(c.id); }
+  } catch (e) { console.error(`[webhook-sub] analyst-retire sweep failed: ${e.message}`); }
+  return done;
+}
 function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
@@ -289,6 +330,13 @@ const handler = async (req, res) => {
     // via /api/discord, which already accepts any paid sub — Analyst OR Trader.)
     await analystAdd(email);
     await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
+
+    // UPGRADE PATH: retire any Analyst sub this email holds. Trader includes Analyst, so leaving it running
+    // billed the customer $79 + $199 = $278/mo for one entitlement. Non-fatal.
+    try {
+      const retired = await retireAnalystOnTraderUpgrade(email, obj.subscription);
+      if (retired.length) console.log(`[webhook-sub] trader upgrade — retired analyst sub(s): ${retired.join(', ')}`);
+    } catch (e) { console.error(`[webhook-sub] analyst retire failed (non-fatal): ${e.message}`); }
 
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
