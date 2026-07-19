@@ -481,8 +481,9 @@
     <div style="max-width:880px;margin:52px auto 0;position:relative;">
       <div style="position:relative;z-index:1;background:#161719;border:1px solid var(--bdr);border-radius:16px;box-shadow:var(--shadow-lg), var(--glow);overflow:hidden;text-align:left;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bdr);">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--txt1);"><span style="color:var(--green);">▲</span> NoVo <span style="color:var(--txt3);font-weight:500;">// Trading Dashboard</span></div>
-          <div style="display:flex;align-items:center;gap:14px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--txt1);"><span style="color:var(--green);">▲</span> NoVo <span style="color:var(--txt3);font-weight:500;">// Trading Dashboard</span> <span style="color:var(--txt3);font-weight:500;font-size:10px;">v4.3</span></div>
+          <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;justify-content:flex-end;">
+            <span style="font-size:11px;color:var(--txt3);white-space:nowrap;">7-Day P&amp;L <b style="color:var(--green);">+$147</b></span>
             <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span>LIVE</span>
             <span style="font-size:13px;font-weight:800;color:var(--txt1);white-space:nowrap;">SPY <span id="mockPrice" style="color:var(--green);font-variant-numeric:tabular-nums;">$743.10</span></span>
           </div>
@@ -532,6 +533,18 @@
             <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;">Analysis Feed</div>
             <div style="margin-bottom:12px;"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Structural Bias</span><br><span style="display:inline-block;margin-top:5px;font-weight:800;color:#26d07a;font-size:13px;letter-spacing:1px;background:rgba(38,208,122,0.1);border:1px solid rgba(38,208,122,0.32);border-radius:999px;padding:3px 13px;">BULLISH &#9652;</span></div>
             <div style="font-size:12px;line-height:1.6;color:var(--txt2);border-left:2px solid var(--bdr);padding-left:12px;">Price reclaimed the 15-min VWAP and is holding above the <b style="color:var(--txt1);">gamma flip at 743</b> — the <b style="color:var(--txt1);">call wall at 746</b> caps the first push, but structure favors continuation while VWAP holds as support.</div>
+          </div>
+        </div>
+        <!-- dealer positioning — the live map NoVo reads and trades off -->
+        <div style="padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.015);">
+          <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;">Dealer Positioning &middot; SPY</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:7px;">
+            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Net GEX</span><span style="font-size:12.5px;font-weight:800;color:var(--green);">+$1.8B</span></span>
+            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Gamma Flip</span><span style="font-size:12.5px;font-weight:800;color:var(--txt1);">743.00</span></span>
+            <span style="display:flex;flex-direction:column;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Gravity</span><span style="font-size:12.5px;font-weight:800;color:#3b82f6;">742.10</span></span>
+            <span style="display:flex;flex-direction:column;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Call Wall</span><span style="font-size:12.5px;font-weight:800;color:var(--green);">746.00</span></span>
+            <span style="display:flex;flex-direction:column;background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Put Wall</span><span style="font-size:12.5px;font-weight:800;color:#f43f5e;">740.00</span></span>
+            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Exp Move</span><span style="font-size:12.5px;font-weight:800;color:var(--txt1);">&plusmn;$4.85</span></span>
           </div>
         </div>
         <!-- one-click execution -->
