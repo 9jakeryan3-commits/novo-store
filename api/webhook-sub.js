@@ -155,6 +155,30 @@ async function retireAnalystOnTraderUpgrade(email, newTraderSubId) {
   } catch (e) { console.error(`[webhook-sub] analyst-retire sweep failed: ${e.message}`); }
   return done;
 }
+// True if this email already holds a live TRADER subscription. Mirror image of the upgrade case: Trader
+// includes Analyst, so someone on Trader buying Analyst is paying twice for one entitlement. Trader subs carry
+// NO tier metadata (only checkout-analyst.js sets tier:'analyst'), so "live and not analyst" == Trader.
+// Same multi-customer sweep as above — Stripe mints a customer per checkout, so the Trader sub is very likely
+// on a different customer object sharing the email.
+async function hasActiveTraderSub(email, excludeSubId) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return false;
+  const LIVE = ['active', 'trialing', 'past_due', 'unpaid'];
+  const hit = async (custId) => {
+    const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    return subs.data.some(s => s.id !== excludeSubId && s.metadata?.tier !== 'analyst' && LIVE.includes(s.status));
+  };
+  try {
+    const seen = new Set();
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); if (await hit(c.id)) return true; }
+    } catch (_) { /* search index warming up — fall through to list() */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id) && await hit(c.id)) return true; }
+  } catch (e) { console.error(`[webhook-sub] trader-sub check failed: ${e.message}`); }
+  return false;
+}
 function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
@@ -311,6 +335,36 @@ const handler = async (req, res) => {
     // NoVo Analyst ($69 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
+      // REVERSE-DUPLICATE GUARD: they already hold Trader, which INCLUDES Analyst. Left alone this bills
+      // $199 + $79 for one entitlement. Analyst opens on a 7-day trial, so cancelling here almost always
+      // means they are never charged at all. Non-fatal: a failure must not block the normal Analyst flow.
+      try {
+        const already = await hasActiveTraderSub(email, obj.subscription);
+        if (already) {
+          let charged = true;
+          try {
+            const sub = await stripe.subscriptions.retrieve(obj.subscription);
+            charged = sub.status !== 'trialing';                 // trialing => no money moved
+            await stripe.subscriptions.cancel(obj.subscription);
+          } catch (e) { console.error(`[webhook-sub] dupe-analyst cancel failed: ${e.message}`); }
+          console.log(`[webhook-sub] duplicate Analyst purchase by active Trader sub ${email} — cancelled ${obj.subscription} (charged=${charged})`);
+          try {
+            await resend.emails.send({
+              from: 'NoVo <orders@novo-aitrading.app>',
+              replyTo: 'support@novo-aitrading.app', to: [email],
+              subject: 'You already have NoVo Analyst — duplicate subscription cancelled',
+              html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
+                <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have this</h2>
+                <p style="margin:0 0 12px;">Your <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription already includes everything in <strong style="color:#eaf3ff;">NoVo Analyst</strong> — the live dealer dashboard, the daily Open and Close desk notes, and the Sunday Week Ahead.</p>
+                <p style="margin:0 0 12px;">So we cancelled the duplicate Analyst subscription you just started${charged ? '' : ' before it charged you'}. Nothing changes about your Trader access.</p>
+                <p style="margin:0 0 12px;">${charged ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
+                <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
+            });
+          } catch (e) { console.error(`[webhook-sub] dupe-analyst notice failed: ${e.message}`); }
+          return res.status(200).json({ received: true, duplicate_tier: true });
+        }
+      } catch (e) { console.error(`[webhook-sub] reverse-dupe guard failed (non-fatal): ${e.message}`); }
+
       const _r = await analystAdd(email);
       await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
       if (!_r.existed) {         // skip re-welcoming on a Stripe retry of the same event (they were already added)
