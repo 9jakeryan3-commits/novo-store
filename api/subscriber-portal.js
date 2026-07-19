@@ -14,7 +14,7 @@ function _rateLimited(ip) {
 }
 
 function portalEmailHtml(url) {
-  return `<!DOCTYPE html><html><body style="margin:0;background:#0b1527;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  return `<!DOCTYPE html><html><body style="margin:0;background:#101013;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px">
     <div style="font-size:32px;font-weight:900;color:#eaf3ff;letter-spacing:-1px">No<span style="color:#10b981">Vo</span></div>
     <h2 style="color:#eaf3ff;font-size:20px;margin:24px 0 8px">Manage your subscription</h2>

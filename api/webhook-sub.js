@@ -115,31 +115,35 @@ async function hasOtherActivePaidSub(email, excludeSubId) {
   return false;
 }
 function analystWelcomeHtml(connectUrl) {
-  return `<div style="margin:0;padding:0;background:#070b12;">
+  return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-    <div style="background:#0a1120;border:1px solid #1c2c47;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
+    <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
       <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
       <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">NoVo Analyst</div>
     </div>
-    <div style="background:#0f1a2e;border:1px solid #1c2c47;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
+    <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
       <h1 style="color:#eaf3ff;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; NoVo Analyst is live.</h1>
       <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll now get NoVo's market reads by email &mdash; <b style="color:#eaf3ff">The Open</b> and <b style="color:#eaf3ff">The Close</b> each session, plus the <b style="color:#eaf3ff">Week Ahead</b> on Sundays. And in the members-only <b style="color:#eaf3ff">Analyst Discord</b>: real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> alerts the moment a major level breaks or dealers flip the <b style="color:#eaf3ff">gamma regime</b> from absorbing to amplifying &mdash; link your Discord below to unlock them. Every read carries the <b style="color:#eaf3ff">actual levels</b> &mdash; real support, resistance, and structure &mdash; not vague prose. The same dealer-flow read the machine runs on, in plain language. No hype, no signals.</p>
       <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">Your first read arrives with the next market session.</p>
-      <div style="margin:18px 0 6px;border:1px solid #1c2c47;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.07);">
+      <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.07);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Your live dashboard</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Watch the dealer map update through the session &mdash; the live <b style="color:#eaf3ff">SPY / QQQ / SPX</b> chart with dealer levels, net GEX, Zero-Gamma, walls, expected move &amp; skew, plus the &lsquo;The Line&rsquo; feed. Install it as an app and turn on push alerts.</div>
         <a href="https://novo-aitrading.app/analyst/live" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your live dashboard &rarr;</a>
         <div style="font-size:12px;color:#6f8bab;line-height:1.5;margin-top:12px;">Sign in with this email &mdash; we'll send a one-tap link.</div>
       </div>
-      ${connectUrl ? `<div style="margin:18px 0 6px;border:1px solid #2b2f57;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
+      ${connectUrl ? `<div style="margin:18px 0 6px;border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Prefer Discord?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Get every read and alert in the members-only Analyst channels. Link your Discord account to unlock them.</div>
         <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Connect your Discord &rarr;</a>
         <div style="font-size:12px;color:#6f8bab;line-height:1.5;margin-top:12px;">Want Discord only? Once it's linked, just hit <b style="color:#9fb6d1;">unsubscribe</b> on any email &mdash; your reads keep flowing in the private channels, and your subscription stays active.</div>
       </div>` : ''}
-      <div style="margin-top:22px;border:1px solid #1c2c47;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
+      <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
+      </div>
+      <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.06);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Don't need these in your inbox?</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Every read is live in your <b style="color:#22d3ee">dealer dashboard</b> and the <b style="color:#7f8cff">Analyst Discord</b> &mdash; email is just a backup for when you're away from them. To stop the emails, click <b style="color:#eaf3ff">Unsubscribe</b> at the bottom of any read. Your subscription, dashboard, and Discord access stay exactly the same.</div>
       </div>
       <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice, not trade signals. Trading involves substantial risk of loss. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
     </div>
@@ -154,56 +158,61 @@ function welcomeEmailHtml(connectUrl) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body style="margin:0;padding:0;background:#eef2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#101013;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <div style="max-width:560px;margin:0 auto;padding:30px 16px;">
-  <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:34px 32px;">
+  <div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
-      <img src="https://novo-aitrading.app/novo-logo.png" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
-      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; Autonomous Execution</div>
+      <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
+      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; One-Click Execution</div>
     </div>
 
-    <h1 style="color:#0b1527;font-size:22px;margin:0 0 10px;">Welcome to NoVo Trader &mdash; you're all set.</h1>
-    <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. Head to your portal to finish setup and open your dashboard &mdash; you'll be up and running in minutes.</p>
+    <h1 style="color:#eaf3ff;font-size:22px;margin:0 0 10px;">Welcome to NoVo Trader &mdash; you're all set.</h1>
+    <p style="color:#c2d2e6;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. Head to your portal to finish setup and open your dashboard &mdash; you'll be up and running in minutes.</p>
 
     <div style="text-align:center;margin:0 0 26px;">
-      <a href="https://app.novo-aitrading.app" style="display:inline-block;background:#10b981;color:#ffffff;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:700;font-size:15px;">Open Your Portal</a>
+      <a href="https://app.novo-aitrading.app" style="display:inline-block;background:#10b981;color:#04121a;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:800;font-size:15px;">Open Your Portal</a>
     </div>
 
-    ${connectUrl ? `<div style="background:#f4f5ff;border:1px solid #d9ddfb;border-radius:10px;padding:16px 18px;margin:0 0 24px;text-align:center;">
-      <div style="font-size:14px;color:#0b1527;font-weight:700;margin-bottom:6px;">Join the members Discord</div>
-      <div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:12px;">Your subscription includes the private NoVo Discord &mdash; the daily reads, alerts, and the members community. Link your account to unlock it.</div>
+    ${connectUrl ? `<div style="background:rgba(88,101,242,0.08);border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:10px;padding:16px 18px;margin:0 0 24px;text-align:center;">
+      <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Join the members Discord</div>
+      <div style="font-size:13px;color:#9fb6d1;line-height:1.5;margin-bottom:12px;">Your subscription includes the private NoVo Discord &mdash; the daily reads, alerts, and the members community. Link your account to unlock it.</div>
       <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:14px;">Connect your Discord &rarr;</a>
     </div>` : ''}
 
-    <div style="background:#eefcff;border:1px solid #b9e9f2;border-left:3px solid #06b6d4;border-radius:10px;padding:16px 18px;margin:0 0 24px;">
-      <div style="font-size:14px;color:#0b1527;font-weight:700;margin-bottom:6px;">Included: the NoVo Analyst live dashboard</div>
-      <div style="font-size:13px;color:#475569;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#0b1527;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#0b1527;">live SPY / QQQ / SPX dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
+    <div style="background:rgba(6,182,212,0.07);border:1px solid #2e3036;border-left:3px solid #06b6d4;border-radius:10px;padding:16px 18px;margin:0 0 24px;">
+      <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Included: the NoVo Analyst live dashboard</div>
+      <div style="font-size:13px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#eaf3ff;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#eaf3ff;">live SPY / QQQ / SPX dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
       <a href="https://novo-aitrading.app/analyst/live" style="display:inline-block;background:#06b6d4;color:#04121a;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:800;font-size:14px;">Open the live dashboard &rarr;</a>
     </div>
 
-    <div style="border-top:1px solid #e2e8f0;margin:0 0 20px;"></div>
-    <h2 style="color:#0b1527;font-size:16px;margin:0 0 14px;">Getting started</h2>
+    <div style="border-top:1px solid #2e3036;margin:0 0 20px;"></div>
+    <h2 style="color:#eaf3ff;font-size:16px;margin:0 0 14px;">Getting started</h2>
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
-      <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">1</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Go to <strong style="color:#0b1527;">app.novo-aitrading.app</strong> and create your account using <strong style="color:#0b1527;">this email address</strong>.</td></tr>
-      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">2</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Connect your <strong style="color:#0b1527;">Tradier + Alpaca</strong> keys &mdash; validated against the brokers.</td></tr>
-      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">3</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#334155;font-size:14px;line-height:1.55;">Your private dashboard goes live automatically &mdash; AI pre-configured, <strong style="color:#0b1527;">paper trading immediately</strong>.</td></tr>
-      <tr><td style="vertical-align:top;padding:0 12px 0 0;"><div style="background:#10b981;color:#ffffff;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700;">4</div></td>
-          <td style="vertical-align:top;color:#334155;font-size:14px;line-height:1.55;">Open it in any browser, or install it as an app on your desktop or phone.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">1</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Go to <strong style="color:#eaf3ff;">app.novo-aitrading.app</strong> and create your account using <strong style="color:#eaf3ff;">this email address</strong>.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">2</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Connect your <strong style="color:#eaf3ff;">Tradier + Alpaca</strong> keys &mdash; validated against the brokers.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">3</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Your private dashboard goes live automatically &mdash; AI pre-configured, <strong style="color:#eaf3ff;">paper trading immediately</strong>.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 0 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">4</div></td>
+          <td style="vertical-align:top;color:#c2d2e6;font-size:14px;line-height:1.55;">Open it in any browser, or install it as an app on your desktop or phone.</td></tr>
     </table>
 
-    <p style="color:#475569;font-size:14px;line-height:1.6;margin:22px 0 0;">Start in paper mode (the default) and watch it run before switching to live.</p>
+    <p style="color:#c2d2e6;font-size:14px;line-height:1.6;margin:22px 0 0;">Start in paper mode (the default) and watch it run before switching to live.</p>
 
-    <div style="background:#fff8ec;border:1px solid #f5d9a8;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#7c5e1e;line-height:1.6;">
-      <strong style="color:#b45309;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#1a4a8a;">app.novo-aitrading.app</a>.
+    <div style="background:rgba(245,158,11,0.08);border:1px solid #3a3c42;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#e8c48f;line-height:1.6;">
+      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
     </div>
 
-    <p style="color:#475569;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app" style="color:#1a4a8a;">support@novo-aitrading.app</a>.</p>
+    <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app" style="color:#22d3ee;">support@novo-aitrading.app</a>.</p>
 
-    <div style="border-top:1px solid #e2e8f0;margin-top:24px;padding-top:16px;">
-      <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.5;">Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
+    <div style="background:rgba(34,211,238,0.06);border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:10px;padding:16px 18px;margin:22px 0 0;">
+      <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Don't need email?</div>
+      <div style="font-size:13px;color:#9fb6d1;line-height:1.55;">Everything NoVo emails you is live in your <strong style="color:#eaf3ff;">dashboard</strong> and the <strong style="color:#eaf3ff;">Discord</strong> &mdash; email is just a backup for when you're away. To stop the emails, click <strong style="color:#eaf3ff;">Unsubscribe</strong> at the bottom of any read. Your subscription, dashboard, and Discord access stay exactly the same.</div>
+    </div>
+
+    <div style="border-top:1px solid #2e3036;margin-top:24px;padding-top:16px;">
+      <p style="font-size:12px;color:#6f8bab;margin:0;line-height:1.5;">Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
     </div>
   </div>
 </div>
