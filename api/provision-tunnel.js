@@ -89,26 +89,34 @@ module.exports = async (req, res) => {
     return res.status(403).json({ error: 'Invalid license key.' });
   }
 
-  // Gate on license STATUS (not just signature) — a cancelled/suspended/revoked key must not be able to
-  // mint a Cloudflare tunnel + DNS record (infra/cost abuse). FAIL OPEN on any license-server error so a
-  // transient LS outage never breaks a legitimate buyer's install.
-  try {
+  // Gate on license STATUS (not just signature) — a cancelled/suspended/revoked key must not be able to mint
+  // a Cloudflare tunnel + DNS record (infra/cost abuse). FAILS CLOSED (audit #3): if the license server is
+  // configured but we can't confirm the key is active, refuse rather than mint infra during the blind window.
+  // Provisioning is a one-time install step, so a transient LS outage costs a legit buyer a retry, not access.
+  {
     const LS = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
     if (LS && process.env.LICENSE_ADMIN_KEY) {
-      const sr = await fetch(`${LS}/admin/key-status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY },
-        body: JSON.stringify({ key: cleanKey }),
-      });
-      if (sr.ok) {
-        const st = await sr.json();
-        if (st.found && st.status !== 'active') {
-          console.warn(`[provision-tunnel] refused: key status=${st.status} from ${ip}`);
-          return res.status(403).json({ error: 'License is not active. Reactivate it, then re-run setup.' });
-        }
+      let st = null;
+      try {
+        const sr = await fetch(`${LS}/admin/key-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Key': process.env.LICENSE_ADMIN_KEY },
+          body: JSON.stringify({ key: cleanKey }),
+        });
+        if (!sr.ok) throw new Error(`LS responded ${sr.status}`);
+        st = await sr.json();
+      } catch (e) {
+        console.warn(`[provision-tunnel] license verification unavailable (${e.message}) — failing closed for ${ip}`);
+        return res.status(503).json({ error: 'License verification is temporarily unavailable. Please re-run setup in a few minutes.' });
       }
+      if (st && st.found && st.status !== 'active') {
+        console.warn(`[provision-tunnel] refused: key status=${st.status} from ${ip}`);
+        return res.status(403).json({ error: 'License is not active. Reactivate it, then re-run setup.' });
+      }
+      // st.found === false: signature is valid (only we can sign a key) but LS has no record yet — allow (LS
+      // lag on a brand-new key); the app-runtime license_check still gates actual usage.
     }
-  } catch (_e) { /* fail-open: LS unreachable -> proceed so installs never break on a blip */ }
+  }
 
   const keyHash   = createHash('sha256').update(cleanKey).digest('hex').slice(0, 32);
   const blobPath  = `tunnel-map/${keyHash}.json`;
@@ -119,8 +127,16 @@ module.exports = async (req, res) => {
     const { blobs } = await list({ prefix: `tunnel-map/${keyHash}`, token: blobToken });
     if (blobs.length > 0) {
       const data = await fetch(blobs[0].url).then(r => r.json());
+      // The CF tunnel bearer token is NOT persisted at rest (audit #4) — re-fetch it from Cloudflare by the
+      // stored tunnelId (the token endpoint is idempotent). Legacy blobs that still carry data.token fall back.
+      let token = data.token;
+      if (!token && data.tunnelId) {
+        const tk = await cfFetch('GET', `/accounts/${CF_ACCOUNT_ID}/cfd_tunnel/${data.tunnelId}/token`);
+        token = tk.result;
+      }
+      if (!token) throw new Error('Failed to retrieve tunnel token for existing tunnel');
       console.log(`[provision-tunnel] returning existing: ${data.hostname}`);
-      return res.status(200).json({ hostname: data.hostname, token: data.token });
+      return res.status(200).json({ hostname: data.hostname, token });
     }
 
     // --- Get CF zone ID ---
@@ -177,13 +193,22 @@ module.exports = async (req, res) => {
           const recId = rec.result?.[0]?.id;
           if (recId) await cfFetch('DELETE', `/zones/${zoneId}/dns_records/${recId}`).catch(() => {});
         } catch (_) {}
+        // Re-fetch the winner's token from Cloudflare (not stored at rest — audit #4); legacy blobs fall back.
+        let token = data.token;
+        if (!token && data.tunnelId) {
+          const tk = await cfFetch('GET', `/accounts/${CF_ACCOUNT_ID}/cfd_tunnel/${data.tunnelId}/token`);
+          token = tk.result;
+        }
+        if (!token) throw new Error('Failed to retrieve tunnel token for existing tunnel');
         console.log(`[provision-tunnel] concurrent provision detected — returning existing: ${data.hostname}`);
-        return res.status(200).json({ hostname: data.hostname, token: data.token });
+        return res.status(200).json({ hostname: data.hostname, token });
       }
     } catch (_) {}
 
-    // --- Persist mapping in Vercel Blob ---
-    const mapping = { hostname, tunnelId, token, keyHash, createdAt: new Date().toISOString() };
+    // --- Persist mapping in Vercel Blob (token is DELIBERATELY omitted — audit #4: the CF bearer token is a
+    // secret and must not live at rest in a public blob; it's re-fetched from Cloudflare by tunnelId on the
+    // idempotent-return paths above). ---
+    const mapping = { hostname, tunnelId, keyHash, createdAt: new Date().toISOString() };
     await put(blobPath, JSON.stringify(mapping), {
       access: 'public',
       addRandomSuffix: false,
