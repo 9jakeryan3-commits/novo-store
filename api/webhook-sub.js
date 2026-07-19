@@ -269,12 +269,16 @@ const handler = async (req, res) => {
     // Trader INCLUDES Analyst — add the Trader subscriber to the Analyst email audience too, so they receive
     // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
     // via /api/discord, which already accepts any paid sub — Analyst OR Trader.)
-    const _rt = await analystAdd(email);
+    await analystAdd(email);
     await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
 
     // Hosted model: no license key, no download. The control plane recognizes the subscription by the
     // customer's email (Stripe is the source of truth); this email just welcomes them to the portal.
-    if (_rt.existed) return res.status(200).json({ received: true });   // Stripe retry of the same event → don't re-welcome
+    // Do NOT gate this welcome on Analyst-audience membership: an Analyst subscriber who UPGRADES to Trader is
+    // already on that audience, so the old `if (_rt.existed) return` silently skipped the ONLY email carrying
+    // the portal link + Tradier/Alpaca setup steps — breaking their activation. Always send it. (True Stripe
+    // retry idempotency needs a persistent event-id store the serverless doesn't have yet; the handler acks 200
+    // on success AND on Resend failure, so genuine retries are rare — a duplicate welcome beats no onboarding.) (audit #11)
     try {
       await resend.emails.send({
         from: 'NoVo <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends

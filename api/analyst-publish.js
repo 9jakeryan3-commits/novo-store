@@ -275,6 +275,15 @@ export default async function handler(req, res) {
     try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); tokenV = String(b.token || ''); sub = b.sub || null; } catch (_) {}
     if (!_verifyToken(tokenV)) return res.status(401).json({ error: 'unauthorized' });
     if (!sub || !sub.endpoint) return res.status(400).json({ error: 'bad subscription' });
+    // SSRF guard (launch audit low): sub.endpoint is member-supplied and later POSTed to by
+    // webpush.sendNotification on every publish. Restrict it to the real Web Push provider hosts over HTTPS so
+    // it can't be pointed at an internal/metadata URL and turned into a blind server-side request.
+    let _epHost = '';
+    try { const _u = new URL(String(sub.endpoint)); if (_u.protocol === 'https:') _epHost = _u.hostname.toLowerCase(); } catch (_) {}
+    const _PUSH_OK = ['fcm.googleapis.com', 'android.googleapis.com', 'updates.push.services.mozilla.com', 'web.push.apple.com'];
+    if (!_epHost || !(_PUSH_OK.includes(_epHost) || _epHost.endsWith('.notify.windows.com'))) {
+      return res.status(400).json({ error: 'unsupported push endpoint' });
+    }
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(200).json({ ok: true });   // nothing to persist to yet — don't error the client
     try {
