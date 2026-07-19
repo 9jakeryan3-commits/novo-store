@@ -1,31 +1,107 @@
 {
   "redirects": [
-    { "source": "/blog", "destination": "/journal", "permanent": true },
-    { "source": "/blog/", "destination": "/journal/", "permanent": true },
-    { "source": "/blog/:path*", "destination": "/journal/:path*", "permanent": true },
-    { "source": "/journal/guide-1dte-spy-options-scalping.html", "destination": "/journal/guide-0dte-spy-options-scalping.html", "permanent": true },
-    { "source": "/trader", "destination": "/", "permanent": true }
+    {
+      "source": "/blog",
+      "destination": "/journal",
+      "permanent": true
+    },
+    {
+      "source": "/blog/",
+      "destination": "/journal/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/journal/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/journal/guide-1dte-spy-options-scalping.html",
+      "destination": "/journal/guide-0dte-spy-options-scalping.html",
+      "permanent": true
+    },
+    {
+      "source": "/trader",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/journal/when-to-turn-on-auto-entry.html",
+      "destination": "/journal/manual-first-vs-full-auto.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/opt-in-autonomy-explained.html",
+      "destination": "/journal/manual-first-vs-full-auto.html",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/analyst/archive/:slug", "destination": "/api/analyst-publish?slug=:slug" },
-    { "source": "/analyst/archive", "destination": "/api/analyst-publish" },
-    { "source": "/analyst", "destination": "/analyst.html" },
-    { "source": "/plans", "destination": "/plans.html" },
-    { "source": "/success", "destination": "/success.html" },
-    { "source": "/subscribe-success", "destination": "/subscribe-success.html" },
-    { "source": "/subscriber", "destination": "/subscriber.html" },
-    { "source": "/license", "destination": "/license.html" },
-    { "source": "/options-101", "destination": "/options-101.html" },
-    { "source": "/help", "destination": "/help.html" },
-    { "source": "/analyst/methodology", "destination": "/analyst-methodology.html" },
-    { "source": "/analyst/live", "destination": "/analyst-live.html" },
-    { "source": "/analyst/sw.js", "destination": "/analyst-sw.js" }
+    {
+      "source": "/analyst/archive/:slug",
+      "destination": "/api/analyst-publish?slug=:slug"
+    },
+    {
+      "source": "/analyst/archive",
+      "destination": "/api/analyst-publish"
+    },
+    {
+      "source": "/analyst",
+      "destination": "/analyst.html"
+    },
+    {
+      "source": "/plans",
+      "destination": "/plans.html"
+    },
+    {
+      "source": "/success",
+      "destination": "/success.html"
+    },
+    {
+      "source": "/subscribe-success",
+      "destination": "/subscribe-success.html"
+    },
+    {
+      "source": "/subscriber",
+      "destination": "/subscriber.html"
+    },
+    {
+      "source": "/license",
+      "destination": "/license.html"
+    },
+    {
+      "source": "/options-101",
+      "destination": "/options-101.html"
+    },
+    {
+      "source": "/help",
+      "destination": "/help.html"
+    },
+    {
+      "source": "/analyst/methodology",
+      "destination": "/analyst-methodology.html"
+    },
+    {
+      "source": "/analyst/live",
+      "destination": "/analyst-live.html"
+    },
+    {
+      "source": "/analyst/sw.js",
+      "destination": "/analyst-sw.js"
+    }
   ],
   "functions": {
-    "api/webhook-sub.js": { "maxDuration": 30 },
-    "api/reconcile-subs.js": { "maxDuration": 60 }
+    "api/webhook-sub.js": {
+      "maxDuration": 30
+    },
+    "api/reconcile-subs.js": {
+      "maxDuration": 60
+    }
   },
   "crons": [
-    { "path": "/api/reconcile-subs", "schedule": "0 6 * * *" }
+    {
+      "path": "/api/reconcile-subs",
+      "schedule": "0 6 * * *"
+    }
   ]
 }
