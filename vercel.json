@@ -34,6 +34,36 @@
       "source": "/journal/opt-in-autonomy-explained.html",
       "destination": "/journal/manual-first-vs-full-auto.html",
       "permanent": true
+    },
+    {
+      "source": "/journal/stop-market-vs-stop-limit-options.html",
+      "destination": "/journal/stop-limit-vs-stop-market-options.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-skew-in-options.html",
+      "destination": "/journal/volatility-skew-explained.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-moneyness.html",
+      "destination": "/journal/moneyness-itm-atm-otm.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-a-volatility-smile.html",
+      "destination": "/journal/the-volatility-smile.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-are-circuit-breakers.html",
+      "destination": "/journal/circuit-breakers-market-halts.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/why-0dte-has-maximum-gamma.html",
+      "destination": "/journal/why-gamma-matters-for-0dte.html",
+      "permanent": true
     }
   ],
   "rewrites": [
