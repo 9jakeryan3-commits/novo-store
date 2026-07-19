@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import _kv from './_kv.js';
 
 // Newsletter signup for The NoVo Journal. Adds the email to a Resend audience when RESEND_AUDIENCE_ID is set
 // (the proper list you can broadcast to); until then it emails the owner so no signup is ever lost.
@@ -52,6 +53,11 @@ export default async function handler(req, res) {
 
   const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'Too many requests — try again in a minute.' });
+  // Cross-instance rate limit — the _rl Map above is per-lambda on Vercel, so it can't aggregate. The real
+  // control lives in shared KV. Fails open if KV is unconfigured. (launch audit #12/#13)
+  if (!(await _kv.rateOk('sub_ip:' + _ip, 5, 60))) {
+    return res.status(429).json({ error: 'Too many requests — try again in a minute.' });
+  }
 
   let email = '';
   try { email = (req.body && req.body.email ? String(req.body.email) : '').trim().toLowerCase(); } catch { email = ''; }
@@ -72,7 +78,11 @@ export default async function handler(req, res) {
         isNew = true;
       } catch (_) { /* already on the list — treat as success, skip re-welcoming */ }
       // Welcome the new subscriber (Discord + Analyst upsell). Best-effort — never block the signup.
-      if (isNew) {
+      // Only a genuinely-new contact gets a welcome (an already-listed re-subscribe silently succeeds), AND a
+      // GLOBAL hourly cap on welcome sends bounds the Resend-quota blast radius even if an attacker rotates the
+      // (spoofable) client IP past the per-IP limit — a tripped quota silently kills paid Analyst broadcasts, so
+      // protecting it outranks sending one welcome during an attack. Fails open if KV is unconfigured. (audit #12)
+      if (isNew && await _kv.rateOk('sub_welcome_global', 300, 3600)) {
         try {
           await resend.emails.send({
             from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',

@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const { Resend } = require('resend');
+const { claimOnce } = require('./_kv');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -237,6 +238,14 @@ const handler = async (req, res) => {
     event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_SUB_WEBHOOK_SECRET);
   } catch (err) {
     return res.status(400).json({ error: `Webhook error: ${err.message}` });
+  }
+
+  // Idempotency (launch audit): Stripe retries any non-2xx and can redeliver on its own schedule. Every side
+  // effect below (Resend audience add/remove, license activate/suspend/cancel, welcome emails) must run at
+  // most once per event. Claim the event id in shared KV; a duplicate delivery acks 200 without re-running.
+  // Fails OPEN (no KV configured → proceeds) so it never blocks a genuine first delivery. (audit gap #6 / #11)
+  if (event.id && !(await claimOnce('stripe_evt:sub:' + event.id, 259200))) {
+    return res.status(200).json({ received: true, duplicate: true });
   }
 
   const obj = event.data.object;
