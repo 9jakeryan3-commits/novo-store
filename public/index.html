@@ -469,6 +469,7 @@
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button type="button" onclick="subscribeYearly()" style="background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-weight:700;font-size:13px;padding:10px 22px;border-radius:999px;cursor:pointer;">Trader yearly &mdash; $1,990/yr, save $33/mo</button>
+      <button type="button" onclick="startAnalystTrial('yearly')" style="background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-weight:700;font-size:13px;padding:10px 22px;border-radius:999px;cursor:pointer;">Analyst yearly &mdash; $790/yr, save $13/mo</button>
     </div>
     <div class="hero-links">
       <a href="#how-it-works" class="hero-link">See How It Works</a>
@@ -489,10 +490,14 @@
       .hm-card img{ display:block; width:100%; height:auto; }
       .hm-card:hover{ transform:translateY(-9px) rotate(0deg) !important; z-index:20 !important; }
       @media (prefers-reduced-motion:reduce){ .hm-card{ transition:none; } }
+      /* Mobile keeps the SAME overlapping fan in the corner — no reflow to a plain stacked list. The
+         clamp() widths above already shrink the phone cards on narrow viewports; this just tightens the
+         fan's own scale a touch further so four overlapping cards read as a mashup, not a wall, on a phone. */
       @media (max-width:640px){
-        .hero-mashup{ padding-left:0; }
-        .hm-fan{ position:static; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; }
-        .hm-card{ width:44%; transform:none !important; margin-left:0 !important; }
+        .hero-mashup{ padding-left:14px; margin-top:38px; }
+        .hm-fan{ top:clamp(16px,5vw,28px); left:clamp(-14px,-2vw,-2px); }
+        .hm-card{ width:clamp(64px,20vw,84px); }
+        .hm-card:nth-child(n+2){ margin-left:-34px !important; }
       }
     </style>
     <div class="hero-mashup">
@@ -1353,6 +1358,23 @@ async function subscribeYearly() {
     } else {
       throw new Error('No checkout URL');
     }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+async function startAnalystTrial(plan) {
+  if (plan) window._analystPlan = plan;   // remembered across the terms-gate retry (which re-calls with no arg)
+  if (SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
+  if (!requireTerms('startAnalystTrial')) return;
+  const p = (window._analystPlan === 'yearly') ? 'yearly' : 'monthly';
+  const buttons = document.querySelectorAll('[onclick^="startAnalystTrial"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+  try {
+    const res = await fetch('/api/checkout-analyst', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: p }) });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; } else { throw new Error('No checkout URL'); }
   } catch (err) {
     buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
     alert('Something went wrong. Please try again or contact support.');
