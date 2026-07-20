@@ -477,99 +477,34 @@
     </div>
     <p class="hero-sub"><strong style="color:var(--txt1);">From zero to trading, one house</strong> &mdash; learn free, read the market like a desk, then let NoVo execute. <strong style="color:var(--txt1);">NoVo Trader</strong> paper-trades on Alpaca and goes live on Tradier or Alpaca — AI included, all-in, cancel any time. &nbsp;·&nbsp; Just want the read? <a href="/analyst" style="color:#22d3ee;font-weight:700;">NoVo Analyst</a> is the daily market read &mdash; email, Discord + a live dealer dashboard.</p>
 
-    <!-- HERO PRODUCT SHOT -->
-    <div style="max-width:880px;margin:52px auto 0;position:relative;">
-      <div style="position:relative;z-index:1;background:#161719;border:1px solid var(--bdr);border-radius:16px;box-shadow:var(--shadow-lg), var(--glow);overflow:hidden;text-align:left;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bdr);">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--txt1);"><span style="color:var(--green);">▲</span> NoVo <span style="color:var(--txt3);font-weight:500;">// Trading Dashboard</span> <span style="color:var(--txt3);font-weight:500;font-size:10px;">v4.3</span></div>
-          <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap;justify-content:flex-end;">
-            <span style="font-size:11px;color:var(--txt3);white-space:nowrap;">7-Day P&amp;L <b style="color:var(--green);">+$147</b></span>
-            <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span>LIVE</span>
-            <span style="font-size:13px;font-weight:800;color:var(--txt1);white-space:nowrap;">SPY <span id="mockPrice" style="color:var(--green);font-variant-numeric:tabular-nums;">$743.10</span></span>
-          </div>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--bdr);">
-          <div style="flex:1 1 340px;background:#161719;padding:18px;">
-            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;">SPY · 1-min <span style="color:var(--txt2);font-weight:600;text-transform:none;letter-spacing:0;">· dealer levels mapped live</span></div>
-            <div style="position:relative;">
-            <svg id="mockChart" viewBox="0 0 320 92" preserveAspectRatio="none" style="width:100%;height:92px;display:block;">
-              <line x1="0" y1="22" x2="320" y2="22" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-              <line x1="0" y1="45" x2="320" y2="45" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-              <line x1="0" y1="68" x2="320" y2="68" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-              <!-- dealer levels mapped onto the chart -->
-              <line x1="0" y1="14" x2="320" y2="14" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
-              <line x1="0" y1="46" x2="320" y2="46" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
-              <line x1="0" y1="82" x2="320" y2="82" stroke="#f43f5e" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity="0.6"/>
-              <!-- JS live-simulates this group (streaming candles + ping); the static candles below are the no-JS fallback. -->
-              <g id="mockCandles">
-                <g stroke-width="1.4">
-                  <line x1="12" y1="72" x2="12" y2="83" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="7.5" y="74" width="9" height="6" fill="#26d07a"/>
-                  <line x1="38" y1="60" x2="38" y2="77" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="33.5" y="63" width="9" height="11" fill="#26d07a"/>
-                  <line x1="64" y1="57" x2="64" y2="66" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="59.5" y="60" width="9" height="3" fill="#26d07a"/>
-                  <line x1="90" y1="57" x2="90" y2="69" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="85.5" y="60" width="9" height="6" fill="#f43f5e"/>
-                  <line x1="116" y1="62" x2="116" y2="74" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="111.5" y="66" width="9" height="4" fill="#f43f5e"/>
-                  <line x1="142" y1="60" x2="142" y2="73" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="137.5" y="64" width="9" height="6" fill="#26d07a"/>
-                  <line x1="168" y1="51" x2="168" y2="67" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="163.5" y="55" width="9" height="9" fill="#26d07a"/>
-                  <line x1="194" y1="41" x2="194" y2="58" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="189.5" y="45" width="9" height="10" fill="#26d07a"/>
-                  <line x1="220" y1="43" x2="220" y2="52" stroke="#f43f5e" vector-effect="non-scaling-stroke"/><rect x="215.5" y="45" width="9" height="4" fill="#f43f5e"/>
-                  <line x1="246" y1="36" x2="246" y2="52" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="241.5" y="40" width="9" height="9" fill="#26d07a"/>
-                  <line x1="272" y1="24" x2="272" y2="43" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="267.5" y="28" width="9" height="12" fill="#26d07a"/>
-                  <line x1="298" y1="14" x2="298" y2="31" stroke="#26d07a" vector-effect="non-scaling-stroke"/><rect x="293.5" y="18" width="9" height="10" fill="#26d07a"/>
-                </g>
-              </g>
-            </svg>
-            <span style="position:absolute;right:5px;top:1px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#10b981;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">CALL WALL 746</span>
-            <span style="position:absolute;right:5px;top:37px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#f59e0b;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">GAMMA FLIP 743</span>
-            <span style="position:absolute;right:5px;top:73px;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#f43f5e;background:rgba(22,23,25,0.82);padding:1px 5px;border-radius:3px;">PUT WALL 740</span>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;">
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Analyst</div><div id="mockApex" style="font-size:17px;font-weight:800;color:#22d3ee;">62</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">RVOL</div><div id="mockRvol" style="font-size:17px;font-weight:800;color:var(--txt1);">1.8×</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Bias</div><div style="font-size:15px;font-weight:800;color:var(--green);">BULL</div></div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:9px;padding:9px 10px;"><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">VIX</div><div id="mockVix" style="font-size:17px;font-weight:800;color:var(--txt1);">16.9</div></div>
-            </div>
-          </div>
-          <div style="flex:1 1 260px;background:#161719;padding:18px;">
-            <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;">Analysis Feed</div>
-            <div style="margin-bottom:12px;"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);">Structural Bias</span><br><span style="display:inline-block;margin-top:5px;font-weight:800;color:#26d07a;font-size:13px;letter-spacing:1px;background:rgba(38,208,122,0.1);border:1px solid rgba(38,208,122,0.32);border-radius:999px;padding:3px 13px;">BULLISH &#9652;</span></div>
-            <div style="font-size:12px;line-height:1.6;color:var(--txt2);border-left:2px solid var(--bdr);padding-left:12px;">Price reclaimed the 15-min VWAP and is holding above the <b style="color:var(--txt1);">gamma flip at 743</b> — the <b style="color:var(--txt1);">call wall at 746</b> caps the first push, but structure favors continuation while VWAP holds as support.</div>
-          </div>
-        </div>
-        <!-- dealer positioning — the live map NoVo reads and trades off -->
-        <div style="padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.015);">
-          <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:8px;">Dealer Positioning &middot; SPY</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:7px;">
-            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Net GEX</span><span style="font-size:12.5px;font-weight:800;color:var(--green);">+$1.8B</span></span>
-            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Gamma Flip</span><span style="font-size:12.5px;font-weight:800;color:var(--txt1);">743.00</span></span>
-            <span style="display:flex;flex-direction:column;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Gravity</span><span style="font-size:12.5px;font-weight:800;color:#3b82f6;">742.10</span></span>
-            <span style="display:flex;flex-direction:column;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Call Wall</span><span style="font-size:12.5px;font-weight:800;color:var(--green);">746.00</span></span>
-            <span style="display:flex;flex-direction:column;background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.28);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Put Wall</span><span style="font-size:12.5px;font-weight:800;color:#f43f5e;">740.00</span></span>
-            <span style="display:flex;flex-direction:column;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;"><span style="font-size:8px;letter-spacing:0.8px;text-transform:uppercase;color:var(--txt3);">Exp Move</span><span style="font-size:12.5px;font-weight:800;color:var(--txt1);">&plusmn;$4.85</span></span>
-          </div>
-        </div>
-        <!-- one-click execution -->
-        <div style="display:flex;align-items:center;gap:9px;padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
-          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:2px;">One-Click</span>
-          <span style="font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 13px;">▲ Buy Calls</span>
-          <span style="font-size:11px;font-weight:800;color:#f43f5e;border:1px solid rgba(244,63,94,0.4);border-radius:7px;padding:4px 13px;">▼ Buy Puts</span>
-          <span style="font-size:10px;color:var(--txt3);">picks the strike, sizes it, sets the stop</span>
-          <span style="margin-left:auto;font-size:10px;color:var(--txt3);">non-custodial &middot; your broker</span>
-        </div>
-        <!-- open position + managed exit ladder -->
-        <div style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-top:1px solid var(--bdr);background:rgba(255,255,255,0.02);flex-wrap:wrap;">
-          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-right:2px;">Position</span>
-          <span style="font-size:11px;font-weight:700;color:var(--txt1);white-space:nowrap;">SPY 744C ×5 · avg $1.28 · <b style="color:var(--green);">+21%</b></span>
-          <span style="font-size:11px;color:var(--txt3);margin:0 3px;">·</span>
-          <span style="font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;">Exit</span>
-          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:3px 9px;">TP1</span>
-          <span style="font-size:11px;font-weight:700;color:var(--green);border:1px solid rgba(16,185,129,0.35);border-radius:7px;padding:3px 9px;">TP2</span>
-          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:3px 9px;">TS1</span>
-          <span style="font-size:11px;font-weight:700;color:var(--blue);border:1px solid rgba(59,130,246,0.35);border-radius:7px;padding:3px 9px;">TS2</span>
-          <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0b0f18;background:var(--green);border-radius:7px;padding:5px 14px;">● TRADING</span>
-        </div>
+    <!-- HERO PRODUCT SHOT — real v4.3 stacked mashup (2026-07-19), replaces the SVG mock -->
+    <style>
+      .hero-mashup{ position:relative; max-width:900px; margin:52px auto 0; padding-top:30px; padding-left:20px; }
+      .hm-back{ width:100%; display:block; border-radius:12px; overflow:hidden; border:1px solid var(--bdr);
+        box-shadow:var(--shadow-lg), 0 0 90px -30px rgba(16,185,129,.18); transform:rotate(-1.6deg); }
+      .hm-back img{ display:block; width:100%; }
+      .hm-fan{ position:absolute; top:clamp(26px,4vw,58px); left:clamp(-22px,-1.2vw,6px); display:flex; align-items:flex-start; z-index:5; }
+      .hm-card{ width:clamp(88px,11vw,132px); border-radius:13px; overflow:hidden; border:1px solid var(--bdr); background:#0a0f18;
+        box-shadow:0 26px 54px -16px rgba(0,0,0,.72); transition:transform .35s cubic-bezier(.2,.7,.2,1); }
+      .hm-card img{ display:block; width:100%; }
+      .hm-card:hover{ transform:translateY(-9px) rotate(0deg) !important; z-index:20 !important; }
+      @media (prefers-reduced-motion:reduce){ .hm-card{ transition:none; } }
+      @media (max-width:640px){
+        .hero-mashup{ padding-left:0; }
+        .hm-fan{ position:static; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; }
+        .hm-card{ width:44%; transform:none !important; margin-left:0 !important; }
+      }
+    </style>
+    <div class="hero-mashup">
+      <div class="hm-back"><img src="/screenshots/mock-cockpit.jpg" width="1500" height="827" alt="NoVo trading dashboard — live SPY chart, dealer map and market intel" loading="eager"></div>
+      <div class="hm-fan">
+        <div class="hm-card" style="transform:rotate(-14deg);z-index:4;"><img src="/screenshots/mock-signal.jpg" width="470" height="983" alt="NoVo mobile — the market read" loading="lazy"></div>
+        <div class="hm-card" style="transform:rotate(-6deg) translateY(14px);z-index:3;margin-left:-50px;"><img src="/screenshots/mock-analysis.jpg" width="470" height="983" alt="NoVo mobile — session thesis" loading="lazy"></div>
+        <div class="hm-card" style="transform:rotate(5deg) translateY(14px);z-index:2;margin-left:-50px;"><img src="/screenshots/mock-trade.jpg" width="470" height="792" alt="NoVo mobile — trade log and equity" loading="lazy"></div>
+        <div class="hm-card" style="transform:rotate(14deg);z-index:1;margin-left:-50px;"><img src="/screenshots/mock-journal.jpg" width="470" height="716" alt="NoVo mobile — performance journal" loading="lazy"></div>
       </div>
     </div>
-    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:12px auto 0;">Live dashboard preview — illustrative. Structure readouts and analysis update in real time.</p>
+    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:16px auto 0;">Live dashboard preview — illustrative. Desktop &amp; mobile.</p>
 
     <p style="margin-top:44px;">NoVo does the execution heavy lifting — executes your entry in one click, sizes the position, manages the trade, and exits the instant your rules dictate, never a single tick outside the risk boundaries you set.</p>
     <p class="hero-clarify">Not a copy bot. Not a signal service. Not a congressman trade tracker.<br>Your rules, executed faster than human reflexes — by a tool that never blinks, never tires, never hesitates.</p>
