@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
   if (!key) return bad(res, 503, 'Chat is not configured yet.');
 
   // Rate limit: 20 msgs/hour/IP + a global burst cap. Fails open if KV is down.
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  const ip = ((req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',').pop() || '').trim()) || 'unknown';
   if (!(await rateOk(`chat:${ip}`, 20, 3600))) return bad(res, 429, 'Too many messages — please wait a bit.');
   if (!(await rateOk('chat:global', 2000, 3600))) return bad(res, 429, 'Chat is busy — try again shortly.');
 

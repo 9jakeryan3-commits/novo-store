@@ -64,4 +64,12 @@ async function rateOk(key, limit, windowSec) {
   }
 }
 
-module.exports = { kv, kvReady, claimOnce, rateOk };
+// Release a claimOnce key so a side effect that FAILED after claiming gets re-delivered by Stripe (which
+// retries any non-2xx). Best-effort; a KV miss just means the event stays claimed (same as before).
+async function releaseClaim(key) {
+  const r = kv();
+  if (!r) return;
+  try { await r.del(key); } catch (_) {}
+}
+
+module.exports = { kv, kvReady, claimOnce, rateOk, releaseClaim };

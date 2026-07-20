@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  const ip = ((req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',').pop() || '').trim()) || 'unknown';
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
   // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
   if (!(await require('./_kv').rateOk('prov:' + ip, 5, 60))) return res.status(429).json({ error: 'Too many requests' });
@@ -114,7 +114,13 @@ module.exports = async (req, res) => {
         return res.status(403).json({ error: 'License is not active. Reactivate it, then re-run setup.' });
       }
       // st.found === false: signature is valid (only we can sign a key) but LS has no record yet — allow (LS
-      // lag on a brand-new key); the app-runtime license_check still gates actual usage.
+      // lag on a brand-new key); the app-runtime license_check still gates actual usage. Reaching here requires
+      // a valid HMAC, which is infeasible to forge (32-bit sig + 3/min IP + 5/min KV rate limits = millennia),
+      // so this stays fail-OPEN to avoid breaking a legit new buyer during LS sync lag — but log it so any
+      // abuse of this narrow path is visible.
+      if (st && st.found === false) {
+        console.warn(`[provision-tunnel] minting for a validly-signed key with no LS record yet (new-key lag) from ${ip}`);
+      }
     }
   }
 

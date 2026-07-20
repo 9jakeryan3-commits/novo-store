@@ -51,7 +51,7 @@ function freeWelcomeHtml(invite) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  const _ip = (req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',').pop() || req.socket?.remoteAddress || '').trim() || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'Too many requests — try again in a minute.' });
   // Cross-instance rate limit — the _rl Map above is per-lambda on Vercel, so it can't aggregate. The real
   // control lives in shared KV. Fails open if KV is unconfigured. (launch audit #12/#13)

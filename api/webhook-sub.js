@@ -1,6 +1,6 @@
 const Stripe = require('stripe');
 const { Resend } = require('resend');
-const { claimOnce } = require('./_kv');
+const { claimOnce, releaseClaim } = require('./_kv');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -51,8 +51,23 @@ async function discordRevokeRole(discordId) {
       { method: 'DELETE', headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` } });
   } catch (e) { console.error(`[webhook-sub] discord role revoke failed: ${e.message}`); }
 }
+// Analyst price ids (env + hardcoded fallbacks, matching checkout-analyst.js) — the RELIABLE tier signal.
+const ANALYST_PRICE_IDS = new Set([
+  process.env.STRIPE_PRICE_ANALYST_79, process.env.STRIPE_PRICE_ANALYST_YEARLY_790,
+  'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',
+].filter(Boolean));
+
+// Resolve tier from the subscription's PRICE, not just the mutable/strippable metadata.tier. metadata is a
+// fast path; the price id is authoritative. Misclassifying tier on cancel either left an Analyst in the paid
+// audience or (worse) skipped revoking a Trader license (cancelled member keeps trading).
+function subIsAnalyst(sub) {
+  if (sub?.metadata?.tier === 'analyst') return true;
+  try { return (sub?.items?.data || []).some(it => ANALYST_PRICE_IDS.has(it?.price?.id)); }
+  catch (_) { return false; }
+}
+
 async function isAnalystSub(subscriptionId) {
-  try { const s = await stripe.subscriptions.retrieve(subscriptionId); return s?.metadata?.tier === 'analyst'; }
+  try { const s = await stripe.subscriptions.retrieve(subscriptionId); return subIsAnalyst(s); }
   catch { return false; }
 }
 // Small retry so a single transient Resend blip doesn't leave an audience move half-done (e.g. removed from
@@ -379,6 +394,35 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
+    // SAME-TIER DUPLICATE GUARD: this email already holds ANOTHER active Trader sub. checkout-sub.js is an
+    // anonymous checkout (no customer passed), so Stripe mints a fresh customer + sub every time — an
+    // already-active Trader who clicks Subscribe again (or a double-fire) is billed a SECOND $199 for one
+    // instance. Cancel the duplicate + notify. Mirrors the Analyst reverse-dupe guard above. Non-fatal.
+    try {
+      if (await hasActiveTraderSub(email, obj.subscription)) {
+        let charged = true;
+        try {
+          const sub = await stripe.subscriptions.retrieve(obj.subscription);
+          charged = sub.status !== 'trialing';
+          await stripe.subscriptions.cancel(obj.subscription);
+        } catch (e) { console.error(`[webhook-sub] dupe-trader cancel failed: ${e.message}`); }
+        console.log(`[webhook-sub] duplicate Trader purchase by active Trader ${email} — cancelled ${obj.subscription} (charged=${charged})`);
+        try {
+          await resend.emails.send({
+            from: 'NoVo <orders@novo-aitrading.app>',
+            replyTo: 'support@novo-aitrading.app', to: [email],
+            subject: 'You already have NoVo Trader — duplicate subscription cancelled',
+            html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
+              <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have NoVo Trader</h2>
+              <p style="margin:0 0 12px;">You already have an active <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription, so we cancelled the duplicate you just started${charged ? '' : ' before it charged you'}. Your existing access is unchanged.</p>
+              <p style="margin:0 0 12px;">${charged ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
+              <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
+          });
+        } catch (e) { console.error(`[webhook-sub] dupe-trader notice failed: ${e.message}`); }
+        return res.status(200).json({ received: true, duplicate_tier: true });
+      }
+    } catch (e) { console.error(`[webhook-sub] trader reverse-dupe guard failed (non-fatal): ${e.message}`); }
+
     // Trader INCLUDES Analyst — add the Trader subscriber to the Analyst email audience too, so they receive
     // the Open / Close / Week Ahead reads + intraday alerts. (Their paid-Discord role is granted on connect
     // via /api/discord, which already accepts any paid sub — Analyst OR Trader.)
@@ -440,6 +484,10 @@ const handler = async (req, res) => {
         await suspendSub(subscriptionId);
       } catch (err) {
         console.error(`[webhook-sub] Suspend failed — sub:${subscriptionId} error:${err.message}`);
+        // Release the idempotency claim + return 500 so Stripe RETRIES — else this suspend is permanently lost
+        // (the event was claimed above) and a delinquent keeps access until the daily reconcile. Idempotent.
+        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+        return res.status(500).json({ error: 'suspend failed, will retry' });
       }
     }
   }
@@ -447,7 +495,7 @@ const handler = async (req, res) => {
   // ── Subscription cancelled → revoke access ────────────────────────────────
   else if (event.type === 'customer.subscription.deleted') {
     const subscriptionId = obj?.id;
-    if (obj?.metadata?.tier === 'analyst') {   // Analyst cancel → drop from the audience (no license to cancel)
+    if (subIsAnalyst(obj)) {   // Analyst cancel → drop from the audience (no license). Tier from PRICE, not just metadata.
       try {
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         // Only strip entitlements if NO other active paid sub (e.g. an active Trader) still includes them.
@@ -457,22 +505,28 @@ const handler = async (req, res) => {
           await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
         }
       } catch (err) {
-        console.error(`[webhook-sub] analyst remove failed — sub:${subscriptionId} error:${err.message}`);
+        console.error(`[webhook-sub] analyst cancel failed — sub:${subscriptionId} error:${err.message}`);
+        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+        return res.status(500).json({ error: 'analyst cancel failed, will retry' });
       }
     } else if (subscriptionId) {
       try {
         await cancelSub(subscriptionId);
-      } catch (err) {
-        console.error(`[webhook-sub] Cancel failed — sub:${subscriptionId} error:${err.message}`);
-      }
-      try {   // Trader cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them
+        // Trader cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them.
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await discordRevokeRole(cust?.metadata?.discord_id);
           await analystRemove(cust?.email);
           await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
         }
-      } catch (e) {}
+      } catch (err) {
+        // Was two separate try blocks, the second swallowing ALL errors — so a Discord/audience failure left a
+        // cancelled member with their paid role indefinitely (no reconciler for Discord). Now: release the
+        // claim + 500 so Stripe retries the whole idempotent cleanup.
+        console.error(`[webhook-sub] Trader cancel side-effects failed — sub:${subscriptionId} error:${err.message}`);
+        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+        return res.status(500).json({ error: 'cancel side-effects failed, will retry' });
+      }
     }
   }
 

@@ -220,7 +220,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') return handleArchive(req, res);
 
   // Rate-limit the write endpoints (defense-in-depth on the shared-secret auth).
-  const _ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  const _ip = (req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',').pop() || req.socket?.remoteAddress || '').trim() || 'unknown';
   if (_rateLimited(_ip)) return res.status(429).json({ error: 'rate limited' });
 
   // Toggle the signed-in member's email-reads subscription (token-gated). Flips the Resend contact's
