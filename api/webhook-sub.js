@@ -38,6 +38,32 @@ async function cancelSub(subscriptionId) {
   return licensePost(`/admin/subscription/${subscriptionId}/cancel`, {});
 }
 
+// Refund the just-captured invoice of a subscription (used when we cancel a duplicate the customer was charged
+// for, so they're never out the money pending a manual refund). Returns true if a refund was issued. Best-effort.
+async function _refundLatest(sub) {
+  try {
+    let inv = sub && sub.latest_invoice;
+    if (!inv) return false;
+    if (typeof inv === 'string') inv = await stripe.invoices.retrieve(inv);
+    let pi = inv && inv.payment_intent;
+    if (!pi) return false;
+    pi = (typeof pi === 'string') ? pi : pi.id;
+    await stripe.refunds.create({ payment_intent: pi });
+    return true;
+  } catch (e) {
+    console.error(`[webhook-sub] refund failed: ${e.message}`);
+    return false;
+  }
+}
+
+// Resolve the Stripe customer id from a charge.refunded (a Charge) or charge.dispute.created (a Dispute) object.
+async function _customerFromChargeEvent(evtType, obj) {
+  if (obj && obj.customer) return obj.customer;
+  const chargeId = (evtType === 'charge.dispute.created') ? obj && obj.charge : null;
+  if (chargeId) { try { const ch = await stripe.charges.retrieve(chargeId); return ch.customer || null; } catch (_) {} }
+  return null;
+}
+
 // ── NoVo Analyst ($69 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
@@ -356,12 +382,13 @@ const handler = async (req, res) => {
       try {
         const already = await hasActiveTraderSub(email, obj.subscription);
         if (already) {
-          let charged = true;
+          let charged = true, refunded = false;
           try {
             const sub = await stripe.subscriptions.retrieve(obj.subscription);
             charged = sub.status !== 'trialing';                 // trialing => no money moved
             await stripe.subscriptions.cancel(obj.subscription);
-          } catch (e) { console.error(`[webhook-sub] dupe-analyst cancel failed: ${e.message}`); }
+            if (charged) refunded = await _refundLatest(sub);    // auto-refund the rare charged duplicate
+          } catch (e) { console.error(`[webhook-sub] dupe-analyst cancel/refund failed: ${e.message}`); }
           console.log(`[webhook-sub] duplicate Analyst purchase by active Trader sub ${email} — cancelled ${obj.subscription} (charged=${charged})`);
           try {
             await resend.emails.send({
@@ -372,13 +399,35 @@ const handler = async (req, res) => {
                 <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have this</h2>
                 <p style="margin:0 0 12px;">Your <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription already includes everything in <strong style="color:#eaf3ff;">NoVo Analyst</strong> — the live dealer dashboard, the daily Open and Close desk notes, and the Sunday Week Ahead.</p>
                 <p style="margin:0 0 12px;">So we cancelled the duplicate Analyst subscription you just started${charged ? '' : ' before it charged you'}. Nothing changes about your Trader access.</p>
-                <p style="margin:0 0 12px;">${charged ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
+                <p style="margin:0 0 12px;">${charged ? (refunded ? 'Any charge for it has been refunded to your card.' : 'If your card was charged for it, just reply to this email and we will refund it.') : 'You were not charged.'}</p>
                 <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
             });
           } catch (e) { console.error(`[webhook-sub] dupe-analyst notice failed: ${e.message}`); }
           return res.status(200).json({ received: true, duplicate_tier: true });
         }
       } catch (e) { console.error(`[webhook-sub] reverse-dupe guard failed (non-fatal): ${e.message}`); }
+
+      // TRIAL-ONCE (audit 2026-07-20): the Analyst checkout mints a fresh Stripe customer every time (anonymous
+      // checkout, no customer passed), so Stripe's own one-trial-per-customer never applies — an email could
+      // cancel before day 7 and re-subscribe for an endless chain of free 7-day trials. Gate it ourselves: the
+      // FIRST Analyst sub per email keeps its trial; a later one whose email ALREADY trialed has its trial ended
+      // immediately (converts to paid — they entered a card at checkout). Keyed by sub id so a Stripe RETRY of
+      // this same event is a no-op, never a wrongful charge. Fails open (KV down → trial kept) — never over-charges.
+      try {
+        const _kv = require('./_kv').kv();
+        if (_kv) {
+          const _prevSub = await _kv.get('analyst_trialed:' + email);
+          if (!_prevSub) {
+            await _kv.set('analyst_trialed:' + email, obj.subscription);
+          } else if (_prevSub !== obj.subscription) {
+            const _s = await stripe.subscriptions.retrieve(obj.subscription);
+            if (_s.status === 'trialing') {
+              await stripe.subscriptions.update(obj.subscription, { trial_end: 'now' });
+              console.log(`[webhook-sub] repeat Analyst trial by ${email} — trial ended (converts to paid), sub ${obj.subscription}`);
+            }
+          }
+        }
+      } catch (e) { console.error(`[webhook-sub] analyst trial-once check failed (non-fatal): ${e.message}`); }
 
       const _r = await analystAdd(email);
       await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
@@ -400,13 +449,16 @@ const handler = async (req, res) => {
     // instance. Cancel the duplicate + notify. Mirrors the Analyst reverse-dupe guard above. Non-fatal.
     try {
       if (await hasActiveTraderSub(email, obj.subscription)) {
-        let charged = true;
+        let charged = true, refunded = false;
         try {
           const sub = await stripe.subscriptions.retrieve(obj.subscription);
           charged = sub.status !== 'trialing';
           await stripe.subscriptions.cancel(obj.subscription);
-        } catch (e) { console.error(`[webhook-sub] dupe-trader cancel failed: ${e.message}`); }
-        console.log(`[webhook-sub] duplicate Trader purchase by active Trader ${email} — cancelled ${obj.subscription} (charged=${charged})`);
+          // Cancelling does NOT refund the just-captured invoice — auto-refund it so a double-subscribe never
+          // leaves the customer out $199 pending a manual support refund (audit 2026-07-20).
+          if (charged) refunded = await _refundLatest(sub);
+        } catch (e) { console.error(`[webhook-sub] dupe-trader cancel/refund failed: ${e.message}`); }
+        console.log(`[webhook-sub] duplicate Trader purchase by active Trader ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
         try {
           await resend.emails.send({
             from: 'NoVo <orders@novo-aitrading.app>',
@@ -414,7 +466,7 @@ const handler = async (req, res) => {
             subject: 'You already have NoVo Trader — duplicate subscription cancelled',
             html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
               <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have NoVo Trader</h2>
-              <p style="margin:0 0 12px;">You already have an active <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription, so we cancelled the duplicate you just started${charged ? '' : ' before it charged you'}. Your existing access is unchanged.</p>
+              <p style="margin:0 0 12px;">You already have an active <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription, so we cancelled the duplicate you just started${charged ? (refunded ? ' and refunded the charge to your card' : '') : ' before it charged you'}. Your existing access is unchanged.</p>
               <p style="margin:0 0 12px;">${charged ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
               <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
           });
@@ -550,6 +602,38 @@ const handler = async (req, res) => {
       } catch (err) {
         console.error(`[webhook-sub] analyst email sync failed: ${err.message}`);
       }
+    }
+  }
+
+  // ── Chargeback or full money-back refund → REVOKE access (audit 2026-07-20) ────────────────────────────
+  // Neither a card dispute nor the 7-day money-back refund used to touch entitlement (it keyed only on
+  // subscription STATUS), so a disputer/refundee kept the Analyst dashboard + Trader engine while the money was
+  // clawed back. Resolve the customer and cancel their live sub(s); the customer.subscription.deleted cascade
+  // above then revokes the Resend audience / Discord role and tells the control-plane to tear the engine down.
+  // Partial refunds are ignored. (Requires charge.dispute.created + charge.refunded enabled on the Stripe endpoint.)
+  else if (event.type === 'charge.dispute.created' || event.type === 'charge.refunded') {
+    try {
+      const fullRefund = event.type === 'charge.refunded'
+        ? (Number(obj.amount || 0) > 0 && Number(obj.amount_refunded || 0) >= Number(obj.amount || 0))
+        : true;   // a dispute always revokes
+      if (fullRefund) {
+        const customerId = await _customerFromChargeEvent(event.type, obj);
+        if (customerId) {
+          const subs = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 20 });
+          let n = 0;
+          for (const s of subs.data) {
+            if (['active', 'trialing', 'past_due', 'unpaid'].includes(s.status)) {
+              try { await stripe.subscriptions.cancel(s.id); n++; }
+              catch (e) { console.error(`[webhook-sub] revoke-cancel ${s.id} failed: ${e.message}`); }
+            }
+          }
+          console.log(`[webhook-sub] ${event.type} for ${customerId} — cancelled ${n} live sub(s), access revoked`);
+        }
+      }
+    } catch (err) {
+      console.error(`[webhook-sub] dispute/refund revoke failed: ${err.message}`);
+      if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+      return res.status(500).json({ error: 'dispute/refund revoke failed, will retry' });
     }
   }
 
