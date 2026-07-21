@@ -215,6 +215,14 @@
   .ss-label { font-size: 11px; font-weight: 700; color: var(--txt2); margin-left: 8px; letter-spacing: 1px; }
   .ss-live { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
   .ss-main img { width: 100%; display: block; }
+  /* two framed shots side by side (desktop) → stacked (mobile). The frame = .ss-main's border+radius+shadow
+     + the .ss-bar window chrome, so they read as live terminal windows, not pasted screenshots. */
+  .ss-duo { display: flex; gap: 22px; align-items: flex-start; justify-content: center; }
+  .ss-duo > .ss-shot { flex: 1 1 0; min-width: 0; margin: 0; background: #0d0e10; }
+  @media (max-width: 720px) {
+    .ss-duo { flex-direction: column; gap: 26px; align-items: center; }
+    .ss-duo > .ss-shot { flex: none; width: 100%; max-width: 420px; }
+  }
   .ss-caption { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 12px; letter-spacing: .3px; }
   .ss-mobile-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; margin-top: 24px; }
   .ss-mobile-row > div { flex: 0 1 300px; max-width: 300px; }
@@ -520,8 +528,17 @@
     </div>
 
     <div class="ss-wrap">
-      <div class="ss-mobile"><img src="/screenshots/analyst-desktop.png?v=2" alt="NoVo Analyst live dealer map — SPY/QQQ/SPX session &amp; dealer levels, gamma flip, call/put walls, gravity, expected move and skew, the gamma profile by strike, and the real-time 'The Line' level-break feed" loading="lazy"></div>
-      <p class="ss-mobile-cap">The live dealer map on desktop &mdash; the session chart, the full dealer-positioning read, the gamma profile, and &lsquo;The Line&rsquo; level-break feed on one screen. Installs like an app on desktop &amp; mobile &mdash; add it to your home screen and glance at it like a desk terminal.</p>
+      <div class="ss-duo">
+        <figure class="ss-main ss-shot">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; dealer map</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-ui-1.jpg?v=1" alt="NoVo Analyst — SPY session &amp; dealer-levels chart with gamma flip, call/put walls and gravity, the VIX fear gauge, and the full dealer-positioning read: net GEX, gamma flip, walls, gravity, the expected-move band, and near/far skew" loading="lazy">
+        </figure>
+        <figure class="ss-main ss-shot">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; profile &amp; the read</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-ui-2.jpg?v=1" alt="NoVo Analyst — the gamma profile by strike, the cross-asset QQQ/SPX map, the real-time 'The Line' level-break playbook, and the written session read" loading="lazy">
+        </figure>
+      </div>
+      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart and full dealer-positioning read, the gamma profile by strike, the cross-asset map, and &lsquo;The Line&rsquo; level-break feed. Installs like an app on desktop &amp; mobile &mdash; add it to your home screen and glance at it like a desk terminal.</p>
     </div>
   </div>
 </section>
