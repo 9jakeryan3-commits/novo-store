@@ -4,25 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What Happens to Your Trade When You Step Away | The NoVo Journal</title>
-<meta name="description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop, exit ladder, end-of-day flatten. Here is the honest split.">
+<meta name="description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop and exit ladder — but the close stays yours. Here is the honest split.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/when-you-cant-watch-the-screen.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/when-you-cant-watch-the-screen.html">
 <meta property="og:title" content="What Happens to Your Trade When You Step Away">
-<meta property="og:description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop, exit ladder, end-of-day flatten. Here is the honest split.">
+<meta property="og:description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop and exit ladder — but the close stays yours. Here is the honest split.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="What Happens to Your Trade When You Step Away">
-<meta name="twitter:description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop, exit ladder, end-of-day flatten. Here is the honest split.">
+<meta name="twitter:description" content="NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop and exit ladder — but the close stays yours. Here is the honest split.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"What Happens to Your Trade When You Step Away","description":"NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop, exit ladder, end-of-day flatten. Here is the honest split.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/when-you-cant-watch-the-screen.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"What Happens to Your Trade When You Step Away","description":"NoVo will not enter a trade for you while you are away — you click every entry. But an open position is managed without you: broker-side stop and exit ladder — but the close stays yours. Here is the honest split.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/when-you-cant-watch-the-screen.html"}
 </script>
 </head>
 <body>
@@ -50,10 +50,10 @@
     <h2>What NoVo will not do</h2>
     <p><strong>It will not enter a trade for you.</strong> Every entry is a click you make. If a setup forms at 11:40 and you are in a meeting, that setup passes. There is no toggle that changes this, and that is deliberate: you decide every trade, and the tool acts on your instruction. If what you actually want is something that takes positions unattended, this is not it.</p>
     <h2>What it does do &mdash; and this is the part that matters</h2>
-    <p>Stepping away should cost you an <em>opportunity</em>. It should never cost you a <em>position</em>. The moment you open a trade, three things are already in place without you:</p>
+    <p>Stepping away should cost you an <em>opportunity</em>. It should never cost you a <em>position</em>. The moment you open a trade, your downside is handled without you &mdash; and one thing deliberately stays in your hands:</p>
     <p><strong>1. A broker-side stop, armed at entry.</strong> Not a mental stop, not an alert &mdash; a real resting order at your broker. If the tape moves against you while your screen is off, the exit does not depend on you seeing it. See <a href="/journal/hard-stop-vs-mental-stop-0dte.html">hard stop vs. mental stop</a> for why that distinction decides outcomes on 0DTE.</p>
     <p><strong>2. A multi-tier exit ladder.</strong> Profit targets and trailing logic are attached to the position from the start, so a winner gets banked to plan rather than to nerve. The mechanics are laid out in <a href="/journal/novo-exit-ladder-explained.html">the exit ladder explained</a>.</p>
-    <p><strong>3. End-of-day flatten.</strong> A 0DTE option left open into the close is the fastest way to turn a small loss into the whole day. Positions are force-flattened before expiry rather than left to decay unattended.</p>
+    <p><strong>3. The close stays yours.</strong> NoVo does <em>not</em> force-flatten your positions &mdash; it's user-managed, so on a same-day option, getting flat before the bell is your call, one click. The stop and ladder above will manage a 0DTE while you're away, but they will not auto-close it at 4:00, and an in-the-money 0DTE left open into the close <a href="/journal/automatic-exercise-itm-option.html">auto-exercises into shares</a>. So the honest rule is simple: don't step away holding a same-day option into the final minutes. Close the 0DTE before you go, or carry a 1DTE+ if you need to be hands-off into the close.</p>
     <p class="pull">Being away costs you the entry you did not take. It should never cost you the exit you already planned. That is the line NoVo is built on.</p>
     <h2>Why this is the honest trade-off</h2>
     <p>A tool that enters for you has to be right about <em>when</em> as well as <em>what</em> &mdash; and it takes on discretionary authority over your account to do it. A tool that executes your click only has to be right about the mechanics: strike, size, stop, exit. That is a far smaller promise, and a far more keepable one.</p>

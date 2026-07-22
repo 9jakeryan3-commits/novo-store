@@ -4,25 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails | The NoVo Journal</title>
-<meta name="description" content="Every NoVo trade ships with a full exit plan attached at the click: a broker-side stop, scaled profit targets, a trailing stop as targets hit, and a force-flatten before the close. Here's how the exit ladder is built.">
+<meta name="description" content="Every NoVo trade ships with a full exit plan attached at the click: a broker-side stop, scaled profit targets, and a trailing stop as targets hit. Here's how the exit ladder is built.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html">
 <meta property="og:title" content="The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails">
-<meta property="og:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, a trailing stop, and a force-flatten before the bell.">
+<meta property="og:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails">
-<meta name="twitter:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, a trailing stop, and a force-flatten before the bell.">
+<meta name="twitter:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails","description":"What NoVo attaches to every trade: a broker-side stop, scaled targets, a trailing stop, and a force-flatten before the bell.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails","description":"What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html"}
 </script>
 </head>
 <body>
@@ -51,8 +51,8 @@
     <h2>Scaled targets and the trail</h2>
     <p>Instead of one all-or-nothing exit, NoVo sets <strong>multiple profit targets</strong> at successive levels, taking part of the position off at each. As targets hit, the stop <strong>trails up</strong> &mdash; locking in gains and reducing the position's risk while letting the remainder run toward the next dealer level (the <a href="/journal/bracket-orders-oco-options.html">bracket/OCO machinery</a> that's brutal to run by hand on a fast 0DTE). You bank pieces on the way, rather than betting the whole trade on one exit.</p>
     <p class="pull">One entry, a whole exit plan &mdash; stop, scaled targets, trailing lock-in &mdash; committed before the trade can make you second-guess it.</p>
-    <h2>The force-flatten</h2>
-    <p>Finally, on same-day positions NoVo <strong>force-flattens before the close</strong>, so a 0DTE contract never rides into the <a href="/journal/spy-options-cash-vs-physical-settlement.html">physical settlement</a> and <a href="/journal/automatic-exercise-itm-option.html">auto-exercise</a> that turns a winner into a stock position. You bring the read and the trigger; NoVo brings the hands &mdash; and the discipline of an exit that was decided in advance and executes without nerve. (You decide every entry; the exit ladder runs either way.)</p>
+    <h2>Closing before the bell &mdash; your one tap</h2>
+    <p>The ladder above &mdash; stop, targets, trail &mdash; runs on its own the whole time you're in the trade. The one thing it does <em>not</em> do is force-close your position at the bell: NoVo is user-managed, so on a same-day option the final call is yours. That's a single tap. NoVo keeps the read live straight into the final minutes &mdash; the levels, your P&amp;L, exactly where you stand &mdash; and closes the position the instant you click, so a 0DTE never rides into the <a href="/journal/spy-options-cash-vs-physical-settlement.html">physical settlement</a> and <a href="/journal/automatic-exercise-itm-option.html">auto-exercise</a> that turns a winner into a stock position &mdash; unless you choose to let it. You bring the read and the trigger; NoVo brings the hands. (You decide every entry <em>and</em> the close; the rest of the ladder runs either way.)</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>

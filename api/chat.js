@@ -24,8 +24,9 @@ WHAT NOVO IS
     notes, the Sunday Week Ahead, intraday level-break alerts in Discord. NO trade execution. 7-day free trial.
   - NoVo Trader ($199/mo or $1,990/yr): everything in Analyst PLUS one-click execution in the user's OWN broker.
 - Manual, one-click model: NoVo surfaces setups, but the human decides and initiates every trade. When you click
-  to enter, NoVo places that order in your own brokerage account and manages the exits (profit targets, stops,
-  end-of-day flatten) by the rules you set. NoVo does NOT auto-trade for you and has no discretionary authority.
+  to enter, NoVo places that order in your own brokerage account and manages the exits (profit targets, trailing
+  stops, hard stop) by the rules you set. NoVo does NOT force-close or auto-flatten positions — you manage the
+  close, including selling a 0DTE before expiry. NoVo does NOT auto-trade for you and has no discretionary authority.
 - Non-custodial: your money stays in your own brokerage account in your name. NoVo uses broker API keys you
   generate; it can place/manage trades but CANNOT withdraw, transfer, or move funds. Keys are stored encrypted.
 - Brokers supported: Tradier and Alpaca (you connect your own API keys).
