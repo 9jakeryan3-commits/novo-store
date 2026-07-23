@@ -7,25 +7,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty | The NoVo Journal</title>
-<meta name="description" content="No service has 100% uptime, so what happens to your open position if NoVo has an outage mid-trade? Because the protective stop rests at your broker, your downside is still covered. Here's the honest fail-safe account.">
+<meta name="description" content="No service has 100% uptime, so what happens to your open position if NoVo has an outage mid-trade? On Tradier the stop rests at your broker so downside stays capped through a NoVo outage; on Alpaca it's software-enforced, so an outage is a real gap. Here's the honest fail-safe account.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/what-if-novo-goes-down.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/what-if-novo-goes-down.html">
 <meta property="og:title" content="What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty">
-<meta property="og:description" content="No service is 100% up. If NoVo has an outage mid-trade, your broker-side stop still protects the position. The honest fail-safe account.">
+<meta property="og:description" content="No service is 100% up. On Tradier your broker-side stop protects the position through a NoVo outage; on Alpaca the stop is software-enforced. The honest fail-safe account.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty">
-<meta name="twitter:description" content="No service is 100% up. If NoVo has an outage mid-trade, your broker-side stop still protects the position. The honest fail-safe account.">
+<meta name="twitter:description" content="No service is 100% up. On Tradier your broker-side stop protects the position through a NoVo outage; on Alpaca the stop is software-enforced. The honest fail-safe account.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty","description":"No service is 100% up. If NoVo has an outage mid-trade, your broker-side stop still protects the position. The honest fail-safe account.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/what-if-novo-goes-down.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty","description":"No service is 100% up. On Tradier your broker-side stop protects the position through a NoVo outage; on Alpaca the stop is software-enforced. The honest fail-safe account.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/what-if-novo-goes-down.html"}
 </script>
 </head>
 <body>
@@ -48,12 +48,12 @@
   </header>
   <div class="article-meta">NoVo AI Trading &middot; 2026</div>
   <div class="article-body">
-    <p>No service has 100% uptime, so it's fair to ask: what happens to your open position if NoVo has an outage <em>mid-trade</em>? The honest answer is that NoVo is built with this exact scenario in mind &mdash; because the protective <a href="/journal/server-side-broker-stop.html">stop rests at your broker</a>, your downside stays covered even if NoVo itself goes offline.</p>
+    <p>No service has 100% uptime, so it's fair to ask: what happens to your open position if NoVo has an outage <em>mid-trade</em>? <strong>The honest answer depends on your broker.</strong> On <strong>Tradier</strong>, NoVo rests the protective <a href="/journal/server-side-broker-stop.html">stop at the broker/exchange</a>, so your downside stays capped even if NoVo itself goes offline. On <strong>Alpaca</strong> &mdash; which doesn't support broker-side stops for options &mdash; NoVo enforces the same &minus;15% stop in <em>software</em> (its exit engine), so a full NoVo outage <em>is</em> a genuine gap. For fully hands-off live trading, Tradier's broker-side stop is the sturdier choice.</p>
     <h2>The key design choice</h2>
-    <p>This is why NoVo places the stop <em>at the broker</em>, not just inside the app. That stop is live at the exchange, <strong>independent of NoVo's uptime</strong> &mdash; so if NoVo's server has an outage while you're in a position, the stop is still resting at the broker, ready to protect you. Your worst-case risk cap doesn't depend on NoVo staying up. It's deliberate <a href="/journal/what-runs-laptop-closed.html">defense in depth</a>: the protection lives in the most robust place, not the most fragile one.</p>
+    <p>On Tradier this is why NoVo places the stop <em>at the broker</em>, not just inside the app: it's live at the exchange, <strong>independent of NoVo's uptime</strong> &mdash; so if NoVo's server has an outage while you're in a position, the stop is still resting at the broker, ready to protect you. On Alpaca (no broker stops for options) the stop is software-enforced and <em>does</em> depend on NoVo running &mdash; so size for the chance an outage catches you before it fires. It's deliberate <a href="/journal/what-runs-laptop-closed.html">defense in depth</a> where the broker allows it, and an honest limit where it doesn't.</p>
     <h2>What an outage would and wouldn't affect</h2>
-    <p>Honestly: during an outage you might lose the <em>cockpit</em> temporarily &mdash; the live map, new <a href="/journal/one-click-execution-explained.html">one-click entries</a>, the in-app view. That's a real inconvenience. But your <em>open position's protection</em> (the broker-side stop) persists, and your <a href="/journal/non-custodial-explained.html">money stays safe</a> in your broker regardless. You can also always go directly to your <a href="/journal/novo-vs-broker-app.html">broker's own app</a> to manage or close a position if needed &mdash; because it's <em>your</em> account, you're never locked out of it by a NoVo outage.</p>
-    <p class="pull">An outage can take the cockpit offline; it can't take your stop offline, because your stop lives at the broker. The protection doesn't depend on the tool that placed it.</p>
+    <p>Honestly: during an outage you might lose the <em>cockpit</em> temporarily &mdash; the live map, new <a href="/journal/one-click-execution-explained.html">one-click entries</a>, the in-app view. That's a real inconvenience. On Tradier your <em>open position's protection</em> (the broker-side stop) persists; on Alpaca the software stop pauses with NoVo, so you'd manage from your broker app. Either way your <a href="/journal/non-custodial-explained.html">money stays safe</a> in your broker. You can also always go directly to your <a href="/journal/novo-vs-broker-app.html">broker's own app</a> to manage or close a position if needed &mdash; because it's <em>your</em> account, you're never locked out of it by a NoVo outage.</p>
+    <p class="pull">On Tradier, an outage can take the cockpit offline but not your stop &mdash; it lives at the broker. On Alpaca the stop is software-enforced, so size for the chance an outage catches you before it fires.</p>
     <h2>The honest fail-safe posture</h2>
     <p>NoVo doesn't claim it can never go down &mdash; nobody honest does. Instead it's <em>architected</em> so an outage can't leave you unprotected: broker-side stops that survive independently, <a href="/journal/who-holds-your-money-in-automated-trading.html">your money in your own account</a>, and direct broker access as a fallback. The design assumes things can fail and makes sure the <em>important</em> thing &mdash; your downside protection and your capital &mdash; doesn't fail with it. That's what fail-safe honesty looks like: not a promise of perfection, but protection that holds when imperfection happens.</p>
   </div>

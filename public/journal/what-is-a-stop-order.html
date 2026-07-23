@@ -55,7 +55,7 @@
     <p>Because a triggered stop becomes a <em>market</em> order, it fills at the next available price &mdash; which in a <a href="/journal/holding-0dte-into-close.html">fast or gapping market</a> can be well beyond your trigger (<a href="/journal/why-fill-price-differ-from-quote.html">slippage</a>). So a stop caps your <em>intended</em> loss but can&rsquo;t guarantee the exact exit price. A <a href="/journal/stop-limit-vs-stop-market-options.html">stop-limit</a> adds price control (but risks not filling at all).</p>
     <p class="pull">A stop order is a promise to exit, not a promise of price. It fires when you&rsquo;re wrong &mdash; then takes whatever the market offers next.</p>
     <h2>The takeaway</h2>
-    <p>Stop orders enforce your exit automatically &mdash; essential on fast 0DTE where <a href="/journal/hard-stop-vs-mental-stop-0dte.html">mental stops fail</a>. Size for possible slippage (<a href="/journal/size-off-worst-case.html">worst case</a>). NoVo attaches a <a href="/journal/server-side-broker-stop.html">broker-side stop</a> on entry so your risk cap is live from the start.
+    <p>Stop orders enforce your exit automatically &mdash; essential on fast 0DTE where <a href="/journal/hard-stop-vs-mental-stop-0dte.html">mental stops fail</a>. Size for possible slippage (<a href="/journal/size-off-worst-case.html">worst case</a>). NoVo attaches a <a href="/journal/server-side-broker-stop.html">protective stop</a> on entry so your risk cap is live from the start.
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>

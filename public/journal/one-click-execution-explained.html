@@ -7,25 +7,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>One-Click Execution, Explained: What Happens the Instant You Tap Buy | The NoVo Journal</title>
-<meta name="description" content="When you tap Buy in NoVo, a sequence fires in one motion: strike selection, sizing, order routing, a broker-side stop, and the exit ladder. Here's exactly what happens the instant you commit — and what it doesn't do.">
+<meta name="description" content="When you tap Buy in NoVo, a sequence fires in one motion: strike selection, sizing, order routing, a protective stop, and the exit ladder. Here's exactly what happens the instant you commit — and what it doesn't do.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/one-click-execution-explained.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/one-click-execution-explained.html">
 <meta property="og:title" content="One-Click Execution, Explained: What Happens the Instant You Tap Buy">
-<meta property="og:description" content="Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a broker-side stop, and the exit ladder. Exactly what happens.">
+<meta property="og:description" content="Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a protective stop, and the exit ladder. Exactly what happens.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="One-Click Execution, Explained: What Happens the Instant You Tap Buy">
-<meta name="twitter:description" content="Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a broker-side stop, and the exit ladder. Exactly what happens.">
+<meta name="twitter:description" content="Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a protective stop, and the exit ladder. Exactly what happens.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"One-Click Execution, Explained: What Happens the Instant You Tap Buy","description":"Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a broker-side stop, and the exit ladder. Exactly what happens.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/one-click-execution-explained.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"One-Click Execution, Explained: What Happens the Instant You Tap Buy","description":"Tap Buy in NoVo and one motion fires: strike pick, sizing, routing, a protective stop, and the exit ladder. Exactly what happens.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/one-click-execution-explained.html"}
 </script>
 </head>
 <body>
@@ -50,7 +50,7 @@
   <div class="article-body">
     <p>NoVo's headline feature is <strong>one-click execution</strong> &mdash; but what does the click actually <em>do</em>? A lot, in one motion. Understanding the sequence that fires the instant you tap Buy Calls or Buy Puts shows why it's more than a fast order button.</p>
     <h2>The sequence</h2>
-    <p>When you commit, NoVo executes a chain that would take precious seconds (and mistakes) to do by hand: <strong>(1) strike selection</strong> &mdash; it picks an appropriate strike based on the setup; <strong>(2) sizing</strong> &mdash; it sizes the position to <a href="/journal/setting-your-own-risk-boundaries.html">your risk budget</a>; <strong>(3) order routing</strong> &mdash; it routes the order to <a href="/journal/non-custodial-explained.html">your broker</a> with logic aimed at a good fill; <strong>(4) the <a href="/journal/server-side-broker-stop.html">broker-side stop</a></strong> &mdash; it attaches a protective stop that rests at the broker; and <strong>(5) the <a href="/journal/novo-exit-ladder-anatomy.html">exit ladder</a></strong> &mdash; it sets the scaled exit plan. One tap, the whole trade structured.</p>
+    <p>When you commit, NoVo executes a chain that would take precious seconds (and mistakes) to do by hand: <strong>(1) strike selection</strong> &mdash; it picks an appropriate strike based on the setup; <strong>(2) sizing</strong> &mdash; it sizes the position to <a href="/journal/setting-your-own-risk-boundaries.html">your risk budget</a>; <strong>(3) order routing</strong> &mdash; it routes the order to <a href="/journal/non-custodial-explained.html">your broker</a> with logic aimed at a good fill; <strong>(4) the <a href="/journal/server-side-broker-stop.html">protective stop</a></strong> &mdash; it attaches a protective stop (a resting broker order on Tradier; software-enforced on Alpaca); and <strong>(5) the <a href="/journal/novo-exit-ladder-anatomy.html">exit ladder</a></strong> &mdash; it sets the scaled exit plan. One tap, the whole trade structured.</p>
     <h2>Why doing it in one motion matters</h2>
     <p>Done manually, each of those steps is a chance to fumble &mdash; mis-click a strike, mis-size, forget the stop, hesitate on the exit. In a fast <a href="/journal/premium-vs-notional-leverage.html">0DTE</a> tape, those seconds and errors are expensive. Bundling them into one click removes the <a href="/journal/psychology-of-clicking-buy.html">friction and hesitation at the door</a> and ensures the risk controls (stop, sizing, exit) are <em>always</em> in place &mdash; not something you meant to add and didn't. Discipline becomes automatic because it's built into the execution.</p>
     <p class="pull">The click isn't just &ldquo;buy fast&rdquo; &mdash; it's &ldquo;buy correctly, sized, stopped, and with an exit plan, every single time, without fumbling.&rdquo;</p>

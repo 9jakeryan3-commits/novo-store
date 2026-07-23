@@ -7,25 +7,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails | The NoVo Journal</title>
-<meta name="description" content="Every NoVo trade ships with a full exit plan attached at the click: a broker-side stop, scaled profit targets, and a trailing stop as targets hit. Here's how the exit ladder is built.">
+<meta name="description" content="Every NoVo trade ships with a full exit plan attached at the click: a protective stop, scaled profit targets, and a trailing stop as targets hit. Here's how the exit ladder is built.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html">
 <meta property="og:title" content="The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails">
-<meta property="og:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.">
+<meta property="og:description" content="What NoVo attaches to every trade: a protective stop, scaled targets, and a trailing stop as targets hit.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails">
-<meta name="twitter:description" content="What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.">
+<meta name="twitter:description" content="What NoVo attaches to every trade: a protective stop, scaled targets, and a trailing stop as targets hit.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails","description":"What NoVo attaches to every trade: a broker-side stop, scaled targets, and a trailing stop as targets hit.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"The Anatomy of NoVo's Exit Ladder: Stops, Targets, and Trails","description":"What NoVo attaches to every trade: a protective stop, scaled targets, and a trailing stop as targets hit.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/novo-exit-ladder-anatomy.html"}
 </script>
 </head>
 <body>
@@ -49,7 +49,7 @@
   <div class="article-meta">NoVo AI Trading &middot; 2026</div>
   <div class="article-body">
     <p>Most traders lose on the exit, not the entry &mdash; freezing on a winner, hoping on a loser. NoVo's answer is to attach a complete, pre-committed <strong>exit ladder</strong> to every trade the moment you hit Buy Calls or Buy Puts. Here's what's in it.</p>
-    <h2>The broker-side stop</h2>
+    <h2>The protective stop</h2>
     <p>First, a protective stop &mdash; placed <a href="/journal/novo-stop-on-option-or-spy.html">on the option, sized to a SPY level</a> you set &mdash; and it lives <em>at the broker</em>, not just on NoVo's server. Even in the rare event of a connection problem, the stop is already resting with your broker. It's the floor under the trade, decided before emotion can move it.</p>
     <h2>Scaled targets and the trail</h2>
     <p>Instead of one all-or-nothing exit, NoVo sets <strong>multiple profit targets</strong> at successive levels, taking part of the position off at each. As targets hit, the stop <strong>trails up</strong> &mdash; locking in gains and reducing the position's risk while letting the remainder run toward the next dealer level (the <a href="/journal/bracket-orders-oco-options.html">bracket/OCO machinery</a> that's brutal to run by hand on a fast 0DTE). You bank pieces on the way, rather than betting the whole trade on one exit.</p>

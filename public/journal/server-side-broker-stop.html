@@ -7,25 +7,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Server-Side Broker Stop NoVo Attaches, Explained | The NoVo Journal</title>
-<meta name="description" content="The instant you enter, NoVo attaches a protective stop that rests at your broker — not just in the app. Here's how the broker-side stop works, why resting it at the broker matters, and its honest limits.">
+<meta name="description" content="On Tradier NoVo rests a protective stop at your broker; on Alpaca (no broker stops for options) it's software-enforced. How each works, why the broker matters, and the honest limits.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/server-side-broker-stop.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-aitrading.app/journal/server-side-broker-stop.html">
 <meta property="og:title" content="The Server-Side Broker Stop NoVo Attaches, Explained">
-<meta property="og:description" content="On entry, NoVo attaches a stop that rests at your broker, not just in the app. How the broker-side stop works and its honest limits.">
+<meta property="og:description" content="On Tradier a stop that rests at your broker; on Alpaca software-enforced. How NoVo's stop works and its honest limits.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Server-Side Broker Stop NoVo Attaches, Explained">
-<meta name="twitter:description" content="On entry, NoVo attaches a stop that rests at your broker, not just in the app. How the broker-side stop works and its honest limits.">
+<meta name="twitter:description" content="On Tradier a stop that rests at your broker; on Alpaca software-enforced. How NoVo's stop works and its honest limits.">
 <meta name="twitter:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"The Server-Side Broker Stop NoVo Attaches, Explained","description":"On entry, NoVo attaches a stop that rests at your broker, not just in the app. How the broker-side stop works and its honest limits.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/server-side-broker-stop.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"The Server-Side Broker Stop NoVo Attaches, Explained","description":"On Tradier a stop that rests at your broker; on Alpaca software-enforced. How NoVo's stop works and its honest limits.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-18","dateModified":"2026-07-18","mainEntityOfPage":"https://novo-aitrading.app/journal/server-side-broker-stop.html"}
 </script>
 </head>
 <body>
@@ -44,18 +44,18 @@
   <header class="article-head">
     <div class="kicker">Product</div>
     <h1>The Server-Side Broker Stop NoVo Attaches, Explained</h1>
-    <p class="standfirst">Where your stop <em>lives</em> matters as much as that it exists. NoVo rests its protective stop at the broker, at the exchange &mdash; not in an app that can crash &mdash; and that design choice is a real layer of safety.</p>
+    <p class="standfirst">Where your stop <em>lives</em> depends on your broker. On <strong>Tradier</strong>, NoVo rests the protective stop at the broker/exchange &mdash; not in an app that can crash &mdash; a real layer of safety. On <strong>Alpaca</strong> (no broker stops for options) it's software-enforced. Here's the honest difference.</p>
   </header>
   <div class="article-meta">NoVo AI Trading &middot; 2026</div>
   <div class="article-body">
-    <p>The instant you enter a trade, NoVo attaches a protective <strong>stop that rests at your broker</strong> &mdash; not merely tracked inside the app. This <em>server-side, broker-side</em> stop is a core piece of NoVo's risk architecture, and understanding how it works (and its limits) shows why it matters.</p>
+    <p>The instant you enter a trade, NoVo attaches a protective stop &mdash; on <strong>Tradier</strong> a real broker-side order resting at the exchange, on <strong>Alpaca</strong> a stop enforced in NoVo's own software (Alpaca options have no broker-side stops). Understanding the difference &mdash; and its limits &mdash; is the point of this piece.</p>
     <h2>Why where the stop lives matters</h2>
-    <p>There's a big difference between a stop that only exists in an app (which must be online, connected, and running to fire) and one that rests <em>at the broker/exchange</em>. NoVo places the stop at your broker, so it's live at the exchange independent of your device <em>and</em> independent of NoVo's own uptime. Even if your <a href="/journal/what-runs-laptop-closed.html">laptop is closed</a>, your wifi drops, or NoVo's server has <a href="/journal/what-if-novo-goes-down.html">an outage</a>, the stop is still resting at the broker, ready to protect the position. That's real defense in depth.</p>
+    <p>There's a big difference between a stop that only exists in an app (which must be online, connected, and running to fire) and one that rests <em>at the broker/exchange</em>. On Tradier, NoVo places the stop at your broker, so it's live at the exchange independent of your device <em>and</em> of NoVo's own uptime &mdash; even if your <a href="/journal/what-runs-laptop-closed.html">laptop is closed</a> or NoVo's server has <a href="/journal/what-if-novo-goes-down.html">an outage</a>, the stop is still resting at the broker. On Alpaca the stop is software-enforced, so it depends on NoVo running &mdash; a full outage is a genuine gap there. That's real defense in depth where the broker allows it, and an honest limit where it doesn't.</p>
     <h2>How it fits the trade</h2>
     <p>The stop is attached automatically as part of <a href="/journal/one-click-execution-explained.html">one-click execution</a> &mdash; you never have to remember to set it, and it's sized to the <a href="/journal/setting-your-own-risk-boundaries.html">risk you defined</a>. It works alongside the <a href="/journal/novo-exit-ladder-anatomy.html">exit ladder</a> (which scales out of winners) as the downside protection on every position. The point is that your risk cap is <em>in the market</em> from the moment you enter, not something you'll add in a second &mdash; discipline built into execution, resting where it's most robust.</p>
-    <p class="pull">A stop that lives only in an app dies with the app. A stop resting at the broker survives your laptop, your wifi, and even the tool that placed it. That's where a real stop belongs.</p>
+    <p class="pull">On Tradier, a stop resting at the broker survives your laptop, your wifi, and even the tool that placed it. On Alpaca the stop is software-enforced &mdash; robust in normal conditions, but not outage-proof.</p>
     <h2>The honest limits</h2>
-    <p>A broker-side stop is robust, but it's still a <em>stop</em>, not a shield: it executes at the next available price, so in a <a href="/journal/one-click-order-slippage.html">gap or fast move</a> it can fill beyond your level (<a href="/journal/size-off-worst-case.html">size for that</a>). It protects the downside on the trade; it can't guarantee the exact exit price, and it can't prevent a loss &mdash; only cap the intended one. NoVo places the most robust kind of stop in the most robust place; the market still has the final say on the fill, and honest software says so.</p>
+    <p>First, it only <em>rests at the broker</em> on Tradier &mdash; on Alpaca (no broker stops for options) NoVo enforces it in software, so a full NoVo outage can leave an Alpaca position unprotected until NoVo is back. Second, even a true broker-side stop is still a <em>stop</em>, not a shield: it executes at the next available price, so in a <a href="/journal/one-click-order-slippage.html">gap or fast move</a> it can fill beyond your level (<a href="/journal/size-off-worst-case.html">size for that</a>). It protects the downside on the trade; it can't guarantee the exact exit price, and it can't prevent a loss &mdash; only cap the intended one. NoVo places the most robust kind of stop in the most robust place; the market still has the final say on the fill, and honest software says so.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
