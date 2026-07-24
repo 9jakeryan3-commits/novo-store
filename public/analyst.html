@@ -7,11 +7,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPY Gamma Exposure (GEX) Dashboard for 0DTE — NoVo Analyst</title>
-<meta name="description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE options — net GEX, gamma flip, dealer walls, gravity, expected move &amp; skew — plus a written market read every session and real-time level-break alerts. The read the desks pay for, in plain English. $79/mo, 7-day free trial.">
+<meta name="description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE options — net GEX, gamma flip, dealer walls, gravity, expected move &amp; skew, a gamma-squeeze signal, live options flow (call vs put demand) and historical analogues — plus a written market read every session and real-time level-break + squeeze alerts. The read the desks pay for, in plain English. $79/mo, 7-day free trial.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app/analyst">
 <meta property="og:title" content="SPY Gamma Exposure (GEX) Dashboard for 0DTE — NoVo Analyst">
-<meta property="og:description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE — net GEX, gamma flip, walls, expected move — with a written desk-note read every session. $79/mo.">
+<meta property="og:description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE — net GEX, gamma flip, walls, expected move, a gamma-squeeze signal, live options flow &amp; historical analogues — with a written desk-note read every session. $79/mo.">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -21,7 +21,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NoVo Analyst — the dealer map, live, all session">
-<meta name="twitter:description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE — net GEX, gamma flip, walls, expected move — with a written desk-note read every session. $79/mo.">
+<meta name="twitter:description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE — net GEX, gamma flip, walls, expected move, a gamma-squeeze signal, live options flow &amp; historical analogues — with a written desk-note read every session. $79/mo.">
 <meta name="twitter:image" content="https://novo-aitrading.app/og-home.png?v=2">
 <link rel="canonical" href="https://novo-aitrading.app/analyst">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -481,6 +481,9 @@
       <span class="hero-chip">Put / Call skew</span>
       <span class="hero-chip">Fast / slow MM skew</span>
       <span class="hero-chip">IV rank</span>
+      <span class="hero-chip"><b>Gamma squeeze</b></span>
+      <span class="hero-chip"><b>Options flow</b></span>
+      <span class="hero-chip"><b>Historical analogues</b></span>
     </div>
     <div class="hero-cta">
       <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);box-shadow:0 8px 28px rgba(34,211,238,0.35);" onclick="startAnalystTrial('monthly')">Start 7-day free trial</button>
@@ -518,7 +521,7 @@
   <div class="container">
     <div class="section-label" style="color:#22d3ee;">What you see</div>
     <h2 class="section-title">The dealer's map &mdash; decoded</h2>
-    <p class="section-sub">Six institutional reads on <b style="color:var(--txt1);">SPY, QQQ &amp; SPX</b>, computed off live options positioning and updated through the session. Every term is explained in plain English &mdash; you don't need a desk background to use it.</p>
+    <p class="section-sub">Institutional reads on <b style="color:var(--txt1);">SPY, QQQ &amp; SPX</b> &mdash; dealer positioning, live options flow, and the gamma squeeze &mdash; computed off live options data and updated through the session. Every term is explained in plain English; you don't need a desk background to use it.</p>
     <div class="features-grid">
       <div class="feature"><div class="feature-icon">🧲</div><div><h4>Net GEX &middot; the regime</h4><p>Positive = dealers dampen moves (grind / mean-revert). Negative = they amplify (moves extend). Know which market you're in before you enter.</p></div></div>
       <div class="feature"><div class="feature-icon">🔀</div><div><h4>Gamma Flip</h4><p>The price where dealer hedging flips from dampening to amplifying. Cross it and the whole character of the tape changes.</p></div></div>
@@ -528,6 +531,9 @@
       <div class="feature"><div class="feature-icon">📊</div><div><h4>ATM IV &amp; IV rank</h4><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
       <div class="feature"><div class="feature-icon">🪐</div><div><h4>Gravity &middot; the magnet</h4><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
       <div class="feature"><div class="feature-icon">🌡️</div><div><h4>Fast / Slow MM skew</h4><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚡</div><div><h4>Gamma squeeze signal</h4><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Fires an alert the moment it arms.</p></div></div>
+      <div class="feature"><div class="feature-icon">📈</div><div><h4>Options flow &middot; call vs put demand</h4><p>Which side the volume is building on across the SPY chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
+      <div class="feature"><div class="feature-icon">🕰️</div><div><h4>Historical analogues</h4><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
     </div>
 
     <div class="ss-wrap">
@@ -559,7 +565,8 @@
     </div>
     <div class="ai-grid" style="margin-top:20px;">
       <div class="ai-card"><div class="ai-card-label" style="color:#22d3ee;">In your inbox</div><h3>The Open &middot; The Close &middot; The Week Ahead</h3><p>A morning desk note, a closing read, and a Sunday week-ahead &mdash; each grounded in the live dealer map and this week's real catalysts, in plain English.</p></div>
-      <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>&lsquo;The Line&rsquo; level-break alerts</h3><p>When SPY breaks or reclaims a MAJOR level, you get an instant hold-or-break playbook &mdash; in the app and the NoVo Discord. Deterministic, never a signal.</p></div>
+      <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>&lsquo;The Line&rsquo; level-break alerts</h3><p>When SPY breaks or reclaims a MAJOR level, you get an instant hold-or-break playbook &mdash; in the app and the NoVo Discord. The same deterministic read every time.</p></div>
+      <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>Gamma-squeeze alerts</h3><p>When dealers go short gamma and price breaks the flip &mdash; the setup where moves extend instead of fading &mdash; NoVo fires a squeeze alert to the app and Discord, and to your device on Trader. Momentum over mean-reversion, called the moment it arms.</p></div>
     </div>
   </div>
 </div>
@@ -663,6 +670,9 @@
         <li>Plain-English read — a bottom line + every term explained</li>
         <li>VIX fear gauge + 24/5 futures ribbon</li>
         <li>The full dealer map — walls, gamma flip, gravity, expected move</li>
+        <li><b style="color:var(--txt1)">Gamma-squeeze signal &amp; alert</b> — when dealers flip to amplifying</li>
+        <li><b style="color:var(--txt1)">Options flow</b> — live call vs put demand + unusual-volume strikes</li>
+        <li><b style="color:var(--txt1)">Historical analogues</b> — &ldquo;today looks like…&rdquo; with how it resolved</li>
       </ul>
       <button class="price-btn" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;max-width:460px;margin-left:auto;margin-right:auto;display:block;box-shadow:0 8px 26px rgba(34,211,238,0.30);" onclick="startAnalystTrial('monthly')">Start free — 7-day trial</button>
       <button class="price-btn-secondary" style="max-width:460px;margin-left:auto;margin-right:auto;display:block;border-color:#22d3ee;color:#22d3ee;" onclick="startAnalystTrial('yearly')">Or pay yearly — $790/yr &nbsp;·&nbsp; 2 months free</button>
@@ -706,6 +716,7 @@
         <div class="price-roi" style="color:var(--green);">When you're ready to let NoVo trade the read for you.</div>
         <ul class="price-features">
           <li><b style="color:#22d3ee;">Includes NoVo Analyst</b> — the full dealer map + reads</li>
+          <li>Gamma-squeeze alerts to your device — when moves are set to extend</li>
           <li>Executes the read for you — one click, in your own broker (Tradier + Alpaca)</li>
           <li>Conviction-sized entries + a multi-tier exit ladder</li>
           <li>Paper-trade first — go live when you're ready</li>
