@@ -72,6 +72,21 @@
   .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 3px; }
   .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
+  /* Options-flow tiles: 4-across on desktop so the panel is compact, 2-up on mobile */
+  .flow-tiles { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 760px) { .flow-tiles { grid-template-columns: 1fr 1fr; } }
+  /* Gamma-squeeze HERO banner — sits atop the dealer card, escalates in colour by state */
+  .sqz-hero { display: flex; align-items: center; gap: 10px; border: 1px solid var(--bdr); background: var(--navy); border-radius: 10px; padding: 10px 14px; margin: 0 0 12px; }
+  .sqz-hero .sqz-k { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--txt3); white-space: nowrap; }
+  .sqz-hero .sqz-score { font-size: 22px; font-weight: 800; font-family: 'Space Grotesk','Inter',sans-serif; line-height: 1; }
+  .sqz-hero .sqz-state { font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; white-space: nowrap; background: rgba(128,128,128,.14); }
+  .sqz-hero .sqz-lbl { font-size: 12px; color: var(--txt2); margin-left: auto; text-align: right; line-height: 1.3; }
+  .sqz-hero.q { opacity: .68; }
+  .sqz-hero.building { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.07); }
+  .sqz-hero.armed { border-color: rgba(249,115,22,.55); background: rgba(249,115,22,.10); }
+  .sqz-hero.firing-up { border-color: rgba(34,197,94,.65); background: rgba(34,197,94,.12); }
+  .sqz-hero.firing-down { border-color: rgba(239,68,68,.65); background: rgba(239,68,68,.12); }
+  @media (max-width: 560px) { .sqz-hero .sqz-lbl { display: none; } }
   .grn { color: #10b981 !important; } .red { color: #f43f5e !important; } .cyn { color: #22d3ee !important; } .amb { color: #f59e0b !important; }
   .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
   /* Two cards now (the strip drops the ticker already expanded above), so split the full width 50/50
@@ -180,6 +195,7 @@
       <div class="lv-card">
         <h2 id="dealer-h">SPY · Dealer positioning</h2>
         <div style="margin-bottom:12px;"><span class="lv-spot" id="d-spot">—</span> <span id="d-reg" class="s" style="font-size:12px;"></span></div>
+        <div id="d-sqz-hero" class="sqz-hero q" style="display:none;"></div>
         <div class="lv-tiles">
           <div class="lv-tile"><div class="k">Net GEX</div><div class="v" id="d-gex">—</div><div class="s" id="d-gex-s"></div></div>
           <div class="lv-tile"><div class="k">Gamma Flip</div><div class="v cyn" id="d-flip">—</div><div class="s">the regime line</div></div>
@@ -189,9 +205,24 @@
           <div class="lv-tile"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
           <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
           <div class="lv-tile"><div class="k">Skew · near / far</div><div class="v" id="d-mm">—</div><div class="s" id="d-mm-s">near vs far expiry</div></div>
-          <div class="lv-tile"><div class="k">Gamma squeeze</div><div class="v" id="d-sqz">—</div><div class="s" id="d-sqz-s">short-gamma break risk</div></div>
         </div>
       </div>
+    </div>
+
+    <!-- options flow + historical analogues (promoted up, right under the hero row) -->
+    <div class="lv-card" id="flow-card" style="margin-top:16px;">
+      <h2 id="flow-h">SPY · Options flow <span style="font-size:11px;color:var(--txt3);font-weight:400;">volume-based · call vs put demand (not buy/sell prints)</span></h2>
+      <div class="lv-tiles flow-tiles">
+        <div class="lv-tile"><div class="k">Live lean</div><div class="v" id="f-lean">—</div><div class="s" id="f-lean-s">flow, last ~60s</div></div>
+        <div class="lv-tile"><div class="k">Put / Call vol</div><div class="v" id="f-pc">—</div><div class="s">day cumulative ratio</div></div>
+        <div class="lv-tile"><div class="k">Call volume</div><div class="v grn" id="f-cv">—</div><div class="s">contracts today</div></div>
+        <div class="lv-tile"><div class="k">Put volume</div><div class="v red" id="f-pv">—</div><div class="s">contracts today</div></div>
+      </div>
+      <div id="f-whales" style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6;"></div>
+    </div>
+    <div class="lv-card" id="anlg-card" style="margin-top:16px;">
+      <h2>Today looks like… <span style="font-size:11px;color:var(--txt3);font-weight:400;">closest historical SPY dealer setups &amp; how they resolved</span></h2>
+      <div id="anlg-body" style="font-size:13px;color:var(--txt2);line-height:1.6;">—</div>
     </div>
 
     <!-- gamma profile · The Line · index strip — desktop: gamma|line row then strip full-width;
@@ -200,22 +231,6 @@
       <div class="lv-card b-gamma"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
       <div class="lv-card b-line"><h2>'The Line' — SPY level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time SPY level-break playbooks &mdash; QQQ &amp; SPX typically move in close correlation.</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li></ul></div>
       <div class="lv-strip b-strip" id="strip"></div>
-    </div>
-
-    <!-- options flow + historical analogues -->
-    <div class="lv-card" id="flow-card">
-      <h2 id="flow-h">SPY · Options flow <span style="font-size:11px;color:var(--txt3);font-weight:400;">volume-based · call vs put demand (not buy/sell prints)</span></h2>
-      <div class="lv-tiles">
-        <div class="lv-tile"><div class="k">Live lean</div><div class="v" id="f-lean">—</div><div class="s" id="f-lean-s">flow, last ~60s</div></div>
-        <div class="lv-tile"><div class="k">Put / Call vol</div><div class="v" id="f-pc">—</div><div class="s">day cumulative ratio</div></div>
-        <div class="lv-tile"><div class="k">Call volume</div><div class="v grn" id="f-cv">—</div><div class="s">contracts today</div></div>
-        <div class="lv-tile"><div class="k">Put volume</div><div class="v red" id="f-pv">—</div><div class="s">contracts today</div></div>
-      </div>
-      <div id="f-whales" style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6;"></div>
-    </div>
-    <div class="lv-card" id="anlg-card">
-      <h2>Today looks like… <span style="font-size:11px;color:var(--txt3);font-weight:400;">closest historical SPY dealer setups &amp; how they resolved</span></h2>
-      <div id="anlg-body" style="font-size:13px;color:var(--txt2);line-height:1.6;">—</div>
     </div>
 
     <!-- today's read (full-width prose) -->
@@ -274,8 +289,8 @@
       // distinguish "unavailable this session" (a payload arrived but this index was skipped) from "loading"
       // (no payload yet) so an empty tab can't read as a silent coverage gap (audit #5).
       var _msg = (STATE && STATE.updated_at) ? '— unavailable this session' : '— loading…';
-      ['d-spot','d-gex','d-flip','d-cw','d-pw','d-grav','d-em','d-sk','d-mm','d-sqz','f-lean','f-pc','f-cv','f-pv'].forEach(function(id){ $(id).textContent='—'; });
-      $('f-whales').textContent='';
+      ['d-spot','d-gex','d-flip','d-cw','d-pw','d-grav','d-em','d-sk','d-mm','f-lean','f-pc','f-cv','f-pv'].forEach(function(id){ var e=$(id); if(e) e.textContent='—'; });
+      var _sh=$('d-sqz-hero'); if(_sh) _sh.style.display='none'; $('f-whales').textContent='';
       $('d-reg').innerHTML='<span style="color:var(--txt3)">'+_msg+'</span>'; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
       $('chart').style.display='none';
       var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
@@ -305,18 +320,24 @@
     } else { $('d-em').textContent='—'; $('d-em-s').textContent=''; }
     if (d.skew_pts!=null){ var sp=d.skew_pts; $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts'; $('d-sk').className='v '+(sp>=1.5?'red':sp<=-1?'grn':''); var _sklbl=(sp>=1.5?'puts bid (hedging)':sp<=-1?'calls bid (chase)':'balanced'); $('d-sk-s').textContent = _sklbl+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):''); } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
     if (d.mm_skew){ var mf=d.mm_skew.fast, ms=d.mm_skew.slow, msp=d.mm_skew.spread; $('d-mm').textContent=(mf>=0?'+':'')+mf.toFixed(1)+' / '+(ms>=0?'+':'')+ms.toFixed(1); $('d-mm').className='v '+(msp>=0.3?'red':msp<=-0.3?'grn':''); $('d-mm-s').textContent=(msp>=0.3?'near-term fear building':msp<=-0.3?'near-term complacency':'term structure flat'); } else { $('d-mm').textContent='—'; $('d-mm').className='v'; $('d-mm-s').textContent='near vs far expiry'; }
-    // gamma squeeze tile
-    var sq = d.squeeze;
-    if (sq && sq.state && sq.state!=='dormant'){
-      var _up = sq.direction==='up';
-      $('d-sqz').textContent = (sq.score||0) + ' · ' + sq.state + (_up?' ▲':' ▼');
-      $('d-sqz').className = 'v ' + (sq.state==='firing' ? (_up?'grn':'red') : '');
-      $('d-sqz-s').textContent = sq.label || '';
-    } else if (sq && sq.regime==='long gamma'){
-      $('d-sqz').textContent='dampened'; $('d-sqz').className='v'; $('d-sqz-s').textContent='dealers long gamma — moves fade';
-    } else {
-      $('d-sqz').textContent = sq ? ((sq.score||0)+' · quiet') : '—'; $('d-sqz').className='v';
-      $('d-sqz-s').textContent = (sq&&sq.regime==='short gamma')?'short gamma, away from the line':'short-gamma break risk';
+    // gamma squeeze — HERO banner atop the dealer card (escalates in colour by state)
+    var sq = d.squeeze, hero = $('d-sqz-hero');
+    if (hero){
+      if (!sq){ hero.style.display='none'; }
+      else {
+        hero.style.display='flex';
+        var st = sq.state||'dormant', _up = sq.direction==='up';
+        var cls='sqz-hero', badge='', bcol='var(--txt3)', scol='var(--txt2)';
+        if (st==='firing'){ cls+=_up?' firing-up':' firing-down'; badge=(_up?'FIRING ▲':'FIRING ▼'); bcol=scol=(_up?'#22c55e':'#ef4444'); }
+        else if (st==='armed'){ cls+=' armed'; badge='ARMED '+(_up?'▲':'▼'); bcol=scol='#f97316'; }
+        else if (st==='building'){ cls+=' building'; badge='BUILDING '+(_up?'▲':'▼'); bcol=scol='#f59e0b'; }
+        else { cls+=' q'; badge=(sq.regime==='long gamma')?'DAMPENED':'QUIET'; }
+        hero.className=cls;
+        hero.innerHTML = '<span class="sqz-k">Gamma squeeze</span>'
+          + '<span class="sqz-score" style="color:'+scol+'">'+(sq.score||0)+'</span>'
+          + '<span class="sqz-state" style="color:'+bcol+'">'+badge+'</span>'
+          + '<span class="sqz-lbl">'+_escH(sq.label||'')+'</span>';
+      }
     }
     renderFlow(d);
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
@@ -482,7 +503,9 @@
     var lean = fl.lean, lp = fl.lean_pct;
     if (lean==='calls'){ $('f-lean').textContent='Calls'+(lp!=null?' '+lp+'%':''); $('f-lean').className='v grn'; }
     else if (lean==='puts'){ $('f-lean').textContent='Puts'+(lp!=null?' '+(100-lp)+'%':''); $('f-lean').className='v red'; }
-    else { $('f-lean').textContent = (lean==='balanced'?'Balanced':'—'); $('f-lean').className='v'; }
+    else if (lean==='balanced'){ $('f-lean').textContent='Balanced'; $('f-lean').className='v'; }
+    else { $('f-lean').textContent='Building…'; $('f-lean').className='v'; }
+    $('f-lean-s').textContent = (lp!=null ? 'flow, last ~60s' : 'first read — no delta yet');
     $('f-pc').textContent = (fl.pc_ratio!=null? Number(fl.pc_ratio).toFixed(2) : '—');
     $('f-pc').className = 'v ' + (fl.pc_ratio!=null ? (fl.pc_ratio>=1.2?'red':fl.pc_ratio<=0.7?'grn':'') : '');
     $('f-cv').textContent = fl.call_vol!=null ? Number(fl.call_vol).toLocaleString() : '—';
