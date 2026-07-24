@@ -7,12 +7,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How NoVo Decides, Executes &amp; Exits | The NoVo Journal</title>
-<meta name="description" content="From a confirmed signal to a filled order to a disciplined exit — and the daily circuit breakers that protect your capital. How NoVo turns a read into a managed trade.">
+<meta name="description" content="From a confirmed signal to a filled order to a disciplined exit — a hard stop and a trailing take-profit ladder that protect each position. How NoVo turns a read into a managed trade.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/how-novo-decides-executes-exits.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://novo-aitrading.app/journal/how-novo-decides-executes-exits.html">
 <meta property="og:title" content="How NoVo Decides, Executes & Exits">
-<meta property="og:description" content="A multi-stage entry gate, adaptive execution, a strict exit hierarchy, and hard daily circuit breakers.">
+<meta property="og:description" content="A multi-stage entry gate, adaptive execution, and a strict per-position exit hierarchy.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="How NoVo Decides, Executes & Exits">
@@ -21,7 +21,7 @@
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=10">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"How NoVo Decides, Executes &amp; Exits","description":"From a confirmed signal to a filled order to a disciplined exit \u2014 and the daily circuit breakers that protect your capital. How NoVo turns a read into a managed trade.","image":"https://novo-aitrading.app/novo-logo.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-06-28","mainEntityOfPage":"https://novo-aitrading.app/journal/how-novo-decides-executes-exits.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"How NoVo Decides, Executes &amp; Exits","description":"From a confirmed signal to a filled order to a disciplined exit \u2014 a hard stop and a trailing take-profit ladder that protect each position. How NoVo turns a read into a managed trade.","image":"https://novo-aitrading.app/novo-logo.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-06-28","mainEntityOfPage":"https://novo-aitrading.app/journal/how-novo-decides-executes-exits.html"}
 </script>
 </head>
 <body>
@@ -67,7 +67,6 @@
     <p>This is where most traders fall apart, so NoVo makes it mechanical. Every open position is re-evaluated continuously against a strict priority ladder, where higher rules always override lower ones:</p>
     <ul>
       <li><strong>Your manual controls</strong> — take partial profit or liquidate everything, instantly, whenever you want.</li>
-      <li><strong>End-of-day protection</strong> — positions are flattened before expiry risk becomes a problem, so a trade never gets "stuck" into the close.</li>
       <li><strong>A hard stop</strong> — a fixed maximum loss per trade. When it's hit, the trade is closed. No negotiation, no "give it room."</li>
       <li><strong>Trailing stops</strong> — once a trade is working, NoVo trails the gain to lock in profit if it reverses.</li>
       <li><strong>Staged take-profits</strong> — bank a portion at a first target and let the rest run, or cap the whole position — your choice.</li>
@@ -75,7 +74,7 @@
     <p>Every one of those levels is a number <em>you</em> set, live, from the dashboard. Nothing is hidden or hardcoded. Earlier versions of NoVo had a discretionary exit that could cut a trade when the AI bias flipped mid-position — that was deliberately <strong>removed</strong>, because a momentary bias flip wasn't reliable enough to justify overriding the stop you set. Your risk rules run the show.</p>
 
     <h2>The capital protections that never sleep</h2>
-    <p>Around all of it sit hard daily circuit breakers. You set a maximum daily loss and a daily profit goal. Hit the loss limit and NoVo halts and stands down for the day — it stops you from revenge-trading a bad morning into a disastrous afternoon. Hit the profit goal and it banks the day rather than giving gains back by overtrading. There are also enforced cooldowns between trades so it never machine-guns into a chop. And if the system ever restarts while a position is open, it re-adopts that position with safe assumptions and keeps managing it without missing a beat.</p>
+    <p>Those protections run per position: the hard stop caps the loss on every trade, and the trailing and take-profit rungs bank gains before they can give back. There are also enforced cooldowns between trades so it never machine-guns into a chop. And if the system ever restarts while a position is open, it re-adopts that position with safe assumptions and keeps managing it without missing a beat.</p>
 
     <p>Entry, execution, exit, and the guardrails around them — all mechanical, all consistent, all under your configured limits. That's the difference between a plan and a system that actually follows one.</p>
   </div>
