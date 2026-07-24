@@ -232,6 +232,17 @@
   .ss-mobile { border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
   .ss-mobile img { width: 100%; display: block; }
   .ss-mobile-cap { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 10px; letter-spacing: .3px; }
+  /* fanned/stacked live-UI shots — hover a card to bring it to the front and straighten it */
+  .ss-fan { position: relative; height: 600px; margin-top: 40px; }
+  .ss-fan-card { position: absolute; top: 22px; left: 50%; width: 60%; margin: 0; background: #0d0e10; border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom; transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
+  .ss-fan-card img { width: 100%; display: block; }
+  .ss-fan-1 { transform: translateX(-80%) rotate(-7deg); z-index: 1; }
+  .ss-fan-2 { transform: translateX(-20%) rotate(7deg); z-index: 2; }
+  .ss-fan-card:hover, .ss-fan-card:focus-visible { transform: translateX(-50%) translateY(-16px) rotate(0deg) scale(1.05); z-index: 5; box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
+  @media (max-width: 760px) {
+    .ss-fan { height: auto; margin-top: 30px; }
+    .ss-fan-card { position: relative; top: auto; left: auto; width: 100%; max-width: 440px; margin: 0 auto 24px; transform: none !important; box-shadow: 0 18px 50px rgba(0,0,0,.5); }
+  }
   @media(max-width:600px) { .ss-mobile-row > div { flex-basis: 82%; max-width: 82%; } }
 
   /* ── AI Engine section ── */
@@ -537,17 +548,17 @@
     </div>
 
     <div class="ss-wrap">
-      <div class="ss-duo">
-        <figure class="ss-main ss-shot">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; dealer map</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-ui-1.jpg?v=1" alt="NoVo Analyst — SPY session &amp; dealer-levels chart with gamma flip, call/put walls and gravity, the VIX fear gauge, and the full dealer-positioning read: net GEX, gamma flip, walls, gravity, the expected-move band, and near/far skew" loading="lazy">
+      <div class="ss-fan">
+        <figure class="ss-fan-card ss-fan-1" tabindex="0">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; live dealer map</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-dash-1.png?v=1" alt="NoVo Analyst dashboard — the SPY session chart with dealer levels, the gamma-squeeze hero banner, the full dealer-positioning tiles, the VIX fear gauge, and the options-flow panel" loading="lazy">
         </figure>
-        <figure class="ss-main ss-shot">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; profile &amp; the read</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-ui-2.jpg?v=1" alt="NoVo Analyst — the gamma profile by strike, the cross-asset QQQ/SPX map, the real-time 'The Line' level-break playbook, and the written session read" loading="lazy">
+        <figure class="ss-fan-card ss-fan-2" tabindex="0">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; profile, The Line &amp; the read</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-dash-2.png?v=1" alt="NoVo Analyst dashboard — the gamma profile by strike, the real-time 'The Line' level-break feed, the cross-asset QQQ/SPX map, and the written session read" loading="lazy">
         </figure>
       </div>
-      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart and full dealer-positioning read, the gamma profile by strike, the cross-asset map, and &lsquo;The Line&rsquo; level-break feed. Installs like an app on desktop &amp; mobile &mdash; add it to your home screen and glance at it like a desk terminal.</p>
+      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the gamma-squeeze hero &amp; full dealer read, the options-flow panel, the gamma profile, the cross-asset map, and &lsquo;The Line&rsquo; feed. <b style="color:var(--txt2);">Hover a card to bring it forward.</b> Installs like an app on desktop &amp; mobile.</p>
     </div>
   </div>
 </section>
