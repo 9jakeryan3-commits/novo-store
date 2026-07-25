@@ -76,17 +76,18 @@
   .flow-tiles { grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 760px) { .flow-tiles { grid-template-columns: 1fr 1fr; } }
   /* Gamma-squeeze HERO banner — sits atop the dealer card, escalates in colour by state */
-  .sqz-hero { display: flex; align-items: center; gap: 10px; border: 1px solid var(--bdr); background: var(--navy); border-radius: 10px; padding: 10px 14px; margin: 0 0 12px; }
+  .sqz-hero { display: flex; flex-direction: column; gap: 7px; border: 1px solid var(--bdr); background: var(--navy); border-radius: 10px; padding: 11px 14px; margin: 0 0 12px; }
+  .sqz-hero .sqz-hd { display: flex; align-items: center; gap: 10px; }
   .sqz-hero .sqz-k { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--txt3); white-space: nowrap; }
-  .sqz-hero .sqz-score { font-size: 22px; font-weight: 800; font-family: 'Space Grotesk','Inter',sans-serif; line-height: 1; }
-  .sqz-hero .sqz-state { font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; white-space: nowrap; background: rgba(128,128,128,.14); }
-  .sqz-hero .sqz-lbl { font-size: 12px; color: var(--txt2); margin-left: auto; text-align: right; line-height: 1.3; }
-  .sqz-hero.q { opacity: .68; }
+  .sqz-hero .sqz-state { font-size: 11px; font-weight: 800; letter-spacing: .06em; margin-left: auto; white-space: nowrap; }
+  .sqz-hero .sqz-meter { height: 6px; border-radius: 999px; background: rgba(148,163,184,.18); overflow: hidden; }
+  .sqz-hero .sqz-fill { height: 100%; border-radius: 999px; transition: width .5s ease; min-width: 3px; }
+  .sqz-hero .sqz-lbl { font-size: 12px; color: var(--txt2); line-height: 1.35; }
+  .sqz-hero.q { opacity: .7; }
   .sqz-hero.building { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.07); }
   .sqz-hero.armed { border-color: rgba(249,115,22,.55); background: rgba(249,115,22,.10); }
   .sqz-hero.firing-up { border-color: rgba(34,197,94,.65); background: rgba(34,197,94,.12); }
   .sqz-hero.firing-down { border-color: rgba(239,68,68,.65); background: rgba(239,68,68,.12); }
-  @media (max-width: 560px) { .sqz-hero .sqz-lbl { display: none; } }
   .grn { color: #10b981 !important; } .red { color: #f43f5e !important; } .cyn { color: #22d3ee !important; } .amb { color: #f59e0b !important; }
   .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
   /* Two cards now (the strip drops the ticker already expanded above), so split the full width 50/50
@@ -326,17 +327,16 @@
       if (!sq){ hero.style.display='none'; }
       else {
         hero.style.display='flex';
-        var st = sq.state||'dormant', _up = sq.direction==='up';
-        var cls='sqz-hero', badge='', bcol='var(--txt3)', scol='var(--txt2)';
-        if (st==='firing'){ cls+=_up?' firing-up':' firing-down'; badge=(_up?'FIRING ▲':'FIRING ▼'); bcol=scol=(_up?'#22c55e':'#ef4444'); }
-        else if (st==='armed'){ cls+=' armed'; badge='ARMED '+(_up?'▲':'▼'); bcol=scol='#f97316'; }
-        else if (st==='building'){ cls+=' building'; badge='BUILDING '+(_up?'▲':'▼'); bcol=scol='#f59e0b'; }
-        else { cls+=' q'; badge=(sq.regime==='long gamma')?'DAMPENED':'QUIET'; }
+        var st = sq.state||'dormant', _up = sq.direction==='up', _sc = Math.max(0, Math.min(100, sq.score||0));
+        var cls='sqz-hero', badge='', col='var(--txt3)';
+        if (st==='firing'){ cls+=_up?' firing-up':' firing-down'; badge=(_up?'FIRING ▲':'FIRING ▼'); col=(_up?'#22c55e':'#ef4444'); }
+        else if (st==='armed'){ cls+=' armed'; badge='ARMED '+(_up?'▲':'▼'); col='#f97316'; }
+        else if (st==='building'){ cls+=' building'; badge='BUILDING '+(_up?'▲':'▼'); col='#f59e0b'; }
+        else { cls+=' q'; badge=(sq.regime==='long gamma')?'DAMPENED':'QUIET'; col='var(--txt3)'; }
         hero.className=cls;
-        hero.innerHTML = '<span class="sqz-k">Gamma squeeze</span>'
-          + '<span class="sqz-score" style="color:'+scol+'">'+(sq.score||0)+'</span>'
-          + '<span class="sqz-state" style="color:'+bcol+'">'+badge+'</span>'
-          + '<span class="sqz-lbl">'+_escH(sq.label||'')+'</span>';
+        hero.innerHTML = '<div class="sqz-hd"><span class="sqz-k">Gamma squeeze</span><span class="sqz-state" style="color:'+col+'">'+badge+'</span></div>'
+          + '<div class="sqz-meter"><div class="sqz-fill" style="width:'+_sc+'%;background:'+col+'"></div></div>'
+          + '<div class="sqz-lbl">'+_escH(sq.label||'')+'</div>';
       }
     }
     renderFlow(d);
