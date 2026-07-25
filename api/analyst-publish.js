@@ -93,6 +93,43 @@ async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub 
   return false;
 }
 
+// Analyst price ids (mirror webhook-sub.js) — the RELIABLE tier signal; metadata.tier is strippable/mutable.
+const ANALYST_PRICE_IDS = new Set([
+  process.env.STRIPE_PRICE_ANALYST_79, process.env.STRIPE_PRICE_ANALYST_YEARLY_790,
+  'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',
+].filter(Boolean));
+function _subIsAnalyst(sub) {
+  if (sub?.metadata?.tier === 'analyst') return true;
+  try { return (sub?.items?.data || []).some(it => ANALYST_PRICE_IDS.has(it?.price?.id)); }
+  catch (_) { return false; }
+}
+// Resolve a member's tier for push routing: 'trader' (has a live non-analyst sub) | 'analyst' | null. Used only
+// to SUPPRESS the duplicate squeeze push to Trader devices, so it fails OPEN — any Stripe error → null →
+// treated as "not trader" → the device still gets the push. An Analyst-only member is never wrongly suppressed.
+async function _memberTier(email) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return null;
+  const LIVE = ['active', 'trialing', 'past_due'];
+  try {
+    const custIds = new Set();
+    try {
+      const sr = await _stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) custIds.add(c.id);
+    } catch (_) { /* search index warming up — fall through to list() */ }
+    const custs = await _stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) custIds.add(c.id);
+    let sawAnalyst = false;
+    for (const id of custIds) {
+      const subs = await _stripe.subscriptions.list({ customer: id, status: 'all', limit: 20 });
+      for (const s of subs.data) {
+        if (!LIVE.includes(s.status)) continue;
+        if (_subIsAnalyst(s)) sawAnalyst = true; else return 'trader';   // any live non-analyst sub = Trader
+      }
+    }
+    return sawAnalyst ? 'analyst' : null;
+  } catch (e) { console.error('[analyst-publish] tier resolve:', e.message); return null; }
+}
+
 // ── PUBLIC ARCHIVE (served here as GET so it doesn't add a 13th serverless function — Hobby cap is 12) ──
 async function _loadJson(prefix, token) {
   try {
@@ -273,7 +310,8 @@ export default async function handler(req, res) {
   if (req.method === 'POST' && req.query && req.query.push === 'subscribe') {
     let tokenV = '', sub = null;
     try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); tokenV = String(b.token || ''); sub = b.sub || null; } catch (_) {}
-    if (!_verifyToken(tokenV)) return res.status(401).json({ error: 'unauthorized' });
+    const _pEmail = _verifyToken(tokenV);
+    if (!_pEmail) return res.status(401).json({ error: 'unauthorized' });
     if (!sub || !sub.endpoint) return res.status(400).json({ error: 'bad subscription' });
     // SSRF guard (launch audit low): sub.endpoint is member-supplied and later POSTed to by
     // webpush.sendNotification on every publish. Restrict it to the real Web Push provider hosts over HTTPS so
@@ -286,9 +324,13 @@ export default async function handler(req, res) {
     }
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(200).json({ ok: true });   // nothing to persist to yet — don't error the client
+    // Tag the device's tier so the squeeze fan-out can skip Trader-tier devices (they get it from their own
+    // engine's Trader push). Best-effort — a null tier just means the device keeps getting the squeeze push.
+    let _tier = null;
+    try { _tier = await _memberTier(_pEmail); } catch (_) {}
     try {
       const key = 'analyst-push/' + crypto.createHash('sha256').update(String(sub.endpoint)).digest('hex').slice(0, 40) + '.json';
-      await put(key, JSON.stringify({ sub, at: Date.now() }),
+      await put(key, JSON.stringify({ sub, at: Date.now(), tier: _tier }),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
@@ -506,16 +548,22 @@ export default async function handler(req, res) {
         process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
       const BT = process.env.BLOB_READ_WRITE_TOKEN;
       const { blobs } = await list({ prefix: 'analyst-push/', token: BT });
+      // 'squeeze' alerts route around Trader-tier devices — those get the squeeze from their own engine's Trader
+      // push, so this Analyst push would double-notify. Analyst-only (and untagged legacy) devices still get it.
+      const alertKind = (body.alert_kind || '').toString().toLowerCase();
       const payload = JSON.stringify({
         title: title || 'NoVo Analyst',
         body: String(text || '').replace(/\s+/g, ' ').trim().slice(0, 160),
-        url: `${SITE}/analyst/live`, tag: 'novo-analyst-line',
+        url: `${SITE}/analyst/live`, tag: alertKind === 'squeeze' ? 'novo-analyst-squeeze' : 'novo-analyst-line',
       });
       const stale = [];
       await Promise.all((blobs || []).map(async (b) => {
         try {
           const rec = await fetch(b.url).then(r => r.json());
-          if (rec && rec.sub) await webpush.sendNotification(rec.sub, payload);
+          if (rec && rec.sub) {
+            if (alertKind === 'squeeze' && rec.tier === 'trader') return;   // Trader gets it from their own engine
+            await webpush.sendNotification(rec.sub, payload);
+          }
         } catch (err) {
           if (err && (err.statusCode === 404 || err.statusCode === 410)) stale.push(b.url);  // expired sub → prune
         }
