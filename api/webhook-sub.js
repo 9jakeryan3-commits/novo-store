@@ -251,7 +251,7 @@ function analystWelcomeHtml(connectUrl) {
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Don't need these in your inbox?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Every read is live in your <b style="color:#22d3ee">dealer dashboard</b> and the <b style="color:#7f8cff">Analyst Discord</b> &mdash; email is just a backup for when you're away from them. To stop the emails, click <b style="color:#eaf3ff">Unsubscribe</b> at the bottom of any read. Your subscription, dashboard, and Discord access stay exactly the same.</div>
       </div>
-      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice, not trade signals. Trading involves substantial risk of loss. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
+      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss. Manage or cancel anytime via the billing link in your Stripe receipts.</p>
     </div>
   </div>
 </div>`;

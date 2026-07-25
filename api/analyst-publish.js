@@ -183,7 +183,7 @@ function _page(t, desc, canon, inner) {
 <style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}</style></head><body><div class="wrap">
 <div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=1" alt="NoVo AI Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
 ${inner}
-<div class="disc">Market analysis &amp; education only &mdash; not financial advice, and not trade signals. Trading involves substantial risk of loss.</div>
+<div class="disc">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss.</div>
 </div></body></html>`;
 }
 async function handleArchive(req, res) {
@@ -298,7 +298,7 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
           subject: 'Your NoVo Analyst live dashboard link',
-          html: `<div style="margin:0;padding:0;background:#101013;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 7 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice, not trade signals.</p></div></div></div>`,
+          html: `<div style="margin:0;padding:0;background:#101013;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 7 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice.</p></div></div></div>`,
         });
       }
     } catch (e) { console.error('[analyst-live] login:', e.message); }
@@ -528,7 +528,7 @@ export default async function handler(req, res) {
       const embeds = [{
         author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-aitrading.app/novo-icon.png?v=4' },
         title, description: _cap(_bold(_prose)), color, fields,
-        footer: { text: 'NoVo — market analysis & education, not trade signals.' },
+        footer: { text: 'NoVo — market analysis & education.' },
         timestamp: new Date().toISOString(),
       }];
       if (chartUrl) embeds[0].image = { url: chartUrl };
@@ -684,7 +684,7 @@ export default async function handler(req, res) {
           discordCta +
           `<div style="margin-top:26px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">${upsellHtml}</div>` +
           (bottomNote || '') +
-          '<p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only — not financial advice, and not trade signals. Trading involves substantial risk of loss.</p>' +
+          '<p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only — not financial advice. Trading involves substantial risk of loss.</p>' +
         '</div>' +
         '<div style="text-align:center;font-size:11px;color:#6f8bab;padding:14px 8px;">You are subscribed to NoVo email updates. <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#6f8bab;text-decoration:underline;">Unsubscribe</a></div>' +
       '</div>' +
