@@ -482,11 +482,13 @@
     $('fear-marker').style.left = pct + '%';
   }
 
-  // Market ribbon — BTC / Gold / Crude / Nasdaq / Russell from the store's public /api/quotes (60s CDN-cached).
+  // Market ribbon — a pure 24/5 FUTURES strip from the store's public /api/quotes (60s CDN-cached): the equity
+  // E-minis (ES/NQ/YM/RTY) + Gold/Crude, so it tracks live Sun 6pm→Fri 5pm ET instead of freezing at the cash
+  // close. BTC (24/7 crypto), the Dollar index and the 10Y cash yield were pulled — only clean 24/5 futures here.
   async function loadRibbon(){
     try {
       var r = await fetch('/api/quotes', { cache: 'no-store' }); if (!r.ok) return;
-      var d = await r.json(), order = ['Dow','Nasdaq','Russell','Gold','Crude','BTC','Dollar','10Y'];
+      var d = await r.json(), order = ['S&P 500','Nasdaq','Dow','Russell','Gold','Crude'];
       var html = order.filter(function(n){ return d[n]; }).map(function(n){
         var q = d[n], up = (q.chg || 0) >= 0;
         return '<div class="rib"><span class="rib-n">'+n+'</span><span class="rib-p">'+_escH(q.price)+'</span>'
