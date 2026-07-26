@@ -230,7 +230,7 @@
          mobile reflow: gamma → strip (3 ticker boxes) → The Line (so The Line sits under the boxes) -->
     <div class="lv-bottom">
       <div class="lv-card b-gamma"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
-      <div class="lv-card b-line"><h2>'The Line' — SPY level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time SPY level-break playbooks &mdash; QQQ tends to follow; IWM (small-caps) is its own market, so read its map on its own.</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li></ul></div>
+      <div class="lv-card b-line"><h2>'The Line' — <span id="ln-tk">SPY</span> level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time level-break playbooks for the ticker you trade &mdash; SPY, QQQ and IWM each read their own dealer map (QQQ tracks SPY loosely; IWM, the small-caps, is its own market).</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next level event…</li></ul></div>
       <div class="lv-strip b-strip" id="strip"></div>
     </div>
 
@@ -449,10 +449,12 @@
       $('read-t').textContent = 'Next read publishes before the bell.';
       $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
     }
+    var _tk = (STATE && STATE.exec_ticker) || 'SPY';   // The Line follows whichever ticker the engine is watching
+    try { var _lnTk = $('ln-tk'); if (_lnTk) _lnTk.textContent = _tk; } catch(e){}
     var feed = $('feed');
     if (STATE.line_feed && STATE.line_feed.length){
       feed.innerHTML = STATE.line_feed.map(function(f){
-        var head = '<span class="ts">'+_escH(f.ts)+'</span>SPY '+_escH(f.text)+(f.now!=null ? ' <span class="now">(&rarr; '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
+        var head = '<span class="ts">'+_escH(f.ts)+'</span>'+_escH(_tk)+' '+_escH(f.text)+(f.now!=null ? ' <span class="now">(&rarr; '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
         if (f.bias){ var bc = f.bias==='BULLISH' ? ['rgba(16,185,129,.14)','#34d399'] : (f.bias==='BEARISH' ? ['rgba(239,68,68,.14)','#f87171'] : ['rgba(148,163,184,.14)','#b3c2d6']); head += '<span class="lbias" style="background:'+bc[0]+';color:'+bc[1]+';">'+_escH(f.bias)+'</span>'; }
         var body = '';
         if (f.hold)  body += '<span class="ln">'+_escH(f.hold)+'</span>';
@@ -461,7 +463,7 @@
         return '<li>'+head+body+'</li>';
       }).join('');
     }
-    else { feed.innerHTML = '<li style="border:0;color:var(--txt3);">Waiting for the next SPY level event…</li>'; }   // clear stale entries when the feed is empty/new-session
+    else { feed.innerHTML = '<li style="border:0;color:var(--txt3);">Waiting for the next '+_escH(_tk)+' level event…</li>'; }   // clear stale entries when the feed is empty/new-session
   }
 
   // VIX fear gauge — parse the engine's published vol_env line ("… VIX 15.0 — 11th percentile … (very low vol).")
