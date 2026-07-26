@@ -488,13 +488,10 @@ export default async function handler(req, res) {
     levelsTable = `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${colCell('Resistance',res,'#f87171')}${colCell('Support',sup,'#34d399')}</tr></table>`;
   }
 
-  // ── Also fan out to Discord (best-effort) as a rich embed. Alerts -> the alerts channel, full reads -> #novo-analysis.
-  // Alerts go ONLY to DISCORD_ALERTS_WEBHOOK — NEVER fall back into the reads channel. So unsetting that env var
-  // cleanly stops all Discord alert posts (the PWA push below still fires) — the clean off-switch for deleting the
-  // alerts channel entirely. Reads keep using the analyst reads webhook as before.
-  const discordWebhook = (kind === 'alert')
-    ? (process.env.DISCORD_ALERTS_WEBHOOK || '')
-    : process.env.DISCORD_ANALYST_WEBHOOK;
+  // ── Also fan out to Discord (best-effort) as a rich embed → #novo-analysis. The engine no longer emits
+  // kind='alert' at all (The Line, the gamma squeeze, and the regime flip are dashboard-only now) and the old
+  // #novo-alerts channel is deleted — so there's no alerts webhook to reference. Reads use the analyst webhook.
+  const discordWebhook = process.env.DISCORD_ANALYST_WEBHOOK;
   // Alerts (kind=alert) ALWAYS fan out to Discord — they're Discord-only now (engine sends them send=false).
   // Full reads hit Discord when emailed (send=true) — EXCEPT the free-list Mid-Day sales email (audience=free),
   // which is a conversion pitch for the free list and must never post to the PAID #novo-analysis channel.
