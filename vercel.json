@@ -110,6 +110,10 @@
       "destination": "/options-101.html"
     },
     {
+      "source": "/0dte",
+      "destination": "/0dte.html"
+    },
+    {
       "source": "/help",
       "destination": "/help.html"
     },
