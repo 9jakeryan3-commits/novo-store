@@ -155,7 +155,7 @@ async function hasOtherActivePaidSub(email, excludeSubId) {
   } catch (e) { console.error(`[webhook-sub] other-active-sub check failed: ${e.message}`); }
   return false;
 }
-// Trader INCLUDES Analyst, so holding both bills $79 + $199 for ONE entitlement. On a Trader checkout, retire
+// Trader INCLUDES Analyst, so holding both bills $79 + $169 for ONE entitlement. On a Trader checkout, retire
 // any Analyst subscription this email still holds. Stripe mints a SEPARATE customer per checkout, so an
 // upgrader's Analyst sub usually sits on a DIFFERENT customer object that merely shares the email — hence the
 // search()+list() sweep (same shape as hasOtherActivePaidSub).
@@ -377,7 +377,7 @@ const handler = async (req, res) => {
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
       // REVERSE-DUPLICATE GUARD: they already hold Trader, which INCLUDES Analyst. Left alone this bills
-      // $199 + $79 for one entitlement. Analyst opens on a 7-day trial, so cancelling here almost always
+      // $169 + $79 for one entitlement. Analyst opens on a 7-day trial, so cancelling here almost always
       // means they are never charged at all. Non-fatal: a failure must not block the normal Analyst flow.
       try {
         const already = await hasActiveTraderSub(email, obj.subscription);
@@ -445,7 +445,7 @@ const handler = async (req, res) => {
 
     // SAME-TIER DUPLICATE GUARD: this email already holds ANOTHER active Trader sub. checkout-sub.js is an
     // anonymous checkout (no customer passed), so Stripe mints a fresh customer + sub every time — an
-    // already-active Trader who clicks Subscribe again (or a double-fire) is billed a SECOND $199 for one
+    // already-active Trader who clicks Subscribe again (or a double-fire) is billed a SECOND $169 for one
     // instance. Cancel the duplicate + notify. Mirrors the Analyst reverse-dupe guard above. Non-fatal.
     try {
       if (await hasActiveTraderSub(email, obj.subscription)) {
@@ -455,7 +455,7 @@ const handler = async (req, res) => {
           charged = sub.status !== 'trialing';
           await stripe.subscriptions.cancel(obj.subscription);
           // Cancelling does NOT refund the just-captured invoice — auto-refund it so a double-subscribe never
-          // leaves the customer out $199 pending a manual support refund (audit 2026-07-20).
+          // leaves the customer out $169 pending a manual support refund (audit 2026-07-20).
           if (charged) refunded = await _refundLatest(sub);
         } catch (e) { console.error(`[webhook-sub] dupe-trader cancel/refund failed: ${e.message}`); }
         console.log(`[webhook-sub] duplicate Trader purchase by active Trader ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
@@ -482,7 +482,7 @@ const handler = async (req, res) => {
     await freeRemove(email);   // paid now → off the free list (Weekly + articles reach them via the Analyst broadcasts)
 
     // UPGRADE PATH: retire any Analyst sub this email holds. Trader includes Analyst, so leaving it running
-    // billed the customer $79 + $199 = $278/mo for one entitlement. Non-fatal.
+    // billed the customer $79 + $169 = $278/mo for one entitlement. Non-fatal.
     try {
       const retired = await retireAnalystOnTraderUpgrade(email, obj.subscription);
       if (retired.length) console.log(`[webhook-sub] trader upgrade — retired analyst sub(s): ${retired.join(', ')}`);
