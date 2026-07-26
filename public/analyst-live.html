@@ -222,7 +222,7 @@
       <div id="f-whales" style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6;"></div>
     </div>
     <div class="lv-card" id="anlg-card" style="margin-top:16px;">
-      <h2>Today looks like… <span style="font-size:11px;color:var(--txt3);font-weight:400;">closest historical SPY dealer setups &amp; how they resolved</span></h2>
+      <h2>Today looks like… <span style="font-size:11px;color:var(--txt3);font-weight:400;">closest historical <span id="anlg-tk">SPY</span> dealer setups &amp; how they resolved</span></h2>
       <div id="anlg-body" style="font-size:13px;color:var(--txt2);line-height:1.6;">—</div>
     </div>
 
@@ -413,7 +413,7 @@
       var div = document.createElement('div'); div.className='lv-mini';
       div.innerHTML = '<div class="t">'+_escH(d.ticker)+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
         '<div class="r"><span class="'+(pos?'grn':'red')+'">'+(pos?'dampening':'amplifying')+'</span> · GEX '+_gexMoney(d.net_gex)+(d.em_daily!=null?(' · EM ±'+(d.em_daily_pct||0).toFixed(1)+'%'):'')+(d.skew_pts!=null?(' · skew '+(d.skew_pts>=0?'+':'')+d.skew_pts.toFixed(1)):'')+'</div>';
-      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); });
+      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); });
       el.appendChild(div);
     });
   }
@@ -449,11 +449,12 @@
       $('read-t').textContent = 'Next read publishes before the bell.';
       $('read-b').textContent = 'The Open, The Close, and the Sunday Week Ahead land here as they publish — plus real-time ‘The Line’ level-break alerts through the session.';
     }
-    var _tk = (STATE && STATE.exec_ticker) || 'SPY';   // The Line follows whichever ticker the engine is watching
+    var _tk = CUR || (STATE && STATE.exec_ticker) || 'SPY';   // The Line shows whichever ticker the viewer SELECTED
     try { var _lnTk = $('ln-tk'); if (_lnTk) _lnTk.textContent = _tk; } catch(e){}
+    var _lf = (STATE.line_feeds && STATE.line_feeds[_tk]) || (_tk===((STATE&&STATE.exec_ticker)||'SPY') ? STATE.line_feed : null) || [];
     var feed = $('feed');
-    if (STATE.line_feed && STATE.line_feed.length){
-      feed.innerHTML = STATE.line_feed.map(function(f){
+    if (_lf && _lf.length){
+      feed.innerHTML = _lf.map(function(f){
         var head = '<span class="ts">'+_escH(f.ts)+'</span>'+_escH(_tk)+' '+_escH(f.text)+(f.now!=null ? ' <span class="now">(&rarr; '+_escH(Number(f.now).toFixed(2))+')</span>' : '');
         if (f.bias){ var bc = f.bias==='BULLISH' ? ['rgba(16,185,129,.14)','#34d399'] : (f.bias==='BEARISH' ? ['rgba(239,68,68,.14)','#f87171'] : ['rgba(148,163,184,.14)','#b3c2d6']); head += '<span class="lbias" style="background:'+bc[0]+';color:'+bc[1]+';">'+_escH(f.bias)+'</span>'; }
         var body = '';
@@ -520,10 +521,12 @@
 
   function renderAnalogues(){
     var box=$('anlg-body'); if(!box) return;
-    var a = STATE && STATE.analogues;
+    var _tk = CUR || (STATE && STATE.exec_ticker) || 'SPY';   // analogues for the SELECTED ticker
+    try { var _aTk=$('anlg-tk'); if(_aTk) _aTk.textContent=_tk; } catch(e){}
+    var a = (STATE && STATE.analogues_by && STATE.analogues_by[_tk]) || (_tk==='SPY' ? (STATE && STATE.analogues) : null);
     if (!a || a.status==='accruing'){
       var n = (a && a.rows)||0;
-      box.innerHTML = '<span style="color:var(--txt3)">Building history — closest-match analogues appear once enough sessions accrue ('+n+' snapshots logged so far).</span>';
+      box.innerHTML = '<span style="color:var(--txt3)">Building '+_escH(_tk)+' history — closest-match analogues appear once enough sessions accrue ('+n+' snapshots logged so far).</span>';
       return;
     }
     var rows = a.analogues||[];
@@ -554,7 +557,7 @@
     } catch(_) { _neverBlank(); }
   }
 
-  document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); } });
+  document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); } });
 
   var _pollTimer = null, _ribTimer = null, _polling = false;
   async function _pollGuarded(){ if(_polling) return; _polling = true; try { await poll(); } finally { _polling = false; } }  // in-flight guard: a slow (mobile) poll can't stack on the next tick
