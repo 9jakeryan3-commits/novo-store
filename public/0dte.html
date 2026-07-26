@@ -25,14 +25,44 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"0DTE Options Trading — The Complete SPY Scalping Guide","description":"Everything on trading SPY 0DTE options: mechanics, strike selection, risk, timing, spreads, brokers and tools — plain-English guides from the NoVo Journal.","url":"https://novo-aitrading.app/0dte","isPartOf":{"@type":"WebSite","name":"NoVo AI Trading","url":"https://novo-aitrading.app"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}}}
 </script>
+<style>
+  /* Options-101 curriculum styles (this page mirrors that layout; blog.css carries nav/ticker/footer only). */
+  .learn-intro { max-width: 760px; margin: 0 auto 8px; padding: 0 24px; text-align: center; }
+  .learn-intro p { font-size: 16px; color: var(--txt2); line-height: 1.7; }
+  .lead-note { font-size: 13px; color: var(--txt3); margin-top: 12px; }
+  .learn-wrap { max-width: 1000px; margin: 0 auto; padding: 8px 24px 8px; }
+  .mod { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 16px; padding: 26px 26px 12px; margin: 0 0 20px; box-shadow: 0 6px 24px rgba(0,0,0,.28); }
+  .mod-head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+  .mod-num { flex-shrink: 0; font-family: 'Space Grotesk','Inter',sans-serif; font-size: 30px; font-weight: 800; color: #22d3ee; line-height: 1; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(34,211,238,.3); border-radius: 12px; background: rgba(34,211,238,.06); }
+  .mod-head h2 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 21px; font-weight: 800; color: var(--txt1); letter-spacing: -.4px; margin: 4px 0 4px; }
+  .mod-head p { font-size: 14px; color: var(--txt2); line-height: 1.55; margin: 0; }
+  .mod-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .mod-steps li { margin: 0; }
+  .mod-steps a { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border: 1px solid var(--bdr); border-radius: 10px; padding: 13px 15px; text-decoration: none; transition: border-color .15s, transform .15s, background .15s; height: 100%; }
+  .mod-steps a:hover { border-color: rgba(34,211,238,.45); transform: translateY(-2px); background: #1c1d21; }
+  .step-n { flex-shrink: 0; font-size: 11px; font-weight: 800; color: var(--txt3); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 2px; min-width: 20px; }
+  .step-body { min-width: 0; }
+  .step-t { display: block; font-size: 14.5px; font-weight: 700; color: var(--txt1); line-height: 1.3; }
+  .step-d { display: block; font-size: 12.5px; color: var(--txt2); line-height: 1.45; margin-top: 3px; }
+  .path-handoff { max-width: 1000px; margin: 8px auto 0; padding: 0 24px; }
+  .path-handoff a { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: center; text-align: center; background: linear-gradient(180deg, rgba(34,211,238,.07), var(--navy2) 60%); border: 1px solid rgba(34,211,238,.3); border-radius: 14px; padding: 24px; text-decoration: none; }
+  .path-handoff .ph-t { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 19px; font-weight: 800; color: var(--txt1); letter-spacing: -.3px; }
+  .path-handoff .ph-s { font-size: 14px; color: var(--txt2); }
+  .path-handoff .ph-go { font-size: 14px; font-weight: 800; color: #22d3ee; }
+  @media (max-width: 560px) {
+    .mod { padding: 20px 16px 10px; }
+    .mod-num { width: 44px; height: 44px; font-size: 24px; }
+    .mod-steps { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
 <nav><div class="nav-inner">
   <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=1" alt="NoVo"></a>
   <div class="nav-actions">
-    <a class="nav-link" href="/">NoVo Trader</a> <a class="nav-link" href="/options-101">Options 101</a> <a class="nav-link" href="/0dte">0DTE Guide</a> <a class="nav-link" href="/journal/">The Journal</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
-    <a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Subscribe</a>
+    <a class="nav-link" href="/">NoVo Trader</a> <a class="nav-link" href="/options-101">Options 101</a> <a class="nav-link" href="/journal/">The Journal</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
+    <a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Subscribe</a><a class="nav-portal" href="https://app.novo-aitrading.app/status" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
   </div>
 </div></nav>
 
