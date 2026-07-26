@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPY Gamma Exposure (GEX) Dashboard for 0DTE — NoVo Analyst</title>
-<meta name="description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE options — net GEX, gamma flip, dealer walls, gravity, expected move &amp; skew, a gamma-squeeze signal, live options flow (call vs put demand) and historical analogues — plus a written market read every session and real-time level-break + squeeze alerts. The read the desks pay for, in plain English. $79/mo, 7-day free trial.">
+<meta name="description" content="A live gamma exposure (GEX) dashboard for SPY 0DTE options — net GEX, gamma flip, dealer walls, gravity, expected move &amp; skew, a gamma-squeeze signal, live options flow (call vs put demand) and historical analogues — plus a written market read every session and real-time per-ticker level-break + squeeze signals. The read the desks pay for, in plain English. $79/mo, 7-day free trial.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-aitrading.app/analyst">
 <meta property="og:title" content="SPY Gamma Exposure (GEX) Dashboard for 0DTE — NoVo Analyst">
@@ -37,7 +37,7 @@
       "name": "NoVo",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
-      "description": "NoVo Analyst is a live SPY/QQQ/IWM dealer-positioning read — net GEX, the gamma flip, dealer walls, gravity, expected move, skew and fast/slow MM skew, a gamma-squeeze signal, live options flow (call vs put demand) and historical analogues — with a written desk-note market read every session and real-time level-break + squeeze alerts — the dealer-positioning intelligence desks pay hundreds for, in plain English.",
+      "description": "NoVo Analyst is a live SPY/QQQ/IWM dealer-positioning read — net GEX, the gamma flip, dealer walls, gravity, expected move, skew and fast/slow MM skew, a gamma-squeeze signal, live options flow (call vs put demand) and historical analogues — with a written desk-note market read every session and real-time per-ticker level-break + squeeze signals — the dealer-positioning intelligence desks pay hundreds for, in plain English.",
       "image": "https://novo-aitrading.app/og-home.png",
       "url": "https://novo-aitrading.app/analyst"
     },
@@ -47,7 +47,7 @@
         {
           "@type": "Question",
           "name": "Is this trade signals?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No. NoVo Analyst is a structural read of dealer positioning — the map, the levels, and what tends to follow, with real-time level-break and gamma-squeeze alerts. It never tells you to buy calls here; it shows you where the market is on the map and you make the call." }
+          "acceptedAnswer": { "@type": "Answer", "text": "No. NoVo Analyst is a structural read of dealer positioning — the map, the levels, and what tends to follow, with real-time per-ticker level-break and gamma-squeeze signals. It never tells you to buy calls here; it shows you where the market is on the map and you make the call." }
         },
         {
           "@type": "Question",
@@ -508,7 +508,7 @@
       <div class="feature"><div class="feature-icon">📊</div><div><h4>ATM IV &amp; IV rank</h4><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
       <div class="feature"><div class="feature-icon">🪐</div><div><h4>Gravity &middot; the magnet</h4><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
       <div class="feature"><div class="feature-icon">🌡️</div><div><h4>Fast / Slow MM skew</h4><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
-      <div class="feature"><div class="feature-icon">⚡</div><div><h4>Gamma squeeze signal</h4><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Fires an alert the moment it arms.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚡</div><div><h4>Gamma squeeze signal</h4><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Live on the dashboard the moment it arms, for whichever ticker you&rsquo;re watching.</p></div></div>
       <div class="feature"><div class="feature-icon">📈</div><div><h4>Options flow &middot; call vs put demand</h4><p>Which side the volume is building on across the SPY chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h4>Historical analogues</h4><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
     </div>
@@ -544,7 +544,7 @@
     <div class="ai-grid" style="margin-top:20px;">
       <div class="ai-card"><div class="ai-card-label" style="color:#22d3ee;">In your inbox</div><h3>The Open &middot; The Close &middot; The Week Ahead</h3><p>A morning desk note, a closing read, and a Sunday week-ahead &mdash; each grounded in the live dealer map and this week's real catalysts, in plain English.</p></div>
       <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>&lsquo;The Line&rsquo; level-break playbooks</h3><p>When SPY, QQQ or IWM breaks or reclaims a MAJOR level, an instant hold-or-break playbook lands on your dashboard &mdash; for whichever ticker you&rsquo;re watching. The same deterministic read every time.</p></div>
-      <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>Gamma-squeeze alerts</h3><p>When dealers go short gamma and price breaks the flip &mdash; the setup where moves extend instead of fading &mdash; NoVo fires a squeeze alert to the app and Discord, and to your device on Trader. Momentum over mean-reversion, called the moment it arms.</p></div>
+      <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>Gamma-squeeze signal</h3><p>When dealers go short gamma and price breaks the flip &mdash; the setup where moves extend instead of fading &mdash; it lands live on your dashboard the moment it arms, for the ticker you&rsquo;re watching (and pushes to your phone on Trader). Momentum over mean-reversion.</p></div>
     </div>
   </div>
 </div>
@@ -647,7 +647,7 @@
         <li>Private Analyst Discord — the reads channel + the &lsquo;Trader Floor&rsquo;</li>
         <li>Plain-English read — a bottom line + every term explained</li>
         <li>VIX fear gauge + 24/5 futures ribbon</li>
-        <li><b style="color:var(--txt1)">Gamma-squeeze signal &amp; alert</b> — when dealers flip to amplifying</li>
+        <li><b style="color:var(--txt1)">Gamma-squeeze signal</b> — live on the dashboard, per ticker, when dealers flip to amplifying</li>
         <li><b style="color:var(--txt1)">Options flow</b> — live call vs put demand + unusual-volume strikes</li>
         <li><b style="color:var(--txt1)">Historical analogues</b> — &ldquo;today looks like…&rdquo; with how it resolved</li>
       </ul>
@@ -721,7 +721,7 @@
 
       <details class="faq-item">
         <summary class="faq-q">Is this trade signals?</summary>
-        <div class="faq-a"><strong>No.</strong> NoVo Analyst is a structural read of dealer positioning &mdash; the map, the levels, and what tends to follow, with real-time level-break and gamma-squeeze alerts. It never tells you to &ldquo;buy calls here&rdquo;; it shows you where the market is on the map and you make the call.</div>
+        <div class="faq-a"><strong>No.</strong> NoVo Analyst is a structural read of dealer positioning &mdash; the map, the levels, and what tends to follow, with real-time per-ticker level-break and gamma-squeeze signals. It never tells you to &ldquo;buy calls here&rdquo;; it shows you where the market is on the map and you make the call.</div>
       </details>
 
       <details class="faq-item">
