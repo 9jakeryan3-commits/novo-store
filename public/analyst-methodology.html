@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Methodology — How NoVo Reads Dealer Positioning | NoVo Analyst</title>
-<meta name="description" content="How NoVo Analyst computes the dealer-positioning read — net GEX, the gamma flip, call/put walls, gravity, expected move, and put/call skew. Standard, transparent market-structure analytics for SPY, QQQ & IWM.">
+<meta name="description" content="How NoVo Analyst computes the dealer-positioning read — net GEX, the gamma flip, call/put walls, gravity, expected move, put/call skew, and the in-house order-flow tape (sweeps, blocks & dark pool). Standard, transparent market-structure analytics for SPY, QQQ & IWM.">
 <link rel="canonical" href="https://novo-aitrading.app/analyst/methodology">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://novo-aitrading.app/analyst/methodology">
@@ -117,6 +117,12 @@
     <div class="m-tag">The Fear Premium</div>
     <h2>Put/Call Skew</h2>
     <p><b>Skew</b> is the 25-delta risk reversal &mdash; the implied vol of a 25-delta put minus a 25-delta call, in vol points. Because indices fall faster than they rise, puts almost always cost more, so a <b>positive</b> reading is normal &mdash; it measures how much <b>downside hedging demand</b> (fear) is bid into the tape. A skew that steepens flags rising hedging; one that flattens or inverts flags complacency or an upside chase.</p>
+  </div>
+
+  <div class="m-card">
+    <div class="m-tag">The Order-Flow Footprint</div>
+    <h2>Sweeps, Blocks &amp; Dark Pool</h2>
+    <p>The dealer map tells you where the pressure sits; the <b>print tape</b> tells you who's acting on it. We read the live time-and-sales tape for SPY, QQQ and IWM and tag three things. A <b>sweep</b> is one order deliberately shredded across multiple exchanges at once to get filled immediately &mdash; an urgent, aggressive footprint, tagged by which side crossed the spread (call-buying leans bullish, put-buying bearish). A <b>block</b> is a single oversized print &mdash; size that moves on conviction, not accident. <b>Dark-pool</b> volume is trading printed to off-exchange (FINRA) venues &mdash; the institutional accumulation or distribution that doesn't show on the lit book. It's the same tape the flow desks read, computed <b>in-house</b> off the live feed &mdash; no third-party flow vendor between you and the print.</p>
   </div>
 
   <div class="m-line">
