@@ -7,12 +7,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Options Flow: Sweeps, Blocks &amp; Dark Pool, Explained | The NoVo Journal</title>
-<meta name="description" content="Sweeps, block trades and dark-pool prints are the order-flow footprint sitting next to the dealer map. Here's what each one actually is, how to read it, and how NoVo computes all three in-house off the live tape for SPY, QQQ and IWM.">
+<meta name="description" content="Sweeps, block trades and dark-pool prints are the order-flow footprint sitting next to the dealer map. Here's what each one actually is, how to read it, and how NoVo reads sweeps and blocks in-house off the live tape for SPY, QQQ and IWM.">
 <link rel="canonical" href="https://novo-aitrading.app/journal/options-flow-sweeps-blocks-dark-pool.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://novo-aitrading.app/journal/options-flow-sweeps-blocks-dark-pool.html">
 <meta property="og:title" content="Sweeps, Blocks &amp; Dark Pool">
-<meta property="og:description" content="The order-flow footprint next to the dealer map — sweeps, blocks and dark-pool prints, read off the live tape.">
+<meta property="og:description" content="The order-flow footprint next to the dealer map — sweeps and block prints, read off the live tape.">
 <meta property="og:image" content="https://novo-aitrading.app/journal/covers/novo-cover.png">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="600">
@@ -23,7 +23,7 @@
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="stylesheet" href="/journal/blog.css?v=12">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"Options Flow: Sweeps, Blocks & Dark Pool, Explained","description":"Sweeps, block trades and dark-pool prints are the order-flow footprint sitting next to the dealer map. What each one is, how to read it, and how NoVo computes all three in-house off the live tape for SPY, QQQ and IWM.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-26","mainEntityOfPage":"https://novo-aitrading.app/journal/options-flow-sweeps-blocks-dark-pool.html"}
+{"@context":"https://schema.org","@type":"Article","headline":"Options Flow: Sweeps, Blocks & Dark Pool, Explained","description":"Sweeps, block trades and dark-pool prints are the order-flow footprint sitting next to the dealer map. What each one is, how to read it, and how NoVo reads sweeps and blocks in-house off the live tape for SPY, QQQ and IWM.","image":"https://novo-aitrading.app/journal/covers/novo-cover.png","author":{"@type":"Organization","name":"NoVo AI Trading"},"publisher":{"@type":"Organization","name":"NoVo AI Trading","logo":{"@type":"ImageObject","url":"https://novo-aitrading.app/novo-logo.png"}},"datePublished":"2026-07-26","mainEntityOfPage":"https://novo-aitrading.app/journal/options-flow-sweeps-blocks-dark-pool.html"}
 </script>
 </head>
 <body>
@@ -63,7 +63,7 @@
 <p>On its own, flow is anecdotes. Layered onto the <a href="/journal/guide-market-structure-dealer-flow.html">dealer map</a>, it becomes context. A wall of call sweeps into the <a href="/journal/gamma-walls-explained.html">call wall</a> is a very different story from the same sweeps in open air. Dark-pool accumulation under the put wall while dealers sit long gamma says one thing; the same prints in a negative-gamma regime says another. The map gives you the structure; the flow tells you whether anyone is pushing against it right now.</p>
 
 <h2>Getting it without a flow terminal</h2>
-<p>Reading raw time-and-sales for three tickers all session is not realistic by hand, and dedicated flow terminals run hundreds of dollars a month. <a href="/analyst">NoVo Analyst</a> computes all three &mdash; sweeps, blocks and dark pool &mdash; <strong>in-house off the live tape</strong> for SPY, QQQ and IWM, right on the dealer-map dashboard: sweep bias and call-versus-put sweep premium, the block count and notional, and dark-pool volume with its accumulation/distribution lean, per ticker, updating through the session. It's the order-flow footprint sitting next to the net-GEX regime, the gamma flip, and the walls &mdash; one read, no third-party feed between you and the print. See <a href="/journal/dealer-flow-analysis-for-retail.html">dealer-flow analysis for retail</a> and <a href="/journal/what-a-daily-market-read-gives-you.html">what the daily read gives you</a>.</p>
+<p>Reading raw time-and-sales for three tickers all session is not realistic by hand, and dedicated flow terminals run hundreds of dollars a month. <a href="/analyst">NoVo Analyst</a> reads the two you can act on &mdash; <strong>sweeps and blocks</strong> &mdash; <strong>in-house off the live tape</strong> for SPY, QQQ and IWM, right on the dealer-map dashboard: sweep bias and call-versus-put sweep premium, plus the block count and notional, per ticker, updating through the session. (Dark pool is an off-exchange <em>equity</em> print that the consolidated options-tape feed doesn't isolate, so it isn't part of the read.) It's the order-flow footprint sitting next to the net-GEX regime, the gamma flip, and the walls &mdash; one read, no third-party feed between you and the print. See <a href="/journal/dealer-flow-analysis-for-retail.html">dealer-flow analysis for retail</a> and <a href="/journal/what-a-daily-market-read-gives-you.html">what the daily read gives you</a>.</p>
   </div>
 
   <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/dark-pools-explained.html">Dark Pools, Explained</a> &middot; <a href="/journal/how-market-makers-hedge.html">How Market Makers Hedge</a> &middot; <a href="/journal/gamma-levels-vs-options-flow.html">Gamma Levels vs. Options Flow</a></p>
@@ -80,7 +80,7 @@
       <div class="cta-card cta-card-analyst">
         <div class="cta-tag">NoVo Analyst &middot; $79/mo</div>
         <h4>Just want the read?</h4>
-        <p>The live dealer map &mdash; dealer positioning, options flow, and in-house sweeps, blocks &amp; dark-pool prints &mdash; plus a written market read every session, to your inbox, the dashboard, and the private Analyst Discord. Structure, levels, and the order-flow footprint.</p>
+        <p>The live dealer map &mdash; dealer positioning, options flow, and in-house sweeps &amp; block prints &mdash; plus a written market read every session, to your inbox, the dashboard, and the private Analyst Discord. Structure, levels, and the order-flow footprint.</p>
         <a class="btn-cta btn-cta-analyst" href="/analyst">Get NoVo Analyst &mdash; free trial &rarr;</a>
       </div>
     </div>
