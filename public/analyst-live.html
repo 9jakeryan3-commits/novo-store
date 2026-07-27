@@ -222,6 +222,16 @@
       </div>
       <div id="f-whales" style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6;"></div>
     </div>
+    <div class="lv-card" id="tape-card" style="margin-top:16px;display:none;">
+      <h2 id="tape-h">SPY · Sweeps, blocks &amp; dark pool <span style="font-size:11px;color:var(--txt3);font-weight:400;">live off the print tape — aggressor-tagged buy/sell prints</span></h2>
+      <div class="lv-tiles flow-tiles">
+        <div class="lv-tile"><div class="k">Sweep bias</div><div class="v" id="t-bias">—</div><div class="s" id="t-bias-s">multi-venue aggressor sweeps</div></div>
+        <div class="lv-tile"><div class="k">Call / Put sweeps</div><div class="v" id="t-sweeps">—</div><div class="s">premium, last ~45m</div></div>
+        <div class="lv-tile"><div class="k">Blocks</div><div class="v" id="t-blocks">—</div><div class="s" id="t-blocks-s">large single prints</div></div>
+        <div class="lv-tile"><div class="k">Dark pool</div><div class="v" id="t-dark">—</div><div class="s" id="t-dark-s">off-exchange underlying</div></div>
+      </div>
+      <div id="t-feed" style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.7;"></div>
+    </div>
     <div class="lv-card" id="anlg-card" style="margin-top:16px;">
       <h2>Today looks like… <span style="font-size:11px;color:var(--txt3);font-weight:400;">closest historical <span id="anlg-tk">SPY</span> dealer setups &amp; how they resolved</span></h2>
       <div id="anlg-body" style="font-size:13px;color:var(--txt2);line-height:1.6;">—</div>
@@ -293,6 +303,7 @@
       var _msg = (STATE && STATE.updated_at) ? '— unavailable this session' : '— loading…';
       ['d-spot','d-gex','d-flip','d-cw','d-pw','d-grav','d-em','d-sk','d-mm','f-lean','f-pc','f-cv','f-pv'].forEach(function(id){ var e=$(id); if(e) e.textContent='—'; });
       var _sh=$('d-sqz-hero'); if(_sh) _sh.style.display='none'; $('f-whales').textContent='';
+      var _tc=$('tape-card'); if(_tc) _tc.style.display='none';
       $('d-reg').innerHTML='<span style="color:var(--txt3)">'+_msg+'</span>'; $('d-gex-s').textContent=''; $('d-em-s').textContent=''; $('d-sk-s').textContent='';
       $('chart').style.display='none';
       var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
@@ -341,6 +352,7 @@
       }
     }
     renderFlow(d);
+    renderTapeFlow(d);
     // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
     // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
     // (never QQQ/IWM, which would mislabel), so the card isn't blank until the new engine restarts.
@@ -520,6 +532,41 @@
     if (w.length){
       $('f-whales').innerHTML = '<b>Unusual volume:</b> ' + w.map(function(x){ return '<span style="color:'+(x.side==='CALL'?'#22c55e':'#ef4444')+'">'+_escH(String(x.side).toLowerCase())+' '+_f(x.strike)+'</span> ('+Number(x.vol).toLocaleString()+')'; }).join('  ·  ');
     } else { $('f-whales').textContent=''; }
+  }
+
+  function _usd(n){ n=Number(n)||0; var a=Math.abs(n);
+    if(a>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+    if(a>=1e3) return '$'+Math.round(n/1e3)+'K';
+    return '$'+Math.round(n); }
+
+  function renderTapeFlow(d){
+    var card=$('tape-card'); if(!card) return;
+    var t = d && d.tape_flow;
+    // Absent (Tradier-only box) or stale (tape stopped) -> hide the whole panel rather than show dashes.
+    if (!t || t.stale){ card.style.display='none'; return; }
+    card.style.display='block';
+    $('tape-h').innerHTML = CUR + ' · Sweeps, blocks &amp; dark pool <span style="font-size:11px;color:var(--txt3);font-weight:400;">live off the print tape — aggressor-tagged buy/sell prints</span>';
+    var cs=Number(t.call_sweep_prem)||0, ps=Number(t.put_sweep_prem)||0;
+    var bias=t.sweep_bias||'balanced';
+    $('t-bias').textContent = bias.charAt(0).toUpperCase()+bias.slice(1);
+    $('t-bias').className = 'v ' + (bias==='bullish'?'grn':bias==='bearish'?'red':'');
+    var sc=Number(t.sweep_count)||0;
+    $('t-bias-s').textContent = sc? (sc+' sweep'+(sc===1?'':'s')+' · last ~45m') : 'no sweeps yet';
+    $('t-sweeps').innerHTML = '<span style="color:#22c55e">'+_usd(cs)+'</span> / <span style="color:#ef4444">'+_usd(ps)+'</span>';
+    var bc=Number(t.block_count)||0, bn=Number(t.block_notional)||0;
+    $('t-blocks').textContent = bc? String(bc) : '—';
+    $('t-blocks-s').textContent = bc? (_usd(bn)+' total') : 'large single prints';
+    var dn=Number(t.darkpool_notional)||0, db=t.darkpool_bias||'';
+    $('t-dark').textContent = dn? _usd(dn) : '—';
+    $('t-dark').className = 'v ' + (db==='accumulation'?'grn':db==='distribution'?'red':'');
+    $('t-dark-s').textContent = dn? (db||'off-exchange underlying') : 'off-exchange underlying';
+    var feed = t.feed||[];
+    if (feed.length){
+      $('t-feed').innerHTML = feed.map(function(x){
+        var txt=String(x.text||''); var col = /call|accum|bull/i.test(txt)?'#22c55e' : /put|distrib|bear/i.test(txt)?'#ef4444' : 'var(--txt2)';
+        return '<div style="padding:3px 0;border-bottom:1px solid rgba(128,128,128,0.12)"><span style="color:var(--txt3)">'+_escH(String(x.ts||''))+'</span> · <span style="color:'+col+'">'+_escH(txt)+'</span></div>';
+      }).join('');
+    } else { $('t-feed').innerHTML='<span style="color:var(--txt3)">Watching the tape — sweeps, blocks &amp; dark-pool prints appear here as they hit.</span>'; }
   }
 
   function renderAnalogues(){
