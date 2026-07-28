@@ -235,15 +235,17 @@
   .ss-fan { position: relative; height: 600px; margin-top: 40px; }
   .ss-fan-card { position: absolute; top: 22px; left: 50%; width: 60%; margin: 0; background: #0d0e10; border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom; transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
   .ss-fan-card img { width: 100%; display: block; }
-  .ss-fan-1 { transform: translateX(-30%) rotate(6deg); z-index: 2; }
-  .ss-fan-2 { transform: translateX(-72%) rotate(-7deg); z-index: 1; }
+  .ss-fan-1 { transform: translateX(-18%) rotate(7deg); z-index: 3; }
+  .ss-fan-2 { transform: translateX(-50%) rotate(0deg); z-index: 2; }
+  .ss-fan-3 { transform: translateX(-82%) rotate(-7deg); z-index: 1; }
   .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: translateX(-50%) translateY(-16px) rotate(0deg) scale(1.05); z-index: 5; box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
   /* Mobile: keep the SAME fanned/overlapping stack (not a flat vertical list); tap a card to bring it forward */
   @media (max-width: 760px) {
-    .ss-fan { height: 0; padding-bottom: 88%; margin-top: 26px; }
+    .ss-fan { height: 0; padding-bottom: 92%; margin-top: 26px; }
     .ss-fan-card { top: 8px; width: 76%; box-shadow: 0 14px 44px rgba(0,0,0,.5); }
-    .ss-fan-1 { transform: translateX(-38%) rotate(4deg); z-index: 2; }
-    .ss-fan-2 { transform: translateX(-62%) rotate(-5deg); z-index: 1; }
+    .ss-fan-1 { transform: translateX(-26%) rotate(5deg); z-index: 3; }
+    .ss-fan-2 { transform: translateX(-50%) rotate(0deg); z-index: 2; }
+    .ss-fan-3 { transform: translateX(-74%) rotate(-5deg); z-index: 1; }
     .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: translateX(-50%) translateY(-8px) rotate(0deg) scale(1.03); box-shadow: 0 22px 60px rgba(0,0,0,.7); }
   }
   @media(max-width:600px) { .ss-mobile-row > div { flex-basis: 82%; max-width: 82%; } }
@@ -519,11 +521,15 @@
       <div class="ss-fan">
         <figure class="ss-fan-card ss-fan-1" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; live dealer map</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-dash-1.png?v=1" alt="NoVo Analyst dashboard — the SPY session chart with dealer levels, the gamma-squeeze hero banner, the full dealer-positioning tiles, the VIX fear gauge, and the options-flow panel" loading="lazy">
+          <img src="/screenshots/analyst-dash-1.png?v=2" alt="NoVo Analyst dashboard — the SPY session chart with dealer levels, the gamma-squeeze hero banner, the full dealer-positioning tiles, the VIX fear gauge, and the options-flow panel" loading="lazy">
         </figure>
         <figure class="ss-fan-card ss-fan-2" tabindex="0">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; profile, The Line &amp; the read</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-dash-2.png?v=1" alt="NoVo Analyst dashboard — the gamma profile by strike, the real-time 'The Line' level-break feed, the cross-asset QQQ/IWM map, and the written session read" loading="lazy">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; sweeps/blocks, analogues &amp; The Line</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-dash-2.png?v=2" alt="NoVo Analyst dashboard — the live sweeps &amp; blocks print tape, the 'today looks like' historical analogues, the gamma profile by strike, and the real-time 'The Line' level-break feed" loading="lazy">
+        </figure>
+        <figure class="ss-fan-card ss-fan-3" tabindex="0">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; cross-asset map &amp; the written read</span><span class="ss-live">&#9679; LIVE</span></div>
+          <img src="/screenshots/analyst-dash-3.png?v=2" alt="NoVo Analyst dashboard — the cross-asset QQQ and IWM dealer map, the written Pre-Market Primer session read, and the notification controls" loading="lazy">
         </figure>
       </div>
       <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the gamma-squeeze hero &amp; full dealer read, the options-flow and sweeps/blocks tape panels, the gamma profile, the cross-asset map, and &lsquo;The Line&rsquo; feed. Installs like an app on desktop &amp; mobile.</p>
