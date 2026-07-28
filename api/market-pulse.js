@@ -47,7 +47,9 @@ async function fearFor(sym, closes) {
   return { sym, value: Math.round(cur * 10) / 10, pct, tag: volTag(pct) };
 }
 
-// S&P momentum, 0-100 = where today's ES sits in its trailing-120-session range (higher = greedier)
+// S&P momentum vs its 125-day moving average (CNN's "market momentum" method), 0-100. Being near a range HIGH
+// isn't greed by itself — distance above/below the trend is. ±10% from the MA maps to 100/0; at the MA = 50.
+// (Sitting at the top of the range but only ~4% above a rising MA is mildly extended, not extreme greed.)
 async function spMomentum() {
   try {
     const url = "https://query1.finance.yahoo.com/v8/finance/chart/ES=F?interval=1d&range=1y";
@@ -55,10 +57,11 @@ async function spMomentum() {
     const closes = (res?.indicators?.quote?.[0]?.close || []).filter((c) => c != null);
     const cur = res?.meta?.regularMarketPrice || closes[closes.length - 1];
     if (!cur || closes.length < 30) return null;
-    const win = closes.slice(-120);
-    const lo = Math.min(...win), hi = Math.max(...win);
-    if (hi <= lo) return 50;
-    return Math.max(0, Math.min(100, Math.round(((cur - lo) / (hi - lo)) * 100)));
+    const tail = closes.slice(-125);
+    const ma = tail.reduce((a, b) => a + b, 0) / tail.length;
+    if (!(ma > 0)) return 50;
+    const devPct = (cur / ma - 1) * 100;
+    return Math.max(0, Math.min(100, Math.round(50 + (devPct / 10) * 50)));
   } catch { return null; }
 }
 
@@ -73,11 +76,14 @@ module.exports = async (req, res) => {
       fearFor("VIX", vixC), fearFor("VXN", vxnC), fearFor("RVX", rvxC), spMomentum(),
     ]);
 
-    // NoVo Market Pulse: 50% inverted average vol percentile (fear) + 50% S&P momentum. Public inputs only.
+    // NoVo Market Pulse: 55% inverted average vol percentile (VIX+VXN+RVX — the fear anchor, and the multi-index
+    // read catches Nasdaq/Russell fear a VIX-only gauge misses) + 45% S&P momentum vs its 125-day trend. Public
+    // inputs only. Volatility is weighted slightly heavier so a market merely holding above trend doesn't read as
+    // "greed" while vol is bid — the calibration issue vs breadth-heavy indices.
     const volPcts = [vix, vxn, rvx].filter(Boolean).map((f) => f.pct);
     const avgVol = volPcts.length ? volPcts.reduce((a, b) => a + b, 0) / volPcts.length : null;
     let pulse = null;
-    if (avgVol != null && mom != null) pulse = Math.round(0.5 * (100 - avgVol) + 0.5 * mom);
+    if (avgVol != null && mom != null) pulse = Math.round(0.55 * (100 - avgVol) + 0.45 * mom);
     else if (avgVol != null) pulse = Math.round(100 - avgVol);
     else if (mom != null) pulse = mom;
 
