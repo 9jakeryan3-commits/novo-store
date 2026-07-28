@@ -16,6 +16,19 @@ module.exports = async (req, res) => {
   if (typeof b.breadth === "number" && isFinite(b.breadth)) out.breadth = Math.max(0, Math.min(100, b.breadth));
   if (typeof b.putcall === "number" && isFinite(b.putcall) && b.putcall > 0) out.putcall = b.putcall;
   const r = kv();
-  if (r) { try { await r.set("mkt:pulse:inputs", JSON.stringify(out), { ex: 1800 }); } catch {} }
+  if (r) {
+    try {
+      await r.set("mkt:pulse:inputs", JSON.stringify(out), { ex: 1800 });
+      // Rolling last-known of EACH field (freeze) — so market-pulse can hold a factor when one input lapses
+      // off-hours (breadth's leader-basket key expires after the close). Only overwrite a field when present.
+      let last = await r.get("mkt:pulse:last");
+      if (typeof last === "string") { try { last = JSON.parse(last); } catch { last = null; } }
+      last = last && typeof last === "object" ? last : {};
+      if (out.breadth != null) last.breadth = out.breadth;
+      if (out.putcall != null) last.putcall = out.putcall;
+      last.ts = out.ts;
+      await r.set("mkt:pulse:last", JSON.stringify(last), { ex: 93600 });   // 26h
+    } catch {}
+  }
   return res.status(200).json({ ok: true, stored: out });
 };

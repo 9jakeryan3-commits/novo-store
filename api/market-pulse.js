@@ -94,6 +94,23 @@ module.exports = async (req, res) => {
         }
       }
     } catch {}
+    // FREEZE (like VIX/skew): breadth comes from the live leader basket and its key lapses after the close, while
+    // put/call is recomputed off-hours — so a factor could vanish and the gauge would drop from 4 tiles to 3.
+    // Fall back to the last-known value (pulse-ingest holds it 26h) for whichever input the current publish is
+    // missing, so all four factors always show (frozen at the last session's read off-hours).
+    if (breadth == null || putcall == null) {
+      try {
+        const r = kv();
+        if (r) {
+          let last = await r.get("mkt:pulse:last");
+          if (typeof last === "string") { try { last = JSON.parse(last); } catch { last = null; } }
+          if (last && typeof last === "object") {
+            if (breadth == null && typeof last.breadth === "number") breadth = last.breadth;
+            if (putcall == null && typeof last.putcall === "number") putcall = last.putcall;
+          }
+        }
+      } catch {}
+    }
 
     // Each factor is a 0-100 GREED score. volatility = inverted VIX/VXN/RVX percentile (the fear anchor, multi-
     // index catches Nasdaq/Russell fear a VIX-only gauge misses). put/call: >1 = defensive (fear) → lower score.
