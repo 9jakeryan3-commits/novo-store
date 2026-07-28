@@ -111,18 +111,23 @@
   .nav-portal svg { width: 17px; height: 17px; }
   .nav-portal-txt { display: none; }   /* Portal is icon-only — the person glyph says it all (title tooltip retained) */
   @media (max-width: 1024px) { .nav-price { display: none; } }
-  @media (max-width: 640px) {
-    /* 2-row mobile header: row 1 = logo + Subscribe + Portal; row 2 = the nav links. */
-    .nav-inner { flex-flow: row wrap; align-items: center; justify-content: center; gap: 9px 4px; padding: 9px 14px; }
+  @media (max-width: 1024px) {
+    /* 2-row header for foldables/tablets down to phones — desktop single row only fits >1024px */
+    .nav-inner { flex-flow: row wrap; align-items: center; justify-content: center; gap: 9px 6px; padding: 10px 16px; }
     .nav-logo { order: 1; margin-right: auto; }
-    .nav-logo img { height: 36px; }
+    .nav-logo img { height: 40px; }
     .nav-actions { display: contents; }
-    .nav-buy { order: 2; padding: 8px 15px; font-size: 12.5px; box-shadow: none; }
+    .nav-buy { order: 2; padding: 8px 16px; font-size: 13px; box-shadow: none; }
     .nav-portal { order: 3; padding: 7px 10px; gap: 3px; }
     .nav-portal svg { width: 16px; height: 16px; }
     .nav-inner::after { content: ""; order: 4; flex-basis: 100%; height: 0; }
-    .nav-actions > a:not(.nav-buy):not(.nav-portal) { order: 5; font-size: 11px !important; padding: 3px 4px !important; white-space: nowrap; letter-spacing: 0; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { order: 5; font-size: 12px !important; padding: 4px 7px !important; white-space: nowrap; letter-spacing: 0; }
     .nav-price { display: none; }
+  }
+  @media (max-width: 560px) {
+    .nav-logo img { height: 36px; }
+    .nav-buy { padding: 8px 15px; font-size: 12.5px; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { font-size: 11px !important; padding: 3px 4px !important; }
   }
 
   /* ── Hero ── */
