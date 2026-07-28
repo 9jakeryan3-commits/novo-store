@@ -8,6 +8,8 @@
 // Vol history/quotes come from CBOE's free delayed CDN (Yahoo delisted ^RVX); S&P momentum from Yahoo ES=F.
 // CDN-cached 5 min (the vol quotes are ~15-min delayed anyway).
 
+const { kv } = require("./_kv");
+
 const CBOE_HIST = (s) => `https://cdn.cboe.com/api/global/delayed_quotes/charts/historical/_${s}.json`;
 const CBOE_QUOTE = (s) => `https://cdn.cboe.com/api/global/delayed_quotes/quotes/_${s}.json`;
 
@@ -76,16 +78,46 @@ module.exports = async (req, res) => {
       fearFor("VIX", vixC), fearFor("VXN", vxnC), fearFor("RVX", rvxC), spMomentum(),
     ]);
 
-    // NoVo Market Pulse: 55% inverted average vol percentile (VIX+VXN+RVX — the fear anchor, and the multi-index
-    // read catches Nasdaq/Russell fear a VIX-only gauge misses) + 45% S&P momentum vs its 125-day trend. Public
-    // inputs only. Volatility is weighted slightly heavier so a market merely holding above trend doesn't read as
-    // "greed" while vol is bid — the calibration issue vs breadth-heavy indices.
+    // NoVo's OWN internals, published by the engine (breadth from the ~50-stock leader basket + SPY put/call).
+    // These are the very factors CNN uses that aren't free elsewhere — NoVo has them from its own feed. Folded in
+    // when fresh (<30m); absent (engine offline) → the gauge falls back to vol + momentum. Aggregate sentiment
+    // only, never the dealer map.
+    let breadth = null, putcall = null;
+    try {
+      const r = kv();
+      if (r) {
+        let p = await r.get("mkt:pulse:inputs");
+        if (typeof p === "string") { try { p = JSON.parse(p); } catch { p = null; } }
+        if (p && Date.now() - (p.ts || 0) < 1800000) {
+          if (typeof p.breadth === "number") breadth = p.breadth;   // 0-100, 50 = neutral (higher = more advancers)
+          if (typeof p.putcall === "number") putcall = p.putcall;   // SPY put/call ratio
+        }
+      }
+    } catch {}
+
+    // Each factor is a 0-100 GREED score. volatility = inverted VIX/VXN/RVX percentile (the fear anchor, multi-
+    // index catches Nasdaq/Russell fear a VIX-only gauge misses). put/call: >1 = defensive (fear) → lower score.
     const volPcts = [vix, vxn, rvx].filter(Boolean).map((f) => f.pct);
     const avgVol = volPcts.length ? volPcts.reduce((a, b) => a + b, 0) / volPcts.length : null;
+    const volScore = avgVol != null ? Math.round(100 - avgVol) : null;
+    const pcScore = putcall != null ? Math.max(0, Math.min(100, Math.round(50 - (putcall - 1.0) * 80))) : null;
+
+    const factors = [];
+    if (volScore != null) factors.push({ key: "volatility", score: volScore, w: 0.35 });
+    if (mom != null) factors.push({ key: "momentum", score: mom, w: 0.25 });
+    if (breadth != null) factors.push({ key: "breadth", score: Math.round(breadth), w: 0.20 });
+    if (pcScore != null) factors.push({ key: "putcall", score: pcScore, w: 0.20 });
     let pulse = null;
-    if (avgVol != null && mom != null) pulse = Math.round(0.55 * (100 - avgVol) + 0.45 * mom);
-    else if (avgVol != null) pulse = Math.round(100 - avgVol);
-    else if (mom != null) pulse = mom;
+    if (factors.length) {
+      const tw = factors.reduce((a, f) => a + f.w, 0);
+      pulse = Math.round(factors.reduce((a, f) => a + f.score * f.w, 0) / tw);
+    }
+    const flabel = (k, s) =>
+      k === "volatility" ? (s < 35 ? "elevated" : s < 60 ? "normal" : "calm")
+      : k === "momentum" ? (s < 35 ? "below trend" : s < 60 ? "at trend" : "above trend")
+      : k === "breadth" ? (s < 40 ? "weak" : s < 60 ? "mixed" : "strong")
+      : (s < 40 ? "defensive" : s < 60 ? "balanced" : "call-heavy");
+    const factorsOut = factors.map((f) => ({ key: f.key, score: f.score, label: flabel(f.key, f.score) }));
 
     // Fear history from the VIX 1y closes: now / yesterday / ~1wk / ~1mo, each ranked in the same window.
     const hist = {};
@@ -105,6 +137,7 @@ module.exports = async (req, res) => {
     res.status(200).json({
       updated: Date.now(),
       pulse: pulse == null ? null : { score: pulse, label: pulseLabel(pulse) },
+      factors: factorsOut,
       fear: { SPY: vix, QQQ: vxn, IWM: rvx },
       momentum: mom,
       history: hist,
