@@ -1,5 +1,15 @@
-// Trending US tickers (Yahoo trending) with live price + change. PUBLIC data. CDN-cached 5m.
+// "Today's movers" — a curated universe of recognizable, high-volume names ranked by the
+// biggest absolute % move today. PUBLIC data. CDN-cached 5m.
+// (Replaces Yahoo's /v1/finance/trending, whose search-spike ranking surfaced obscure names
+//  that read as random on a public page — Jake, 2026-07-28.)
 // v7/quote is 401 without a crumb now, so price/change come from the chart endpoint (same as api/quotes.js).
+
+// Widely-followed, liquid tickers. Ranked live by today's move — never a static list.
+const UNIVERSE = [
+  "SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "AMD",
+  "NFLX", "AVGO", "COIN", "PLTR", "MU", "INTC", "MARA", "SOFI", "F", "BAC",
+  "DIS", "UBER", "SMCI", "BABA",
+];
 
 async function chartQuote(sym) {
   try {
@@ -30,17 +40,10 @@ async function chartQuote(sym) {
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");
   try {
-    let syms = [];
-    try {
-      const r = await fetch("https://query1.finance.yahoo.com/v1/finance/trending/US?count=15", {
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      const q = (await r.json())?.finance?.result?.[0]?.quotes || [];
-      syms = q.map((x) => x.symbol).filter(Boolean).slice(0, 12);
-    } catch { syms = []; }
-    // Fallback to the most-watched names if trending is empty/blocked, so the section never renders bare.
-    if (!syms.length) syms = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "AMD", "META"];
-    const out = (await Promise.all(syms.map(chartQuote))).filter(Boolean).slice(0, 8);
+    const quotes = (await Promise.all(UNIVERSE.map(chartQuote))).filter(Boolean);
+    // Biggest absolute movers today, top 8.
+    quotes.sort((a, b) => Math.abs(b.chg) - Math.abs(a.chg));
+    const out = quotes.slice(0, 8);
     res.status(200).json({ updated: Date.now(), stocks: out });
   } catch {
     res.status(200).json({ updated: Date.now(), stocks: [] });
