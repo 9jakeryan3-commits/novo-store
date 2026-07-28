@@ -78,6 +78,10 @@
   ],
   "rewrites": [
     {
+      "source": "/market-data",
+      "destination": "/market-data.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },
