@@ -102,11 +102,13 @@ module.exports = async (req, res) => {
     const volScore = avgVol != null ? Math.round(100 - avgVol) : null;
     const pcScore = putcall != null ? Math.max(0, Math.min(100, Math.round(50 - (putcall - 1.0) * 80))) : null;
 
+    // Weights lean toward the FEAR anchors (volatility + put/call) over the trend-followers (momentum + breadth),
+    // so a market holding above trend while vol is bid + options are defensive reads Neutral/Fear, not Greed.
     const factors = [];
     if (volScore != null) factors.push({ key: "volatility", score: volScore, w: 0.35 });
-    if (mom != null) factors.push({ key: "momentum", score: mom, w: 0.25 });
+    if (pcScore != null) factors.push({ key: "putcall", score: pcScore, w: 0.25 });
     if (breadth != null) factors.push({ key: "breadth", score: Math.round(breadth), w: 0.20 });
-    if (pcScore != null) factors.push({ key: "putcall", score: pcScore, w: 0.20 });
+    if (mom != null) factors.push({ key: "momentum", score: mom, w: 0.20 });
     let pulse = null;
     if (factors.length) {
       const tw = factors.reduce((a, f) => a + f.w, 0);
