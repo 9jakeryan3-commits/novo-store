@@ -75,7 +75,11 @@
   .hero-grid { display:grid; grid-template-columns: 1.1fr .9fr; gap:22px; align-items:stretch; }
   @media(max-width:820px){ .hero-grid{ grid-template-columns:1fr; } }
   .pulse-card { text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .gauge { position:relative; width:min(340px,80vw); }
+  .gauge { position:relative; width:min(390px,88vw); }
+  .zlbl { font-size:9.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; fill:var(--txt3); transition:fill .5s ease; }
+  .ztick { font-size:11px; font-weight:700; fill:var(--txt3); text-anchor:middle; font-family:'Space Grotesk','Inter',sans-serif; }
+  .gseg { transition:opacity .55s ease; }
+  #needle { transition:transform .9s cubic-bezier(.2,.75,.2,1); }
   .gg-num { font-size:60px; font-weight:900; color:var(--txt1); line-height:1; margin-top:-8px; }
   .gg-lbl { font-size:17px; font-weight:800; letter-spacing:.5px; margin-top:4px; }
   .gg-cap { font-size:11px; color:var(--txt3); letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
@@ -203,16 +207,37 @@
     <div class="card pulse-card">
       <div class="gg-cap">NoVo Market Pulse</div>
       <div class="gauge">
-        <svg viewBox="0 0 200 120" style="width:100%;display:block;">
+        <svg viewBox="0 0 340 196" style="width:100%;display:block;overflow:visible;">
           <defs>
-            <linearGradient id="pg" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#f43f5e"/><stop offset=".5" stop-color="#f59e0b"/><stop offset="1" stop-color="#10b981"/>
-            </linearGradient>
+            <path id="lp0" d="M 18.3 172.46 A 152 152 0 0 1 55.98 81.48"/>
+            <path id="lp1" d="M 69.48 67.98 A 152 152 0 0 1 136.84 33.66"/>
+            <path id="lp2" d="M 96.8 48.8 A 152 152 0 0 1 243.2 48.8"/>
+            <path id="lp3" d="M 203.16 33.66 A 152 152 0 0 1 270.52 67.98"/>
+            <path id="lp4" d="M 284.02 81.48 A 152 152 0 0 1 321.7 172.46"/>
           </defs>
-          <path d="M18 108 A82 82 0 0 1 182 108" fill="none" stroke="url(#pg)" stroke-width="16" stroke-linecap="round"/>
-          <g id="needle" transform="rotate(0 100 108)">
-            <line x1="100" y1="108" x2="100" y2="40" stroke="#eaf3ff" stroke-width="3.5" stroke-linecap="round"/>
-            <circle cx="100" cy="108" r="6" fill="#eaf3ff"/>
+          <!-- zone bands (dimmed; JS brightens the active zone) -->
+          <path id="seg0" class="gseg" d="M 40.02 179.55 A 130 130 0 0 1 74.0 94.34"   fill="none" stroke="#ef4444" stroke-width="26" opacity="0.26"/>
+          <path id="seg1" class="gseg" d="M 82.34 86.0 A 130 130 0 0 1 143.86 54.66"    fill="none" stroke="#f97316" stroke-width="26" opacity="0.26"/>
+          <path id="seg2" class="gseg" d="M 155.51 52.81 A 130 130 0 0 1 184.49 52.81"  fill="none" stroke="#eab308" stroke-width="26" opacity="0.26"/>
+          <path id="seg3" class="gseg" d="M 196.14 54.66 A 130 130 0 0 1 257.66 86.0"   fill="none" stroke="#84cc16" stroke-width="26" opacity="0.26"/>
+          <path id="seg4" class="gseg" d="M 266.0 94.34 A 130 130 0 0 1 299.98 179.55"  fill="none" stroke="#22c55e" stroke-width="26" opacity="0.26"/>
+          <!-- zone labels (curve along the arc) -->
+          <text class="zlbl" id="zt0"><textPath href="#lp0" startOffset="50%" text-anchor="middle">Extreme Fear</textPath></text>
+          <text class="zlbl" id="zt1"><textPath href="#lp1" startOffset="50%" text-anchor="middle">Fear</textPath></text>
+          <text class="zlbl" id="zt2"><textPath href="#lp2" startOffset="50%" text-anchor="middle">Neutral</textPath></text>
+          <text class="zlbl" id="zt3"><textPath href="#lp3" startOffset="50%" text-anchor="middle">Greed</textPath></text>
+          <text class="zlbl" id="zt4"><textPath href="#lp4" startOffset="50%" text-anchor="middle">Extreme Greed</textPath></text>
+          <!-- tick numbers -->
+          <text class="ztick" x="64" y="185">0</text>
+          <text class="ztick" x="95" y="110">25</text>
+          <text class="ztick" x="170" y="79">50</text>
+          <text class="ztick" x="245" y="110">75</text>
+          <text class="ztick" x="276" y="185">100</text>
+          <!-- needle (points up = value 50 at rest; JS rotates 1.8*score-90) -->
+          <g id="needle" transform="rotate(-90 170 182)">
+            <polygon points="170,43 166.5,182 173.5,182" fill="#eaf3ff"/>
+            <circle cx="170" cy="182" r="8" fill="#eaf3ff"/>
+            <circle cx="170" cy="182" r="3.4" fill="#0d0e10"/>
           </g>
         </svg>
         <div class="gg-num" id="pulse-num">—</div>
@@ -406,15 +431,21 @@
         '<div class="pfbar"><i style="width:'+Math.max(4,Math.min(100,f.score))+'%;background:'+col+'"></i></div></div>';
     }).join('');
   }
+  var GZONES=[{max:25,c:'#ef4444'},{max:45,c:'#f97316'},{max:55,c:'#eab308'},{max:75,c:'#84cc16'},{max:101,c:'#22c55e'}];
   function renderPulse(p){
     if(!p){ return; }
+    var sc=Math.max(0,Math.min(100,p.score));
     $('pulse-num').textContent=p.score;
-    var lbl=$('pulse-lbl');
-    var col=p.score<45?'#f43f5e':p.score<55?'#f59e0b':'#10b981';
-    lbl.textContent=p.label; lbl.style.color=col;
-    // needle: score 0-100 -> -90deg..+90deg
-    var deg=(p.score/100)*180-90;
-    var n=$('needle'); if(n){ n.setAttribute('transform','rotate('+deg+' 100 108)'); }
+    var zi=0; for(var i=0;i<GZONES.length;i++){ if(sc<GZONES[i].max){ zi=i; break; } }
+    var zc=GZONES[zi].c;
+    var lbl=$('pulse-lbl'); lbl.textContent=p.label; lbl.style.color=zc;
+    // brighten the active zone band + its label; dim the rest
+    for(var s=0;s<5;s++){
+      var seg=document.getElementById('seg'+s); if(seg) seg.style.opacity=(s===zi)?'1':'0.24';
+      var zt=document.getElementById('zt'+s); if(zt){ zt.style.fill=(s===zi)?zc:'var(--txt3)'; }
+    }
+    // needle: rotate group about the hub (170,182); value 50 = straight up
+    var n=$('needle'); if(n){ n.setAttribute('transform','rotate('+(1.8*sc-90)+' 170 182)'); }
   }
 
   function renderHist(h){
