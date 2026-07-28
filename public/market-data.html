@@ -218,6 +218,12 @@
   .cmt .ct { font-size:11px; color:var(--txt3); }
   .cmt .cbadge { font-size:10px; font-weight:800; letter-spacing:.5px; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
   .cmt .cx { font-size:14px; color:var(--txt2); line-height:1.55; word-break:break-word; }
+  /* chat box: fixed height, scrolls internally so the page never grows with the thread */
+  #cmt-list { max-height:440px; overflow-y:auto; margin-top:14px; padding-right:8px; border:1px solid var(--bdr); border-radius:12px; background:var(--navy); padding:12px 12px 2px; }
+  #cmt-list::-webkit-scrollbar { width:8px; }
+  #cmt-list::-webkit-scrollbar-thumb { background:#39404a; border-radius:4px; }
+  #cmt-list::-webkit-scrollbar-track { background:transparent; }
+  #cmt-list .muted { padding:8px 2px; }
 </style>
 </head>
 <body>
