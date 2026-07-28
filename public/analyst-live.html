@@ -188,7 +188,7 @@
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
         <div class="lv-fear" id="d-fear" style="margin-top:auto;padding-top:16px;">
-          <div class="fear-hd"><span class="fear-lbl">Fear gauge · VIX</span><span class="fear-tag" id="fear-tag">&mdash;</span></div>
+          <div class="fear-hd"><span class="fear-lbl" id="fear-lbl">Fear gauge · VIX</span><span class="fear-tag" id="fear-tag">&mdash;</span></div>
           <div class="fear-row"><span class="fear-vix" id="fear-vix">&mdash;</span><span class="fear-pct" id="fear-pct"></span></div>
           <div class="fear-meter"><div class="fear-marker" id="fear-marker" style="left:0%"></div></div>
           <div class="fear-scale"><span>calm</span><span>fear</span></div>
@@ -480,20 +480,32 @@
     else { feed.innerHTML = '<li style="border:0;color:var(--txt3);">Waiting for the next '+_escH(_tk)+' level event…</li>'; }   // clear stale entries when the feed is empty/new-session
   }
 
-  // VIX fear gauge — parse the engine's published vol_env line ("… VIX 15.0 — 11th percentile … (very low vol).")
+  // Fear gauge — PER-TICKER (2026-07-28): SPY→VIX, QQQ→VXN, IWM→RVX, each value ranked against its OWN 1-yr
+  // history (server sends vol_env_by[ticker] = {sym,value,pct,tag}). Falls back to parsing the legacy vol_env VIX
+  // string for an older engine that hasn't published vol_env_by yet.
   function renderFear(){
-    var s = (STATE && STATE.vol_env) || '';
-    var vixM = s.match(/VIX\s+([\d.]+)/i), pctM = s.match(/(\d+)\s*(?:st|nd|rd|th)?\s*percentile/i), tagM = s.match(/\(([^)]+?)\s*vol\)/i);
     var box = $('d-fear'); if (!box) return;
-    if (!vixM || !pctM) { box.style.display = 'none'; return; }
+    var _tk = (typeof CUR !== 'undefined' && CUR) || (STATE && STATE.exec_ticker) || 'SPY';
+    var fd = (STATE && STATE.vol_env_by && STATE.vol_env_by[_tk]) || null;
+    var sym, val, pct, tag;
+    if (fd && fd.value != null && fd.pct != null){
+      sym = (fd.sym || 'VIX'); val = Number(fd.value); pct = parseInt(fd.pct, 10); tag = fd.tag || '';
+    } else {
+      var s = (STATE && STATE.vol_env) || '';
+      var vixM = s.match(/(VIX|VXN|RVX)\s+([\d.]+)/i), pctM = s.match(/(\d+)\s*(?:st|nd|rd|th)?\s*percentile/i), tagM = s.match(/\(([^)]+?)\s*vol\)/i);
+      if (!vixM || !pctM){ box.style.display = 'none'; return; }
+      sym = vixM[1].toUpperCase(); val = Number(vixM[2]); pct = parseInt(pctM[1], 10); tag = tagM ? tagM[1] : '';
+    }
+    if (!isFinite(val) || !isFinite(pct)){ box.style.display = 'none'; return; }
+    pct = Math.max(0, Math.min(100, pct));
     box.style.display = '';
-    var pct = Math.max(0, Math.min(100, parseInt(pctM[1], 10)));
-    $('fear-vix').textContent = 'VIX ' + vixM[1];
+    var lbl = $('fear-lbl'); if (lbl) lbl.textContent = 'Fear gauge · ' + sym;
+    $('fear-vix').textContent = sym + ' ' + val.toFixed(1);
     $('fear-pct').textContent = pct + 'th pct · 1yr';
     // Color aligned to the SERVER's tag bands (very-low/low <=35 calm, normal <=65, elevated/high >65), so the
-    // pill text and its color never imply different severities (was 33/66 vs the tag's 35/65 breaks).
+    // pill text and its color never imply different severities.
     var col = pct <= 35 ? '#10b981' : pct <= 65 ? '#f59e0b' : '#f43f5e';
-    var t = $('fear-tag'); t.textContent = tagM ? tagM[1] : ''; t.style.color = col;
+    var t = $('fear-tag'); t.textContent = tag; t.style.color = col;
     $('fear-marker').style.left = pct + '%';
   }
 
