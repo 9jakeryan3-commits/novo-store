@@ -581,14 +581,18 @@
   // ---- community comments (name/text are ALREADY html-escaped server-side) ----
   function timeAgo(ts){ var s=Math.max(0,(Date.now()-ts)/1000); return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago'; }
   function badge(t){ return t==='bull'?'<span class="cbadge" style="background:rgba(16,185,129,.15);color:#34d399;">Bullish</span>':t==='bear'?'<span class="cbadge" style="background:rgba(239,68,68,.15);color:#f87171;">Bearish</span>':''; }
-  function renderCmts(list){
+  function renderCmts(list, forceBottom){
     var box=$('cmt-list'); if(!box) return;
     if(!list||!list.length){ box.innerHTML='<div class="muted">No comments yet — be the first.</div>'; return; }
-    box.innerHTML=list.map(function(c){
+    // live-chat feel: oldest → newest (newest at the BOTTOM). Stay pinned to the newest message unless the
+    // reader has scrolled up to read older ones (then don't yank them down).
+    var pin = forceBottom || (box.scrollHeight - box.scrollTop - box.clientHeight < 90);
+    box.innerHTML=list.slice().reverse().map(function(c){
       return '<div class="cmt"><div class="ch"><span class="cn">'+c.name+'</span>'+badge(c.tag)+'<span class="ct">'+timeAgo(c.ts)+'</span></div><div class="cx">'+c.text+'</div></div>';
     }).join('');
+    if(pin){ box.scrollTop = box.scrollHeight; }
   }
-  async function loadCmts(){ try{ var r=await fetch('/api/comments',{cache:'no-store'}); if(r.ok) renderCmts((await r.json()).comments); }catch(_){} }
+  async function loadCmts(forceBottom){ try{ var r=await fetch('/api/comments',{cache:'no-store'}); if(r.ok) renderCmts((await r.json()).comments, forceBottom); }catch(_){} }
   (function(){ var f=$('cmt-form'); if(!f) return; f.addEventListener('submit',async function(e){
     e.preventDefault(); var msg=$('cmt-msg');
     var text=$('cmt-text').value.trim(); if(text.length<2){ msg.style.color='var(--red)'; msg.textContent='Say a little more.'; return; }
@@ -596,14 +600,14 @@
     msg.style.color='var(--txt3)'; msg.textContent='Posting…';
     try{ var r=await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('cmt-name').value,text:text,tag:tag,website:$('cmt-hp').value})});
       var d=await r.json().catch(function(){return{};});
-      if(r.ok){ msg.style.color='var(--green)'; msg.textContent='Posted.'; $('cmt-text').value=''; loadCmts(); }
+      if(r.ok){ msg.style.color='var(--green)'; msg.textContent='Posted.'; $('cmt-text').value=''; loadCmts(true); }
       else { msg.style.color='var(--red)'; msg.textContent=d.error||'Could not post.'; }
     }catch(_){ msg.style.color='var(--red)'; msg.textContent='Network error — try again.'; }
   }); })();
 
-  loadPulse(); loadFut(); loadPoll(); loadTrend(); loadCal(); loadCmts();
+  loadPulse(); loadFut(); loadPoll(); loadTrend(); loadCal(); loadCmts(true);
   setInterval(loadPulse, 120000); setInterval(loadFut, 60000);
-  setInterval(loadTrend, 300000); setInterval(loadCal, 3600000); setInterval(loadCmts, 60000);
+  setInterval(loadTrend, 300000); setInterval(loadCal, 3600000); setInterval(function(){loadCmts();}, 20000);
 })();
 </script>
 <script src="/ticker-live.js" defer></script>
