@@ -273,7 +273,50 @@
   <p class="muted" style="margin-top:12px;">VIX/VXN/RVX are ~15-min delayed. Percentile = where today's level sits vs the past year of daily closes.</p>
 </div>
 
-<!-- sentiment poll now lives in the Community section (below the dealer teaser) -->
+<!-- COMMUNITY & SENTIMENT (poll + discussion together) — directly under the fear panels -->
+<div class="container sec" id="community">
+  <div class="lbl">Community</div>
+  <h2 class="h2">Sentiment &amp; discussion</h2>
+  <p class="sub">Vote the tape, then talk it out with other traders. Keep it civil — no links, no spam.</p>
+  <div class="cs-grid">
+    <!-- sentiment poll -->
+    <div class="card" id="poll-card" style="text-align:center;align-self:start;">
+      <div class="lbl" style="margin-bottom:6px;">Sentiment poll</div>
+      <h3 style="font-size:17px;color:var(--txt1);margin:0 0 2px;font-family:'Space Grotesk','Inter',sans-serif;">How do you feel today?</h3>
+      <div id="poll-vote" style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+        <button class="pbtn bear" data-side="bear" type="button">▼ Bearish</button>
+        <button class="pbtn bull" data-side="bull" type="button">▲ Bullish</button>
+      </div>
+      <div id="poll-res" style="display:none;margin-top:18px;">
+        <div class="pbar"><div class="pbull" id="pbull" style="width:50%"></div><div class="pbear" id="pbear" style="width:50%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:13.5px;font-weight:800;">
+          <span class="up" id="pbull-t">▲ 50%</span><span class="dn" id="pbear-t">50% ▼</span>
+        </div>
+        <div class="muted" id="poll-n" style="margin-top:8px;">— votes today · resets daily</div>
+      </div>
+    </div>
+    <!-- discussion -->
+    <div>
+      <div class="card">
+        <form id="cmt-form" autocomplete="off">
+          <input class="cmt-input" id="cmt-name" maxlength="24" placeholder="Name (optional)">
+          <input type="text" id="cmt-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;opacity:0;">
+          <textarea class="cmt-input" id="cmt-text" maxlength="500" placeholder="What are you seeing in the tape?"></textarea>
+          <div class="cmt-actions">
+            <div class="cmt-tags">
+              <label><input type="radio" name="ctag" value="" checked> Neutral</label>
+              <label><input type="radio" name="ctag" value="bull"> ▲ Bullish</label>
+              <label><input type="radio" name="ctag" value="bear"> ▼ Bearish</label>
+            </div>
+            <button type="submit" class="btn btn-p" style="padding:10px 20px;">Post comment</button>
+          </div>
+          <div id="cmt-msg" class="muted" style="margin-top:8px;min-height:16px;"></div>
+        </form>
+      </div>
+      <div id="cmt-list" style="margin-top:14px;"><div class="muted">No comments yet — be the first.</div></div>
+    </div>
+  </div>
+</div>
 
 <!-- AD SLOT 1 — AdSense responsive display unit. Create the ad unit in your AdSense dashboard and paste its
      slot ID into data-ad-slot below. (If you use Auto ads instead, the loader in <head> handles placement and
@@ -339,50 +382,7 @@
   </div>
 </div>
 
-<!-- COMMUNITY & SENTIMENT (poll + discussion together) -->
-<div class="container sec" id="community">
-  <div class="lbl">Community</div>
-  <h2 class="h2">Sentiment &amp; discussion</h2>
-  <p class="sub">Vote the tape, then talk it out with other traders. Keep it civil — no links, no spam.</p>
-  <div class="cs-grid">
-    <!-- sentiment poll -->
-    <div class="card" id="poll-card" style="text-align:center;align-self:start;">
-      <div class="lbl" style="margin-bottom:6px;">Sentiment poll</div>
-      <h3 style="font-size:17px;color:var(--txt1);margin:0 0 2px;font-family:'Space Grotesk','Inter',sans-serif;">How do you feel today?</h3>
-      <div id="poll-vote" style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
-        <button class="pbtn bear" data-side="bear" type="button">▼ Bearish</button>
-        <button class="pbtn bull" data-side="bull" type="button">▲ Bullish</button>
-      </div>
-      <div id="poll-res" style="display:none;margin-top:18px;">
-        <div class="pbar"><div class="pbull" id="pbull" style="width:50%"></div><div class="pbear" id="pbear" style="width:50%"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:13.5px;font-weight:800;">
-          <span class="up" id="pbull-t">▲ 50%</span><span class="dn" id="pbear-t">50% ▼</span>
-        </div>
-        <div class="muted" id="poll-n" style="margin-top:8px;">— votes today · resets daily</div>
-      </div>
-    </div>
-    <!-- discussion -->
-    <div>
-      <div class="card">
-        <form id="cmt-form" autocomplete="off">
-          <input class="cmt-input" id="cmt-name" maxlength="24" placeholder="Name (optional)">
-          <input type="text" id="cmt-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;opacity:0;">
-          <textarea class="cmt-input" id="cmt-text" maxlength="500" placeholder="What are you seeing in the tape?"></textarea>
-          <div class="cmt-actions">
-            <div class="cmt-tags">
-              <label><input type="radio" name="ctag" value="" checked> Neutral</label>
-              <label><input type="radio" name="ctag" value="bull"> ▲ Bullish</label>
-              <label><input type="radio" name="ctag" value="bear"> ▼ Bearish</label>
-            </div>
-            <button type="submit" class="btn btn-p" style="padding:10px 20px;">Post comment</button>
-          </div>
-          <div id="cmt-msg" class="muted" style="margin-top:8px;min-height:16px;"></div>
-        </form>
-      </div>
-      <div id="cmt-list" style="margin-top:14px;"><div class="muted">No comments yet — be the first.</div></div>
-    </div>
-  </div>
-</div>
+<!-- community & sentiment moved up, directly under the fear panels -->
 
 <!-- AD SLOT 2 — AdSense responsive display unit. Paste this unit's slot ID into data-ad-slot below. -->
 <div class="container" style="margin:8px 0;">
