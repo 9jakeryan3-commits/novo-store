@@ -13,7 +13,7 @@ function _rateLimited(ip) {
 
 // Trader YEARLY subscription ($1,690/yr, auto-renew). Identical to checkout-sub.js except the price.
 module.exports = async (req, res) => {
-  const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+  const SITE = process.env.SITE_URL || 'https://novo-options.trade';
   res.setHeader('Access-Control-Allow-Origin', SITE);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

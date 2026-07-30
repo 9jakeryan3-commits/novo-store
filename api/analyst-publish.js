@@ -19,7 +19,7 @@ const FROM = process.env.ANALYST_FROM_EMAIL || 'The NoVo Journal <analyst@novo-a
 
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+const SITE = process.env.SITE_URL || 'https://novo-options.trade';
 
 // Constant-time secret check for the owner-only publish/delete auth (avoids a timing side-channel; also the
 // single source of truth for the header check on both POST and DELETE).
@@ -181,7 +181,7 @@ function _levelsTable(levels) {
 function _page(t, desc, canon, inner) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(canon)}"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="article"><meta property="og:site_name" content="NoVo AI Trading"><link rel="icon" href="${SITE}/favicon.ico">
 <style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}</style></head><body><div class="wrap">
-<div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=1" alt="NoVo AI Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
+<div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=1" alt="NoVo"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
 ${inner}
 <div class="disc">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss.</div>
 </div></body></html>`;
@@ -526,7 +526,7 @@ export default async function handler(req, res) {
         if (sup) fields.push({ name: '🟢 Support', value: sup, inline: true });
       }
       const embeds = [{
-        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-aitrading.app/novo-icon.png?v=4' },
+        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-options.trade/novo-icon.png?v=4' },
         title, description: _cap(_bold(_prose)), color, fields,
         footer: { text: 'NoVo — market analysis & education.' },
         timestamp: new Date().toISOString(),
@@ -535,7 +535,7 @@ export default async function handler(req, res) {
       if (_data) embeds.push({ description: _cap(_bold(_data)), color: 0x22d3ee, footer: { text: 'NoVo — analysis & education, not signals.' } });
       await fetch(discordWebhook, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-aitrading.app/novo-icon.png?v=4', embeds }),
+        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-options.trade/novo-icon.png?v=4', embeds }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
   }
@@ -632,7 +632,7 @@ export default async function handler(req, res) {
   const discordCta = isOpenPrimer
     ? '<div style="margin-top:22px;border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">' +
         '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">&#128276; Intraday alerts are live in Discord</div>' +
-        '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> level-break playbooks and dealer-regime shifts fire the moment they happen &mdash; in the members-only Analyst Discord, not email. <a href="https://discord.gg/EfnPJ5gC5w" style="color:#7f8cff;font-weight:700;text-decoration:none;">Join the Analyst Discord &rarr;</a> <span style="color:#6f8bab;">(link your account on <a href="https://novo-aitrading.app/analyst" style="color:#7f8cff;text-decoration:none;">/analyst</a> to unlock the channels).</span></div>' +
+        '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">Real-time <b style="color:#eaf3ff">&lsquo;The Line&rsquo;</b> level-break playbooks and dealer-regime shifts fire the moment they happen &mdash; in the members-only Analyst Discord, not email. <a href="https://discord.gg/EfnPJ5gC5w" style="color:#7f8cff;font-weight:700;text-decoration:none;">Join the Analyst Discord &rarr;</a> <span style="color:#6f8bab;">(link your account on <a href="https://novo-options.trade/analyst" style="color:#7f8cff;text-decoration:none;">/analyst</a> to unlock the channels).</span></div>' +
       '</div>'
     : '';
 
@@ -646,13 +646,13 @@ export default async function handler(req, res) {
   const buildUpsell = (u) => u === 'both'
     // Conversion pitch for the FREE list (the Mid-Day sales email) — offer BOTH paid tiers, let them choose.
     ? '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:8px;">Ready for more than the taste?</div>' +
-      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:11px;"><b style="color:#eaf3ff">NoVo Analyst</b> &mdash; the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes, real-time level-break alerts, and a <b style="color:#eaf3ff">live dealer dashboard</b>, $79/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>' +
-      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Trader</b> &mdash; the machine: the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>'
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:11px;"><b style="color:#eaf3ff">NoVo Analyst</b> &mdash; the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes, real-time level-break alerts, and a <b style="color:#eaf3ff">live dealer dashboard</b>, $79/mo. <a href="https://novo-options.trade/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>' +
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Trader</b> &mdash; the machine: the same read, live, executing in your own broker account within your rules. <a href="https://novo-options.trade" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>'
     : u === 'analyst'
     ? '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>' +
-      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This weekly outlook is the taste. <b style="color:#eaf3ff">NoVo Analyst</b> adds the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes, intraday level-break alerts, and a <b style="color:#eaf3ff">live dealer dashboard</b> — $79/mo. <a href="https://novo-aitrading.app/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This weekly outlook is the taste. <b style="color:#eaf3ff">NoVo Analyst</b> adds the daily <b style="color:#eaf3ff">Open</b> &amp; <b style="color:#eaf3ff">Close</b> desk notes, intraday level-break alerts, and a <b style="color:#eaf3ff">live dealer dashboard</b> — $79/mo. <a href="https://novo-options.trade/analyst" style="color:#34d399;font-weight:700;text-decoration:none;">Get NoVo Analyst &rarr;</a></div>'
     : '<div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>' +
-      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>';
+      '<div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> is the machine — the same read, live, executing in your own broker account within your rules. <a href="https://novo-options.trade" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>';
   // Paid-only reminder that the live web dashboard exists (the free list never sees it — it's a paid feature).
   const LIVE_CTA = `<a href="${SITE}/analyst/live" style="display:block;text-align:center;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;text-decoration:none;padding:12px 18px;border-radius:9px;margin:0 0 20px;">&#9673; Open your live dealer dashboard &rarr;</a>`;
   // Clear, always-visible note for PAID subs (Analyst + Trader): every read here is live in their dashboard +
@@ -666,7 +666,7 @@ export default async function handler(req, res) {
     '<div style="margin:0;padding:0;background:#101013;">' +
       '<div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
         '<div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">' +
-          '<img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">' +
+          '<img src="https://novo-options.trade/novo-logo-light.png?v=1" alt="NoVo" height="30" style="height:30px;width:auto;display:inline-block;border:0;">' +
           `<div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${esc(label)}</div>` +
         '</div>' +
         '<div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +

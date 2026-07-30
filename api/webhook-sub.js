@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const LICENSE_SERVER = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
 const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
-const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+const SITE = process.env.SITE_URL || 'https://novo-options.trade';
 
 // Stripe moved the invoice's subscription id to invoice.parent.subscription_details.subscription
 // in its 2025 API versions; older versions use the top-level invoice.subscription. Read whichever
@@ -224,7 +224,7 @@ function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
-      <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=1" alt="NoVo" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
       <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">NoVo Analyst</div>
     </div>
     <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
@@ -234,7 +234,7 @@ function analystWelcomeHtml(connectUrl) {
       <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.07);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Your live dashboard</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Watch the dealer map update through the session &mdash; the live <b style="color:#eaf3ff">SPY / QQQ / SPX</b> chart with dealer levels, net GEX, Zero-Gamma, walls, expected move &amp; skew, plus the &lsquo;The Line&rsquo; feed. Install it as an app and turn on push alerts.</div>
-        <a href="https://novo-aitrading.app/analyst/live" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your live dashboard &rarr;</a>
+        <a href="https://novo-options.trade/analyst/live" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your live dashboard &rarr;</a>
         <div style="font-size:12px;color:#6f8bab;line-height:1.5;margin-top:12px;">Sign in with this email &mdash; we'll send a one-tap link.</div>
       </div>
       ${connectUrl ? `<div style="margin:18px 0 6px;border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
@@ -245,7 +245,7 @@ function analystWelcomeHtml(connectUrl) {
       </div>` : ''}
       <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-aitrading.app" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-options.trade" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
       </div>
       <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Don't need these in your inbox?</div>
@@ -268,7 +268,7 @@ function welcomeEmailHtml(connectUrl) {
 <div style="max-width:560px;margin:0 auto;padding:30px 16px;">
   <div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
-      <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=1" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
       <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; One-Click Execution</div>
     </div>
 
@@ -288,7 +288,7 @@ function welcomeEmailHtml(connectUrl) {
     <div style="background:rgba(6,182,212,0.07);border:1px solid #2e3036;border-left:3px solid #06b6d4;border-radius:10px;padding:16px 18px;margin:0 0 24px;">
       <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Included: the NoVo Analyst live dashboard</div>
       <div style="font-size:13px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#eaf3ff;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#eaf3ff;">live SPY / QQQ / SPX dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
-      <a href="https://novo-aitrading.app/analyst/live" style="display:inline-block;background:#06b6d4;color:#04121a;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:800;font-size:14px;">Open the live dashboard &rarr;</a>
+      <a href="https://novo-options.trade/analyst/live" style="display:inline-block;background:#06b6d4;color:#04121a;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:800;font-size:14px;">Open the live dashboard &rarr;</a>
     </div>
 
     <div style="border-top:1px solid #2e3036;margin:0 0 20px;"></div>

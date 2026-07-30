@@ -8,7 +8,7 @@ const GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
 const ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 
 module.exports = async (req, res) => {
-  const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+  const SITE = process.env.SITE_URL || 'https://novo-options.trade';
   const redirect = `${SITE}/api/discord`;
   const code = (req.query.code || '').toString();
   const state = (req.query.state || '').toString();

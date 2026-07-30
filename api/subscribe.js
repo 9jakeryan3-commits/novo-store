@@ -27,7 +27,7 @@ function freeWelcomeHtml(invite) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
-      <img src="https://novo-aitrading.app/novo-logo-light.png?v=1" alt="NoVo AI Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=1" alt="NoVo" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
       <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">Market Notes</div>
     </div>
     <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
@@ -40,7 +40,7 @@ function freeWelcomeHtml(invite) {
       </div>` : ''}
       <div style="margin-top:16px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($79/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-aitrading.app/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($79/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-options.trade/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
       </div>
       <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Unsubscribe anytime from any email.</p>
     </div>

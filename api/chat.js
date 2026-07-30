@@ -58,7 +58,7 @@ HARD RULES
 function bad(res, code, msg) { return res.status(code).json({ error: msg }); }
 
 module.exports = async (req, res) => {
-  const SITE = process.env.SITE_URL || 'https://novo-aitrading.app';
+  const SITE = process.env.SITE_URL || 'https://novo-options.trade';
   res.setHeader('Access-Control-Allow-Origin', SITE);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
