@@ -49,7 +49,7 @@
   <div class="article-body">
 <p><strong>Reinforcement learning (RL)</strong> trains an <em>agent</em> to take actions that maximize a reward over time. Instead of predicting a label, it learns a policy: in this state, take this action. That framing fits trading unusually well — and breaks in specific ways.</p>
 <h2>Where RL fits</h2>
-<p>RL shines on <strong>sequential decisions</strong> where the goal is clear: how to execute a large order with minimal slippage, when to scale out of a position, how to size given recent results. These are policy problems, exactly what RL is built for. NoVo, for example, uses a bandit-style approach to choose execution tactics — a close cousin of RL.</p>
+<p>RL shines on <strong>sequential decisions</strong> where the goal is clear: how to execute a large order with minimal slippage, when to scale out of a position, how to size given recent results. These are policy problems, exactly what RL is built for.</p>
 <h2>Why it's hard</h2>
 <p>Two problems. <strong>Reward design</strong>: if you reward raw profit, the agent learns to take insane risk for a lucky streak; you have to bake risk into the reward, which is subtle. <strong>Non-stationarity</strong>: markets change, so a policy learned on last year's regime can be actively wrong in this one (<a href="/journal/volatility-regimes.html">volatility regimes</a>).</p>
 <p class="pull">Reward the wrong thing and RL will optimize it ruthlessly — usually by taking risk you never intended. The agent does exactly what you asked, not what you meant.</p>

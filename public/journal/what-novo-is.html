@@ -57,7 +57,7 @@
     <p>A basic bot does one thing: "if indicator X crosses Y, buy." That works until the market changes character, and then it bleeds. NoVo is a layered system that weighs several independent reads of the market at once before it ever commits — what the live tape is doing, how options dealers are positioned, what the broader macro backdrop looks like, where retail emotion is sitting, and what the chart structure says. No single trigger fires a trade on its own.</p>
 
     <h2>It executes, end to end</h2>
-    <p>A signal service leaves the hard part to you. It tells you what it sees and then steps back — leaving you to size the position, place the order, manage the stop, and decide when to get out, under pressure. That's exactly where discipline breaks down. NoVo closes that gap: working inside the rules and risk limits <em>you</em> set, it takes your read and executes it end-to-end — picks the strike, sizes it, routes the order, manages the position, and exits — in one click, so the discipline doesn't hinge on you executing flawlessly by hand. You set the plan and the boundaries; the tool handles the mechanical execution.</p>
+    <p>A signal service leaves the hard part to you. It tells you what it sees and then steps back — leaving you to size the position, place the order, manage the stop, and decide when to get out, under pressure. That's exactly where discipline breaks down. NoVo closes that gap: working inside the rules and risk limits <em>you</em> set, it takes your read and executes it end-to-end — picks the strike, sizes it, places the order, manages the position, and exits — in one click, so the discipline doesn't hinge on you executing flawlessly by hand. You set the plan and the boundaries; the tool handles the mechanical execution.</p>
 
     <p class="pull">Most tools hand you a cockpit and still make you place every order by hand. NoVo is the cockpit that executes — you call the read, it flies the mechanics in one click.</p>
 
@@ -68,16 +68,16 @@
       <li><strong>A conviction score.</strong> Those reads are fused into a single measure of how strong a setup is right now, which also scales how much it commits to the trade.</li>
       <li><strong>An AI vision layer.</strong> On a regular cadence, NoVo has an AI model analyze live market structure — trend, key levels, momentum — and produce a directional bias that gates entries.</li>
       <li><strong>A macro and psychology read.</strong> Separate AI layers classify the broader regime (risk-on, risk-off, chop) and model where retail traders are likely trapped or about to capitulate.</li>
-      <li><strong>Adaptive execution.</strong> When it's time to fill an order, NoVo chooses among several execution approaches and learns over time which fills best in which conditions.</li>
+      <li><strong>Adaptive-Urgent execution.</strong> When you hit Buy, NoVo fires a single fast order that crosses the spread in under a second at a capped price, then confirms the fill against your broker &mdash; a pro-grade entry in one click.</li>
       <li><strong>A strict exit hierarchy.</strong> Hard stop, trailing stops, and staged take-profits — all configurable by you, with no hidden discretionary exits.</li>
-      <li><strong>A memory that compounds.</strong> Every trade is recorded with full context, and once a week NoVo distills recent outcomes into written rules that shape its future behavior.</li>
+      <li><strong>A permanent record.</strong> Every trade is recorded with full context &mdash; your honest, searchable trade journal, kept automatically.</li>
     </ul>
 
     <h2>A few always-on services, one machine</h2>
     <p>Under the hood NoVo runs as a small set of always-on services: the trading engine, the market-data pipeline, and the web dashboard you control it from. They share a fast in-memory state so the data feed never blocks the trading engine, and the trading engine never waits on the AI. The intelligence runs around the clock — reading the tape and dealer map so a fresh read is always waiting when you are, and any trade you call is one click away — from any browser or your phone, anywhere.</p>
 
     <h2>What you actually touch</h2>
-    <p>You interact with all of it through the C2 Dashboard — a web app you can open in any browser or add to your phone's home screen. From there you authorize trading, halt it instantly, set your risk parameters, watch live positions, and read the system's own market commentary. The complexity stays inside; the controls are simple.</p>
+    <p>You interact with all of it through the NoVo Trader dashboard — a web app you can open in any browser or add to your phone's home screen. From there you authorize trading, halt it instantly, set your risk parameters, watch live positions, and read the system's own market commentary. The complexity stays inside; the controls are simple.</p>
 
     <p>That's NoVo: always-on market intelligence paired with one-click execution — on the instrument it was built for, at the speed you can't match, with the discipline you can't sustain.</p>
   </div>
