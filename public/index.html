@@ -53,7 +53,7 @@
         {
           "@type": "Question",
           "name": "What does the AI actually do?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Four AI layers run simultaneously: Vision Sensor reads SPY market structure, Intuition Engine reads retail psychology, Systemic Resonance classifies the macro session, and an adaptive multi-armed-bandit execution router learns from every fill which order tactic wins in current conditions." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Four AI layers run simultaneously: Vision Sensor reads SPY market structure, Intuition Engine reads retail psychology, Systemic Resonance classifies the macro session, and Adaptive-Urgent execution crosses the spread in under a second with capped slippage and broker-confirmed fills." }
         },
         {
           "@type": "Question",
@@ -689,9 +689,9 @@
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
-        <h3>Adaptive Execution Router — Learns Every Fill</h3>
-        <p>A multi-armed-bandit algorithm continuously tests multiple order-execution tactics — spanning passive, adaptive, and aggressive approaches — and exploits whichever produces the best fills in current conditions.</p>
-        <p>Position sizing is conviction-weighted: your Analyst Score band sets contract count, so the strongest setups automatically size larger from the same allocation budget. At peak conviction or extreme tape velocity, passive fills are banned — the move can't be missed for the sake of price. It gets better fills the longer it runs.</p>
+        <h3>Adaptive-Urgent Execution — Built for 0DTE Speed</h3>
+        <p>When NoVo takes your click it fires an Adaptive-Urgent order that crosses the spread in under a second — lifting the offer and re-pricing to a hard slippage cap, so you're filled on the move instead of chasing behind it. Every fill is confirmed against your broker, so a position is never missed or lost.</p>
+        <p>Position sizing is conviction-weighted: your Analyst Score band sets contract count, so the strongest setups automatically size larger from the same allocation budget. The order is aggressive by design — it crosses to take the fill — but the slippage cap means it never pays through a blown-out spread.</p>
       </div>
     </div>
     <div class="how-card" style="margin-top:20px;">
@@ -705,7 +705,7 @@
     <!-- MANUAL ENTRY (2026-07-16) — the teammate pivot. NoVo is no longer only autonomous: the operator
          can take the trade himself THROUGH NoVo's execution engine. Accuracy notes, deliberate:
          * NOT described as "instant"/"lightning" — it fires on the next scan tick (<=5s). The FILL is fast
-           (same execution router), the click-to-order is not, and that is not a claim to make on a public page.
+           (same Adaptive-Urgent execution), the click-to-order is not, and that is not a claim to make on a public page.
          * No thresholds named (premium floor / spread gate) — "can't fill cleanly" per the no-secrets rule. -->
     <div class="how-card" style="margin-top:20px;">
       <div class="how-num">04 &nbsp;·&nbsp; YOUR CALL</div>
@@ -727,7 +727,7 @@
   <div class="container">
     <div class="section-label">The Intelligence Layer</div>
     <div class="ai-headline">AI isn't a feature.<br><span>It's what gives NoVo judgment, not just a fixed rule sheet.</span></div>
-    <p class="ai-sub">AI runs through everything NoVo does. Four intelligence layers work simultaneously — reading market structure, modeling retail psychology, detecting macro regime shifts, and learning from every fill to sharpen execution. Take the AI away and you're left with rules and no judgment behind them.</p>
+    <p class="ai-sub">AI runs through everything NoVo does — reading market structure, modeling retail psychology, and detecting macro regime shifts in real time, then crossing the spread on your click with a fast, capped, broker-confirmed fill. Take the AI away and you're left with rules and no judgment behind them.</p>
     <div class="ai-grid">
       <div class="ai-card">
         <div class="ai-card-label">Real-Time &nbsp;·&nbsp; Vision Sensor</div>
@@ -748,10 +748,10 @@
         <p>The <strong>Whale Sensor</strong> flags the strikes taking unusual option volume and injects them into the macro thesis. Overnight futures drift frames the directional lean before the open.</p>
       </div>
       <div class="ai-card">
-        <div class="ai-card-label">Continuous &nbsp;·&nbsp; Adaptive Execution Router</div>
-        <h3>NoVo learns which execution tactic wins — from every fill it takes.</h3>
-        <p>A <strong>multi-armed-bandit</strong> scores every fill — how completely it filled, how fast, at what slippage — and continuously shifts toward the order-execution tactic winning in current conditions.</p>
-        <p>It reads the live regime as it goes: speed in a violent tape, precision in chop. This is the loop that makes NoVo's execution sharper the longer it runs — built from your own real fills, not stale data.</p>
+        <div class="ai-card-label">Instant &nbsp;·&nbsp; Adaptive-Urgent Execution</div>
+        <h3>NoVo crosses the spread in under a second — capped, confirmed, every time.</h3>
+        <p>One click fires an <strong>Adaptive-Urgent</strong> order — the aggressive-but-capped logic pro platforms use — lifting the offer and re-pricing to a hard slippage cap in a fraction of a second, so you're filled on the move, not chasing it.</p>
+        <p>Then it confirms the fill against your own broker position, so a fill that lands is never missed or lost. Fast in, price-protected, every position accounted for.</p>
       </div>
     </div>
   </div>
@@ -933,7 +933,7 @@
           <tr>
             <td>The strategy</td>
             <td class="cost-sub">You build &amp; tune it</td>
-            <td class="cost-novo">Built in — and sharpens with every fill</td>
+            <td class="cost-novo">Built in — nothing to code or backtest</td>
           </tr>
           <tr>
             <td>Reading the tape</td>
@@ -943,7 +943,7 @@
           <tr>
             <td>Adapting to the market</td>
             <td class="cost-sub">You re-tune it by hand</td>
-            <td class="cost-novo">Learns from every fill, live</td>
+            <td class="cost-novo">AI re-reads the regime live, every scan</td>
           </tr>
           <tr>
             <td>Execution</td>
@@ -1016,7 +1016,7 @@
         <li>Hard stop on every trade — broker-side on Tradier</li>
         <li>DTE dial — 0DTE default, dial out to 5 DTE</li>
         <li>4 AI intelligence layers (included)</li>
-        <li>Adaptive execution router — learns from every fill</li>
+        <li>Adaptive-Urgent execution — crosses the spread in under a second, capped slippage</li>
         <li>Private Analyst Discord — the reads channel + the &lsquo;Trader Floor&rsquo;</li>
         <li>Live trade journal + performance analytics</li>
         <li>Trade alerts to your phone</li>
@@ -1124,7 +1124,7 @@
         <strong>Vision Sensor:</strong> Reads your ticker's live market structure on a tight continuous cycle — the structural picture behind the reads you see on the dashboard and in NoVo Analyst.<br><br>
         <strong>Intuition Engine:</strong> Classifies the current retail-psychology state — crowd behavior read across multiple conditions — as live situational context.<br><br>
         <strong>Systemic Resonance:</strong> Classifies the macro session using volatility, credit-market stress, currency pressure, and unusual option-volume detection — the regime backdrop for every read.<br><br>
-        <strong>Adaptive Execution Router:</strong> A multi-armed-bandit that learns from every fill which order-execution tactic is winning in current conditions and shifts toward it — so NoVo's execution sharpens with every trade you take.</div>
+        <strong>Adaptive-Urgent Execution:</strong> One click fires an Adaptive-Urgent order that lifts the offer and re-prices to a hard slippage cap in under a second — you're filled on the move, not chasing it — and every fill is confirmed against your broker, so a position is never missed or lost.</div>
       </details>
 
       <details class="faq-item">
