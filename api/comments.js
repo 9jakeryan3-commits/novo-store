@@ -72,7 +72,12 @@ module.exports = async (req, res) => {
   if (r) {
     try {
       const all = await r.lrange(LIST, 0, 49);
-      out = all.map(asObj).filter((c) => c && c.text);
+      // (A7.3) strip any U+FFFD replacement char on read -- cleans the corrupted-byte seed comment (and any
+      // future bad bytes) without a KV migration; drop a comment that becomes empty after stripping.
+      out = all.map(asObj)
+        .filter((c) => c && c.text)
+        .map((c) => ({ ...c, text: String(c.text).replace(/[�]/g, "").trim() }))
+        .filter((c) => c.text);
     } catch {}
   }
   return res.status(200).json({ comments: out });

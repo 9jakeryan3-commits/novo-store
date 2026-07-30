@@ -147,10 +147,16 @@ module.exports = async (req, res) => {
         const v = vixC[i], p = pctRank(vixC, v);
         return { value: Math.round(v * 10) / 10, pct: p, tag: volTag(p) };
       };
+      // (A4.1) CBOE hasn't posted today's close during the live session / early after-hours, so vixC's last row is
+      // still YESTERDAY. Detect that (live VIX differs from the last posted close) and shift the offsets back one so
+      // 'yesterday' isn't 2 sessions ago. Once today's close posts (last row ≈ live), use the normal offsets.
+      const _lastClose = Math.round(vixC[vixC.length - 1] * 10) / 10;
+      const _todayPosted = vix && Math.abs((vix.value || 0) - _lastClose) < 0.1;
+      const _off = _todayPosted ? 0 : -1;
       hist.now = vix ? { value: vix.value, pct: vix.pct, tag: vix.tag } : at(0);
-      hist.yesterday = at(1);
-      hist.week = at(5);
-      hist.month = at(21);
+      hist.yesterday = at(1 + _off);
+      hist.week = at(5 + _off);
+      hist.month = at(21 + _off);
     }
 
     res.status(200).json({
