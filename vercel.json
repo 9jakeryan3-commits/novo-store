@@ -14,7 +14,7 @@
     },
     {
       "source": "/blog",
-      "destination": "/journal",
+      "destination": "/journal/",
       "permanent": true
     },
     {
@@ -25,6 +25,11 @@
     {
       "source": "/blog/:path*",
       "destination": "/journal/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/journal",
+      "destination": "/journal/",
       "permanent": true
     },
     {
