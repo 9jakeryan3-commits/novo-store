@@ -7,7 +7,7 @@
 const { rateOk } = require('./_kv');
 
 const MODEL = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
-const SUPPORT_EMAIL = (process.env.SUPPORT_EMAIL || 'support@novo-aitrading.app').trim();
+const SUPPORT_EMAIL = (process.env.SUPPORT_EMAIL || 'support@novo-options.trade').trim();
 const MAX_MSGS = 16;          // trailing turns kept
 const MAX_CHARS = 1500;       // per user message
 

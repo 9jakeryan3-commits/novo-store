@@ -85,7 +85,7 @@ export default async function handler(req, res) {
       if (isNew && await _kv.rateOk('sub_welcome_global', 300, 3600)) {
         try {
           await resend.emails.send({
-            from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
+            from: FROM, to: [email], replyTo: 'support@novo-options.trade',
             subject: 'Welcome to NoVo Market Notes',
             html: freeWelcomeHtml(process.env.DISCORD_INVITE_URL || 'https://discord.gg/EfnPJ5gC5w'),
           });

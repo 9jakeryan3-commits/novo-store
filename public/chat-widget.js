@@ -4,7 +4,7 @@
 (function () {
   if (window.__novoChat) return; window.__novoChat = true;
 
-  var SUPPORT = 'support@novo-aitrading.app';
+  var SUPPORT = 'support@novo-options.trade';
   var messages = [];      // {role:'user'|'assistant', content}
   var busy = false, opened = false;
 

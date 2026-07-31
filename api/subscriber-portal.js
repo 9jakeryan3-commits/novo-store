@@ -20,7 +20,7 @@ function portalEmailHtml(url) {
     <h2 style="color:#eaf3ff;font-size:20px;margin:24px 0 8px">Manage your subscription</h2>
     <p style="color:#8aacc8;font-size:15px;line-height:1.6">Click below to open your secure Stripe billing portal &mdash; update your payment method, view invoices, or cancel.</p>
     <p style="margin:24px 0"><a href="${url}" style="display:inline-block;background:#3b82f6;color:#fff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px">Open Billing Portal</a></p>
-    <p style="color:#506e8f;font-size:12px;line-height:1.6">This link is personal to you and expires shortly. If you didn't request it, you can safely ignore this email. Questions? Reply here or contact support@novo-aitrading.app.</p>
+    <p style="color:#506e8f;font-size:12px;line-height:1.6">This link is personal to you and expires shortly. If you didn't request it, you can safely ignore this email. Questions? Reply here or contact support@novo-options.trade.</p>
   </div></body></html>`;
 }
 
@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
       });
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
-        replyTo: 'support@novo-aitrading.app',
+        replyTo: 'support@novo-options.trade',
         to: [email],
         subject: 'NoVo — Manage your subscription',
         html: portalEmailHtml(portal.url),

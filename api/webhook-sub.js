@@ -310,7 +310,7 @@ function welcomeEmailHtml(connectUrl) {
       <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
     </div>
 
-    <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-aitrading.app" style="color:#22d3ee;">support@novo-aitrading.app</a>.</p>
+    <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-options.trade" style="color:#22d3ee;">support@novo-options.trade</a>.</p>
 
     <div style="background:rgba(34,211,238,0.06);border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:10px;padding:16px 18px;margin:22px 0 0;">
       <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Don't need email?</div>
@@ -393,14 +393,14 @@ const handler = async (req, res) => {
           try {
             await resend.emails.send({
               from: 'NoVo <orders@novo-aitrading.app>',
-              replyTo: 'support@novo-aitrading.app', to: [email],
+              replyTo: 'support@novo-options.trade', to: [email],
               subject: 'You already have NoVo Analyst — duplicate subscription cancelled',
               html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
                 <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have this</h2>
                 <p style="margin:0 0 12px;">Your <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription already includes everything in <strong style="color:#eaf3ff;">NoVo Analyst</strong> — the live dealer dashboard, the daily Open and Close desk notes, and the Sunday Week Ahead.</p>
                 <p style="margin:0 0 12px;">So we cancelled the duplicate Analyst subscription you just started${charged ? '' : ' before it charged you'}. Nothing changes about your Trader access.</p>
                 <p style="margin:0 0 12px;">${charged ? (refunded ? 'Any charge for it has been refunded to your card.' : 'If your card was charged for it, just reply to this email and we will refund it.') : 'You were not charged.'}</p>
-                <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
+                <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-options.trade" style="color:#34d399;">support@novo-options.trade</a></p></div>`,
             });
           } catch (e) { console.error(`[webhook-sub] dupe-analyst notice failed: ${e.message}`); }
           return res.status(200).json({ received: true, duplicate_tier: true });
@@ -435,7 +435,7 @@ const handler = async (req, res) => {
         try {
           await resend.emails.send({
             from: 'The NoVo Journal <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
-            replyTo: 'support@novo-aitrading.app', to: [email],
+            replyTo: 'support@novo-options.trade', to: [email],
             subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
           });
         } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
@@ -462,13 +462,13 @@ const handler = async (req, res) => {
         try {
           await resend.emails.send({
             from: 'NoVo <orders@novo-aitrading.app>',
-            replyTo: 'support@novo-aitrading.app', to: [email],
+            replyTo: 'support@novo-options.trade', to: [email],
             subject: 'You already have NoVo Trader — duplicate subscription cancelled',
             html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
               <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have NoVo Trader</h2>
               <p style="margin:0 0 12px;">You already have an active <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription, so we cancelled the duplicate you just started${charged ? (refunded ? ' and refunded the charge to your card' : '') : ' before it charged you'}. Your existing access is unchanged.</p>
               <p style="margin:0 0 12px;">${charged ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
-              <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-aitrading.app" style="color:#34d399;">support@novo-aitrading.app</a></p></div>`,
+              <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-options.trade" style="color:#34d399;">support@novo-options.trade</a></p></div>`,
           });
         } catch (e) { console.error(`[webhook-sub] dupe-trader notice failed: ${e.message}`); }
         return res.status(200).json({ received: true, duplicate_tier: true });
@@ -498,7 +498,7 @@ const handler = async (req, res) => {
     try {
       await resend.emails.send({
         from: 'NoVo <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
-        replyTo: 'support@novo-aitrading.app',
+        replyTo: 'support@novo-options.trade',
         to: [email],
         subject: 'Welcome to NoVo Trader — open your portal',
         html: welcomeEmailHtml(`${SITE}/api/discord?cs=${obj.id}`),

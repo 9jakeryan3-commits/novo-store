@@ -296,7 +296,7 @@ export default async function handler(req, res) {
       if (await _activePaidSub(email)) {
         const link = `${SITE}/analyst/live?t=${encodeURIComponent(_signToken(email))}`;
         await resend.emails.send({
-          from: FROM, to: [email], replyTo: 'support@novo-aitrading.app',
+          from: FROM, to: [email], replyTo: 'support@novo-options.trade',
           subject: 'Your NoVo Analyst live dashboard link',
           html: `<div style="margin:0;padding:0;background:#101013;"><div style="max-width:520px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;"><div style="background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:28px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">NoVo Analyst &middot; Live</div><h1 style="color:#eaf3ff;font-size:20px;margin:0 0 12px;">Your live dashboard is ready.</h1><p style="color:#9fb6d1;font-size:14px;line-height:1.6;margin:0 0 20px;">The live SPY / QQQ / SPX dealer map &mdash; net GEX, walls, Zero-Gamma, expected move, skew &mdash; updating through the session. This link keeps you signed in for 7 days.</p><a href="${link}" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;">Open the live dashboard &rarr;</a><p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:22px 0 0;">If you didn't request this, ignore it. Market analysis &amp; education only &mdash; not financial advice.</p></div></div></div>`,
         });
@@ -544,7 +544,7 @@ export default async function handler(req, res) {
   // ANALYST_VAPID_PUBLIC / ANALYST_VAPID_PRIVATE env keys are set (mirrors the Trader dashboard's dormant push).
   if (kind === 'alert' && process.env.ANALYST_VAPID_PUBLIC && process.env.ANALYST_VAPID_PRIVATE && process.env.BLOB_READ_WRITE_TOKEN) {
     try {
-      webpush.setVapidDetails(process.env.ANALYST_VAPID_SUBJECT || 'mailto:support@novo-aitrading.app',
+      webpush.setVapidDetails(process.env.ANALYST_VAPID_SUBJECT || 'mailto:support@novo-options.trade',
         process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
       const BT = process.env.BLOB_READ_WRITE_TOKEN;
       const { blobs } = await list({ prefix: 'analyst-push/', token: BT });
