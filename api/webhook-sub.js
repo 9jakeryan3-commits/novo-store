@@ -367,7 +367,11 @@ const handler = async (req, res) => {
 
   // ── New subscription checkout completed ───────────────────────────────────
   if (event.type === 'checkout.session.completed' && obj.mode === 'subscription') {
-    const email = obj?.customer_details?.email;
+    const _rawEmail = obj?.customer_details?.email;
+    // Normalize (trim + lowercase) so the trial-once KV gate + reverse-dupe guard key on the SAME value the
+    // entitlement checks (~lines 138/167/205) already use — otherwise 'John@x.com' vs 'john@x.com' bypasses the
+    // one-free-trial-per-email gate and mints unlimited free 7-day Analyst trials.
+    const email = _rawEmail ? String(_rawEmail).trim().toLowerCase() : _rawEmail;
     if (!email) {
       console.error(`[webhook-sub] Missing email — session:${obj.id}`);
       return res.status(200).json({ received: true });
@@ -523,7 +527,16 @@ const handler = async (req, res) => {
       try {
         await activateSub(subscriptionId);
       } catch (err) {
-        console.error(`[webhook-sub] Activate failed — sub:${subscriptionId} error:${err.message}`);
+        // A 404 is the benign first-invoice case (license row not provisioned yet — nothing to reactivate): ack
+        // and move on. But a TRANSIENT failure (5xx / network) must NOT be swallowed, or a paying customer who
+        // recovered a past-due payment stays suspended until the next monthly invoice — reconcile-subs.js has no
+        // reactivate path. Release the claim + 500 so Stripe retries, exactly like the suspend path below.
+        const _benign404 = /→\s*404$/.test(err.message || '');
+        console.error(`[webhook-sub] Activate failed — sub:${subscriptionId} error:${err.message}${_benign404 ? ' (404 benign first-invoice, acking)' : ' (transient, will retry)'}`);
+        if (!_benign404) {
+          if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+          return res.status(500).json({ error: 'activate failed, will retry' });
+        }
       }
     }
   }

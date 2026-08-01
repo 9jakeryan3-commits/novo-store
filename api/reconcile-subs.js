@@ -32,9 +32,20 @@ async function reconcileAnalyst() {
     checked++;
     let subs = [];
     try {
-      const custs = await stripe.customers.list({ email, limit: 100 });
-      for (const cu of custs.data) {
-        const s = await stripe.subscriptions.list({ customer: cu.id, status: 'all', limit: 20 });
+      // customers.list({email}) is case-sensitive exact-match, so a Resend contact whose casing differs from the
+      // Stripe customer email would match nothing and the cancelled sub would never be removed from the paid
+      // audience. Stripe Search's email index IS case-insensitive — use it as primary + list() as a fallback for
+      // a just-created customer (Search is eventually consistent). Mirrors analyst-publish.js.
+      const _seen = new Set();
+      const _norm = String(email).trim().toLowerCase();
+      try {
+        const sr = await stripe.customers.search({ query: `email:"${_norm.replace(/"/g, '')}"`, limit: 20 });
+        for (const cu of sr.data) _seen.add(cu.id);
+      } catch (_) { /* search index warming up / unavailable — fall through to list() */ }
+      const custs = await stripe.customers.list({ email: _norm, limit: 100 });
+      for (const cu of custs.data) _seen.add(cu.id);
+      for (const cuId of _seen) {
+        const s = await stripe.subscriptions.list({ customer: cuId, status: 'all', limit: 20 });
         subs.push(...s.data);
       }
     } catch (e) { skipped++; continue; }              // can't confirm with Stripe → leave alone (fail safe)
