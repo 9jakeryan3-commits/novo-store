@@ -2,6 +2,12 @@
   "redirects": [
     {
       "source": "/(.*)",
+      "has": [{ "type": "host", "value": "^www\\.novo-aitrading\\.app$" }],
+      "destination": "https://novo-options.trade/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": "^www\\.novo-options\\.trade$" }],
       "destination": "https://novo-options.trade/$1",
       "permanent": true
