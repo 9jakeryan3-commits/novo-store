@@ -99,6 +99,18 @@
       "destination": "/market-data.html"
     },
     {
+      "source": "/market-data/spy",
+      "destination": "/market-data-spy.html"
+    },
+    {
+      "source": "/market-data/qqq",
+      "destination": "/market-data-qqq.html"
+    },
+    {
+      "source": "/market-data/iwm",
+      "destination": "/market-data-iwm.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },
