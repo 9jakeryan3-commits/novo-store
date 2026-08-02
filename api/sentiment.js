@@ -4,7 +4,16 @@
 const { kv } = require("./_kv");
 
 const today = () => new Date().toISOString().slice(0, 10);
-const ip = (req) => String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "0";
+// Use the platform's real client IP. The LEFT-most X-Forwarded-For entry is client-supplied (spoofable — a fresh
+// value per request defeated the one-vote-per-IP NX guard, letting one client arbitrarily inflate the public
+// gauge). Vercel sets x-real-ip to the true connecting IP; else take the RIGHT-most XFF entry (the trusted edge
+// appends the real source last, so a client can only prepend spoofed values).
+const ip = (req) => {
+  const real = String(req.headers["x-real-ip"] || "").trim();
+  if (real) return real;
+  const xs = String(req.headers["x-forwarded-for"] || "").split(",").map((s) => s.trim()).filter(Boolean);
+  return xs.length ? xs[xs.length - 1] : "0";
+};
 function hash(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;

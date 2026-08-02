@@ -8,7 +8,9 @@
     if (!b) return;
     var oc = b.getAttribute('onclick') || '';
     if (/subscribeNow|subscribeYearly|traderCheckout/.test(oc)) {
-      gtag('event', 'begin_checkout', { currency: 'USD', value: 199, items: [{ item_id: 'trader', item_name: 'NoVo Trader' }] });
+      // Trader is $169/mo or $1,690/yr (was a stale $199, which matched neither price → wrong GA4 conversion value).
+      var _tv = /subscribeYearly/.test(oc) ? 1690 : 169;
+      gtag('event', 'begin_checkout', { currency: 'USD', value: _tv, items: [{ item_id: 'trader', item_name: 'NoVo Trader' }] });
     } else if (/startAnalystTrial|analystCheckout/.test(oc)) {
       gtag('event', 'begin_checkout', { currency: 'USD', value: 79, items: [{ item_id: 'analyst', item_name: 'NoVo Analyst' }] });
     }

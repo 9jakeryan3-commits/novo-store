@@ -49,6 +49,15 @@ function _liveBlobKey() {
   if (!s) return 'analyst-live/state.json';
   return 'analyst-live/' + crypto.createHash('sha256').update('livestate:' + s).digest('hex').slice(0, 40) + '.json';
 }
+// LIVE session-chart PNGs are PAID dealer-map images (walls/flip/zero-gamma drawn). Vercel Hobby has no private
+// blobs, so — exactly like the live-state JSON above — derive their path from the secret (unguessable) instead of
+// a deterministic analyst-live/chart-SPY.png that anyone could poll for the paid chart for free (the blob store-id
+// leaks via the public archive <img> tags). Members still get the real URL from the token-gated ?live JSON.
+function _liveChartKey(name) {
+  const s = _LIVE_SECRET();
+  const prefix = s ? crypto.createHash('sha256').update('livechart:' + s).digest('hex').slice(0, 40) : 'pub';
+  return `analyst-live/${prefix}-${name}.png`;
+}
 function _signToken(email, days = 7) {   // 7-day TTL bounds post-cancel access (was 30); re-login is a one-click magic link
   const secret = _LIVE_SECRET();
   if (!secret || !email) return '';
@@ -404,7 +413,7 @@ export default async function handler(req, res) {
       const _hostChart = async (b64, name) => {
         try {
           const h = crypto.createHash('sha256').update(b64).digest('hex').slice(0, 12);
-          const { url } = await put(`analyst-live/chart-${name}.png`, Buffer.from(b64, 'base64'),
+          const { url } = await put(_liveChartKey(name), Buffer.from(b64, 'base64'),
             { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'image/png', token: BT });
           return url + '?v=' + h;
         } catch (_) { return null; }
