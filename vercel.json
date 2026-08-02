@@ -119,6 +119,14 @@
       "destination": "/tools-options-profit-calculator.html"
     },
     {
+      "source": "/compare/novo-vs-spotgamma",
+      "destination": "/compare-novo-vs-spotgamma.html"
+    },
+    {
+      "source": "/compare/best-0dte-tools",
+      "destination": "/compare-best-0dte-tools.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },
