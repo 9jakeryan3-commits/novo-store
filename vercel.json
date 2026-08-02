@@ -143,6 +143,18 @@
       "destination": "/compare-best-gamma-gex-tools.html"
     },
     {
+      "source": "/market-holidays",
+      "destination": "/market-holidays.html"
+    },
+    {
+      "source": "/options-glossary",
+      "destination": "/options-glossary.html"
+    },
+    {
+      "source": "/economic-calendar",
+      "destination": "/economic-calendar.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },

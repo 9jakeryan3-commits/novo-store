@@ -79,6 +79,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/market-holidays</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/options-glossary</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/economic-calendar</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/plans</loc>
     <lastmod>2026-07-26</lastmod>
     <changefreq>weekly</changefreq>
