@@ -300,6 +300,23 @@
       </div>
       <div id="pulse-factors" class="pf-row"></div>
       <div class="gg-cap" id="pulse-ago" style="margin-top:14px;">&nbsp;</div>
+      <style>
+        .embed-mini{ margin-top:14px; width:100%; text-align:left; border-top:1px solid var(--bdr); padding-top:12px; }
+        .embed-mini summary{ cursor:pointer; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--cyan); font-weight:800; list-style:none; }
+        .embed-mini summary::-webkit-details-marker{ display:none; }
+        .embed-mini pre{ background:var(--navy); border:1px solid var(--bdr); border-radius:8px; padding:11px; margin:10px 0 8px; font-size:10.5px; color:var(--txt2); overflow-x:auto; white-space:pre-wrap; word-break:break-all; line-height:1.5; }
+        .embed-mini .emn{ font-size:11px; color:var(--txt3); }
+      </style>
+      <details class="embed-mini">
+        <summary>&lt;/&gt; Embed this gauge on your site — free</summary>
+        <pre id="embed-code">&lt;iframe src="https://novo-options.trade/embed/pulse" width="360" height="420"
+  style="border:0;max-width:100%" title="NoVo Market Pulse"&gt;&lt;/iframe&gt;
+&lt;p&gt;&lt;a href="https://novo-options.trade/market-data"&gt;NoVo Market Pulse&lt;/a&gt; — live market fear &amp;amp; greed&lt;/p&gt;</pre>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-p" style="padding:7px 14px;font-size:13px;" onclick="copyEmbed(this)">Copy code</button>
+          <span class="emn">Keep the small credit link — free to use anywhere.</span>
+        </div>
+      </details>
     </div>
 
     <div class="hero-copy" style="display:flex;flex-direction:column;justify-content:center;">
@@ -323,11 +340,6 @@
     <!-- cards injected -->
   </div>
   <p class="muted" style="margin-top:12px;">VIX/VXN/RVX are ~15-min delayed. Percentile = where today's level sits vs the past year of daily closes.</p>
-  <p style="margin-top:14px;font-size:14px;">Go deeper on one ticker's 0DTE dealer map, gamma &amp; expected move: <a href="/market-data/spy">SPY gamma today</a> &nbsp;·&nbsp; <a href="/market-data/qqq">QQQ gamma today</a> &nbsp;·&nbsp; <a href="/market-data/iwm">IWM gamma today</a>.</p>
-  <p style="margin-top:6px;font-size:14px;">Free tools: <a href="/tools/expected-move">Expected-Move</a> &nbsp;·&nbsp; <a href="/tools/options-profit-calculator">Options P&amp;L</a> &nbsp;·&nbsp; <a href="/tools/position-size-calculator">Position Size</a> &nbsp;·&nbsp; <a href="/tools/options-greeks-calculator">Greeks</a> &nbsp;·&nbsp; <a href="/tools/max-pain-calculator">Max Pain</a>.</p>
-  <p style="margin-top:6px;font-size:14px;">Compare: <a href="/compare/novo-vs-spotgamma">vs SpotGamma</a> &nbsp;·&nbsp; <a href="/compare/novo-vs-unusual-whales">vs Unusual Whales</a> &nbsp;·&nbsp; <a href="/compare/novo-vs-option-alpha">vs Option Alpha</a> &nbsp;·&nbsp; <a href="/compare/best-0dte-tools">Best 0DTE tools</a> &nbsp;·&nbsp; <a href="/compare/best-gamma-gex-tools">Best GEX tools</a>.</p>
-  <p style="margin-top:6px;font-size:14px;">Reference: <a href="/market-holidays">Market holidays 2026</a> &nbsp;·&nbsp; <a href="/economic-calendar">Economic calendar</a> &nbsp;·&nbsp; <a href="/options-glossary">Options glossary</a>.</p>
-  <p style="margin-top:6px;font-size:14px;">Learn: <a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; GEX</a> &nbsp;·&nbsp; <a href="/learn/0dte-options">0DTE</a> &nbsp;·&nbsp; <a href="/learn/options-basics-greeks">Greeks</a> &nbsp;·&nbsp; <a href="/learn/risk-management">Risk</a> &nbsp;·&nbsp; <a href="/learn/volatility-market-structure">Volatility</a>.</p>
 </div>
 
 <!-- FEAR HISTORY (directly under the 3 index fear cards) -->
@@ -335,6 +347,16 @@
   <div class="lbl">Fear · over time</div>
   <h2 class="h2">Where fear was</h2>
   <div class="hist" id="hist-row"></div>
+</div>
+
+<!-- EXPLORE (tools / compare / reference / learn) -->
+<div class="container sec" style="padding-top:6px;">
+  <div class="lbl">Explore</div>
+  <p style="margin-top:6px;font-size:14px;">Go deeper on one ticker's 0DTE dealer map, gamma &amp; expected move: <a href="/market-data/spy">SPY gamma today</a> &nbsp;·&nbsp; <a href="/market-data/qqq">QQQ gamma today</a> &nbsp;·&nbsp; <a href="/market-data/iwm">IWM gamma today</a>.</p>
+  <p style="margin-top:6px;font-size:14px;">Free tools: <a href="/tools/expected-move">Expected-Move</a> &nbsp;·&nbsp; <a href="/tools/options-profit-calculator">Options P&amp;L</a> &nbsp;·&nbsp; <a href="/tools/position-size-calculator">Position Size</a> &nbsp;·&nbsp; <a href="/tools/options-greeks-calculator">Greeks</a> &nbsp;·&nbsp; <a href="/tools/max-pain-calculator">Max Pain</a>.</p>
+  <p style="margin-top:6px;font-size:14px;">Compare: <a href="/compare/novo-vs-spotgamma">vs SpotGamma</a> &nbsp;·&nbsp; <a href="/compare/novo-vs-unusual-whales">vs Unusual Whales</a> &nbsp;·&nbsp; <a href="/compare/novo-vs-option-alpha">vs Option Alpha</a> &nbsp;·&nbsp; <a href="/compare/best-0dte-tools">Best 0DTE tools</a> &nbsp;·&nbsp; <a href="/compare/best-gamma-gex-tools">Best GEX tools</a>.</p>
+  <p style="margin-top:6px;font-size:14px;">Reference: <a href="/market-holidays">Market holidays 2026</a> &nbsp;·&nbsp; <a href="/economic-calendar">Economic calendar</a> &nbsp;·&nbsp; <a href="/options-glossary">Options glossary</a>.</p>
+  <p style="margin-top:6px;font-size:14px;">Learn: <a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; GEX</a> &nbsp;·&nbsp; <a href="/learn/0dte-options">0DTE</a> &nbsp;·&nbsp; <a href="/learn/options-basics-greeks">Greeks</a> &nbsp;·&nbsp; <a href="/learn/risk-management">Risk</a> &nbsp;·&nbsp; <a href="/learn/volatility-market-structure">Volatility</a>.</p>
 </div>
 
 <!-- COMMUNITY & SENTIMENT (poll + discussion together) -->
@@ -446,30 +468,12 @@
   <p class="sub" style="max-width:760px;">The Market Pulse is a single 0–100 read of market sentiment — 0 is Extreme Fear, 100 is Extreme Greed. It weighs index-volatility percentiles (VIX, VXN <i>and</i> RVX — so it catches Nasdaq and small-cap fear a VIX-only gauge misses) against where the S&amp;P sits versus its 125-day trend, all from public data. It's a weather report, not a trade signal. It can read differently from breadth-based indices like CNN's Fear &amp; Greed — those lean heavily on market breadth and options positioning, while NoVo's leans on volatility and trend, so the two often diverge. For the <i>structure</i> under the sentiment — how dealer gamma is positioning the market — see <a href="/analyst">NoVo Analyst</a> or read <a href="/journal/">The Journal</a>.</p>
 </div>
 
-<!-- EMBED WIDGET (free backlink engine) -->
-<div class="container sec">
-  <div class="lbl">Free widget</div>
-  <h2 class="h2">Embed the NoVo Market Pulse — free</h2>
-  <p class="sub">Add the live fear &amp; greed gauge to your own site or blog. Paste the snippet — it updates on its own, no key or signup.</p>
-  <div style="display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start;">
-    <div style="min-width:0;"><iframe src="/embed/pulse" width="360" height="420" style="border:0;max-width:100%;border-radius:14px;" title="NoVo Market Pulse" loading="lazy"></iframe></div>
-    <div style="min-width:0;">
-      <pre id="embed-code" style="background:var(--navy);border:1px solid var(--bdr);border-radius:10px;padding:14px;overflow-x:auto;font-size:12px;color:var(--txt2);white-space:pre-wrap;word-break:break-all;">&lt;iframe src="https://novo-options.trade/embed/pulse" width="360" height="420"
-  style="border:0;max-width:100%" title="NoVo Market Pulse"&gt;&lt;/iframe&gt;
-&lt;p&gt;&lt;a href="https://novo-options.trade/market-data"&gt;NoVo Market Pulse&lt;/a&gt;
-  — live market fear &amp;amp; greed&lt;/p&gt;</pre>
-      <button type="button" class="btn btn-p" style="margin-top:10px;padding:10px 18px;" onclick="copyEmbed(this)">Copy embed code</button>
-      <p class="muted" style="margin-top:10px;">Keep the small “NoVo Market Pulse” credit link and you're free to use it anywhere.</p>
-    </div>
-  </div>
-</div>
 <script>
 function copyEmbed(btn){
   var s='<iframe src="https://novo-options.trade/embed/pulse" width="360" height="420" style="border:0;max-width:100%" title="NoVo Market Pulse"></iframe>\n<p><a href="https://novo-options.trade/market-data">NoVo Market Pulse</a> — live market fear & greed</p>';
-  (navigator.clipboard&&navigator.clipboard.writeText(s)||Promise.reject()).then(function(){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent='Copy embed code';},1800);}).catch(function(){var t=document.getElementById('embed-code');var r=document.createRange();r.selectNode(t);getSelection().removeAllRanges();getSelection().addRange(r);});
+  (navigator.clipboard&&navigator.clipboard.writeText(s)||Promise.reject()).then(function(){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent='Copy code';},1800);}).catch(function(){var t=document.getElementById('embed-code');var r=document.createRange();r.selectNode(t);getSelection().removeAllRanges();getSelection().addRange(r);});
 }
 </script>
-<style>@media(max-width:760px){#embed-code{font-size:11px}.container.sec [style*="grid-template-columns:380px"]{grid-template-columns:1fr !important}}</style>
 
 <!-- FOOTER -->
 <div class="foot"><div class="container">
