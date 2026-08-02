@@ -139,6 +139,10 @@
       "destination": "/compare-best-0dte-tools.html"
     },
     {
+      "source": "/compare/best-gamma-gex-tools",
+      "destination": "/compare-best-gamma-gex-tools.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },
