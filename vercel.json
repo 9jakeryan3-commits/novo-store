@@ -175,6 +175,10 @@
       "destination": "/learn-volatility-market-structure.html"
     },
     {
+      "source": "/embed/pulse",
+      "destination": "/embed-pulse.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },

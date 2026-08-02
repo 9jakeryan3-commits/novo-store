@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoVo Market Pulse — Live Fear &amp; Greed</title>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://novo-options.trade/market-data">
+<style>
+  :root{ --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --txt1:#eaf3ff; --txt3:#506e8f; --cyan:#22d3ee; }
+  *{ box-sizing:border-box; margin:0; }
+  html,body{ background:var(--navy); }
+  body{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:var(--txt1); padding:14px; }
+  .w{ max-width:360px; margin:0 auto; background:var(--navy2); border:1px solid var(--bdr); border-radius:16px; padding:18px 18px 12px; text-align:center; }
+  .cap{ font-size:10.5px; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:var(--txt3); margin-bottom:2px; }
+  svg{ width:100%; display:block; overflow:visible; }
+  .zlbl{ font-size:9.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; fill:var(--txt3); transition:fill .5s ease; }
+  .ztick{ font-size:11px; font-weight:700; fill:var(--txt3); text-anchor:middle; }
+  .gseg{ transition:opacity .55s ease; }
+  #needle{ transition:transform .9s cubic-bezier(.2,.75,.2,1); }
+  .num{ font-size:52px; font-weight:900; line-height:1; margin-top:-6px; font-family:'Space Grotesk',sans-serif; }
+  .lbl{ font-size:15px; font-weight:800; letter-spacing:.5px; margin-top:3px; color:var(--txt3); }
+  .foot{ margin-top:12px; padding-top:10px; border-top:1px solid var(--bdr); font-size:11.5px; }
+  .foot a{ color:var(--cyan); text-decoration:none; font-weight:700; }
+  .foot .ago{ color:var(--txt3); display:block; margin-top:2px; font-size:10.5px; }
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="cap">NoVo Market Pulse</div>
+  <svg viewBox="0 0 340 196">
+    <defs>
+      <path id="lp0" d="M 18.3 172.46 A 152 152 0 0 1 55.98 81.48"/>
+      <path id="lp1" d="M 69.48 67.98 A 152 152 0 0 1 136.84 33.66"/>
+      <path id="lp2" d="M 96.8 48.8 A 152 152 0 0 1 243.2 48.8"/>
+      <path id="lp3" d="M 203.16 33.66 A 152 152 0 0 1 270.52 67.98"/>
+      <path id="lp4" d="M 284.02 81.48 A 152 152 0 0 1 321.7 172.46"/>
+    </defs>
+    <path id="seg0" class="gseg" d="M 40.02 179.55 A 130 130 0 0 1 74.0 94.34"   fill="none" stroke="#ef4444" stroke-width="26" opacity="0.26"/>
+    <path id="seg1" class="gseg" d="M 82.34 86.0 A 130 130 0 0 1 143.86 54.66"    fill="none" stroke="#f97316" stroke-width="26" opacity="0.26"/>
+    <path id="seg2" class="gseg" d="M 155.51 52.81 A 130 130 0 0 1 184.49 52.81"  fill="none" stroke="#eab308" stroke-width="26" opacity="0.26"/>
+    <path id="seg3" class="gseg" d="M 196.14 54.66 A 130 130 0 0 1 257.66 86.0"   fill="none" stroke="#84cc16" stroke-width="26" opacity="0.26"/>
+    <path id="seg4" class="gseg" d="M 266.0 94.34 A 130 130 0 0 1 299.98 179.55"  fill="none" stroke="#22c55e" stroke-width="26" opacity="0.26"/>
+    <text class="zlbl" id="zt0"><textPath href="#lp0" startOffset="50%" text-anchor="middle">Extreme Fear</textPath></text>
+    <text class="zlbl" id="zt1"><textPath href="#lp1" startOffset="50%" text-anchor="middle">Fear</textPath></text>
+    <text class="zlbl" id="zt2"><textPath href="#lp2" startOffset="50%" text-anchor="middle">Neutral</textPath></text>
+    <text class="zlbl" id="zt3"><textPath href="#lp3" startOffset="50%" text-anchor="middle">Greed</textPath></text>
+    <text class="zlbl" id="zt4"><textPath href="#lp4" startOffset="50%" text-anchor="middle">Extreme Greed</textPath></text>
+    <text class="ztick" x="64" y="185">0</text>
+    <text class="ztick" x="95" y="110">25</text>
+    <text class="ztick" x="170" y="79">50</text>
+    <text class="ztick" x="245" y="110">75</text>
+    <text class="ztick" x="276" y="185">100</text>
+    <g id="needle" transform="rotate(-90 170 182)">
+      <polygon points="170,43 166.5,182 173.5,182" fill="#eaf3ff"/>
+      <circle cx="170" cy="182" r="8" fill="#eaf3ff"/>
+      <circle cx="170" cy="182" r="3.4" fill="#0d0e10"/>
+    </g>
+  </svg>
+  <div class="num" id="num">—</div>
+  <div class="lbl" id="lbl">Loading…</div>
+  <div class="foot">
+    <a href="https://novo-options.trade/market-data" target="_blank" rel="noopener">Live market fear &amp; greed → novo-options.trade</a>
+    <span class="ago" id="ago">&nbsp;</span>
+  </div>
+</div>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var GZ=[{max:25,c:'#ef4444'},{max:45,c:'#f97316'},{max:55,c:'#eab308'},{max:75,c:'#84cc16'},{max:101,c:'#22c55e'}];
+  function ago(ts){ if(!ts) return ''; var m=Math.max(0,Math.round((Date.now()-ts)/60000)); return 'Updated '+(m<1?'just now':m+' min ago'); }
+  function render(p){
+    if(!p) return;
+    var sc=Math.max(0,Math.min(100,p.score));
+    $('num').textContent=p.score;
+    var zi=0; for(var i=0;i<GZ.length;i++){ if(sc<GZ[i].max){ zi=i; break; } }
+    var zc=GZ[zi].c;
+    var l=$('lbl'); l.textContent=p.label||''; l.style.color=zc;
+    for(var s=0;s<5;s++){ var seg=$('seg'+s); if(seg) seg.style.opacity=(s===zi)?'1':'0.24';
+      var zt=$('zt'+s); if(zt) zt.style.fill=(s===zi)?zc:'#506e8f'; }
+    var n=$('needle'); if(n) n.setAttribute('transform','rotate('+(1.8*sc-90)+' 170 182)');
+  }
+  function load(){ fetch('https://novo-options.trade/api/market-pulse',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){ if(d){ render(d.pulse); $('ago').textContent=ago(d.updated); } }).catch(function(){}); }
+  load(); setInterval(load,120000);
+})();
+</script>
+</body>
+</html>
