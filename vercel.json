@@ -86,11 +86,6 @@
       "source": "/license",
       "destination": "/license.html",
       "permanent": true
-    },
-    {
-      "source": "/privacy",
-      "destination": "/privacy.html",
-      "permanent": true
     }
   ],
   "rewrites": [
@@ -205,6 +200,10 @@
     {
       "source": "/refund-policy",
       "destination": "/refund-policy.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
     },
     {
       "source": "/getting-started",
