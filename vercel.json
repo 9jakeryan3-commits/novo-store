@@ -119,6 +119,18 @@
       "destination": "/tools-options-profit-calculator.html"
     },
     {
+      "source": "/tools/position-size-calculator",
+      "destination": "/tools-position-size-calculator.html"
+    },
+    {
+      "source": "/tools/options-greeks-calculator",
+      "destination": "/tools-options-greeks-calculator.html"
+    },
+    {
+      "source": "/tools/max-pain-calculator",
+      "destination": "/tools-max-pain-calculator.html"
+    },
+    {
       "source": "/compare/novo-vs-spotgamma",
       "destination": "/compare-novo-vs-spotgamma.html"
     },
