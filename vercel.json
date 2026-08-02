@@ -111,6 +111,14 @@
       "destination": "/market-data-iwm.html"
     },
     {
+      "source": "/tools/expected-move",
+      "destination": "/tools-expected-move.html"
+    },
+    {
+      "source": "/tools/options-profit-calculator",
+      "destination": "/tools-options-profit-calculator.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },
