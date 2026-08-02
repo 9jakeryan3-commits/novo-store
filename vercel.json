@@ -155,6 +155,26 @@
       "destination": "/economic-calendar.html"
     },
     {
+      "source": "/learn/gamma-gex-dealer-positioning",
+      "destination": "/learn-gamma-gex-dealer-positioning.html"
+    },
+    {
+      "source": "/learn/0dte-options",
+      "destination": "/learn-0dte-options.html"
+    },
+    {
+      "source": "/learn/options-basics-greeks",
+      "destination": "/learn-options-basics-greeks.html"
+    },
+    {
+      "source": "/learn/risk-management",
+      "destination": "/learn-risk-management.html"
+    },
+    {
+      "source": "/learn/volatility-market-structure",
+      "destination": "/learn-volatility-market-structure.html"
+    },
+    {
       "source": "/analyst/archive/:slug",
       "destination": "/api/analyst-publish?slug=:slug"
     },

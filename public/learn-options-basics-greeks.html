@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-adsense-account" content="ca-pub-4434105753461088">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4EMKLHBB6F"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Options Basics & the Greeks — NoVo Options Learn</title><meta name="description" content="The foundations — calls and puts, the Greeks (delta, gamma, theta, vega), moneyness, breakeven, premium and how option pricing actually works.">
+<link rel="icon" href="/icon-192.png?v=5"><meta name="theme-color" content="#121316">
+<meta property="og:type" content="website"><meta property="og:url" content="https://novo-options.trade/learn/options-basics-greeks">
+<meta property="og:title" content="Options Basics & the Greeks — NoVo Options Learn"><meta property="og:description" content="The foundations — calls and puts, the Greeks (delta, gamma, theta, vega), moneyness, breakeven, premium and how option pricing actually works."><meta property="og:image" content="https://novo-options.trade/og-home.png?v=2">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@0dte_NoVo"><meta name="twitter:creator" content="@0dte_NoVo">
+<meta name="twitter:title" content="Options Basics & the Greeks — NoVo Options Learn"><meta name="twitter:description" content="The foundations — calls and puts, the Greeks (delta, gamma, theta, vega), moneyness, breakeven, premium and how option pricing actually works."><meta name="twitter:image" content="https://novo-options.trade/og-home.png?v=2">
+<link rel="canonical" href="https://novo-options.trade/learn/options-basics-greeks">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Options Basics & the Greeks","url":"https://novo-options.trade/learn/options-basics-greeks","description":"The foundations — calls and puts, the Greeks (delta, gamma, theta, vega), moneyness, breakeven, premium and how option pricing actually works.","mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://novo-options.trade/journal/assignment-over-the-weekend.html","name":"Weekend Assignment Risk: The Monday Surprise for Sellers"},{"@type":"ListItem","position":2,"url":"https://novo-options.trade/journal/automatic-exercise-itm-option.html","name":"Automatic Exercise: What Happens If You Forget to Close an ITM Option"},{"@type":"ListItem","position":3,"url":"https://novo-options.trade/journal/breakeven-itis.html","name":"Breakeven-itis: Why You Keep Cutting Winners Too Soon"},{"@type":"ListItem","position":4,"url":"https://novo-options.trade/journal/call-vs-put-options.html","name":"Calls vs. Puts: Options Basics in Plain English"},{"@type":"ListItem","position":5,"url":"https://novo-options.trade/journal/calls-or-puts-how-to-decide.html","name":"Buying Calls vs Buying Puts: How to Decide Direction"},{"@type":"ListItem","position":6,"url":"https://novo-options.trade/journal/can-assignment-cause-margin-call.html","name":"Can Options Assignment Cause a Margin Call? Yes — Here's How"},{"@type":"ListItem","position":7,"url":"https://novo-options.trade/journal/cash-secured-puts.html","name":"Cash-Secured Puts, Explained"},{"@type":"ListItem","position":8,"url":"https://novo-options.trade/journal/choosing-a-strike-for-0dte-scalp.html","name":"Choosing a Strike for a 0DTE Scalp: How Far Out-of-the-Money?"},{"@type":"ListItem","position":9,"url":"https://novo-options.trade/journal/covered-calls.html","name":"Covered Calls, Explained"},{"@type":"ListItem","position":10,"url":"https://novo-options.trade/journal/cumulative-delta-explained.html","name":"Cumulative Delta Explained: Reading Buying vs Selling Pressure"},{"@type":"ListItem","position":11,"url":"https://novo-options.trade/journal/debit-spread-to-cut-theta.html","name":"Using a Debit Spread to Cut Theta on a Directional 0DTE Bet"},{"@type":"ListItem","position":12,"url":"https://novo-options.trade/journal/deep-itm-options-move-like-shares.html","name":"Deep In-the-Money Options: Why They Move Almost Like Shares"},{"@type":"ListItem","position":13,"url":"https://novo-options.trade/journal/delta-and-gamma-together.html","name":"Delta and Gamma Together: How a Scalp Actually Moves"},{"@type":"ListItem","position":14,"url":"https://novo-options.trade/journal/delta-based-strike-selection.html","name":"Delta-Based Strike Selection: Why the Right Delta Beats a Round Number"},{"@type":"ListItem","position":15,"url":"https://novo-options.trade/journal/delta-divergence-highs-lows.html","name":"Reading Delta Divergence at Session Highs and Lows"},{"@type":"ListItem","position":16,"url":"https://novo-options.trade/journal/delta-hedging-explained.html","name":"Delta Hedging Explained: How Dealers Stay Neutral (and Move the Tape)"},{"@type":"ListItem","position":17,"url":"https://novo-options.trade/journal/delta-hedging-vs-gamma-hedging.html","name":"Delta Hedging vs Gamma Hedging: What Dealers Actually Rebalance"},{"@type":"ListItem","position":18,"url":"https://novo-options.trade/journal/delta-neutral-trading.html","name":"Delta-Neutral Trading: Betting on Volatility, Not Direction"},{"@type":"ListItem","position":19,"url":"https://novo-options.trade/journal/delta-probability-in-the-money.html","name":"Does Delta Really Equal the Probability of Expiring In-the-Money?"},{"@type":"ListItem","position":20,"url":"https://novo-options.trade/journal/delta-vs-gamma.html","name":"Delta vs Gamma: The Difference Every Options Trader Needs"},{"@type":"ListItem","position":21,"url":"https://novo-options.trade/journal/delta-vs-probability-of-profit.html","name":"Delta vs Probability of Profit: Why They're Not the Same"},{"@type":"ListItem","position":22,"url":"https://novo-options.trade/journal/do-i-buy-100-shares-call-itm.html","name":"Do I Have to Buy 100 Shares If My Call Expires ITM?"},{"@type":"ListItem","position":23,"url":"https://novo-options.trade/journal/does-novo-handle-assignment.html","name":"Can NoVo Handle Assignment or Exercise for Me?"},{"@type":"ListItem","position":24,"url":"https://novo-options.trade/journal/double-bottom-put-wall-scalp.html","name":"The Double-Bottom Scalp at the Put Wall"},{"@type":"ListItem","position":25,"url":"https://novo-options.trade/journal/early-assignment-explained.html","name":"Early Assignment Explained: When Option Sellers Get Called Early"},{"@type":"ListItem","position":26,"url":"https://novo-options.trade/journal/early-assignment-risk.html","name":"Early Assignment Risk: When a Short Option Gets Exercised Before Expiration"}]}}</script>
+<style>
+  :root {
+    --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --amber:#f59e0b;
+    --green:#10b981; --red:#ef4444; --cyan:#22d3ee; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#506e8f;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background: var(--navy); color: var(--txt2); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.gg-num { font-family:'Space Grotesk','Inter',sans-serif; }
+  a { color: var(--cyan); }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+
+  /* ── Nav (unified site header) ── */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
+  .nav-logo img { height: 46px; width: auto; display: block; }
+  .nav-actions { display: flex; gap: 14px; align-items: center; justify-content: flex-end; }
+  .nav-actions > a:not(.nav-buy):not(.nav-portal) { padding: 0 !important; }
+  .nav-buy { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 11px 22px; border-radius: 9px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+  .nav-buy:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(16,185,129,0.45); }
+  .nav-portal { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.07); color: var(--blue); border: 1px solid rgba(59,130,246,0.35); padding: 9px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; }
+  .nav-portal:hover { border-color: var(--blue); background: rgba(59,130,246,0.16); }
+  .nav-portal svg { width: 17px; height: 17px; }
+  .nav-portal-txt { display: none; }
+  @media (max-width: 1024px) {
+    /* 2-row header for foldables/tablets down to phones — desktop single row only fits >1024px */
+    .nav-inner { flex-flow: row wrap; align-items: center; justify-content: center; gap: 9px 6px; padding: 10px 16px; }
+    .nav-logo { order: 1; margin-right: auto; }
+    .nav-logo img { height: 40px; }
+    .nav-actions { display: contents; }
+    .nav-buy { order: 2; padding: 8px 16px; font-size: 13px; box-shadow: none; }
+    .nav-portal { order: 3; padding: 7px 10px; gap: 3px; }
+    .nav-portal svg { width: 16px; height: 16px; }
+    .nav-inner::after { content: ""; order: 4; flex-basis: 100%; height: 0; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { order: 5; font-size: 12px !important; padding: 4px 7px !important; white-space: nowrap; letter-spacing: 0; }
+  }
+  @media (max-width: 560px) {
+    .nav-logo img { height: 36px; }
+    .nav-buy { padding: 8px 15px; font-size: 12.5px; }
+    .nav-inner { column-gap: 4px; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { font-size: 10px !important; padding: 2px 3px !important; letter-spacing: 0 !important; }
+  }
+  /* ── site-wide markets ticker ── */
+  .ticker{background:#0d0e10;border-bottom:1px solid #2e3036;overflow:hidden;}
+  .ticker-row{display:flex;align-items:stretch;max-width:1200px;margin:0 auto;}
+  .ticker-tag{flex-shrink:0;padding:9px 14px;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#22d3ee;border-right:1px solid #2e3036;display:flex;align-items:center;gap:6px;background:#0d0e10;}
+  .ticker-tag .dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;}
+  .ticker-track{flex:1;overflow:hidden;}
+  .ticker-inner{display:flex;align-items:center;width:max-content;animation:tickermarquee 55s linear infinite;}
+  .ticker:hover .ticker-inner{animation-play-state:paused;}
+  .tick{display:flex;align-items:center;gap:9px;padding:9px 18px;border-right:1px solid #2e3036;white-space:nowrap;font-size:12.5px;}
+  .tick .t-name{color:#8aacc8;font-weight:700;letter-spacing:.04em;}
+  .tick .t-val{color:#eaf3ff;font-weight:700;}
+  .tick .t-chg{font-weight:700;font-size:11.5px;}
+  .tick .up{color:#10b981;}.tick .dn{color:#f43f5e;}
+  .tick svg{width:46px;height:18px;display:block;}
+  @keyframes tickermarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  @media(prefers-reduced-motion:reduce){.ticker-inner{animation:none;}.ticker-track{overflow-x:auto;}}
+
+  /* section shell */
+  /* vertical only — must NOT use the `padding` shorthand: these classes share an element with .container
+     (class="container sec"), and a shorthand here would override .container's `0 22px` side padding and slam
+     the content edge-to-edge on mobile. Set top/bottom explicitly so the container's side padding survives. */
+  .sec { padding-top: 34px; padding-bottom: 34px; }
+  .lbl { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--cyan); margin-bottom:12px; }
+  .h2 { font-size:clamp(20px,3vw,26px); font-weight:800; color:var(--txt1); letter-spacing:-.5px; margin:0 0 6px; }
+  .sub { font-size:14.5px; color:var(--txt2); max-width:640px; margin:0 0 22px; }
+  .card { background:var(--navy2); border:1px solid var(--bdr); border-radius:14px; padding:22px; }
+  .muted { color:var(--txt3); font-size:12px; }
+
+  /* HERO / pulse */
+  .hero { padding-top: 40px; padding-bottom: 8px; }  /* vertical only (shares element with .container) — see .sec note */
+  .hero-grid { display:grid; grid-template-columns: 1.1fr .9fr; gap:22px; align-items:stretch; }
+  @media(max-width:820px){ .hero-grid{ grid-template-columns:1fr; } }
+  .pulse-card { text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  /* fill the card's content box (which already respects container + card padding) and cap on wide screens.
+     Do NOT use a vw width here: 88vw is wider than the available content area (~100vw − 88px of padding) on a
+     narrow screen like the Z Fold cover, so the gauge overflowed its own panel and pushed it past the edge. */
+  .gauge { position:relative; width:100%; max-width:390px; }
+  .zlbl { font-size:9.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; fill:var(--txt3); transition:fill .5s ease; }
+  .ztick { font-size:11px; font-weight:700; fill:var(--txt3); text-anchor:middle; font-family:'Space Grotesk','Inter',sans-serif; }
+  .gseg { transition:opacity .55s ease; }
+  #needle { transition:transform .9s cubic-bezier(.2,.75,.2,1); }
+  .gg-num { font-size:60px; font-weight:900; color:var(--txt1); line-height:1; margin-top:-8px; }
+  .gg-lbl { font-size:17px; font-weight:800; letter-spacing:.5px; margin-top:4px; }
+  .gg-cap { font-size:11px; color:var(--txt3); letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+  .pf-row { display:grid; grid-template-columns:repeat(2,1fr); gap:9px 16px; width:100%; margin-top:18px; }
+  .pf { text-align:left; }
+  .pf .pfk { font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:var(--txt3); display:flex; justify-content:space-between; gap:8px; }
+  .pf .pfv { font-weight:800; text-transform:capitalize; }
+  .pf .pfbar { height:5px; border-radius:3px; background:var(--navy); border:1px solid var(--bdr); margin-top:4px; overflow:hidden; }
+  .pf .pfbar i { display:block; height:100%; border-radius:3px; }
+  .hero-copy h1 { font-size:clamp(26px,4vw,38px); font-weight:900; color:var(--txt1); letter-spacing:-1px; line-height:1.12; margin:0 0 12px; }
+  .hero-copy h1 span { color:var(--cyan); }
+  .hero-copy p { font-size:15.5px; color:var(--txt2); line-height:1.7; margin:0 0 16px; }
+  .hero-cta { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; text-decoration:none; padding:12px 20px; border-radius:10px; }
+  .btn-p { background:linear-gradient(180deg,#34d399,#10b981); color:#04120c; box-shadow:0 8px 24px rgba(16,185,129,.28); }
+  .btn-s { background:transparent; color:var(--txt1); border:1px solid var(--bdr); }
+
+  /* fear cards */
+  .fear-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:720px){ .fear-row{ grid-template-columns:1fr; } }
+  .fear-card .fh { display:flex; justify-content:space-between; align-items:baseline; }
+  .fear-card .ftk { font-size:12px; font-weight:800; letter-spacing:1px; color:var(--txt2); }
+  .fear-card .fsym { font-size:11px; color:var(--txt3); font-weight:700; }
+  .fear-card .fval { font-size:38px; font-weight:900; color:var(--txt1); line-height:1; margin:8px 0 2px; }
+  .fear-card .fpct { font-size:12px; color:var(--txt3); }
+  .meter { position:relative; height:8px; border-radius:5px; margin:14px 0 8px; background:linear-gradient(90deg,#10b981 0%,#f59e0b 55%,#f43f5e 100%); }
+  .meter .mk { position:absolute; top:-3px; width:3px; height:14px; border-radius:2px; background:#f0f0ee; box-shadow:0 0 0 2px rgba(0,0,0,.55); transform:translateX(-50%); transition:left .6s ease; }
+  .mrow { display:flex; justify-content:space-between; font-size:10px; letter-spacing:1px; color:var(--txt3); text-transform:uppercase; }
+  .tag { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
+
+  /* history */
+  .hist { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media(max-width:600px){ .hist{ grid-template-columns:repeat(2,1fr); } }
+  .hist .hc { background:var(--navy); border:1px solid var(--bdr); border-radius:10px; padding:14px; text-align:center; }
+  .hist .hk { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; }
+  .hist .hv { font-size:24px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
+
+  /* futures strip */
+  .fut { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+  @media(max-width:900px){ .fut{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:520px){ .fut{ grid-template-columns:repeat(2,1fr); } }
+  .fut .fc { background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:14px; }
+  .fut .fn { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
+  .fut .fp { font-size:20px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
+  .fut .fg { font-size:12.5px; font-weight:700; }
+  .up{ color:var(--green); } .dn{ color:var(--red); }
+
+  /* dealer teaser (LOCKED) */
+  .teaser { display:grid; grid-template-columns:1fr 1fr; gap:0; overflow:hidden; padding:0; }
+  @media(max-width:820px){ .teaser{ grid-template-columns:1fr; } }
+  .teaser .tleft { padding:26px; }
+  .teaser .tright { position:relative; min-height:280px; background:#0d0e10; border-left:1px solid var(--bdr); }
+  @media(max-width:820px){ .teaser .tright{ border-left:none; border-top:1px solid var(--bdr); } }
+  .teaser .tright img { width:100%; height:100%; object-fit:cover; object-position:left top; display:block; filter:blur(5px) saturate(.85); opacity:.55; }
+  .lockchips { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:18px 0; }
+  .lockchip { background:var(--navy); border:1px solid var(--bdr); border-radius:9px; padding:11px 13px; position:relative; }
+  .lockchip .ck { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--txt3); }
+  .lockchip .cv { font-size:15px; font-weight:800; color:var(--txt2); filter:blur(4px); user-select:none; }
+  .lockchip .cvv { font-size:15px; font-weight:800; color:var(--txt1); }
+  .lockbadge { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .lockpill { background:rgba(34,211,238,.14); border:1px solid rgba(34,211,238,.4); color:var(--cyan); font-size:10px; font-weight:800; letter-spacing:1px; padding:5px 12px; border-radius:999px; }
+  .tright .ovl { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,rgba(13,14,16,.15),rgba(13,14,16,.55)); }
+
+  /* ad slot */
+  .ad { background:var(--navy2); border:1px dashed var(--bdr); border-radius:12px; min-height:110px; display:flex; align-items:center; justify-content:center; color:var(--txt3); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+
+  .foot { border-top:1px solid var(--bdr); padding:26px 0 40px; color:var(--txt3); font-size:12.5px; }
+  .foot a { color:var(--txt2); text-decoration:none; font-weight:600; margin-right:16px; }
+
+  /* sentiment poll */
+  .pbtn { flex:1; max-width:180px; font-weight:800; font-size:15px; padding:14px 10px; border-radius:11px; cursor:pointer; border:1px solid var(--bdr); background:var(--navy); transition:transform .12s, background .15s; }
+  .pbtn:hover { transform:translateY(-2px); }
+  .pbtn.bull { color:var(--green); border-color:rgba(16,185,129,.4); }
+  .pbtn.bear { color:var(--red); border-color:rgba(239,68,68,.4); }
+  .pbar { display:flex; height:16px; border-radius:8px; overflow:hidden; background:var(--navy); border:1px solid var(--bdr); }
+  .pbull { background:linear-gradient(90deg,#059669,#10b981); transition:width .6s ease; }
+  .pbear { background:linear-gradient(90deg,#f43f5e,#b91c1c); transition:width .6s ease; }
+  .cs-grid { display:grid; grid-template-columns:330px 1fr; gap:16px; align-items:start; }
+  @media(max-width:760px){ .cs-grid{ grid-template-columns:1fr; } }
+
+  /* trending + calendar */
+  .tc-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:820px){ .tc-grid{ grid-template-columns:1fr; } }
+  .trow, .crow { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 2px; border-bottom:1px solid var(--bdr); }
+  .trow:last-child, .crow:last-child { border-bottom:none; }
+  .tsym { font-weight:800; color:var(--txt1); font-size:14px; }
+  .tname { font-size:11.5px; color:var(--txt3); }
+  .tprice { font-weight:700; color:var(--txt1); font-size:14px; text-align:right; }
+  .tchg { font-size:12px; font-weight:700; text-align:right; }
+  .cdate { font-weight:800; color:var(--cyan); font-size:12px; min-width:62px; }
+  .cev { color:var(--txt1); font-weight:600; font-size:13.5px; }
+  .cmeta { font-size:11px; color:var(--txt3); }
+
+  /* comments */
+  .cmt-input { width:100%; background:var(--navy); border:1px solid var(--bdr); border-radius:9px; color:var(--txt1); padding:11px 13px; font-size:14px; font-family:inherit; margin-bottom:10px; }
+  .cmt-input:focus { outline:none; border-color:var(--cyan); }
+  textarea.cmt-input { resize:vertical; min-height:64px; }
+  .cmt-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .cmt-tags { display:flex; gap:14px; font-size:13px; color:var(--txt2); }
+  .cmt-tags label { display:inline-flex; align-items:center; gap:5px; cursor:pointer; }
+  .cmt { background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:13px 15px; margin-bottom:10px; }
+  .cmt .ch { display:flex; align-items:center; gap:9px; margin-bottom:5px; }
+  .cmt .cn { font-weight:800; color:var(--txt1); font-size:13.5px; }
+  .cmt .ct { font-size:11px; color:var(--txt3); }
+  .cmt .cbadge { font-size:10px; font-weight:800; letter-spacing:.5px; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
+  .cmt .cx { font-size:14px; color:var(--txt2); line-height:1.55; word-break:break-word; }
+  /* chat box: fixed height, scrolls internally so the page never grows with the thread */
+  #cmt-list { max-height:440px; overflow-y:auto; margin-top:14px; padding-right:8px; border:1px solid var(--bdr); border-radius:12px; background:var(--navy); padding:12px 12px 2px; }
+  #cmt-list::-webkit-scrollbar { width:8px; }
+  #cmt-list::-webkit-scrollbar-thumb { background:#39404a; border-radius:4px; }
+  #cmt-list::-webkit-scrollbar-track { background:transparent; }
+  #cmt-list .muted { padding:8px 2px; }
+</style>
+
+<style>
+  .prose{ max-width:820px; } .prose p{ margin:0 0 14px; font-size:15px; color:var(--txt2); } .prose a{ color:var(--cyan); }
+  .hublist{ display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; margin-top:6px; }
+  @media(max-width:720px){ .hublist{ grid-template-columns:1fr; } }
+  .hublist a{ display:block; padding:11px 0; border-bottom:1px solid var(--bdr); text-decoration:none; color:var(--txt1); font-size:14.5px; font-weight:600; line-height:1.4; }
+  .hublist a:hover{ color:var(--cyan); }
+  .hubx{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .hubx a{ background:var(--navy2); border:1px solid var(--bdr); border-radius:8px; padding:8px 13px; text-decoration:none; color:var(--txt2); font-size:13px; font-weight:700; }
+  .hubx a:hover{ border-color:var(--cyan); color:var(--txt1); }
+  .tool-cta{ background:linear-gradient(180deg,rgba(34,211,238,.07),rgba(34,211,238,.02)); border:1px solid rgba(34,211,238,.28); border-radius:14px; padding:22px 24px; }
+  .tool-cta h3{ margin:0 0 8px; color:var(--txt1); font-size:19px; font-family:'Space Grotesk','Inter',sans-serif; } .tool-cta p{ margin:0 0 14px; color:var(--txt2); font-size:14.5px; }
+</style>
+
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo"><a href="/"><img src="/novo-logo-light.png?v=2" alt="NoVo"></a></div>
+    <div class="nav-actions">
+      <a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Trader</a>
+      <a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a>
+      <a href="/options-101" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Options 101</a> <a href="/0dte" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">0DTE Guide</a> <a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a>
+      <a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;text-decoration:none;display:inline-flex;align-items:center;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Subscribe</a>
+      <a class="nav-portal" href="https://app.novo-aitrading.app/status" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
+    </div>
+  </div>
+</nav>
+<!--sitewide-ticker--><div class="ticker"><div class="ticker-row"><span class="ticker-tag"><span class="dot"></span>US Markets</span><div class="ticker-track"><div class="ticker-inner"><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span></div></div></div></div>
+<div class="container hero" style="padding-bottom:8px;">
+  <div class="lbl">Learn · hub</div>
+  <h1 style="font-size:clamp(25px,3.6vw,36px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.14;margin:0 0 12px;">Options Basics &amp; the Greeks</h1>
+  <p style="font-size:15.5px;color:var(--txt2);line-height:1.7;margin:0;max-width:800px;">The foundations — calls and puts, the Greeks (delta, gamma, theta, vega), moneyness, breakeven, premium and how option pricing actually works.</p>
+</div>
+<div class="container sec" style="padding-top:14px;">
+  <div class="lbl">Articles</div>
+  <div class="hublist"><a href="/journal/assignment-over-the-weekend.html">Weekend Assignment Risk: The Monday Surprise for Sellers</a><a href="/journal/automatic-exercise-itm-option.html">Automatic Exercise: What Happens If You Forget to Close an ITM Option</a><a href="/journal/breakeven-itis.html">Breakeven-itis: Why You Keep Cutting Winners Too Soon</a><a href="/journal/call-vs-put-options.html">Calls vs. Puts: Options Basics in Plain English</a><a href="/journal/calls-or-puts-how-to-decide.html">Buying Calls vs Buying Puts: How to Decide Direction</a><a href="/journal/can-assignment-cause-margin-call.html">Can Options Assignment Cause a Margin Call? Yes — Here's How</a><a href="/journal/cash-secured-puts.html">Cash-Secured Puts, Explained</a><a href="/journal/choosing-a-strike-for-0dte-scalp.html">Choosing a Strike for a 0DTE Scalp: How Far Out-of-the-Money?</a><a href="/journal/covered-calls.html">Covered Calls, Explained</a><a href="/journal/cumulative-delta-explained.html">Cumulative Delta Explained: Reading Buying vs Selling Pressure</a><a href="/journal/debit-spread-to-cut-theta.html">Using a Debit Spread to Cut Theta on a Directional 0DTE Bet</a><a href="/journal/deep-itm-options-move-like-shares.html">Deep In-the-Money Options: Why They Move Almost Like Shares</a><a href="/journal/delta-and-gamma-together.html">Delta and Gamma Together: How a Scalp Actually Moves</a><a href="/journal/delta-based-strike-selection.html">Delta-Based Strike Selection: Why the Right Delta Beats a Round Number</a><a href="/journal/delta-divergence-highs-lows.html">Reading Delta Divergence at Session Highs and Lows</a><a href="/journal/delta-hedging-explained.html">Delta Hedging Explained: How Dealers Stay Neutral (and Move the Tape)</a><a href="/journal/delta-hedging-vs-gamma-hedging.html">Delta Hedging vs Gamma Hedging: What Dealers Actually Rebalance</a><a href="/journal/delta-neutral-trading.html">Delta-Neutral Trading: Betting on Volatility, Not Direction</a><a href="/journal/delta-probability-in-the-money.html">Does Delta Really Equal the Probability of Expiring In-the-Money?</a><a href="/journal/delta-vs-gamma.html">Delta vs Gamma: The Difference Every Options Trader Needs</a><a href="/journal/delta-vs-probability-of-profit.html">Delta vs Probability of Profit: Why They're Not the Same</a><a href="/journal/do-i-buy-100-shares-call-itm.html">Do I Have to Buy 100 Shares If My Call Expires ITM?</a><a href="/journal/does-novo-handle-assignment.html">Can NoVo Handle Assignment or Exercise for Me?</a><a href="/journal/double-bottom-put-wall-scalp.html">The Double-Bottom Scalp at the Put Wall</a><a href="/journal/early-assignment-explained.html">Early Assignment Explained: When Option Sellers Get Called Early</a><a href="/journal/early-assignment-risk.html">Early Assignment Risk: When a Short Option Gets Exercised Before Expiration</a></div>
+  <div style="margin-top:22px;"><div class="lbl">Other hubs</div><div class="hubx"><a href="/learn/gamma-gex-dealer-positioning">Gamma, GEX & Dealer Positioning</a><a href="/learn/0dte-options">0DTE & Same-Day Options</a><a href="/learn/risk-management">Risk, Sizing & Discipline</a><a href="/learn/volatility-market-structure">Volatility & Market Structure</a></div></div>
+</div>
+<div class="container sec"><div class="tool-cta"><h3>From reading it to trading it</h3><p>The concepts in these articles — gamma, the walls, expected move — are exactly what NoVo maps live on SPY, QQQ and IWM, with one-click execution and automated exits.</p>
+  <a class="btn btn-p" href="/" style="display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:14.5px;text-decoration:none;padding:12px 20px;border-radius:10px;background:linear-gradient(180deg,#34d399,#10b981);color:#04120c;">Explore NoVo →</a></div></div>
+<!-- FOOTER -->
+<div class="foot"><div class="container">
+  <div style="margin-bottom:10px;">
+    <a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/">NoVo Trader</a><a href="/journal/">The Journal</a><a href="/options-101">Options 101</a><a href="/help">Help</a><a href="/privacy.html">Privacy</a>
+  </div>
+  <p style="max-width:820px;line-height:1.6;">Market data on this page is delayed and provided for general information only — it is not financial advice or a recommendation to trade. VIX/VXN/RVX are ~15-minute delayed (CBOE); index values use E-mini futures. Options trading involves significant risk of loss. © 2026 NoVo Options Trading.</p>
+</div></div>
+<script src="/ticker-live.js" defer></script>
+</body>
+</html>
