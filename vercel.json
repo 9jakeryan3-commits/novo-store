@@ -7,7 +7,7 @@
       "permanent": true
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|sitemap-old).*)",
       "has": [{ "type": "host", "value": "^(www\\.)?novo-aitrading\\.app$" }],
       "destination": "https://novo-options.trade/$1",
       "permanent": true
