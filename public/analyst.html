@@ -484,7 +484,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-badge">NoVo Analyst &nbsp;·&nbsp; Dealer Positioning &nbsp;·&nbsp; The Read</div>
     <h1>Stop guessing.<br><span>Read the dealers, every 60&nbsp;seconds.</span></h1>
     <p class="hero-tagline">Dealer map, recomputed <b style="color:#22d3ee;">every 60 seconds</b> &middot; <b>SPY / QQQ / IWM</b> <span style="white-space:nowrap">&middot; 0DTE &amp; Scalping</span></p>
-    <p>The market isn't random. Dealers hedge around the same gamma levels every session &mdash; the walls that pin price, the <b style="color:var(--txt1);">regime that says chop or trend</b>, the magnet price snaps back to, and the flip that turns one into the other. NoVo remaps it <b style="color:#22d3ee;">every 60 seconds</b> through the session, and tells you what it means <b style="color:var(--txt1);">before the open</b>.</p>
+    <p>Net GEX and the regime. The flip, the walls, and <b style="color:var(--txt1);">Gravity</b> &mdash; the magnet price keeps snapping back to. Put/call skew and the near/far term structure. The live flow lean with unusual volume by strike. And what price did the last time dealers sat exactly like this. Remapped <b style="color:#22d3ee;">every 60 seconds</b>, written up <b style="color:var(--txt1);">before the open</b>.</p>
     <p style="max-width:720px;margin:22px auto 28px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">The flow terminals hand you raw data and make <b style="color:#22d3ee;">you</b> the analyst. <b style="color:var(--green);">NoVo reads the same flow &mdash; and hands you the read.</b></p>
     <div class="hero-chips" aria-label="What the dealer map shows">
       <span class="hero-chip">Net GEX (gamma exposure) regime</span>
@@ -503,6 +503,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-cta">
       <button class="btn-primary" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);box-shadow:0 8px 28px rgba(34,211,238,0.35);" onclick="startAnalystTrial('monthly')">Start 7-day free trial</button>
       <a href="/analyst/archive" class="btn-secondary" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See a sample read &rarr;</a>
+      <a href="/market-data" class="btn-secondary" style="border-color:var(--bdr);color:var(--txt2);text-decoration:none;">Today&rsquo;s levels, free</a>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button type="button" onclick="startAnalystTrial('yearly')" style="background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-weight:700;font-size:13px;padding:10px 22px;border-radius:999px;cursor:pointer;">Analyst yearly &mdash; $1,290/yr, 2 months free</button>
@@ -532,6 +533,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- THE DEALER MAP — feature grid -->
+<!-- WHO IT'S FOR -->
+<section style="background:var(--navy2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">
+  <div class="container">
+    <h2 class="section-title" style="text-align:center;">Built for one kind of trader.</h2>
+    <p class="section-sub" style="text-align:center;">If you trade SPY, QQQ or IWM intraday &mdash; especially 0DTE &mdash; this was built for your session. If you swing single names for weeks, it wasn&rsquo;t.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;max-width:900px;margin:26px auto 0;">
+      <div style="background:var(--navy);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#34d399;margin-bottom:9px;">You&rsquo;ll get it in a session</div>
+        <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.85;">
+          <li>0DTE and intraday on the index ETFs</li>
+          <li>You already trade levels &mdash; you just want better ones</li>
+          <li>You&rsquo;d rather be told the regime than guess it</li>
+          <li>One or two tickers, traded properly</li>
+        </ul>
+      </div>
+      <div style="background:var(--navy);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px;">Look elsewhere if</div>
+        <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.85;">
+          <li>You need dealer gamma on thousands of single names</li>
+          <li>You hold for weeks and don&rsquo;t care about the open</li>
+          <li>You want signals to follow, not a read to trade</li>
+          <li>You want it to trade for you unattended</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="container">
     <div class="section-label" style="color:#22d3ee;">What you see</div>
@@ -621,8 +650,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section>
   <div class="container">
     <div class="section-label" style="color:#22d3ee;">The read archive</div>
-    <h2 class="section-title">Every read &mdash; public after its session.</h2>
-    <p class="section-sub">Members get each read live; the world sees it once the session is over. Browse the growing library of desk notes and see exactly what landed in members' inboxes that morning &mdash; it's also how NoVo's read gets found on Google.</p>
+    <h2 class="section-title">Every read we&rsquo;ve published, in the open.</h2>
+    <p class="section-sub">Members get each read live; everyone else sees it once the session is over &mdash; win, lose or wrong. Read back through every desk note we have ever sent and judge the call yourself before you pay for the next one &mdash; it's also how NoVo's read gets found on Google.</p>
     <div class="how-grid">
       <div class="how-card"><div class="how-num" style="color:#22d3ee;">Before the bell</div><h3>The Open</h3><p>The morning desk note &mdash; the setup into the open, the dealer positioning, and the levels that matter today.</p></div>
       <div class="how-card"><div class="how-num" style="color:#22d3ee;">After the close</div><h3>The Close</h3><p>What the session actually did versus the levels, and the read into the next session.</p></div>
@@ -659,8 +688,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section style="background:var(--navy2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">
   <div class="container">
     <div class="section-label" style="color:#22d3ee;">Raw data vs the read</div>
-    <h2 class="section-title">The terminals sell you data.<br>NoVo sells you the read.</h2>
-    <p class="section-sub">The flow terminals are powerful &mdash; and they make <b style="color:var(--txt1);">you</b> do the interpreting, across thousands of tickers. NoVo reads the same order flow &mdash; sweeps and block prints &mdash; <b style="color:var(--txt1);">in-house</b>, stays focused on the three indices that move everything, and hands you the conclusion.</p>
+    <h2 class="section-title">What a flow terminal won&rsquo;t give you.</h2>
+    <p class="section-sub">Three indices, read in-house &mdash; sweeps and block prints off the live tape, dealer positioning, and the conclusion written out.</p>
     <div class="cost-compare">
       <div class="cost-compare-title">NoVo Analyst vs the flow terminals</div>
       <table>
