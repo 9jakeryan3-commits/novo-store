@@ -17,6 +17,24 @@
 
 const { kv } = require('./_kv.js');
 const zlib = require('zlib');
+const crypto = require('crypto');
+
+// Same 7-day HMAC token the live dashboard already carries. Every question costs a retrieval
+// plus a model call, so this is subscriber-only — not because the answer is secret, but
+// because an open endpoint is someone else's free Gemini bill.
+function verifyToken(token) {
+  try {
+    const secret = process.env.ANALYST_LIVE_SECRET || process.env.ANALYST_PUBLISH_SECRET || '';
+    if (!secret || !token) return null;
+    const [payload, sig] = String(token).split('.');
+    if (!payload || !sig) return null;
+    const want = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+    const a = Buffer.from(sig), b = Buffer.from(want);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+    const j = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return (j && j.x > Date.now()) ? j.e : null;
+  } catch (_) { return null; }
+}
 
 const DIM = 768;
 const MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
@@ -84,6 +102,22 @@ async function accessToken() {
   return _tok;
 }
 
+// Vertex when the service account is present; the AI Studio key otherwise. Vertex is
+// preferred — it is where every other NoVo product's AI runs — but the feature should not be
+// blocked on moving a credential, and this picks Vertex up automatically once it is set.
+async function callModel(path, body) {
+  if (process.env.GOOGLE_VERTEX_SA_JSON) {
+    const v = await vertex(path, body);
+    if (v) return v;
+  }
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${path}?key=${key}`,
+    { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) { console.error('[analyst-ask] genai', r.status, (await r.text()).slice(0, 200)); return null; }
+  return r.json();
+}
+
 async function vertex(path, body) {
   const sa = JSON.parse(process.env.GOOGLE_VERTEX_SA_JSON || '{}');
   const tok = await accessToken();
@@ -96,11 +130,23 @@ async function vertex(path, body) {
 }
 
 async function embed(text) {
-  const j = await vertex('gemini-embedding-001:predict', {
-    instances: [{ content: text, task_type: 'RETRIEVAL_QUERY' }],
-    parameters: { outputDimensionality: DIM },
-  });
-  const v = j?.predictions?.[0]?.embeddings?.values;
+  let v = null;
+  if (process.env.GOOGLE_VERTEX_SA_JSON) {
+    const j = await vertex('gemini-embedding-001:predict', {
+      instances: [{ content: text, task_type: 'RETRIEVAL_QUERY' }],
+      parameters: { outputDimensionality: DIM },
+    });
+    v = j?.predictions?.[0]?.embeddings?.values || null;
+  }
+  if (!v && process.env.GEMINI_API_KEY) {
+    const j = await callModel('gemini-embedding-001:embedContent', {
+      model: 'models/gemini-embedding-001',
+      content: { parts: [{ text }] },
+      taskType: 'RETRIEVAL_QUERY',
+      outputDimensionality: DIM,
+    });
+    v = j?.embedding?.values || null;
+  }
   if (!v) return null;
   let n = 0; for (const x of v) n += x * x; n = Math.sqrt(n) || 1;
   return v.map((x) => x / n);
@@ -147,6 +193,9 @@ HOW YOU ANSWER
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  const email = verifyToken((req.body && req.body.t) || (req.query && req.query.t));
+  if (!email) return res.status(401).json({ error: 'sign in on the dashboard to ask NoVo' });
+
   const question = String((req.body && req.body.question) || '').trim().slice(0, 600);
   if (!question) return res.status(400).json({ error: 'no question' });
 
@@ -174,7 +223,7 @@ module.exports = async (req, res) => {
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 
-    const j = await vertex(`${MODEL}:generateContent`, {
+    const j = await callModel(`${MODEL}:generateContent`, {
       systemInstruction: { parts: [{ text: SYSTEM }] },
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.25, maxOutputTokens: 900 },
