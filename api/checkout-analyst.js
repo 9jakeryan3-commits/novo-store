@@ -1,7 +1,7 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// NoVo Analyst — $79/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
+// NoVo Analyst — $129/mo market-analysis email tier. Tagged metadata.tier=analyst so webhook-sub routes it
 // to the Analyst Resend audience (NOT the Trader license/provision path). 503 until STRIPE_PRICE_ANALYST set.
 
 const _rl = new Map();
@@ -27,16 +27,16 @@ module.exports = async (req, res) => {
   // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
   if (!(await require('./_kv').rateOk('ckt_an:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
-  // plan: 'yearly' picks the annual price ($790/yr); anything else = monthly ($79/mo).
-  // Hardcoded to the $79/$790 price IDs (created 2026-07-18). The old $69/$690 prices stay live in Stripe so
-  // existing Analyst subscribers keep their rate for life — only new checkouts hit $79/$790. Env overrides win.
+  // plan: 'yearly' picks the annual price ($1,290/yr); anything else = monthly ($129/mo).
+  // Hardcoded to the $129/$1,290 price IDs (created 2026-08-16). The older $79/$790 and $69/$690 prices stay live in Stripe so
+  // existing Analyst subscribers keep their rate for life — only new checkouts hit $129/$1,290. Env overrides win.
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
-  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1TugYAApyfMAkbeEarl2ULSv';        // $79/mo
-  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1TugYAApyfMAkbeE9c3Rdypj'; // $790/yr
+  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $79 — raised 2026-08-16)
+  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $790)
   const priceId = (plan === 'yearly') ? YEARLY_790 : MONTHLY_79;
 
   try {

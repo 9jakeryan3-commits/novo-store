@@ -80,7 +80,8 @@ async function discordRevokeRole(discordId) {
 // Analyst price ids (env + hardcoded fallbacks, matching checkout-analyst.js) — the RELIABLE tier signal.
 const ANALYST_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_ANALYST_79, process.env.STRIPE_PRICE_ANALYST_YEARLY_790,
-  'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',
+  'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',   // $79 / $790 — kept: existing subs
+  'price_1U59pFApyfMAkbeEhEDpToGK', 'price_1U59pFApyfMAkbeEDzNHEJbD',   // $129 / $1,290
 ].filter(Boolean));
 
 // Resolve tier from the subscription's PRICE, not just the mutable/strippable metadata.tier. metadata is a

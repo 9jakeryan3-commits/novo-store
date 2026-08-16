@@ -11,7 +11,7 @@ function _rateLimited(ip) {
   return rec.n > 5;
 }
 
-// Trader YEARLY subscription ($1,690/yr, auto-renew). Identical to checkout-sub.js except the price.
+// Trader YEARLY subscription ($2,490/yr, auto-renew). Identical to checkout-sub.js except the price.
 module.exports = async (req, res) => {
   const SITE = process.env.SITE_URL || 'https://novo-options.trade';
   res.setHeader('Access-Control-Allow-Origin', SITE);
@@ -29,10 +29,10 @@ module.exports = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      // Trader $1,690/yr (2026-07-25). Hardcoded to the $1,690 price ID. The old $1,990 price stays live so
+      // Trader $2,490/yr (2026-08-16). Hardcoded to the $2,490 price ID. The old $1,990 price stays live so
       // existing annual subs keep $1,990 for life — only new checkouts hit $1,690. Price ID is not a secret.
       // Env override STRIPE_PRICE_SUB_YEARLY_ID_1690 wins if set.
-      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_YEARLY_ID_1690 || 'price_1TxG8uApyfMAkbeERRpjPXlp'), quantity: 1 }],
+      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_YEARLY_ID_1690 || 'price_1U59pFApyfMAkbeEAmFMG9sw'), quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,

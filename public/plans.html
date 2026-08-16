@@ -25,20 +25,20 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NoVo Pricing — $79 Analyst vs $169 Trader</title>
-<meta name="description" content="NoVo pricing: Analyst $79/mo for the SPY gamma dashboard and daily reads, Trader $169/mo to execute in your own broker in one click. Free tier, cancel any time.">
+<title>NoVo Pricing — $129 Analyst vs $249 Trader</title>
+<meta name="description" content="NoVo pricing: Analyst $129/mo for the SPY gamma dashboard and daily reads, Trader $249/mo to execute in your own broker in one click. Free tier, cancel any time.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://novo-options.trade/plans">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-options.trade/plans">
-<meta property="og:title" content="NoVo Pricing — $79 Analyst vs $169 Trader">
-<meta property="og:description" content="Analyst $79/mo for the dealer map and daily reads. Trader $169/mo to execute it in one click, in your own broker. Free tier, cancel any time.">
+<meta property="og:title" content="NoVo Pricing — $129 Analyst vs $249 Trader">
+<meta property="og:description" content="Analyst $129/mo for the dealer map and daily reads. Trader $249/mo to execute it in one click, in your own broker. Free tier, cancel any time.">
 <meta property="og:image" content="https://novo-options.trade/og-plans.png?v=1">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="NoVo Pricing — $79 Analyst vs $169 Trader">
-<meta name="twitter:description" content="Analyst $79/mo for the dealer map and daily reads. Trader $169/mo to execute it in one click, in your own broker. Free tier, cancel any time.">
+<meta name="twitter:title" content="NoVo Pricing — $129 Analyst vs $249 Trader">
+<meta name="twitter:description" content="Analyst $129/mo for the dealer map and daily reads. Trader $249/mo to execute it in one click, in your own broker. Free tier, cancel any time.">
 <meta name="twitter:image" content="https://novo-options.trade/og-plans.png?v=1">
 <link rel="icon" href="/icon-192.png?v=5">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </ul>
       <div class="cta-wrap">
         <button class="btn btn-cyan" onclick="analystCheckout()">Start 7-day free trial</button>
-        <div class="undercta">Then $79/mo or $790/yr · cancel any time</div>
+        <div class="undercta">Then $129/mo or $1,290/yr · cancel any time</div>
       </div>
     </div>
 
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="subnote" id="tr-note">per month · cancel any time</div>
       <span class="trialpill">Includes NoVo Analyst</span>
       <div class="roi">The read at <b>~5 seconds</b>, the chart at <b>half a second</b> — then trade the level itself, and <b>the exit manages itself</b>. Just your broker keys (Tradier or tastytrade, Alpaca optional).</div>
-      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Assemble it piecemeal elsewhere: a dealer-flow/GEX subscription <b style="color:var(--txt1);">alone</b> runs roughly <b style="color:var(--txt1);">$90&ndash;$300/mo</b> depending on tier &mdash; and that is <em>before</em> an execution layer, in a second tool that does not talk to the first. <b style="color:var(--green);">NoVo is both, in one house, for $169.</b></div>
+      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Assemble it piecemeal elsewhere: a dealer-flow/GEX subscription <b style="color:var(--txt1);">alone</b> runs roughly <b style="color:var(--txt1);">$90&ndash;$300/mo</b> depending on tier &mdash; and that is <em>before</em> an execution layer, in a second tool that does not talk to the first. <b style="color:var(--green);">NoVo is both, in one house, for $249.</b></div>
       <ul class="feats">
         <li class="chk"><b>The dealer read at ~5 seconds</b>, and the scalping chart streaming at <b>half a second</b> — SpotGamma’s $299 tier, OptionsDepth’s $249 tier and Unusual Whales’ top tier all refresh once a minute</li>
         <li class="chk"><b>Trade the level itself</b> — one click picks the strike and sizes it, then <b>the exit manages itself</b>: stop and exit ladder run without you watching. Every other dealer map in this market is read-only</li>
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li class="chk">Guided setup + email support</li>
       </ul>
       <div class="cta-wrap">
-        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $169/mo</button>
+        <button class="btn btn-green" id="tr-btn" onclick="traderCheckout()">Subscribe — $249/mo</button>
       </div>
     </div>
 
@@ -369,11 +369,11 @@ function setTraderPlan(p) {
   var mo = document.getElementById('tr-mo'), yr = document.getElementById('tr-yr');
   var num = document.getElementById('tr-num'), per = document.getElementById('tr-per'), note = document.getElementById('tr-note'), btn = document.getElementById('tr-btn');
   if (window._traderPlan === 'yearly') {
-    num.textContent = '1,690'; per.textContent = '/yr'; note.innerHTML = 'per year · 2 months free vs monthly · cancel any time';
-    btn.textContent = 'Subscribe — $1,690/yr'; yr.className = 'on-green'; mo.className = '';
+    num.textContent = '2,490'; per.textContent = '/yr'; note.innerHTML = 'per year · 2 months free vs monthly · cancel any time';
+    btn.textContent = 'Subscribe — $2,490/yr'; yr.className = 'on-green'; mo.className = '';
   } else {
     num.textContent = '169'; per.textContent = '/mo'; note.innerHTML = 'per month · cancel any time';
-    btn.textContent = 'Subscribe — $169/mo'; mo.className = 'on-green'; yr.className = '';
+    btn.textContent = 'Subscribe — $249/mo'; mo.className = 'on-green'; yr.className = '';
   }
 }
 
