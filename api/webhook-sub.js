@@ -225,7 +225,7 @@ function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
-      <img src="https://novo-options.trade/novo-logo-light.png?v=4" alt="NoVo" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=4" alt="NoVo Options Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
       <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">NoVo Analyst</div>
     </div>
     <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
@@ -269,7 +269,7 @@ function welcomeEmailHtml(connectUrl) {
 <div style="max-width:560px;margin:0 auto;padding:30px 16px;">
   <div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
-      <img src="https://novo-options.trade/novo-logo-light.png?v=4" alt="NoVo" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=4" alt="NoVo Options Trading" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
       <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; One-Click Execution</div>
     </div>
 
