@@ -168,7 +168,11 @@ function search(idx, q, k = 6, minMemory = 2) {
     if (seen.has(c.r)) continue;
     seen.add(c.r);
     (c.s === 'memory' ? mem : jour).push({ ...c, score: scores[i] });
-    if (mem.length + jour.length > 40) break;
+    // Stop once BOTH quotas can be met. Capping the scan at a flat 40 candidates silently
+    // defeated the reservation: journal outnumbers memory 2,168 to 194, so on most questions
+    // no memory chunk reaches the top 40 and `mem` came back empty — the reserved slots then
+    // reserved nothing, which is exactly the failure the reservation exists to prevent.
+    if (jour.length >= k && mem.length >= minMemory) break;
   }
   const picked = mem.slice(0, minMemory);
   for (const h of [...jour, ...mem.slice(minMemory)]) {
