@@ -10,7 +10,7 @@ self.addEventListener('push', function (e) {
   let d = {}; try { d = e.data.json(); } catch (_) { d = { title: 'NoVo Analyst', body: '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'NoVo Analyst', {
     body: d.body || '', tag: d.tag || 'novo-analyst', renotify: true,
-    icon: '/icon-192.png?v=4', badge: '/icon-192.png?v=4', data: { url: d.url || '/analyst/live' }
+    icon: '/icon-192.png?v=6', badge: '/icon-192.png?v=6', data: { url: d.url || '/analyst/live' }
   }));
 });
 self.addEventListener('notificationclick', function (e) {
