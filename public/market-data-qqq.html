@@ -301,6 +301,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a class="btn btn-s" href="#gamma">How to read it ↓</a>
       </div>
     </div>
+
+      <!-- FREE DELAYED LEVELS -->
+      <!-- The four levels every free GEX site now gives away (AlgoStorm publishes all four with
+           no login at all). Hiding them made NoVo look thinner than the free tools; publishing
+           them delayed makes the 60-second refresh the thing being bought. Data comes from
+           /api/levels, which can only ever serve a snapshot 15-30 minutes old. -->
+      <section id="levels" style="margin:26px 0 8px;">
+        <div class="card" style="padding:18px 18px 16px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+            <div style="font-weight:800;color:var(--txt1);font-size:17px;">Today&rsquo;s QQQ dealer levels</div>
+            <div id="lv-asof" style="font-size:11.5px;color:var(--txt2);font-weight:600;">loading&hellip;</div>
+          </div>
+          <div id="lv-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;">
+            <div style="color:var(--txt2);font-size:13px;">Fetching today&rsquo;s levels&hellip;</div>
+          </div>
+          <div style="margin-top:15px;padding-top:14px;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+            <div style="font-size:13.5px;color:var(--txt2);line-height:1.6;max-width:520px;">
+              These are <b style="color:var(--txt1);">delayed</b> &mdash; same as every free gamma site.
+              Members see this map recomputed <b style="color:var(--cyan);">every 60 seconds</b>, with the written read and an alert the moment a level breaks.
+            </div>
+            <a class="btn btn-p" href="/analyst" style="white-space:nowrap;">See it at 60 seconds &rarr;</a>
+          </div>
+        </div>
+      </section>
+      <script>
+      (function(){
+        var TK = 'QQQ';
+        var box = document.getElementById('lv-grid'), asof = document.getElementById('lv-asof');
+        var money = function(v){ return v == null ? null : '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); };
+        var cell = function(label, val, tone){
+          return '<div style="background:var(--navy2);border:1px solid var(--bdr);border-radius:9px;padding:11px 12px;">'
+            + '<div style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:800;margin-bottom:5px;">' + label + '</div>'
+            + '<div style="font-size:19px;font-weight:900;color:' + (tone || 'var(--txt1)') + ';">' + (val == null ? '&mdash;' : val) + '</div></div>';
+        };
+        fetch('/api/levels').then(function(r){ return r.json(); }).then(function(d){
+          var t = (d && d.ok && (d.tickers || []).filter(function(x){ return x.ticker === TK; })[0]) || null;
+          if (!t) { box.innerHTML = '<div style="color:var(--txt2);font-size:13px;">Levels publish shortly before the open.</div>'; asof.textContent = ''; return; }
+          box.innerHTML = [
+            cell('Gamma flip', money(t.flip), 'var(--cyan)'),
+            cell('Call wall', money(t.callWall), '#34d399'),
+            cell('Put wall', money(t.putWall), '#f87171'),
+            cell('Expected move', t.expectedMove == null ? null : '\u00b1' + Number(t.expectedMove).toFixed(2), 'var(--txt1)'),
+            cell('Spot', money(t.spot))
+          ].join('');
+          var mins = d.ageMinutes == null ? null : d.ageMinutes;
+          asof.textContent = mins == null ? 'delayed' : ('delayed \u00b7 as of ' + mins + ' min ago');
+        }).catch(function(){
+          box.innerHTML = '<div style="color:var(--txt2);font-size:13px;">Levels are unavailable right now.</div>';
+          asof.textContent = '';
+        });
+      })();
+      </script>
+
     <div class="card fear-card" id="tk-fear" style="align-self:center;">
       <div class="fh"><span class="ftk">QQQ · VXN</span><span class="fsym">VXN</span></div>
       <div class="fval">—</div>

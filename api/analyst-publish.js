@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import webpush from 'web-push';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+const { kv } = require('./_kv.js');
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
 // "Analyst" Resend audience (email). Dormant (503) until RESEND_ANALYST_AUDIENCE_ID +
@@ -400,6 +401,58 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'unauthorized' });
   }
 
+const _PUBLIC_DELAY_MIN = 15;
+
+// Pull ONLY the four commodity levels (+ spot and regime) out of a live-state payload.
+// An explicit allow-list, not a delete-list: a new field added to the dealer state upstream
+// cannot appear here by accident, which is the failure mode that leaks a paid product.
+function _publicLevels(state) {
+  const num = (v) => { const n = Number(v); return Number.isFinite(n) && n !== 0 ? n : null; };
+  const rows = Array.isArray(state && state.indices) ? state.indices : [];
+  return rows.map((i) => ({
+    ticker: String((i && i.ticker) || '').toUpperCase(),
+    spot: num(i && i.spot),
+    flip: num(i && i.flip),
+    callWall: num(i && (i.call_wall != null ? i.call_wall : i.callWall)),
+    putWall: num(i && (i.put_wall != null ? i.put_wall : i.putWall)),
+    expectedMove: num(i && (i.expected_move != null ? i.expected_move : i.expectedMove)),
+    regime: (i && i.regime) ? String(i.regime) : null,
+  })).filter((t) => t.ticker && (t.flip || t.callWall || t.putWall));
+}
+
+async function _promotePublicLevels(state) {
+  try {
+    const r = kv();
+    if (!r) return;
+    const now = Date.now();
+    const tickers = _publicLevels(state);
+    if (!tickers.length) return;
+
+    let pending = await r.get('public:levels:pending');
+    if (typeof pending === 'string') { try { pending = JSON.parse(pending); } catch (_) { pending = null; } }
+
+    // Pending has aged past the delay window -> it becomes public, and this cycle takes its
+    // place. Until then nothing moves, so the public slot simply stays where it was.
+    if (pending && pending.asof && (now - pending.asof) >= _PUBLIC_DELAY_MIN * 60000) {
+      await r.set('public:levels', JSON.stringify(pending));
+      await r.set('public:levels:pending', JSON.stringify({ asof: now, session: state.session || null, tickers }));
+    } else if (!pending) {
+      await r.set('public:levels:pending', JSON.stringify({ asof: now, session: state.session || null, tickers }));
+    }
+  } catch (_) {
+    // Never let the public mirror break the members' live save. It is the lower-value half.
+  }
+}
+
+  // --- free delayed levels -------------------------------------------------------------
+  // Feeds api/levels.js. Two slots rotate: this cycle -> pending -> public. A snapshot only
+  // becomes public after sitting in pending for a full DELAY window, so what the public
+  // endpoint serves is always 15-30 minutes old and the CURRENT cycle can never reach it.
+  // That is the whole design: the four commodity levels are given away at the freshness the
+  // free tools give them, and the 60-second refresh stays the thing being sold.
+  //
+  // Only these five numbers are copied across. The read, the flow tape, the squeeze signal,
+  // the analogues and the charts are not in this object and cannot leak through it.
   // Live-state save — the engine POSTs the current SPY/QQQ/SPX dealer state (secret-auth) for the members
   // dashboard. Stored at the unguessable, secret-derived blob path; overwrites each cycle.
   if (req.body && typeof req.body === 'object' && req.body.kind === 'live-state') {
@@ -430,6 +483,7 @@ export default async function handler(req, res) {
       }
       await put(_liveBlobKey(), JSON.stringify(state),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      await _promotePublicLevels(state);
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }
