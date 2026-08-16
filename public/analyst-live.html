@@ -802,6 +802,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var d = document.createElement('div'); d.className = 'm ' + (cls||''); d.textContent = text;
     log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
   }
+  // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
+  // storage key it persists to instead, which is what the push-notification code already does.
+  function tok(){
+    try { var u = new URLSearchParams(location.search).get('t'); if (u) return u; } catch(_){}
+    try { return localStorage.getItem('novo_live_t') || ''; } catch(_){ return ''; }
+  }
   window.novoAsk = async function(q){
     q = (q||'').trim(); if (!q || busy) return;
     var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
@@ -812,7 +818,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try{
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ question: q, t: (typeof TOKEN !== 'undefined' ? TOKEN : null) })
+        body: JSON.stringify({ question: q, t: tok() || null })
       });
       var d = await r.json();
       thinking.remove();
