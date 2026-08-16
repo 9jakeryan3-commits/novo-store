@@ -454,6 +454,40 @@ async function _promotePublicLevels(state) {
   //
   // Only these five numbers are copied across. The read, the flow tape, the squeeze signal,
   // the analogues and the charts are not in this object and cannot leak through it.
+  // Numeric grounding — coverage + per-session counts. Tiny, so it goes straight to KV.
+  if (req.body && typeof req.body === 'object' && req.body.kind === 'analyst-context') {
+    try {
+      const r = kv();
+      if (r) await r.set('analyst:context', JSON.stringify(req.body.context || {}));
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
+  // Retrieval-index receive — the engine POSTs the embedded corpus so the STORE can answer
+  // subscriber questions. Routing questions back to the owner's PC would make a paid feature
+  // depend on that machine being awake; nothing in this bundle needs to live there (the
+  // Journal is already public here, and trade rows were allow-listed out before embedding).
+  // Two parts because a serverless body caps at ~4.5MB: 0.8MB of text, 3.1MB of fp16 vectors.
+  if (req.body && typeof req.body === 'object' && req.body.kind === 'analyst-index') {
+    const BT = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!BT) return res.status(500).json({ error: 'no blob token' });
+    const part = String(req.body.part || '');
+    if (part !== 'meta' && part !== 'vecs') return res.status(400).json({ error: 'bad part' });
+    try {
+      const buf = Buffer.from(String(req.body.gz_b64 || ''), 'base64');
+      if (!buf.length) return res.status(400).json({ error: 'empty payload' });
+      const { url } = await put(`analyst-index/${part}.gz`, buf, {
+        access: 'public', addRandomSuffix: false, allowOverwrite: true,
+        contentType: 'application/gzip', token: BT,
+      });
+      try {
+        const r = kv();
+        if (r) await r.set('analyst:index:' + part, JSON.stringify({ url, bytes: buf.length, built: req.body.built || Date.now() / 1000, stats: req.body.stats || null }));
+      } catch (_) {}
+      return res.status(200).json({ ok: true, part, bytes: buf.length });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
   // Live-state save — the engine POSTs the current SPY/QQQ/SPX dealer state (secret-auth) for the members
   // dashboard. Stored at the unguessable, secret-derived blob path; overwrites each cycle.
   if (req.body && typeof req.body === 'object' && req.body.kind === 'live-state') {
