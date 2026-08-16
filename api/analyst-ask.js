@@ -193,6 +193,10 @@ HOW YOU ANSWER
 - Use REFERENCE to explain mechanics, and cite the source titles you actually used.
 - Separate what is on the map right now from what tends to be written about setups like it.
 - Plain English, a desk note not an essay. No "as an AI".
+- PLAIN TEXT ONLY. The panel renders exactly what you write, so markdown does not format — it
+  shows up as literal asterisks. No **bold**, no *, no #, no tables. Short paragraphs separated
+  by a blank line; if you must list, start the line with "- ".
+- Answer the question directly. Never restate the task or narrate your approach.
 - Vol index by ticker: VIX is SPY, VXN is QQQ, RVX is IWM. Never call VXN "VIX".`;
 
 module.exports = async (req, res) => {
@@ -230,14 +234,37 @@ module.exports = async (req, res) => {
     const j = await callModel(`${MODEL}:generateContent`, {
       systemInstruction: { parts: [{ text: SYSTEM }] },
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.25, maxOutputTokens: 900 },
+      generationConfig: {
+        temperature: 0.25,
+        maxOutputTokens: 1600,
+        // This model thinks by default and the hidden reasoning bills against maxOutputTokens,
+        // so on a tight budget the thinking eats the allowance and the visible answer comes back
+        // as a truncated fragment. The engine's llm_client hit this and fixed it the same way:
+        // control thinking explicitly rather than inheriting the model default.
+        thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+      },
     });
-    const answer = j?.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Join every text part and drop any the model marked as thought — reading parts[0] alone
+    // returns a reasoning fragment ("Explain the mechanism: ...") whenever a thought leads.
+    const answer = (j?.candidates?.[0]?.content?.parts || [])
+      .filter((p) => p && p.text && !p.thought)
+      .map((p) => p.text)
+      .join('')
+      .trim();
     if (!answer) return res.status(502).json({ error: 'no answer' });
+
+    // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
+    // would sit on screen as punctuation.
+    const clean = answer
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/(^|\n)\s*[*•]\s+/g, '$1- ')
+      .replace(/(^|\n)#{1,6}\s*/g, '$1')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
 
     return res.status(200).json({
       ok: true,
-      answer: answer.trim(),
+      answer: clean,
       sources: hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
       indexBuilt: idx.built || null,
     });
