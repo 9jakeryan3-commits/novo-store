@@ -468,6 +468,42 @@ const _PUBLIC_DELAY_MIN = 15;
 // Pull ONLY the four commodity levels (+ spot and regime) out of a live-state payload.
 // An explicit allow-list, not a delete-list: a new field added to the dealer state upstream
 // cannot appear here by accident, which is the failure mode that leaks a paid product.
+
+// ── LIVE dealer levels for the members' AI analyst ─────────────────────────────
+// api/analyst-ask.js used to ground its answers in `public:levels` — the slot api/levels.js
+// serves 15-30 MINUTES DELAYED to anonymous visitors. A paying member asking "where is the
+// call wall right now" got the same stale numbers a logged-out visitor sees, stated as
+// current. The live state has always existed; the chat endpoint just never read it.
+// Written to a PRIVATE key: only read server-side by analyst-ask, which checks a member
+// token first. Never served by api/levels.js.
+const LIVE_LEVELS_KEY = 'analyst:live_levels';
+
+async function _publishLiveLevels(state) {
+  try {
+    const r = kv();
+    if (!r) return;
+    const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+    const rows = (Array.isArray(state && state.indices) ? state.indices : []).map((i) => ({
+      ticker: String((i && i.ticker) || '').toUpperCase(),
+      spot: num(i && i.spot),
+      netGex: num(i && i.net_gex),
+      flip: num(i && i.flip),
+      callWall: num(i && i.call_wall),
+      putWall: num(i && i.put_wall),
+      gravity: num(i && i.gravity),
+      expectedMove: num(i && i.em_daily),
+      expectedMovePct: num(i && i.em_daily_pct),
+      atmIv: num(i && i.atm_iv),
+      skewPts: num(i && i.skew_pts),
+      regime: num(i && i.net_gex) == null ? null : (Number(i.net_gex) < 0 ? 'short gamma' : 'long gamma'),
+    })).filter((t) => t.ticker);
+    if (!rows.length) return;
+    await r.set(LIVE_LEVELS_KEY, JSON.stringify({
+      asof: Date.now(), session: state.session || null, live: true, tickers: rows,
+    }), { ex: 3600 });
+  } catch (_) { /* the members' live save must never fail over this mirror */ }
+}
+
 function _publicLevels(state) {
   const num = (v) => { const n = Number(v); return Number.isFinite(n) && n !== 0 ? n : null; };
   const rows = Array.isArray(state && state.indices) ? state.indices : [];
@@ -583,6 +619,7 @@ async function _promotePublicLevels(state) {
       }
       await put(_liveBlobKey(), JSON.stringify(state),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      await _publishLiveLevels(state);
       await _promotePublicLevels(state);
       await _recordProfiles(state);
       return res.status(200).json({ ok: true });

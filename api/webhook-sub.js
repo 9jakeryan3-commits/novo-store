@@ -71,7 +71,12 @@ const FREE_AUDIENCE = process.env.RESEND_AUDIENCE_ID;   // the free "Market Note
 const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
 const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 async function discordRevokeRole(discordId) {
-  if (!discordId || !process.env.DISCORD_BOT_TOKEN) return;
+  if (!discordId) return;
+  if (!process.env.DISCORD_BOT_TOKEN) {
+    // Silent before: a burned/unset token meant revocation never happened and nothing said so.
+    console.error('[webhook-sub] DISCORD_BOT_TOKEN not set - role NOT revoked for', discordId);
+    return;
+  }
   try {
     await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD}/members/${discordId}/roles/${DISCORD_ROLE}`,
       { method: 'DELETE', headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` } });

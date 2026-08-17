@@ -199,8 +199,13 @@ module.exports = async (req, res) => {
     const r = kv();
     let live = null, ctx = null;
     try {
-      const [l, c] = await Promise.all([r.get('public:levels'), r.get('analyst:context')]);
-      live = typeof l === 'string' ? JSON.parse(l) : l;
+      // Members get the LIVE dealer state. `public:levels` is the deliberately 15-30 min
+      // delayed slot api/levels.js serves anonymous visitors — grounding a paid answer in it
+      // reported stale numbers as current. Fall back to it only if the live mirror is missing.
+      const [lv, l, c] = await Promise.all([
+        r.get('analyst:live_levels'), r.get('public:levels'), r.get('analyst:context')]);
+      const liveMirror = typeof lv === 'string' ? JSON.parse(lv) : lv;
+      live = liveMirror || (typeof l === 'string' ? JSON.parse(l) : l);
       ctx = typeof c === 'string' ? JSON.parse(c) : c;
     } catch (_) {}
 

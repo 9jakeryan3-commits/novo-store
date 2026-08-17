@@ -63,21 +63,30 @@ module.exports = async (req, res) => {
         } catch (e) {}
       }
 
+      // Every failure here used to be silent: no token was a no-op and both fetches swallowed their
+      // errors, then the redirect told the member "connected" regardless. A burned or unset
+      // DISCORD_BOT_TOKEN meant paying subscribers got no role and nothing anywhere said so.
       const bot = process.env.DISCORD_BOT_TOKEN;
-      if (bot) {
+      let granted = false;
+      if (!bot) {
+        console.error('[discord] DISCORD_BOT_TOKEN not set - paid role NOT granted for', uid);
+      } else {
         try {
           await fetch(`https://discord.com/api/guilds/${GUILD}/members/${uid}`, {
             method: 'PUT', headers: { Authorization: `Bot ${bot}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ access_token: access, roles: [ROLE] }),
           });
-        } catch (e) {}
+        } catch (e) { console.error(`[discord] guild join failed for ${uid}: ${e.message}`); }
         try {
-          await fetch(`https://discord.com/api/guilds/${GUILD}/members/${uid}/roles/${ROLE}`, {
+          const rr = await fetch(`https://discord.com/api/guilds/${GUILD}/members/${uid}/roles/${ROLE}`, {
             method: 'PUT', headers: { Authorization: `Bot ${bot}` },
           });
-        } catch (e) {}
+          granted = rr.ok;
+          if (!rr.ok) console.error(`[discord] role grant HTTP ${rr.status} for ${uid} - token may be revoked`);
+        } catch (e) { console.error(`[discord] role grant failed for ${uid}: ${e.message}`); }
       }
-      res.writeHead(302, { Location: isAnalyst ? `${SITE}/analyst?welcome=1&discord=connected` : `${SITE}/analyst?discord=connected` });
+      const dstate = granted ? 'connected' : 'failed';
+      res.writeHead(302, { Location: isAnalyst ? `${SITE}/analyst?welcome=1&discord=${dstate}` : `${SITE}/analyst?discord=${dstate}` });
       return res.end();
     } catch (e) { console.error('[discord cb]', e.message); return back('error'); }
   }
