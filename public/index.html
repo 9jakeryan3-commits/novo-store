@@ -467,8 +467,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .tick svg{width:46px;height:18px;display:block;}
   @keyframes tickermarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
   @media(prefers-reduced-motion:reduce){.ticker-inner{animation:none;}.ticker-track{overflow-x:auto;}}
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"NoVo Options Trading","url":"https://novo-options.trade/","description":"NoVo maps options dealer positioning on SPY, QQQ and IWM - net GEX, the gamma flip, the walls and the expected move, every 60 seconds. Read it, ask it, trade the level in one click in your own broker.","publisher":{"@type":"Organization","name":"NoVo Options Trading","url":"https://novo-options.trade/","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is NoVo a signal service?","acceptedAnswer":{"@type":"Answer","text":"No. NoVo does not send “buy this now” alerts. It maps live dealer positioning — net GEX, the gamma flip, the call and put walls, gravity and the expected move — and tells you what that structure has tended to mean. You decide what to do with it."}},{"@type":"Question","name":"What is the difference between Analyst and Trader?","acceptedAnswer":{"@type":"Answer","text":"Analyst ($129/mo) is the intelligence: the live dealer map on SPY, QQQ and IWM, a written desk note every session, the options-flow read, and NoVo the AI market analyst to ask about any of it. Trader ($249/mo) includes all of that and adds one-click execution in your own broker with automated exits. Analyst is for reading the market; Trader is for trading it."}},{"@type":"Question","name":"Does it trade for me?","acceptedAnswer":{"@type":"Answer","text":"No. Entry is always your click. Only the exits are automated — the profit targets, the trailing stop and the hard stop, by the rules you set. NoVo has no discretionary authority and never enters a position on its own."}},{"@type":"Question","name":"Is my money safe?","acceptedAnswer":{"@type":"Answer","text":"NoVo is non-custodial. Your funds stay in your own brokerage account in your own name. NoVo uses broker API keys you generate; it can place and manage trades but cannot withdraw, transfer or move money. Keys are stored encrypted."}},{"@type":"Question","name":"Which tickers, and why only three?","acceptedAnswer":{"@type":"Answer","text":"SPY, QQQ and IWM. Dealer positioning is only useful when the options volume behind it is deep enough to be meaningful, and these three carry it. Depth on three beats thin coverage of thousands — you pick your tape and trade its levels."}},{"@type":"Question","name":"What can I use without paying?","acceptedAnswer":{"@type":"Answer","text":"The market data page and its fear gauges, the per-ticker SPY , QQQ and IWM gamma pages, Options 101 , the 0DTE guide , all four calculators and the whole Journal . No account, no card."}},{"@type":"Question","name":"Can I cancel?","acceptedAnswer":{"@type":"Answer","text":"Any time, in one click from your portal. Analyst starts with a 7-day free trial — cancel before it ends and you pay nothing. See the refund policy ."}}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -513,11 +516,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="hero-link-sep">&middot;</span>
       <a class="hero-link" href="/journal/">The Journal</a>
     </div>
-    <div style="margin-top:14px;font-size:12.5px;color:var(--txt3);">Analyst starts with a 7-day free trial &middot; you click every entry &middot; non-custodial &middot; cancel any time</div>
+    <div style="margin-top:14px;font-size:12.5px;color:var(--txt3);">Analyst starts with a 7-day free trial
+    <div class="hero-mashup">
+      <div class="hm-back"><img src="/screenshots/mock-cockpit.jpg" width="1500" height="827" alt="The NoVo dashboard — the live SPY dealer map, the scalping chart with dealer levels drawn on it, and the market read" loading="eager" fetchpriority="high" decoding="async"></div>
+      <div class="hm-fan">
+        <div class="hm-card" style="transform:rotate(-14deg);z-index:4;"><img src="/screenshots/mock-signal.jpg" width="470" height="983" alt="NoVo on mobile — the market read" decoding="async"></div>
+        <div class="hm-card" style="transform:rotate(-6deg) translateY(14px);z-index:3;margin-left:-50px;"><img src="/screenshots/mock-analysis.jpg" width="470" height="983" alt="NoVo on mobile — the session thesis" loading="lazy" decoding="async"></div>
+      </div>
+    </div>
+ &middot; you click every entry &middot; non-custodial &middot; cancel any time</div>
   </div>
 </section>
 
+<div class="stats">
+  <div class="container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;text-align:center;">
+    <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">60s</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Map recomputed</div></div>
+    <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">3</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Index ETFs, mastered</div></div>
+    <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">1,000+</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Journal articles, free</div></div>
+    <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">$0</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">To start reading</div></div>
+  </div>
+</div>
+
 <hr class="divider">
+
+<hr class="divider">
+
+<section>
+  <div class="container">
+    <div class="section-label">Why dealer positioning</div>
+    <h2 class="section-title">Price does not move in a vacuum.</h2>
+    <p class="section-sub">Someone is on the other side of every option you buy, and they hedge. That hedging is mechanical, it is large, and it leaves a footprint you can read before the move rather than after it.</p>
+    <div class="for-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+      <div class="for-card">
+        <h3 style="color:var(--txt1);font-size:17px;margin:0 0 12px;">What a chart tells you</h3>
+        <p style="color:var(--txt2);font-size:14.5px;line-height:1.75;margin:0;">Where price has already been. Every indicator on it is arithmetic on that same history, which is why five of them can all agree and all be late.</p>
+      </div>
+      <div class="for-card">
+        <h3 style="color:#22d3ee;font-size:17px;margin:0 0 12px;">What the dealer map tells you</h3>
+        <p style="color:var(--txt2);font-size:14.5px;line-height:1.75;margin:0;">Where the hedging pressure sits right now &mdash; which prices dealers must defend, where their hedging flips from damping moves to amplifying them, and how far the options market thinks today can travel.</p>
+      </div>
+    </div>
+    <p style="color:var(--txt2);font-size:15px;line-height:1.8;margin:24px 0 0;max-width:70ch;">None of it is a prediction, and NoVo will never dress it up as one. It is context &mdash; the difference between guessing at a level and knowing why that level is there.</p>
+  </div>
+</section>
 
 <!-- THE TWO PRODUCTS -->
 <section>
@@ -567,6 +608,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div style="text-align:center;margin-top:30px;">
       <a href="/analyst" class="btn-secondary analyst-glow" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See the full live map &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section>
+  <div class="container">
+    <div class="section-label">Who this is for</div>
+    <h2 class="section-title">Built for a specific trader.</h2>
+    <p class="section-sub">Depth on three tickers, not thin coverage of thousands. That is a deliberate trade, and it will not suit everyone.</p>
+    <div class="for-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+      <div class="for-card">
+        <h3 style="color:var(--green);font-size:17px;margin:0 0 12px;">A good fit if</h3>
+        <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.9;">
+          <li>You trade 0DTE or intraday on the index ETFs</li>
+          <li>You already trade levels &mdash; you just want better ones</li>
+          <li>You would rather be told the regime than guess it</li>
+          <li>You want one or two tickers traded properly</li>
+        </ul>
+      </div>
+      <div class="for-card">
+        <h3 style="color:var(--red);font-size:17px;margin:0 0 12px;">Not a fit if</h3>
+        <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.9;">
+          <li>You need dealer gamma on thousands of single names</li>
+          <li>You hold for weeks and do not care about the open</li>
+          <li>You want signals to follow rather than a read to trade</li>
+          <li>You want software to trade unattended &mdash; NoVo never enters on its own</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
@@ -629,6 +700,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <hr class="divider">
 
+<hr class="divider">
+
+<section>
+  <div class="container">
+    <div class="section-label" style="color:var(--amber);">The Journal</div>
+    <h2 class="section-title">A thousand articles, and none of them behind a login.</h2>
+    <p class="section-sub">Plain-English writing on market structure, dealer flow, risk and the psychology of getting in your own way &mdash; the same corpus NoVo the AI analyst answers from.</p>
+    <div class="features-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;">
+      <div class="feature"><div class="feature-icon">&#129518;</div><div><h4>Market structure &amp; dealer flow</h4><p>What gamma, the flip and the walls actually do to a tape, without the jargon wall.</p></div></div>
+      <div class="feature"><div class="feature-icon">&#127919;</div><div><h4>0DTE, properly</h4><p>Strike selection, timing, decay and the ways same-day options quietly take accounts apart.</p></div></div>
+      <div class="feature"><div class="feature-icon">&#128737;</div><div><h4>Risk &amp; discipline</h4><p>Position sizing, expectancy, variance and why good analysis gets abandoned at the worst moment.</p></div></div>
+    </div>
+    <div style="text-align:center;margin-top:28px;">
+      <a href="/journal/" class="btn-secondary" style="border-color:var(--bdr);color:var(--txt1);text-decoration:none;">Read the Journal &rarr;</a>
+    </div>
+  </div>
+</section>
+
 <!-- COMPARISONS -->
 <section>
   <div class="container">
@@ -646,6 +735,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 
 <hr class="divider">
+
+<hr class="divider">
+
+<section>
+  <div class="container">
+    <div class="section-label">Common questions</div>
+    <h2 class="section-title">The things people ask first.</h2>
+    <div style="max-width:760px;">
+      <details class="faq-item"><summary class="faq-q">Is NoVo a signal service?</summary><div class="faq-a"><strong>No.</strong> NoVo does not send &ldquo;buy this now&rdquo; alerts. It maps live dealer positioning &mdash; net GEX, the gamma flip, the call and put walls, gravity and the expected move &mdash; and tells you what that structure has tended to mean. You decide what to do with it.</div></details>
+      <details class="faq-item"><summary class="faq-q">What is the difference between Analyst and Trader?</summary><div class="faq-a"><strong>Analyst ($129/mo)</strong> is the intelligence: the live dealer map on SPY, QQQ and IWM, a written desk note every session, the options-flow read, and NoVo the AI market analyst to ask about any of it. <strong>Trader ($249/mo)</strong> includes all of that and adds one-click execution in your own broker with automated exits. Analyst is for reading the market; Trader is for trading it.</div></details>
+      <details class="faq-item"><summary class="faq-q">Does it trade for me?</summary><div class="faq-a"><strong>No.</strong> Entry is always your click. Only the exits are automated &mdash; the profit targets, the trailing stop and the hard stop, by the rules you set. NoVo has no discretionary authority and never enters a position on its own.</div></details>
+      <details class="faq-item"><summary class="faq-q">Is my money safe?</summary><div class="faq-a"><strong>NoVo is non-custodial.</strong> Your funds stay in your own brokerage account in your own name. NoVo uses broker API keys you generate; it can place and manage trades but cannot withdraw, transfer or move money. Keys are stored encrypted.</div></details>
+      <details class="faq-item"><summary class="faq-q">Which tickers, and why only three?</summary><div class="faq-a">SPY, QQQ and IWM. Dealer positioning is only useful when the options volume behind it is deep enough to be meaningful, and these three carry it. Depth on three beats thin coverage of thousands &mdash; you pick your tape and trade its levels.</div></details>
+      <details class="faq-item"><summary class="faq-q">What can I use without paying?</summary><div class="faq-a">The <a href="/market-data" style="color:#22d3ee;">market data page</a> and its fear gauges, the per-ticker <a href="/market-data/spy" style="color:#22d3ee;">SPY</a>, <a href="/market-data/qqq" style="color:#22d3ee;">QQQ</a> and <a href="/market-data/iwm" style="color:#22d3ee;">IWM</a> gamma pages, <a href="/options-101" style="color:#22d3ee;">Options 101</a>, the <a href="/0dte" style="color:#22d3ee;">0DTE guide</a>, all four calculators and the whole <a href="/journal/" style="color:#22d3ee;">Journal</a>. No account, no card.</div></details>
+      <details class="faq-item"><summary class="faq-q">Can I cancel?</summary><div class="faq-a">Any time, in one click from your portal. Analyst starts with a 7-day free trial &mdash; cancel before it ends and you pay nothing. See the <a href="/refund-policy" style="color:#22d3ee;">refund policy</a>.</div></details>
+    </div>
+  </div>
+</section>
 
 <!-- CLOSE -->
 <section>
