@@ -59,6 +59,47 @@ function _liveChartKey(name) {
   const prefix = s ? crypto.createHash('sha256').update('livechart:' + s).digest('hex').slice(0, 40) : 'pub';
   return `analyst-live/${prefix}-${name}.png`;
 }
+
+// ── GAMMA-BY-STRIKE HISTORY (the time axis) ────────────────────────────────────
+// The dashboard's gamma profile is a snapshot of right now. Keeping a session's worth of those
+// snapshots is what turns it into a strike-x-time heatmap: where dealer gamma built, drained, and
+// which strikes held it all day. Stored per ticker, per session date, in KV.
+//   key   gh:<TICKER>:<YYYY-MM-DD>   list, newest pushed on the left
+//   value {t, r:[[strike, gamma], ...]}   gamma rounded — this is a colour scale, not an audit trail
+// The engine publishes every ~60s; one snapshot every ~4 min is plenty for a heatmap column and keeps
+// a session near 90 columns instead of 400. PAID data: only ever served token-gated, like ?live.
+const _GH_MIN_GAP_MS = 4 * 60 * 1000;
+const _GH_MAX = 120;                       // hard cap; a session is ~90
+const _GH_TTL = 36 * 60 * 60;              // survives the overnight, gone by the next session's close
+
+function _ghKey(ticker, d) {
+  const day = (d instanceof Date ? d : new Date()).toISOString().slice(0, 10);
+  return `gh:${String(ticker).replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase()}:${day}`;
+}
+
+async function _recordProfiles(state) {
+  const r = kv();
+  if (!r) return;                          // no KV configured -> feature is simply absent, never an error
+  const idxs = Array.isArray(state && state.indices) ? state.indices : [];
+  for (const idx of idxs) {
+    const prof = Array.isArray(idx && idx.profile) ? idx.profile : null;
+    if (!prof || !prof.length || !idx.ticker) continue;
+    const key = _ghKey(idx.ticker);
+    try {
+      const head = await r.lindex(key, 0);
+      const prev = typeof head === 'string' ? JSON.parse(head) : head;
+      if (prev && prev.t && Date.now() - prev.t < _GH_MIN_GAP_MS) continue;   // too soon: skip this publish
+      const rows = prof
+        .filter((x) => x && x.k != null && x.g != null)
+        .map((x) => [Math.round(Number(x.k) * 100) / 100, Math.round(Number(x.g))]);
+      if (!rows.length) continue;
+      await r.lpush(key, JSON.stringify({ t: Date.now(), r: rows }));
+      await r.ltrim(key, 0, _GH_MAX - 1);
+      await r.expire(key, _GH_TTL);
+    } catch (_) { /* history is best-effort: never fail a publish over it */ }
+  }
+}
+
 function _signToken(email, days = 7) {   // 7-day TTL bounds post-cancel access (was 30); re-login is a one-click magic link
   const secret = _LIVE_SECRET();
   if (!secret || !email) return '';
@@ -242,6 +283,26 @@ export default async function handler(req, res) {
     }
     return res.status(200).json(state);
   }
+  // Gamma-by-strike history for the heatmap. Same token gate as ?live — this is paid dealer data.
+  if (req.method === 'GET' && req.query && 'hist' in req.query) {
+    const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    res.setHeader('Cache-Control', 'no-store');
+    const ticker = String(req.query.ticker || 'SPY').replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase();
+    const r = kv();
+    if (!r) return res.status(200).json({ ticker, snapshots: [] });
+    try {
+      const raw = await r.lrange(_ghKey(ticker), 0, _GH_MAX - 1);
+      const snaps = (raw || [])
+        .map((x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } })
+        .filter(Boolean)
+        .sort((a, b) => a.t - b.t);                      // oldest first: the heatmap reads left to right
+      return res.status(200).json({ ticker, snapshots: snaps });
+    } catch (_) {
+      return res.status(200).json({ ticker, snapshots: [] });
+    }
+  }
+
   // VAPID public key for the members dashboard to subscribe to Web Push (empty until configured → button stays hidden).
   if (req.method === 'GET' && req.query && req.query.push === 'key') {
     res.setHeader('Cache-Control', 'no-store');
@@ -519,6 +580,7 @@ async function _promotePublicLevels(state) {
       await put(_liveBlobKey(), JSON.stringify(state),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       await _promotePublicLevels(state);
+      await _recordProfiles(state);
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }
