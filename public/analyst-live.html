@@ -178,6 +178,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PML7VTJ9"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -737,6 +739,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 22px -8px rgba(34,211,238,.5);}
   #novo-ask-bubble:hover{border-color:rgba(34,211,238,.7)}
   #novo-ask-bubble .dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 9px #22d3ee}
+  @media (prefers-reduced-motion: reduce){ .lvpulse, #novo-ask-bubble .dot { animation: none !important; } }
   #novo-ask{position:fixed;right:18px;bottom:18px;z-index:61;width:min(calc(100vw - 36px),420px);
     height:min(calc(100dvh - 36px),620px);display:none;flex-direction:column;border-radius:16px;overflow:hidden;
     background:var(--navy,#0b1220);border:1px solid var(--bdr,#22303f);box-shadow:0 18px 50px rgba(0,0,0,.6)}
@@ -759,9 +762,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   #novo-ask input:focus{border-color:#22d3ee}
   #novo-ask button.go{background:#22d3ee;border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 
-<div id="novo-ask-bubble" onclick="novoAskOpen(1)"><span class="dot"></span> Ask NoVo</div>
+<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot"></span> Ask NoVo</button>
 
 <div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
   <header>

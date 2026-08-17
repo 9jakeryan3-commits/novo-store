@@ -48,7 +48,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --cyan:#22d3ee; --green:#10b981; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#506e8f; }
+  :root { --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --cyan:#22d3ee; --green:#10b981; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#7d97b8; }
   html { scroll-behavior: smooth; }
   body { background: var(--navy); color: var(--txt2); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
   h1,h2,h3,.hero h1 { font-family:'Space Grotesk','Inter',sans-serif; }
@@ -110,12 +110,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .footer p { font-size:12px; color:var(--txt3); max-width:640px; margin:0 auto; line-height:1.7; }
   .footer a { color:var(--txt2); text-decoration:none; font-weight:600; font-size:13px; }
   .footer .links { display:flex; gap:20px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:16px; }
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"NoVo Help & Docs","item":"https://novo-options.trade/help"}]}
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PML7VTJ9"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -130,12 +134,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a href="/journal/">The Journal</a>
       <a href="/0dte">0DTE Guide</a>
       <a class="nav-buy" href="/plans">Plans</a>
-      <a class="nav-portal" href="https://app.novo-aitrading.app/status" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+      <a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
     </div>
   </div>
 </nav>
 
-<section class="hero">
+
+<div id="main" tabindex="-1"></div><section class="hero">
   <div class="container">
     <div class="eyebrow">Docs &amp; Support</div>
     <h1>How can we <span>help?</span></h1>

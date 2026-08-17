@@ -16,12 +16,21 @@
   --red:#f43f5e;
   --txt1:#eef5ff;
   --txt2:#9fb6d1;
-  --txt3:#5f7799;
+  --txt3:#7d97b8;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
 body{background:var(--navy);color:var(--txt2);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
 a{color:inherit;text-decoration:none;}
+/* Article body links were inheriting body colour with no underline, so 6,936 contextual
+   links across 1,029 articles were invisible to readers. Colour alone is not enough at
+   this contrast, hence the underline. */
+.article-body a{color:var(--cyan);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;}
+.article-body a:hover{text-decoration-thickness:2px;}
+/* Footer links were separated from surrounding text by colour alone at 2.20:1. */
+.foot a{text-decoration:underline;text-underline-offset:2px;}
+/* No focus style existed anywhere; the UA default ring is near-invisible on this ground. */
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
 img{max-width:100%;display:block;}
 .wrap{max-width:1200px;margin:0 auto;padding:0 22px;}
 
@@ -53,7 +62,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 @media(max-width:560px){
   .nav-logo img{height:36px;}
   .nav-buy{padding:8px 15px;font-size:12.5px;}
-  .nav-link{font-size:11px;padding:3px 4px;}
+  .nav-link{font-size:12.5px;padding:11px 8px;min-height:44px;display:inline-flex;align-items:center;}
 }
 
 /* ---------- MARKETS TICKER ---------- */
@@ -262,3 +271,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .foot .links{margin-bottom:10px;}
 .foot .links a{margin:0 9px;}
 .foot .links a:hover{color:var(--cyan);}
+
+/* Skip link: off-screen until focused. */
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:var(--cyan);color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none;}
+.skip-link:focus{left:0;}
