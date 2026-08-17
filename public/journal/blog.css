@@ -37,7 +37,7 @@ img{max-width:100%;display:block;}
 /* ---------- top nav ---------- */
 nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--bdr);}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;max-width:1200px;margin:0 auto;}
-.nav-logo img{height:46px;width:auto;}
+.nav-logo img{height:58px;width:auto;}
 .nav-actions{display:flex;gap:14px;align-items:center;}
 .nav-link{color:var(--txt2);font-weight:600;font-size:14px;letter-spacing:.02em;}
 .nav-link:hover{color:var(--txt1);}
@@ -51,7 +51,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
      dissolves (display:contents) so its children flex within nav-inner; order + a full-width ::after split rows. */
   .nav-inner{flex-flow:row wrap;align-items:center;justify-content:center;gap:9px 6px;padding:10px 16px;}
   .nav-logo{order:1;margin-right:auto;}
-  .nav-logo img{height:40px;}
+  .nav-logo img{height:52px;}
   .nav-actions{display:contents;}
   .nav-buy{order:2;padding:8px 16px;font-size:13px;box-shadow:none;}
   .nav-portal{order:3;padding:7px 10px;}
@@ -60,7 +60,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
   .nav-link{order:5;font-size:12px;padding:4px 7px;white-space:nowrap;letter-spacing:0;}
 }
 @media(max-width:560px){
-  .nav-logo img{height:36px;}
+  .nav-logo img{height:46px;}
   .nav-buy{padding:8px 15px;font-size:12.5px;}
   .nav-link{font-size:12.5px;padding:11px 8px;min-height:44px;display:inline-flex;align-items:center;}
 }
