@@ -517,14 +517,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a class="hero-link" href="/journal/">The Journal</a>
     </div>
     <div style="margin-top:14px;font-size:12.5px;color:var(--txt3);">Analyst starts with a 7-day free trial
-    <div class="hero-mashup">
-      <div class="hm-back"><img src="/screenshots/mock-cockpit.jpg" width="1500" height="827" alt="The NoVo dashboard — the live SPY dealer map, the scalping chart with dealer levels drawn on it, and the market read" loading="eager" fetchpriority="high" decoding="async"></div>
-      <div class="hm-fan">
-        <div class="hm-card" style="transform:rotate(-14deg);z-index:4;"><img src="/screenshots/mock-signal.jpg" width="470" height="983" alt="NoVo on mobile — the market read" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(-6deg) translateY(14px);z-index:3;margin-left:-50px;"><img src="/screenshots/mock-analysis.jpg" width="470" height="983" alt="NoVo on mobile — the session thesis" loading="lazy" decoding="async"></div>
-      </div>
-    </div>
- &middot; you click every entry &middot; non-custodial &middot; cancel any time</div>
+    &middot; you click every entry &middot; non-custodial &middot; cancel any time</div>
   </div>
 </section>
 
@@ -766,6 +759,229 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
+<script>
+(function(){var f=document.getElementById('fb-sub');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('fb-email').value.trim();var m=document.getElementById('fb-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='Subscribed — check your inbox.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
+</script>
+
+
+<div class="disclaimer">
+  <div class="container">
+    <p>NoVo is a software tool for market analysis and for executing trades you initiate. It is not financial advice. Past performance of any trading system does not guarantee future results. Options trading involves significant risk of loss and is not appropriate for all investors. You are responsible for all trading decisions, risk configuration, and capital management. Use in paper mode before deploying real capital.</p>
+    <p style="margin-top:12px;">NoVo never takes custody of your funds. It executes trades through your own broker API keys and never holds, transfers, or accesses your money — your capital remains in your own brokerage accounts at all times.</p>
+    <p style="margin-top:16px;display:flex;gap:20px;justify-content:center;align-items:center;flex-wrap:wrap;"><a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.79 19.79 0 0016.558 3.2a.074.074 0 00-.079.037c-.34.607-.719 1.4-.984 2.02a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.997-2.02.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.369a.07.07 0 00-.032.027C1.533 7.55.943 10.65 1.09 13.712a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.055c.5-3.177-.838-6.246-2.549-9.317a.061.061 0 00-.031-.027zM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>Discord</a><a href="https://www.reddit.com/user/novo_algotrades" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Reddit</a><a href="https://stocktwits.com/0dte_NoVo" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">StockTwits</a> · <a href="https://x.com/0dte_NoVo" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">X</a><a href="/options-101" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Options 101</a><a href="/journal/" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">The Journal</a><a href="/help" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Help</a><a href="/about" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">About</a><a href="/faq" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">FAQ</a><a href="/terms" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Terms</a><a href="/risk-disclosure" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Risk</a><a href="/refund-policy" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Refunds</a><a href="/privacy" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Privacy</a></p>
+    <p style="margin-top:16px;">Questions? <a href="mailto:general@novo-options.trade" style="color:var(--txt2);font-weight:600;">general@novo-options.trade</a> &nbsp;·&nbsp; Support: <a href="mailto:support@novo-options.trade" style="color:var(--txt2);font-weight:600;">support@novo-options.trade</a></p>
+    <p style="margin-top:16px;font-weight:800;color:#22d3ee;letter-spacing:1px;font-size:13px;">NoVo — from zero to trading</p>
+    <p style="margin-top:12px;">© 2026 NoVo Options Trading. All rights reserved.</p>
+  </div>
+</div>
+
+<script>
+// ── SALES PAUSE SWITCH ──────────────────────────────────────────────────
+// Flip to false (or delete this block) to resume sales. Single source of
+// truth: controls both the checkout() intercept below and the notice
+// banner near the main buy button. Site stays fully visible/browsable —
+// only the actual purchase flow is paused.
+const SALES_PAUSED = false;
+const SALES_PAUSED_MESSAGE = "Checkout is briefly paused right now — please check back soon. Thanks for your patience!";
+
+
+// Prices are hardcoded in the markup ($249 / $2,490) — no dynamic PRICE_DISPLAY override.
+
+// ── Terms-of-use gate: buyer must agree to the License + Risk terms before any checkout ──
+function requireTerms(fnName) {
+  if (localStorage.getItem('novo_terms_agreed') === '1') return true;
+  window._pendingBuy = fnName;
+  let m = document.getElementById('terms-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'terms-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,20,0.80);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML = '<div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;max-width:440px;width:100%;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,0.55);">' +
+      '<div style="font-size:19px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">One quick step</div>' +
+      '<p style="font-size:14px;color:#8aacc8;line-height:1.55;margin:0 0 18px;">Before checkout, please confirm you agree to the terms of use.</p>' +
+      '<label style="display:flex;gap:11px;align-items:flex-start;cursor:pointer;font-size:14px;color:#cfe0f0;line-height:1.5;">' +
+      '<input type="checkbox" id="terms-check-input" style="margin-top:3px;width:17px;height:17px;flex-shrink:0;accent-color:#10b981;cursor:pointer;">' +
+      '<span>I have read and agree to the <a href="/license" target="_blank" rel="noopener" style="color:#3b82f6;font-weight:600;">NoVo Terms of Use &amp; Risk Disclosure</a>.</span></label>' +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">' +
+      '<button type="button" onclick="closeTerms()" style="background:transparent;border:1px solid #2a3f60;color:#8aacc8;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Cancel</button>' +
+      '<button type="button" id="terms-continue" disabled onclick="acceptTerms()" style="background:#10b981;border:none;color:#111a14;padding:10px 22px;border-radius:8px;font-weight:800;cursor:pointer;font-size:14px;opacity:0.45;">Agree &amp; Continue</button></div></div>';
+    document.body.appendChild(m);
+    const cb = m.querySelector('#terms-check-input');
+    const btn = m.querySelector('#terms-continue');
+    cb.addEventListener('change', function () { btn.disabled = !cb.checked; btn.style.opacity = cb.checked ? '1' : '0.45'; });
+    m.addEventListener('click', function (e) { if (e.target === m) closeTerms(); });
+  } else {
+    m.style.display = 'flex';
+  }
+  document.body.style.overflow = 'hidden';
+  return false;
+}
+function closeTerms() {
+  const m = document.getElementById('terms-modal');
+  if (m) m.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function acceptTerms() {
+  const cb = document.getElementById('terms-check-input');
+  if (!cb || !cb.checked) return;
+  localStorage.setItem('novo_terms_agreed', '1');
+  closeTerms();
+  const fn = window._pendingBuy;
+  if (fn && typeof window[fn] === 'function') window[fn]();
+}
+
+async function checkout() {
+  if (SALES_PAUSED) {
+    alert(SALES_PAUSED_MESSAGE);
+    return;
+  }
+  if (!requireTerms('checkout')) return;
+  const buttons = document.querySelectorAll('[onclick="checkout()"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.classList.add('btn-loading'); b.textContent = 'Redirecting...'; });
+
+  try {
+    const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No checkout URL returned');
+    }
+  } catch (err) {
+    buttons.forEach(b => { b.classList.remove('btn-loading'); b.textContent = b.dataset.orig || 'Try Again'; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+async function subscribeNow() {
+  if (SALES_PAUSED) {
+    alert(SALES_PAUSED_MESSAGE);
+    return;
+  }
+  if (!requireTerms('subscribeNow')) return;
+  const buttons = document.querySelectorAll('[onclick="subscribeNow()"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+
+  try {
+    const res = await fetch('/api/checkout-sub', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No checkout URL');
+    }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+async function subscribeYearly() {
+  if (SALES_PAUSED) {
+    alert(SALES_PAUSED_MESSAGE);
+    return;
+  }
+  if (!requireTerms('subscribeYearly')) return;
+  const buttons = document.querySelectorAll('[onclick="subscribeYearly()"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+
+  try {
+    const res = await fetch('/api/checkout-sub-yearly', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No checkout URL');
+    }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+async function startAnalystTrial(plan) {
+  if (plan) window._analystPlan = plan;   // remembered across the terms-gate retry (which re-calls with no arg)
+  if (SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
+  if (!requireTerms('startAnalystTrial')) return;
+  const p = (window._analystPlan === 'yearly') ? 'yearly' : 'monthly';
+  const buttons = document.querySelectorAll('[onclick^="startAnalystTrial"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+  try {
+    const res = await fetch('/api/checkout-analyst', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: p }) });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; } else { throw new Error('No checkout URL'); }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+function openSetupGuide() {
+  document.getElementById('setup-guide-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSetupGuide() {
+  document.getElementById('setup-guide-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSetupGuide();
+});
+</script>
+
+<!-- QUICK SETUP GUIDE MODAL -->
+<div class="setup-modal-overlay" id="setup-guide-overlay" onclick="if(event.target===this) closeSetupGuide()">
+  <div class="setup-modal">
+    <button class="setup-modal-close" onclick="closeSetupGuide()" aria-label="Close">&times;</button>
+    <div class="section-label">Subscribe → Connect → Trade</div>
+    <h2>How It Works</h2>
+    <p class="setup-sub">From checkout to a live dashboard — most people are running in minutes, paper trading immediately with zero real money at risk.</p>
+    <p class="setup-sub" style="margin-top:10px;">You only bring one broker — <strong>Tradier or tastytrade</strong> (data + trading in one account), plus optional <strong>Alpaca</strong> if you want to paper trade — AI is built in, so there's nothing else to configure.</p>
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="setup-step-num">1</div>
+        <div class="setup-step-body">
+          <h3>Subscribe</h3>
+          <p>Secure checkout via Stripe — monthly or yearly. Instant access, cancel any time.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">2</div>
+        <div class="setup-step-body">
+          <h3>Create your account</h3>
+          <p>Head to <code>app.novo-aitrading.app</code> and sign up with the email you subscribed with.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">3</div>
+        <div class="setup-step-body">
+          <h3>Connect your broker keys</h3>
+          <p>Connect your broker — <strong>Tradier or tastytrade</strong> (one is all you need) — plus optional <strong>Alpaca</strong> if you want to paper trade. They're validated against the brokers. AI is pre-configured, so there's nothing else to enter.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">4</div>
+        <div class="setup-step-body">
+          <h3>Your dashboard spins up automatically</h3>
+          <p>Your own private NoVo launches automatically — no setup, no babysitting. It's ready in moments.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">5</div>
+        <div class="setup-step-body">
+          <h3>Open your dashboard</h3>
+          <p>Open it from the portal in any browser, or add it to your phone's home screen. NoVo starts in <strong>paper mode</strong> — simulated trades, no real money — so there's nothing to be careful about yet. Flip to live when you're ready.</p>
+        </div>
+      </div>
+    </div>
+    <div class="setup-modal-cta">
+      <p>Step-by-step help lives in your portal, and support is always an email away at <strong>support@novo-options.trade</strong>.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-primary" style="background:linear-gradient(180deg,#34d399,#10b981);" onclick="subscribeNow()">Subscribe — $249/mo</button>
+        </div>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
