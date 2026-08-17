@@ -226,7 +226,7 @@ function makeExecutors(ctx = {}) {
     try {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
       const resp = await get(url, { "User-Agent": "Mozilla/5.0" });
-      if (!resp.ok) return { error: `no quote for ${sym}` };
+      if (!resp || !resp.ok) return { error: `no quote for ${sym}` };
       const res = (await resp.json())?.chart?.result?.[0];
       const m = res?.meta;
       if (!m || m.regularMarketPrice == null) return { error: `no quote for ${sym}` };
@@ -253,25 +253,32 @@ function makeExecutors(ctx = {}) {
     const MAJOR = /\b(fed|fomc|interest rate|cpi|inflation|nonfarm|payroll|employment|unemployment|jobless|gdp|pce|retail sales|ism|consumer confidence|ppi)\b/i;
     const isUS = (c) => /united states|^us$|^u\.s\.?$/i.test(String(c || "").trim());
     const ymd = (d) => d.toISOString().slice(0, 10);
+    // One day per request is Nasdaq's only granularity, so a ten-day window is ten requests.
+    // Sequentially — each with a retry — that overran the tool loop's per-round budget and came
+    // back to the model as a timeout, which it correctly but uselessly reported as "no calendar".
+    // In parallel the whole window costs about one round trip.
     const out = [];
     try {
-      for (let i = 0; i < days && out.length < 14; i++) {
-        const real = new Date(Date.now() + i * 86400000);
-        // Nasdaq buckets US events one calendar day late; api/calendar.js documents the +1 in detail.
-        const q = new Date(real.getTime() + 86400000);
-        const resp = await get(`https://api.nasdaq.com/api/calendar/economicevents?date=${ymd(q)}`,
-          { "User-Agent": "Mozilla/5.0", Accept: "application/json" });
-        if (!resp.ok) continue;
-        const rows = (await resp.json())?.data?.rows || [];
-        rows.filter((x) => isUS(x.country) && MAJOR.test(x.eventName || ""))
-          .forEach((x) => out.push({
-            date: ymd(real),
-            timeET: String(x.gmt || "").trim() || null,   // Nasdaq mislabels this "gmt"; it is ET
-            event: String(x.eventName || "").trim(),
-            consensus: String(x.consensus || "").trim() || null,
-            previous: String(x.previous || "").trim() || null,
-          }));
-      }
+      const perDay = await Promise.all(
+        Array.from({ length: days }, async (_unused, i) => {
+          const real = new Date(Date.now() + i * 86400000);
+          // Nasdaq buckets US events one calendar day late; api/calendar.js documents the +1 in detail.
+          const q = new Date(real.getTime() + 86400000);
+          const resp = await get(`https://api.nasdaq.com/api/calendar/economicevents?date=${ymd(q)}`,
+            { "User-Agent": "Mozilla/5.0", Accept: "application/json" });
+          if (!resp || !resp.ok) return [];
+          let rows = [];
+          try { rows = (await resp.json())?.data?.rows || []; } catch (_) { return []; }
+          return rows.filter((x) => isUS(x.country) && MAJOR.test(x.eventName || ""))
+            .map((x) => ({
+              date: ymd(real),
+              timeET: String(x.gmt || "").trim() || null,   // Nasdaq mislabels this "gmt"; it is ET
+              event: String(x.eventName || "").trim(),
+              consensus: String(x.consensus || "").trim() || null,
+              previous: String(x.previous || "").trim() || null,
+            }));
+        }));
+      for (const day of perDay) out.push(...day);   // Promise.all preserves order, so this stays date-ordered
     } catch (_) { /* fall through to whatever was collected */ }
     if (!out.length) return { error: "no calendar data available right now" };
     return { events: out.slice(0, 14) };
@@ -287,7 +294,7 @@ function makeExecutors(ctx = {}) {
     try {
       const resp = await get(`https://api.nasdaq.com/api/analyst/${encodeURIComponent(sym)}/earnings-date`,
         { "User-Agent": "Mozilla/5.0", Accept: "application/json" });
-      if (!resp.ok) return { error: `no earnings date found for ${sym}` };
+      if (!resp || !resp.ok) return { error: `no earnings date found for ${sym}` };
       const j = await resp.json();
       text = String(j?.data?.reportText || "").replace(/\s+/g, " ").trim();
     } catch (_) { return { error: `no earnings date found for ${sym}` }; }
@@ -323,7 +330,7 @@ function makeExecutors(ctx = {}) {
     try {
       const url = `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(sym)}&region=US&lang=en-US`;
       const resp = await get(url, { "User-Agent": "Mozilla/5.0" });
-      if (!resp.ok) return { error: "news unavailable" };
+      if (!resp || !resp.ok) return { error: "news unavailable" };
       const xml = await resp.text();
       const clean = (s) => s.replace(/<!\[CDATA\[|\]\]>/g, "").replace(/<[^>]+>/g, "")
         .replace(/&amp;/g, "&").replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"')
