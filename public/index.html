@@ -297,11 +297,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
   .feature h4 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }
   .feature p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
-  /* Nine reading cards: 3x3 on desktop. The grid falls to two columns between
-     584px and 859px, where the ninth would be left alone -- let it span. */
-  @media (min-width: 584px) and (max-width: 859px) {
-    .features-grid > .feature:nth-child(9) { grid-column: 1 / -1; }
-  }
 
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -622,17 +617,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="section-title">The dealer map, in plain English.</h2>
     <p class="section-sub">Options dealers hedge. Where they sit decides whether a move gets damped or amplified, and which prices behave like magnets. That is knowable &mdash; and it is what NoVo draws, every 60 seconds.</p>
     <div class="features-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
-      <div class="feature"><div class="feature-icon">&#129522;</div><div><h3>Net GEX &middot; the regime</h3><p>Positive and dealers damp the tape into a grind. Negative and they amplify every push.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#128256;</div><div><h3>The gamma flip</h3><p>The price where hedging switches from damping to amplifying. The single line that matters most.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#129521;</div><div><h3>Call &amp; put walls</h3><p>The biggest gamma strikes &mdash; the prices that pin, cap and support the tape.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#128208;</div><div><h3>Expected move</h3><p>The &plusmn;1&sigma; range the options market is pricing for this session.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#129680;</div><div><h3>Gravity</h3><p>The gamma-weighted centre that price keeps snapping back toward.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#128011;</div><div><h3>Flow, sweeps &amp; blocks</h3><p>Which side the volume leans, off the live print tape, computed in-house rather than rented.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#9878;</div><div><h3>Put/call skew &amp; IV rank</h3><p>Whether traders are paying up for downside protection, and how expensive options are against their own year.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#9889;</div><div><h3>Gamma-squeeze signal</h3><p>A live 0&ndash;100 read on when dealers flip from damping moves to amplifying them.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#127756;</div><div><h3>Fast / slow MM skew</h3><p>Near-term skew against the structural baseline &mdash; how far today&rsquo;s pricing has pulled away from normal.</p></div></div>
-      <div class="feature" style="grid-column:1/-1;"><div class="feature-icon">&#127919;</div><div><h3>The Analyst Score</h3><p>One 0&ndash;100 number for how the whole map lines up right now, so you can tell a clean setup from a muddled one at a glance.</p></div></div>
-      <div class="feature" style="grid-column:1/-1;"><div class="feature-icon">&#128368;</div><div><h3>Historical analogues &mdash; &ldquo;today looks like&hellip;&rdquo;</h3><p>NoVo logs every session it has ever mapped, then scores today against them and shows you the closest prior setups with what price actually did afterwards. Pattern memory for the map &mdash; with the sample size attached, because a few dozen sessions is a count and not a tendency.</p></div></div>
+      <div class="feature"><div class="feature-icon">🧲</div><div><h3>Net GEX &middot; the regime</h3><p>Positive = dealers dampen moves (grind / mean-revert). Negative = they amplify (moves extend). Know which market you're in before you enter.</p></div></div>
+      <div class="feature"><div class="feature-icon">🔀</div><div><h3>Gamma Flip</h3><p>The price where dealer hedging flips from dampening to amplifying. Cross it and the whole character of the tape changes.</p></div></div>
+      <div class="feature"><div class="feature-icon">🧱</div><div><h3>Call &amp; Put walls</h3><p>The biggest gamma strikes &mdash; the pins price gets drawn to and the levels it reacts at. Resistance above, support below.</p></div></div>
+      <div class="feature"><div class="feature-icon">📐</div><div><h3>Expected move</h3><p>The &plusmn;1&sigma; range the options market is pricing for the day and the week &mdash; your realistic playing field, VIX/VXN-anchored.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚖️</div><div><h3>Put/Call skew</h3><p>Are traders paying up for downside protection or chasing upside? The market's fear-vs-greed tell, in vol points.</p></div></div>
+      <div class="feature"><div class="feature-icon">📊</div><div><h3>ATM IV &amp; IV rank</h3><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
+      <div class="feature"><div class="feature-icon">🪐</div><div><h3>Gravity &middot; the magnet</h3><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
+      <div class="feature"><div class="feature-icon">🌡️</div><div><h3>Fast / Slow MM skew</h3><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚡</div><div><h3>Gamma squeeze signal</h3><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Live on the dashboard the moment it arms, for whichever ticker you&rsquo;re watching.</p></div></div>
+      <div class="feature"><div class="feature-icon">📈</div><div><h3>Options flow &middot; call vs put demand</h3><p>Which side the volume is building on across the chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
+      <div class="feature"><div class="feature-icon">🐋</div><div><h3>Sweeps &amp; blocks</h3><p>Real order flow off the live <b style="color:var(--txt1);">print tape</b> &mdash; aggressor-tagged <b style="color:var(--txt1);">sweeps</b> (one order shredded across venues to get filled fast) and oversized <b style="color:var(--txt1);">block</b> prints, for SPY, QQQ and IWM. This is the buy/sell footprint, not just volume totals &mdash; and it's computed <b style="color:var(--txt1);">in-house off the tape</b>, so you're not renting a third-party flow feed. The read that used to cost hundreds a month, in your dealer map.</p></div></div>
+      <div class="feature"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it anything about the map, right on the dashboard. It answers off today&rsquo;s live dealer read, a thousand Journal articles and every session it has logged &mdash; and it shows you what it used. The market, not your account.</p></div></div>
+      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">&#127919;</div><div><h3>The Analyst Score</h3><p>One 0&ndash;100 number for how the whole map lines up right now, so you can tell a clean setup from a muddled one at a glance.</p></div></div>
+      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h3>Historical analogues</h3><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
     </div>
     <div style="text-align:center;margin-top:30px;">
       <a href="/analyst" class="btn-secondary analyst-glow" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">See the full live map &rarr;</a>
