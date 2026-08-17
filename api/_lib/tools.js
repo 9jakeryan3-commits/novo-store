@@ -128,6 +128,15 @@ const declarations = [
     },
   },
   {
+    name: "get_track_record",
+    description:
+      "How NoVo's own published claims have actually scored against its logged history: how often each ticker " +
+      "closed inside the expected move, and whether price travels further per hour in negative gamma than positive, " +
+      "each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
+      "the scored record — get_session_history gives the raw session summary, not the hit rate.",
+    parameters: { type: "object", properties: {} },
+  },
+  {
     name: "search_news",
     description:
       "Recent headlines for one ticker — title and published age only, never article text. Use for " +
@@ -364,9 +373,42 @@ function makeExecutors(ctx = {}) {
     } catch (_) { return { error: "news lookup failed" }; }
   }
 
+  // The scored record behind /track-record, read from the same key the public page serves. The
+  // analyst was answering "how often does SPY close inside the expected move" with "I have not
+  // logged that" while the site published the count — its own strongest evidence, out of reach.
+  async function get_track_record() {
+    if (!r) return { error: "track record unavailable" };
+    let snap = null;
+    try { snap = await r.get("novo:track_record"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    if (!snap || !snap.tickers) return { error: "no track record published yet" };
+    const out = {};
+    for (const [tk, t] of Object.entries(snap.tickers)) {
+      const e = t.expected_move || {}, f = t.flip_regime || {};
+      out[tk] = {
+        expectedMove: e.sessions
+          ? { inside: e.inside, outside: e.outside, sessions: e.sessions,
+              ratePct: e.rate, baselinePct: e.baseline }
+          : null,
+        flipRegime: f.enough
+          ? { holds: f.holds, ratio: f.ratio,
+              positiveMedianHourPct: f.positive_median_pct, positiveN: f.positive_n,
+              negativeMedianHourPct: f.negative_median_pct, negativeN: f.negative_n }
+          : { enough: false, positiveN: f.positive_n || 0, negativeN: f.negative_n || 0 },
+      };
+    }
+    return {
+      tickers: out,
+      sessionsLogged: snap.sessions_logged || null,
+      from: snap.from || null, to: snap.to || null,
+      note: "NoVo's own log, self-reported and self-scored — not an independent audit, and not the " +
+            "record of any trade. Always state the sample size alongside any rate from here.",
+    };
+  }
+
   return {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
-    get_quote, get_economic_calendar, get_earnings_dates, search_news,
+    get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
   };
 }
 
