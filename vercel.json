@@ -48,11 +48,6 @@
       "permanent": true
     },
     {
-      "source": "/trader",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/journal/when-to-turn-on-auto-entry.html",
       "destination": "/journal/manual-first-vs-full-auto.html",
       "permanent": true
@@ -99,6 +94,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/trader",
+      "destination": "/trader.html"
+    },
     {
       "source": "/market-data",
       "destination": "/market-data.html"
