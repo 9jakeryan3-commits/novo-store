@@ -455,6 +455,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   @media(prefers-reduced-motion:reduce){.ticker-inner{animation:none;}.ticker-track{overflow-x:auto;}}
 
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
+
+h2.section-title{margin-top:0}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"SPY Gamma Exposure (GEX) Dashboard for 0DTE","item":"https://novo-options.trade/analyst"}]}
@@ -488,7 +490,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section class="hero">
   <div class="container">
     <div class="hero-badge">NoVo Analyst &nbsp;·&nbsp; Dealer Positioning &nbsp;·&nbsp; The Read</div>
-    <h1>Stop guessing.<br><span>Read the dealers.</span></h1>
+    <p class="hero-kicker" style="font-size:clamp(20px,3.2vw,30px);font-weight:800;color:var(--txt1);letter-spacing:-.02em;margin:0 0 6px;">Stop guessing. <span style="color:#22d3ee;">Read the dealers.</span></p><h1>SPY, QQQ &amp; IWM gamma exposure &mdash; the live dealer map</h1>
     <p class="hero-tagline">Dealer map, recomputed <b style="color:#22d3ee;">every 60 seconds</b> &middot; <b>SPY / QQQ / IWM</b> <span style="white-space:nowrap">&middot; 0DTE &amp; Scalping</span></p>
     <p>Net GEX and the regime. The flip, the walls, and <b style="color:var(--txt1);">Gravity</b> &mdash; the magnet price keeps snapping back to. Put/call skew and the near/far term structure. The live flow lean with unusual volume by strike. And what price did the last time dealers sat exactly like this. Remapped <b style="color:#22d3ee;">every 60 seconds</b>, written up <b style="color:var(--txt1);">before the open</b>.</p>
     <p style="max-width:720px;margin:22px auto 28px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">The flow terminals hand you raw data and make <b style="color:#22d3ee;">you</b> the analyst. <b style="color:var(--green);">NoVo reads the same flow &mdash; and hands you the read.</b></p>
@@ -574,19 +576,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="section-title">The dealer's map &mdash; decoded</h2>
     <p class="section-sub">Institutional reads on <b style="color:var(--txt1);">SPY, QQQ &amp; IWM</b> &mdash; dealer positioning, live options flow, sweeps &amp; block prints, and the gamma squeeze &mdash; computed off live options data and updated through the session. Every term is explained in plain English; you don't need a desk background to use it.</p>
     <div class="features-grid">
-      <div class="feature"><div class="feature-icon">🧲</div><div><h4>Net GEX &middot; the regime</h4><p>Positive = dealers dampen moves (grind / mean-revert). Negative = they amplify (moves extend). Know which market you're in before you enter.</p></div></div>
-      <div class="feature"><div class="feature-icon">🔀</div><div><h4>Gamma Flip</h4><p>The price where dealer hedging flips from dampening to amplifying. Cross it and the whole character of the tape changes.</p></div></div>
-      <div class="feature"><div class="feature-icon">🧱</div><div><h4>Call &amp; Put walls</h4><p>The biggest gamma strikes &mdash; the pins price gets drawn to and the levels it reacts at. Resistance above, support below.</p></div></div>
-      <div class="feature"><div class="feature-icon">📐</div><div><h4>Expected move</h4><p>The &plusmn;1&sigma; range the options market is pricing for the day and the week &mdash; your realistic playing field, VIX/VXN-anchored.</p></div></div>
-      <div class="feature"><div class="feature-icon">⚖️</div><div><h4>Put/Call skew</h4><p>Are traders paying up for downside protection or chasing upside? The market's fear-vs-greed tell, in vol points.</p></div></div>
-      <div class="feature"><div class="feature-icon">📊</div><div><h4>ATM IV &amp; IV rank</h4><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
-      <div class="feature"><div class="feature-icon">🪐</div><div><h4>Gravity &middot; the magnet</h4><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
-      <div class="feature"><div class="feature-icon">🌡️</div><div><h4>Fast / Slow MM skew</h4><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
-      <div class="feature"><div class="feature-icon">⚡</div><div><h4>Gamma squeeze signal</h4><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Live on the dashboard the moment it arms, for whichever ticker you&rsquo;re watching.</p></div></div>
-      <div class="feature"><div class="feature-icon">📈</div><div><h4>Options flow &middot; call vs put demand</h4><p>Which side the volume is building on across the chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
-      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🐋</div><div><h4>Sweeps &amp; blocks</h4><p>Real order flow off the live <b style="color:var(--txt1);">print tape</b> &mdash; aggressor-tagged <b style="color:var(--txt1);">sweeps</b> (one order shredded across venues to get filled fast) and oversized <b style="color:var(--txt1);">block</b> prints, for SPY, QQQ and IWM. This is the buy/sell footprint, not just volume totals &mdash; and it's computed <b style="color:var(--txt1);">in-house off the tape</b>, so you're not renting a third-party flow feed. The read that used to cost hundreds a month, in your dealer map.</p></div></div>
-      <div class="feature" id="ask-novo" style="grid-column: 1 / -1;scroll-margin-top:90px;"><div class="feature-icon">💬</div><div><h4>NoVo &mdash; the AI market analyst</h4><p>Ask it anything about the map, right on the dashboard. It answers off today&rsquo;s live dealer read, a thousand Journal articles and every session it has logged &mdash; and it shows you what it used. The market, not your account.</p></div></div>
-      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h4>Historical analogues</h4><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
+      <div class="feature"><div class="feature-icon">🧲</div><div><h3>Net GEX &middot; the regime</h3><p>Positive = dealers dampen moves (grind / mean-revert). Negative = they amplify (moves extend). Know which market you're in before you enter.</p></div></div>
+      <div class="feature"><div class="feature-icon">🔀</div><div><h3>Gamma Flip</h3><p>The price where dealer hedging flips from dampening to amplifying. Cross it and the whole character of the tape changes.</p></div></div>
+      <div class="feature"><div class="feature-icon">🧱</div><div><h3>Call &amp; Put walls</h3><p>The biggest gamma strikes &mdash; the pins price gets drawn to and the levels it reacts at. Resistance above, support below.</p></div></div>
+      <div class="feature"><div class="feature-icon">📐</div><div><h3>Expected move</h3><p>The &plusmn;1&sigma; range the options market is pricing for the day and the week &mdash; your realistic playing field, VIX/VXN-anchored.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚖️</div><div><h3>Put/Call skew</h3><p>Are traders paying up for downside protection or chasing upside? The market's fear-vs-greed tell, in vol points.</p></div></div>
+      <div class="feature"><div class="feature-icon">📊</div><div><h3>ATM IV &amp; IV rank</h3><p>How expensive options are right now versus their own recent range &mdash; so you know when premium is cheap or rich.</p></div></div>
+      <div class="feature"><div class="feature-icon">🪐</div><div><h3>Gravity &middot; the magnet</h3><p>The gamma-weighted center of the dealer book &mdash; the level price gravitates back toward in a positive-gamma regime. A high-probability mean-reversion target.</p></div></div>
+      <div class="feature"><div class="feature-icon">🌡️</div><div><h3>Fast / Slow MM skew</h3><p>Near-term skew vs the structural baseline &mdash; whether dealers' short-dated fear is spiking above, or fading below, the longer-dated read.</p></div></div>
+      <div class="feature"><div class="feature-icon">⚡</div><div><h3>Gamma squeeze signal</h3><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Live on the dashboard the moment it arms, for whichever ticker you&rsquo;re watching.</p></div></div>
+      <div class="feature"><div class="feature-icon">📈</div><div><h3>Options flow &middot; call vs put demand</h3><p>Which side the volume is building on across the chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
+      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🐋</div><div><h3>Sweeps &amp; blocks</h3><p>Real order flow off the live <b style="color:var(--txt1);">print tape</b> &mdash; aggressor-tagged <b style="color:var(--txt1);">sweeps</b> (one order shredded across venues to get filled fast) and oversized <b style="color:var(--txt1);">block</b> prints, for SPY, QQQ and IWM. This is the buy/sell footprint, not just volume totals &mdash; and it's computed <b style="color:var(--txt1);">in-house off the tape</b>, so you're not renting a third-party flow feed. The read that used to cost hundreds a month, in your dealer map.</p></div></div>
+      <div class="feature" id="ask-novo" style="grid-column: 1 / -1;scroll-margin-top:90px;"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it anything about the map, right on the dashboard. It answers off today&rsquo;s live dealer read, a thousand Journal articles and every session it has logged &mdash; and it shows you what it used. The market, not your account.</p></div></div>
+      <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h3>Historical analogues</h3><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
     </div>
 
     <div class="ss-wrap">
@@ -629,7 +631,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <div class="section-label" style="margin-top:72px;">Today Looks Like&hellip;</div>
-    <div class="section-title">The only question that<br>actually matters.</div>
+    <h2 class="section-title">The only question that<br>actually matters.</h2>
     <p class="section-sub">Every dealer map tells you where the walls are. None of them tell you what happened the <em>last time</em> the dealers were positioned exactly like this &mdash; so you are left reading a chart and guessing. NoVo scores today&rsquo;s SPY dealer configuration against every session it has logged, and shows you the closest matches with what price actually did afterwards.</p>
 
     <div style="max-width:760px;margin:26px auto 0;background:var(--navy2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;">
@@ -738,7 +740,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section id="pricing">
   <div class="container">
     <div class="section-label">Pricing</div>
-        <div class="section-title" style="text-align:center;">The read is the product.</div>
+        <h2 class="section-title" style="text-align:center;">The read is the product.</h2>
     <p class="section-sub" style="margin: 0 auto 40px; text-align:center;"><b style="color:#22d3ee;">NoVo Analyst</b> is the cornerstone &mdash; the live dealer map + a written read every session. Learn free first, or add <b style="color:var(--green);">NoVo Trader</b> when you want it traded for you in your own broker.</p>
 
     <!-- Analyst — the cornerstone, full-width flagship -->
@@ -831,7 +833,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section>
   <div class="container">
     <div class="section-label">FAQ</div>
-    <div class="section-title">Common questions.</div>
+    <h2 class="section-title">Common questions.</h2>
     <div class="faq-list">
 
       <details class="faq-item">

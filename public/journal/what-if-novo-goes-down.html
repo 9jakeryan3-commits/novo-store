@@ -56,7 +56,7 @@
     <h1>What Happens If NoVo Goes Down Mid-Trade? Fail-Safe Honesty</h1>
     <p class="standfirst">&ldquo;What if it goes down while I'm in a trade?&rdquo; is exactly the question you should ask any trading tool. Here's the honest answer &mdash; including the design choice that keeps your downside covered even then.</p>
   </header>
-  <div class="article-meta"><time class="article-date" datetime="2026-07-18">18 July 2026</time> &middot; NoVo Options Trading &middot; Jul 18, 2026</div>
+  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time></div>
   <div class="article-body">
     <p>No service has 100% uptime, so it's fair to ask: what happens to your open position if NoVo has an outage <em>mid-trade</em>? <strong>The honest answer depends on your broker.</strong> On <strong>Tradier</strong>, NoVo rests the protective <a href="/journal/server-side-broker-stop.html">stop at the broker/exchange</a>, so your downside stays capped even if NoVo itself goes offline. On <strong>Alpaca</strong> &mdash; which doesn't support broker-side stops for options &mdash; NoVo enforces the same &minus;15% stop in <em>software</em> (its exit engine), so a full NoVo outage <em>is</em> a genuine gap. For fully hands-off live trading, Tradier's broker-side stop is the sturdier choice.</p>
     <h2>The key design choice</h2>
