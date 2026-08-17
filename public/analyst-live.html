@@ -47,7 +47,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="apple-touch-icon" href="/icon-192.png?v=7">
 <link rel="manifest" href="/analyst-live.webmanifest">
-<link rel="stylesheet" href="/journal/blog.css?v=14">
+<link rel="stylesheet" href="/journal/blog.css?v=15">
 <style>
   /* Match the Trader dashboard's palette — neutral near-black (was navy). Card SHAPE/spacing unchanged
      (rounded + spaced, as-is). Only the hue moves: page/tile/card shades + text go neutral gray. */
@@ -176,6 +176,23 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .fear-marker { position: absolute; top: -3px; width: 3px; height: 14px; border-radius: 2px; background: #f0f0ee; box-shadow: 0 0 0 2px rgba(0,0,0,.55); transform: translateX(-50%); transition: left .5s ease; }
   .fear-scale { display: flex; justify-content: space-between; font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--txt3); margin-top: 5px; }
   .hidden { display: none !important; }
+
+  /* ---- brand mark: coin image + live text wordmark ---- */
+  .nav-logo a, a.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+  .nav-logo img { height: 44px; width: auto; display: block; }
+  .wm { display: flex; flex-direction: column; line-height: 1; }
+  .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 27px; font-weight: 800;
+    color: var(--txt1, #eaf3ff); letter-spacing: -0.6px; }
+  .wm-2 { font-size: 9.5px; font-weight: 700; letter-spacing: 3.1px; text-transform: uppercase;
+    color: var(--txt3, #7d97b8); margin-top: 4px; white-space: nowrap; }
+  @media (max-width: 1024px) {
+    .nav-logo img { height: 40px; }
+    .wm-1 { font-size: 24px; } .wm-2 { font-size: 9px; letter-spacing: 2.5px; }
+  }
+  @media (max-width: 560px) {
+    .nav-logo img { height: 34px; }
+    .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
+  }
 </style>
 </head>
 <body>
@@ -200,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ===== DASHBOARD ===== -->
   <div id="dash" class="hidden">
     <div class="lv-top">
-      <div class="lv-brand"><img src="/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="439" height="184" decoding="async"></div>
+      <div class="lv-brand"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></div>
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
       <span id="sess" class="lv-sess"></span>
       <div class="lv-tabs" id="tabs">

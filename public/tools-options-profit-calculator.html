@@ -66,7 +66,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── Nav (unified site header) ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
-  .nav-logo img { height: 58px; width: auto; display: block; }
   .nav-actions { display: flex; gap: 14px; align-items: center; justify-content: flex-end; }
   .nav-actions > a:not(.nav-buy):not(.nav-portal) { padding: 0 !important; }
   .nav-buy { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 11px 22px; border-radius: 9px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
@@ -79,7 +78,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     /* 2-row header for foldables/tablets down to phones — desktop single row only fits >1024px */
     .nav-inner { flex-flow: row wrap; align-items: center; justify-content: center; gap: 9px 6px; padding: 10px 16px; }
     .nav-logo { order: 1; margin-right: auto; }
-    .nav-logo img { height: 52px; }
     .nav-actions { display: contents; }
     .nav-buy { order: 2; padding: 8px 16px; font-size: 13px; box-shadow: none; }
     .nav-portal { order: 3; padding: 7px 10px; gap: 3px; }
@@ -88,7 +86,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .nav-actions > a:not(.nav-buy):not(.nav-portal) { order: 5; font-size: 12px !important; padding: 4px 7px !important; white-space: nowrap; letter-spacing: 0; }
   }
   @media (max-width: 560px) {
-    .nav-logo img { height: 46px; }
     .nav-buy { padding: 8px 15px; font-size: 12.5px; }
     .nav-inner { column-gap: 4px; }
     .nav-actions > a:not(.nav-buy):not(.nav-portal) { font-size: 12.5px !important; padding: 11px 8px !important; min-height: 44px; display: inline-flex; align-items: center; letter-spacing: 0 !important; }
@@ -267,6 +264,23 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 .nav-menu-panel .grp { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
   color: var(--txt3, #7d97b8); font-weight: 800; padding: 14px 14px 4px; }
 @media (max-width: 1024px) { .nav-more { display: none; } }
+
+  /* ---- brand mark: coin image + live text wordmark ---- */
+  .nav-logo a, a.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+  .nav-logo img { height: 44px; width: auto; display: block; }
+  .wm { display: flex; flex-direction: column; line-height: 1; }
+  .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 27px; font-weight: 800;
+    color: var(--txt1, #eaf3ff); letter-spacing: -0.6px; }
+  .wm-2 { font-size: 9.5px; font-weight: 700; letter-spacing: 3.1px; text-transform: uppercase;
+    color: var(--txt3, #7d97b8); margin-top: 4px; white-space: nowrap; }
+  @media (max-width: 1024px) {
+    .nav-logo img { height: 40px; }
+    .wm-1 { font-size: 24px; } .wm-2 { font-size: 9px; letter-spacing: 2.5px; }
+  }
+  @media (max-width: 560px) {
+    .nav-logo img { height: 34px; }
+    .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
+  }
 </style>
 
 <style>
@@ -336,7 +350,7 @@ nav { position: relative; }
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo"><a href="/"><img src="/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="439" height="184" decoding="async"></a></div>
+    <div class="nav-logo"><a href="/"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></a></div>
     <div class="nav-actions"><a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Home</a><a href="/market-data" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Market Data</a><a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a><a href="/trader" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Trader</a><a href="/options-101" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Options 101</a><a href="/0dte" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">0DTE Guide</a><a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a><div class="nav-more"><button type="button" class="nav-more-btn" aria-expanded="false" aria-controls="nav-more-panel" onclick="novoMoreToggle(event)">More<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="nav-more-panel" id="nav-more-panel"><div class="nmg"><h4>Learn</h4><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a></div><div class="nmg"><h4>Free data &amp; tools</h4><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a></div><div class="nmg"><h4>Compare</h4><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a></div><div class="nmg"><h4>NoVo</h4><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div></div></div><button type="button" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-panel" onclick="novoNavToggle(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button><div class="nav-menu-panel" id="nav-menu-panel"><a href="/">Home</a><a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/trader">NoVo Trader</a><a href="/options-101">Options 101</a><a href="/0dte">0DTE Guide</a><a href="/journal/">The Journal</a><div class="grp">Learn</div><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a><div class="grp">Free data &amp; tools</div><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a><div class="grp">Compare</div><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a><div class="grp">NoVo</div><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div><a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;text-decoration:none;display:inline-flex;align-items:center;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a>
       <a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
     </div>
