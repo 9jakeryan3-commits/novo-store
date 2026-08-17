@@ -2,11 +2,12 @@
 // Guardrailed: product/how-to support ONLY. Never trade advice, never "should I buy", never account actions —
 // those are routed to support@ email. No account/billing data is ever accessed here. Rate-limited via _kv.
 //
-// Env: GEMINI_API_KEY (Google AI Studio key), GEMINI_MODEL (default gemini-2.5-flash), SUPPORT_EMAIL.
+// Env: GOOGLE_VERTEX_SA_JSON (the NoVo service account), GEMINI_MODEL, SUPPORT_EMAIL.
 
 const { rateOk } = require('./_kv');
+const { vertex, answerText, genConfig } = require('./_vertex');
 
-const MODEL = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
+const MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
 const SUPPORT_EMAIL = (process.env.SUPPORT_EMAIL || 'support@novo-options.trade').trim();
 const MAX_MSGS = 16;          // trailing turns kept
 const MAX_CHARS = 1500;       // per user message
@@ -70,8 +71,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return bad(res, 405, 'Method not allowed');
 
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return bad(res, 503, 'Chat is not configured yet.');
+  if (!process.env.GOOGLE_VERTEX_SA_JSON) return bad(res, 503, 'Chat is not configured yet.');
 
   // Rate limit: 20 msgs/hour/IP + a global burst cap. Fails open if KV is down.
   const ip = ((req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',').pop() || '').trim()) || 'unknown';
@@ -92,24 +92,18 @@ module.exports = async (req, res) => {
   if (!contents.length || contents[contents.length - 1].role !== 'user') return bad(res, 400, 'last message must be from the user');
 
   const payload = {
-    system_instruction: { parts: [{ text: SYSTEM }] },
+    systemInstruction: { parts: [{ text: SYSTEM }] },
     contents,
-    generationConfig: { temperature: 0.3, maxOutputTokens: 600, topP: 0.9 },
+    generationConfig: genConfig({ temperature: 0.3, maxOutputTokens: 600, topP: 0.9 }),
     safetySettings: [],
   };
 
   try {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent?key=${key}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
-    );
-    if (!r.ok) {
-      const t = await r.text().catch(() => '');
-      console.error(`[chat] gemini ${r.status}: ${t.slice(0, 300)}`);
+    const data = await vertex(`${MODEL}:generateContent`, payload, 'chat');
+    if (!data) {
       return bad(res, 502, 'The assistant is unavailable right now — please email ' + SUPPORT_EMAIL + '.');
     }
-    const data = await r.json();
-    const reply = (data?.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+    const reply = answerText(data);
     if (!reply) return bad(res, 502, 'No reply — please try rephrasing, or email ' + SUPPORT_EMAIL + '.');
     return res.status(200).json({ reply });
   } catch (e) {
