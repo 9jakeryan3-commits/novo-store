@@ -115,6 +115,10 @@
       "destination": "/market-data-iwm.html"
     },
     {
+      "source": "/track-record",
+      "destination": "/track-record.html"
+    },
+    {
       "source": "/tradingview",
       "destination": "/tradingview.html"
     },
