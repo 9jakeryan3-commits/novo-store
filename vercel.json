@@ -330,5 +330,10 @@
         }
       ]
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "master": false
+    }
+  }
 }
