@@ -2,13 +2,23 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "^www\\.novo-options\\.trade$" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "^www\\.novo-options\\.trade$"
+        }
+      ],
       "destination": "https://novo-options.trade/$1",
       "permanent": true
     },
     {
       "source": "/((?!api/|sitemap-old).*)",
-      "has": [{ "type": "host", "value": "^(www\\.)?novo-aitrading\\.app$" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "^(www\\.)?novo-aitrading\\.app$"
+        }
+      ],
       "destination": "https://novo-options.trade/$1",
       "permanent": true
     },
@@ -278,6 +288,48 @@
     {
       "path": "/api/reconcile-subs",
       "schedule": "0 6 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.(png|jpg|jpeg|gif|svg|ico|webp|avif|woff|woff2|ttf|otf)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(js|css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
     }
   ]
 }

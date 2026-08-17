@@ -23,5 +23,12 @@
     fetch('/api/quotes').then(function (r) { return r.json(); }).then(paint).catch(function () {});
   }
   load();
-  setInterval(load, 60000);
+  // Poll only while the tab is actually being looked at — this runs on 1,040 static article
+  // pages, and a background tab was billing an invocation a minute for a ticker nobody sees.
+  setInterval(function () {
+    if (document.visibilityState === 'visible') load();
+  }, 60000);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') load();
+  });
 })();

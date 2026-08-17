@@ -192,7 +192,7 @@ function _levelsTable(levels) {
 function _page(t, desc, canon, inner) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(canon)}"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="article"><meta property="og:site_name" content="NoVo AI Trading"><link rel="icon" href="${SITE}/favicon.ico?v=2">
 <style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}</style></head><body><div class="wrap">
-<div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=4" alt="NoVo Options Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
+<div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=5" alt="NoVo Options Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
 ${inner}
 <div class="disc">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss.</div>
 </div></body></html>`;
@@ -624,7 +624,7 @@ async function _promotePublicLevels(state) {
         if (sup) fields.push({ name: '🟢 Support', value: sup, inline: true });
       }
       const embeds = [{
-        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-options.trade/novo-icon.png?v=5' },
+        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-options.trade/novo-icon.png?v=6' },
         title, description: _cap(_bold(_prose)), color, fields,
         footer: { text: 'NoVo — market analysis & education.' },
         timestamp: new Date().toISOString(),
@@ -633,7 +633,7 @@ async function _promotePublicLevels(state) {
       if (_data) embeds.push({ description: _cap(_bold(_data)), color: 0x22d3ee, footer: { text: 'NoVo — analysis & education, not signals.' } });
       await fetch(discordWebhook, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-options.trade/novo-icon.png?v=5', embeds }),
+        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-options.trade/novo-icon.png?v=6', embeds }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
   }
@@ -764,7 +764,7 @@ async function _promotePublicLevels(state) {
     '<div style="margin:0;padding:0;background:#101013;">' +
       '<div style="max-width:600px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
         '<div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">' +
-          '<img src="https://novo-options.trade/novo-logo-light.png?v=4" alt="NoVo Options Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">' +
+          '<img src="https://novo-options.trade/novo-logo-light.png?v=5" alt="NoVo Options Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">' +
           `<div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${esc(label)}</div>` +
         '</div>' +
         '<div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:28px 28px 24px;">' +
