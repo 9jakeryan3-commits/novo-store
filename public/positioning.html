@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-adsense-account" content="ca-pub-4434105753461088">
+<!-- Google tag - novo-options.trade ONLY. Loaded from script so it never fires anywhere
+     else: every Vercel preview build has its own *.vercel.app hostname, and the tag firing
+     there registered each one as a separate domain in the Google tag gateway. The app and
+     dashboard subdomains are infrastructure, not the marketing site, and are not tracked. -->
+<script>
+(function(){var h=location.hostname;
+if(h!=='novo-options.trade'&&h!=='www.novo-options.trade')return;
+var s=document.createElement('script');s.async=true;
+s.src='https://www.googletagmanager.com/gtag/js?id=G-4EMKLHBB6F';
+document.head.appendChild(s);
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
+gtag('js',new Date());gtag('config','G-4EMKLHBB6F');
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;
+j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PML7VTJ9');
+})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Futures positioning &mdash; CFTC Commitments of Traders for S&amp;P, Nasdaq, Russell &amp; VIX | NoVo</title>
+<meta name="description" content="Free weekly futures positioning from the CFTC: how speculators and hedgers are placed in S&P 500, Nasdaq 100, Russell 2000 and VIX futures, with a 12-week trend. Public-domain data.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="icon" href="/icon-192.png?v=7">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+<meta name="theme-color" content="#121316">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://novo-options.trade/positioning">
+<meta property="og:site_name" content="NoVo Options Trading">
+<meta property="og:title" content="Futures positioning &mdash; CFTC Commitments of Traders for S&amp;P, Nasdaq, Russell &amp; VIX | NoVo">
+<meta property="og:description" content="Free weekly futures positioning from the CFTC: how speculators and hedgers are placed in S&P 500, Nasdaq 100, Russell 2000 and VIX futures, with a 12-week trend. Public-domain data.">
+<meta property="og:image" content="https://novo-options.trade/og-home.png?v=4">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@0dte_NoVo">
+<meta name="twitter:creator" content="@0dte_NoVo">
+<meta name="twitter:title" content="Futures positioning &mdash; CFTC Commitments of Traders for S&amp;P, Nasdaq, Russell &amp; VIX | NoVo">
+<meta name="twitter:description" content="Free weekly futures positioning from the CFTC: how speculators and hedgers are placed in S&P 500, Nasdaq 100, Russell 2000 and VIX futures, with a 12-week trend. Public-domain data.">
+<meta name="twitter:image" content="https://novo-options.trade/og-home.png?v=4">
+<link rel="canonical" href="https://novo-options.trade/positioning">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+[{"@context":"https://schema.org","@type":"WebApplication","name":"Expected Move Calculator — 1σ & 2σ Option Range (SPY / QQQ / Any Ticker) | NoVo","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free expected-move calculator: enter price, implied volatility and days to expiration to get the ±1σ (68%) and 2σ (95%) option range — the move the market is pricing. Built for 0DTE.","url":"https://novo-options.trade/positioning","publisher":{"@type":"Organization","name":"NoVo Options Trading","url":"https://novo-options.trade"}},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Tools","item":"https://novo-options.trade/positioning"},{"@type":"ListItem","position":2,"name":"Expected Move Calculator","item":"https://novo-options.trade/positioning"}]},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the expected move in options?","acceptedAnswer":{"@type":"Answer","text":"The expected move is the ±1-standard-deviation price range the options market is pricing over a period, derived from implied volatility. Price stays inside it about 68% of the time (1σ) and about 95% of the time at 2σ. It's the market's own estimate of how far a stock or index is likely to travel."}},{"@type":"Question","name":"How do you calculate the expected move for 0DTE?","acceptedAnswer":{"@type":"Answer","text":"For a 0DTE (same-day) option, expected move = price × (implied volatility / 100) × √(1 / 365). For example, SPY at $745 with 16% ATM IV has a 1-day expected move of about ±$6.2. You can also estimate it from the at-the-money straddle price × 0.85."}},{"@type":"Question","name":"What implied volatility should I use?","acceptedAnswer":{"@type":"Answer","text":"Use the at-the-money implied volatility of the specific expiration you're trading. As a quick proxy for the index ETFs you can use the matching vol index: VIX for SPY, VXN for QQQ, and RVX for IWM. NoVo shows all three live on the market-data page."}},{"@type":"Question","name":"Is the expected move guaranteed?","acceptedAnswer":{"@type":"Answer","text":"No. It's a probability range, not a limit — roughly a 1-in-3 chance price closes outside the 1σ band and about 1-in-20 outside 2σ. Big news or a gamma squeeze can push far beyond it. Treat it as context, not a barrier."}}]}]
+</script>
+<style>
+  :root {
+    --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --amber:#f59e0b;
+    --green:#10b981; --red:#f43f5e; --cyan:#22d3ee; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#7d97b8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background: var(--navy); color: var(--txt2); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.gg-num { font-family:'Space Grotesk','Inter',sans-serif; }
+  a { color: var(--cyan); }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+
+  /* ── Nav (unified site header) ── */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
+  .nav-actions { display: flex; gap: 14px; align-items: center; justify-content: flex-end; }
+  .nav-actions > a:not(.nav-buy):not(.nav-portal) { padding: 0 !important; }
+  .nav-buy { background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 11px 22px; border-radius: 9px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+  .nav-buy:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(16,185,129,0.45); }
+  .nav-portal { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.07); color: var(--blue); border: 1px solid rgba(59,130,246,0.35); padding: 9px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; }
+  .nav-portal:hover { border-color: var(--blue); background: rgba(59,130,246,0.16); }
+  .nav-portal svg { width: 17px; height: 17px; }
+  .nav-portal-txt { display: none; }
+  @media (max-width: 1024px) {
+    /* 2-row header for foldables/tablets down to phones — desktop single row only fits >1024px */
+    .nav-inner { flex-flow: row wrap; align-items: center; justify-content: center; gap: 9px 6px; padding: 10px 16px; }
+    .nav-logo { order: 1; margin-right: auto; }
+    .nav-actions { display: contents; }
+    .nav-buy { order: 2; padding: 8px 16px; font-size: 13px; box-shadow: none; }
+    .nav-portal { order: 3; padding: 7px 10px; gap: 3px; }
+    .nav-portal svg { width: 16px; height: 16px; }
+    .nav-inner::after { content: ""; order: 4; flex-basis: 100%; height: 0; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { order: 5; font-size: 12px !important; padding: 4px 7px !important; white-space: nowrap; letter-spacing: 0; }
+  }
+  @media (max-width: 560px) {
+    .nav-buy { padding: 8px 15px; font-size: 12.5px; }
+    .nav-inner { column-gap: 4px; }
+    .nav-actions > a:not(.nav-buy):not(.nav-portal) { font-size: 12.5px !important; padding: 11px 8px !important; min-height: 44px; display: inline-flex; align-items: center; letter-spacing: 0 !important; }
+  }
+  /* ── site-wide markets ticker ── */
+  .ticker{background:#0d0e10;border-bottom:1px solid #2e3036;overflow:hidden;}
+  .ticker-row{display:flex;align-items:stretch;max-width:1200px;margin:0 auto;}
+  .ticker-tag{flex-shrink:0;padding:9px 14px;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#22d3ee;border-right:1px solid #2e3036;display:flex;align-items:center;gap:6px;background:#0d0e10;}
+  .ticker-tag .dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;}
+  .ticker-track{flex:1;overflow:hidden;}
+  .ticker-inner{display:flex;align-items:center;width:max-content;animation:tickermarquee 55s linear infinite;}
+  .ticker:hover .ticker-inner{animation-play-state:paused;}
+  .tick{display:flex;align-items:center;gap:9px;padding:9px 18px;border-right:1px solid #2e3036;white-space:nowrap;font-size:12.5px;}
+  .tick .t-name{color:#8aacc8;font-weight:700;letter-spacing:.04em;}
+  .tick .t-val{color:#eaf3ff;font-weight:700;}
+  .tick .t-chg{font-weight:700;font-size:11.5px;}
+  .tick .up{color:#10b981;}.tick .dn{color:#f43f5e;}
+  .tick svg{width:46px;height:18px;display:block;}
+  @keyframes tickermarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  @media(prefers-reduced-motion:reduce){.ticker-inner{animation:none;}.ticker-track{overflow-x:auto;}}
+
+  /* section shell */
+  /* vertical only — must NOT use the `padding` shorthand: these classes share an element with .container
+     (class="container sec"), and a shorthand here would override .container's `0 22px` side padding and slam
+     the content edge-to-edge on mobile. Set top/bottom explicitly so the container's side padding survives. */
+  .sec { padding-top: 34px; padding-bottom: 34px; }
+  .lbl { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--cyan); margin-bottom:12px; }
+  .h2 { font-size:clamp(20px,3vw,26px); font-weight:800; color:var(--txt1); letter-spacing:-.5px; margin:0 0 6px; }
+  .sub { font-size:14.5px; color:var(--txt2); max-width:640px; margin:0 0 22px; }
+  .card { background:var(--navy2); border:1px solid var(--bdr); border-radius:14px; padding:22px; }
+  .muted { color:var(--txt3); font-size:12px; }
+
+  /* HERO / pulse */
+  .hero { padding-top: 40px; padding-bottom: 8px; }  /* vertical only (shares element with .container) — see .sec note */
+  .hero-grid { display:grid; grid-template-columns: 1.1fr .9fr; gap:22px; align-items:stretch; }
+  @media(max-width:820px){ .hero-grid{ grid-template-columns:1fr; } }
+  .pulse-card { text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  /* fill the card's content box (which already respects container + card padding) and cap on wide screens.
+     Do NOT use a vw width here: 88vw is wider than the available content area (~100vw − 88px of padding) on a
+     narrow screen like the Z Fold cover, so the gauge overflowed its own panel and pushed it past the edge. */
+  .gauge { position:relative; width:100%; max-width:390px; }
+  .zlbl { font-size:9.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; fill:var(--txt3); transition:fill .5s ease; }
+  .ztick { font-size:11px; font-weight:700; fill:var(--txt3); text-anchor:middle; font-family:'Space Grotesk','Inter',sans-serif; }
+  .gseg { transition:opacity .55s ease; }
+  #needle { transition:transform .9s cubic-bezier(.2,.75,.2,1); }
+  .gg-num { font-size:60px; font-weight:900; color:var(--txt1); line-height:1; margin-top:-8px; }
+  .gg-lbl { font-size:17px; font-weight:800; letter-spacing:.5px; margin-top:4px; }
+  .gg-cap { font-size:11px; color:var(--txt3); letter-spacing:2px; text-transform:uppercase; margin-top:10px; }
+  .pf-row { display:grid; grid-template-columns:repeat(2,1fr); gap:9px 16px; width:100%; margin-top:18px; }
+  .pf { text-align:left; }
+  .pf .pfk { font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:var(--txt3); display:flex; justify-content:space-between; gap:8px; }
+  .pf .pfv { font-weight:800; text-transform:capitalize; }
+  .pf .pfbar { height:5px; border-radius:3px; background:var(--navy); border:1px solid var(--bdr); margin-top:4px; overflow:hidden; }
+  .pf .pfbar i { display:block; height:100%; border-radius:3px; }
+  .hero-copy h1 { font-size:clamp(26px,4vw,38px); font-weight:900; color:var(--txt1); letter-spacing:-1px; line-height:1.12; margin:0 0 12px; }
+  .hero-copy h1 span { color:var(--cyan); }
+  .hero-copy p { font-size:15.5px; color:var(--txt2); line-height:1.7; margin:0 0 16px; }
+  .hero-cta { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:14.5px; text-decoration:none; padding:12px 20px; border-radius:10px; }
+  .btn-p { background:linear-gradient(180deg,#34d399,#10b981); color:#04120c; box-shadow:0 8px 24px rgba(16,185,129,.28); }
+  .btn-s { background:transparent; color:var(--txt1); border:1px solid var(--bdr); }
+
+  /* fear cards */
+  .fear-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:720px){ .fear-row{ grid-template-columns:1fr; } }
+  .fear-card .fh { display:flex; justify-content:space-between; align-items:baseline; }
+  .fear-card .ftk { font-size:12px; font-weight:800; letter-spacing:1px; color:var(--txt2); }
+  .fear-card .fsym { font-size:11px; color:var(--txt3); font-weight:700; }
+  .fear-card .fval { font-size:38px; font-weight:900; color:var(--txt1); line-height:1; margin:8px 0 2px; }
+  .fear-card .fpct { font-size:12px; color:var(--txt3); }
+  .meter { position:relative; height:8px; border-radius:5px; margin:14px 0 8px; background:linear-gradient(90deg,#10b981 0%,#f59e0b 55%,#f43f5e 100%); }
+  .meter .mk { position:absolute; top:-3px; width:3px; height:14px; border-radius:2px; background:#f0f0ee; box-shadow:0 0 0 2px rgba(0,0,0,.55); transform:translateX(-50%); transition:left .6s ease; }
+  .mrow { display:flex; justify-content:space-between; font-size:10px; letter-spacing:1px; color:var(--txt3); text-transform:uppercase; }
+  .tag { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
+
+  /* history */
+  .hist { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media(max-width:600px){ .hist{ grid-template-columns:repeat(2,1fr); } }
+  .hist .hc { background:var(--navy); border:1px solid var(--bdr); border-radius:10px; padding:14px; text-align:center; }
+  .hist .hk { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; }
+  .hist .hv { font-size:24px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
+
+  /* futures strip */
+  .fut { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+  @media(max-width:900px){ .fut{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:520px){ .fut{ grid-template-columns:repeat(2,1fr); } }
+  .fut .fc { background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:14px; }
+  .fut .fn { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
+  .fut .fp { font-size:20px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
+  .fut .fg { font-size:12.5px; font-weight:700; }
+  .up{ color:var(--green); } .dn{ color:var(--red); }
+
+  /* dealer teaser (LOCKED) */
+  .teaser { display:grid; grid-template-columns:1fr 1fr; gap:0; overflow:hidden; padding:0; }
+  @media(max-width:820px){ .teaser{ grid-template-columns:1fr; } }
+  .teaser .tleft { padding:26px; }
+  .teaser .tright { position:relative; min-height:280px; background:#0d0e10; border-left:1px solid var(--bdr); }
+  @media(max-width:820px){ .teaser .tright{ border-left:none; border-top:1px solid var(--bdr); } }
+  .teaser .tright img { width:100%; height:100%; object-fit:cover; object-position:left top; display:block; filter:blur(5px) saturate(.85); opacity:.55; }
+  .lockchips { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:18px 0; }
+  .lockchip { background:var(--navy); border:1px solid var(--bdr); border-radius:9px; padding:11px 13px; position:relative; }
+  .lockchip .ck { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--txt3); }
+  .lockchip .cv { font-size:15px; font-weight:800; color:var(--txt2); filter:blur(4px); user-select:none; }
+  .lockchip .cvv { font-size:15px; font-weight:800; color:var(--txt1); }
+  .lockbadge { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .lockpill { background:rgba(34,211,238,.14); border:1px solid rgba(34,211,238,.4); color:var(--cyan); font-size:10px; font-weight:800; letter-spacing:1px; padding:5px 12px; border-radius:999px; }
+  .tright .ovl { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,rgba(13,14,16,.15),rgba(13,14,16,.55)); }
+
+  /* ad slot */
+  .ad { background:var(--navy2); border:1px dashed var(--bdr); border-radius:12px; min-height:110px; display:flex; align-items:center; justify-content:center; color:var(--txt3); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+
+  .foot { border-top:1px solid var(--bdr); padding:26px 0 40px; color:var(--txt3); font-size:12.5px; }
+  .foot a { color:var(--txt2); text-decoration:none; font-weight:600; margin-right:16px; }
+
+  /* sentiment poll */
+  .pbtn { flex:1; max-width:180px; font-weight:800; font-size:15px; padding:14px 10px; border-radius:11px; cursor:pointer; border:1px solid var(--bdr); background:var(--navy); transition:transform .12s, background .15s; }
+  .pbtn:hover { transform:translateY(-2px); }
+  .pbtn.bull { color:var(--green); border-color:rgba(16,185,129,.4); }
+  .pbtn.bear { color:var(--red); border-color:rgba(239,68,68,.4); }
+  .pbar { display:flex; height:16px; border-radius:8px; overflow:hidden; background:var(--navy); border:1px solid var(--bdr); }
+  .pbull { background:linear-gradient(90deg,#059669,#10b981); transition:width .6s ease; }
+  .pbear { background:linear-gradient(90deg,#f43f5e,#b91c1c); transition:width .6s ease; }
+  .cs-grid { display:grid; grid-template-columns:330px 1fr; gap:16px; align-items:start; }
+  @media(max-width:760px){ .cs-grid{ grid-template-columns:1fr; } }
+
+  /* trending + calendar */
+  .tc-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:820px){ .tc-grid{ grid-template-columns:1fr; } }
+  .trow, .crow { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 2px; border-bottom:1px solid var(--bdr); }
+  .trow:last-child, .crow:last-child { border-bottom:none; }
+  .tsym { font-weight:800; color:var(--txt1); font-size:14px; }
+  .tname { font-size:11.5px; color:var(--txt3); }
+  .tprice { font-weight:700; color:var(--txt1); font-size:14px; text-align:right; }
+  .tchg { font-size:12px; font-weight:700; text-align:right; }
+  .cdate { font-weight:800; color:var(--cyan); font-size:12px; min-width:62px; }
+  .cev { color:var(--txt1); font-weight:600; font-size:13.5px; }
+  .cmeta { font-size:11px; color:var(--txt3); }
+
+  /* comments */
+  .cmt-input { width:100%; background:var(--navy); border:1px solid var(--bdr); border-radius:9px; color:var(--txt1); padding:11px 13px; font-size:14px; font-family:inherit; margin-bottom:10px; }
+  .cmt-input:focus { outline:none; border-color:var(--cyan); }
+  textarea.cmt-input { resize:vertical; min-height:64px; }
+  .cmt-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .cmt-tags { display:flex; gap:14px; font-size:13px; color:var(--txt2); }
+  .cmt-tags label { display:inline-flex; align-items:center; gap:5px; cursor:pointer; }
+  .cmt { background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:13px 15px; margin-bottom:10px; }
+  .cmt .ch { display:flex; align-items:center; gap:9px; margin-bottom:5px; }
+  .cmt .cn { font-weight:800; color:var(--txt1); font-size:13.5px; }
+  .cmt .ct { font-size:11px; color:var(--txt3); }
+  .cmt .cbadge { font-size:10px; font-weight:800; letter-spacing:.5px; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
+  .cmt .cx { font-size:14px; color:var(--txt2); line-height:1.55; word-break:break-word; }
+  /* chat box: fixed height, scrolls internally so the page never grows with the thread */
+  #cmt-list { max-height:440px; overflow-y:auto; margin-top:14px; padding-right:8px; border:1px solid var(--bdr); border-radius:12px; background:var(--navy); padding:12px 12px 2px; }
+  #cmt-list::-webkit-scrollbar { width:8px; }
+  #cmt-list::-webkit-scrollbar-thumb { background:#39404a; border-radius:4px; }
+  #cmt-list::-webkit-scrollbar-track { background:transparent; }
+  #cmt-list .muted { padding:8px 2px; }
+
+/* ---- More dropdown (desktop) ---- */
+.nav-more { position: static; }
+.nav-more-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0;
+  color: var(--txt2, #8aacc8); font-weight: 600; font-size: 14px; padding: 10px 12px; cursor: pointer;
+  white-space: nowrap; font-family: inherit; }
+.nav-more-btn:hover { color: var(--txt1, #eaf3ff); }
+.nav-more-btn svg { width: 13px; height: 13px; }
+.nav-more-panel { display: none; position: absolute; top: 100%; right: 12px; z-index: 2000;
+  background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036); border-radius: 12px;
+  padding: 18px 20px; box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 6px 26px; max-width: 94vw; }
+.nav-more-panel.open { display: grid; }
+.nav-more-panel h4 { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); margin: 0 0 8px; font-weight: 800; }
+.nav-more-panel a { display: block; padding: 5px 0; font-size: 13.5px; font-weight: 600;
+  color: var(--txt2, #8aacc8); text-decoration: none; }
+.nav-more-panel a:hover, .nav-more-panel a:focus-visible { color: var(--cyan, #22d3ee); }
+.nav-menu-panel .grp { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); font-weight: 800; padding: 14px 14px 4px; }
+@media (max-width: 1024px) { .nav-more { display: none; } }
+
+  /* ---- brand mark: coin image + live text wordmark ---- */
+  .nav-logo a, a.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+  .nav-logo img { height: 44px; width: auto; display: block; }
+  .wm { display: flex; flex-direction: column; line-height: 1; }
+  .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 27px; font-weight: 800;
+    color: var(--txt1, #eaf3ff); letter-spacing: -0.6px; }
+  .wm-2 { font-size: 9.5px; font-weight: 700; letter-spacing: 3.1px; text-transform: uppercase;
+    color: var(--txt3, #7d97b8); margin-top: 4px; white-space: nowrap; }
+  @media (max-width: 1024px) {
+    .nav-logo img { height: 40px; }
+    .wm-1 { font-size: 24px; } .wm-2 { font-size: 9px; letter-spacing: 2.5px; }
+  }
+  @media (max-width: 560px) {
+    .nav-logo img { height: 34px; }
+    .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
+  }
+
+  .hm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
+  .hm-sec { background:var(--navy2); border:1px solid var(--bdr); border-radius:11px; padding:13px 14px 14px; }
+  .hm-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .hm-name { font-size:13px; font-weight:800; color:var(--txt1); }
+</style>
+
+<style>
+  .calc-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+  @media(max-width:760px){ .calc-wrap{ grid-template-columns:1fr; } }
+  .calc-in .fld{ margin-bottom:14px; }
+  .calc-in label{ display:block; font-size:12px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--txt3); margin-bottom:6px; }
+  .calc-in input, .calc-in select{ width:100%; background:var(--navy); border:1px solid var(--bdr); border-radius:9px; color:var(--txt1); padding:12px 13px; font-size:16px; font-family:inherit; }
+  .calc-in input:focus, .calc-in select:focus{ outline:none; border-color:var(--cyan); }
+  .seg{ display:flex; gap:8px; }
+  .seg button{ flex:1; background:var(--navy); border:1px solid var(--bdr); color:var(--txt2); font-weight:800; padding:11px; border-radius:9px; cursor:pointer; font-size:14px; }
+  .seg button.on{ border-color:var(--cyan); color:var(--txt1); background:rgba(34,211,238,.08); }
+  .res{ display:flex; flex-direction:column; gap:12px; }
+  .res .big{ background:var(--navy2); border:1px solid var(--bdr); border-radius:12px; padding:18px 20px; }
+  .res .rk{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--txt3); }
+  .res .rv{ font-size:30px; font-weight:900; color:var(--txt1); font-family:'Space Grotesk','Inter',sans-serif; margin-top:4px; line-height:1.05; }
+  .res .rv.pos{ color:var(--green); } .res .rv.neg{ color:var(--red); }
+  .res .rsub{ font-size:12.5px; color:var(--txt3); margin-top:4px; }
+  .res .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .res .sm{ background:var(--navy); border:1px solid var(--bdr); border-radius:10px; padding:13px 15px; }
+  .res .sm .rk{ font-size:10px; } .res .sm .rv{ font-size:19px; }
+  .prose{ max-width:760px; } .prose p{ margin:0 0 14px; font-size:15px; color:var(--txt2); }
+  .prose h3{ color:var(--txt1); font-size:18px; margin:22px 0 8px; font-family:'Space Grotesk','Inter',sans-serif; }
+  .faq details{ border:1px solid var(--bdr); border-radius:11px; background:var(--navy2); padding:2px 16px; margin-bottom:10px; }
+  .faq summary{ cursor:pointer; font-weight:700; color:var(--txt1); padding:14px 0; font-size:15.5px; list-style:none; }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .faq summary::after{ content:'+'; float:right; color:var(--cyan); font-weight:800; }
+  .faq details[open] summary::after{ content:'−'; }
+  .faq .fa{ color:var(--txt2); font-size:14.5px; padding:0 0 14px; line-height:1.65; }
+  .tool-cta{ background:linear-gradient(180deg,rgba(34,211,238,.07),rgba(34,211,238,.02)); border:1px solid rgba(34,211,238,.28); border-radius:14px; padding:22px 24px; }
+  .tool-cta h3{ margin:0 0 8px; color:var(--txt1); font-size:19px; font-family:'Space Grotesk','Inter',sans-serif; }
+  .tool-cta p{ margin:0 0 14px; color:var(--txt2); font-size:14.5px; }
+  .xtool{ display:inline-block; background:var(--navy2); border:1px solid var(--bdr); border-radius:9px; padding:9px 14px; text-decoration:none; color:var(--txt2); font-size:13.5px; font-weight:700; margin:0 8px 8px 0; }
+  .xtool:hover{ border-color:var(--cyan); color:var(--txt1); }
+  .disclaim{ font-size:11.5px; color:var(--txt3); margin-top:14px; }
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
+
+/* ---- mobile nav menu ---------------------------------------------------- */
+nav { position: relative; }
+.nav-menu-btn { display: none; align-items: center; gap: 7px; background: rgba(255,255,255,.04);
+  border: 1px solid var(--bdr, #2e3036); color: var(--txt1, #eaf3ff); font-weight: 700;
+  font-size: 13px; padding: 9px 13px; border-radius: 9px; cursor: pointer; line-height: 1;
+  min-height: 40px; white-space: nowrap; }
+.nav-menu-btn:hover { border-color: var(--blue, #3b82f6); }
+.nav-menu-btn svg { width: 15px; height: 15px; }
+.nav-menu-panel { display: none; position: absolute; top: 100%; right: 12px; left: 12px;
+  z-index: 2000; background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036);
+  border-radius: 12px; padding: 8px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+.nav-menu-panel.open { display: block; }
+.nav-menu-panel a { display: block; padding: 13px 14px; border-radius: 8px; text-decoration: none;
+  color: var(--txt1, #eaf3ff); font-weight: 600; font-size: 15px; min-height: 44px; }
+.nav-menu-panel a:hover, .nav-menu-panel a:focus-visible { background: rgba(255,255,255,.06); }
+@media (max-width: 1024px) {
+  .nav-menu-btn { display: inline-flex; order: 2; }
+  /* Hide the individual links; the panel carries them. Covers both templates. */
+  .nav-actions > a:not(.nav-buy):not(.nav-portal), .nav-actions > .nav-link { display: none !important; }
+}
+</style>
+
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PML7VTJ9"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo"><a href="/"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></a></div>
+    <div class="nav-actions"><a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Home</a><a href="/market-data" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Market Data</a><a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a><a href="/trader" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Trader</a><a href="/options-101" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Options 101</a><a href="/0dte" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">0DTE Guide</a><a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a><div class="nav-more"><button type="button" class="nav-more-btn" aria-expanded="false" aria-controls="nav-more-panel" onclick="novoMoreToggle(event)">More<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="nav-more-panel" id="nav-more-panel"><div class="nmg"><h4>Learn</h4><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a><a href="/tradingview">TradingView script</a><a href="/track-record">The track record</a><a href="/positioning">Futures positioning</a></div><div class="nmg"><h4>Free data &amp; tools</h4><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a></div><div class="nmg"><h4>Compare</h4><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a></div><div class="nmg"><h4>NoVo</h4><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div></div></div><button type="button" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-panel" onclick="novoNavToggle(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button><div class="nav-menu-panel" id="nav-menu-panel"><a href="/">Home</a><a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/trader">NoVo Trader</a><a href="/options-101">Options 101</a><a href="/0dte">0DTE Guide</a><a href="/journal/">The Journal</a><div class="grp">Learn</div><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a><div class="grp">Free data &amp; tools</div><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a><div class="grp">Compare</div><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a><div class="grp">NoVo</div><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div><a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;text-decoration:none;display:inline-flex;align-items:center;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a>
+      <a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
+    </div>
+  </div>
+</nav>
+<!--sitewide-ticker--><div class="ticker"><div class="ticker-row"><span class="ticker-tag"><span class="dot"></span>US Markets</span><div class="ticker-track"><div class="ticker-inner"><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span><span class="tick"><span class="t-name">SPY</span><span class="t-val">746.74</span><span class="t-chg up">+0.78%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,27 28,29 42,20 56,22 70,13 84,15 100,6"/></svg></span><span class="tick"><span class="t-name">VIX</span><span class="t-val">15.81</span><span class="t-chg dn">-2.11%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,12 14,15 28,13 42,20 56,19 70,26 84,25 100,32"/></svg></span><span class="tick"><span class="t-name">S&amp;P 500</span><span class="t-val">7,483</span><span class="t-chg up">+0.01%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,24 14,22 28,24 42,20 56,21 70,18 84,20 100,16"/></svg></span><span class="tick"><span class="t-name">Nasdaq</span><span class="t-val">25,833</span><span class="t-chg dn">-0.80%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,14 14,16 28,13 42,22 56,20 70,25 84,28 100,30"/></svg></span><span class="tick"><span class="t-name">Russell</span><span class="t-val">2,996</span><span class="t-chg dn">-0.55%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#f43f5e" stroke-width="2" points="0,16 14,14 28,18 42,17 56,22 70,21 84,26 100,28"/></svg></span><span class="tick"><span class="t-name">Gold</span><span class="t-val">4,187</span><span class="t-chg up">+1.49%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,30 14,26 28,27 42,19 56,18 70,12 84,10 100,5"/></svg></span><span class="tick"><span class="t-name">BTC</span><span class="t-val">62,172</span><span class="t-chg up">+0.77%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,28 14,24 28,26 42,18 56,20 70,14 84,12 100,9"/></svg></span><span class="tick"><span class="t-name">Crude</span><span class="t-val">68.78</span><span class="t-chg up">+0.13%</span><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,22 14,20 28,22 42,19 56,20 70,17 84,18 100,15"/></svg></span></div></div>
+<div id="main" tabindex="-1"></div></div></div>
+
+<div class="container hero" style="padding-bottom:8px;">
+  <div class="lbl">Free &middot; public domain</div>
+  <h1 style="font-size:clamp(26px,4vw,40px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.12;margin:0 0 12px;">Futures positioning &mdash; who is actually long</h1>
+  <p style="font-size:15.5px;line-height:1.7;color:var(--txt2);max-width:800px;margin:0;">The dealer map reads options positioning intraday. This reads futures positioning weekly: how speculators and hedgers are actually placed in S&amp;P, Nasdaq, Russell and VIX futures, straight from the CFTC's Commitments of Traders.</p>
+</div>
+
+<div class="container sec">
+  <div id="pos-meta" class="muted" style="font-size:13px;margin-bottom:14px;"></div>
+  <div id="pos-grid" class="hm-grid"><div class="muted">Loading&hellip;</div></div>
+
+  <div class="card" style="margin-top:18px;">
+    <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read it</h2>
+    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;"><b style="color:var(--txt1);">Speculators</b> (the CFTC calls them non-commercial) are the trend-following money &mdash; funds taking a view. <b style="color:var(--txt1);">Hedgers</b> (commercial) are the other side, using futures against a real book. The two nets are close to mirror images by construction, so the useful signal is the direction of travel, not the level.</p>
+    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">VIX is the one to read backwards: speculators are structurally short VIX futures, so a short position getting <em>less</em> short is the crowd paying up for protection.</p>
+    <p style="font-size:13px;color:var(--txt3);margin:0;">The CFTC publishes on Friday afternoon for the prior Tuesday, so this is days old by design &mdash; that is the dataset, not a delay NoVo added. It is public-domain U.S. government data, unlike most market data on the web.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var grid = document.getElementById('pos-grid'), meta = document.getElementById('pos-meta');
+  function n0(v){ return (v == null) ? '—' : Number(v).toLocaleString(); }
+  function spark(points, key){
+    var vals = points.map(function(p){ return p[key]; }).filter(function(v){ return v != null; });
+    if (vals.length < 2) return '';
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var w = 150, h = 34, rng = (hi - lo) || 1;
+    var d = vals.map(function(v, i){
+      var x = (i / (vals.length - 1)) * w, y = h - ((v - lo) / rng) * h;
+      return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+    var zeroY = (lo <= 0 && hi >= 0) ? (h - ((0 - lo) / rng) * h) : null;
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true" '
+         + 'style="width:100%;height:34px;display:block;margin-top:8px;">'
+         + (zeroY != null ? '<line x1="0" y1="' + zeroY.toFixed(1) + '" x2="' + w + '" y2="' + zeroY.toFixed(1)
+              + '" stroke="rgba(125,151,184,.35)" stroke-width="1" stroke-dasharray="3 3"/>' : '')
+         + '<path d="' + d + '" fill="none" stroke="#22d3ee" stroke-width="1.8"/></svg>';
+  }
+  fetch('/api/positioning', { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(d){
+    if (!d || !d.ok || !d.markets.length) {
+      grid.innerHTML = '<div class="muted">Positioning is unavailable right now.</div>'; return;
+    }
+    meta.textContent = 'CFTC Commitments of Traders · report dated ' + d.markets[0].asof + ' · public domain.';
+    grid.innerHTML = d.markets.map(function(m){
+      var up = m.specChange != null && m.specChange > 0;
+      var chg = m.specChange == null ? '' :
+        '<span style="color:' + (up ? 'var(--green)' : 'var(--red)') + ';font-weight:800;">'
+        + (up ? '+' : '') + n0(m.specChange) + '</span> on the week';
+      return '<div class="hm-sec">'
+        + '<div class="hm-head"><span class="hm-name">' + m.label + (m.etf ? ' <span class="muted" style="font-weight:600;">' + m.etf + '</span>' : '') + '</span></div>'
+        + '<div style="font-size:12px;color:var(--txt3);letter-spacing:.5px;text-transform:uppercase;">Speculators net</div>'
+        + '<div style="font-size:20px;font-weight:900;color:' + (m.specNet >= 0 ? 'var(--green)' : 'var(--red)') + ';">'
+        + (m.specNet > 0 ? '+' : '') + n0(m.specNet) + '</div>'
+        + '<div style="font-size:12px;color:var(--txt2);margin-top:2px;">' + chg + '</div>'
+        + spark(m.points, 'specNet')
+        + '<div style="font-size:12px;color:var(--txt3);margin-top:8px;">Hedgers net <b style="color:var(--txt2);">'
+        + (m.commNet > 0 ? '+' : '') + n0(m.commNet) + '</b></div>'
+        + '<div style="font-size:11.5px;color:var(--txt3);margin-top:2px;">Open interest ' + n0(m.openInterest) + '</div>'
+        + '</div>';
+    }).join('');
+  }).catch(function(){ grid.innerHTML = '<div class="muted">Positioning is unavailable right now.</div>'; });
+})();
+</script>
+
+
+<!-- FOOTER -->
+<div class="foot"><div class="container">
+  <div style="margin-bottom:7px;"><a href="/">Home</a> &middot; <a href="/analyst">NoVo Analyst</a> &middot; <a href="/trader">NoVo Trader</a> &middot; <a href="/plans">Plans</a> &middot; <a href="/market-data">Market Data</a> &middot; <a href="/market-data/spy">SPY gamma</a> &middot; <a href="/market-data/qqq">QQQ gamma</a> &middot; <a href="/market-data/iwm">IWM gamma</a></div><div style="margin-bottom:7px;"><a href="/options-101">Options 101</a> &middot; <a href="/0dte">0DTE Guide</a> &middot; <a href="/learn/options-basics-greeks">Basics &amp; the Greeks</a> &middot; <a href="/learn/0dte-options">0DTE options</a> &middot; <a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a> &middot; <a href="/learn/volatility-market-structure">Volatility &amp; structure</a> &middot; <a href="/learn/risk-management">Risk management</a> &middot; <a href="/journal/">The Journal</a> &middot; <a href="/options-glossary">Glossary</a> &middot; <a href="/tradingview">TradingView script</a><a href="/track-record">The track record</a><a href="/positioning">Futures positioning</a></div><div style="margin-bottom:7px;"><a href="/tools/expected-move">Expected Move</a> &middot; <a href="/tools/max-pain-calculator">Max Pain</a> &middot; <a href="/tools/position-size-calculator">Position Size</a> &middot; <a href="/tools/options-profit-calculator">Options P&amp;L</a> &middot; <a href="/tools/options-greeks-calculator">Greeks</a> &middot; <a href="/economic-calendar">Economic Calendar</a> &middot; <a href="/market-holidays">Market Holidays</a></div><div style="margin-bottom:7px;"><a href="/compare/best-0dte-tools">Best 0DTE Tools</a> &middot; <a href="/compare/best-gamma-gex-tools">Best GEX Tools</a> &middot; <a href="/compare/novo-vs-spotgamma">vs SpotGamma</a> &middot; <a href="/compare/novo-vs-unusual-whales">vs Unusual Whales</a> &middot; <a href="/compare/novo-vs-option-alpha">vs Option Alpha</a></div><div style="margin-bottom:7px;"><a href="/about">About</a> &middot; <a href="/faq">FAQ</a> &middot; <a href="/help">Help</a> &middot; <a href="/getting-started">Getting Started</a> &middot; <a href="/security">Security</a> &middot; <a href="/analyst/archive">Read Archive</a> &middot; <a href="/analyst/methodology">Methodology</a></div><div style="margin-bottom:7px;"><a href="/terms">Terms</a> &middot; <a href="/risk-disclosure">Risk</a> &middot; <a href="/refund-policy">Refunds</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/license">License</a></div><div style="margin-bottom:7px;"><a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Discord</a> &middot; <a href="https://www.reddit.com/user/novo_algotrades" target="_blank" rel="noopener">Reddit</a> &middot; <a href="https://stocktwits.com/0dte_NoVo" target="_blank" rel="noopener">StockTwits</a> &middot; <a href="https://x.com/0dte_NoVo" target="_blank" rel="noopener">X</a> &middot; <a href="mailto:general@novo-options.trade">Contact</a></div>
+  <p style="max-width:820px;line-height:1.6;">Market data on this page is delayed and provided for general information only — it is not financial advice or a recommendation to trade. VIX/VXN/RVX are ~15-minute delayed (CBOE); index values use E-mini futures. Options trading involves significant risk of loss. © 2026 NoVo Options Trading.</p>
+</div></div>
+
+<script>
+
+function _f(id){return parseFloat(document.getElementById(id).value);}
+function _money(x){return '$'+x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function calcEM(){
+  var p=_f('p'), iv=_f('iv'), d=_f('d');
+  var el=function(id){return document.getElementById(id);};
+  if(!(p>0)||!(iv>0)||!(d>0)){ ['em-move','em-range','em-2s','em-strad'].forEach(function(i){el(i).textContent='\u2014';}); el('em-pct').textContent=''; return; }
+  var t=d/365;
+  var move=p*(iv/100)*Math.sqrt(t);
+  var pct=move/p*100;
+  el('em-move').textContent='\u00b1'+_money(move);
+  el('em-pct').textContent='\u00b1'+pct.toFixed(2)+'% of price, over '+d+' day'+(d==1?'':'s');
+  el('em-range').textContent=_money(p-move)+'  \u2013  '+_money(p+move);
+  el('em-2s').textContent=_money(p-2*move)+' \u2013 '+_money(p+2*move);
+  // The ATM straddle price is the market's own EM proxy: EM ~= straddle x 0.85, so straddle ~= EM / 0.85.
+  el('em-strad').textContent='\u2248'+_money(move/0.85);
+}
+calcEM();
+
+</script>
+<script src="/ticker-live.js" defer></script>
+<script defer src="/chat-widget.js"></script>
+<script>
+function novoNavToggle(e){
+  if(e){e.stopPropagation();}
+  var p=document.getElementById('nav-menu-panel'),b=document.querySelector('.nav-menu-btn');
+  if(!p||!b)return;
+  var open=p.classList.toggle('open');
+  b.setAttribute('aria-expanded',open?'true':'false');
+  b.setAttribute('aria-label',open?'Close menu':'Open menu');
+}
+document.addEventListener('click',function(ev){
+  var p=document.getElementById('nav-menu-panel');
+  if(p&&p.classList.contains('open')&&!p.contains(ev.target)&&!ev.target.closest('.nav-menu-btn')){novoNavToggle();}
+});
+document.addEventListener('keydown',function(ev){
+  var p=document.getElementById('nav-menu-panel');
+  if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoNavToggle();document.querySelector('.nav-menu-btn').focus();}
+});
+</script>
+<script>
+function novoMoreToggle(e){
+  if(e){e.stopPropagation();}
+  var p=document.getElementById('nav-more-panel'),b=document.querySelector('.nav-more-btn');
+  if(!p||!b)return;
+  var open=p.classList.toggle('open');
+  b.setAttribute('aria-expanded',open?'true':'false');
+}
+document.addEventListener('click',function(ev){
+  var p=document.getElementById('nav-more-panel');
+  if(p&&p.classList.contains('open')&&!p.contains(ev.target)&&!ev.target.closest('.nav-more-btn')){novoMoreToggle();}
+});
+document.addEventListener('keydown',function(ev){
+  var p=document.getElementById('nav-more-panel');
+  if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoMoreToggle();document.querySelector('.nav-more-btn').focus();}
+});
+</script>
+</body>
+</html>
