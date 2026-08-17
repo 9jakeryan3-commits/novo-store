@@ -118,13 +118,13 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* bottom block: desktop = gamma | The Line on top row, index strip full-width below.
      mobile reflow = gamma → strip (3 ticker boxes) → The Line, so The Line sits UNDER the boxes. */
   .lv-bottom { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-top: 16px; align-items: stretch; }
-  .lv-bottom .b-gamma { grid-column: 1; grid-row: 1; }
-  .lv-bottom .b-line  { grid-column: 2; grid-row: 1; }
+  
+  .lv-bottom .b-line  { grid-column: 1 / -1; grid-row: 1; }
   .lv-bottom .b-heat { grid-column: 1 / -1; grid-row: 3; }
   .lv-bottom .b-strip { grid-column: 1 / -1; grid-row: 2; margin: 0; }
   @media (max-width: 900px) {
     .lv-bottom { grid-template-columns: 1fr; }
-    .lv-bottom .b-gamma { grid-column: 1; grid-row: auto; order: 1; }
+    
     .lv-bottom .b-strip { grid-column: 1; grid-row: auto; order: 2; }
     .lv-bottom .b-line  { grid-column: 1; grid-row: auto; order: 3; }
   }
@@ -233,6 +233,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- HERO: chart | dealer positioning (balanced two-up) -->
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
+        <h2 style="margin-top:16px;">Gamma profile by strike</h2>
+        <canvas id="profile" height="200" style="width:100%;"></canvas>
         <div class="lv-fear" id="d-fear" style="margin-top:auto;padding-top:16px;">
           <div class="fear-hd"><span class="fear-lbl" id="fear-lbl">Fear gauge · VIX</span><span class="fear-tag" id="fear-tag">&mdash;</span></div>
           <div class="fear-row"><span class="fear-vix" id="fear-vix">&mdash;</span><span class="fear-pct" id="fear-pct"></span></div>
@@ -288,7 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- gamma profile · The Line · index strip — desktop: gamma|line row then strip full-width;
          mobile reflow: gamma → strip (3 ticker boxes) → The Line (so The Line sits under the boxes) -->
     <div class="lv-bottom">
-      <div class="lv-card b-gamma"><h2>Gamma profile by strike</h2><canvas id="profile" height="200" style="width:100%;"></canvas></div>
+      
       <div class="lv-card b-heat"><h2>Gamma by strike, through the session</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 8px;">Where dealer gamma built and drained today. Green = long gamma, red = short. <span id="gh-note"></span></div><canvas id="gheat" height="260" style="width:100%;"></canvas></div><div class="lv-card b-line"><h2>'The Line' — <span id="ln-tk">SPY</span> level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time level-break playbooks for the ticker you trade &mdash; SPY, QQQ and IWM each read their own dealer map (QQQ tracks SPY loosely; IWM, the small-caps, is its own market).</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next level event…</li></ul></div>
       <div class="lv-strip b-strip" id="strip"></div>
     </div>
