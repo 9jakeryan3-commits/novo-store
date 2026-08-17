@@ -412,6 +412,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       })();
       </script>
 
+    <div class="card" id="tk-hist" style="margin-top:16px;">
+      <div class="lbl">Where the levels have been</div>
+      <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">SPY dealer levels, recent sessions</h2>
+      <p class="sub" style="margin:0 0 10px;font-size:13px;">The same delayed levels, with a past &mdash; gamma flip, call wall and put wall against spot. <span id="lh-note" class="muted"></span></p>
+      <canvas id="lh-canvas" height="240" style="width:100%;"></canvas>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--txt2);">
+        <span><span style="display:inline-block;width:16px;height:3px;background:var(--cyan);vertical-align:middle;"></span> Gamma flip</span>
+        <span><span style="display:inline-block;width:16px;height:3px;background:#34d399;vertical-align:middle;"></span> Call wall</span>
+        <span><span style="display:inline-block;width:16px;height:3px;background:#f87171;vertical-align:middle;"></span> Put wall</span>
+        <span><span style="display:inline-block;width:16px;height:3px;background:rgba(234,243,255,.75);vertical-align:middle;"></span> Spot</span>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      var TKH = 'SPY';
+      var cv = document.getElementById('lh-canvas'), note = document.getElementById('lh-note');
+      if (!cv) return;
+      function draw(pts){
+        var dpr = window.devicePixelRatio || 1, W = cv.offsetWidth, H = 240;
+        cv.style.height = H + 'px'; cv.width = W * dpr; cv.height = H * dpr;
+        var c = cv.getContext('2d'); c.scale(dpr, dpr); c.clearRect(0, 0, W, H);
+        if (!pts || pts.length < 2) {
+          if (note) note.textContent = pts && pts.length ? 'building \u2014 one point every 15 minutes.' : 'building \u2014 the first points land within the hour.';
+          c.fillStyle = 'rgba(125,151,184,.55)'; c.font = '12px Inter, sans-serif'; c.textAlign = 'center';
+          c.fillText('Collecting the level history\u2026', W / 2, H / 2);
+          return;
+        }
+        if (note) note.textContent = pts.length + ' points, delayed.';
+        var vals = [];
+        pts.forEach(function(p){ ['s','f','c','p'].forEach(function(k){ if (p[k] != null) vals.push(p[k]); }); });
+        var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+        if (!(hi > lo)) return;
+        var pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+        var padT = 10, padB = 20, axisW = 46;
+        var plotL = axisW, plotW = W - axisW - 8, plotH = H - padT - padB;
+        function x(i){ return plotL + (i / (pts.length - 1)) * plotW; }
+        function y(v){ return padT + (hi - v) / (hi - lo) * plotH; }
+        c.strokeStyle = 'rgba(255,255,255,.06)'; c.lineWidth = 1;
+        c.font = '10px Inter, sans-serif'; c.textAlign = 'right'; c.textBaseline = 'middle';
+        for (var g = 0; g <= 4; g++) {
+          var vv = lo + (hi - lo) * (g / 4), yy = y(vv);
+          c.beginPath(); c.moveTo(plotL, yy + 0.5); c.lineTo(plotL + plotW, yy + 0.5); c.stroke();
+          c.fillStyle = 'rgba(125,151,184,.75)'; c.fillText(vv.toFixed(0), axisW - 8, yy);
+        }
+        function line(key, colour, width){
+          c.strokeStyle = colour; c.lineWidth = width; c.beginPath();
+          var started = false;
+          pts.forEach(function(p, i){
+            if (p[key] == null) { started = false; return; }
+            if (!started) { c.moveTo(x(i), y(p[key])); started = true; }
+            else c.lineTo(x(i), y(p[key]));
+          });
+          c.stroke();
+        }
+        line('s', 'rgba(234,243,255,.75)', 1.5);
+        line('f', '#22d3ee', 2);
+        line('c', '#34d399', 2);
+        line('p', '#f87171', 2);
+        c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = 'rgba(125,151,184,.75)';
+        var marks = Math.min(5, pts.length);
+        for (var m = 0; m < marks; m++) {
+          var si = Math.round(m * (pts.length - 1) / (marks - 1 || 1));
+          var dt = new Date(pts[si].t);
+          c.fillText((dt.getMonth() + 1) + '/' + dt.getDate(), x(si), H - padB + 5);
+        }
+      }
+      var CACHE = null;
+      fetch('/api/levels?history=' + TKH, { cache: 'no-store' })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ CACHE = (d && d.points) || []; draw(CACHE); })
+        .catch(function(){ draw([]); });
+      window.addEventListener('resize', function(){ if (CACHE) draw(CACHE); });
+    })();
+    </script>
+
     <div class="card fear-card" id="tk-fear" style="align-self:center;">
       <div class="fh"><span class="ftk">SPY · VIX</span><span class="fsym">VIX</span></div>
       <div class="fval">—</div>
