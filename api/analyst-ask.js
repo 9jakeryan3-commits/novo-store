@@ -18,6 +18,15 @@
 const { kv } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
+const { declarations, makeExecutors } = require('./_lib/tools.js');
+
+// Three rounds is enough for the deepest real chain — look up the map, notice a gap, fill it,
+// answer — and bounded so a question cannot spend a subscriber's wait on the model talking to
+// itself. The per-round budget matters more than the round count: a wedged upstream must return
+// an error the model can speak to before the serverless function is killed with nothing on screen.
+const MAX_ROUNDS = 3;
+const MAX_CALLS_PER_ROUND = 4;
+const ROUND_BUDGET_MS = 4000;
 
 // Same 7-day HMAC token the live dashboard already carries. Every question costs a retrieval
 // plus a model call, so this is subscriber-only — not because the answer is secret, but
@@ -190,8 +199,15 @@ HARD BOUNDARIES — never bend these
 - Never hype. No urgency, no "don't miss this", no guarantees.
 - Never disparage another tool or person. If asked to compare, describe what NoVo does and stop.
 
+LOOKING THINGS UP
+You can call read-only lookups for what you were not handed: the live dealer read for any ticker, today's strike-by-strike gamma, a ticker's recent sessions, the archive, a quote, the economic calendar, an earnings date, recent headlines. Use them when the answer turns on something you do not already have in front of you — do not call one to confirm a number that is already in MARKET DATA.
+- Ask for what you need in one go rather than one lookup at a time.
+- A lookup that comes back with an error or nothing is an answer: say you do not have it. Never fill that gap from memory.
+- Headlines are claims, not facts. Attribute them — "the wires are saying" — and never convert one into a number.
+- A quote is a price, not a level. Levels come from the dealer map.
+
 GROUNDING
-- Every number you state comes from MARKET DATA. If it is not there, say you do not have it. Never estimate a level, never invent a statistic.
+- Every number you state comes from MARKET DATA or from a lookup you actually ran in this conversation. If it is in neither, say you do not have it. Never estimate a level, never invent a statistic.
 - When you lean on logged history, state the session count. A few dozen sessions is a count, not "usually".
 - Use REFERENCE for mechanics and cite the source titles you actually drew on.
 - Separate what is on the map right now from what tends to be true about setups like it.
@@ -244,26 +260,72 @@ module.exports = async (req, res) => {
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 
-    const j = await callModel(`${MODEL}:generateContent`, {
-      systemInstruction: { parts: [{ text: SYSTEM }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.25,
-        maxOutputTokens: 1600,
-        // This model thinks by default and the hidden reasoning bills against maxOutputTokens,
-        // so on a tight budget the thinking eats the allowance and the visible answer comes back
-        // as a truncated fragment. The engine's llm_client hit this and fixed it the same way:
-        // control thinking explicitly rather than inheriting the model default.
-        thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
-      },
-    });
-    // Join every text part and drop any the model marked as thought — reading parts[0] alone
-    // returns a reasoning fragment ("Explain the mechanism: ...") whenever a thought leads.
-    const answer = (j?.candidates?.[0]?.content?.parts || [])
-      .filter((p) => p && p.text && !p.thought)
-      .map((p) => p.text)
-      .join('')
-      .trim();
+    // ── the tool loop ──────────────────────────────────────────────────────────────
+    // The grounding above already answers most questions on its own. The loop exists for the ones
+    // it cannot reach: a catalyst behind a move, an earnings date driving IV, how gamma built
+    // through the session. The model chooses from a fixed, server-owned, read-only set; this runs
+    // them and hands the results back as data. It still never executes anything and never computes
+    // a number — the market/account line is enforced by what is absent from the tool list.
+    const exec = makeExecutors({ index: idx, embed, search });
+    const contents = [{ role: 'user', parts: [{ text: prompt }] }];
+    const ledger = [];
+    let answer = '';
+
+    for (let round = 0; round < MAX_ROUNDS; round++) {
+      const j = await callModel(`${MODEL}:generateContent`, {
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents,
+        tools: [{ functionDeclarations: declarations }],
+        // The final round is forced to NONE so the loop always ends in prose. Left on AUTO, the
+        // model can keep asking for one more lookup until the function is killed mid-chain, which
+        // a subscriber sees as the analyst simply never answering.
+        toolConfig: { functionCallingConfig: { mode: round < MAX_ROUNDS - 1 ? 'AUTO' : 'NONE' } },
+        generationConfig: {
+          temperature: 0.25,
+          maxOutputTokens: 1600,
+          // This model thinks by default and the hidden reasoning bills against maxOutputTokens,
+          // so on a tight budget the thinking eats the allowance and the visible answer comes back
+          // as a truncated fragment. The engine's llm_client hit this and fixed it the same way:
+          // control thinking explicitly rather than inheriting the model default.
+          thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+        },
+      });
+      const parts = j?.candidates?.[0]?.content?.parts || [];
+      const calls = parts.filter((p) => p && p.functionCall).slice(0, MAX_CALLS_PER_ROUND);
+
+      if (!calls.length) {
+        // Join every text part and drop any the model marked as thought — reading parts[0] alone
+        // returns a reasoning fragment ("Explain the mechanism: ...") whenever a thought leads.
+        answer = parts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+        break;
+      }
+
+      // The model turn has to be echoed back verbatim, function calls included, or the next
+      // request carries responses to calls that are no longer in the transcript.
+      contents.push({ role: 'model', parts });
+
+      const started = Date.now();
+      const responses = await Promise.all(calls.map(async (p) => {
+        const name = p.functionCall.name;
+        const args = p.functionCall.args || {};
+        let out;
+        if (typeof exec[name] !== 'function') {
+          out = { error: `no such tool: ${name}` };
+        } else {
+          try {
+            const left = Math.max(1200, ROUND_BUDGET_MS - (Date.now() - started));
+            out = await Promise.race([
+              exec[name](args),
+              new Promise((r) => setTimeout(() => r({ error: `${name} timed out` }), left)),
+            ]);
+          } catch (e) { out = { error: `${name} failed` }; }
+        }
+        ledger.push({ tool: name, args, ok: !(out && out.error) });
+        return { functionResponse: { name, response: (out && typeof out === 'object') ? out : { value: out } } };
+      }));
+      contents.push({ role: 'user', parts: responses });
+    }
+
     if (!answer) return res.status(502).json({ error: 'no answer' });
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
@@ -279,6 +341,9 @@ module.exports = async (req, res) => {
       ok: true,
       answer: clean,
       sources: hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
+      // The ledger is what the analyst actually looked up to write this, failures included. It
+      // is the difference between an answer you can check and an answer you have to trust.
+      lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
       indexBuilt: idx.built || null,
     });
   } catch (e) {

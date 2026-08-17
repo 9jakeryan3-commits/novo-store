@@ -946,13 +946,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (!d.ok) { add('', d.error || 'NoVo is unavailable right now.'); }
       else {
         add('', d.answer);
+        var log = document.getElementById('novo-ask-log');
+        // What it looked up, then what it read. A failed lookup is shown too \u2014 that is the
+        // difference between an answer you can check and one you have to take on faith.
+        if (d.lookups && d.lookups.length) {
+          var names = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
+            get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
+            get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date',
+            search_news:'headlines' };
+          var seen = {}, parts = [];
+          d.lookups.forEach(function(l){
+            var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
+            if (seen[n]) return; seen[n] = 1;
+            parts.push(l.ok ? n : n + ' (no data)');
+          });
+          if (parts.length) {
+            var k = document.createElement('div'); k.className = 'src';
+            k.textContent = 'Checked: ' + parts.join(' \u00b7 ');
+            log.appendChild(k);
+          }
+        }
         if (d.sources && d.sources.length) {
-          var log = document.getElementById('novo-ask-log');
           var s = document.createElement('div'); s.className = 'src';
           s.textContent = 'Sources: ' + d.sources.map(function(x){
             return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' \u00b7 ');
-          log.appendChild(s); log.scrollTop = log.scrollHeight;
+          log.appendChild(s);
         }
+        log.scrollTop = log.scrollHeight;
       }
     } catch(e){ thinking.remove(); add('', 'NoVo is unavailable right now.'); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
