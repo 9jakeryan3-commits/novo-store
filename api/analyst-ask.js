@@ -102,20 +102,10 @@ async function accessToken() {
   return _tok;
 }
 
-// Vertex when the service account is present; the AI Studio key otherwise. Vertex is
-// preferred — it is where every other NoVo product's AI runs — but the feature should not be
-// blocked on moving a credential, and this picks Vertex up automatically once it is set.
+// Vertex only. The AI Studio key it used to fall back to is retired, so the fallback could
+// never succeed — all it did was turn a clear Vertex auth failure into a vague one.
 async function callModel(path, body) {
-  if (process.env.GOOGLE_VERTEX_SA_JSON) {
-    const v = await vertex(path, body);
-    if (v) return v;
-  }
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return null;
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${path}?key=${key}`,
-    { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) { console.error('[analyst-ask] genai', r.status, (await r.text()).slice(0, 200)); return null; }
-  return r.json();
+  return vertex(path, body);
 }
 
 async function vertex(path, body) {
@@ -131,21 +121,12 @@ async function vertex(path, body) {
 
 async function embed(text) {
   let v = null;
-  if (process.env.GOOGLE_VERTEX_SA_JSON) {
+  {
     const j = await vertex('gemini-embedding-001:predict', {
       instances: [{ content: text, task_type: 'RETRIEVAL_QUERY' }],
       parameters: { outputDimensionality: DIM },
     });
     v = j?.predictions?.[0]?.embeddings?.values || null;
-  }
-  if (!v && process.env.GEMINI_API_KEY) {
-    const j = await callModel('gemini-embedding-001:embedContent', {
-      model: 'models/gemini-embedding-001',
-      content: { parts: [{ text }] },
-      taskType: 'RETRIEVAL_QUERY',
-      outputDimensionality: DIM,
-    });
-    v = j?.embedding?.values || null;
   }
   if (!v) return null;
   let n = 0; for (const x of v) n += x * x; n = Math.sqrt(n) || 1;

@@ -6384,4 +6384,23 @@
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
+
+  <url>
+    <loc>https://novo-options.trade/journal/what-an-ai-market-analyst-does.html</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/where-ai-has-a-real-edge-in-market-analysis.html</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/future-of-ai-market-analysis.html</loc>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
