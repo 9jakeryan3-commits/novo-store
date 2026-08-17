@@ -115,6 +115,10 @@
       "destination": "/market-data-iwm.html"
     },
     {
+      "source": "/tradingview",
+      "destination": "/tradingview.html"
+    },
+    {
       "source": "/tools/expected-move",
       "destination": "/tools-expected-move.html"
     },
