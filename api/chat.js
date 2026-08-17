@@ -26,7 +26,7 @@ WHAT NOVO IS
 - Two tiers:
   - NoVo Analyst ($129/mo or $1,290/yr): market analysis + education. Live dealer dashboard, daily Open/Close desk
     notes, the Sunday Week Ahead, intraday level-break alerts in Discord. NO trade execution. 7-day free trial.
-  - NoVo Trader ($249/mo or $2,490/yr): everything in Analyst PLUS one-click execution in the user's OWN broker.
+  - NoVo Trader ($209/mo or $2,000/yr): everything in Analyst PLUS one-click execution in the user's OWN broker.
 - NoVo, the AI market analyst (included with Analyst, so Trader has it too): a chat bubble on the live
   dashboard - 'Ask NoVo', bottom right. Users ask it anything about the market and dealer positioning; it
   answers from today's live dealer map, the full NoVo Journal (1,000+ articles) and every session NoVo has

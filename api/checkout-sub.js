@@ -28,10 +28,10 @@ module.exports = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      // Trader $249/mo (2026-08-16). Hardcoded to the $249 price ID. The old $199 price stays live in Stripe
-      // so existing subscribers keep $199 for life (price-for-life) — only new checkouts hit $249. Safe to
-      // commit: a Stripe price ID is not a secret. Env override STRIPE_PRICE_SUB_ID_169 wins if set.
-      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_ID_169 || 'price_1U59pFApyfMAkbeEdN60riuh'), quantity: 1 }],
+      // Trader $209/mo (2026-08-16). Hardcoded to the $209 price ID. The old $199 price stays live in Stripe
+      // so existing subscribers keep $199 for life (price-for-life) — only new checkouts hit $209. Safe to
+      // commit: a Stripe price ID is not a secret. Env override STRIPE_PRICE_SUB_ID wins if set.
+      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_ID || 'price_1U5QCzApyfMAkbeEwzZTsogm'), quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,
