@@ -42,7 +42,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <meta name="twitter:title" content="0DTE Options Trading — The Complete SPY Scalping Guide">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <link rel="icon" href="/icon-192.png?v=7">
-<link rel="stylesheet" href="/journal/blog.css?v=12">
+<link rel="stylesheet" href="/journal/blog.css?v=13">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"0DTE Options Trading — The Complete SPY Scalping Guide","description":"Everything on trading SPY 0DTE options: mechanics, strike selection, risk, timing, spreads, brokers and tools — plain-English guides from the NoVo Journal.","url":"https://novo-options.trade/0dte","isPartOf":{"@type":"WebSite","name":"NoVo Options Trading","url":"https://novo-options.trade"},"publisher":{"@type":"Organization","name":"NoVo Options Trading","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}}}
 </script>
@@ -77,6 +77,27 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   }
 
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
+
+/* ---- mobile nav menu ---------------------------------------------------- */
+nav { position: relative; }
+.nav-menu-btn { display: none; align-items: center; gap: 7px; background: rgba(255,255,255,.04);
+  border: 1px solid var(--bdr, #2e3036); color: var(--txt1, #eaf3ff); font-weight: 700;
+  font-size: 13px; padding: 9px 13px; border-radius: 9px; cursor: pointer; line-height: 1;
+  min-height: 40px; white-space: nowrap; }
+.nav-menu-btn:hover { border-color: var(--blue, #3b82f6); }
+.nav-menu-btn svg { width: 15px; height: 15px; }
+.nav-menu-panel { display: none; position: absolute; top: 100%; right: 12px; left: 12px;
+  z-index: 2000; background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036);
+  border-radius: 12px; padding: 8px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+.nav-menu-panel.open { display: block; }
+.nav-menu-panel a { display: block; padding: 13px 14px; border-radius: 8px; text-decoration: none;
+  color: var(--txt1, #eaf3ff); font-weight: 600; font-size: 15px; min-height: 44px; }
+.nav-menu-panel a:hover, .nav-menu-panel a:focus-visible { background: rgba(255,255,255,.06); }
+@media (max-width: 1024px) {
+  .nav-menu-btn { display: inline-flex; order: 2; }
+  /* Hide the individual links; the panel carries them. Covers both templates. */
+  .nav-actions > a:not(.nav-buy):not(.nav-portal), .nav-actions > .nav-link { display: none !important; }
+}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"0DTE Options Trading","item":"https://novo-options.trade/0dte"}]}
@@ -91,10 +112,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <nav><div class="nav-inner">
   <a class="nav-logo" href="/"><img src="/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="439" height="184" decoding="async"></a>
-  <div class="nav-actions">
+  <div class="nav-actions"><a class="nav-link" href="/">Home</a>
     <a class="nav-link" href="/market-data">Market Data</a>
     <a class="nav-link" href="/trader">NoVo Trader</a> <a class="nav-link" href="/options-101">Options 101</a> <a class="nav-link" href="/journal/">The Journal</a> <a class="nav-link" href="/analyst">NoVo Analyst</a>
-    <a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a><a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+    <button type="button" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-panel" onclick="novoNavToggle(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button><div class="nav-menu-panel" id="nav-menu-panel"><a href="/">Home</a><a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/trader">NoVo Trader</a><a href="/options-101">Options 101</a><a href="/0dte">0DTE Guide</a><a href="/journal/">The Journal</a></div><a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a><a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
   </div>
 </div></nav>
 
@@ -347,5 +368,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script src="/ticker-live.js" defer></script>
 <script defer src="/chat-widget.js"></script>
+<script>
+function novoNavToggle(e){
+  if(e){e.stopPropagation();}
+  var p=document.getElementById('nav-menu-panel'),b=document.querySelector('.nav-menu-btn');
+  if(!p||!b)return;
+  var open=p.classList.toggle('open');
+  b.setAttribute('aria-expanded',open?'true':'false');
+  b.setAttribute('aria-label',open?'Close menu':'Open menu');
+}
+document.addEventListener('click',function(ev){
+  var p=document.getElementById('nav-menu-panel');
+  if(p&&p.classList.contains('open')&&!p.contains(ev.target)&&!ev.target.closest('.nav-menu-btn')){novoNavToggle();}
+});
+document.addEventListener('keydown',function(ev){
+  var p=document.getElementById('nav-menu-panel');
+  if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoNavToggle();document.querySelector('.nav-menu-btn').focus();}
+});
+</script>
 </body>
 </html>

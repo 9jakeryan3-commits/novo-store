@@ -275,3 +275,24 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 /* Skip link: off-screen until focused. */
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:var(--cyan);color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none;}
 .skip-link:focus{left:0;}
+
+/* ---- mobile nav menu ---------------------------------------------------- */
+nav { position: relative; }
+.nav-menu-btn { display: none; align-items: center; gap: 7px; background: rgba(255,255,255,.04);
+  border: 1px solid var(--bdr, #2e3036); color: var(--txt1, #eaf3ff); font-weight: 700;
+  font-size: 13px; padding: 9px 13px; border-radius: 9px; cursor: pointer; line-height: 1;
+  min-height: 40px; white-space: nowrap; }
+.nav-menu-btn:hover { border-color: var(--blue, #3b82f6); }
+.nav-menu-btn svg { width: 15px; height: 15px; }
+.nav-menu-panel { display: none; position: absolute; top: 100%; right: 12px; left: 12px;
+  z-index: 2000; background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036);
+  border-radius: 12px; padding: 8px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+.nav-menu-panel.open { display: block; }
+.nav-menu-panel a { display: block; padding: 13px 14px; border-radius: 8px; text-decoration: none;
+  color: var(--txt1, #eaf3ff); font-weight: 600; font-size: 15px; min-height: 44px; }
+.nav-menu-panel a:hover, .nav-menu-panel a:focus-visible { background: rgba(255,255,255,.06); }
+@media (max-width: 1024px) {
+  .nav-menu-btn { display: inline-flex; order: 2; }
+  /* Hide the individual links; the panel carries them. Covers both templates. */
+  .nav-actions > a:not(.nav-buy):not(.nav-portal), .nav-actions > .nav-link { display: none !important; }
+}
