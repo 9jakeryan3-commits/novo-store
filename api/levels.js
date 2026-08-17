@@ -33,6 +33,21 @@ module.exports = async (req, res) => {
   const r = kv();
   if (!r) return res.status(200).json({ ok: false, tickers: [], note: 'levels unavailable' });
 
+  // ?history=SPY — the same delayed levels, with a past. Written only when a snapshot is
+  // promoted to public, so it is exactly as delayed as the live public slot and exposes
+  // nothing new; it just stops the free tier being a single frozen frame.
+  const wantHist = String((req.query && req.query.history) || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (wantHist) {
+    let raw = [];
+    try { raw = await r.lrange(`public:levels:hist:${wantHist}`, 0, 599); } catch (_) { raw = []; }
+    const points = (raw || [])
+      .map((x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } })
+      .filter(Boolean)
+      .sort((a, b) => a.t - b.t);
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1800');
+    return res.status(200).json({ ok: true, ticker: wantHist, delayed: true, points });
+  }
+
   let snap = null;
   try { snap = await r.get(PUBLIC_KEY); } catch (_) { snap = null; }
   if (typeof snap === 'string') { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }

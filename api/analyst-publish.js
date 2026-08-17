@@ -522,6 +522,31 @@ function _publicLevels(state) {
   })).filter((t) => t.ticker && (t.flip || t.callWall || t.putWall));
 }
 
+
+// ── FREE history of the delayed dealer levels ──────────────────────────────────
+// Appended only at the moment a snapshot is promoted to public, so the history is exactly as
+// delayed as the live public slot — it adds no freshness, only a past. Nothing in the
+// competitive set gives a level history away, and this is NoVo's own computed analytic, so
+// there is no third-party data licence attached to it.
+const PUB_HIST_MAX = 600;                    // ~3 weeks of RTH promotions
+const PUB_HIST_TTL = 40 * 24 * 60 * 60;      // 40 days
+
+async function _appendPublicHistory(r, snap) {
+  try {
+    const rows = Array.isArray(snap && snap.tickers) ? snap.tickers : [];
+    const asof = Number(snap && snap.asof) || Date.now();
+    for (const t of rows) {
+      if (!t || !t.ticker) continue;
+      const key = `public:levels:hist:${String(t.ticker).toUpperCase()}`;
+      const point = { t: asof, s: t.spot, f: t.flip, c: t.callWall, p: t.putWall, e: t.expectedMove };
+      if (point.f == null && point.c == null && point.p == null) continue;
+      await r.lpush(key, JSON.stringify(point));
+      await r.ltrim(key, 0, PUB_HIST_MAX - 1);
+      await r.expire(key, PUB_HIST_TTL);
+    }
+  } catch (_) { /* history is best-effort; never break the promotion */ }
+}
+
 async function _promotePublicLevels(state) {
   try {
     const r = kv();
@@ -537,6 +562,7 @@ async function _promotePublicLevels(state) {
     // place. Until then nothing moves, so the public slot simply stays where it was.
     if (pending && pending.asof && (now - pending.asof) >= _PUBLIC_DELAY_MIN * 60000) {
       await r.set('public:levels', JSON.stringify(pending));
+      await _appendPublicHistory(r, pending);
       await r.set('public:levels:pending', JSON.stringify({ asof: now, session: state.session || null, tickers }));
     } else if (!pending) {
       await r.set('public:levels:pending', JSON.stringify({ asof: now, session: state.session || null, tickers }));
