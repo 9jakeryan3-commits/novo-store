@@ -32,7 +32,8 @@ module.exports = async (req, res) => {
       // Trader $2,000/yr (2026-08-16). Hardcoded to the $2,000 price ID. The old $1,990 price stays live so
       // existing annual subs keep $1,990 for life — only new checkouts hit $2,000. Price ID is not a secret.
       // Env override STRIPE_PRICE_SUB_YEARLY_ID wins if set.
-      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_YEARLY_ID || 'price_1U5QD0ApyfMAkbeEolFRb6gD'), quantity: 1 }],
+      // Trader $2,000/yr. Hardcoded on purpose - see checkout-sub.js.
+      line_items: [{ price: 'price_1U5QD0ApyfMAkbeEolFRb6gD', quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,

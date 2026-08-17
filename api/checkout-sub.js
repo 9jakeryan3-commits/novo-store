@@ -31,7 +31,9 @@ module.exports = async (req, res) => {
       // Trader $209/mo (2026-08-16). Hardcoded to the $209 price ID. The old $199 price stays live in Stripe
       // so existing subscribers keep $199 for life (price-for-life) — only new checkouts hit $209. Safe to
       // commit: a Stripe price ID is not a secret. Env override STRIPE_PRICE_SUB_ID wins if set.
-      line_items: [{ price: (process.env.STRIPE_PRICE_SUB_ID || 'price_1U5QCzApyfMAkbeEwzZTsogm'), quantity: 1 }],
+      // Trader $209/mo. Hardcoded on purpose: a stale STRIPE_PRICE_SUB_ID env override
+      // silently beat the committed value and could have billed a $1 test price.
+      line_items: [{ price: 'price_1U5QCzApyfMAkbeEwzZTsogm', quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,
