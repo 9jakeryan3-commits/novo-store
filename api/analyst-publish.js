@@ -478,6 +478,30 @@ const _PUBLIC_DELAY_MIN = 15;
 // token first. Never served by api/levels.js.
 const LIVE_LEVELS_KEY = 'analyst:live_levels';
 
+
+// ── ATM IV history, for IV rank ────────────────────────────────────────────────
+// IV rank is a percentile against the ticker's own recent range, so it needs a window to
+// rank against — and nothing was retaining one. The engine has published atm_iv per ticker
+// all along and it was used once and dropped. Stored as a hash keyed by session date, so a
+// publish every 60s writes one point per day rather than 390 of them. Starting the capture
+// now is what makes the feature real later; it cannot be backfilled.
+const IV_HIST_TTL = 400 * 24 * 60 * 60;   // a year of sessions, plus slack
+
+async function _recordAtmIv(state) {
+  try {
+    const r = kv();
+    if (!r) return;
+    const day = new Date().toISOString().slice(0, 10);
+    for (const i of (Array.isArray(state && state.indices) ? state.indices : [])) {
+      const iv = Number(i && i.atm_iv);
+      if (!i || !i.ticker || !Number.isFinite(iv) || iv <= 0) continue;
+      const key = `iv:hist:${String(i.ticker).toUpperCase()}`;
+      await r.hset(key, { [day]: Math.round(iv * 100) / 100 });
+      await r.expire(key, IV_HIST_TTL);
+    }
+  } catch (_) { /* best-effort: never break a publish over history */ }
+}
+
 async function _publishLiveLevels(state) {
   try {
     const r = kv();
@@ -646,6 +670,7 @@ async function _promotePublicLevels(state) {
       await put(_liveBlobKey(), JSON.stringify(state),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       await _publishLiveLevels(state);
+      await _recordAtmIv(state);
       await _promotePublicLevels(state);
       await _recordProfiles(state);
       return res.status(200).json({ ok: true });

@@ -48,6 +48,32 @@ module.exports = async (req, res) => {
     return res.status(200).json({ ok: true, ticker: wantHist, delayed: true, points });
   }
 
+  // ?iv=SPY — IV rank and percentile against the ticker's own retained range.
+  // NoVo's own computed ATM IV, ranked against NoVo's own history: no third-party feed,
+  // and no dealer-map field. Returns nulls with a day count while the window is still short.
+  const wantIv = String((req.query && req.query.iv) || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (wantIv) {
+    let h = null;
+    try { h = await r.hgetall(`iv:hist:${wantIv}`); } catch (_) { h = null; }
+    const days = Object.entries(h || {})
+      .map(([d, v]) => [d, Number(v)])
+      .filter(([, v]) => Number.isFinite(v) && v > 0)
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600');
+    if (days.length < 2) {
+      return res.status(200).json({ ok: true, ticker: wantIv, atmIv: days.length ? days[days.length - 1][1] : null,
+        ivRank: null, ivPercentile: null, days: days.length, note: 'building the window' });
+    }
+    const vals = days.map(([, v]) => v);
+    const cur = vals[vals.length - 1];
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    const rank = hi > lo ? Math.round(((cur - lo) / (hi - lo)) * 1000) / 10 : null;
+    const below = vals.filter((v) => v < cur).length;
+    const pct = Math.round((below / vals.length) * 1000) / 10;
+    return res.status(200).json({ ok: true, ticker: wantIv, atmIv: cur, ivRank: rank, ivPercentile: pct,
+      low: lo, high: hi, days: vals.length });
+  }
+
   let snap = null;
   try { snap = await r.get(PUBLIC_KEY); } catch (_) { snap = null; }
   if (typeof snap === 'string') { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
