@@ -232,6 +232,27 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   #cmt-list::-webkit-scrollbar-thumb { background:#39404a; border-radius:4px; }
   #cmt-list::-webkit-scrollbar-track { background:transparent; }
   #cmt-list .muted { padding:8px 2px; }
+
+/* ---- More dropdown (desktop) ---- */
+.nav-more { position: static; }
+.nav-more-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0;
+  color: var(--txt2, #8aacc8); font-weight: 600; font-size: 14px; padding: 10px 12px; cursor: pointer;
+  white-space: nowrap; font-family: inherit; }
+.nav-more-btn:hover { color: var(--txt1, #eaf3ff); }
+.nav-more-btn svg { width: 13px; height: 13px; }
+.nav-more-panel { display: none; position: absolute; top: 100%; right: 12px; z-index: 2000;
+  background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036); border-radius: 12px;
+  padding: 18px 20px; box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 6px 26px; max-width: 94vw; }
+.nav-more-panel.open { display: grid; }
+.nav-more-panel h4 { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); margin: 0 0 8px; font-weight: 800; }
+.nav-more-panel a { display: block; padding: 5px 0; font-size: 13.5px; font-weight: 600;
+  color: var(--txt2, #8aacc8); text-decoration: none; }
+.nav-more-panel a:hover, .nav-more-panel a:focus-visible { color: var(--cyan, #22d3ee); }
+.nav-menu-panel .grp { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); font-weight: 800; padding: 14px 14px 4px; }
+@media (max-width: 1024px) { .nav-more { display: none; } }
 </style>
 
 <style>
@@ -296,11 +317,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <nav>
   <div class="nav-inner">
     <div class="nav-logo"><a href="/"><img src="/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="439" height="184" decoding="async"></a></div>
-    <div class="nav-actions"><a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Home</a>
-      <a href="/trader" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Trader</a>
-      <a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a>
-      <a href="/options-101" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Options 101</a> <a href="/0dte" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">0DTE Guide</a> <a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a>
-      <button type="button" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-panel" onclick="novoNavToggle(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button><div class="nav-menu-panel" id="nav-menu-panel"><a href="/">Home</a><a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/trader">NoVo Trader</a><a href="/options-101">Options 101</a><a href="/0dte">0DTE Guide</a><a href="/journal/">The Journal</a></div><a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;text-decoration:none;display:inline-flex;align-items:center;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a>
+    <div class="nav-actions"><a href="/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Home</a><a href="/market-data" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Market Data</a><a href="/analyst" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Analyst</a><a href="/trader" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">NoVo Trader</a><a href="/options-101" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">Options 101</a><a href="/0dte" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">0DTE Guide</a><a href="/journal/" style="color:var(--txt2);font-weight:600;font-size:14px;text-decoration:none;padding:10px 12px;white-space:nowrap;">The Journal</a><div class="nav-more"><button type="button" class="nav-more-btn" aria-expanded="false" aria-controls="nav-more-panel" onclick="novoMoreToggle(event)">More<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="nav-more-panel" id="nav-more-panel"><div class="nmg"><h4>Learn</h4><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a></div><div class="nmg"><h4>Free data &amp; tools</h4><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a></div><div class="nmg"><h4>Compare</h4><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a></div><div class="nmg"><h4>NoVo</h4><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div></div></div><button type="button" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-panel" onclick="novoNavToggle(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button><div class="nav-menu-panel" id="nav-menu-panel"><a href="/">Home</a><a href="/market-data">Market Data</a><a href="/analyst">NoVo Analyst</a><a href="/trader">NoVo Trader</a><a href="/options-101">Options 101</a><a href="/0dte">0DTE Guide</a><a href="/journal/">The Journal</a><div class="grp">Learn</div><a href="/learn/options-basics-greeks">Options basics &amp; the Greeks</a><a href="/learn/0dte-options">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure">Volatility &amp; market structure</a><a href="/learn/risk-management">Risk management</a><a href="/options-glossary">Options glossary</a><div class="grp">Free data &amp; tools</div><a href="/market-data/spy">SPY gamma map</a><a href="/market-data/qqq">QQQ gamma map</a><a href="/market-data/iwm">IWM gamma map</a><a href="/tools/expected-move">Expected move</a><a href="/tools/max-pain-calculator">Max pain</a><a href="/tools/position-size-calculator">Position size</a><a href="/tools/options-profit-calculator">Options P&amp;L</a><a href="/tools/options-greeks-calculator">Greeks calculator</a><a href="/economic-calendar">Economic calendar</a><a href="/market-holidays">Market holidays</a><div class="grp">Compare</div><a href="/compare/best-0dte-tools">Best 0DTE tools</a><a href="/compare/best-gamma-gex-tools">Best gamma / GEX tools</a><a href="/compare/novo-vs-spotgamma">NoVo vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales">NoVo vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha">NoVo vs Option Alpha</a><div class="grp">NoVo</div><a href="/plans">Plans &amp; pricing</a><a href="/analyst/archive">The read archive</a><a href="/analyst/methodology">How the map is built</a><a href="/getting-started">Getting started</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/help">Help</a><a href="/security">Security</a></div><a class="nav-buy" href="/plans" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;text-decoration:none;display:inline-flex;align-items:center;box-shadow:0 4px 16px rgba(34,211,238,0.30);">Plans</a>
       <a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/status" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
     </div>
   </div>
@@ -348,6 +365,23 @@ document.addEventListener('click',function(ev){
 document.addEventListener('keydown',function(ev){
   var p=document.getElementById('nav-menu-panel');
   if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoNavToggle();document.querySelector('.nav-menu-btn').focus();}
+});
+</script>
+<script>
+function novoMoreToggle(e){
+  if(e){e.stopPropagation();}
+  var p=document.getElementById('nav-more-panel'),b=document.querySelector('.nav-more-btn');
+  if(!p||!b)return;
+  var open=p.classList.toggle('open');
+  b.setAttribute('aria-expanded',open?'true':'false');
+}
+document.addEventListener('click',function(ev){
+  var p=document.getElementById('nav-more-panel');
+  if(p&&p.classList.contains('open')&&!p.contains(ev.target)&&!ev.target.closest('.nav-more-btn')){novoMoreToggle();}
+});
+document.addEventListener('keydown',function(ev){
+  var p=document.getElementById('nav-more-panel');
+  if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoMoreToggle();document.querySelector('.nav-more-btn').focus();}
 });
 </script>
 </body>

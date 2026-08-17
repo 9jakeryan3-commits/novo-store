@@ -296,3 +296,24 @@ nav { position: relative; }
   /* Hide the individual links; the panel carries them. Covers both templates. */
   .nav-actions > a:not(.nav-buy):not(.nav-portal), .nav-actions > .nav-link { display: none !important; }
 }
+
+/* ---- More dropdown (desktop) ---- */
+.nav-more { position: static; }
+.nav-more-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0;
+  color: var(--txt2, #8aacc8); font-weight: 600; font-size: 14px; padding: 10px 12px; cursor: pointer;
+  white-space: nowrap; font-family: inherit; }
+.nav-more-btn:hover { color: var(--txt1, #eaf3ff); }
+.nav-more-btn svg { width: 13px; height: 13px; }
+.nav-more-panel { display: none; position: absolute; top: 100%; right: 12px; z-index: 2000;
+  background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036); border-radius: 12px;
+  padding: 18px 20px; box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 6px 26px; max-width: 94vw; }
+.nav-more-panel.open { display: grid; }
+.nav-more-panel h4 { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); margin: 0 0 8px; font-weight: 800; }
+.nav-more-panel a { display: block; padding: 5px 0; font-size: 13.5px; font-weight: 600;
+  color: var(--txt2, #8aacc8); text-decoration: none; }
+.nav-more-panel a:hover, .nav-more-panel a:focus-visible { color: var(--cyan, #22d3ee); }
+.nav-menu-panel .grp { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--txt3, #7d97b8); font-weight: 800; padding: 14px 14px 4px; }
+@media (max-width: 1024px) { .nav-more { display: none; } }
