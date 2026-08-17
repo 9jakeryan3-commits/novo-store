@@ -297,6 +297,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
   .feature h4 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }
   .feature p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
+  /* Nine reading cards: 3x3 on desktop. The grid falls to two columns between
+     584px and 859px, where the ninth would be left alone -- let it span. */
+  @media (min-width: 584px) and (max-width: 859px) {
+    .features-grid > .feature:nth-child(9) { grid-column: 1 / -1; }
+  }
 
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -626,7 +631,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="feature"><div class="feature-icon">&#9878;</div><div><h3>Put/call skew &amp; IV rank</h3><p>Whether traders are paying up for downside protection, and how expensive options are against their own year.</p></div></div>
       <div class="feature"><div class="feature-icon">&#9889;</div><div><h3>Gamma-squeeze signal</h3><p>A live 0&ndash;100 read on when dealers flip from damping moves to amplifying them.</p></div></div>
       <div class="feature"><div class="feature-icon">&#127756;</div><div><h3>Fast / slow MM skew</h3><p>Near-term skew against the structural baseline &mdash; how far today&rsquo;s pricing has pulled away from normal.</p></div></div>
-      <div class="feature"><div class="feature-icon">&#127919;</div><div><h3>The Analyst Score</h3><p>One 0&ndash;100 number for how the whole map lines up right now, so you can tell a clean setup from a muddled one at a glance.</p></div></div>
+      <div class="feature" style="grid-column:1/-1;"><div class="feature-icon">&#127919;</div><div><h3>The Analyst Score</h3><p>One 0&ndash;100 number for how the whole map lines up right now, so you can tell a clean setup from a muddled one at a glance.</p></div></div>
       <div class="feature" style="grid-column:1/-1;"><div class="feature-icon">&#128368;</div><div><h3>Historical analogues &mdash; &ldquo;today looks like&hellip;&rdquo;</h3><p>NoVo logs every session it has ever mapped, then scores today against them and shows you the closest prior setups with what price actually did afterwards. Pattern memory for the map &mdash; with the sample size attached, because a few dozen sessions is a count and not a tendency.</p></div></div>
     </div>
     <div style="text-align:center;margin-top:30px;">
