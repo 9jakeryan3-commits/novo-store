@@ -40,6 +40,7 @@
   // minimal formatting: **bold**, autolink bare emails, keep newlines (white-space:pre-wrap handles them)
   function fmt(s){
     var h = esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+    h = h.replace(/(^|\n)[ \t]*[*-][ \t]+/g, '$1• ');   // markdown bullets -> a real bullet
     h = h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');
     return h;
   }
