@@ -33,8 +33,9 @@ grep -o '"message": "[^"]*"' /tmp/novo-deploy.log | head -1
 # The deploy is not done until the alias actually serves it.
 echo ".. verifying"
 for i in 1 2 3 4 5 6 7 8 9 10; do
+  # Compare raw bytes on both sides -- normalising one and not the other always fails.
   LIVE=$(curl -s "https://novo-options.trade/?v=$RANDOM" | md5sum | cut -d' ' -f1)
-  WANT=$(sed 's/\r$//' public/index.html | md5sum | cut -d' ' -f1)
+  WANT=$(md5sum <public/index.html | cut -d' ' -f1)
   [ "$LIVE" = "$WANT" ] && { echo "OK  production serves $LOCAL"; exit 0; }
   sleep 4
 done
