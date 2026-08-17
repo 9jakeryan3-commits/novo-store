@@ -28,15 +28,15 @@ module.exports = async (req, res) => {
   if (!(await require('./_kv').rateOk('ckt_an:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
   // plan: 'yearly' picks the annual price ($1,290/yr); anything else = monthly ($129/mo).
-  // Hardcoded to the $129/$1,290 price IDs (created 2026-08-16). The older $79/$790 and $69/$690 prices stay live in Stripe so
+  // Hardcoded to the $129/$1,290 price IDs (created 2026-08-16). The older $129/$1,290 and $69/$690 prices stay live in Stripe so
   // existing Analyst subscribers keep their rate for life — only new checkouts hit $129/$1,290. Env overrides win.
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
-  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $79 — raised 2026-08-16)
-  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $790)
+  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $129 — raised 2026-08-16)
+  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $1,290)
   const priceId = (plan === 'yearly') ? YEARLY_790 : MONTHLY_79;
 
   try {

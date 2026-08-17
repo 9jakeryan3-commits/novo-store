@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       // Trader $2,490/yr (2026-08-16). Hardcoded to the $2,490 price ID. The old $1,990 price stays live so
-      // existing annual subs keep $1,990 for life — only new checkouts hit $1,690. Price ID is not a secret.
+      // existing annual subs keep $1,990 for life — only new checkouts hit $2,490. Price ID is not a secret.
       // Env override STRIPE_PRICE_SUB_YEARLY_ID_1690 wins if set.
       line_items: [{ price: (process.env.STRIPE_PRICE_SUB_YEARLY_ID_1690 || 'price_1U59pFApyfMAkbeEAmFMG9sw'), quantity: 1 }],
       mode: 'subscription',
