@@ -272,6 +272,22 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .nav-logo img { height: 34px; }
     .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
   }
+
+  /* ---- sector heatmap ---- */
+  .hm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:12px; }
+  .hm-sec { background:var(--navy2); border:1px solid var(--bdr); border-radius:11px; padding:11px 12px 12px; }
+  .hm-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:9px; }
+  .hm-name { font-size:12.5px; font-weight:800; color:var(--txt1); letter-spacing:.2px; }
+  .hm-pct { font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .hm-tiles { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+  .hm-t { border-radius:7px; padding:9px 8px; text-align:center; display:block;
+    border:1px solid rgba(255,255,255,.05); }
+  .hm-t .s { display:block; font-size:11.5px; font-weight:800; color:var(--txt1); letter-spacing:.3px; }
+  .hm-t .c { display:block; font-size:11px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums;
+    color:var(--txt1); opacity:.92; }
+  .hm-key { display:flex; align-items:center; gap:7px; justify-content:center; margin-top:14px; font-size:11.5px; }
+  .hm-sw { width:26px; height:10px; border-radius:3px; display:inline-block; }
+  @media (max-width:560px){ .hm-grid{ grid-template-columns:1fr 1fr; gap:9px; } .hm-tiles{ gap:5px; } }
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"Market Fear Gauge","item":"https://novo-options.trade/market-data"}]}
@@ -473,6 +489,23 @@ nav { position: relative; }
 
 <!-- fear history moved up, directly under the 3 index fear cards -->
 
+<!-- SECTOR HEATMAP -->
+<div class="container sec" id="heatmap">
+  <div class="lbl">Markets &middot; today</div>
+  <h2 class="h2">Where the money went today</h2>
+  <p class="sub">Every S&amp;P sector and the names that move it, shaded by today's percentage change. Free, public data, updated through the session.</p>
+  <div class="hm-grid" id="hm-grid"><div class="muted">Loading&hellip;</div></div>
+  <div class="hm-key">
+    <span class="muted">Down</span>
+    <span class="hm-sw" style="background:rgba(244,63,94,.85)"></span>
+    <span class="hm-sw" style="background:rgba(244,63,94,.42)"></span>
+    <span class="hm-sw" style="background:rgba(125,151,184,.20)"></span>
+    <span class="hm-sw" style="background:rgba(16,185,129,.42)"></span>
+    <span class="hm-sw" style="background:rgba(16,185,129,.85)"></span>
+    <span class="muted">Up</span>
+  </div>
+</div>
+
 <!-- FUTURES / INDICES -->
 <div class="container sec">
   <div class="lbl">Markets · live 24/5</div>
@@ -668,6 +701,30 @@ function copyEmbed(btn){
     });
   });
 
+
+  // ---- sector heatmap (public data) ----
+  function heatBg(p){
+    var a = Math.min(Math.abs(p)/3, 1);                 // saturate at +/-3%
+    if (Math.abs(p) < 0.05) return 'rgba(125,151,184,.16)';
+    return (p > 0 ? 'rgba(16,185,129,' : 'rgba(244,63,94,') + (0.16 + a*0.66).toFixed(2) + ')';
+  }
+  function renderHeat(d){
+    var box = $('hm-grid'); if(!box) return;
+    var secs = (d && d.sectors) || [];
+    if(!secs.length){ box.innerHTML = '<div class="muted">Market data unavailable right now.</div>'; return; }
+    box.innerHTML = secs.map(function(s){
+      var tiles = (s.stocks||[]).map(function(k){
+        return '<div class="hm-t" style="background:'+heatBg(k.chg)+'" '
+             + 'title="'+k.sym+' '+(k.chg>0?'+':'')+k.chg+'% today"><span class="s">'+k.sym+'</span>'
+             + '<span class="c">'+(k.chg>0?'+':'')+k.chg.toFixed(2)+'%</span></div>';
+      }).join('');
+      return '<div class="hm-sec"><div class="hm-head"><span class="hm-name">'+s.label+'</span>'
+           + '<span class="hm-pct" style="color:'+(s.chg>0?'var(--green)':s.chg<0?'var(--red)':'var(--txt3)')+'">'
+           + (s.chg>0?'+':'')+s.chg.toFixed(2)+'%</span></div>'
+           + '<div class="hm-tiles">'+tiles+'</div></div>';
+    }).join('');
+  }
+  async function loadHeat(){ try{ var r=await fetch('/api/heatmap',{cache:'no-store'}); if(r.ok) renderHeat(await r.json()); }catch(_){} }
   // ---- trending ----
   function renderTrend(list){
     var box=$('trend-list'); if(!box) return;
@@ -694,8 +751,8 @@ function copyEmbed(btn){
   async function loadCal(){ try{ var r=await fetch('/api/calendar',{cache:'no-store'}); if(r.ok) renderCal((await r.json()).events); }catch(_){} }
 
 
-  loadPulse(); loadFut(); loadPoll(); loadTrend(); loadCal();
-  setInterval(loadPulse, 120000); setInterval(loadFut, 60000);
+  loadPulse(); loadFut(); loadPoll(); loadHeat(); loadTrend(); loadCal();
+  setInterval(loadPulse, 120000); setInterval(loadFut, 60000); setInterval(loadHeat, 300000);
   setInterval(loadTrend, 300000); setInterval(loadCal, 3600000);
 })();
 </script>
