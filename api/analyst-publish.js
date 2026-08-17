@@ -477,7 +477,11 @@ function _publicLevels(state) {
     flip: num(i && i.flip),
     callWall: num(i && (i.call_wall != null ? i.call_wall : i.callWall)),
     putWall: num(i && (i.put_wall != null ? i.put_wall : i.putWall)),
-    expectedMove: num(i && (i.expected_move != null ? i.expected_move : i.expectedMove)),
+    // The engine publishes the daily expected move as `em_daily` (dollars, see main.py:1100).
+    // This only ever looked for expected_move/expectedMove, so /market-data/<ticker> has shown a
+    // blank Expected move since the page shipped. Keep the old names as fallbacks.
+    expectedMove: num(i && (i.em_daily != null ? i.em_daily
+                     : i.expected_move != null ? i.expected_move : i.expectedMove)),
     regime: (i && i.regime) ? String(i.regime) : null,
   })).filter((t) => t.ticker && (t.flip || t.callWall || t.putWall));
 }
