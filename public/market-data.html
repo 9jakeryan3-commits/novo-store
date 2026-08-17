@@ -617,12 +617,15 @@ function copyEmbed(btn){
   }
 
   var FNAME={volatility:'Volatility',momentum:'Momentum',breadth:'Breadth',putcall:'Put / Call'};
-  function renderFactors(list){
+  function renderFactors(list, putCall){
     var box=$('pulse-factors'); if(!box) return;
     if(!list||!list.length){ box.innerHTML=''; return; }
     box.innerHTML=list.map(function(f){
       var col=f.score<40?'#f43f5e':f.score<60?'#f59e0b':'#10b981';
-      return '<div class="pf"><div class="pfk"><span>'+(FNAME[f.key]||esc(f.key))+'</span><span class="pfv" style="color:'+col+'">'+esc(f.label)+'</span></div>'+
+      // show the put/call RATIO itself, not just its label - every options site publishes one free
+      var val=esc(f.label);
+      if(f.key==='putcall' && putCall!=null){ val=Number(putCall).toFixed(2)+' · '+val; }
+      return '<div class="pf"><div class="pfk"><span>'+(FNAME[f.key]||esc(f.key))+'</span><span class="pfv" style="color:'+col+'">'+val+'</span></div>'+
         '<div class="pfbar"><i style="width:'+Math.max(4,Math.min(100,f.score))+'%;background:'+col+'"></i></div></div>';
     }).join('');
   }
@@ -672,7 +675,7 @@ function copyEmbed(btn){
 
   async function loadPulse(){
     try{ var r=await fetch('/api/market-pulse',{cache:'no-store'}); if(!r.ok) return; var d=await r.json();
-      renderPulse(d.pulse); renderFactors(d.factors); renderFear(d.fear); renderHist(d.history); $('pulse-ago').textContent=ago(d.updated);
+      renderPulse(d.pulse); renderFactors(d.factors, d.putCall); renderFear(d.fear); renderHist(d.history); $('pulse-ago').textContent=ago(d.updated);
     }catch(_){}
   }
   async function loadFut(){

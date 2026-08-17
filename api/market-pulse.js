@@ -137,6 +137,10 @@ module.exports = async (req, res) => {
       : k === "breadth" ? (s < 40 ? "weak" : s < 60 ? "mixed" : "strong")
       : (s < 40 ? "defensive" : s < 60 ? "balanced" : "call-heavy");
     const factorsOut = factors.map((f) => ({ key: f.key, score: f.score, label: flabel(f.key, f.score) }));
+    // The SPY put/call ratio itself, not just its qualitative label. It is NoVo's own computed number
+    // off the chain the engine already reads, and every serious options site publishes a put/call
+    // ratio free, so showing the figure is table stakes rather than a leak. The dealer map stays paid.
+    const putCallOut = putcall != null ? Math.round(putcall * 1000) / 1000 : null;
 
     // Fear history from the VIX 1y closes: now / yesterday / ~1wk / ~1mo, each ranked in the same window.
     const hist = {};
@@ -163,6 +167,7 @@ module.exports = async (req, res) => {
       updated: Date.now(),
       pulse: pulse == null ? null : { score: pulse, label: pulseLabel(pulse) },
       factors: factorsOut,
+      putCall: putCallOut,
       fear: { SPY: vix, QQQ: vxn, IWM: rvx },
       momentum: mom,
       history: hist,
