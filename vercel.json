@@ -96,6 +96,111 @@
       "source": "/terms.html",
       "destination": "/license",
       "permanent": true
+    },
+    {
+      "source": "/journal/bollinger-bands.html",
+      "destination": "/journal/bollinger-bands-explained.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-the-vix-term-structure.html",
+      "destination": "/journal/vix-term-structure.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-term-structure-of-vol.html",
+      "destination": "/journal/vix-term-structure.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/implied-volatility-explained.html",
+      "destination": "/journal/what-is-implied-volatility.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/pin-risk-explained.html",
+      "destination": "/journal/what-is-pin-risk.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/put-call-parity.html",
+      "destination": "/journal/what-is-put-call-parity.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-a-trailing-stop.html",
+      "destination": "/journal/trailing-stop-explained.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/options-contract-multiplier.html",
+      "destination": "/journal/the-options-contract-multiplier.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-pfof.html",
+      "destination": "/journal/what-is-payment-for-order-flow.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/marketable-limit-orders.html",
+      "destination": "/journal/what-is-a-marketable-limit-order.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/synthetic-positions.html",
+      "destination": "/journal/what-is-a-synthetic-position.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-a-roll.html",
+      "destination": "/journal/what-is-rolling-an-option.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/day-order-vs-gtc.html",
+      "destination": "/journal/day-vs-gtc-orders.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/european-vs-american-style-options.html",
+      "destination": "/journal/american-vs-european-options.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-extrinsic-value.html",
+      "destination": "/journal/intrinsic-vs-extrinsic-value.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-time-value.html",
+      "destination": "/journal/intrinsic-vs-extrinsic-value.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-volume-in-options.html",
+      "destination": "/journal/volume-vs-open-interest.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-a-cash-secured-put.html",
+      "destination": "/journal/cash-secured-puts.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-a-covered-call.html",
+      "destination": "/journal/covered-calls.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/options-bid-ask-spread.html",
+      "destination": "/journal/bid-ask-spread-explained.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-is-implied-vs-realized-vol.html",
+      "destination": "/journal/realized-vs-implied-volatility.html",
+      "permanent": true
     }
   ],
   "rewrites": [

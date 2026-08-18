@@ -529,12 +529,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/bollinger-bands.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/boundaries-first-mindset.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -1093,12 +1087,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/day-order-vs-gtc.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/day-trade-spy-options-500.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -1490,12 +1478,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/european-open-us-futures.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/european-vs-american-style-options.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -2263,12 +2245,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/implied-volatility-explained.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/in-memory-state-trading.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -2761,12 +2737,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/marketable-limit-orders.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/mean-reversion-scalp-to-gravity.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -3235,19 +3205,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/options-bid-ask-spread.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/options-buying-power.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/options-contract-multiplier.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -3398,12 +3356,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/pennant-pattern.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/pin-risk-explained.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -3560,12 +3512,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/pullback-entry-strategy.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/put-call-parity.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -4310,12 +4256,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/survivorship-bias-backtesting.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/synthetic-positions.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5215,19 +5155,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/what-is-a-cash-secured-put.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/what-is-a-conversion.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-a-covered-call.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5371,12 +5299,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/what-is-a-roll.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/what-is-a-scalp-vs-day-trade.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -5450,12 +5372,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-is-a-trading-plan.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-a-trailing-stop.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5605,12 +5521,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/what-is-extrinsic-value.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/what-is-front-running.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -5624,12 +5534,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-is-implied-volatility.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-implied-vs-realized-vol.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5696,12 +5600,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-is-payment-for-order-flow.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-pfof.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5779,12 +5677,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/what-is-term-structure-of-vol.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/what-is-the-nbbo.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -5797,19 +5689,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/what-is-the-vix-term-structure.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/what-is-the-vix.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-time-value.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -5840,12 +5720,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-is-vol-of-vol.html</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-is-volume-in-options.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
