@@ -1,0 +1,124 @@
+# NoVo Options Trading — product & offering
+
+The single source of truth for **what is free and what is paid**. If a claim on the site
+disagrees with this file, one of them is a bug — check the code column and fix whichever is wrong.
+
+Last verified against the deployed site and engine: **2026-08-18**.
+
+> **Keep this current.** Any change to what a tier includes — a feature shipped, retired, moved
+> across the paywall, or repriced — updates this file in the *same commit* as the page copy.
+> That is the whole point of it; a stale offering doc is worse than none.
+
+---
+
+## The tiers
+
+| | Price | Trial | Includes |
+|---|---|---|---|
+| **Free** | $0 | — | No account for most of it; email only for the list + Discord |
+| **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
+| **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + execution |
+
+- **7-day money-back on the first payment, both plans.** Trader has no trial, so this is its
+  evaluation window. Stated in `license.html`, `refund-policy.html`, `help.html`, `api/chat.js`,
+  and under the Trader button on `plans.html`.
+- **Price for life** — the rate you subscribe at holds while the subscription stays active.
+- Cancel any time from the Stripe billing portal; access runs to the end of the paid period.
+- One Terms of Service: **`/license`**. `/terms` 308s to it.
+
+---
+
+## FREE — no account, no card
+
+| What | Where it lives |
+|---|---|
+| Dealer levels, **delayed** — gamma flip, call wall, put wall, expected move, spot | `/market-data`, `/market-data/{spy,qqq,iwm}` ← `api/levels.js` |
+| Fear gauge — VIX / VXN / RVX ranked against their own 1-year history | market-data pages |
+| **ATM IV and IV rank**, per ticker | `api/levels.js?iv=` — free by decision, it is a commodity metric |
+| Market Pulse (fear/greed), sector heatmap, 24/5 futures ribbon | `api/market-pulse.js`, `api/heatmap.js` |
+| Futures positioning — weekly CFTC Commitments of Traders | `/positioning` ← `api/positioning.js` |
+| The track record — both public claims scored, sample sizes shown | `/track-record` ← `api/track-record.js` |
+| The public read archive — every desk note, after its session | `/analyst/archive` ← `api/analyst-publish.js` |
+| The NoVo Journal — 1,042 articles | `/journal/` |
+| Options 101, the 0DTE guide, 5 learn guides | `/options-101`, `/0dte`, `/learn/*` |
+| Five calculators — expected move, max pain, position size, options P&L, Greeks | `/tools/*` |
+| TradingView script — flip, walls and expected-move band on your own chart | `/tradingview` |
+| Options glossary, economic calendar, market holidays | `/options-glossary`, `/economic-calendar`, `/market-holidays` |
+| 5 comparison pages, and the methodology page | `/compare/*`, `/analyst/methodology` |
+| Embeddable fear-gauge widget | `/embed-pulse` |
+
+**Free with an email, no card:** the Sunday Week Ahead, new articles as they drop, the NoVo Discord.
+
+---
+
+## NoVo Analyst — $129/mo
+
+The free pages give delayed levels. Analyst gives them **live on a ~60-second cadence**, plus the
+layer underneath. Nothing in this section appears on any free page.
+
+**The map**
+- Net GEX · Gravity · Put/call skew · Skew near/far · **Vanna exposure** · **Charm per day**
+- Gamma profile by strike, and **gamma by strike through the session** (time axis)
+- Per-ticker: SPY, QQQ, IWM
+
+**Signals & flow**
+- **'The Line'** — level-break playbooks on all three tickers. Triggers are prior-day high/low,
+  opening-range high/low and pre-market high/low. **Not** the gamma flip — it is a moving level.
+- Gamma-squeeze signal, per ticker
+- Options flow — call vs put demand off chain volume, unusual-volume strikes. **Volume-based, not
+  buy/sell prints** — keep that label.
+- Sweeps & blocks — aggressor-tagged, computed in-house off the live dxFeed tape
+- Historical analogues — "today looks like…", with how each resolved
+
+**The read & the analyst**
+- The Open, The Close, the Sunday Week Ahead — dashboard first, emailed, **and pushed**
+- **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
+  plus 9 read-only live lookups (dealer levels, gamma profile, session history, its own track
+  record, the archive, quotes, macro calendar, earnings dates, headlines).
+  Market only — never accounts, trades or P&L; never advice.
+
+**Delivery**
+- Installable PWA + **push alerts** (The Line and each session's read), toggleable on the dashboard
+- Private Analyst Discord — the reads channel + the 'Trader Floor'
+
+---
+
+## NoVo Trader — $209/mo · includes all of Analyst
+
+- **Dealer read at ~5 seconds**, scalping chart streaming at half a second
+- **One-click execution** in your own broker — **you click every entry, always**
+- **Automated exits only** — TP1/TP2, trailing stops, hard stop broker-side on **Tradier and
+  tastytrade** (Alpaca falls back to the software exit engine)
+- Adaptive-Urgent execution — crosses the spread in under a second, capped slippage
+- Analyst Score + conviction-weighted position sizing
+- **DTE dial 0–5, defaulting to 0**
+- Live tape + full options chain, paper mode, trade journal + performance analytics
+- Regime · Retail State · RVOL · Tape Imbalance
+- **No push notifications** — by design; you are on the dashboard when you trade
+
+**Brokers:** Tradier *or* tastytrade for live (either is a complete setup — data and execution).
+Alpaca optional, paper. Non-custodial: NoVo can place and manage orders, never move money.
+
+---
+
+## Standing rules this offering depends on
+
+1. **Entry is always the user's click.** Only exits are automated. No auto-entry, no autonomy
+   toggle, ever. Any copy or screenshot implying otherwise is a defect.
+2. **No performance claims** — no win rates, P&L figures or implied returns on public pages.
+3. **The AI reads the market, not your account.** Enforced structurally: no tool in
+   `api/_lib/tools.js` can reach an account, an order or `trades.db`.
+4. **Options flow is volume-based**, not buy/sell prints. Sweeps & blocks is the separate,
+   real print-tape feature.
+5. **Analyst refresh ~60s, Trader telemetry ~5s.** That gap is the tier line, not an error.
+
+## Where to check when this changes
+
+| Question | Look at |
+|---|---|
+| What does the Analyst dashboard actually render? | `public/analyst-live.html` |
+| What does the Trader dashboard render? | `NoVo-Pulse/c2_dashboard.py` |
+| What does the AI analyst have access to? | `api/_lib/tools.js`, `api/analyst-ask.js` |
+| What does a free visitor get? | `api/levels.js` + the `market-data*` pages |
+| What does checkout actually charge? | `api/checkout-analyst.js`, `api/checkout-sub*.js` |
+| What is promised in writing? | `public/license.html`, `refund-policy.html`, `api/chat.js` |
