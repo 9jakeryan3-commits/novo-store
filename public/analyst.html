@@ -260,7 +260,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* fanned/stacked live-UI shots — hover a card to bring it to the front and straighten it */
   .ss-fan { position: relative; height: 600px; margin-top: 40px; }
   .ss-fan-card { position: absolute; top: 22px; left: 50%; width: 60%; margin: 0; background: #0d0e10; border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom; transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
-  .ss-fan-card img { width: 100%; display: block; }
+  /* height:auto is load-bearing: the width/height attributes on the img are a
+     presentational hint, so without it each card renders at the capture's full
+     1048px and overflows the 600px fan. */
+  .ss-fan-card img { width: 100%; height: auto; display: block; }
   .ss-fan-1 { transform: translateX(-18%) rotate(7deg); z-index: 3; }
   .ss-fan-2 { transform: translateX(-50%) rotate(0deg); z-index: 2; }
   .ss-fan-3 { transform: translateX(-82%) rotate(-7deg); z-index: 1; }
