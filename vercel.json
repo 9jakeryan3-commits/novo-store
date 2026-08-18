@@ -86,6 +86,16 @@
       "source": "/journal/why-0dte-has-maximum-gamma.html",
       "destination": "/journal/why-gamma-matters-for-0dte.html",
       "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/license",
+      "permanent": true
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/license",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -208,10 +218,6 @@
     {
       "source": "/risk-disclosure",
       "destination": "/risk-disclosure.html"
-    },
-    {
-      "source": "/terms",
-      "destination": "/terms.html"
     },
     {
       "source": "/refund-policy",
