@@ -694,6 +694,7 @@ async function _promotePublicLevels(state) {
   const pill = (body.pill || '').toString().trim();                    // regime-alert pill text
   const pillKind = (body.pill_kind || '').toString().toLowerCase();    // amplify | absorb | warn | calm
   const kind = (body.kind || 'read').toString().toLowerCase();          // 'read' (full desk note) | 'alert' (intraday)
+  const toDiscord = body.discord !== false;                             // false = push/email only, skip Discord
   const archive = body.archive !== false;                               // false = don't add to the public reads archive (e.g. the Mid-Day sales email)
   if (!title || (!text && !html)) return res.status(400).json({ error: 'title + text/html required' });
 
@@ -747,7 +748,7 @@ async function _promotePublicLevels(state) {
   // Alerts (kind=alert) ALWAYS fan out to Discord — they're Discord-only now (engine sends them send=false).
   // Full reads hit Discord when emailed (send=true) — EXCEPT the free-list Mid-Day sales email (audience=free),
   // which is a conversion pitch for the free list and must never post to the PAID #novo-analysis channel.
-  if (discordWebhook && (kind === 'alert' || (send && audience !== 'free'))) {
+  if (discordWebhook && toDiscord && (kind === 'alert' || (send && audience !== 'free'))) {
     try {
       const biasColor = { BULLISH: 0x10b981, BEARISH: 0xf43f5e, NEUTRAL: 0x9fb6d1 };
       const pillColor = { amplify: 0xf43f5e, absorb: 0x2962ff, warn: 0xf59e0b, calm: 0x10b981 };
@@ -794,7 +795,8 @@ async function _promotePublicLevels(state) {
 
   // ── WEB PUSH — fan 'The Line' (kind='alert') out to installed PWA members. Best-effort; DORMANT until the
   // ANALYST_VAPID_PUBLIC / ANALYST_VAPID_PRIVATE env keys are set (mirrors the Trader dashboard's dormant push).
-  if (kind === 'alert' && process.env.ANALYST_VAPID_PUBLIC && process.env.ANALYST_VAPID_PRIVATE && process.env.BLOB_READ_WRITE_TOKEN) {
+  const pushable = kind === 'alert' || (kind === 'read' && send && audience !== 'free');
+  if (pushable && process.env.ANALYST_VAPID_PUBLIC && process.env.ANALYST_VAPID_PRIVATE && process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       webpush.setVapidDetails(process.env.ANALYST_VAPID_SUBJECT || 'mailto:support@novo-options.trade',
         process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
@@ -806,7 +808,9 @@ async function _promotePublicLevels(state) {
       const payload = JSON.stringify({
         title: title || 'NoVo Analyst',
         body: String(text || '').replace(/\s+/g, ' ').trim().slice(0, 160),
-        url: `${SITE}/analyst/live`, tag: alertKind === 'squeeze' ? 'novo-analyst-squeeze' : 'novo-analyst-line',
+        url: `${SITE}/analyst/live`,
+        tag: alertKind === 'squeeze' ? 'novo-analyst-squeeze'
+           : kind === 'read' ? 'novo-analyst-read' : 'novo-analyst-line',
       });
       const stale = [];
       await Promise.all((blobs || []).map(async (b) => {
