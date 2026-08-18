@@ -591,7 +591,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="feature"><div class="feature-icon">⚡</div><div><h3>Gamma squeeze signal</h3><p>A live 0&ndash;100 read on when dealers flip from dampening to <b style="color:var(--txt1);">amplifying</b> &mdash; short gamma plus a break of the flip, where moves extend instead of mean-reverting. Live on the dashboard the moment it arms, for whichever ticker you&rsquo;re watching.</p></div></div>
       <div class="feature"><div class="feature-icon">📈</div><div><h3>Options flow &middot; call vs put demand</h3><p>Which side the volume is building on across the chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
       <div class="feature"><div class="feature-icon">🐋</div><div><h3>Sweeps &amp; blocks</h3><p>Real order flow off the live <b style="color:var(--txt1);">print tape</b> &mdash; aggressor-tagged <b style="color:var(--txt1);">sweeps</b> (one order shredded across venues to get filled fast) and oversized <b style="color:var(--txt1);">block</b> prints, for SPY, QQQ and IWM. The buy/sell footprint, not just volume totals &mdash; computed <b style="color:var(--txt1);">in-house off the tape</b>, drawn straight into your dealer map.</p></div></div>
-      <div class="feature"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it anything about the map, right on the dashboard. It answers off today&rsquo;s live dealer read, a thousand Journal articles and every session it has logged &mdash; and it shows you what it used. The market, not your account.</p></div></div>
+      <div class="feature"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it anything about the map, right on the dashboard. It answers off today&rsquo;s live dealer read, a thousand Journal articles and every session it has logged &mdash; and when it needs the catalyst behind a move, the next earnings date or the macro calendar, it goes and gets them. It shows you what it checked. The market, not your account.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">&#127919;</div><div><h3>The Analyst Score</h3><p>One 0&ndash;100 number for how the whole map lines up right now, so you can tell a clean setup from a muddled one at a glance.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">&#128200;</div><div><h3>Gamma by strike, through the session</h3><p>The dealer map with a time axis: one column every few minutes, so you can see where gamma built, where it drained, and which strikes held it all day &mdash; not just where it sits right now.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h3>Historical analogues</h3><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
@@ -657,13 +657,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="ai-section" id="ask-novo" style="scroll-margin-top:90px;">
   <div class="container">
     <div class="section-label" style="color:#22d3ee;">NoVo &middot; the AI market analyst</div>
-    <h2 class="ai-headline">Ask the map a question.<br><span>And get an analyst&rsquo;s answer, with its sources.</span></h2>
-    <p class="ai-sub">A chat bubble on your dashboard. Ask what the flip means today, why the walls are pinning, what happens to IV after CPI &mdash; and it answers off <b style="color:var(--txt1);">today&rsquo;s live dealer map</b>, <b style="color:var(--txt1);">every session it has logged</b>, and a <b style="color:var(--txt1);">thousand-article Journal</b>, listing what it used so you can go and read it.</p>
+    <h2 class="ai-headline">Ask the map a question.<br><span>And it goes and gets what it needs to answer.</span></h2>
+    <p class="ai-sub">A chat bubble on your dashboard. Ask what the flip means today, why the walls are pinning, what happens to IV after CPI &mdash; and it answers off <b style="color:var(--txt1);">today&rsquo;s live dealer map</b>, <b style="color:var(--txt1);">every session it has logged</b>, and a <b style="color:var(--txt1);">thousand-article Journal</b>. When the answer needs something else, it fetches it: the headlines behind a move, the next earnings date, what is on the macro calendar. It lists what it checked, including what came back empty.</p>
     <div class="ai-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
       <div class="ai-card">
         <div class="ai-card-label">Grounded &nbsp;&middot;&nbsp; not guessing</div>
-        <h3>Every number it states is one it was handed.</h3>
-        <p>It never queries and never computes, so it cannot invent a level or round a statistic it does not have. When it leans on the logged history, it says how many sessions that history covers.</p>
+        <h3>Every number comes from a source it can name.</h3>
+        <p>Levels off the live map, rates off its own logged record, prices off the tape &mdash; never off a guess. Ask it something it cannot reach and it says so instead of filling the gap.</p>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-label">Scored &nbsp;&middot;&nbsp; not asserted</div>
+        <h3>Ask it how often it has been right.</h3>
+        <p>It reads its own published track record &mdash; how often each ticker closed inside the expected move, whether the gamma flip really does change how price moves &mdash; and answers with the sample size attached.</p>
       </div>
       <div class="ai-card">
         <div class="ai-card-label">Scope &nbsp;&middot;&nbsp; the market only</div>
@@ -698,19 +703,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <hr class="divider">
 
-<section>
-  <div style="max-width:620px;margin:0 auto;padding:8px 24px;text-align:center;">
-    <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">Free &middot; Market Notes + Community</div>
-    <h2 style="font-size:24px;font-weight:800;color:#eaf3ff;letter-spacing:-.4px;margin:0 0 8px;">Get NoVo's market notes &mdash; free</h2>
-    <p style="font-size:14.5px;color:#8aacc8;line-height:1.65;max-width:520px;margin:0 auto 20px;">A weekly market read (the Week Ahead) plus new articles as they drop &mdash; no hype, no spam. And hop into the <b style="color:#eaf3ff;">new NoVo Discord</b>: a free community, live discussion, and NoVo's daily trading tips.</p>
-    <form id="fb-sub" style="display:flex;gap:8px;max-width:440px;margin:0 auto 10px;flex-wrap:wrap;justify-content:center;">
-      <input id="fb-email" aria-label="Email address" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:12px 14px;border-radius:9px;border:1px solid #2c3a4e;background:#1c1d21;color:#eaf3ff;font-size:14px;">
-      <button type="submit" style="padding:12px 24px;border-radius:9px;border:1px solid #2c3a4e;background:rgba(138,172,200,0.12);color:#eaf3ff;font-weight:800;font-size:14px;cursor:pointer;">Get free notes</button>
-    </form>
-    <div id="fb-msg" style="font-size:13px;min-height:16px;margin-bottom:16px;"></div>
-    <a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:9px;background:#5865F2;color:#fff;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.79 19.79 0 0016.558 3.2a.074.074 0 00-.079.037c-.34.607-.719 1.4-.984 2.02a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.997-2.02.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.369a.07.07 0 00-.032.027C1.533 7.55.943 10.65 1.09 13.712a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.055c.5-3.177-.838-6.246-2.549-9.317a.061.061 0 00-.031-.027zM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>Join the new NoVo Discord &rarr;</a>
-    <div style="margin-top:14px;font-size:13px;color:var(--txt3);">Also on <a href="https://www.reddit.com/user/novo_algotrades" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">Reddit</a> &amp; <a href="https://stocktwits.com/0dte_NoVo" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">StockTwits</a> · <a href="https://x.com/0dte_NoVo" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">X</a> &mdash; daily dealer-positioning reads.</div>
-  </div>
+<section>
+  <div style="max-width:620px;margin:0 auto;padding:8px 24px;text-align:center;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#22d3ee;margin-bottom:10px;">Free &middot; Market Notes + Community</div>
+    <h2 style="font-size:24px;font-weight:800;color:#eaf3ff;letter-spacing:-.4px;margin:0 0 8px;">Get NoVo's market notes &mdash; free</h2>
+    <p style="font-size:14.5px;color:#8aacc8;line-height:1.65;max-width:520px;margin:0 auto 20px;">A weekly market read (the Week Ahead) plus new articles as they drop &mdash; no hype, no spam. And hop into the <b style="color:#eaf3ff;">new NoVo Discord</b>: a free community, live discussion, and NoVo's daily trading tips.</p>
+    <form id="fb-sub" style="display:flex;gap:8px;max-width:440px;margin:0 auto 10px;flex-wrap:wrap;justify-content:center;">
+      <input id="fb-email" aria-label="Email address" type="email" required placeholder="you@email.com" style="flex:1;min-width:200px;padding:12px 14px;border-radius:9px;border:1px solid #2c3a4e;background:#1c1d21;color:#eaf3ff;font-size:14px;">
+      <button type="submit" style="padding:12px 24px;border-radius:9px;border:1px solid #2c3a4e;background:rgba(138,172,200,0.12);color:#eaf3ff;font-weight:800;font-size:14px;cursor:pointer;">Get free notes</button>
+    </form>
+    <div id="fb-msg" style="font-size:13px;min-height:16px;margin-bottom:16px;"></div>
+    <a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:9px;background:#5865F2;color:#fff;font-weight:800;font-size:14px;padding:12px 26px;border-radius:9px;text-decoration:none;"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.79 19.79 0 0016.558 3.2a.074.074 0 00-.079.037c-.34.607-.719 1.4-.984 2.02a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.997-2.02.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.369a.07.07 0 00-.032.027C1.533 7.55.943 10.65 1.09 13.712a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.055c.5-3.177-.838-6.246-2.549-9.317a.061.061 0 00-.031-.027zM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>Join the new NoVo Discord &rarr;</a>
+    <div style="margin-top:14px;font-size:13px;color:var(--txt3);">Also on <a href="https://www.reddit.com/user/novo_algotrades" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">Reddit</a> &amp; <a href="https://stocktwits.com/0dte_NoVo" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">StockTwits</a> · <a href="https://x.com/0dte_NoVo" target="_blank" rel="noopener" style="color:#22d3ee;font-weight:700;">X</a> &mdash; daily dealer-positioning reads.</div>
+  </div>
 </section>
 
 <hr class="divider">
@@ -822,7 +827,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li>&lsquo;The Line&rsquo; level-break playbooks — live, all three tickers</li>
           <li>Gamma-squeeze signal + live options-flow read, per ticker</li>
           <li><b style="color:var(--txt1)">Sweeps &amp; blocks</b> — real order flow off the tape, in-house</li>
-          <li><b style="color:var(--txt1)">NoVo — the AI market analyst</b> — ask it anything about the map</li>
+          <li><b style="color:var(--txt1)">NoVo — the AI market analyst</b> — ask it anything about the map and the market around it</li>
           <li>Historical analogues — &ldquo;today looks like…&rdquo;</li>
           <li>Emailed reads — The Open, The Close &amp; the Sunday Week Ahead</li>
           <li>Private Analyst Discord — reads + the &lsquo;Trader Floor&rsquo;</li>
