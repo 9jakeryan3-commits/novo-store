@@ -46,7 +46,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <meta name="twitter:title" content="NoVo | SPY, QQQ & IWM Scalping Made Easy — One-Click Execution">
 <meta name="twitter:description" content="Map every dealer level on SPY, QQQ & IWM, then execute it in one click — in your own broker, non-custodial. You decide every trade.">
 <meta name="twitter:image" content="https://novo-options.trade/og-trader.png?v=4">
-<link rel="preload" as="image" href="/screenshots/mock-cockpit.jpg" fetchpriority="high">
 <link rel="canonical" href="https://novo-options.trade/trader">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -595,16 +594,6 @@ nav { position: relative; }
   .nav-actions > a:not(.nav-buy):not(.nav-portal), .nav-actions > .nav-link { display: none !important; }
 }
 </style>
-    <div class="hero-mashup">
-      <div class="hm-back"><img src="/screenshots/mock-cockpit.jpg" width="1500" height="827" alt="NoVo trading dashboard — live SPY chart, dealer map and market intel" loading="eager" fetchpriority="high" decoding="async"></div>
-      <div class="hm-fan">
-        <div class="hm-card" style="transform:rotate(-14deg);z-index:4;"><img src="/screenshots/mock-signal.jpg" width="470" height="983" alt="NoVo mobile — the market read" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(-6deg) translateY(14px);z-index:3;margin-left:-50px;"><img src="/screenshots/mock-analysis.jpg" width="470" height="983" alt="NoVo mobile — session thesis" loading="lazy"></div>
-        <div class="hm-card" style="transform:rotate(5deg) translateY(14px);z-index:2;margin-left:-50px;"><img src="/screenshots/mock-trade.jpg" width="470" height="792" alt="NoVo mobile — trade log and equity" loading="lazy"></div>
-        <div class="hm-card" style="transform:rotate(14deg);z-index:1;margin-left:-50px;"><img src="/screenshots/mock-journal.jpg" width="470" height="716" alt="NoVo mobile — performance journal" loading="lazy"></div>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:16px auto 0;">Live dashboard preview — illustrative. Desktop &amp; mobile.</p>
 
     <p style="margin-top:44px;">NoVo does the execution heavy lifting — executes your entry in one click, sizes the position, manages the trade, and exits the instant your rules dictate, never a single tick outside the risk boundaries you set.</p>
     <p class="hero-clarify">The full dealer map, read live and executed in one click — your rules, carried out the instant they trigger, mechanically, not emotionally.</p>
@@ -1572,9 +1561,9 @@ document.addEventListener('keydown', (e) => {
 })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
-  <script src="/ticker-live.js" defer></script>
-<script defer src="/chat-widget.js"></script>
-<script src="/ga-events.js"></script>
+  <script src="/ticker-live.js?v=1" defer></script>
+<script defer src="/chat-widget.js?v=1"></script>
+<script src="/ga-events.js?v=1"></script>
 <script>
 function novoNavToggle(e){
   if(e){e.stopPropagation();}

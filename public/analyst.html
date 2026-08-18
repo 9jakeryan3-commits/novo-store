@@ -642,24 +642,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h3>Historical analogues</h3><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
     </div>
 
-    <div class="ss-wrap">
-      <div class="ss-fan">
-        <figure class="ss-fan-card ss-fan-1" tabindex="0">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; live dealer map</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-dash-1.png?v=2" alt="NoVo Analyst dashboard — the SPY session chart with dealer levels, the gamma-squeeze hero banner, the full dealer-positioning tiles, the VIX fear gauge, and the options-flow panel" loading="lazy">
-        </figure>
-        <figure class="ss-fan-card ss-fan-2" tabindex="0">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; sweeps/blocks, analogues &amp; The Line</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-dash-2.png?v=2" alt="NoVo Analyst dashboard — the live sweeps &amp; blocks print tape, the 'today looks like' historical analogues, the gamma profile by strike, and the real-time 'The Line' level-break feed" loading="lazy">
-        </figure>
-        <figure class="ss-fan-card ss-fan-3" tabindex="0">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">NoVo Analyst &middot; cross-asset map &amp; the written read</span><span class="ss-live">&#9679; LIVE</span></div>
-          <img src="/screenshots/analyst-dash-3.png?v=2" alt="NoVo Analyst dashboard — the cross-asset QQQ and IWM dealer map, the written Pre-Market Primer session read, and the notification controls" loading="lazy">
-        </figure>
-      </div>
-      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the gamma-squeeze hero &amp; full dealer read, the options-flow and sweeps/blocks tape panels, the gamma profile, the cross-asset map, and &lsquo;The Line&rsquo; feed. Installs like an app on desktop &amp; mobile.</p>
-    </div>
-    <script>(function(){var c=document.querySelectorAll('.ss-fan-card');c.forEach(function(el){el.addEventListener('click',function(){c.forEach(function(x){x.classList.remove('front');});el.classList.add('front');});});})();</script>
   </div>
 </section>
 
@@ -1132,10 +1114,10 @@ async function startAnalystTrial(plan) {
 })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
-  <script src="/ticker-live.js" defer></script>
+  <script src="/ticker-live.js?v=1" defer></script>
   
-<script defer src="/chat-widget.js"></script>
-<script src="/ga-events.js"></script>
+<script defer src="/chat-widget.js?v=1"></script>
+<script src="/ga-events.js?v=1"></script>
 <script>
 function novoNavToggle(e){
   if(e){e.stopPropagation();}
