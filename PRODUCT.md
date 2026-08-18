@@ -112,6 +112,21 @@ Alpaca optional, paper. Non-custodial: NoVo can place and manage orders, never m
    real print-tape feature.
 5. **Analyst refresh ~60s, Trader telemetry ~5s.** That gap is the tier line, not an error.
 
+## Card parity
+
+Every page that shows a pricing card must show the paid tier as **at least** as substantial as the
+free one. The free tier is genuinely large, so a thin paid card inverts the pitch.
+
+| Page | Free | Paid |
+|---|---|---|
+| `/plans` | 11 | Analyst 14 · Trader 18 |
+| `/` | 11 | Analyst 13 |
+| `/analyst` | 11 | Trader 11 (cross-sell) |
+| `/trader` | 11 | Analyst 13 (cross-sell) |
+
+Each product page shows Free plus the **other** tier as the cross-sell. Change one card, change all
+four — they are copy-pasted per page, not included. See [[verify-fix-count-not-page]].
+
 ## Where to check when this changes
 
 | Question | Look at |
