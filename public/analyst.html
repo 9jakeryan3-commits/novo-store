@@ -258,13 +258,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .ss-mobile img { width: 100%; display: block; }
   .ss-mobile-cap { font-size: 11px; color: var(--txt3); text-align: center; margin-top: 10px; letter-spacing: .3px; }
   /* fanned/stacked live-UI shots — hover a card to bring it to the front and straighten it */
-  .ss-fan { position: relative; height: 700px; margin-top: 40px; }
-  .ss-fan-card { position: absolute; top: 22px; left: 50%; width: 42%; margin: 0; background: #0d0e10; border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom; transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
+  /* Breaks out of the 900px container: at 42% of 852px a card was 356px wide and a
+     full-page capture of a dark dashboard just read as a black rectangle. */
+  .ss-wrap { width: min(1240px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+  .ss-fan { position: relative; height: 830px; margin-top: 40px; }
+  .ss-fan-card { position: absolute; top: 22px; left: 50%; width: 46%; margin: 0; background: #0d0e10; border: 1px solid var(--bdr); border-radius: 10px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom; transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
   .ss-fan-card img { width: 100%; height: auto; display: block; aspect-ratio: 3 / 4; object-fit: cover; object-position: top center; }
-  .ss-fan-1 { transform: translateX(-2%) rotate(6deg); z-index: 4; }
-  .ss-fan-2 { transform: translateX(-34%) rotate(2deg); z-index: 3; }
-  .ss-fan-3 { transform: translateX(-66%) rotate(-2deg); z-index: 2; }
-  .ss-fan-4 { transform: translateX(-98%) rotate(-6deg); z-index: 1; }
+  .ss-fan-1 { transform: translateX(-6%) rotate(4deg); z-index: 4; }
+  .ss-fan-2 { transform: translateX(-35%) rotate(1.4deg); z-index: 3; }
+  .ss-fan-3 { transform: translateX(-65%) rotate(-1.4deg); z-index: 2; }
+  .ss-fan-4 { transform: translateX(-94%) rotate(-4deg); z-index: 1; }
   .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: translateX(-50%) translateY(-16px) rotate(0deg) scale(1.05); z-index: 5; box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
   /* Mobile: keep the SAME fanned/overlapping stack (not a flat vertical list); tap a card to bring it forward */
   @media (max-width: 760px) {
