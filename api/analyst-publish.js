@@ -230,8 +230,8 @@ function _levelsTable(levels) {
   const col = (t, items, c) => `<td style="vertical-align:top;width:50%;padding:0 5px;"><div style="border:1px solid #2e3036;border-top:2px solid ${c};border-radius:8px;overflow:hidden;"><div style="background:#26272c;padding:7px 12px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${c};">${t}</div><table style="width:100%;border-collapse:collapse;">${rows(items, c)}</table></div></td>`;
   return `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${col('Resistance', rs, '#f87171')}${col('Support', sp, '#34d399')}</tr></table>`;
 }
-function _page(t, desc, canon, inner) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(canon)}"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="article"><meta property="og:site_name" content="NoVo AI Trading"><link rel="icon" href="${SITE}/favicon.ico?v=2">
+function _page(t, desc, canon, inner, extraHead) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(canon)}"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="article"><meta property="og:url" content="${esc(canon)}"><meta property="og:site_name" content="NoVo Options Trading"><meta property="og:image" content="${SITE}/og-default.png?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@0dte_NoVo"><meta name="twitter:title" content="${esc(t)}"><meta name="twitter:description" content="${esc(desc)}"><meta name="twitter:image" content="${SITE}/og-default.png?v=3"><link rel="icon" href="${SITE}/favicon.ico?v=2">${extraHead || ''}
 <style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}</style></head><body><div class="wrap">
 <div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=5" alt="NoVo Options Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
 ${inner}
@@ -252,12 +252,28 @@ async function handleArchive(req, res) {
     const rd = await _loadJson(`analyst-archive/reads/${slug}.json`, token);
     if (!rd || (rd.publishAfter && now < rd.publishAfter)) {
       return res.status(404).send(_page('Not available yet — NoVo Analyst', 'This read has not been released to the public archive yet.', `${SITE}/analyst/archive`,
-        '<div class="kicker">NoVo Analyst</div><h1>Not released yet.</h1><p class="lead">This read hasn\'t hit the public archive yet &mdash; subscribers already have it live. <a href="' + SITE + '/analyst">Start a free 7-day trial &rarr;</a></p><p style="margin-top:20px;"><a href="' + SITE + '/analyst/archive">&larr; Browse released reads</a></p>'));
+        '<div class="kicker">NoVo Analyst</div><h1>Not released yet.</h1><p class="lead">This read hasn\'t hit the public archive yet &mdash; subscribers already have it live. <a href="' + SITE + '/analyst">Start a free 7-day trial &rarr;</a></p><p style="margin-top:20px;"><a href="' + SITE + '/analyst/archive">&larr; Browse released reads</a></p>',
+      '<meta name="robots" content="noindex, nofollow">'));
     }
     const bt = esc(rd.text || '').replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|FLOW DYNAMICS|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1<b>$2</b>');
     const desc = (rd.text || '').replace(/\s+/g, ' ').slice(0, 155);
     const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure" onerror="this.style.display='none'">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
-    return res.status(200).send(_page(`${rd.title} — NoVo Analyst`, desc, `${SITE}/analyst/archive/${slug}`, inner));
+    // A published desk note is an Article — it had none, so the archive was invisible as content.
+    const ld = JSON.stringify({
+      "@context": "https://schema.org", "@type": "Article",
+      headline: String(rd.title || '').slice(0, 110),
+      description: desc,
+      datePublished: rd.publishedAt ? new Date(rd.publishedAt).toISOString() : undefined,
+      dateModified: rd.publishedAt ? new Date(rd.publishedAt).toISOString() : undefined,
+      mainEntityOfPage: `${SITE}/analyst/archive/${slug}`,
+      image: `${SITE}/og-default.png?v=3`,
+      author: { "@type": "Organization", name: "NoVo Options Trading", url: `${SITE}/` },
+      publisher: { "@type": "Organization", name: "NoVo Options Trading", url: `${SITE}/`,
+                   logo: { "@type": "ImageObject", url: `${SITE}/novo-logo.png` } },
+      isAccessibleForFree: true,
+    });
+    return res.status(200).send(_page(`${rd.title} — NoVo Analyst`, desc, `${SITE}/analyst/archive/${slug}`, inner,
+      `<script type="application/ld+json">${ld}</script>`));
   }
   let idx = await _loadJson('analyst-archive/index.json', token);
   if (!Array.isArray(idx)) idx = [];
