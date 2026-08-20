@@ -94,6 +94,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      canvas absorbs the difference: its wrapper takes the leftover height and drawProfile sizes to it,
      so the strike ladder gets MORE room exactly when there is room going spare. */
   @media (max-width: 900px) { .lv-grid { grid-template-columns: 1fr; } }
+  /* The session heatmap now lives INSIDE the hero grid so mobile can order it. Desktop is unchanged:
+     it spans both columns on its own row, exactly where it sat as a sibling card. On mobile the three
+     gamma views (chart, profile, heatmap) stay together and the dealer panel follows, instead of the
+     heatmap being stranded a screen below the card it belongs with. */
+  .lv-grid > .gh-card { grid-column: 1 / -1; }
+  @media (max-width: 900px) {
+    .lv-grid > .lv-card:first-child { order: 1; }
+    .lv-grid > .gh-card { order: 2; }
+    .lv-grid > .lv-card:nth-child(2) { order: 3; }
+  }
   /* Wide desktop: push the split toward the chart. The right column is fixed-content tiles that
      stop improving past ~640px, while the chart keeps reading better the wider it gets. */
   @media (min-width: 1400px) {
@@ -374,10 +384,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="fear-scale"><span>calm</span><span>fear</span></div>
         </div>
       </div>
+      <div class="lv-card gh-card"><h2>Gamma by strike, through the session</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 8px;">Where dealer gamma built and drained today. Green = long gamma, red = short. <span id="gh-note"></span></div><canvas id="gheat" height="260" style="width:100%;"></canvas></div>
     </div>
 
     <!-- options flow + historical analogues (promoted up, right under the hero row) -->
-    <div class="lv-card" style="margin-top:16px;"><h2>Gamma by strike, through the session</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 8px;">Where dealer gamma built and drained today. Green = long gamma, red = short. <span id="gh-note"></span></div><canvas id="gheat" height="260" style="width:100%;"></canvas></div>
     <div class="lv-card" id="flow-card" style="margin-top:16px;">
       <h2 id="flow-h">SPY · Options flow <span style="font-size:11px;color:var(--txt3);font-weight:400;">volume-based · call vs put demand (not buy/sell prints)</span></h2>
       <div class="lv-tiles flow-tiles">
@@ -1103,11 +1113,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="log" id="novo-ask-log">
     <div class="intro">
       Ask about the map, the session, or what is moving it. I read today&rsquo;s dealer positioning,
-      every session I have logged and a thousand-article archive &mdash; and I go and get the catalyst,
-      an earnings date or the macro calendar when the answer needs one. The market, not your account.
+      every session I have logged and a thousand-article archive &mdash; so I can tell you what a setup
+      like this one has actually resolved to before, and over how many sessions. I go and get the
+      catalyst, an earnings date or the macro calendar when the answer needs one, and I will say when
+      the sample is too thin to lean on. The market, not your account.
       <div class="chips">
         <button onclick="novoAsk(this.textContent)">Where is price against the flip right now?</button>
         <button onclick="novoAsk(this.textContent)">How has gamma built or drained today?</button>
+        <button onclick="novoAsk(this.textContent)">What has a setup like this usually done?</button>
         <button onclick="novoAsk(this.textContent)">What are the wires saying today?</button>
         <button onclick="novoAsk(this.textContent)">How often does the close land inside the expected move?</button>
         <button onclick="novoAsk(this.textContent)">What is on the calendar this week?</button>
