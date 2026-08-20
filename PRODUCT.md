@@ -59,6 +59,10 @@ layer underneath. Nothing in this section appears on any free page.
 **The map**
 - Net GEX · Gravity · Put/call skew · Skew near/far · **Vanna exposure** · **Charm per day**
 - Gamma profile by strike, and **gamma by strike through the session** (time axis)
+- **What this setup has historically resolved to** — the live dealer state (regime x distance to the
+  flip x volatility tercile) matched against NoVo's own logged sessions: direction, hit rate and
+  median over the next hour, with the sample size beside it. A bucket that misses the floor
+  (>=12 observations across >=5 distinct sessions) renders nothing rather than a number.
 - Per-ticker: SPY, QQQ, IWM
 
 **Signals & flow**
@@ -69,12 +73,17 @@ layer underneath. Nothing in this section appears on any free page.
   buy/sell prints** — keep that label.
 - Sweeps & blocks — aggressor-tagged, computed in-house off the live dxFeed tape
 - Historical analogues — "today looks like…", with how each resolved
+- **Signal scorecard** — the gamma squeeze's direction and the tape's sweep bias graded against what
+  price actually did over the following hour. Non-directional states (dormant, balanced) are counted
+  for exposure and never scored.
 
 **The read & the analyst**
-- The Open, The Close, the Sunday Week Ahead — dashboard first, emailed, **and pushed**
+- The Open, The Close, the Sunday Week Ahead — dashboard first, emailed, **and pushed**. Each cites
+  what the current setup has historically resolved to, with its sample size — the read carries a
+  record, not only a reading.
 - **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
-  plus 9 read-only live lookups (dealer levels, gamma profile, session history, its own track
-  record, the archive, quotes, macro calendar, earnings dates, headlines).
+  plus 10 read-only live lookups (dealer levels, gamma profile, session history, **base rates**, its
+  own track record, the archive, quotes, macro calendar, earnings dates, headlines).
   Market only — never accounts, trades or P&L; never advice.
 
 **Delivery**
