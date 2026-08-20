@@ -104,6 +104,37 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 3px; }
   .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
+  /* DEALER MAP — call wall / flip / spot / gravity / put wall are POSITIONS ON A PRICE AXIS, not five
+     equal boxes. Rendering them as a rail in true price order, with spot in its real place, makes
+     "where am I and what is above/below me" one glance instead of five separate reads. */
+  .dm-regime { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:11px 14px; margin:0 0 12px;
+               border:1px solid var(--bdr); border-radius:10px; background:var(--navy); }
+  .dm-regime .rg-v { font-size:24px; font-weight:900; font-family:'Space Grotesk','Inter',sans-serif; letter-spacing:-.5px; }
+  .dm-regime .rg-k { font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--txt3); }
+  .dm-regime .rg-s { font-size:12px; color:var(--txt2); margin-left:auto; text-align:right; }
+  .dm-regime.pos { border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.06); }
+  .dm-regime.neg { border-color:rgba(244,63,94,.35); background:rgba(244,63,94,.06); }
+  .dmap { position:relative; margin:0 0 14px; padding-left:15px; }
+  .dmap:before { content:''; position:absolute; left:4px; top:14px; bottom:14px; width:2px; border-radius:2px;
+                 background:linear-gradient(180deg, rgba(16,185,129,.5), rgba(148,163,184,.16) 50%, rgba(244,63,94,.5)); }
+  .dm-row { position:relative; display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:12px;
+            padding:8px 11px; border-radius:9px; border:1px solid transparent; }
+  .dm-row + .dm-row { margin-top:3px; }
+  .dm-row:before { content:''; position:absolute; left:-15px; top:50%; transform:translateY(-50%); width:8px; height:8px;
+                   border-radius:50%; background:var(--txt3); box-shadow:0 0 0 3px var(--navy2); }
+  .dm-row .dm-k { font-size:10.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--txt3); }
+  .dm-row .dm-s { font-size:11px; color:var(--txt2); margin-top:1px; }
+  .dm-row .dm-v { font-size:17px; font-weight:800; font-family:'Space Grotesk','Inter',sans-serif; color:var(--txt1);
+                  font-variant-numeric:tabular-nums; }
+  .dm-row .dm-d { font-size:11.5px; color:var(--txt3); min-width:56px; text-align:right; font-variant-numeric:tabular-nums; }
+  .dm-row.k-cw:before   { background:#10b981; }
+  .dm-row.k-flip:before { background:#22d3ee; }
+  .dm-row.k-grav:before { background:#3b82f6; }
+  .dm-row.k-pw:before   { background:#f43f5e; }
+  .dm-row.is-spot { background:rgba(34,211,238,.10); border-color:rgba(34,211,238,.38); }
+  .dm-row.is-spot:before { background:#22d3ee; width:11px; height:11px; left:-16px; }
+  .dm-row.is-spot .dm-v { font-size:23px; color:#22d3ee; }
+  .dm-row.is-spot .dm-k { color:#22d3ee; }
   /* Options-flow tiles: 4-across on desktop so the panel is compact, 2-up on mobile */
   .flow-tiles { grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 760px) { .flow-tiles { grid-template-columns: 1fr 1fr; } }
@@ -254,14 +285,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="lv-card">
         <h2 id="dealer-h">SPY · Dealer positioning</h2>
-        <div style="margin-bottom:12px;"><span class="lv-spot" id="d-spot">—</span> <span id="d-reg" class="s" style="font-size:12px;"></span></div>
+        <div class="dm-regime" id="d-regime"><span class="rg-k">Net GEX</span><span class="rg-v" id="d-gex">—</span><span class="rg-s" id="d-reg"></span><span class="rg-k" id="d-gex-s"></span></div>
         <div id="d-sqz-hero" class="sqz-hero q" style="display:none;"></div>
+        <div class="dmap" id="d-map"></div>
         <div class="lv-tiles">
-          <div class="lv-tile"><div class="k">Net GEX</div><div class="v" id="d-gex">—</div><div class="s" id="d-gex-s"></div></div>
-          <div class="lv-tile"><div class="k">Gamma Flip</div><div class="v cyn" id="d-flip">—</div><div class="s">the regime line</div></div>
-          <div class="lv-tile"><div class="k">Call Wall</div><div class="v grn" id="d-cw">—</div><div class="s">resistance / pin</div></div>
-          <div class="lv-tile"><div class="k">Put Wall</div><div class="v red" id="d-pw">—</div><div class="s">support</div></div>
-          <div class="lv-tile"><div class="k">Gravity</div><div class="v" id="d-grav" style="color:#3b82f6">—</div><div class="s">magnet / mean-revert</div></div>
           <div class="lv-tile"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
           <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
           <div class="lv-tile"><div class="k">Skew · near / far</div><div class="v" id="d-mm">—</div><div class="s" id="d-mm-s">near vs far expiry</div></div>
@@ -370,21 +397,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var _pc=$('profile'); if(_pc){ var _px=_pc.getContext('2d'); _pc.width=_pc.offsetWidth; _px.clearRect(0,0,_pc.width,_pc.height); }
       return;
     }
-    $('d-spot').textContent = _f(d.spot);
     var _ng = d.net_gex;
     if (_ng==null){   // don't assert a regime from absent data — show unknown, not a default "positive/dampening"
       $('d-reg').innerHTML = '<span style="color:var(--txt3)">&mdash; data unavailable</span>';
-      $('d-gex').textContent = 'n/a'; $('d-gex').className = 'v'; $('d-gex-s').textContent = '';
+      $('d-gex').textContent = 'n/a'; $('d-gex').className = 'rg-v'; $('d-gex-s').textContent = '';
+      var _rg0=$('d-regime'); if(_rg0) _rg0.className='dm-regime';
     } else {
       var pos = _ng >= 0;
       $('d-reg').innerHTML = '<span class="'+(pos?'grn':'red')+'">'+(pos?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)')+'</span>';
-      $('d-gex').textContent = _gexMoney(_ng); $('d-gex').className = 'v '+(pos?'grn':'red');
+      $('d-gex').textContent = _gexMoney(_ng); $('d-gex').className = 'rg-v '+(pos?'grn':'red');
+      var _rg=$('d-regime'); if(_rg) _rg.className='dm-regime '+(pos?'pos':'neg');
       $('d-gex-s').textContent = pos?'long gamma':'short gamma';
     }
-    $('d-flip').textContent = d.flip?_f(d.flip):'—';
-    $('d-cw').textContent = d.call_wall?_f(d.call_wall):'—';
-    $('d-pw').textContent = d.put_wall?_f(d.put_wall):'—';
-    $('d-grav').textContent = d.gravity?_f(d.gravity):'—';
+    renderDealerMap(d);
     if (d.em_daily!=null){
       // Show the expected-move BAND (spot ± EM), not just the ±$ — so the range reads against the walls at a
       // glance (e.g. EM-high sitting right at the Call Wall). The ±$/±% moves to the subtitle.
@@ -712,6 +737,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(a>=1e6)  return sg+'$'+(a/1e6).toFixed(1)+'M';
     if(a>=1e3)  return sg+'$'+Math.round(a/1e3)+'K';
     return sg+'$'+Math.round(a); }
+
+  // The dealer map as a price LADDER. Each level is placed in true price order with spot sitting in
+  // its real position among them, so "what is above me, what is below me, how far" is read straight
+  // off the rail instead of being reassembled from five separate tiles. Distances are vs spot.
+  function renderDealerMap(d){
+    var el=$('d-map'); if(!el) return;
+    var spot=(d.spot!=null && Number(d.spot))?Number(d.spot):null;
+    var rows=[];
+    function add(v,k,cls,sub){ var x=Number(v); if(!v||!isFinite(x)||x<=0) return; rows.push({v:x,k:k,cls:cls,sub:sub}); }
+    add(d.call_wall,'Call wall','k-cw','resistance / pin');
+    add(d.flip,'Gamma flip','k-flip','the regime line');
+    add(d.gravity,'Gravity','k-grav','magnet / mean-revert');
+    add(d.put_wall,'Put wall','k-pw','support');
+    if(spot!=null) rows.push({v:spot,k:'Spot',cls:'is-spot',sub:'',spot:true});
+    if(!rows.length){ el.innerHTML=''; return; }
+    rows.sort(function(a,b){ return b.v-a.v; });
+    el.innerHTML = rows.map(function(r){
+      var dist=(spot && !r.spot) ? ((r.v/spot-1)*100) : null;
+      var dtxt=(dist==null)?'':((dist>=0?'+':'')+dist.toFixed(2)+'%');
+      return '<div class="dm-row '+r.cls+'">'
+           +   '<div><div class="dm-k">'+_escH(r.k)+'</div>'
+           +   (r.sub?('<div class="dm-s">'+_escH(r.sub)+'</div>'):'')+'</div>'
+           +   '<div class="dm-v">'+_f(r.v)+'</div>'
+           +   '<div class="dm-d">'+dtxt+'</div>'
+           + '</div>';
+    }).join('');
+  }
 
   function renderTapeFlow(d){
     var card=$('tape-card'); if(!card) return;
