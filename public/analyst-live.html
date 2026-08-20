@@ -324,12 +324,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- market ribbon -->
     <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt3);margin:2px 0 9px;">Futures &middot; <span style="color:#34d399;">Live 24/5</span></div>
     <div class="lv-ribbon" id="mkt-ribbon"></div>
+    <div class="lv-strip" id="strip"></div>
 
     <!-- HERO: chart | dealer positioning (balanced two-up) -->
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
         <h2 style="padding-top:18px;">Gamma profile by strike</h2>
-        <div id="prof-wrap" style="flex:1;min-height:210px;display:flex;align-items:stretch;"><canvas id="profile" height="200" style="width:100%;"></canvas></div>
+        <div id="prof-wrap" style="position:relative;flex:1;min-height:210px;"><canvas id="profile" height="200" style="position:absolute;inset:0;width:100%;height:100%;"></canvas></div>
       </div>
       <div class="lv-card">
         <h2 id="dealer-h">SPY · Dealer positioning</h2>
@@ -384,7 +385,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lv-bottom">
       
       <div class="lv-card b-line"><h2>'The Line' — <span id="ln-tk">SPY</span> level breaks</h2><div style="font-size:11.5px;color:var(--txt3);margin:-4px 0 10px;line-height:1.45;">Real-time level-break playbooks for the ticker you trade &mdash; SPY, QQQ and IWM each read their own dealer map (QQQ tracks SPY loosely; IWM, the small-caps, is its own market).</div><ul id="feed" class="lv-feed"><li style="border:0;color:var(--txt3);">Waiting for the next level event…</li></ul></div>
-      <div class="lv-strip b-strip" id="strip"></div>
     </div>
 
     <!-- today's read (full-width prose) -->
@@ -603,12 +603,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function drawProfile(d){
     var cv = $('profile');
     if(!cv || !d.profile || !d.profile.length) { if(cv){var c0=cv.getContext('2d');cv.width=cv.offsetWidth;c0.clearRect(0,0,cv.width,cv.height);} return; }
-    // Height comes from the wrapper's leftover flex space, so the profile grows into whatever the
-    // dealer column leaves over instead of that space becoming a hole. Floored so it stays legible.
+    // Height comes from the wrapper's leftover flex space so the profile fills the column instead of
+    // leaving a hole. The canvas is positioned ABSOLUTELY inside that wrapper, which is load-bearing:
+    // in normal flow it contributed its own height back to the card, so every render made the row
+    // taller, which handed the wrapper more leftover, which grew the canvas again -- it reached ~900px
+    // and was still climbing. Out of flow the wrapper depends only on the flex leftover, so the loop
+    // cannot close. Display size is the CSS inset:0, so style.height must NOT be set here.
     var _wrap = cv.parentNode;
     var dpr = window.devicePixelRatio||1, W = cv.offsetWidth,
         H = Math.max(210, (_wrap && _wrap.clientHeight) || 220);
-    cv.style.height = H+'px'; cv.width = W*dpr; cv.height = H*dpr;
+    cv.width = W*dpr; cv.height = H*dpr;
     var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
     var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
     var n = rows.length;
