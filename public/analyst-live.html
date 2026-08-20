@@ -82,6 +82,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
   .lv-live.closed { color: #6e6e6e; } .lv-live.closed .dot { background: #6e6e6e; box-shadow: none; animation: none; }
   .lv-sess { color: var(--txt3); font-size: 12.5px; }
+  /* Status sits on the right edge. It used to trail the wordmark on the left while the ticker tabs held
+     the right side; once those were removed the row was brand-left / empty-right. Grouping the badge and
+     the cadence line keeps them together when the row wraps instead of stranding one on its own line. */
+  .lv-status { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  @media (max-width: 560px) { .lv-status { margin-left: 0; justify-content: flex-start; } }
   /* grid */
   .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
   /* The dealer column is simply taller than chart+profile, so the left card either stretches and
@@ -332,8 +337,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="dash" class="hidden">
     <div class="lv-top">
       <div class="lv-brand"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></div>
-      <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
-      <span id="sess" class="lv-sess"></span>
+      <div class="lv-status">
+        <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
+        <span id="sess" class="lv-sess"></span>
+      </div>
     </div>
 
     <!-- market ribbon -->
