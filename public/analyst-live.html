@@ -86,10 +86,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-tabs button { border: 0; background: transparent; color: var(--txt2); font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
   .lv-tabs button.on { background: #22d3ee; color: #04121a; }
   /* grid */
-  .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: start; }
-  /* align-items:start matters: stretched cards had to invent filler to reach the taller column,
-     which is what the old margin-top:auto on the gamma heading was doing. Once the fear gauge
-     moved out that filler became a ~130px hole between the chart and the profile. */
+  .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  /* The dealer column is simply taller than chart+profile, so the left card either stretches and
+     leaves a hole, or stops short and leaves one beside it. Neither is a layout. Instead the profile
+     canvas absorbs the difference: its wrapper takes the leftover height and drawProfile sizes to it,
+     so the strike ladder gets MORE room exactly when there is room going spare. */
   @media (max-width: 900px) { .lv-grid { grid-template-columns: 1fr; } }
   /* Wide desktop: push the split toward the chart. The right column is fixed-content tiles that
      stop improving past ~640px, while the chart keeps reading better the wider it gets. */
@@ -114,7 +115,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
                border:1px solid var(--bdr); border-radius:10px; background:var(--navy); }
   .dm-regime .rg-v { font-size:24px; font-weight:900; font-family:'Space Grotesk','Inter',sans-serif; letter-spacing:-.5px; }
   .dm-regime .rg-k { font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--txt3); }
-  .dm-regime .rg-s { font-size:12px; color:var(--txt2); margin-left:auto; text-align:right; }
+  /* The sentence will never share a line with a 24px value inside a ~500px column, so it stops
+     pretending: margin-left:auto right-aligned it and then let it wrap, which reads as a broken
+     line rather than a designed one. It now takes its own full-width row, left-aligned to the label
+     above it. */
+  .dm-regime .rg-s { font-size:12px; color:var(--txt2); flex: 1 0 100%; margin-top:2px; }
   .dm-regime.pos { border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.06); }
   .dm-regime.neg { border-color:rgba(244,63,94,.35); background:rgba(244,63,94,.06); }
   .dmap { position:relative; margin:0 0 14px; padding-left:15px; }
@@ -204,6 +209,9 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   }
   .lv-mini { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
   .lv-mini.on { border-color: rgba(34,211,238,.5); }
+  .lv-mini:hover { border-color: rgba(34,211,238,.45); background: rgba(34,211,238,.05); }
+  .strip-hd { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: 2px;
+              text-transform: uppercase; color: var(--txt3); margin-bottom: 2px; }
   .lv-mini .t { font-weight: 800; color: var(--txt1); font-size: 16px; }
   .lv-mini .r { font-size: 12.5px; color: var(--txt2); margin-top: 6px; line-height: 1.45; }
   .lv-feed li, .lv-read { list-style: none; }
@@ -321,7 +329,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
         <h2 style="padding-top:18px;">Gamma profile by strike</h2>
-        <canvas id="profile" height="200" style="width:100%;"></canvas>
+        <div id="prof-wrap" style="flex:1;min-height:210px;display:flex;align-items:stretch;"><canvas id="profile" height="200" style="width:100%;"></canvas></div>
       </div>
       <div class="lv-card">
         <h2 id="dealer-h">SPY · Dealer positioning</h2>
@@ -595,7 +603,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function drawProfile(d){
     var cv = $('profile');
     if(!cv || !d.profile || !d.profile.length) { if(cv){var c0=cv.getContext('2d');cv.width=cv.offsetWidth;c0.clearRect(0,0,cv.width,cv.height);} return; }
-    var dpr = window.devicePixelRatio||1, W = cv.offsetWidth, H = 220;
+    // Height comes from the wrapper's leftover flex space, so the profile grows into whatever the
+    // dealer column leaves over instead of that space becoming a hole. Floored so it stays legible.
+    var _wrap = cv.parentNode;
+    var dpr = window.devicePixelRatio||1, W = cv.offsetWidth,
+        H = Math.max(210, (_wrap && _wrap.clientHeight) || 220);
     cv.style.height = H+'px'; cv.width = W*dpr; cv.height = H*dpr;
     var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
     var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
@@ -646,6 +658,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function renderStrip(){
     var el = $('strip'); el.innerHTML = '';
+    // These cards switch the whole dashboard to that ticker, but with no heading and no hover they read
+    // as an unexplained pair of boxes floating between two titled sections -- every other block on the
+    // page announces itself. Say what they are and that they are clickable.
+    var _hd = document.createElement('div');
+    _hd.className = 'strip-hd';
+    _hd.textContent = 'The other indices — click to switch';
+    el.appendChild(_hd);
     // Only the OTHER indices — the current ticker is already fully expanded in the big section above, so
     // repeating it here was pure duplication. The strip is now a compact cross-asset compare/switch.
     (STATE.indices||[]).filter(function(d){return d.ticker!==CUR;}).forEach(function(d){
