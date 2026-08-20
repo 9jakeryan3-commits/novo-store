@@ -151,6 +151,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .ana-head { font-size:10px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--txt3);
               border-bottom:1px solid var(--bdr); padding-bottom:6px; }
   .ana-head .a-o { color:var(--txt3); }
+  /* print tape: four columns, size right-aligned so magnitude is scannable down the row */
+  .tf-row { display:grid; grid-template-columns: 50px 64px 78px 74px 1fr; gap:10px; align-items:baseline;
+            padding:4px 0; border-bottom:1px solid rgba(128,128,128,.12); }
+  .tf-row.tf-raw { grid-template-columns: 50px 1fr; }
+  .tf-row .f-ts { color:var(--txt3); font-variant-numeric:tabular-nums; }
+  .tf-row .f-k { color:var(--txt3); text-transform:uppercase; font-size:10px; font-weight:800; letter-spacing:1px; }
+  .tf-row .f-s { font-weight:700; }
+  .tf-row .f-n { text-align:right; font-variant-numeric:tabular-nums; font-weight:800; color:var(--txt1); }
+  .tf-row .f-v { color:var(--txt3); }
+  @media (max-width: 780px) { .tf-row { grid-template-columns: 46px 1fr auto; }
+                              .tf-row .f-k, .tf-row .f-v { display:none; } }
   @media (max-width: 780px) { .ana-row { grid-template-columns: 1fr 1fr 1fr; row-gap:2px; }
                               .ana-head { display:none; } }
   /* Options-flow tiles: 4-across on desktop so the panel is compact, 2-up on mobile */
@@ -823,7 +834,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // color by DIRECTION, not instrument: call-buy/put-sell = bullish (green); put-buy/call-sell = bearish
         // (red); blocks / underlying prints carry no aggressor direction -> neutral.
         var txt=String(x.text||''); var col = /call-buy|put-sell|bull/i.test(txt)?'#22c55e' : /put-buy|call-sell|bear/i.test(txt)?'#ef4444' : 'var(--txt2)';
-        return '<div style="padding:3px 0;border-bottom:1px solid rgba(128,128,128,0.12)"><span style="color:var(--txt3)">'+_escH(String(x.ts||''))+'</span> · <span style="color:'+col+'">'+_escH(txt)+'</span></div>';
+        var ts='<span class="f-ts">'+_escH(String(x.ts||''))+'</span>';
+        // Every print carries the same four facts, so give them four columns and right-align the size on
+        // tabular numerals -- the whole reason to read a tape is spotting the big one, and $34K buried
+        // mid-sentence at a different x-offset on every row is exactly what stops you seeing it.
+        var m = txt.match(/^\s*([A-Za-z-]+)\s*[·:-]\s*([A-Za-z-]+)\s+(\$[\d.,]+\s*[KMBT]?)\s+across\s+(\d+)\s+venues?\s*$/i);
+        if (!m) return '<div class="tf-row tf-raw">'+ts+'<span style="color:'+col+'">'+_escH(txt)+'</span></div>';
+        return '<div class="tf-row">'+ts
+             + '<span class="f-k">'+_escH(m[1])+'</span>'
+             + '<span class="f-s" style="color:'+col+'">'+_escH(m[2])+'</span>'
+             + '<span class="f-n">'+_escH(m[3].replace(/\s+/g,''))+'</span>'
+             + '<span class="f-v">'+_escH(m[4])+' venues</span></div>';
       }).join('');
     } else { $('t-feed').innerHTML='<span style="color:var(--txt3)">Watching the tape — sweeps &amp; block prints appear here as they hit.</span>'; }
   }
