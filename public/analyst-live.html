@@ -1147,6 +1147,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var d = document.createElement('div'); d.className = 'm ' + (cls||''); d.textContent = text;
     log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
   }
+  function srcLine(text){
+    var log = document.getElementById('novo-ask-log');
+    var k = document.createElement('div'); k.className = 'src'; k.textContent = text;
+    log.appendChild(k); return k;
+  }
+
+  // The transcript lived only in the DOM, so a reload erased what you asked and what it answered.
+  // localStorage keeps it on the device -- nothing transits, no server state, no cost. It expires
+  // after a day ON PURPOSE: this is a live map, and yesterday's answers quote levels that have since
+  // moved, so holding them longer invites reading a stale number as a current one.
+  var TURNS = [], CHAT_KEY = 'novo_ask_log', CHAT_TTL = 24 * 60 * 60 * 1000, CHAT_MAX = 40;
+  function saveTurns(){
+    try { localStorage.setItem(CHAT_KEY, JSON.stringify({ t: Date.now(), turns: TURNS.slice(-CHAT_MAX) })); } catch(_){}
+  }
+  function renderTurn(m){
+    add(m.r === 'you' ? 'you' : '', m.x);
+    if (m.c) srcLine(m.c);
+    if (m.s) srcLine(m.s);
+  }
+  function loadTurns(){
+    try {
+      var raw = localStorage.getItem(CHAT_KEY); if (!raw) return;
+      var o = JSON.parse(raw);
+      if (!o || !Array.isArray(o.turns) || !o.t || (Date.now() - o.t) > CHAT_TTL) { localStorage.removeItem(CHAT_KEY); return; }
+      TURNS = o.turns.slice(-CHAT_MAX);
+      if (!TURNS.length) return;
+      var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+      TURNS.forEach(renderTurn);
+      var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
+    } catch(_){}
+  }
+  loadTurns();
   // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
   // storage key it persists to instead, which is what the push-notification code already does.
   function tok(){
@@ -1157,19 +1189,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     q = (q||'').trim(); if (!q || busy) return;
     var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
     document.getElementById('novo-ask-q').value = '';
-    add('you', q);
+    // Snapshot the prior turns BEFORE this question joins them -- it travels in `question`, and sending
+    // it twice would have NoVo answering an echo of itself.
+    var hist = TURNS.slice(-6).map(function(m){ return { role: m.r === 'you' ? 'user' : 'novo', text: m.x }; });
+    add('you', q); TURNS.push({ r: 'you', x: q }); saveTurns();
     var thinking = add('', 'Reading the map\u2026');
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ question: q, t: tok() || null })
+        body: JSON.stringify({ question: q, t: tok() || null, history: hist })
       });
       var d = await r.json();
       thinking.remove();
-      if (!d.ok) { add('', d.error || 'NoVo is unavailable right now.'); }
+      if (!d.ok) {
+        var em = d.error || 'NoVo is unavailable right now.';
+        add('', em); TURNS.push({ r: 'novo', x: em }); saveTurns();
+      }
       else {
         add('', d.answer);
+        var _turn = { r: 'novo', x: d.answer };
         var log = document.getElementById('novo-ask-log');
         // What it looked up, then what it read. A failed lookup is shown too \u2014 that is the
         // difference between an answer you can check and one you have to take on faith.
@@ -1184,18 +1223,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (seen[n]) return; seen[n] = 1;
             parts.push(l.ok ? n : n + ' (no data)');
           });
-          if (parts.length) {
-            var k = document.createElement('div'); k.className = 'src';
-            k.textContent = 'Checked: ' + parts.join(' \u00b7 ');
-            log.appendChild(k);
-          }
+          if (parts.length) { _turn.c = 'Checked: ' + parts.join(' \u00b7 '); srcLine(_turn.c); }
         }
         if (d.sources && d.sources.length) {
-          var s = document.createElement('div'); s.className = 'src';
-          s.textContent = 'Sources: ' + d.sources.map(function(x){
+          _turn.s = 'Sources: ' + d.sources.map(function(x){
             return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' \u00b7 ');
-          log.appendChild(s);
+          srcLine(_turn.s);
         }
+        TURNS.push(_turn); saveTurns();
         log.scrollTop = log.scrollHeight;
       }
     } catch(e){ thinking.remove(); add('', 'NoVo is unavailable right now.'); }

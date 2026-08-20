@@ -232,6 +232,15 @@ module.exports = async (req, res) => {
   const question = String((req.body && req.body.question) || '').trim().slice(0, 600);
   if (!question) return res.status(400).json({ error: 'no question' });
 
+  // Prior turns, so a follow-up ("and QQQ?", "why?") means something. Hard-bounded on every axis --
+  // count, length and shape -- because this is the one field a client can inflate at will, and it is
+  // re-sent on every question. Six turns covers essentially any real follow-up chain.
+  const history = (Array.isArray(req.body && req.body.history) ? req.body.history : [])
+    .filter((m) => m && (m.role === 'user' || m.role === 'novo') && typeof m.text === 'string')
+    .slice(-6)
+    .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }))
+    .filter((m) => m.text);
+
   try {
     const idx = await loadIndex();
     if (!idx) return res.status(503).json({ error: 'the analyst index has not been published yet' });
@@ -256,7 +265,21 @@ module.exports = async (req, res) => {
     const reference = hits.map((h) =>
       `[${h.s === 'memory' ? "NoVo's own read" : 'Journal'}] ${h.t}\n${String(h.x).slice(0, 900)}`).join('\n\n');
 
-    const prompt =
+    // Earlier turns are context for INTENT ONLY. This is a live map: a number quoted at 10:00 is wrong by
+  // 14:00, and a normal chatbot's habit of treating its own transcript as truth would have NoVo
+  // confidently repeating an expired flip. The transcript resolves what "it" and "the other one" mean;
+  // every figure still has to come from MARKET DATA below.
+  const convo = history.length
+    ? [
+        'EARLIER IN THIS CONVERSATION (what the user is REFERRING TO, never a source of numbers;',
+        'these figures are stale and MARKET DATA below overrides them without comment):',
+        ...history.map((m) => (m.role === 'user' ? 'User: ' : 'You: ') + m.text),
+        '', '',
+      ].join('\n')
+    : '';
+
+  const prompt =
+      convo +
       `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
