@@ -144,6 +144,10 @@ const declarations = [
       "gamma flip (below_far/below_near/at_line/above_near/above_far) and volatility tercile (low/mid/high), " +
       "each with the median move 15m and 60m forward and into the close, plus how often it resolved upward. " +
       "Use for 'how often does', 'what usually happens when', 'is that normal', 'what's the edge here'. " +
+      "Also returns `signals`: how NoVo's OWN calls have scored — the squeeze state and the tape's sweep bias " +
+      "graded against what price actually did over the next hour (correct_rate is directional accuracy; " +
+      "dormant/balanced make no claim and are never scored). Use it when asked whether a signal is worth " +
+      "trusting, and be straight when the record is thin or poor — an honest miss is worth more than a spun one. " +
       "CRITICAL: quote a cell ONLY when usable is true. n counts ~60s snapshots and is autocorrelated — " +
       "`sessions` is the real denominator, so a cell with sessions=1 is one afternoon, not evidence, no matter " +
       "how large n looks. Say the sample size out loud whenever you cite a number from here.",
@@ -415,6 +419,7 @@ function makeExecutors(ctx = {}) {
         volTerciles: t.vol_index_terciles,
         cells,
         byTimeOfDay: (t.by_tod || []).filter((c) => (only ? c.usable : true)),
+        signals: t.signals || null,
       };
     }
     if (!Object.keys(out).length) return { error: "unknown symbol" };
