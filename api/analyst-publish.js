@@ -535,7 +535,15 @@ async function _publishLiveLevels(state) {
       expectedMovePct: num(i && i.em_daily_pct),
       atmIv: num(i && i.atm_iv),
       skewPts: num(i && i.skew_pts),
-      regime: num(i && i.net_gex) == null ? null : (Number(i.net_gex) < 0 ? 'short gamma' : 'long gamma'),
+      // Guard the ABSENT case explicitly. This used num(), and num() coerces with Number() — where
+      // Number(null) and Number('') are both 0, and 0 is finite. A missing net_gex therefore came back
+      // as 0, failed the `< 0` test, and asserted "long gamma": a confident "dealers dampen moves" call
+      // built on no data at all. analyst-live.html:365 already refuses to do this on the front end
+      // ("don't assert a regime from absent data"); the backend was quietly undoing it.
+      // A true 0.0 net gamma is also not a regime, so it reads null rather than defaulting to long.
+      regime: (i == null || i.net_gex == null || i.net_gex === '' || !Number.isFinite(Number(i.net_gex)) || Number(i.net_gex) === 0)
+              ? null
+              : (Number(i.net_gex) < 0 ? 'short gamma' : 'long gamma'),
     })).filter((t) => t.ticker);
     if (!rows.length) return;
     await r.set(LIVE_LEVELS_KEY, JSON.stringify({
@@ -558,7 +566,15 @@ function _publicLevels(state) {
     // blank Expected move since the page shipped. Keep the old names as fallbacks.
     expectedMove: num(i && (i.em_daily != null ? i.em_daily
                      : i.expected_move != null ? i.expected_move : i.expectedMove)),
-    regime: (i && i.regime) ? String(i.regime) : null,
+    // Same trap as `expectedMove` above: this read a bare `i.regime`, and the engine's indices payload
+    // (main.py:1102) never emits that key — it emits `net_gex`. So the public regime has been null since
+    // the endpoint shipped. Derive it the way the members' mirror already does (see _liveLevels), so both
+    // paths agree instead of one silently returning nothing.
+    //
+    // `net_gex` here is already scaled to the per-1% display convention by _gex_disp(); that's a multiply
+    // by a positive spot, so the SIGN — the only thing the regime depends on — is unchanged.
+    regime: (i && i.regime) ? String(i.regime)
+            : (num(i && i.net_gex) == null ? null : (Number(i.net_gex) < 0 ? 'short gamma' : 'long gamma')),
   })).filter((t) => t.ticker && (t.flip || t.callWall || t.putWall));
 }
 
