@@ -136,7 +136,15 @@ module.exports = async (req, res) => {
       : k === "momentum" ? (s < 35 ? "below trend" : s < 60 ? "at trend" : "above trend")
       : k === "breadth" ? (s < 40 ? "weak" : s < 60 ? "mixed" : "strong")
       : (s < 40 ? "defensive" : s < 60 ? "balanced" : "call-heavy");
-    const factorsOut = factors.map((f) => ({ key: f.key, score: f.score, label: flabel(f.key, f.score) }));
+    // Publish the WEIGHT alongside each score. The four scores do not average to the headline —
+    // volatility counts 1.75x breadth — so a reader adding them up got a different number than the
+    // gauge and had no way to see why. `weight` is the normalised share actually used above, so the
+    // published factors always reconcile to the published pulse even when a factor drops out and tw < 1.
+    const _tw = factors.reduce((a, f) => a + f.w, 0) || 1;
+    const factorsOut = factors.map((f) => ({
+      key: f.key, score: f.score, label: flabel(f.key, f.score),
+      weight: Math.round((f.w / _tw) * 100) / 100,
+    }));
     // The SPY put/call ratio itself, not just its qualitative label. It is NoVo's own computed number
     // off the chain the engine already reads, and every serious options site publishes a put/call
     // ratio free, so showing the figure is table stakes rather than a leak. The dealer map stays paid.

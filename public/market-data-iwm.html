@@ -371,9 +371,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="font-weight:800;color:var(--txt1);font-size:17px;">Today&rsquo;s IWM dealer levels</div>
             <div id="lv-asof" style="font-size:11.5px;color:var(--txt2);font-weight:600;">loading&hellip;</div>
           </div>
+          <div id="lv-regime" style="display:none;margin-bottom:12px;padding:11px 13px;border-radius:9px;border:1px solid var(--bdr);"></div>
           <div id="lv-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;">
             <div style="color:var(--txt2);font-size:13px;">Fetching today&rsquo;s levels&hellip;</div>
           </div>
+          <div id="lv-context" style="display:none;margin-top:11px;font-size:13.5px;color:var(--txt2);line-height:1.6;"></div>
           <div style="margin-top:15px;padding-top:14px;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
             <div style="font-size:13.5px;color:var(--txt2);line-height:1.6;max-width:520px;">
               These are <b style="color:var(--txt1);">delayed</b> &mdash; same as every free gamma site.
@@ -395,14 +397,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         };
         fetch('/api/levels').then(function(r){ return r.json(); }).then(function(d){
           var t = (d && d.ok && (d.tickers || []).filter(function(x){ return x.ticker === TK; })[0]) || null;
-          if (!t) { box.innerHTML = '<div style="color:var(--txt2);font-size:13px;">Levels publish shortly before the open.</div>'; asof.textContent = ''; return; }
+          if (!t) { box.innerHTML = '<div style="color:var(--txt2);font-size:13px;">Levels publish shortly before the open.</div>'; asof.textContent = '';
+            var _r0 = document.getElementById('lv-regime'); if (_r0) _r0.style.display = 'none';
+            var _c0 = document.getElementById('lv-context'); if (_c0) _c0.style.display = 'none';
+            return; }
           box.innerHTML = [
             cell('Gamma flip', money(t.flip), 'var(--cyan)'),
             cell('Call wall', money(t.callWall), '#34d399'),
             cell('Put wall', money(t.putWall), '#f87171'),
             cell('Expected move', t.expectedMove == null ? null : '\u00b1' + Number(t.expectedMove).toFixed(2), 'var(--txt1)'),
-            cell('Spot', money(t.spot))
+            // Labelled 'Spot at snapshot' on purpose: the live ticker strip elsewhere on the site quotes
+            // a CURRENT price from a different feed, so the two legitimately differ by the age shown above.
+            // Naming this one for what it is stops that gap reading as one of them being wrong.
+            cell('Spot at snapshot', money(t.spot))
           ].join('');
+          // The regime is the interpretive key to every number above it — which of the two markets
+          // the prose below describes is actually live right now. Absent net_gex reads as unknown and
+          // the banner stays hidden: never assert a regime from missing data.
+          var rg = document.getElementById('lv-regime');
+          if (rg) {
+            var reg = t.regime == null ? null : String(t.regime).toLowerCase();
+            if (reg !== 'short gamma' && reg !== 'long gamma') { rg.style.display = 'none'; }
+            else {
+              var isShort = reg === 'short gamma';
+              var tone = isShort ? '#f87171' : '#34d399';
+              rg.style.display = '';
+              rg.style.background = isShort ? 'rgba(248,113,113,0.07)' : 'rgba(52,211,153,0.07)';
+              rg.style.borderColor = isShort ? 'rgba(248,113,113,0.30)' : 'rgba(52,211,153,0.30)';
+              rg.innerHTML = '<span style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:800;">Dealer regime</span>'
+                + '<div style="margin-top:4px;font-size:15.5px;font-weight:900;color:' + tone + ';">'
+                + (isShort ? 'Short gamma' : 'Long gamma')
+                + '<span style="color:var(--txt2);font-weight:600;font-size:13.5px;"> \u00b7 '
+                + (isShort ? 'dealers hedge with the move \u2014 moves extend' : 'dealers hedge against the move \u2014 moves get dampened')
+                + '</span></div>';
+            }
+          }
+          // Where spot actually sits in the map. The four numbers above imply this; nothing said it.
+          var cx = document.getElementById('lv-context');
+          if (cx) {
+            var parts = [];
+            if (t.spot != null && t.putWall != null && t.spot > t.putWall) parts.push('$' + (t.spot - t.putWall).toFixed(2) + ' above the put wall');
+            if (t.spot != null && t.callWall != null && t.callWall > t.spot) parts.push('$' + (t.callWall - t.spot).toFixed(2) + ' below the call wall');
+            if (parts.length) {
+              var em = t.expectedMove == null ? '' : ' \u2014 against a \u00b1$' + Number(t.expectedMove).toFixed(2) + ' expected move today';
+              cx.style.display = '';
+              cx.innerHTML = '<b style="color:var(--txt1);">' + TK + '</b> is ' + parts.join(' and ') + em + '.';
+            } else { cx.style.display = 'none'; }
+          }
           var mins = d.ageMinutes == null ? null : d.ageMinutes;
           asof.textContent = mins == null ? 'delayed' : ('delayed \u00b7 as of ' + mins + ' min ago');
         }).catch(function(){

@@ -621,7 +621,10 @@ function copyEmbed(btn){
       // show the put/call RATIO itself, not just its label - every options site publishes one free
       var val=esc(f.label);
       if(f.key==='putcall' && putCall!=null){ val=Number(putCall).toFixed(2)+' · '+val; }
-      return '<div class="pf"><div class="pfk"><span>'+(FNAME[f.key]||esc(f.key))+'</span><span class="pfv" style="color:'+col+'">'+val+'</span></div>'+
+      // Show each factor's WEIGHT. These four are not a flat average - volatility carries 1.75x
+      // breadth - so without this the scores visibly fail to add up to the headline gauge.
+      var wt = (f.weight == null) ? '' : '<span style="color:var(--txt3);font-weight:600;font-size:10.5px;"> &middot; '+Math.round(f.weight*100)+'%</span>';
+      return '<div class="pf"><div class="pfk"><span>'+(FNAME[f.key]||esc(f.key))+wt+'</span><span class="pfv" style="color:'+col+'">'+val+'</span></div>'+
         '<div class="pfbar"><i style="width:'+Math.max(4,Math.min(100,f.score))+'%;background:'+col+'"></i></div></div>';
     }).join('');
   }
