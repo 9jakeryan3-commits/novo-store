@@ -404,7 +404,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         hero.className=cls;
         hero.innerHTML = '<div class="sqz-hd"><span class="sqz-k">Gamma squeeze</span><span class="sqz-state" style="color:'+col+'">'+badge+'</span></div>'
           + '<div class="sqz-meter"><div class="sqz-fill" style="width:'+_sc+'%;background:'+col+'"></div></div>'
-          + '<div class="sqz-lbl">'+_escH(sq.label||'')+'</div>';
+          // Per-tile freshness: the dealer half of this signal keeps refreshing after the close while the tape
+          // half stops, so the tile says which basis it is on rather than inheriting the page-level badge.
+          + '<div class="sqz-lbl">'+_escH(sq.label||'')
+            + (sq.tape_live===false ? ' <span style="color:var(--txt3)">· dealer map only — tape closed</span>' : '')
+          + '</div>';
       }
     }
     renderFlow(d);
