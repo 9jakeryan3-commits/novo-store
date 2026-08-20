@@ -494,11 +494,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     renderFlow(d);
     renderTapeFlow(d);
-    // chart — per-index (each ticker carries its own rendered chart). Fallback: during an engine/frontend
-    // deploy skew the engine may still emit only the legacy top-level SPY chart — show it for SPY only
-    // (never QQQ/IWM, which would mislabel), so the card isn't blank until the new engine restarts.
-    var _cu = d.chart_url || (CUR==='SPY' ? (STATE.chart_url||null) : null);
-    var _cb = d.chart_b64 || (CUR==='SPY' ? (STATE.chart_b64||null) : null);
+    // chart — per-index, each ticker renders ITS OWN chart and only its own.
+    //
+    // There used to be a SPY-only fallback to the legacy top-level STATE.chart_url/chart_b64, added so the
+    // card would not sit blank during a one-time engine/frontend deploy skew. That transition is long past
+    // and the shim turned into a liar: whenever SPY's per-ticker chart was absent, SPY silently rendered a
+    // DIFFERENT image built by a different code path, while QQQ and IWM (which never had the fallback)
+    // rendered theirs. That is precisely why SPY showed a one-day window with a VWAP line while the other
+    // two showed two days without one — SPY was not displaying the live per-ticker chart at all, so fixing
+    // the engine's chart window changed nothing on screen for SPY and everything for the others.
+    //
+    // All three are now identical: own chart, or no chart. A missing chart must look missing, not stale.
+    var _cu = d.chart_url || null;
+    var _cb = d.chart_b64 || null;
     if (_cu){ if($('chart').getAttribute('src') !== _cu) $('chart').src = _cu; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; }   // hosted URL: browser caches, only re-downloads when ?v=hash changes
     else if (_cb){ $('chart').src = 'data:image/png;base64,'+_cb; $('chart').style.display='block'; $('chart').alt = CUR+' session chart with dealer levels'; }   // fallback while the store rolls out / if an upload fails
     else { $('chart').style.display='none'; }
