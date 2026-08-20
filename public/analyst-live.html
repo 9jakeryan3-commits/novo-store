@@ -86,7 +86,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-tabs button { border: 0; background: transparent; color: var(--txt2); font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
   .lv-tabs button.on { background: #22d3ee; color: #04121a; }
   /* grid */
-  .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: start; }
+  /* align-items:start matters: stretched cards had to invent filler to reach the taller column,
+     which is what the old margin-top:auto on the gamma heading was doing. Once the fear gauge
+     moved out that filler became a ~130px hole between the chart and the profile. */
   @media (max-width: 900px) { .lv-grid { grid-template-columns: 1fr; } }
   /* Wide desktop: push the split toward the chart. The right column is fixed-content tiles that
      stop improving past ~640px, while the chart keeps reading better the wider it gets. */
@@ -139,6 +142,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* 5 tiles in 2 columns orphaned the last one. Expected move spans the row instead — it has the
      longest subtitle, so it gains the room it was wrapping in, and no tile is left stranded. */
   .lv-tiles .t-wide { grid-column: 1 / -1; }
+  /* analogues: a comparison table, so it gets table alignment */
+  .ana-row { display:grid; grid-template-columns: 84px 56px 60px minmax(90px,1fr) 82px 82px 92px; gap:10px;
+             align-items:baseline; padding:8px 0; border-bottom:1px solid rgba(128,128,128,.15); font-size:12.5px; }
+  .ana-row .a-d { font-weight:800; color:var(--txt1); }
+  .ana-row .a-t, .ana-row .a-m, .ana-row .a-r { color:var(--txt3); }
+  .ana-row .a-o { text-align:right; font-variant-numeric:tabular-nums; }
+  .ana-head { font-size:10px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--txt3);
+              border-bottom:1px solid var(--bdr); padding-bottom:6px; }
+  .ana-head .a-o { color:var(--txt3); }
+  @media (max-width: 780px) { .ana-row { grid-template-columns: 1fr 1fr 1fr; row-gap:2px; }
+                              .ana-head { display:none; } }
   /* Options-flow tiles: 4-across on desktop so the panel is compact, 2-up on mobile */
   .flow-tiles { grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 760px) { .flow-tiles { grid-template-columns: 1fr 1fr; } }
@@ -199,7 +213,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .nf-btn.on:hover { color: #04121a; }
   .nf-note { font-size: 11px; color: var(--txt3); margin-top: 10px; line-height: 1.5; }
   .lv-read .rt { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 16px; font-weight: 800; color: var(--txt1); }
-  .lv-read .rb { white-space: pre-wrap; font-size: 13.5px; color: var(--txt2); line-height: 1.6; margin-top: 8px; max-height: 340px; overflow-y: auto; }
+  /* The read is prose. Unbounded, it set ~200-character lines across the full card, which is about
+     three times a comfortable measure -- the eye loses its place on the return sweep. 78ch caps the
+     line, and the taller box is affordable now that the text is narrower. */
+  .lv-read .rb { white-space: pre-wrap; font-size: 13.5px; color: var(--txt2); line-height: 1.65; margin-top: 8px;
+                 max-width: 78ch; max-height: 520px; overflow-y: auto; padding-right: 8px; }
   .lv-vol { font-size: 12.5px; color: var(--txt2); margin-top: 10px; padding: 10px 12px; background: var(--navy); border: 1px solid var(--bdr); border-radius: 8px; }
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
@@ -285,7 +303,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- HERO: chart | dealer positioning (balanced two-up) -->
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
-        <h2 style="margin-top:auto;padding-top:16px;">Gamma profile by strike</h2>
+        <h2 style="padding-top:18px;">Gamma profile by strike</h2>
         <canvas id="profile" height="200" style="width:100%;"></canvas>
       </div>
       <div class="lv-card">
@@ -822,15 +840,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     var rows = a.analogues||[];
     if (!rows.length){ box.innerHTML='<span style="color:var(--txt3)">No close analogue for the current setup yet.</span>'; return; }
-    box.innerHTML = rows.map(function(r){
-      var oc=r.outcome||{}, parts=[];
-      function sgn(v,lbl){ if(v==null) return ''; var c=v>=0?'#22c55e':'#ef4444'; return '<span style="color:'+c+'">'+(v>=0?'+':'')+Number(v).toFixed(2)+'% '+lbl+'</span>'; }
-      if(oc.fwd15!=null) parts.push(sgn(oc.fwd15,'15m'));
-      if(oc.fwd60!=null) parts.push(sgn(oc.fwd60,'60m'));
-      if(oc.into_close!=null) parts.push(sgn(oc.into_close,'into close'));
-      var out = parts.length?parts.join('  ·  '):'<span style="color:var(--txt3)">outcome n/a</span>';
+    // Three outcomes per row read as a comparison, so they belong in aligned columns on tabular
+    // numerals -- run inline with dot separators, +0.05% and -0.36% never line up and the eye cannot
+    // scan a column to see whether these setups actually resolved the same way.
+    function _oCell(v){
+      if(v==null) return '<span class="a-o" style="color:var(--txt3)">&mdash;</span>';
+      return '<span class="a-o" style="color:'+(v>=0?'#22c55e':'#ef4444')+'">'+(v>=0?'+':'')+Number(v).toFixed(2)+'%</span>';
+    }
+    box.innerHTML = '<div class="ana-row ana-head"><span>Date</span><span>Time</span><span>Match</span>'
+      + '<span>Regime</span><span class="a-o">15m</span><span class="a-o">60m</span><span class="a-o">Into close</span></div>'
+      + rows.map(function(r){
+      var oc=r.outcome||{};
       var dd=new Date(r.date+'T00:00:00'); var dl=isNaN(dd.getTime())?r.date:(dd.toLocaleDateString(undefined,{month:'short',day:'numeric'}));
-      return '<div style="padding:7px 0;border-bottom:1px solid rgba(128,128,128,0.15)"><b>'+_escH(dl)+'</b> <span style="color:var(--txt3)">'+_escH(r.tod)+'</span> · '+Math.round(r.similarity)+'% match · '+_escH(r.regime||'')+'  →  '+out+'</div>';
+      return '<div class="ana-row">'
+           + '<span class="a-d">'+_escH(dl)+'</span>'
+           + '<span class="a-t">'+_escH(r.tod||'')+'</span>'
+           + '<span class="a-m">'+Math.round(r.similarity)+'%</span>'
+           + '<span class="a-r">'+_escH(r.regime||'')+'</span>'
+           + _oCell(oc.fwd15) + _oCell(oc.fwd60) + _oCell(oc.into_close)
+           + '</div>';
     }).join('');
   }
 
