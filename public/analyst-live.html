@@ -174,8 +174,18 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .tf-row .f-v { color:var(--txt3); }
   @media (max-width: 780px) { .tf-row { grid-template-columns: 46px 1fr auto; }
                               .tf-row .f-k, .tf-row .f-v { display:none; } }
-  @media (max-width: 780px) { .ana-row { grid-template-columns: 1fr 1fr 1fr; row-gap:2px; }
-                              .ana-head { display:none; } }
+  /* Mobile: the seven columns cannot survive, so stop pretending they can. One line of setup, one line
+     of outcomes, each outcome wearing its own horizon. Collapsing to three equal columns just scattered
+     the same cells into a grid with no header to read them against. */
+  @media (max-width: 780px) {
+    .ana-head { display:none; }
+    .ana-row { display:block; max-width:none; padding:10px 0; }
+    .ana-row .a-d { font-size:13.5px; }
+    .ana-row .a-t::before, .ana-row .a-m::before, .ana-row .a-r::before { content:' · '; color:var(--txt3); }
+    .ana-row .a-o { display:inline-block; min-width:0; text-align:left; margin:7px 14px 0 0; }
+    .ana-row .a-o::before { content: attr(data-h) ' '; color:var(--txt3); font-weight:800;
+                            font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+  }
   /* Options-flow tiles: 4-across on desktop so the panel is compact, 2-up on mobile */
   .flow-tiles { grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 760px) { .flow-tiles { grid-template-columns: 1fr 1fr; } }
@@ -919,9 +929,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // Three outcomes per row read as a comparison, so they belong in aligned columns on tabular
     // numerals -- run inline with dot separators, +0.05% and -0.36% never line up and the eye cannot
     // scan a column to see whether these setups actually resolved the same way.
-    function _oCell(v){
-      if(v==null) return '<span class="a-o" style="color:var(--txt3)">&mdash;</span>';
-      return '<span class="a-o" style="color:'+(v>=0?'#22c55e':'#ef4444')+'">'+(v>=0?'+':'')+Number(v).toFixed(2)+'%</span>';
+    // The horizon travels ON the cell. On mobile the header row is hidden, and three bare percentages with
+    // nothing saying which is 15m, which is 60m and which is the close is not a table, it is a puzzle.
+    function _oCell(v,h){
+      if(v==null) return '<span class="a-o" data-h="'+h+'" style="color:var(--txt3)">&mdash;</span>';
+      return '<span class="a-o" data-h="'+h+'" style="color:'+(v>=0?'#22c55e':'#ef4444')+'">'+(v>=0?'+':'')+Number(v).toFixed(2)+'%</span>';
     }
     box.innerHTML = '<div class="ana-row ana-head"><span>Date</span><span>Time</span><span>Match</span>'
       + '<span>Regime</span><span class="a-o">15m</span><span class="a-o">60m</span><span class="a-o">Into close</span></div>'
@@ -933,7 +945,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + '<span class="a-t">'+_escH(r.tod||'')+'</span>'
            + '<span class="a-m">'+Math.round(r.similarity)+'%</span>'
            + '<span class="a-r">'+_escH(r.regime||'')+'</span>'
-           + _oCell(oc.fwd15) + _oCell(oc.fwd60) + _oCell(oc.into_close)
+           + _oCell(oc.fwd15,'15m') + _oCell(oc.fwd60,'60m') + _oCell(oc.into_close,'close')
            + '</div>';
     }).join('');
   }
