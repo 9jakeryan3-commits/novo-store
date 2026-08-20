@@ -137,6 +137,25 @@ const declarations = [
     parameters: { type: "object", properties: {} },
   },
   {
+    name: "get_base_rates",
+    description:
+      "What has ACTUALLY happened next, historically, from a given dealer-map state — conditional base rates " +
+      "built from NoVo's own logged snapshots. Cells are keyed by regime (short/long gamma), distance to the " +
+      "gamma flip (below_far/below_near/at_line/above_near/above_far) and volatility tercile (low/mid/high), " +
+      "each with the median move 15m and 60m forward and into the close, plus how often it resolved upward. " +
+      "Use for 'how often does', 'what usually happens when', 'is that normal', 'what's the edge here'. " +
+      "CRITICAL: quote a cell ONLY when usable is true. n counts ~60s snapshots and is autocorrelated — " +
+      "`sessions` is the real denominator, so a cell with sessions=1 is one afternoon, not evidence, no matter " +
+      "how large n looks. Say the sample size out loud whenever you cite a number from here.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "SPY, QQQ or IWM. Omit for all three." },
+        usable_only: { type: "boolean", description: "Default true. Set false only to show how thin a bucket is." },
+      },
+    },
+  },
+  {
     name: "search_news",
     description:
       "Recent headlines for one ticker — title and published age only, never article text. Use for " +
@@ -376,6 +395,35 @@ function makeExecutors(ctx = {}) {
   // The scored record behind /track-record, read from the same key the public page serves. The
   // analyst was answering "how often does SPY close inside the expected move" with "I have not
   // logged that" while the site published the count — its own strongest evidence, out of reach.
+  async function get_base_rates({ symbol, usable_only } = {}) {
+    if (!r) return { error: "base rates unavailable" };
+    let snap = null;
+    try { snap = await r.get("novo:base_rates"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    if (!snap || !snap.tickers) return { error: "no base rates published yet" };
+    const only = usable_only !== false;
+    const want = symbol ? [String(symbol).toUpperCase()] : TICKERS;
+    const out = {};
+    for (const tk of want) {
+      const t = snap.tickers[tk];
+      if (!t) continue;
+      const cells = (t.cells || []).filter((c) => (only ? c.usable : true));
+      out[tk] = {
+        snapshots: t.snapshots,
+        usableCells: t.usable_cells,
+        totalCells: (t.cells || []).length,
+        volTerciles: t.vol_index_terciles,
+        cells,
+        byTimeOfDay: (t.by_tod || []).filter((c) => (only ? c.usable : true)),
+      };
+    }
+    if (!Object.keys(out).length) return { error: "unknown symbol" };
+    return {
+      window: snap.window, minN: snap.min_n, minSessions: snap.min_sessions,
+      builtEt: snap.built_et, note: snap.note, tickers: out,
+    };
+  }
+
   async function get_track_record() {
     if (!r) return { error: "track record unavailable" };
     let snap = null;
@@ -409,6 +457,7 @@ function makeExecutors(ctx = {}) {
   return {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
+    get_base_rates,
   };
 }
 
