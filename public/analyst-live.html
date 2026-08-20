@@ -60,7 +60,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     --txt3:  #6e6e6e;   /* muted labels */
   }
   body { background: #09090b; }
-  .lv-wrap { max-width: 1200px; margin: 0 auto; padding: 14px 16px 60px; }
+  .lv-wrap { max-width: 1560px; margin: 0 auto; padding: 14px 16px 60px; }
+  /* 1200px was leaving ~700px of dead margin on a 1080p desktop, which is the single loudest
+     thing about the old layout. Cap high enough to use the screen, but still cap: past ~1600px
+     the chart stops gaining and the tile rows just stretch into letterboxes. */
   /* login */
   .lv-login { max-width: 440px; margin: 8vh auto; text-align: center; }
   .lv-login h1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 30px; color: var(--txt1); letter-spacing: -1px; margin: 0 0 8px; }
@@ -85,6 +88,13 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* grid */
   .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
   @media (max-width: 900px) { .lv-grid { grid-template-columns: 1fr; } }
+  /* Wide desktop: push the split toward the chart. The right column is fixed-content tiles that
+     stop improving past ~640px, while the chart keeps reading better the wider it gets. */
+  @media (min-width: 1400px) {
+    .lv-grid, .lv-bottom { grid-template-columns: 1.75fr 1fr; gap: 20px; }
+    .lv-tile { padding: 14px 16px; }
+    .lv-tile .v { font-size: 22px; }
+  }
   .lv-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 16px 18px; }
   .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
   .lv-card img.chart { width: 100%; border-radius: 8px; border: 1px solid var(--bdr); display: block; }
@@ -694,10 +704,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } else { $('f-whales').textContent=''; }
   }
 
-  function _usd(n){ n=Number(n)||0; var a=Math.abs(n);
-    if(a>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
-    if(a>=1e3) return '$'+Math.round(n/1e3)+'K';
-    return '$'+Math.round(n); }
+  // Vanna/charm run to tens of billions, so a cap at 'M' printed $45400.5M where $45.4B was meant,
+  // and the sign belongs OUTSIDE the symbol (-$7.1B, never $-7133.7M).
+  function _usd(n){ n=Number(n)||0; var a=Math.abs(n), sg=(n<0?'-':'');
+    if(a>=1e12) return sg+'$'+(a/1e12).toFixed(2)+'T';
+    if(a>=1e9)  return sg+'$'+(a/1e9).toFixed(2)+'B';
+    if(a>=1e6)  return sg+'$'+(a/1e6).toFixed(1)+'M';
+    if(a>=1e3)  return sg+'$'+Math.round(a/1e3)+'K';
+    return sg+'$'+Math.round(a); }
 
   function renderTapeFlow(d){
     var card=$('tape-card'); if(!card) return;
