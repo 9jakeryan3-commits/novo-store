@@ -1081,7 +1081,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   #novo-ask header{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--bdr,#22303f)}
   #novo-ask header b{color:#eaf3ff;font-size:15px}
   #novo-ask header span{color:var(--txt2,#9fb6d1);font-size:11.5px;display:block;margin-top:1px}
-  #novo-ask .x{margin-left:auto;background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
+  #novo-ask .clr{margin-left:auto;background:none;border:1px solid var(--bdr,#22303f);border-radius:999px;
+    color:var(--txt2,#9fb6d1);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 11px;cursor:pointer}
+  #novo-ask .clr:hover{color:#eaf3ff;border-color:#22d3ee}
+  #novo-ask .x{background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
   #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px}
   #novo-ask .m{font-size:13.5px;line-height:1.65;color:var(--txt1,#eaf3ff);white-space:pre-wrap}
   #novo-ask .m.you{color:#22d3ee;font-weight:700}
@@ -1108,6 +1112,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <b>NoVo</b>
       <span>AI market analyst &middot; the map, not your account</span>
     </div>
+    <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
     <button class="x" onclick="novoAskOpen(0)" aria-label="Close">&times;</button>
   </header>
   <div class="log" id="novo-ask-log">
@@ -1178,6 +1183,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
     } catch(_){}
   }
+  // Clearing has to wipe all three: the in-memory turns (which travel to the model as context), the
+  // stored copy, and the rendered log. Dropping any one leaves the conversation half-alive -- a cleared
+  // screen that still sends what you thought you deleted would be the worst of the three to get wrong.
+  window.novoAskClear = function(){
+    TURNS = [];
+    try { localStorage.removeItem(CHAT_KEY); } catch(_){}
+    var log = document.getElementById('novo-ask-log');
+    if (log) log.innerHTML = INTRO_HTML;
+    var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
+  };
+  var INTRO_HTML = (function(){ var l = document.getElementById('novo-ask-log'); return l ? l.innerHTML : ''; })();
   loadTurns();
   // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
   // storage key it persists to instead, which is what the push-notification code already does.
