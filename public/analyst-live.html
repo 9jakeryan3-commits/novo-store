@@ -82,9 +82,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
   .lv-live.closed { color: #6e6e6e; } .lv-live.closed .dot { background: #6e6e6e; box-shadow: none; animation: none; }
   .lv-sess { color: var(--txt3); font-size: 12.5px; }
-  .lv-tabs { margin-left: auto; display: inline-flex; gap: 0; background: rgba(255,255,255,.04); border: 1px solid var(--bdr); border-radius: 999px; padding: 4px; }
-  .lv-tabs button { border: 0; background: transparent; color: var(--txt2); font-weight: 800; font-size: 13px; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
-  .lv-tabs button.on { background: #22d3ee; color: #04121a; }
   /* grid */
   .lv-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
   /* The dealer column is simply taller than chart+profile, so the left card either stretches and
@@ -316,9 +313,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="lv-brand"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></div>
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
       <span id="sess" class="lv-sess"></span>
-      <div class="lv-tabs" id="tabs">
-        <button data-tk="SPY" class="on">SPY</button><button data-tk="QQQ">QQQ</button><button data-tk="IWM">IWM</button>
-      </div>
     </div>
 
     <!-- market ribbon -->
@@ -434,8 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function idx(tk){ return (STATE && STATE.indices || []).find(function(x){ return x.ticker===tk; }); }
 
   function renderDealer(){
-    // keep the tab highlight in sync FIRST, even when the selected ticker has no data yet
-    Array.prototype.forEach.call($('tabs').children, function(b){ b.classList.toggle('on', b.getAttribute('data-tk')===CUR); });
     $('dealer-h').textContent = CUR + ' · Dealer positioning';
     $('chart-h').textContent = CUR + ' · Session & dealer levels';
     var d = idx(CUR);
@@ -662,12 +654,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function renderStrip(){
     var el = $('strip'); el.innerHTML = '';
-    // These cards switch the whole dashboard to that ticker, but with no heading and no hover they read
-    // as an unexplained pair of boxes floating between two titled sections -- every other block on the
-    // page announces itself. Say what they are and that they are clickable.
+    // This is the ONLY ticker control now -- the SPY/QQQ/IWM pill tabs were removed as redundant, since
+    // the strip always offers the two you are NOT on and so reaches every ticker from every ticker.
+    // It therefore has to announce itself rather than look like two decorative summary boxes.
     var _hd = document.createElement('div');
     _hd.className = 'strip-hd';
-    _hd.textContent = 'The other indices — click to switch';
+    _hd.textContent = 'Switch ticker — the other two indices';
     el.appendChild(_hd);
     // Only the OTHER indices — the current ticker is already fully expanded in the big section above, so
     // repeating it here was pure duplication. The strip is now a compact cross-asset compare/switch.
@@ -926,7 +918,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     } catch(_) { _neverBlank(); }
   }
 
-  document.getElementById('tabs').addEventListener('click', function(e){ var tk=e.target && e.target.getAttribute('data-tk'); if(tk){ CUR=tk; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); } });
 
   var _pollTimer = null, _ribTimer = null, _polling = false;
   async function _pollGuarded(){ if(_polling) return; _polling = true; try { await poll(); } finally { _polling = false; } }  // in-flight guard: a slow (mobile) poll can't stack on the next tick
