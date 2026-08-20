@@ -144,6 +144,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* 5 tiles in 2 columns orphaned the last one. Expected move spans the row instead — it has the
      longest subtitle, so it gains the room it was wrapping in, and no tile is left stranded. */
   .lv-tiles .t-wide { grid-column: 1 / -1; }
+  /* what this setup has historically resolved to — the map carrying its own record */
+  .d-br { border:1px solid var(--bdr); background:var(--navy); border-radius:10px; padding:10px 13px; margin:0 0 12px; }
+  .d-br .br-k { font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--txt3); }
+  .d-br .br-r { font-size:12.5px; color:var(--txt2); margin-top:4px; line-height:1.45; }
+  .d-br .br-n { font-size:11px; color:var(--txt3); margin-top:3px; }
+  .d-br b { color:var(--txt1); font-weight:800; }
   /* analogues: a comparison table, so it gets table alignment */
   /* max-width keeps the outcomes NEXT TO the setup that produced them. Left to fill 1560px the 1fr
      regime column shoved the three percentages ~1200px away from the date they belong to, which is
@@ -331,6 +337,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="dm-regime" id="d-regime"><span class="rg-k">Net GEX</span><span class="rg-v" id="d-gex">—</span><span class="rg-g" id="d-gex-s"></span><span class="rg-s" id="d-reg"></span></div>
         <div id="d-sqz-hero" class="sqz-hero q" style="display:none;"></div>
         <div class="dmap" id="d-map"></div>
+        <div class="d-br" id="d-br" style="display:none;"></div>
         <div class="lv-tiles">
           <div class="lv-tile t-wide"><div class="k">Expected move</div><div class="v" id="d-em">—</div><div class="s" id="d-em-s"></div></div>
           <div class="lv-tile"><div class="k">Put/Call skew</div><div class="v" id="d-sk">—</div><div class="s" id="d-sk-s"></div></div>
@@ -492,6 +499,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           + '</div>';
       }
     }
+    renderBaseRate(d);
     renderFlow(d);
     renderTapeFlow(d);
     // chart — per-index, each ticker renders ITS OWN chart and only its own.
@@ -832,6 +840,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            +   '<div class="dm-d">'+dtxt+'</div>'
            + '</div>';
     }).join('');
+  }
+
+  // The dealer map is a snapshot; this is the same setup's RECORD. The engine only sends a cell that
+  // clears its sample floor, so if base_rate is absent the row simply does not render -- a base rate is
+  // worth nothing without its n, and worth less than nothing if the n is one afternoon.
+  function renderBaseRate(d){
+    var el=$('d-br'); if(!el) return;
+    var b = d && d.base_rate;
+    if(!b || !b.fwd60){ el.style.display='none'; return; }
+    var up=Number(b.fwd60.up_rate), md=Number(b.fwd60.median);
+    var dir = up>=50 ? 'up' : 'down';
+    var pct = up>=50 ? up : (100-up);
+    el.style.display='block';
+    el.innerHTML = '<div class="br-k">This setup, historically</div>'
+      + '<div class="br-r">Over the next hour it resolved <b>'+dir+' '+pct.toFixed(0)+'%</b> of the time'
+      + ' · median <b>'+(md>=0?'+':'')+md.toFixed(3)+'%</b></div>'
+      + '<div class="br-n">'+_escH(String(b.regime||''))+' · '+_escH(String(b.flip||'').replace(/_/g,' '))
+      + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions</div>';
   }
 
   function renderTapeFlow(d){
