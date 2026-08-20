@@ -178,10 +178,15 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      of outcomes, each outcome wearing its own horizon. Collapsing to three equal columns just scattered
      the same cells into a grid with no header to read them against. */
   @media (max-width: 780px) {
-    .ana-head { display:none; }
+    /* .ana-row.ana-head, not .ana-head: the header carries BOTH classes, so a bare .ana-head rule ties on
+       specificity with .ana-row below it and loses on order -- the hidden header came back as a mashed
+       DATETIMEMATCHREGIME15M once .ana-row was set to block. */
+    .ana-row.ana-head { display:none; }
     .ana-row { display:block; max-width:none; padding:10px 0; }
     .ana-row .a-d { font-size:13.5px; }
     .ana-row .a-t::before, .ana-row .a-m::before, .ana-row .a-r::before { content:' · '; color:var(--txt3); }
+    /* break after the regime so the outcomes own their line instead of colliding with it (short gamma15M) */
+    .ana-row .a-r::after { content:''; display:block; }
     .ana-row .a-o { display:inline-block; min-width:0; text-align:left; margin:7px 14px 0 0; }
     .ana-row .a-o::before { content: attr(data-h) ' '; color:var(--txt3); font-weight:800;
                             font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
