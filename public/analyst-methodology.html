@@ -180,6 +180,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="m-card">
     <div class="m-tag">The Priced-In Range</div>
+    <h2>Vanna &amp; Charm</h2>
+    <p>The broker chain carries delta, gamma, theta and vega, but not <b>vanna</b> or <b>charm</b> &mdash;
+    so NoVo computes both in closed form from Black-Scholes with r&nbsp;=&nbsp;q&nbsp;=&nbsp;0, then
+    aggregates them across the chain with the same &ldquo;calls add, puts subtract&rdquo; convention as net GEX.</p>
+    <span class="m-formula">vanna  =  &minus;&phi;(d&#8321;) &times; d&#8322; / &sigma;   &mdash;   charm  =  &phi;(d&#8321;) &times; d&#8322; / (2T)</span>
+    <p><b>Vanna</b> is how much dealer delta moves when implied volatility moves. When vol shifts, the
+    whole hedge reprices &mdash; which is why a quiet map can turn active on a vol move alone, with no
+    change in price.</p>
+    <p><b>Charm</b> is how much dealer delta moves as time passes, shown per day. It is what makes a 0DTE
+    afternoon behave differently from the same map at 10am: charm drains delta out of the book into the
+    close, and dealers trade the underlying to keep up. T is floored at a quarter session, because charm
+    genuinely explodes into expiry and an unfloored number stops being a useful reading.</p>
+
     <h2>Expected Move</h2>
     <p>The <b>expected move</b> is the &plusmn;1&sigma; range the options market is pricing for the session (and the week) &mdash; derived from at-the-money implied volatility.</p>
     <span class="m-formula">Expected move  =  spot &times; ATM implied vol &times; &radic;(time)</span>
