@@ -360,7 +360,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="container hero" style="padding-bottom:8px;">
   <div class="lbl">Free &middot; scored, not asserted</div>
   <h1 style="font-size:clamp(26px,4vw,40px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.12;margin:0 0 12px;">The track record</h1>
-  <p style="font-size:15.5px;line-height:1.7;color:var(--txt2);max-width:780px;margin:0;">NoVo makes ten claims in public. This page scores every one of them against its own logged history and shows the sample size, including where the answer is thin. Nothing here is smoothed and nothing is chosen after the fact.</p>
+  <p style="font-size:15.5px;line-height:1.7;color:var(--txt2);max-width:780px;margin:0;">NoVo makes ten claims in public. This page scores every one of them against its own logged history and shows the sample size. Nothing here is smoothed and nothing is chosen after the fact.</p>
 </div>
 
 <div class="container sec">
@@ -439,7 +439,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">This is NoVo's own log, self-reported. It is not an independent audit and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
-    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">A few weeks is a count, not a law. Every number here carries its window and its sample size. It gets longer every session, and if a claim stops holding, this page will say so.</p>
+    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">Every number here carries its window and its sample size. If a claim stops holding, this page will say so.</p>
   </div>
 </div>
 
@@ -454,7 +454,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   fetch('/api/track-record', { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(d){
     if (!d || !d.ok) {
-      $('tr-em').innerHTML = '<div class="muted">The record publishes after the next engine run.</div>';
+      $('tr-em').innerHTML = '<div class="muted">The record is unavailable right now.</div>';
       $('tr-flip').innerHTML = '';
       return;
     }
@@ -492,13 +492,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + bar(f.negative_median_pct, mx, '#f43f5e')
            + '</div>';
       } else {
-        fl += '<div style="margin-bottom:12px;font-size:13px;" class="muted">' + tk
-           + ' &mdash; not enough of both regimes yet (positive n=' + (f.positive_n || 0)
-           + ', negative n=' + (f.negative_n || 0) + ').</div>';
       }
     });
-    $('tr-em').innerHTML = em || '<div class="muted">No scored sessions yet.</div>';
-    $('tr-flip').innerHTML = fl || '<div class="muted">Not enough history yet.</div>';
+    $('tr-em').innerHTML = em;
+    $('tr-flip').innerHTML = fl;
 
     // ── the seven newer claims ───────────────────────────────────────────────────────────────────
     // One renderer for all of them: a verdict, then the numbers that produced it, then the sample.
@@ -525,7 +522,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + nn(g.far_n) + ')</span>'
                   + (g.pull_closer_rate != null ? '<br>It does <b>not</b> reel price back in: from 0.15%+ away, price ended closer only '
                      + g.pull_closer_rate + '% of the time <span class="muted">(n=' + nn(g.pull_n) + ')</span>.' : ''));
-      } else { gv += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing.</div>'; }
+      } else { }
 
       var w = t.wall_respect || {};
       if (w.enough) {
@@ -533,7 +530,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         wl += hd(tk, (cok && pok) ? 'both sides hold' : (cok || pok) ? 'one side holds' : 'neither side holds', (cok && pok) ? true : (cok || pok) ? null : false)
             + sub('call wall held <b>' + w.call_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.call_n) + ')</span>'
                   + ' &middot; put wall held <b>' + w.put_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.put_n) + ')</span>');
-      } else { wl += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (call n=' + (w.call_n||0) + ', put n=' + (w.put_n||0) + ').</div>'; }
+      } else { }
 
       var s2 = t.skew_signal || {};
       if (s2.enough) {
@@ -542,14 +539,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + '%</b> <span class="muted">(n=' + nn(s2.high_n) + ')</span>'
                   + ' &middot; flat (&le; ' + s2.low_threshold + ') &rarr; <b>' + s2.low_median_move_pct
                   + '%</b> <span class="muted">(n=' + nn(s2.low_n) + ')</span>');
-      } else { sk += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing.</div>'; }
+      } else { }
 
       var q = t.squeeze_bands || {}, bs = (q.bands||[]).filter(function(b){ return b.usable; });
       if (bs.length >= 2) {
         sq += hd(tk, q.monotonic ? 'the scale holds' : 'the bands do not separate', !!q.monotonic)
             + sub(bs.map(function(b){ return b.band + ' <b>' + b.median_abs_move_pct + '%</b> <span class="muted">(n=' + nn(b.n) + ')</span>'; }).join(' &rarr; ')
                   + ' <span class="muted">&mdash; median absolute move over the next hour</span>');
-      } else { sq += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; not enough bands reached yet.</div>'; }
+      } else { }
 
       var L = t.line_record || {};
       if (L.enough) {
@@ -558,27 +555,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n)
                   + (L.replay_n ? ', ' + nn(L.replay_n) + ' replayed from historical bars' : '')
                   + ')</span>');
-      } else { ln += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (L.n||0) + ').</div>'; }
+      } else { }
     });
-    $('tr-grav').innerHTML  = gv || '<div class="muted">Accruing.</div>';
-    $('tr-wall').innerHTML  = wl || '<div class="muted">Accruing.</div>';
-    $('tr-skew').innerHTML  = sk || '<div class="muted">Accruing.</div>';
-    $('tr-sqz').innerHTML   = sq || '<div class="muted">Accruing.</div>';
-    $('tr-line').innerHTML  = ln || '<div class="muted">Accruing.</div>';
+    $('tr-grav').innerHTML  = gv;
+    $('tr-wall').innerHTML  = wl;
+    $('tr-skew').innerHTML  = sk;
+    $('tr-sqz').innerHTML   = sq;
+    $('tr-line').innerHTML  = ln;
 
     var b = d.bias_record || {};
     $('tr-bias').innerHTML = b.enough
       ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds)
         + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
-              + '<span class="muted">(n=' + nn(b.n) + ' scored, ' + (b.neutral||0) + ' neutral calls not scored)</span>')
-      : '<div class="muted" style="font-size:13px;">Accruing.</div>';
+              + '<span class="muted">(n=' + nn(b.n) + ')</span>')
+      : '';
 
     var au = d.audit_record || {};
     $('tr-audit').innerHTML = au.enough
       ? hd('The hourly audit', au.holds ? 'holds' : 'does not hold in this window', !!au.holds)
         + sub('the structural bias matched the next hour <b>' + au.correct_rate + '%</b> of the time '
-              + '<span class="muted">(n=' + nn(au.n) + ' scored, ' + (au.neutral||0) + ' neutral not scored)</span>')
-      : '<div class="muted" style="font-size:13px;">Accruing.</div>';
+              + '<span class="muted">(n=' + nn(au.n) + ')</span>')
+      : '';
 
     var pz = d.pulse_signal || {};
     if (pz.enough) {
@@ -597,7 +594,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              + '% <span class="muted">(n=' + (x.n||0) + ')</span></div>';
       }).join('');
     } else {
-      $('tr-pulse').innerHTML = '<div class="muted" style="font-size:13px;">Accruing.</div>';
+      $('tr-pulse').innerHTML = '';
     }
   }).catch(function(){
     $('tr-em').innerHTML = '<div class="muted">The record is unavailable right now.</div>';

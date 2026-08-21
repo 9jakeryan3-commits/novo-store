@@ -1003,8 +1003,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     try { var _aTk=$('anlg-tk'); if(_aTk) _aTk.textContent=_tk; } catch(e){}
     var a = (STATE && STATE.analogues_by && STATE.analogues_by[_tk]) || (_tk==='SPY' ? (STATE && STATE.analogues) : null);
     if (!a || a.status==='accruing'){
-      var n = (a && a.rows)||0;
-      box.innerHTML = '<span style="color:var(--txt3)">Building '+_escH(_tk)+' history — closest-match analogues appear once enough sessions accrue ('+n+' snapshots logged so far).</span>';
+      box.innerHTML = '';
       return;
     }
     var rows = a.analogues||[];
@@ -1260,8 +1259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       Ask about the map, the session, or what is moving it. I read today&rsquo;s dealer positioning,
       every session I have logged and a thousand-article archive &mdash; so I can tell you what a setup
       like this one has actually resolved to before, and over how many sessions. I go and get the
-      catalyst, an earnings date or the macro calendar when the answer needs one, and I will say when
-      the sample is too thin to lean on.
+      catalyst, an earnings date or the macro calendar when the answer needs one.
       <div class="chips">
         <button onclick="novoAsk(this.textContent)">Where is price against the flip right now?</button>
         <button onclick="novoAsk(this.textContent)">How has gamma built or drained today?</button>
