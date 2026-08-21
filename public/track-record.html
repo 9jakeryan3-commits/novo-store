@@ -368,78 +368,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card">
     <div class="lbl">Claim one</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The close lands inside the expected move</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">NoVo publishes a &plusmn;1&sigma; expected move each session. A &plusmn;1&sigma; band contains about 68% of a normal distribution, so that is the number to beat &mdash; not zero.</p>
-    <div id="tr-em"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim two</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The gamma flip changes how price behaves</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Above the flip dealer hedging leans against the move; below it, hedging runs with it. If that is true, the same ticker should travel further in an hour when net gamma is negative.</p>
-    <div id="tr-flip"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim three</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pins price where it sits</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Gravity is the strike where the money sits, not a line price defends. Concentrated gamma dampens movement around itself &mdash; so the testable claim is about volatility, not attraction: is the next hour quieter when price sits <em>on</em> gravity than when it is far from it?</p>
-    <div id="tr-grav"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim four</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The walls hold</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Call wall as resistance, put wall as support. Measured from every snapshot within 0.2% of a wall, against the <em>extreme</em> of the next hour &mdash; a wall pierced and recovered did not hold.</p>
-    <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim five</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Steep skew precedes a wider hour</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Index skew is positive almost always &mdash; downside protection is permanently bid &mdash; so its level is not a direction call and testing it as one measures nothing. The real claim is about volatility: when skew is steep <em>for this ticker</em>, does the next hour travel further than when it is flat? Split by each ticker&rsquo;s own top and bottom fifth.</p>
-    <div id="tr-skew"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim six</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The squeeze scale means something</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The signal escalates at 25, 50 and 75. If a higher score does not precede a bigger move, those thresholds are a colour scheme rather than a measurement.</p>
-    <div id="tr-sqz"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim seven</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Line&rsquo;s level-breaks hold</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every fire names a level and a direction. Two separate questions: did price go the way the call said, and did the level it just broke actually hold behind it.</p>
-    <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div class="lbl">Claim eight</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The open&rsquo;s bias</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Only the pre-market read is scored, open to close. The midday note reads a session already half resolved and the closing note is a summary; grading either would flatter this number. Neutral calls assert nothing and are never scored.</p>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Scored open to close. Neutral calls are not scored.</p>
     <div id="tr-bias"><div class="muted">Loading&hellip;</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim two</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The hourly audit calls the next hour</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Each audit states a bias for the hour ahead, and is scored on that hour. Neutral calls are not scored.</p>
+    <div id="tr-audit"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim three</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Line&rsquo;s level-breaks hold</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Two questions per fire: did price go the way the call said, and did the level hold behind it.</p>
+    <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim four</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The close lands inside the expected move</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">A &plusmn;1&sigma; band contains about 68% of a normal distribution. That is the number to beat.</p>
+    <div id="tr-em"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim five</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The gamma flip changes how price behaves</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Below the flip, dealer hedging runs with the move. If that is true, the same ticker should travel further in an hour when net gamma is negative.</p>
+    <div id="tr-flip"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim six</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pins price where it sits</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Concentrated gamma dampens movement around itself, so the test is volatility rather than attraction: is the next hour quieter when price sits on gravity?</p>
+    <div id="tr-grav"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim seven</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The walls hold</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Call wall as resistance, put wall as support, read against the extreme of the next hour &mdash; a wall pierced and recovered did not hold.</p>
+    <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim eight</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Steep skew precedes a wider hour</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Tested by percentile rather than level: when skew is steep for this ticker, does the next hour travel further?</p>
+    <div id="tr-skew"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim nine</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Market Pulse says something about tomorrow</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">One reading per session, scored against the <em>next</em> session. Grading it against the same day would be circular &mdash; the pulse partly reads the tape it would be measured on.</p>
-    <div id="tr-pulse"><div class="muted">Loading&hellip;</div></div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The squeeze scale means something</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The signal escalates at 25, 50 and 75. A higher score should precede a bigger move.</p>
+    <div id="tr-sqz"><div class="muted">Loading&hellip;</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim ten</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The hourly audit calls the next hour</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every top-of-hour audit states a structural bias for the hour ahead, so it is scored on exactly that horizon. Seven publish a session against three desk notes a day, which makes it the most frequent call NoVo makes. Neutral calls assert nothing and are never scored.</p>
-    <div id="tr-audit"><div class="muted">Loading&hellip;</div></div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Market Pulse says something about tomorrow</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">One reading per session, scored against the next session.</p>
+    <div id="tr-pulse"><div class="muted">Loading&hellip;</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">This is NoVo's own log, self-reported. It is not an independent audit and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
-    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">A few weeks is a count, not a law. The window is short and it is stated on the page rather than buried, so you can weigh it yourself. It gets longer every session, and if a claim stops holding, this page will say so.</p>
+    <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">A few weeks is a count, not a law. Every number here carries its window and its sample size. It gets longer every session, and if a claim stops holding, this page will say so.</p>
   </div>
 </div>
 
