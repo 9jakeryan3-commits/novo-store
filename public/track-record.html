@@ -381,6 +381,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim three</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pulls price toward it</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The map labels gravity a magnet. Taking every snapshot where price sat at least 0.15% away, freezing the level as it stood, and asking whether price was closer to it an hour later.</p>
+    <div id="tr-grav"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim four</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The walls hold</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Call wall as resistance, put wall as support. Measured from every snapshot within 0.2% of a wall, against the <em>extreme</em> of the next hour &mdash; a wall pierced and recovered did not hold.</p>
+    <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim five</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Put skew precedes downside</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The panel reads &ldquo;puts bid (hedging)&rdquo; above +1.5 points. That describes the option chain; whether the tape then follows is a separate claim.</p>
+    <div id="tr-skew"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim six</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The squeeze scale means something</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The signal escalates at 25, 50 and 75. If a higher score does not precede a bigger move, those thresholds are a colour scheme rather than a measurement.</p>
+    <div id="tr-sqz"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim seven</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Line&rsquo;s level-breaks hold</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every fire names a level and a direction. Two separate questions: did price go the way the call said, and did the level it just broke actually hold behind it.</p>
+    <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim eight</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The open&rsquo;s bias</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Only the pre-market read is scored, open to close. The midday note reads a session already half resolved and the closing note is a summary; grading either would flatter this number. Neutral calls assert nothing and are never scored.</p>
+    <div id="tr-bias"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim nine</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Market Pulse says something about tomorrow</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">One reading per session, scored against the <em>next</em> session. Grading it against the same day would be circular &mdash; the pulse partly reads the tape it would be measured on.</p>
+    <div id="tr-pulse"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">This is NoVo's own log, self-reported. It is not an independent audit and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">A few weeks is a count, not a law. The window is short and it is stated on the page rather than buried, so you can weigh it yourself. It gets longer every session, and if a claim stops holding, this page will say so.</p>
@@ -443,6 +492,86 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
     $('tr-em').innerHTML = em || '<div class="muted">No scored sessions yet.</div>';
     $('tr-flip').innerHTML = fl || '<div class="muted">Not enough history yet.</div>';
+
+    // ── the seven newer claims ───────────────────────────────────────────────────────────────────
+    // One renderer for all of them: a verdict, then the numbers that produced it, then the sample.
+    // A rate is never shown without its n — a claim scored on forty snapshots and one scored on four
+    // thousand read identically as a percentage, and only one of them means anything.
+    function hd(tk, verdict, ok){
+      return '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
+           + ' <span style="font-weight:600;color:' + (ok === null ? 'var(--txt3)' : (ok ? 'var(--green)' : 'var(--red)'))
+           + ';">' + verdict + '</span></div>';
+    }
+    function sub(s){ return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:10px;">' + s + '</div>'; }
+    function nn(v){ return Number(v).toLocaleString(); }
+
+    var gv='', wl='', sk='', sq='', ln='';
+    ['SPY','QQQ','IWM'].forEach(function(tk){
+      var t = d.tickers && d.tickers[tk]; if (!t) return;
+
+      var g = t.gravity_pull || {};
+      if (g.enough) {
+        gv += hd(tk, g.holds ? 'holds' : 'does not hold in this window', !!g.holds)
+            + sub('price ended closer to gravity <b>' + g.closer_rate + '%</b> of the time; the median gap '
+                  + (g.median_gap_change > 0 ? 'widened by ' : 'closed by ') + Math.abs(g.median_gap_change)
+                  + ' <span class="muted">(n=' + nn(g.n) + ')</span>');
+      } else { gv += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (g.n||0) + ').</div>'; }
+
+      var w = t.wall_respect || {};
+      if (w.enough) {
+        var cok = w.call_wall_held_rate >= 50, pok = w.put_wall_held_rate >= 50;
+        wl += hd(tk, (cok && pok) ? 'both sides hold' : (cok || pok) ? 'one side holds' : 'neither side holds', (cok && pok) ? true : (cok || pok) ? null : false)
+            + sub('call wall held <b>' + w.call_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.call_n) + ')</span>'
+                  + ' &middot; put wall held <b>' + w.put_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.put_n) + ')</span>');
+      } else { wl += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (call n=' + (w.call_n||0) + ', put n=' + (w.put_n||0) + ').</div>'; }
+
+      var s2 = t.skew_signal || {};
+      if (s2.puts_bid_down_rate != null) {
+        var sok = s2.puts_bid_down_rate > 50;
+        sk += hd(tk, sok ? 'holds' : 'does not carry direction', sok)
+            + sub('with puts bid, the next hour was <b>down ' + s2.puts_bid_down_rate + '%</b> of the time '
+                  + '<span class="muted">(n=' + nn(s2.puts_bid_n) + ')</span>'
+                  + (s2.calls_bid_up_rate != null ? ' &middot; calls bid, up ' + s2.calls_bid_up_rate + '% <span class="muted">(n=' + nn(s2.calls_bid_n) + ')</span>' : ''));
+      } else { sk += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (s2.puts_bid_n||0) + ').</div>'; }
+
+      var q = t.squeeze_bands || {}, bs = (q.bands||[]).filter(function(b){ return b.usable; });
+      if (bs.length >= 2) {
+        sq += hd(tk, q.monotonic ? 'the scale holds' : 'the bands do not separate', !!q.monotonic)
+            + sub(bs.map(function(b){ return b.band + ' <b>' + b.median_abs_move_pct + '%</b> <span class="muted">(n=' + nn(b.n) + ')</span>'; }).join(' &rarr; ')
+                  + ' <span class="muted">&mdash; median absolute move over the next hour</span>');
+      } else { sq += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; not enough bands reached yet.</div>'; }
+
+      var L = t.line_record || {};
+      if (L.enough) {
+        ln += hd(tk, L.holds ? 'holds' : 'does not hold in this window', !!L.holds)
+            + sub('direction right <b>' + L.direction_rate + '%</b> &middot; the level itself held <b>'
+                  + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n) + ')</span>');
+      } else { ln += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (L.n||0) + ').</div>'; }
+    });
+    $('tr-grav').innerHTML  = gv || '<div class="muted">Accruing.</div>';
+    $('tr-wall').innerHTML  = wl || '<div class="muted">Accruing.</div>';
+    $('tr-skew').innerHTML  = sk || '<div class="muted">Accruing.</div>';
+    $('tr-sqz').innerHTML   = sq || '<div class="muted">Accruing.</div>';
+    $('tr-line').innerHTML  = ln || '<div class="muted">Accruing.</div>';
+
+    var b = d.bias_record || {};
+    $('tr-bias').innerHTML = b.enough
+      ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds)
+        + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
+              + '<span class="muted">(n=' + nn(b.n) + ' scored, ' + (b.neutral||0) + ' neutral calls not scored)</span>')
+      : '<div class="muted" style="font-size:13px;">Accruing &mdash; ' + (b.n||0) + ' scored so far. Reads have been logged since 20 August 2026.</div>';
+
+    var pz = d.pulse_signal || {};
+    if (pz.enough) {
+      $('tr-pulse').innerHTML = ['low','mid','high'].map(function(k){
+        var x = pz[k] || {};
+        return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:6px;">' + k
+             + ' pulse &rarr; next session median <b>' + x.median_next_pct + '%</b>, up ' + x.up_rate
+             + '% <span class="muted">(n=' + (x.n||0) + ')</span></div>';
+      }).join('');
+    } else {
+      $('tr-pulse').innerHTML = '<div class="muted" style="font-size:13px;">Accruing &mdash; the pulse has been logged alongside the map since 20 August 2026, and needs a spread of readings before it can be scored.</div>';
+    }
   }).catch(function(){
     $('tr-em').innerHTML = '<div class="muted">The record is unavailable right now.</div>';
     $('tr-flip').innerHTML = '';
