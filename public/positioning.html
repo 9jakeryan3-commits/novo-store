@@ -441,7 +441,7 @@ function calcEM(){
   var p=_f('p'), iv=_f('iv'), d=_f('d');
   var el=function(id){return document.getElementById(id);};
   if(!(p>0)||!(iv>0)||!(d>0)){ ['em-move','em-range','em-2s','em-strad'].forEach(function(i){el(i).textContent='\u2014';}); el('em-pct').textContent=''; return; }
-  var t=d/365;
+  var t=d/252;   // sessions, matching the engine
   var move=p*(iv/100)*Math.sqrt(t);
   var pct=move/p*100;
   el('em-move').textContent='\u00b1'+_money(move);
@@ -449,7 +449,7 @@ function calcEM(){
   el('em-range').textContent=_money(p-move)+'  \u2013  '+_money(p+move);
   el('em-2s').textContent=_money(p-2*move)+' \u2013 '+_money(p+2*move);
   // The ATM straddle price is the market's own EM proxy: EM ~= straddle x 0.85, so straddle ~= EM / 0.85.
-  el('em-strad').textContent='\u2248'+_money(move/0.85);
+  el('em-strad').textContent='\u2248'+_money(move*0.80);
 }
 calcEM();
 
