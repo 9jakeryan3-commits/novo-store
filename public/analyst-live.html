@@ -80,6 +80,30 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-live { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #34d399; }
   .lv-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; animation: lvpulse 2s infinite; }
   @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  /* ── polish kit ─────────────────────────────────────────────────────────────────────────────
+     One easing token so every motion on the page agrees with itself, and one duration scale.
+     Everything below is additive: nothing here changes a layout or a number, so it cannot make
+     the dashboard wrong — only slower to notice, which is why the durations are short. */
+  :root { --ease: cubic-bezier(.2,.7,.3,1); --dur-1: .12s; --dur-2: .22s; }
+
+  /* VALUE FLASH — the one micro-interaction a trading surface actually needs: when a number moves,
+     say which way it moved. Green up, red down, ~half a second, background only so the digits stay
+     legible the whole time. A number you are mid-read must never move, resize or re-colour. */
+  @keyframes lvflash-up { from { background-color: rgba(16,185,129,.20); } to { background-color: transparent; } }
+  @keyframes lvflash-dn { from { background-color: rgba(244,63,94,.20); }  to { background-color: transparent; } }
+  .lvf-up { animation: lvflash-up .55s var(--ease); border-radius: 4px; }
+  .lvf-dn { animation: lvflash-dn .55s var(--ease); border-radius: 4px; }
+
+  /* FIT AND FINISH — every interactive thing gets the same press and the same keyboard ring.
+     focus-visible (not focus) so a mouse click never draws a ring, but Tab always does. */
+  button, .lv-mini, .rib, a.lv-cta { transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease); }
+  button:active, .lv-mini:active { transform: translateY(1px); }
+  button:focus-visible, a:focus-visible, .lv-mini:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #22d3ee; outline-offset: 2px; border-radius: 8px; }
+  .lv-card, .lv-tile, .dm-row { transition: border-color var(--dur-2) var(--ease),
+    background-color var(--dur-2) var(--ease); }
   .lv-live.closed { color: #6e6e6e; } .lv-live.closed .dot { background: #6e6e6e; box-shadow: none; animation: none; }
   .lv-sess { color: var(--txt3); font-size: 12.5px; }
   /* Status sits on the right edge. It used to trail the wordmark on the left while the ticker tabs held
@@ -972,6 +996,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }).join('');
   }
 
+  // ── VALUE FLASH ────────────────────────────────────────────────────────────────────────────
+  // Drives the .lvf-up/.lvf-dn tint. Deliberately ADDITIVE: it observes the DOM rather than hooking
+  // the render functions, so no existing code path changes and a bug here cannot corrupt a number --
+  // the worst it can do is fail to tint one.
+  //
+  // Seeded on first pass so a page load does not flash forty values at once, and batched to one scan
+  // per animation frame -- a render touches dozens of nodes and firing per mutation would thrash.
+  (function(){
+    var root = document.getElementById('dash');
+    if(!root || !window.MutationObserver || !window.WeakMap) return;
+    var SEL = '.dm-row .dm-v, .lv-tile .v, .dm-regime .rg-v, .fear-vix, .rib-p';
+    var last = new WeakMap(), seeded = false, queued = false;
+    function num(t){
+      // Strip the currency symbol and separators BEFORE matching. "-$4.6B" has its minus sitting in
+      // front of the "$", so a bare /-?\d+/ starts at the digit and reads it as +4.6 -- Net GEX going
+      // MORE negative would then flash green. Sign first, symbols second.
+      var m = String(t == null ? '' : t).replace(/[$,\s]/g,'').match(/-?\d+(?:\.\d+)?/);
+      return m ? parseFloat(m[0]) : null;
+    }
+    function scan(){
+      queued = false;
+      var els = root.querySelectorAll(SEL);
+      for (var i = 0; i < els.length; i++){
+        var el = els[i], v = num(el.textContent);
+        if (v == null) continue;
+        var prev = last.get(el);
+        last.set(el, v);
+        if (!seeded || prev == null || prev === v) continue;
+        var cls = v > prev ? 'lvf-up' : 'lvf-dn';
+        el.classList.remove('lvf-up','lvf-dn');
+        void el.offsetWidth;                    // force reflow so a repeat move restarts the tint
+        el.classList.add(cls);
+        (function(e, c){ setTimeout(function(){ e.classList.remove(c); }, 620); })(el, cls);
+      }
+      seeded = true;
+    }
+    new MutationObserver(function(){
+      if (queued) return;
+      queued = true;
+      (window.requestAnimationFrame || setTimeout)(scan, 16);
+    }).observe(root, { subtree: true, childList: true, characterData: true });
+    scan();
+  })();
+
   function render(){ if(!STATE) return; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); }
 
   var _everShown = false;
@@ -1073,7 +1141,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 22px -8px rgba(34,211,238,.5);}
   #novo-ask-bubble:hover{border-color:rgba(34,211,238,.7)}
   #novo-ask-bubble .dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 9px #22d3ee}
-  @media (prefers-reduced-motion: reduce){ .lvpulse, #novo-ask-bubble .dot { animation: none !important; } }
+  /* Reduced motion is not a nice-to-have here: a flashing value is exactly the kind of movement that
+     hurts people who asked the OS to stop it. The flash still fires as a static tint so the INFORMATION
+     (this number just moved, this way) survives — only the animation is removed. */
+  @media (prefers-reduced-motion: reduce){
+    .lvpulse, #novo-ask-bubble .dot { animation: none !important; }
+    .lvf-up, .lvf-dn { animation: none !important; }
+    .lvf-up { background-color: rgba(16,185,129,.16); }
+    .lvf-dn { background-color: rgba(244,63,94,.16); }
+    button, .lv-mini, .rib, .lv-card, .lv-tile, .dm-row { transition: none !important; }
+    button:active, .lv-mini:active { transform: none; }
+  }
   #novo-ask{position:fixed;right:18px;bottom:18px;z-index:61;width:min(calc(100vw - 36px),420px);
     height:min(calc(100dvh - 36px),620px);display:none;flex-direction:column;border-radius:16px;overflow:hidden;
     background:var(--navy,#0b1220);border:1px solid var(--bdr,#22303f);box-shadow:0 18px 50px rgba(0,0,0,.6)}
