@@ -382,8 +382,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim three</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pulls price toward it</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The map labels gravity a magnet. Taking every snapshot where price sat at least 0.15% away, freezing the level as it stood, and asking whether price was closer to it an hour later.</p>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pins price where it sits</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Gravity is the strike where the money sits, not a line price defends. Concentrated gamma dampens movement around itself &mdash; so the testable claim is about volatility, not attraction: is the next hour quieter when price sits <em>on</em> gravity than when it is far from it?</p>
     <div id="tr-grav"><div class="muted">Loading&hellip;</div></div>
   </div>
 
@@ -511,11 +511,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var g = t.gravity_pull || {};
       if (g.enough) {
-        gv += hd(tk, g.holds ? 'holds' : 'does not hold in this window', !!g.holds)
-            + sub('price ended closer to gravity <b>' + g.closer_rate + '%</b> of the time; the median gap '
-                  + (g.median_gap_change > 0 ? 'widened by ' : 'closed by ') + Math.abs(g.median_gap_change)
-                  + ' <span class="muted">(n=' + nn(g.n) + ')</span>');
-      } else { gv += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (g.n||0) + ').</div>'; }
+        gv += hd(tk, g.holds ? 'pins &mdash; ' + g.pin_ratio + '× quieter' : 'no dampening in this window', !!g.holds)
+            + sub('on gravity (within 0.10%) &rarr; median next hour <b>' + g.near_median_move_pct
+                  + '%</b> <span class="muted">(n=' + nn(g.near_n) + ')</span>'
+                  + ' &middot; 0.50%+ away &rarr; <b>' + g.far_median_move_pct + '%</b> <span class="muted">(n='
+                  + nn(g.far_n) + ')</span>'
+                  + (g.pull_closer_rate != null ? '<br>It does <b>not</b> reel price back in: from 0.15%+ away, price ended closer only '
+                     + g.pull_closer_rate + '% of the time <span class="muted">(n=' + nn(g.pull_n) + ')</span>.' : ''));
+      } else { gv += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing.</div>'; }
 
       var w = t.wall_respect || {};
       if (w.enough) {

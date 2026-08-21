@@ -131,7 +131,7 @@ const declarations = [
     name: "get_track_record",
     description:
       "How NoVo's own published claims have actually scored against its logged history: expected-move " +
-      "containment, whether price travels further per hour in negative gamma, whether GRAVITY pulls price " +
+      "containment, whether price travels further per hour in negative gamma, whether GRAVITY dampens movement around it (it PINS, it does not attract) " +
       "toward it, whether the WALLS hold, whether steep SKEW precedes a WIDER hour (it measures volatility, never direction), whether the squeeze SCALE is " +
       "real, how THE LINE's level-breaks resolved, the bias on the open, and the pulse against the next " +
       "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
@@ -480,7 +480,12 @@ function makeExecutors(ctx = {}) {
               negativeMedianHourPct: f.negative_median_pct, negativeN: f.negative_n }
           : { enough: false, positiveN: f.positive_n || 0, negativeN: f.negative_n || 0 },
         // the two labels the dashboard prints every session, finally graded
-        gravityPull: g.enough ? { closerRate: g.closer_rate, medianGapChange: g.median_gap_change, n: g.n, holds: g.holds } : null,
+        // Gravity DAMPENS, it does not attract. Price on gravity moves about half as far over the
+        // next hour; price far from it does not get reeled back. Never describe it as a magnet.
+        gravityPin: g.enough ? { measures: g.measures, pinRatio: g.pin_ratio, holds: g.holds,
+                                 onGravityMovePct: g.near_median_move_pct, onGravityN: g.near_n,
+                                 farMovePct: g.far_median_move_pct, farN: g.far_n,
+                                 pullCloserRate: g.pull_closer_rate, pullN: g.pull_n } : null,
         wallRespect: w.enough ? { callHeldRate: w.call_wall_held_rate, putHeldRate: w.put_wall_held_rate, callN: w.call_n, putN: w.put_n } : null,
         // Skew measures VOLATILITY, not direction. Index skew is positive almost always, so its level
         // is not a directional call — the tested claim is that skew steep FOR THIS TICKER precedes a
