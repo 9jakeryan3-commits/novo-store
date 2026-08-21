@@ -915,7 +915,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function add(v,k,cls,sub){ var x=Number(v); if(!v||!isFinite(x)||x<=0) return; rows.push({v:x,k:k,cls:cls,sub:sub}); }
     add(d.call_wall,'Call wall','k-cw','resistance / pin');
     add(d.flip,'Gamma flip','k-flip','the regime line');
-    add(d.gravity,'Gravity','k-grav','magnet / mean-revert');
+    // "magnet / mean-revert" claimed attraction, and the record says gravity does not attract: from
+    // 0.15% away price ends closer only 28-45% of the time. What it DOES do is dampen — the next hour
+    // is ~2x quieter when price sits on it. The label now says the effect that survives measurement.
+    add(d.gravity,'Gravity','k-grav','pins — quiet while price sits here');
     add(d.put_wall,'Put wall','k-pw','support');
     if(spot!=null) rows.push({v:spot,k:'Spot',cls:'is-spot',sub:'',spot:true});
     if(!rows.length){ el.innerHTML=''; return; }
