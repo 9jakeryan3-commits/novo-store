@@ -430,6 +430,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" style="margin-top:16px;">
+    <div class="lbl">Claim ten</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The hourly audit calls the next hour</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every top-of-hour audit states a structural bias for the hour ahead, so it is scored on exactly that horizon. Seven publish a session against three desk notes a day, which makes it the most frequent call NoVo makes. Neutral calls assert nothing and are never scored.</p>
+    <div id="tr-audit"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">This is NoVo's own log, self-reported. It is not an independent audit and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">A few weeks is a count, not a law. The window is short and it is stated on the page rather than buried, so you can weigh it yourself. It gets longer every session, and if a claim stops holding, this page will say so.</p>
@@ -564,6 +571,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds)
         + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(b.n) + ' scored, ' + (b.neutral||0) + ' neutral calls not scored)</span>')
+      : '<div class="muted" style="font-size:13px;">Accruing.</div>';
+
+    var au = d.audit_record || {};
+    $('tr-audit').innerHTML = au.enough
+      ? hd('The hourly audit', au.holds ? 'holds' : 'does not hold in this window', !!au.holds)
+        + sub('the structural bias matched the next hour <b>' + au.correct_rate + '%</b> of the time '
+              + '<span class="muted">(n=' + nn(au.n) + ' scored, ' + (au.neutral||0) + ' neutral not scored)</span>')
       : '<div class="muted" style="font-size:13px;">Accruing.</div>';
 
     var pz = d.pulse_signal || {};
