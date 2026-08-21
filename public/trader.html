@@ -726,7 +726,7 @@ nav { position: relative; }
   <div class="container" style="max-width:760px;">
     <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:16px;">Why Now</div>
     <p style="font-size:clamp(20px,3vw,28px);font-weight:900;color:var(--txt1);line-height:1.25;margin:0 0 14px;letter-spacing:-0.5px;">The $25,000 wall just came down.</p>
-    <p style="font-size:15px;color:var(--txt2);line-height:1.75;margin:0 auto;max-width:640px;">For two decades, active day-trading was gated behind the Pattern Day Trader rule's $25,000 minimum. As of June 2026 it's <strong style="color:var(--txt1);">eliminated</strong> (an SEC-approved change to FINRA Rule 4210) — so you can now day-trade SPY with <strong style="color:var(--txt1);">any account size</strong>, no $25k gate. And because NoVo buys long options — paid in full, never on margin — you don't even need a margin account to run it; a cash account works, no minimum at all. The door that kept small accounts out is finally open, and NoVo runs the moment you walk through it.</p>
+    <p style="font-size:15px;color:var(--txt2);line-height:1.75;margin:0 auto;max-width:640px;">For two decades, active day-trading was gated behind the Pattern Day Trader rule's $25,000 minimum. As of June 2026 it's <strong style="color:var(--txt1);">eliminated</strong> (an SEC-approved change to FINRA Rule 4210) — so the $25k gate is going away for SPY day trades at <strong style="color:var(--txt1);">any account size</strong>, no $25k gate. And because NoVo buys long options — paid in full, never on margin — a margin account isn't required. If you trade a cash account, remember options settle T+1: proceeds aren't reusable until the next session, which caps how many round trips you can take in a day. The door that kept small accounts out is finally open, and NoVo runs the moment you walk through it.</p>
   </div>
 </div>
 
@@ -809,7 +809,7 @@ nav { position: relative; }
         <div class="how-num">01 &nbsp;·&nbsp; STRUCTURE</div>
         <h3>Analyst Score — grades every setup</h3>
         <p>Multiple proprietary structure components combine into a real-time Analyst Score (0–100), updated on every scan cycle. It <strong>grades the quality</strong> of each setup — and your conviction-sizing bands map that grade to position size, larger on the strongest setups from the same allocation budget.</p>
-        <p>A dual-layer tape filter blocks spoofed moves before a setup can fire. A trade only triggers on a real structure setup — a level reaction, a swept level, or a confirmed continuation once price breaks clear of the levels — with the tape confirmed. No partial alignment fires a trade, and in low-quality windows (the lunch lull, the late-session pin) the lowest-conviction setups are automatically suppressed.</p>
+        <p>A dual-layer tape filter blocks spoofed moves before a setup can fire. NoVo names the structure setups it sees all session — level reactions, swept levels, confirmed continuations once price breaks clear of the levels — and grades each one with the tape confirmed. You decide which to take. Low-quality windows like the lunch lull and the late-session pin are marked on the dashboard, so you can see them coming.</p>
       </div>
       <div class="how-card">
         <div class="how-num">02 &nbsp;·&nbsp; EXECUTE</div>
@@ -834,7 +834,7 @@ nav { position: relative; }
     <div class="how-card" style="margin-top:20px;">
       <div class="how-num">04 &nbsp;·&nbsp; YOUR CALL</div>
       <h3>Buy Calls. Buy Puts. Your read, NoVo's hands.</h3>
-      <p>Two buttons on the dashboard. You spot a setup NoVo hasn't taken &mdash; hit <strong>Buy Calls</strong> or <strong>Buy Puts</strong> and it takes the trade for you: same strike selection, same conviction sizing, same protective stop, same multi-tier exit ladder. Not a bolted-on "manual mode" running its own code &mdash; it's NoVo's own execution engine, pointed where you tell it.</p>
+      <p>Two buttons on the dashboard. You see the setup on the map &mdash; hit <strong>Buy Calls</strong> or <strong>Buy Puts</strong> and it takes the trade for you: same strike selection, same conviction sizing, same protective stop, same multi-tier exit ladder. Not a bolted-on "manual mode" running its own code &mdash; it's NoVo's own execution engine, pointed where you tell it.</p>
       <p><strong>NoVo reads the market all session and names the setups it sees &mdash; you decide which ones to take.</strong> It only ever trades when you say so. Your call, your finger, its execution.</p>
       <p>The guardrails don't move: it still won't take a contract it can't fill cleanly, and never more than one position at a time.</p>
     </div>
@@ -911,7 +911,7 @@ nav { position: relative; }
 
     <div style="max-width:680px;margin:48px auto 0;text-align:center;">
       <h3 style="font-size:22px;font-weight:800;color:var(--txt1);letter-spacing:-0.5px;margin-bottom:12px;">Don't trust it yet? Watch it in paper.</h3>
-      <p style="color:var(--txt2);margin:0;">Run NoVo in paper mode and watch it read the tape and place trades on a simulated account for as long as you want — the analysis and the execution are identical to live. You decide when you believe it enough to connect a live key. You stay in control the entire time.</p>
+      <p style="color:var(--txt2);margin:0;">Run NoVo in paper mode and take real setups on a simulated account for as long as you want — the map, the sizing, the stop and the exits are identical to live. You decide when you believe it enough to connect a live key. You stay in control the entire time.</p>
     </div>
 
     <p style="max-width:680px;margin:28px auto 0;text-align:center;font-weight:700;color:var(--txt1);">It's your tool, showing you exactly why it acts — every level, every reason, on screen — so the decision to trust it always stays yours, backed by what you can see.</p>
@@ -980,7 +980,7 @@ nav { position: relative; }
         <div class="feature-icon">🔁</div>
         <div>
           <h3>Built-In Redundancy</h3>
-          <p>NoVo has failback logic across its data and execution layers. If any upstream provider goes down, the system reroutes automatically and keeps running — no manual intervention, no missed sessions.</p>
+          <p>Built-in redundancy on the data layer — if a market-data provider stalls, NoVo reroutes to its backups and keeps mapping. On the execution side it fails closed: if your broker's position or working-order check errors, NoVo refuses the entry rather than risk a duplicate order, and tells you why.</p>
         </div>
       </div>
     </div>
@@ -1183,7 +1183,7 @@ nav { position: relative; }
           <li><b>Fear gauge</b> &mdash; VIX, VXN and RVX ranked against their own year, + ATM IV and IV rank</li>
           <li><b>Market Pulse</b>, the sector heatmap and a 24/5 futures ribbon</li>
           <li><b>Futures positioning</b> &mdash; weekly CFTC Commitments of Traders</li>
-          <li><b>The track record</b> &mdash; both public claims scored, sample size shown</li>
+          <li><b>The track record</b> &mdash; ten public claims scored, sample size shown</li>
           <li><b>Five calculators</b> &mdash; expected move, max pain, position size, options P&amp;L, Greeks</li>
           <li><b>Free TradingView script</b> &mdash; the flip and the walls on your own chart</li>
           <li><b>The NoVo Journal</b> &mdash; 1,000+ articles, plus Options 101 and the 0DTE guide</li>
@@ -1284,7 +1284,7 @@ nav { position: relative; }
 
       <details class="faq-item">
         <summary class="faq-q">Is algorithmic trading via API legal?</summary>
-        <div class="faq-a">Yes. NoVo connects to your own Tradier brokerage account through their official retail API — the same API Tradier explicitly provides for automated trading. You're placing trades in your own account. Algorithmic trading via broker APIs is fully legal for retail accounts in the US.</div>
+        <div class="faq-a">Yes. NoVo connects to your own Tradier or tastytrade account through the broker's official retail API — the same API each provides for automated trading. You're placing trades in your own account. Algorithmic trading via broker APIs is fully legal for retail accounts in the US.</div>
       </details>
 
       <details class="faq-item">
@@ -1294,7 +1294,7 @@ nav { position: relative; }
 
       <details class="faq-item">
         <summary class="faq-q">What is the Analyst Score and how does entry sizing work?</summary>
-        <div class="faq-a">The Analyst Score is a 0–100 real-time <strong>grade of each setup's quality</strong>, updated continuously from multiple proprietary signal components. It doesn't decide whether a trade fires — your setups (structure + tape) do — it grades the entry so your conviction-sizing bands allocate size. You set three bands: the middle band is your full allocation, sized up when the grade is high and down when it's low. Every band is configurable from the dashboard.</div>
+        <div class="faq-a">The Analyst Score is a 0–100 real-time <strong>grade of each setup's quality</strong>, updated continuously from multiple proprietary signal components. It doesn't decide whether a trade fires — you do, with your click — it grades the entry so your conviction-sizing bands allocate size. You set three bands: the middle band is your full allocation, sized up when the grade is high and down when it's low. Every band is configurable from the dashboard.</div>
       </details>
 
       <details class="faq-item">
