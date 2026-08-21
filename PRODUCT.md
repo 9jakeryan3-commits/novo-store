@@ -37,7 +37,7 @@ Last verified against the deployed site and engine: **2026-08-18**.
 | **ATM IV and IV rank**, per ticker | `api/levels.js?iv=` — free by decision, it is a commodity metric |
 | Market Pulse (fear/greed), sector heatmap, 24/5 futures ribbon | `api/market-pulse.js`, `api/heatmap.js` |
 | Futures positioning — weekly CFTC Commitments of Traders | `/positioning` ← `api/positioning.js` |
-| The track record — both public claims scored, sample sizes shown | `/track-record` ← `api/track-record.js` |
+| The track record — ten public claims scored, sample sizes shown | `/track-record` ← `api/track-record.js` |
 | The public read archive — every desk note, after its session | `/analyst/archive` ← `api/analyst-publish.js` |
 | The NoVo Journal — 1,042 articles | `/journal/` |
 | Options 101, the 0DTE guide, 5 learn guides | `/options-101`, `/0dte`, `/learn/*` |
@@ -82,9 +82,11 @@ layer underneath. Nothing in this section appears on any free page.
   what the current setup has historically resolved to, with its sample size — the read carries a
   record, not only a reading.
 - **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
-  plus 10 read-only live lookups (dealer levels, gamma profile, session history, **base rates**, its
+  plus 11 read-only live lookups (dealer levels, gamma profile, session history, **base rates**, its
   own track record, the archive, quotes, macro calendar, earnings dates, headlines).
   Market only — never accounts, trades or P&L; never advice.
+- Every hourly audit and desk note is kept and scored. NoVo writes each read with the session's
+  earlier calls and its own record in hand.
 
 **Delivery**
 - Installable PWA + **push alerts** (The Line and each session's read), toggleable on the dashboard
