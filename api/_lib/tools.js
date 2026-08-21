@@ -132,7 +132,7 @@ const declarations = [
     description:
       "How NoVo's own published claims have actually scored against its logged history: expected-move " +
       "containment, whether price travels further per hour in negative gamma, whether GRAVITY pulls price " +
-      "toward it, whether the WALLS hold, whether put SKEW precedes downside, whether the squeeze SCALE is " +
+      "toward it, whether the WALLS hold, whether steep SKEW precedes a WIDER hour (it measures volatility, never direction), whether the squeeze SCALE is " +
       "real, how THE LINE's level-breaks resolved, the bias on the open, and the pulse against the next " +
       "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
@@ -482,9 +482,12 @@ function makeExecutors(ctx = {}) {
         // the two labels the dashboard prints every session, finally graded
         gravityPull: g.enough ? { closerRate: g.closer_rate, medianGapChange: g.median_gap_change, n: g.n, holds: g.holds } : null,
         wallRespect: w.enough ? { callHeldRate: w.call_wall_held_rate, putHeldRate: w.put_wall_held_rate, callN: w.call_n, putN: w.put_n } : null,
-        // does "puts bid" actually precede downside, and is the squeeze SCALE real or decorative
-        skewSignal: sk.enough ? { putsBidDownRate: sk.puts_bid_down_rate, putsBidN: sk.puts_bid_n,
-                                  callsBidUpRate: sk.calls_bid_up_rate, callsBidN: sk.calls_bid_n } : null,
+        // Skew measures VOLATILITY, not direction. Index skew is positive almost always, so its level
+        // is not a directional call — the tested claim is that skew steep FOR THIS TICKER precedes a
+        // wider hour than skew that is flat for it. Never quote this as a bearish signal.
+        skewSignal: sk.enough ? { measures: sk.measures, ratio: sk.ratio, holds: sk.holds,
+                                  steepThreshold: sk.high_threshold, steepMedianMovePct: sk.high_median_move_pct, steepN: sk.high_n,
+                                  flatThreshold: sk.low_threshold, flatMedianMovePct: sk.low_median_move_pct, flatN: sk.low_n } : null,
         squeezeBands: (sq.bands || []).filter((b) => b.usable),
         squeezeScaleMonotonic: sq.monotonic === undefined ? null : sq.monotonic,
         // The Line: direction and whether the level it broke actually held. Two different claims.

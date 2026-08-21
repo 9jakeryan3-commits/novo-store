@@ -396,8 +396,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim five</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Put skew precedes downside</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The panel reads &ldquo;puts bid (hedging)&rdquo; above +1.5 points. That describes the option chain; whether the tape then follows is a separate claim.</p>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Steep skew precedes a wider hour</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Index skew is positive almost always &mdash; downside protection is permanently bid &mdash; so its level is not a direction call and testing it as one measures nothing. The real claim is about volatility: when skew is steep <em>for this ticker</em>, does the next hour travel further than when it is flat? Split by each ticker&rsquo;s own top and bottom fifth.</p>
     <div id="tr-skew"><div class="muted">Loading&hellip;</div></div>
   </div>
 
@@ -526,13 +526,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       } else { wl += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (call n=' + (w.call_n||0) + ', put n=' + (w.put_n||0) + ').</div>'; }
 
       var s2 = t.skew_signal || {};
-      if (s2.puts_bid_down_rate != null) {
-        var sok = s2.puts_bid_down_rate > 50;
-        sk += hd(tk, sok ? 'holds' : 'does not carry direction', sok)
-            + sub('with puts bid, the next hour was <b>down ' + s2.puts_bid_down_rate + '%</b> of the time '
-                  + '<span class="muted">(n=' + nn(s2.puts_bid_n) + ')</span>'
-                  + (s2.calls_bid_up_rate != null ? ' &middot; calls bid, up ' + s2.calls_bid_up_rate + '% <span class="muted">(n=' + nn(s2.calls_bid_n) + ')</span>' : ''));
-      } else { sk += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (s2.puts_bid_n||0) + ').</div>'; }
+      if (s2.enough) {
+        sk += hd(tk, s2.holds ? 'holds &mdash; ' + s2.ratio + '× further' : 'the two do not separate', !!s2.holds)
+            + sub('steep (&ge; ' + s2.high_threshold + ') &rarr; median next hour <b>' + s2.high_median_move_pct
+                  + '%</b> <span class="muted">(n=' + nn(s2.high_n) + ')</span>'
+                  + ' &middot; flat (&le; ' + s2.low_threshold + ') &rarr; <b>' + s2.low_median_move_pct
+                  + '%</b> <span class="muted">(n=' + nn(s2.low_n) + ')</span>');
+      } else { sk += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing.</div>'; }
 
       var q = t.squeeze_bands || {}, bs = (q.bands||[]).filter(function(b){ return b.usable; });
       if (bs.length >= 2) {
