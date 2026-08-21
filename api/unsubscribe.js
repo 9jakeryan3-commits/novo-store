@@ -111,10 +111,16 @@ module.exports = async (req, res) => {
 // yet, and inventing one would be worse than omitting it -- so this renders the footer line only when
 // MAIL_POSTAL_ADDRESS is set, and nothing at all until then. Setting that one env var puts the address
 // into every email NoVo sends, with no code change.
+// The sender name is supplied here rather than typed into the env var, so it is spelled the same in
+// every email and cannot drift. Set MAIL_POSTAL_ADDRESS to the street/city/ZIP only.
+// Deliberately NOT "LLC" -- NoVo is a trade name today, and claiming an entity that does not exist
+// yet is a misrepresentation in exactly the message class that has to be accurate.
+const SENDER = 'NoVo Options Trading';
+
 function postalHtml(color) {
   const a = String(process.env.MAIL_POSTAL_ADDRESS || '').trim();
   if (!a) return '';
-  const safe = a.replace(/[<>&]/g, '');
+  const safe = `${SENDER} · ${a}`.replace(/[<>&]/g, '');
   return `<div style="font-size:11px;color:${color || '#6f8bab'};line-height:1.6;margin:6px 0 0;">${safe}</div>`;
 }
 
