@@ -562,7 +562,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds)
         + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(b.n) + ' scored, ' + (b.neutral||0) + ' neutral calls not scored)</span>')
-      : '<div class="muted" style="font-size:13px;">Accruing &mdash; ' + (b.n||0) + ' scored so far. Reads have been logged since 20 August 2026.</div>';
+      : '<div class="muted" style="font-size:13px;">Accruing.</div>';
 
     var pz = d.pulse_signal || {};
     if (pz.enough) {
@@ -573,7 +573,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              + '% <span class="muted">(n=' + (x.n||0) + ')</span></div>';
       }).join('');
     } else {
-      $('tr-pulse').innerHTML = '<div class="muted" style="font-size:13px;">Accruing &mdash; the pulse has been logged alongside the map since 20 August 2026, and needs a spread of readings before it can be scored.</div>';
+      $('tr-pulse').innerHTML = '<div class="muted" style="font-size:13px;">Accruing.</div>';
     }
   }).catch(function(){
     $('tr-em').innerHTML = '<div class="muted">The record is unavailable right now.</div>';
