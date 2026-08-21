@@ -5,6 +5,9 @@ import _kv from './_kv.js';
 // (the proper list you can broadcast to); until then it emails the owner so no signup is ever lost.
 // FROM is hardcoded to the verified domain — a gmail FROM 403s and silently kills all Resend sends.
 const resend = new Resend(process.env.RESEND_API_KEY);
+// The recurring sends are broadcasts and get Resend's own opt-out. This one is transactional, so the
+// merge tag would render as literal text -- it needs a real signed link.
+const { link: unsubLink } = require('./unsubscribe.js');
 const FROM = 'NoVo <orders@novo-aitrading.app>';
 const OWNER = 'novotrades26@gmail.com';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -23,7 +26,7 @@ function _rateLimited(ip, max = 5) {
 
 // Free Market Notes welcome — confirms the signup, invites them to the free Discord community, and upsells
 // Analyst (private read channels). The Discord block only renders when DISCORD_INVITE_URL is set.
-function freeWelcomeHtml(invite) {
+function freeWelcomeHtml(invite, email) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
@@ -42,7 +45,8 @@ function freeWelcomeHtml(invite) {
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want the daily read?</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($129/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-options.trade/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
       </div>
-      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Unsubscribe anytime from any email.</p>
+      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice.</p>
+      <p style="font-size:11px;color:#6f8bab;line-height:1.6;margin:10px 0 0;">You are subscribed to NoVo email updates. <a href="${unsubLink(email)}" style="color:#6f8bab;text-decoration:underline;">Unsubscribe</a></p>
     </div>
   </div>
 </div>`;
@@ -87,7 +91,13 @@ export default async function handler(req, res) {
           await resend.emails.send({
             from: FROM, to: [email], replyTo: 'support@novo-options.trade',
             subject: 'Welcome to NoVo Market Notes',
-            html: freeWelcomeHtml(process.env.DISCORD_INVITE_URL || 'https://discord.gg/EfnPJ5gC5w'),
+            html: freeWelcomeHtml(process.env.DISCORD_INVITE_URL || 'https://discord.gg/EfnPJ5gC5w', email),
+            // RFC 8058: the header pair is what Gmail and Apple Mail surface as their own
+            // one-click unsubscribe, above the message.
+            headers: {
+              'List-Unsubscribe': `<${unsubLink(email)}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
           });
         } catch (_) { /* welcome email is non-fatal */ }
       }
