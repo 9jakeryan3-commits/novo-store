@@ -93,6 +93,25 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   @keyframes lvflash-up { from { background-color: rgba(16,185,129,.20); } to { background-color: transparent; } }
   @keyframes lvflash-dn { from { background-color: rgba(244,63,94,.20); }  to { background-color: transparent; } }
   .lvf-up { animation: lvflash-up .55s var(--ease); border-radius: 4px; }
+
+  /* SKELETON — "—" was doing two jobs: "still loading" and "no data". They look identical and mean
+     opposite things, so a viewer could not tell an empty after-hours field from a dashboard that had
+     not answered yet. Until the first payload renders, every value slot is a shimmer instead; after
+     it, a dash means the value is genuinely absent. */
+  @keyframes lvskel { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
+  .skel .dm-v, .skel .dm-d, .skel .lv-tile .v, .skel .rg-v, .skel .fear-vix, .skel .rib-p, .skel .lv-sess {
+    color: transparent !important;
+    background-image: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.10) 37%, rgba(255,255,255,.04) 63%);
+    background-size: 400% 100%;
+    animation: lvskel 1.4s var(--ease) infinite;
+    border-radius: 5px;
+    display: inline-block;
+    min-width: 62px;
+  }
+  .skel .dm-d, .skel .lv-sess { min-width: 46px; }
+  /* the shimmer is motion for its own sake — hold it still and just show the placeholder block */
+  @media (prefers-reduced-motion: reduce){ .skel .dm-v, .skel .dm-d, .skel .lv-tile .v, .skel .rg-v,
+    .skel .fear-vix, .skel .rib-p, .skel .lv-sess { animation: none !important; } }
   .lvf-dn { animation: lvflash-dn .55s var(--ease); border-radius: 4px; }
 
   /* FIT AND FINISH — every interactive thing gets the same press and the same keyboard ring.
@@ -368,7 +387,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <!-- ===== DASHBOARD ===== -->
-  <div id="dash" class="hidden">
+  <div id="dash" class="hidden skel">
     <div class="lv-top">
       <div class="lv-brand"><img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></div>
       <div class="lv-status">
@@ -1040,7 +1059,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     scan();
   })();
 
-  function render(){ if(!STATE) return; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); }
+  // Safety net: render() returns early when no payload arrived, so a dead fetch would leave the
+  // skeleton shimmering forever — which is strictly worse than the dash it replaced, because it
+  // promises data that is never coming. After 12s, fall back to showing the real placeholders.
+  setTimeout(function(){
+    var _d = document.getElementById('dash');
+    if (_d) _d.classList.remove('skel');
+  }, 12000);
+
+  function render(){
+    if(!STATE) return;
+    renderDealer(); renderStrip(); renderMeta(); renderAnalogues();
+    // First real payload has landed: drop the skeleton. From here a "—" means the value is genuinely
+    // absent (after hours, a level with no data) rather than not here YET — which is the whole point
+    // of the distinction, and what a single dash for both states was destroying.
+    var _d = document.getElementById('dash');
+    if (_d) _d.classList.remove('skel');
+  }
 
   var _everShown = false;
   function _neverBlank(){ if(!_everShown){ showLogin(); _everShown = true; } }   // first-load failure → show login, not a blank page
