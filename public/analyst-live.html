@@ -1225,6 +1225,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   #novo-ask .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
   #novo-ask .chips button{background:rgba(255,255,255,.04);border:1px solid var(--bdr,#22303f);color:var(--txt2,#9fb6d1);
     font-size:11.5px;padding:7px 10px;border-radius:9px;cursor:pointer;text-align:left}
+  /* Quick asks. The intro's suggestions go with the intro, leaving a bare input for the rest of the
+     conversation. These persist. ONE scrolling line, not a wrapping block: the panel is 420px and the
+     log is the thing that should own the height. */
+  #novo-ask .quick{display:none;gap:6px;padding:9px 11px 2px;overflow-x:auto;scrollbar-width:none}
+  #novo-ask .quick::-webkit-scrollbar{display:none}
+  #novo-ask .quick.on{display:flex}
+  #novo-ask .quick button{flex:0 0 auto;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.28);
+    color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  #novo-ask .quick button:hover{border-color:#22d3ee;color:#eaf3ff}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,#22303f)}
   #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,#22303f);border-radius:10px;
     padding:10px 12px;color:#eaf3ff;font-size:13.5px;outline:none}
@@ -1263,6 +1272,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button onclick="novoAsk(this.textContent)">Why does IV crush after CPI?</button>
       </div>
     </div>
+  </div>
+  <!-- Short LABELS, full questions in data-q: the row stays one line and scannable, while the model
+       still gets a properly-formed question rather than two words. -->
+  <div class="quick" id="novo-ask-quick" aria-label="Quick questions">
+    <button type="button" data-q="Read the dealer map right now." onclick="novoAsk(this.dataset.q)">The map</button>
+    <button type="button" data-q="What are the key levels right now?" onclick="novoAsk(this.dataset.q)">Key levels</button>
+    <button type="button" data-q="What has a setup like this usually done?" onclick="novoAsk(this.dataset.q)">This setup</button>
+    <button type="button" data-q="What has changed since the open?" onclick="novoAsk(this.dataset.q)">Since open</button>
+    <button type="button" data-q="What is on the calendar today?" onclick="novoAsk(this.dataset.q)">Catalysts</button>
+    <button type="button" data-q="What are the wires saying today?" onclick="novoAsk(this.dataset.q)">Headlines</button>
+    <button type="button" data-q="How accurate have your published calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
   </div>
   <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
     <input id="novo-ask-q" placeholder="Ask about the market&hellip;" autocomplete="off" maxlength="600">
@@ -1310,6 +1330,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       TURNS = o.turns.slice(-CHAT_MAX);
       if (!TURNS.length) return;
       var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+      window.novoAskQuick();
       TURNS.forEach(renderTurn);
       var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
     } catch(_){}
@@ -1317,12 +1338,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Clearing has to wipe all three: the in-memory turns (which travel to the model as context), the
   // stored copy, and the rendered log. Dropping any one leaves the conversation half-alive -- a cleared
   // screen that still sends what you thought you deleted would be the worst of the three to get wrong.
+  // The intro and the quick row are two states of the same thing, so one function owns which is
+  // visible rather than three call sites each remembering to.
+  window.novoAskQuick = function(){
+    var q = document.getElementById('novo-ask-quick');
+    if (q) q.classList.toggle('on', !document.querySelector('#novo-ask .intro'));
+  };
   window.novoAskClear = function(){
     TURNS = [];
     try { localStorage.removeItem(CHAT_KEY); } catch(_){}
     var log = document.getElementById('novo-ask-log');
     if (log) log.innerHTML = INTRO_HTML;
     var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
+    window.novoAskQuick();
   };
   var INTRO_HTML = (function(){ var l = document.getElementById('novo-ask-log'); return l ? l.innerHTML : ''; })();
   loadTurns();
@@ -1335,6 +1363,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   window.novoAsk = async function(q){
     q = (q||'').trim(); if (!q || busy) return;
     var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+    window.novoAskQuick();
     document.getElementById('novo-ask-q').value = '';
     // Snapshot the prior turns BEFORE this question joins them -- it travels in `question`, and sending
     // it twice would have NoVo answering an echo of itself.
