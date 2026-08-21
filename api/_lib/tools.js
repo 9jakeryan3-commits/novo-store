@@ -130,9 +130,11 @@ const declarations = [
   {
     name: "get_track_record",
     description:
-      "How NoVo's own published claims have actually scored against its logged history: how often each ticker " +
-      "closed inside the expected move, and whether price travels further per hour in negative gamma than positive, " +
-      "each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
+      "How NoVo's own published claims have actually scored against its logged history: expected-move " +
+      "containment, whether price travels further per hour in negative gamma, whether GRAVITY pulls price " +
+      "toward it, whether the WALLS hold, whether put SKEW precedes downside, whether the squeeze SCALE is " +
+      "real, how THE LINE's level-breaks resolved, the bias on the open, and the pulse against the next " +
+      "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
     parameters: { type: "object", properties: {} },
   },
@@ -465,7 +467,8 @@ function makeExecutors(ctx = {}) {
     const out = {};
     for (const [tk, t] of Object.entries(snap.tickers)) {
       const e = t.expected_move || {}, f = t.flip_regime || {},
-            g = t.gravity_pull || {}, w = t.wall_respect || {};
+            g = t.gravity_pull || {}, w = t.wall_respect || {},
+            sk = t.skew_signal || {}, sq = t.squeeze_bands || {}, ln = t.line_record || {};
       out[tk] = {
         expectedMove: e.sessions
           ? { inside: e.inside, outside: e.outside, sessions: e.sessions,
@@ -479,6 +482,14 @@ function makeExecutors(ctx = {}) {
         // the two labels the dashboard prints every session, finally graded
         gravityPull: g.enough ? { closerRate: g.closer_rate, medianGapChange: g.median_gap_change, n: g.n, holds: g.holds } : null,
         wallRespect: w.enough ? { callHeldRate: w.call_wall_held_rate, putHeldRate: w.put_wall_held_rate, callN: w.call_n, putN: w.put_n } : null,
+        // does "puts bid" actually precede downside, and is the squeeze SCALE real or decorative
+        skewSignal: sk.enough ? { putsBidDownRate: sk.puts_bid_down_rate, putsBidN: sk.puts_bid_n,
+                                  callsBidUpRate: sk.calls_bid_up_rate, callsBidN: sk.calls_bid_n } : null,
+        squeezeBands: (sq.bands || []).filter((b) => b.usable),
+        squeezeScaleMonotonic: sq.monotonic === undefined ? null : sq.monotonic,
+        // The Line: direction and whether the level it broke actually held. Two different claims.
+        lineRecord: ln.enough ? { directionRate: ln.direction_rate, levelHeldRate: ln.level_held_rate, n: ln.n }
+                              : { enough: false, n: ln.n || 0, note: ln.note || "accruing" },
       };
     }
     const br = snap.bias_record || {};
@@ -491,6 +502,8 @@ function makeExecutors(ctx = {}) {
       biasRecord: br.enough
         ? { correctRate: br.correct_rate, n: br.n, neutral: br.neutral, holds: br.holds, scored: br.scored }
         : { enough: false, n: br.n || 0, note: br.note || "accruing" },
+      // pulse graded FORWARD, against the next session — same-session would be circular
+      pulseSignal: snap.pulse_signal || null,
       sessionsLogged: snap.sessions_logged || null,
       from: snap.from || null, to: snap.to || null,
       note: "NoVo's own log, self-reported and self-scored — not an independent audit, and not the " +
