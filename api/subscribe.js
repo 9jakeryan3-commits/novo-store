@@ -7,7 +7,7 @@ import _kv from './_kv.js';
 const resend = new Resend(process.env.RESEND_API_KEY);
 // The recurring sends are broadcasts and get Resend's own opt-out. This one is transactional, so the
 // merge tag would render as literal text -- it needs a real signed link.
-const { link: unsubLink } = require('./unsubscribe.js');
+const { link: unsubLink, postalHtml } = require('./unsubscribe.js');
 const FROM = 'NoVo <orders@novo-aitrading.app>';
 const OWNER = 'novotrades26@gmail.com';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -46,7 +46,7 @@ function freeWelcomeHtml(invite, email) {
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;"><b style="color:#eaf3ff">NoVo Analyst</b> ($129/mo) adds The Open + The Close every session, intraday regime alerts, and the <b style="color:#eaf3ff">private read channels</b> in the Discord. <a href="https://novo-options.trade/analyst" style="color:#22d3ee;font-weight:700;text-decoration:none;">See NoVo Analyst &rarr;</a></div>
       </div>
       <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice.</p>
-      <p style="font-size:11px;color:#6f8bab;line-height:1.6;margin:10px 0 0;">You are subscribed to NoVo email updates. <a href="${unsubLink(email)}" style="color:#6f8bab;text-decoration:underline;">Unsubscribe</a></p>
+      <p style="font-size:11px;color:#6f8bab;line-height:1.6;margin:10px 0 0;">You are subscribed to NoVo email updates. <a href="${unsubLink(email)}" style="color:#6f8bab;text-decoration:underline;">Unsubscribe</a></p>${postalHtml()}
     </div>
   </div>
 </div>`;

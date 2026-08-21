@@ -107,5 +107,17 @@ module.exports = async (req, res) => {
      <p>The dealer map, the free tools and the Journal stay open to you.</p>`));
 };
 
+// CAN-SPAM requires a valid physical postal address in every commercial message. There is not one
+// yet, and inventing one would be worse than omitting it -- so this renders the footer line only when
+// MAIL_POSTAL_ADDRESS is set, and nothing at all until then. Setting that one env var puts the address
+// into every email NoVo sends, with no code change.
+function postalHtml(color) {
+  const a = String(process.env.MAIL_POSTAL_ADDRESS || '').trim();
+  if (!a) return '';
+  const safe = a.replace(/[<>&]/g, '');
+  return `<div style="font-size:11px;color:${color || '#6f8bab'};line-height:1.6;margin:6px 0 0;">${safe}</div>`;
+}
+
+module.exports.postalHtml = postalHtml;
 module.exports.sign = sign;
 module.exports.link = link;
