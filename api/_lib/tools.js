@@ -160,6 +160,18 @@ const declarations = [
     },
   },
   {
+    name: "get_recent_reads",
+    description:
+      "NoVo's own recent desk notes — date, kind, the BIAS it published, and an excerpt. Use when asked " +
+      "what you said earlier, whether you have changed your view, or to compare a past call with what " +
+      "actually happened. This is your own record, not the archive: quote it as yours, and if an earlier " +
+      "read did not hold up, say so plainly rather than reframing it.",
+    parameters: {
+      type: "object",
+      properties: { limit: { type: "number", description: "How many, 1-15. Default 5." } },
+    },
+  },
+  {
     name: "search_news",
     description:
       "Recent headlines for one ticker — title and published age only, never article text. Use for " +
@@ -426,7 +438,22 @@ function makeExecutors(ctx = {}) {
     return {
       window: snap.window, minN: snap.min_n, minSessions: snap.min_sessions,
       builtEt: snap.built_et, note: snap.note, tickers: out,
+      // what the tape did on the days each macro print landed — the backward half of the calendar
+      macroDays: snap.events || [],
     };
+  }
+
+  // NoVo recalling what IT said, rather than reconstructing it from the archive by similarity. A read
+  // carries a date and a BIAS, so "what did I call this morning" has an exact answer, not a nearest match.
+  async function get_recent_reads({ limit } = {}) {
+    if (!r) return { error: "reads unavailable" };
+    let snap = null;
+    try { snap = await r.get("novo:base_rates"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    const reads = (snap && snap.reads) || [];
+    if (!reads.length) return { reads: [], note: "no reads logged yet — logging began 2026-08-20" };
+    const k = Math.min(Math.max(Number(limit) || 5, 1), 15);
+    return { reads: reads.slice(0, k) };
   }
 
   async function get_track_record() {
@@ -437,7 +464,8 @@ function makeExecutors(ctx = {}) {
     if (!snap || !snap.tickers) return { error: "no track record published yet" };
     const out = {};
     for (const [tk, t] of Object.entries(snap.tickers)) {
-      const e = t.expected_move || {}, f = t.flip_regime || {};
+      const e = t.expected_move || {}, f = t.flip_regime || {},
+            g = t.gravity_pull || {}, w = t.wall_respect || {};
       out[tk] = {
         expectedMove: e.sessions
           ? { inside: e.inside, outside: e.outside, sessions: e.sessions,
@@ -448,10 +476,20 @@ function makeExecutors(ctx = {}) {
               positiveMedianHourPct: f.positive_median_pct, positiveN: f.positive_n,
               negativeMedianHourPct: f.negative_median_pct, negativeN: f.negative_n }
           : { enough: false, positiveN: f.positive_n || 0, negativeN: f.negative_n || 0 },
+        // the two labels the dashboard prints every session, finally graded
+        gravityPull: g.enough ? { closerRate: g.closer_rate, medianGapChange: g.median_gap_change, n: g.n, holds: g.holds } : null,
+        wallRespect: w.enough ? { callHeldRate: w.call_wall_held_rate, putHeldRate: w.put_wall_held_rate, callN: w.call_n, putN: w.put_n } : null,
       };
     }
+    const br = snap.bias_record || {};
     return {
       tickers: out,
+      // the most public claim the product makes: the BULLISH/BEARISH tag on every desk note, graded
+      // from the price when it published to that session's close. NEUTRAL asserts nothing and is
+      // never scored, so a quiet call cannot farm a record.
+      biasRecord: br.enough
+        ? { correctRate: br.correct_rate, n: br.n, neutral: br.neutral, holds: br.holds }
+        : { enough: false, n: br.n || 0, note: br.note || "accruing" },
       sessionsLogged: snap.sessions_logged || null,
       from: snap.from || null, to: snap.to || null,
       note: "NoVo's own log, self-reported and self-scored — not an independent audit, and not the " +
@@ -462,7 +500,7 @@ function makeExecutors(ctx = {}) {
   return {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
-    get_base_rates,
+    get_base_rates, get_recent_reads,
   };
 }
 
