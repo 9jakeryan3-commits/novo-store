@@ -156,7 +156,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="m-tag">Dealer Gamma</div>
     <h2>Net GEX (Gamma Exposure)</h2>
     <p>Options dealers sit on the other side of most trades, and they hedge to stay neutral. <b>Net GEX</b> measures how much hedging pressure that creates &mdash; the sum, across every strike, of each contract's open interest times its gamma times the index price, with calls adding and puts subtracting.</p>
-    <span class="m-formula">Net GEX  =  &Sigma; ( open interest &times; gamma &times; spot )  &mdash; calls (+), puts (&minus;)</span>
+    <span class="m-formula">Net GEX  =  &Sigma; ( open interest &times; gamma &times; 100 &times; spot )  &mdash; calls (+), puts (&minus;)</span>
     <p><b>Positive net GEX</b> &mdash; dealers are long gamma and hedge <i>against</i> the move (sell rallies, buy dips): the tape grinds and mean-reverts. <b>Negative net GEX</b> &mdash; they hedge <i>with</i> the move (buy strength, sell weakness): moves extend and volatility feeds on itself. That single sign tells you whether today's tape wants to fade or run.</p>
   </div>
 
@@ -169,7 +169,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="m-card">
     <div class="m-tag">Magnets &amp; Barriers</div>
     <h2>Call Wall &amp; Put Wall</h2>
-    <p>Gamma isn't spread evenly &mdash; it clusters at the strikes with the most open interest. The <b>Call Wall</b> is the strike above spot carrying the largest call-gamma concentration; the <b>Put Wall</b> is the largest put-gamma concentration below. In a positive-gamma regime the Call Wall tends to act as a <b>magnet / resistance</b> (a pin) and the Put Wall as <b>support</b> &mdash; the levels dealer hedging defends hardest.</p>
+    <p>Gamma isn't spread evenly &mdash; it clusters at the strikes with the most open interest. Calls and puts are netted at every strike first. The <b>Call Wall</b> is then the strike at or above spot with the largest positive net gamma, and the <b>Put Wall</b> the strike at or below spot with the largest negative net gamma &mdash; so a strike heavy in both cancels rather than counting twice. In a positive-gamma regime the Call Wall tends to act as <b>resistance</b> (a pin) and the Put Wall as <b>support</b> &mdash; the levels dealer hedging defends hardest.</p>
   </div>
 
   <div class="m-card">

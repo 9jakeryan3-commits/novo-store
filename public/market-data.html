@@ -399,7 +399,7 @@ nav { position: relative; }
 
     <div class="hero-copy" style="display:flex;flex-direction:column;justify-content:center;">
       <h1>The market's <span>fear</span>, read three ways.</h1>
-      <p>A live fear gauge for the S&amp;P (VIX), Nasdaq (VXN) and Russell (RVX) — each ranked against its own year — plus the NoVo Market Pulse, a single sentiment score from vol and momentum, and a sector heatmap of where the money actually went. Free, updated through the session.</p>
+      <p>A live fear gauge for the S&amp;P (VIX), Nasdaq (VXN) and Russell (RVX) — each ranked against its own year — plus the NoVo Market Pulse, a single sentiment score from volatility, put/call, breadth and trend, and a sector heatmap of where the money actually went. Free, updated through the session.</p>
       <p style="font-size:13.5px;color:var(--txt3);">Want the <b style="color:var(--txt2)">dealer map</b> behind the moves — net GEX, the gamma flip, dealer walls, expected move and live options flow? That's <a href="/analyst">NoVo Analyst</a>.</p>
       <div class="hero-cta">
         <a class="btn btn-p" href="/analyst">See the live dealer map →</a>
@@ -415,7 +415,7 @@ nav { position: relative; }
     <div style="flex:1 1 300px;min-width:240px;">
       <div class="lbl">Sentiment poll</div>
       <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">How do you feel about the tape today?</h2>
-      <p class="sub" style="margin:0;font-size:13.5px;">The gauge above is measured off volatility and momentum. This one is the room.</p>
+      <p class="sub" style="margin:0;font-size:13.5px;">The gauge above is measured off volatility, options positioning, breadth and trend. This one is the room.</p>
     </div>
     <div id="poll-vote" style="display:flex;gap:10px;flex:0 0 auto;">
       <button class="pbtn bear" data-side="bear" type="button">&#9660; Bearish</button>
@@ -559,7 +559,7 @@ nav { position: relative; }
 <div class="container sec">
   <div class="lbl">About</div>
   <h2 class="h2">What is the NoVo Market Pulse?</h2>
-  <p class="sub" style="max-width:760px;">The Market Pulse is a single 0–100 read of market sentiment — 0 is Extreme Fear, 100 is Extreme Greed. It blends four factors: index-volatility percentiles (VIX, VXN <i>and</i> RVX — so it catches Nasdaq and small-cap fear a VIX-only gauge misses) at 35%, the SPY put/call ratio at 25%, market breadth at 20%, and where the S&amp;P sits versus its 125-day trend at 20%. Volatility and put/call are the fear anchors and carry the most weight. It's a weather report, not a trade signal. It can read differently from breadth-based indices like CNN's Fear &amp; Greed — those lean heavily on market breadth and options positioning, while NoVo's leans on volatility and trend, so the two often diverge. For the <i>structure</i> under the sentiment — how dealer gamma is positioning the market — see <a href="/analyst">NoVo Analyst</a> or read <a href="/journal/">The Journal</a>.</p>
+  <p class="sub" style="max-width:760px;">The Market Pulse is a single 0–100 read of market sentiment — 0 is Extreme Fear, 100 is Extreme Greed. It blends four factors: index-volatility percentiles (VIX, VXN <i>and</i> RVX — so it catches Nasdaq and small-cap fear a VIX-only gauge misses) at 35%, the SPY put/call ratio at 25%, market breadth at 20%, and where the S&amp;P sits versus its 125-day trend at 20%. Volatility and put/call are the fear anchors and carry the most weight. It's a weather report, not a trade signal. It can read differently from indices like CNN's Fear &amp; Greed because the weights differ, not the inputs — NoVo leans hardest on the volatility and put/call anchors, so the two often diverge. For the <i>structure</i> under the sentiment — how dealer gamma is positioning the market — see <a href="/analyst">NoVo Analyst</a> or read <a href="/journal/">The Journal</a>.</p>
 </div>
 
 <script>
