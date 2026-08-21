@@ -15,7 +15,7 @@
 //   1. Market analysis only. Never a trade, position, P&L, or an instruction to buy or sell.
 //   2. Any claim leaning on the logged history states how many sessions it rests on.
 
-const { kv } = require('./_kv.js');
+const { kv, rateOk } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
@@ -229,6 +229,22 @@ module.exports = async (req, res) => {
   const email = verifyToken((req.body && req.body.t) || (req.query && req.query.t));
   if (!email) return res.status(401).json({ error: 'sign in on the dashboard to ask NoVo' });
 
+  // Volume caps. This endpoint was subscriber-gated but UNCAPPED, while the free support bot has run
+  // 20/hour since day one -- the cheap surface was limited and the expensive one was not. A question
+  // here costs a retrieval embedding plus up to four model calls once the tool rounds are used.
+  //
+  // Keyed on the SUBSCRIBER, not the IP: this is a paid endpoint with a real identity, and IP keying
+  // both punishes shared networks and is trivially sidestepped. The hourly cap is what actually stops
+  // a runaway client; the daily one is the cost ceiling; the global one means a single leaked token
+  // cannot run the bill up regardless. rateOk fails open when KV is unreachable, so an outage costs
+  // money rather than breaking a paid feature -- the right way round at this volume.
+  if (!(await rateOk(`ask:${email}:h`, 30, 3600)))
+    return res.status(429).json({ error: 'Too many questions this hour.' });
+  if (!(await rateOk(`ask:${email}:d`, 120, 86400)))
+    return res.status(429).json({ error: "You've hit today's limit." });
+  if (!(await rateOk('ask:global:h', 800, 3600)))
+    return res.status(429).json({ error: 'NoVo is busy — try again shortly.' });
+
   const question = String((req.body && req.body.question) || '').trim().slice(0, 600);
   if (!question) return res.status(400).json({ error: 'no question' });
 
@@ -294,8 +310,12 @@ module.exports = async (req, res) => {
     const contents = [{ role: 'user', parts: [{ text: prompt }] }];
     const ledger = [];
     let answer = '';
+    // What a question actually COSTS, so the caps above can be tuned against measurement instead of
+    // my estimate. Model calls are the spend; tool calls are why there is more than one of them.
+    let modelCalls = 0, toolCalls = 0;
 
     for (let round = 0; round < MAX_ROUNDS; round++) {
+      modelCalls++;
       const j = await callModel(`${MODEL}:generateContent`, {
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents,
@@ -316,6 +336,7 @@ module.exports = async (req, res) => {
       });
       const parts = j?.candidates?.[0]?.content?.parts || [];
       const calls = parts.filter((p) => p && p.functionCall).slice(0, MAX_CALLS_PER_ROUND);
+      toolCalls += calls.length;
 
       if (!calls.length) {
         // Join every text part and drop any the model marked as thought — reading parts[0] alone
@@ -351,6 +372,7 @@ module.exports = async (req, res) => {
     }
 
     if (!answer) return res.status(502).json({ error: 'no answer' });
+    console.log(`[ASK] ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
     // would sit on screen as punctuation.
