@@ -303,6 +303,23 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .feature { display: flex; gap: 14px; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 20px; }
+  /* Ask NoVo showcase — a paragraph describing an analyst sells worse than the analyst answering.
+     Styled to look like the real panel on the dashboard, so what is promised here is recognisably
+     what arrives after signup. */
+  .ask-demo { border: 1px solid var(--bdr); border-radius: 12px; background: #0f0f11; overflow: hidden; margin-top: 14px; }
+  .ask-demo .ad-hd { display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+    border-bottom: 1px solid var(--bdr); font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--txt3); }
+  .ask-demo .ad-dot { width: 7px; height: 7px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }
+  .ask-demo .ad-tag { margin-left: auto; letter-spacing: .08em; color: var(--txt3); font-weight: 700; }
+  .ask-demo .ad-body { padding: 16px; display: grid; gap: 7px; }
+  .ask-demo .ad-q { justify-self: end; max-width: 82%; background: rgba(34,211,238,.10);
+    border: 1px solid rgba(34,211,238,.30); color: #cfe6f2; border-radius: 12px 12px 4px 12px;
+    padding: 9px 13px; font-size: 13.5px; }
+  .ask-demo .ad-a { max-width: 92%; background: var(--navy2); border: 1px solid var(--bdr);
+    border-radius: 12px 12px 12px 4px; padding: 11px 14px; font-size: 13.5px; line-height: 1.6; color: var(--txt1); }
+  .ask-demo .ad-src { font-size: 11px; color: var(--txt3); padding: 0 2px 6px; }
+  .ask-demo .ad-a b { color: #22d3ee; font-weight: 800; }
   .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
   .feature h4 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }
   .feature p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
@@ -646,7 +663,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="feature"><div class="feature-icon">📈</div><div><h3>Options flow &middot; call vs put demand</h3><p>Which side the volume is building on across the chain, the day's put/call ratio, and the unusual-volume strikes &mdash; the crowd's positioning as it forms, live off the chain.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">&#128200;</div><div><h3>Gamma by strike, through the session</h3><p>The dealer map with a time axis: one column every few minutes, so you can see where gamma built, where it drained, and which strikes held it all day &mdash; not just where it sits right now.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🐋</div><div><h3>Sweeps &amp; blocks</h3><p>Real order flow off the live <b style="color:var(--txt1);">print tape</b> &mdash; aggressor-tagged <b style="color:var(--txt1);">sweeps</b> (one order shredded across venues to get filled fast) and oversized <b style="color:var(--txt1);">block</b> prints, for SPY, QQQ and IWM. The buy/sell footprint, not just volume totals &mdash; computed <b style="color:var(--txt1);">in-house off the tape</b>, drawn straight into your dealer map.</p></div></div>
-      <div class="feature" id="ask-novo" style="grid-column: 1 / -1;scroll-margin-top:90px;"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it about the map, the session, or what is moving it. It answers off today&rsquo;s live dealer read, every session it has logged and a thousand Journal articles &mdash; and every historical claim arrives with the sample size behind it, including a straight answer when that sample is too thin to lean on. When it needs the catalyst behind a move, the next earnings date or the macro calendar, it goes and gets them. It shows you what it checked.</p></div></div>
+      <div class="feature" id="ask-novo" style="grid-column: 1 / -1;scroll-margin-top:90px;"><div class="feature-icon">💬</div><div><h3>NoVo &mdash; the AI market analyst</h3><p>Ask it about the map, the session, or what is moving it. It answers off today&rsquo;s live dealer read, every session it has logged and a thousand Journal articles &mdash; and every historical claim arrives with the sample size behind it. When it needs the catalyst behind a move, the next earnings date or the macro calendar, it goes and gets them. It shows you what it checked.</p>
+        <div class="ask-demo">
+          <div class="ad-hd"><span class="ad-dot"></span> NoVo &middot; AI market analyst <span class="ad-tag">Example exchange</span></div>
+          <div class="ad-body">
+            <div class="ad-q">What has a setup like this usually done?</div>
+            <div class="ad-a">Short gamma, price 0.3% under the flip, vol in the middle third. Over the next hour that has resolved <b>down 63% of the time</b>, median &minus;0.03% &mdash; 1,093 snapshots across 6 sessions.</div>
+            <div class="ad-src">Checked: live dealer map SPY &middot; base rates SPY</div>
+            <div class="ad-q">Why did we drop into the close?</div>
+            <div class="ad-a">Price lost the opening-range low at 765.86 just after 14:00 and there was no shelf under it until the pre-market low at 764.15. Dealers are short gamma below the flip, so hedging sold into that move rather than absorbing it.</div>
+            <div class="ad-src">Checked: live dealer map SPY &middot; logged sessions SPY &middot; headlines SPY</div>
+          </div>
+        </div></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">🕰️</div><div><h3>Historical analogues</h3><p>&ldquo;Today looks like&hellip;&rdquo; &mdash; NoVo logs every session's dealer map and surfaces the closest prior setups, with how each one resolved into the close. Pattern memory for the map.</p></div></div>
       <div class="feature" style="grid-column: 1 / -1;"><div class="feature-icon">📊</div><div><h3>What this setup has done before</h3><p>Every live dealer setup carries its own record: what it resolved to over the next hour, how often, and across how many sessions. Read straight off NoVo's own logged map, with the sample size beside every number.</p></div></div>
     </div>
