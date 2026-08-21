@@ -582,7 +582,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     var pz = d.pulse_signal || {};
     if (pz.enough) {
-      $('tr-pulse').innerHTML = ['low','mid','high'].map(function(k){
+      // The gauge is four factors; most scored sessions predate NoVo logging its own put/call and
+      // breadth and are rebuilt from the other two. Stated, because "n=786" would otherwise read as
+      // 786 readings of the gauge on the market-data page.
+      var mix = (pz.reconstructed_n
+        ? '<div class="muted" style="font-size:12px;margin-bottom:8px;">'
+          + nn(pz.sessions_scored) + ' sessions &middot; ' + nn(pz.live_n || 0) + ' four-factor, '
+          + nn(pz.reconstructed_n) + ' rebuilt from volatility and momentum</div>'
+        : '');
+      $('tr-pulse').innerHTML = mix + ['low','mid','high'].map(function(k){
         var x = pz[k] || {};
         return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:6px;">' + k
              + ' pulse &rarr; next session median <b>' + x.median_next_pct + '%</b>, up ' + x.up_rate
