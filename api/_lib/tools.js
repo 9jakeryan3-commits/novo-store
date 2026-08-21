@@ -484,11 +484,12 @@ function makeExecutors(ctx = {}) {
     const br = snap.bias_record || {};
     return {
       tickers: out,
-      // the most public claim the product makes: the BULLISH/BEARISH tag on every desk note, graded
-      // from the price when it published to that session's close. NEUTRAL asserts nothing and is
-      // never scored, so a quiet call cannot farm a record.
+      // the most public claim the product makes: the BULLISH/BEARISH tag on the OPEN's read, graded
+      // open-to-close. Only the Pre-Market Primer counts -- Mid-Day reads a session already half
+      // resolved, the Closing Bell is a summary, and the Weekly takes a view on the week. `scored`
+      // says which, so this is never quoted as though every note were graded.
       biasRecord: br.enough
-        ? { correctRate: br.correct_rate, n: br.n, neutral: br.neutral, holds: br.holds }
+        ? { correctRate: br.correct_rate, n: br.n, neutral: br.neutral, holds: br.holds, scored: br.scored }
         : { enough: false, n: br.n || 0, note: br.note || "accruing" },
       sessionsLogged: snap.sessions_logged || null,
       from: snap.from || null, to: snap.to || null,
