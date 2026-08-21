@@ -548,7 +548,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (L.enough) {
         ln += hd(tk, L.holds ? 'holds' : 'does not hold in this window', !!L.holds)
             + sub('direction right <b>' + L.direction_rate + '%</b> &middot; the level itself held <b>'
-                  + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n) + ')</span>');
+                  + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n)
+                  + (L.replay_n ? ', ' + nn(L.replay_n) + ' replayed from historical bars' : '')
+                  + ')</span>');
       } else { ln += '<div class="muted" style="font-size:13px;margin-bottom:10px;">' + tk + ' &mdash; accruing (n=' + (L.n||0) + ').</div>'; }
     });
     $('tr-grav').innerHTML  = gv || '<div class="muted">Accruing.</div>';
