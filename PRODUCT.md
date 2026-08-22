@@ -96,7 +96,7 @@ layer underneath. Nothing in this section appears on any free page.
 
 ## NoVo Trader — $209/mo · includes all of Analyst
 
-- **Dealer read at ~5 seconds**, scalping chart streaming at half a second
+- **Dealer read at ~5 seconds**, scalping chart streaming at 10 updates a second
 - **One-click execution** in your own broker — **you click every entry, always**
 - **Automated exits only** — TP1/TP2, trailing stops, hard stop broker-side on **Tradier and
   tastytrade** (Alpaca falls back to the software exit engine)
