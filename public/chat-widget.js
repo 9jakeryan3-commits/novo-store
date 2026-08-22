@@ -58,7 +58,7 @@
   function open(){
     opened = true; panel.classList.add('open'); btn.textContent = '×';
     if (!messages.length) addMsg('assistant',
-      "Hi — I'm NoVo's assistant. Ask me anything about how NoVo works: brokers, paper vs live, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + ".");
+      "Support here. Ask anything about how NoVo works: brokers, paper vs live, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + ".");
     setTimeout(function(){ inputEl.focus(); }, 50);
   }
   function close(){ opened = false; panel.classList.remove('open'); btn.textContent = '💬'; }
@@ -69,7 +69,7 @@
     inputEl.value=''; inputEl.style.height='auto';
     messages.push({role:'user', content:text}); addMsg('user', text);
     busy = true; sendEl.disabled = true;
-    var typing = document.createElement('div'); typing.className='nvc-typing'; typing.textContent='NoVo is typing…';
+    var typing = document.createElement('div'); typing.className='nvc-typing'; typing.textContent='The desk is typing…';
     bodyEl.appendChild(typing); scrollDown();
     try {
       var r = await fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({messages: messages})});
@@ -86,16 +86,16 @@
   function mount(){
     var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
-    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Message NoVo support'); btn.textContent='💬';
+    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Message support'); btn.textContent='💬';
     btn.onclick = function(){ opened ? close() : open(); };
 
-    panel = document.createElement('div'); panel.className='nvc-panel'; panel.setAttribute('role','dialog'); panel.setAttribute('aria-label','NoVo support chat');
+    panel = document.createElement('div'); panel.className='nvc-panel'; panel.setAttribute('role','dialog'); panel.setAttribute('aria-label','NoVo Options Trading support');
     panel.innerHTML =
-      '<div class="nvc-hd"><b>Message NoVo</b><span class="nvc-sub">product &amp; how-to help</span>'
+      '<div class="nvc-hd"><b>Message the desk</b><span class="nvc-sub">plans, brokers &amp; billing</span>'
       + '<button class="nvc-x" aria-label="Close">×</button></div>'
       + '<div class="nvc-body"></div>'
       + '<div class="nvc-foot"><div class="nvc-row">'
-      + '<textarea class="nvc-in" rows="1" placeholder="Ask about NoVo…"></textarea>'
+      + '<textarea class="nvc-in" rows="1" placeholder="Ask about plans, brokers or billing…"></textarea>'
       + '<button class="nvc-send">Send</button></div>'
       + '<div class="nvc-note">Support &amp; education only — not financial advice. Account/billing: '
       + '<a href="mailto:' + SUPPORT + '">' + SUPPORT + '</a></div></div>';
