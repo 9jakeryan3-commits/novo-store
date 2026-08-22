@@ -229,6 +229,10 @@
       "destination": "/positioning.html"
     },
     {
+      "source": "/vol",
+      "destination": "/vol.html"
+    },
+    {
       "source": "/track-record",
       "destination": "/track-record.html"
     },

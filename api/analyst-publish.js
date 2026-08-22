@@ -645,6 +645,16 @@ async function _promotePublicLevels(state) {
   // Only these five numbers are copied across. The read, the flow tape, the squeeze signal,
   // the analogues and the charts are not in this object and cannot leak through it.
   // Numeric grounding — coverage + per-session counts. Tiny, so it goes straight to KV.
+  // The PUBLIC volatility record -- CBOE-published indices only, so it is safe on a free page.
+  // ~54KB, so it goes straight to KV like the context rather than to blob storage.
+  if (req.body && typeof req.body === 'object' && req.body.kind === 'vol-history') {
+    try {
+      const r = kv();
+      if (r) await r.set('novo:vol', JSON.stringify(req.body.vol || {}));
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
   if (req.body && typeof req.body === 'object' && req.body.kind === 'analyst-context') {
     try {
       const r = kv();
