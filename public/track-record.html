@@ -458,8 +458,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       $('tr-flip').innerHTML = '';
       return;
     }
-    $('tr-meta').textContent = d.sessions_logged + ' sessions logged, ' + Number(d.snapshots).toLocaleString()
-      + ' snapshots, ' + d.from + ' to ' + d.to + '.';
+    // Everything the page scores, not just the live map -- otherwise the header says 23 sessions
+    // while a claim below it says 1,008. Falls back to the live-only fields if the engine is older.
+    $('tr-meta').textContent = Number(d.sessions_scored || d.sessions_logged).toLocaleString()
+      + ' sessions scored, ' + (d.scored_from || d.from) + ' to ' + (d.scored_to || d.to)
+      + ' · ' + Number(d.snapshots).toLocaleString() + ' live snapshots.';
 
     var em = '', fl = '';
     ['SPY','QQQ','IWM'].forEach(function(tk){
