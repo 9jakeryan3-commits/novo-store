@@ -39,7 +39,10 @@ module.exports = async (req, res) => {
 
   if (req.method !== "GET") return res.status(405).json({ error: "GET or POST" });
 
-  res.setHeader("Cache-Control", "public, s-maxage=1800, stale-while-revalidate=86400");
+  // 30 minutes of edge cache with no browser max-age meant a fresh push could sit invisible for
+  // half an hour, and browsers fell back to heuristic caching on top of that. The record changes
+  // on every engine publish, so it revalidates in a minute and serves stale only while refreshing.
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=600");
   if (!r) return res.status(200).json({ ok: false, note: "unavailable" });
   let snap = null;
   try { snap = await r.get(KEY); } catch (_) { snap = null; }

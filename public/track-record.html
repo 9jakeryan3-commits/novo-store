@@ -462,7 +462,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // while a claim below it says 1,008. Falls back to the live-only fields if the engine is older.
     $('tr-meta').textContent = Number(d.sessions_scored || d.sessions_logged).toLocaleString()
       + ' sessions scored, ' + (d.scored_from || d.from) + ' to ' + (d.scored_to || d.to)
-      + ' · ' + Number(d.snapshots).toLocaleString() + ' live snapshots.';
+      + ' · ' + Number(d.snapshots).toLocaleString() + ' snapshots.';
 
     var em = '', fl = '';
     ['SPY','QQQ','IWM'].forEach(function(tk){
