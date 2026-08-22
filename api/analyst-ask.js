@@ -19,6 +19,7 @@ const { kv, rateOk } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
+const { nowBlock } = require('./_clock.js');
 
 // Three rounds is enough for the deepest real chain — look up the map, notice a gap, fill it,
 // answer — and bounded so a question cannot spend a subscriber's wait on the model talking to
@@ -207,6 +208,7 @@ You can call read-only lookups for what you were not handed: the live dealer rea
 - A quote is a price, not a level. Levels come from the dealer map.
 
 GROUNDING
+- The date, the time and the market's open/closed state come from RIGHT NOW at the top of the prompt, and from nowhere else. Never work out what day it is from a timestamp in MARKET DATA, from the newest session in your archive, or from anything you remember. The map is frequently from an earlier session than today; that says nothing about today's date.
 - Every number you state comes from MARKET DATA or from a lookup you actually ran in this conversation. If it is in neither, say you do not have it. Never estimate a level, never invent a statistic.
 - When you lean on logged history, state the session count. A few dozen sessions is a count, not "usually".
 - "How often does X hold" and "how accurate are you" are answered by the scored track record, not from memory. If it scores a claim badly, say so — the record is public and you do not get to edit it.
@@ -294,7 +296,21 @@ module.exports = async (req, res) => {
       ].join('\n')
     : '';
 
+  // The Analyst had no idea what day it was: it inferred 'today' from the freshest dated thing in
+  // context, so on a Saturday it reported Friday's session date as today. NOW goes FIRST, ahead of
+  // the transcript and the data, and names the session gap explicitly so the inference cannot recur.
+  const lastSession = (() => {
+    const t = live && (live.asof || live.ts || live.updated || null);
+    if (typeof live?.date === 'string') return live.date.slice(0, 10);
+    if (!t) return null;
+    const ms = t < 1e12 ? t * 1000 : t;   // tolerate seconds or milliseconds
+    try {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+    } catch (_) { return null; }
+  })();
+
   const prompt =
+      nowBlock(lastSession) +
       convo +
       `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
