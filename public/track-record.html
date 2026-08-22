@@ -465,6 +465,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ['SPY','QQQ','IWM'].forEach(function(tk){
       var t = d.tickers && d.tickers[tk]; if (!t) return;
       var e = t.expected_move || {};
+      var bt = t.expected_move_backtest || {};
       if (e.sessions) {
         var beat = e.rate != null && e.rate >= e.baseline;
         em += '<div style="margin-bottom:14px;">'
@@ -474,7 +475,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + bar(e.rate || 0, 100, beat ? '#10b981' : '#8aacc8')
            + '<div class="muted" style="font-size:12px;margin-top:4px;">closed inside the band on '
            + e.inside + ' sessions, outside on ' + e.outside + ' &middot; a 1&sigma; band would contain about '
-           + e.baseline + '%</div></div>';
+           + e.baseline + '%</div>'
+           // The same formula over years rather than weeks. Its own line and its own n --
+           // these are backtested sessions, not calls NoVo published, and the two never merge.
+           + (bt.enough ? '<div class="muted" style="font-size:12px;margin-top:3px;">backtested '
+               + String(bt.first).slice(0,4) + '&ndash;' + String(bt.last).slice(0,4) + ': <b style="color:var(--txt1)">'
+               + Number(bt.inside).toLocaleString() + ' of ' + Number(bt.sessions).toLocaleString() + '</b> &middot; ' + pct(bt.rate) + '</div>' : '')
+           + '</div>';
       }
       var f = t.flip_regime || {};
       if (f.enough) {
