@@ -662,7 +662,10 @@ async function _promotePublicLevels(state) {
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(500).json({ error: 'no blob token' });
     const part = String(req.body.part || '');
-    if (part !== 'meta' && part !== 'vecs') return res.status(400).json({ error: 'bad part' });
+    // meta | vecs (legacy single blob) | vecs0, vecs1, ... (chunked). Base64 inflates by 4/3, so a
+    // single 3.24MB vector blob crossed Vercel's 4.5MB body cap and 413'd for two days straight --
+    // silently, because only the engine log saw it. Chunking scales; raising the ceiling would not.
+    if (!/^(meta|vecs\d*)$/.test(part)) return res.status(400).json({ error: 'bad part' });
     try {
       const buf = Buffer.from(String(req.body.gz_b64 || ''), 'base64');
       if (!buf.length) return res.status(400).json({ error: 'empty payload' });
@@ -672,7 +675,9 @@ async function _promotePublicLevels(state) {
       });
       try {
         const r = kv();
-        if (r) await r.set('analyst:index:' + part, JSON.stringify({ url, bytes: buf.length, built: req.body.built || Date.now() / 1000, stats: req.body.stats || null }));
+        // `parts` rides on every chunk so vecs0 alone tells the reader how many to fetch --
+        // no separate manifest key to fall out of sync with the blobs it describes.
+        if (r) await r.set('analyst:index:' + part, JSON.stringify({ url, bytes: buf.length, parts: Number(req.body.parts) || undefined, built: req.body.built || Date.now() / 1000, stats: req.body.stats || null }));
       } catch (_) {}
       return res.status(200).json({ ok: true, part, bytes: buf.length });
     } catch (e) { return res.status(500).json({ error: e.message }); }

@@ -56,21 +56,45 @@ let _idx = null;
 let _idxAt = 0;
 const _IDX_TTL = 15 * 60 * 1000;
 
+const _rec = (x) => (typeof x === 'string' ? JSON.parse(x) : x);
+
+/**
+ * The vector blob, whether it was uploaded whole or in chunks.
+ *
+ * Chunked is tried first: vecs0 carries the part count, and the parts are byte-slices of one gzip
+ * stream, so concatenating them reproduces exactly what the engine compressed. The legacy single
+ * `vecs` key stays readable so an old index keeps answering until the first chunked push lands.
+ */
+async function loadVecBuffer(r) {
+  const head = _rec(await r.get('analyst:index:vecs0'));
+  if (head?.url) {
+    const n = Number(head.parts) || 1;
+    const recs = [head];
+    if (n > 1) {
+      const rest = await Promise.all(
+        Array.from({ length: n - 1 }, (_, i) => r.get('analyst:index:vecs' + (i + 1))));
+      for (const x of rest) recs.push(_rec(x));
+    }
+    if (recs.some((x) => !x?.url)) return null;   // a missing chunk is a corrupt index, not a partial one
+    const bufs = await Promise.all(recs.map((x) => fetch(x.url).then((y) => y.arrayBuffer())));
+    return Buffer.concat(bufs.map((b) => Buffer.from(b)));
+  }
+  const legacy = _rec(await r.get('analyst:index:vecs'));
+  if (!legacy?.url) return null;
+  return Buffer.from(await fetch(legacy.url).then((x) => x.arrayBuffer()));
+}
+
 async function loadIndex() {
   if (_idx && Date.now() - _idxAt < _IDX_TTL) return _idx;
   const r = kv();
   if (!r) return null;
-  const [m, v] = await Promise.all([r.get('analyst:index:meta'), r.get('analyst:index:vecs')]);
-  const meta = typeof m === 'string' ? JSON.parse(m) : m;
-  const vecs = typeof v === 'string' ? JSON.parse(v) : v;
-  if (!meta?.url || !vecs?.url) return null;
+  const [m, vb] = await Promise.all([r.get('analyst:index:meta'), loadVecBuffer(r)]);
+  const meta = _rec(m);
+  if (!meta?.url || !vb) return null;
 
-  const [mb, vb] = await Promise.all([
-    fetch(meta.url).then((x) => x.arrayBuffer()),
-    fetch(vecs.url).then((x) => x.arrayBuffer()),
-  ]);
+  const mb = await fetch(meta.url).then((x) => x.arrayBuffer());
   const chunks = JSON.parse(zlib.gunzipSync(Buffer.from(mb)).toString('utf8'));
-  const raw = zlib.gunzipSync(Buffer.from(vb));
+  const raw = zlib.gunzipSync(vb);
   // fp16 on the wire — measured identical to fp32 for retrieval, at half the bytes.
   const half = new Uint16Array(raw.buffer, raw.byteOffset, raw.length / 2);
   const f32 = new Float32Array(half.length);
