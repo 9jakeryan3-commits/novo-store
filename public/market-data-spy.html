@@ -391,6 +391,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var TK = 'SPY';
         var box = document.getElementById('lv-grid'), asof = document.getElementById('lv-asof');
         var money = function(v){ return v == null ? null : '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); };
+        // Two of these five now ask for a free account: the gamma flip and the expected move.
+        // The walls and spot stay public, so the page keeps its substance and its rankings --
+        // this is a signup prompt at the moment someone wants the number, not a paywall on the page.
+        var lockCell = function(label){
+          return '<a href="https://app.novo-aitrading.app/portal" style="display:block;background:var(--navy2);border:1px dashed rgba(34,211,238,.45);'
+            + 'border-radius:9px;padding:11px 12px;text-decoration:none;">'
+            + '<div style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:800;margin-bottom:5px;">' + label + '</div>'
+            + '<div style="font-size:13.5px;font-weight:800;color:#22d3ee;">Free account &rarr;</div></a>'
+        };
         var cell = function(label, val, tone){
           return '<div style="background:var(--navy2);border:1px solid var(--bdr);border-radius:9px;padding:11px 12px;">'
             + '<div style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:800;margin-bottom:5px;">' + label + '</div>'
@@ -403,10 +412,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var _c0 = document.getElementById('lv-context'); if (_c0) _c0.style.display = 'none';
             return; }
           box.innerHTML = [
-            cell('Gamma flip', money(t.flip), 'var(--cyan)'),
+            lockCell('Gamma flip'),
             cell('Call wall', money(t.callWall), '#34d399'),
             cell('Put wall', money(t.putWall), '#f87171'),
-            cell('Expected move', t.expectedMove == null ? null : '\u00b1' + Number(t.expectedMove).toFixed(2), 'var(--txt1)'),
+            lockCell('Expected move'),
             // Labelled 'Spot at snapshot' on purpose: the live ticker strip elsewhere on the site quotes
             // a CURRENT price from a different feed, so the two legitimately differ by the age shown above.
             // Naming this one for what it is stops that gap reading as one of them being wrong.
@@ -440,7 +449,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if (t.spot != null && t.putWall != null && t.spot > t.putWall) parts.push('$' + (t.spot - t.putWall).toFixed(2) + ' above the put wall');
             if (t.spot != null && t.callWall != null && t.callWall > t.spot) parts.push('$' + (t.callWall - t.spot).toFixed(2) + ' below the call wall');
             if (parts.length) {
-              var em = t.expectedMove == null ? '' : ' \u2014 against a \u00b1$' + Number(t.expectedMove).toFixed(2) + ' expected move today';
+              var em = '';   // the expected move is account-gated above; do not restate it here
               cx.style.display = '';
               cx.innerHTML = '<b style="color:var(--txt1);">' + TK + '</b> is ' + parts.join(' and ') + em + '.';
             } else { cx.style.display = 'none'; }

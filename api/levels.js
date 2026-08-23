@@ -86,12 +86,30 @@ module.exports = async (req, res) => {
   // Cache at the edge for a minute. The data underneath only moves every 15, so this costs
   // nothing in freshness and takes the traffic off the function.
   res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=900');
+
+  // The gamma flip and the expected move now ask for a FREE ACCOUNT (not a paywall -- the walls
+  // and spot above are still open to anyone, and the doctrine at the top of this file still
+  // holds: the levels are the demo, the cadence is the product).
+  //
+  // Stripping them from the PUBLIC payload is what makes that ask real. Leaving them here while
+  // the page renders a lock would put the number one devtools tab away, which is not a gate --
+  // it is a costume. The member portal sends the shared secret and gets the full object.
+  const _full = req.headers['x-novo-key'] &&
+    process.env.ANALYST_PUBLISH_SECRET &&
+    req.headers['x-novo-key'] === process.env.ANALYST_PUBLISH_SECRET;
+  const _tickers = _full ? snap.tickers : snap.tickers.map((t) => {
+    const { flip, expectedMove, ...rest } = t || {};
+    return rest;
+  });
+  if (!_full) res.setHeader('Vary', 'x-novo-key');
+
   return res.status(200).json({
     ok: true,
     asof: snap.asof || null,
     ageMinutes: ageMin,
     delayed: true,
+    gated: _full ? undefined : ['flip', 'expectedMove'],
     session: snap.session || null,
-    tickers: snap.tickers,
+    tickers: _tickers,
   });
 };
