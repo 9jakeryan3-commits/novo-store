@@ -58,6 +58,14 @@ async function one(name, sym) {
 }
 
 module.exports = async (req, res) => {
+  // The member portal lives on app.novo-aitrading.app, so it reads this cross-origin.
+  // These are the same public quotes the marketing site prints on every page -- nothing
+  // gated -- so a single explicit origin is the whole permission needed.
+  const _o = String(req.headers.origin || "");
+  if (_o === "https://app.novo-aitrading.app" || _o === "https://novo-options.trade") {
+    res.setHeader("Access-Control-Allow-Origin", _o);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
   const results = await Promise.all(SYMBOLS.map(([n, s]) => one(n, s)));
   const out = {};
