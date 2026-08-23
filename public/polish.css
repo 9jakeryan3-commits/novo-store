@@ -1,0 +1,105 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   polish.css — the fit-and-finish layer, shared by every marketing page.
+
+   This site's CSS is copy-pasted per page, so anything tuned inside one <style>
+   block only ever fixes one page. This file is the opposite: one place, loaded
+   everywhere, holding only the things that should be identical site-wide.
+
+   Rules for what belongs here:
+     - it must be safe on a page that has never seen it (no layout it can break),
+     - it must survive JS being disabled (nothing here hides content),
+     - and every bit of motion must vanish under prefers-reduced-motion.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. TYPE FINISH ──────────────────────────────────────────────────────────
+   Headlines were breaking wherever the line happened to run out, leaving one
+   orphaned word on the last line. Balancing is the cheapest thing on this page
+   that reads as "designed". `pretty` does the same job for body copy, only for
+   orphans rather than whole-block balance. */
+h1, h2, h3, .section-title, .hero-badge { text-wrap: balance; }
+p, li, .section-sub, .hero-tagline { text-wrap: pretty; }
+
+/* Numbers that sit in a column, or tick, must not jitter as digits change. */
+.proof-n, .stat-n, .hero-chip, .ticker, .ticker-row,
+[class*="price"], [class*="stat"] { font-variant-numeric: tabular-nums; }
+
+/* Selection was the browser default blue on a cyan-and-navy site. */
+::selection { background: rgba(34, 211, 238, 0.26); color: #eaf3ff; }
+::-moz-selection { background: rgba(34, 211, 238, 0.26); color: #eaf3ff; }
+
+/* ── 2. FIT: the sticky nav was eating anchor targets ────────────────────────
+   Every in-page link (#ask-novo, #free, the FAQ) scrolled its target underneath
+   the sticky header + ticker, so the thing you clicked toward landed offscreen.
+   Only 3 of 51 pages set this. */
+:where([id]) { scroll-margin-top: 118px; }
+
+/* ── 3. JUICE: the press ─────────────────────────────────────────────────────
+   Exactly one page in the site had an :active state. Hover tells you a thing is
+   interactive; the PRESS is what makes it feel like it has a mechanism behind
+   it. Small travel, fast curve — a button that moves a lot reads as cheap. */
+:where(a.btn-primary, a.btn-secondary, button.btn-primary, button.btn-secondary,
+       .cta-analyst, .cta-trader, .nav-portal, .feature, .included-item) {
+  transition: transform .16s cubic-bezier(.2, .8, .3, 1),
+              box-shadow .16s ease,
+              border-color .16s ease,
+              background-color .16s ease;
+}
+:where(a.btn-primary, a.btn-secondary, button.btn-primary, button.btn-secondary,
+       .cta-analyst, .cta-trader):active { transform: translateY(1px) scale(.988); }
+
+/* Cards lift rather than press — they are surfaces, not switches. */
+:where(.feature, .included-item):hover { transform: translateY(-2px); }
+:where(.feature, .included-item):active { transform: translateY(0); }
+
+/* Inline links get an underline that grows from the left instead of appearing. */
+:where(.container p, .section-sub) a:not([class]) {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size .22s cubic-bezier(.2, .8, .3, 1);
+  text-decoration: none;
+}
+:where(.container p, .section-sub) a:not([class]):hover { background-size: 100% 1px; }
+
+/* ── 4. FOCUS ────────────────────────────────────────────────────────────────
+   The ring already existed on 50 pages; this only guarantees it is never
+   clipped by a rounded corner and never shows for a mouse click. */
+:focus-visible { outline: 2px solid #22d3ee; outline-offset: 3px; border-radius: 4px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── 5. NAV ELEVATION ────────────────────────────────────────────────────────
+   At rest the header sits flat on the hero. Once the page has moved under it,
+   it earns a border and a shadow — the header stops being part of the hero and
+   becomes a layer above the document. polish.js toggles the class. */
+nav { transition: box-shadow .25s ease, background-color .25s ease; }
+nav.is-scrolled {
+  background: rgba(12, 14, 18, 0.86);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .75);
+}
+
+/* ── 6. REVEAL ───────────────────────────────────────────────────────────────
+   Content is visible BY DEFAULT and stays visible if JS never runs. polish.js
+   opts elements in by adding .rv, which is the only thing that hides them, and
+   it only does that when it has an observer ready to bring them back. A reveal
+   that hides content up front is one script error away from a blank page. */
+.rv { opacity: 0; transform: translateY(14px); }
+.rv-in {
+  opacity: 1; transform: none;
+  transition: opacity .55s cubic-bezier(.2, .8, .3, 1),
+              transform .55s cubic-bezier(.2, .8, .3, 1);
+}
+
+/* ── 7. STILLNESS ────────────────────────────────────────────────────────────
+   Everything above is decoration. Someone who has asked their OS for less
+   motion gets the layout and none of the movement — including the site's own
+   pre-existing glow animations, which nothing was switching off before. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .rv { opacity: 1; transform: none; }
+}
