@@ -24,6 +24,17 @@ BRANCH=$(git branch --show-current)
 node scripts/build-sitemap.js
 node scripts/stamp-assets.js
 
+# lastmod is read from git, so the commit that ships a content change also moves the
+# dates the sitemap records -- meaning the sitemap is always exactly one commit behind
+# and would block every single deploy. When the ONLY thing regeneration touched is the
+# sitemap, that is this lag and nothing else, so commit it and carry on. Anything else
+# dirty is a real uncommitted change and still stops the deploy below.
+if [ "$(git status --porcelain)" = " M public/sitemap.xml" ]; then
+  git commit -q -m "sitemap: refresh lastmod (generated)" -- public/sitemap.xml
+  git push -q
+  echo ".. sitemap lastmod refreshed and pushed"
+fi
+
 # Production is built from the local working tree, so it must equal the commit.
 if [ -n "$(git status --porcelain)" ]; then
   echo "!! uncommitted changes -- commit before deploying:"; git status --short; exit 1
