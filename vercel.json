@@ -229,6 +229,10 @@
       "destination": "/positioning.html"
     },
     {
+      "source": "/ai",
+      "destination": "/ai.html"
+    },
+    {
       "source": "/vol",
       "destination": "/vol.html"
     },
