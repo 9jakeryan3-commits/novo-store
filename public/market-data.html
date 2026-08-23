@@ -474,8 +474,17 @@ nav { position: relative; }
       var t = by[c.getAttribute("data-tk")]; if(!t) return;
       var n = function(x){ return (x==null) ? "\u2014" : Number(x).toFixed(2); };
       var set = function(f,v){ var e=c.querySelector('[data-f="'+f+'"]'); if(e) e.textContent=v; };
-      set("flip", n(t.flip)); set("cw", n(t.callWall)); set("pw", n(t.putWall));
-      set("em", t.expectedMove==null ? "\u2014" : "\u00b1" + Number(t.expectedMove).toFixed(2));
+      set("cw", n(t.callWall)); set("pw", n(t.putWall));
+      // The flip and the expected move ask for a free account now, so the API no longer
+      // sends them to an anonymous caller. Without this the tiles printed an em dash and
+      // read as BROKEN rather than gated -- which is how the hub looked after the gate
+      // shipped to the three per-ticker pages but not to this one.
+      var lock = function(f){
+        var e = c.querySelector('[data-f="'+f+'"]'); if(!e) return;
+        e.innerHTML = '<a href="https://app.novo-aitrading.app/signup" style="color:#22d3ee;'
+          + 'font-weight:800;text-decoration:none;font-size:14px;white-space:nowrap;">Free account &rarr;</a>';
+      };
+      lock("flip"); lock("em");
     });
   }).catch(function(){});
 })();
