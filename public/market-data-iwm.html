@@ -395,7 +395,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // The walls and spot stay public, so the page keeps its substance and its rankings --
         // this is a signup prompt at the moment someone wants the number, not a paywall on the page.
         var lockCell = function(label){
-          return '<a href="https://app.novo-aitrading.app/portal" style="display:block;background:var(--navy2);border:1px dashed rgba(34,211,238,.45);'
+          // /signup, not /portal: someone meeting a locked tile on a public page is almost
+          // always a stranger, and /portal would bounce them to a LOG IN form for an account
+          // they do not have. The signup page carries a Log in link for the other case.
+          return '<a href="https://app.novo-aitrading.app/signup" style="display:block;background:var(--navy2);border:1px dashed rgba(34,211,238,.45);'
             + 'border-radius:9px;padding:11px 12px;text-decoration:none;">'
             + '<div style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:800;margin-bottom:5px;">' + label + '</div>'
             + '<div style="font-size:13.5px;font-weight:800;color:#22d3ee;">Free account &rarr;</div></a>'
