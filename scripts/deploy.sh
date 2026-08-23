@@ -14,6 +14,16 @@ cd "$(dirname "$0")/.."
 BRANCH=$(git branch --show-current)
 [ "$BRANCH" = "master" ] || { echo "!! on '$BRANCH', not master"; exit 1; }
 
+# Regenerate the derived artefacts BEFORE the clean-tree check, so a stale sitemap
+# or a stale asset hash becomes a loud failure instead of silent drift.
+#   - the sitemap was hand-maintained and reached 2,149 entries for 1,067 URLs
+#   - ?v= was hand-typed and never bumped, against a one-year immutable cache, so
+#     edits to chat-widget.js and friends never reached a returning visitor
+# If either rewrites anything, the tree goes dirty and the guard below stops the
+# deploy and tells you to commit -- which is the point.
+node scripts/build-sitemap.js
+node scripts/stamp-assets.js
+
 # Production is built from the local working tree, so it must equal the commit.
 if [ -n "$(git status --porcelain)" ]; then
   echo "!! uncommitted changes -- commit before deploying:"; git status --short; exit 1

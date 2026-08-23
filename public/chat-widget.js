@@ -55,10 +55,15 @@
     bodyEl.appendChild(d); scrollDown(); return d;
   }
 
+  var introShown = false;
+
   function open(){
     opened = true; panel.classList.add('open'); btn.textContent = '×';
-    if (!messages.length) addMsg('assistant',
-      "Support here. Ask anything about how NoVo works: brokers, paper vs live, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + ".");
+    // Guard on the intro itself, not on messages.length. addMsg() only paints the
+    // DOM -- it never pushes to `messages`, which send() owns -- so the old check
+    // stayed true on every reopen and stacked another greeting each time.
+    if (!introShown) { introShown = true; addMsg('assistant',
+      "Support here. Ask anything about how NoVo works: brokers, paper vs live, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + "."); }
     setTimeout(function(){ inputEl.focus(); }, 50);
   }
   function close(){ opened = false; panel.classList.remove('open'); btn.textContent = '💬'; }

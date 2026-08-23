@@ -10,6 +10,24 @@
 
   var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ── the scored-session count ─────────────────────────────────────────────
+  // 1,031 was written into nine pages by hand, so it was correct on the day and
+  // wrong every day after. The number the site quotes is now the number the API
+  // reports. Ships with the last known value in the HTML, so it is right for
+  // crawlers and for anyone whose fetch fails -- this only ever corrects it.
+  var slots = document.querySelectorAll('[data-live-sessions]');
+  if (slots.length) {
+    fetch('/api/track-record', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var n = d && d.sessions_scored;
+        if (!n || typeof n !== 'number') return;      // never blank a good value with a bad one
+        var txt = n.toLocaleString('en-US');
+        slots.forEach(function (el) { if (el.textContent.trim() !== txt) el.textContent = txt; });
+      })
+      .catch(function () {});                          // stale-but-correct beats empty
+  }
+
   // ── nav elevation ────────────────────────────────────────────────────────
   // rAF-throttled: scroll fires far faster than the screen repaints, and doing
   // class work on every event is how a page starts feeling heavy on a phone.
