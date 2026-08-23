@@ -1,4 +1,26 @@
 User-agent: *
 Allow: /
 
+# Transactional endpoints. These are POST-only, so every crawl of one is a guaranteed 4xx --
+# Search Console was reporting /api/subscribe as "Blocked due to other 4xx issue" for exactly
+# that reason. Nothing here is a page, and none of it is fetched while rendering one.
+Disallow: /api/subscribe
+Disallow: /api/checkout
+Disallow: /api/checkout-sub
+Disallow: /api/checkout-sub-yearly
+Disallow: /api/checkout-analyst
+Disallow: /api/chat
+Disallow: /api/subscriber-portal
+Disallow: /api/unsubscribe
+Disallow: /api/reconcile-subs
+Disallow: /api/webhook-sub
+
+# NOT blocked, deliberately: /api/levels, /api/quotes, /api/market-pulse, /api/sentiment,
+# /api/calendar, /api/vol, /api/track-record, /api/heatmap, /api/positioning, /api/trending.
+# The market-data and tools pages fetch these while rendering, and blocking a resource a page
+# needs to render means Googlebot sees the empty version of that page. They all return 200.
+#
+# /api/analyst-publish also stays crawlable: it serves the public archive, and it already
+# canonicalises to /analyst/archive, so it cannot be indexed as a duplicate.
+
 Sitemap: https://novo-options.trade/sitemap.xml
