@@ -81,6 +81,41 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; animation: lvpulse 2s infinite; }
   @keyframes lvpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
+  /* ── settings drawer ────────────────────────────────────────────────────────────────────────
+     The notification switchboard used to sit at the very bottom of a long scroll, below the read
+     and the footer, where a member had to go looking for it. It lives behind a gear in the top bar
+     now, alongside the account links that were previously only reachable by typing a URL. The
+     block itself is MOVED, not rebuilt — same ids, so initNotif() binds exactly as it did and the
+     push/email toggles keep their behaviour. */
+  .lv-gear { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; background: none;
+    border: 1px solid var(--bdr); color: var(--txt2); font: inherit; font-size: 12px; font-weight: 700;
+    padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+  .lv-gear:hover { border-color: #22d3ee; color: var(--txt1); }
+  @media (max-width: 560px) { .lv-gear { margin-left: 0; } }
+  .lv-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.6); opacity: 0; pointer-events: none;
+    transition: opacity .2s ease; z-index: 70; }
+  .lv-scrim.on { opacity: 1; pointer-events: auto; }
+  .lv-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%);
+    background: var(--navy); border-left: 1px solid var(--bdr); z-index: 71; overflow-y: auto;
+    transform: translateX(100%); transition: transform .24s var(--ease, ease); }
+  .lv-drawer.on { transform: none; }
+  .lv-drawer .dh { display: flex; align-items: center; gap: 10px; padding: 16px 18px;
+    border-bottom: 1px solid var(--bdr); position: sticky; top: 0; background: var(--navy); }
+  .lv-drawer .dh b { color: var(--txt1); font-size: 15px; }
+  .lv-drawer .dh button { margin-left: auto; background: none; border: 0; color: var(--txt2);
+    font-size: 22px; line-height: 1; cursor: pointer; }
+  .lv-drawer .db { padding: 4px 18px 26px; }
+  .lv-drawer .dgrp { color: var(--txt3); font-size: 10.5px; font-weight: 800; letter-spacing: 1.8px;
+    text-transform: uppercase; margin: 20px 0 6px; }
+  /* the moved block was a card; inside the drawer it is just content */
+  .lv-drawer .lv-notif { margin: 0; padding: 0; background: none; border: 0; }
+  .lv-drawer .lv-notif h2 { display: none; }
+  .lv-drawer .dlink { display: flex; align-items: center; gap: 10px; padding: 12px 0;
+    border-top: 1px solid var(--bdr); color: var(--txt2); text-decoration: none; font-size: 13.5px; }
+  .lv-drawer .dlink:hover { color: var(--txt1); }
+  .lv-drawer .dlink .ar { margin-left: auto; color: var(--txt3); }
+  @media (prefers-reduced-motion: reduce) { .lv-drawer, .lv-scrim { transition: none; } }
+
   /* ── polish kit ─────────────────────────────────────────────────────────────────────────────
      One easing token so every motion on the page agrees with itself, and one duration scale.
      Everything below is additive: nothing here changes a layout or a number, so it cannot make
@@ -394,6 +429,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
         <span id="sess" class="lv-sess"></span>
       </div>
+      <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881; Settings</button>
     </div>
 
     <!-- market ribbon -->
@@ -466,7 +502,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- today's read (full-width prose) -->
     <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
 
-    <!-- notifications switchboard -->
+    <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
+  </div>
+
+</div>
+
+<!-- ===== SETTINGS DRAWER ===== -->
+<div class="lv-scrim" id="lv-scrim" onclick="lvSettings(0)"></div>
+<div class="lv-drawer" id="lv-drawer" role="dialog" aria-label="Settings" aria-modal="true">
+  <div class="dh"><b>Settings</b>
+    <button type="button" onclick="lvSettings(0)" aria-label="Close">&times;</button></div>
+  <div class="db">
+    <div class="dgrp">Notifications</div>
     <div class="lv-card lv-notif hidden" id="notif">
       <h2>Notifications</h2>
       <div class="nf-row">
@@ -483,11 +530,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="nf-note">Turn any channel off without touching your subscription — the dashboard is always your home base.</div>
     </div>
-
-    <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
+    <div class="dgrp">Account</div>
+    <a class="dlink" href="https://app.novo-aitrading.app/portal">Member portal<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="https://app.novo-aitrading.app/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/analyst/methodology">How the map is built<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
   </div>
-
 </div>
+<script>
+window.lvSettings = function(on){
+  var d = document.getElementById('lv-drawer'), sc = document.getElementById('lv-scrim');
+  if (!d || !sc) return;
+  d.classList.toggle('on', !!on);
+  sc.classList.toggle('on', !!on);
+  // The drawer owns the screen while open, so the page behind it must not scroll.
+  document.body.style.overflow = on ? 'hidden' : '';
+};
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window.lvSettings(0); });
+</script>
 
 <script>
 (function(){
