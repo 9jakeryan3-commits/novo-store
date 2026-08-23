@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import webpush from 'web-push';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+const { isReservedEmail } = require('./_lib/reserved-email.js');
 const { kv } = require('./_kv.js');
 
 // NoVo Analyst — receives a SCRUBBED market report from the engine and broadcasts it to the paid
@@ -391,7 +392,7 @@ export default async function handler(req, res) {
         let id = null;
         try { const g = await resend.contacts.get({ audienceId: aud, email }); id = g && g.data && g.data.id; } catch (_) {}
         if (id) await resend.contacts.update({ audienceId: aud, id, unsubscribed: !want });
-        else if (want) await resend.contacts.create({ audienceId: aud, email, unsubscribed: false });
+        else if (want && !isReservedEmail(email)) await resend.contacts.create({ audienceId: aud, email, unsubscribed: false });
       } catch (e) { console.error('[prefs] email toggle:', e.message); }
     }
     return res.status(200).json({ ok: true, email_optin: want });
@@ -1039,11 +1040,24 @@ async function _promotePublicLevels(state) {
       const bodyHtml = renderBody(buildUpsell(effUpsell), isPaid ? LIVE_CTA : '', isPaid ? UNSUB_NOTE : '');
       const bc = await resend.broadcasts.create({ audienceId: aud, from: FROM, subject: title, html: bodyHtml });
       const bcId = bc?.data?.id || bc?.id;
-      if (bcId) { await resend.broadcasts.send(bcId); ids.push(bcId); }
+      if (bcId) {
+        // SEND is the step that fails, and the failure used to vanish into the catch below as a
+        // bare 500. Resend 422s the whole broadcast if one contact uses a reserved test domain,
+        // and that message is the only place the cause is named -- so say it, with the audience
+        // and the draft id, and leave the draft rather than pretending the publish worked.
+        const sent = await resend.broadcasts.send(bcId);
+        const sendErr = sent?.error?.message || sent?.error || null;
+        if (sendErr) {
+          console.error(`[analyst-publish] broadcast ${bcId} audience=${aud} SEND FAILED: ${String(sendErr).slice(0, 300)}`);
+          throw new Error(`send failed (audience ${aud}): ${String(sendErr).slice(0, 200)}`);
+        }
+        ids.push(bcId);
+      }
     }
     if (ids.length === 0) return res.status(500).json({ error: 'no broadcast created' });
     return res.status(200).json({ ok: true, emailed: true, audiences: ids.length, broadcastIds: ids });
   } catch (e) {
+    console.error('[analyst-publish] broadcast failed:', String(e?.message || e).slice(0, 300));
     return res.status(500).json({ error: String(e?.message || e).slice(0, 200) });
   }
 }

@@ -7,6 +7,7 @@ import _kv from './_kv.js';
 const resend = new Resend(process.env.RESEND_API_KEY);
 // The recurring sends are broadcasts and get Resend's own opt-out. This one is transactional, so the
 // merge tag would render as literal text -- it needs a real signed link.
+const { isReservedEmail } = require('./_lib/reserved-email.js');
 const { link: unsubLink, postalHtml } = require('./unsubscribe.js');
 const FROM = 'NoVo <orders@novo-aitrading.app>';
 const OWNER = 'novotrades26@gmail.com';
@@ -74,7 +75,10 @@ export default async function handler(req, res) {
 
   try {
     const audienceId = process.env.RESEND_AUDIENCE_ID;
-    if (audienceId) {
+    // A reserved test address poisons the whole audience: Resend 422s the entire broadcast
+    // rather than skipping the contact, which silently stopped the Mid-Day for five days.
+    // Accept the signup so a visitor sees no error, just never list the address.
+    if (audienceId && !isReservedEmail(email)) {
       // Idempotent: a returning/duplicate subscriber must not surface an error to the visitor.
       let isNew = false;
       try {

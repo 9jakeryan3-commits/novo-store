@@ -66,6 +66,7 @@ async function _customerFromChargeEvent(evtType, obj) {
 
 // ── NoVo Analyst ($69 email tier) — routed by subscription metadata.tier==='analyst'. These subs have NO
 // license/instance; they only add/remove the email on the Analyst Resend audience. ─────────────────────
+const { isReservedEmail } = require('./_lib/reserved-email.js');
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const FREE_AUDIENCE = process.env.RESEND_AUDIENCE_ID;   // the free "Market Notes" list — kept DISJOINT from Analyst
 const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
@@ -112,6 +113,7 @@ async function _retry(fn, n = 2) {
 // still sending on a first-time-but-flaky add, so a transient error never silently swallows the welcome.
 async function analystAdd(email) {
   if (!ANALYST_AUDIENCE || !email) return { added: false, existed: false };
+  if (isReservedEmail(email)) return { added: false, existed: false };   // never list a reserved test address
   try { await resend.contacts.create({ audienceId: ANALYST_AUDIENCE, email, unsubscribed: false }); return { added: true, existed: false }; }
   catch (e) {
     const existed = /exist|already|duplicat|conflict/i.test(String(e?.message || ''));
@@ -133,6 +135,7 @@ async function freeRemove(email) {
 }
 async function freeAdd(email) {
   if (!FREE_AUDIENCE || !email) return;
+  if (isReservedEmail(email)) return;                                     // never list a reserved test address
   try { await _retry(() => resend.contacts.create({ audienceId: FREE_AUDIENCE, email, unsubscribed: false }), 2); }
   catch (e) { console.error(`[webhook-sub] free-list add failed after retries: ${e.message}`); }
 }

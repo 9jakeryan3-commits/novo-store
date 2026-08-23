@@ -9,6 +9,7 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const { Resend } = require('resend');
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const { isReservedEmail } = require('./_lib/reserved-email.js');
 const ANALYST_AUD = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const FREE_AUD = process.env.RESEND_AUDIENCE_ID;
 const LS = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
@@ -53,7 +54,7 @@ async function reconcileAnalyst() {
     if (subs.some(s => ['active', 'trialing', 'past_due'].includes(s.status))) { kept++; continue; }  // still paying (incl. Trader)
     if (subs.some(s => ['canceled', 'unpaid', 'incomplete_expired'].includes(s.status))) {
       try { await resend.contacts.remove({ audienceId: ANALYST_AUD, email }); } catch (_) {}
-      if (FREE_AUD) { try { await resend.contacts.create({ audienceId: FREE_AUD, email, unsubscribed: false }); } catch (_) {} }
+      if (FREE_AUD && !isReservedEmail(email)) { try { await resend.contacts.create({ audienceId: FREE_AUD, email, unsubscribed: false }); } catch (_) {} }
       removed++;
     } else { skipped++; }
   }
