@@ -774,7 +774,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var div = document.createElement('div'); div.className='lv-mini';
       div.innerHTML = '<div class="t">'+_escH(d.ticker)+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
         '<div class="r"><span class="'+(pos?'grn':'red')+'">'+(pos?'dampening':'amplifying')+'</span> · GEX '+_gexMoney(d.net_gex)+(d.em_daily!=null?(' · EM ±'+(d.em_daily_pct||0).toFixed(1)+'%'):'')+(d.skew_pts!=null?(' · skew '+(d.skew_pts>=0?'+':'')+d.skew_pts.toFixed(1)):'')+'</div>';
-      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); });
+      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); liveChip(); });
       el.appendChild(div);
     });
   }
@@ -1084,9 +1084,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (_d) _d.classList.remove('skel');
   }, 12000);
 
+  // The six standing chips ask the same things whatever the tape is doing. This one is derived from
+  // where price actually sits against the map, which is both the question a trader asks next and the
+  // one a generic assistant cannot offer -- it needs a canonical map to point at. It only speaks when
+  // a level is genuinely in play (inside 0.6%); the rest of the time the row is simply the standing six.
+  function liveChip(){
+    var row = document.getElementById('novo-ask-quick'); if(!row) return;
+    var prev = row.querySelector('button.live'); if(prev) prev.remove();
+    var d = idx(CUR); if(!d) return;
+    var spot = Number(d.spot); if(!isFinite(spot) || spot <= 0) return;
+    var near = null, best = 0.006;
+    [['flip','the gamma flip','the flip'],['call_wall','the call wall','the call wall'],
+     ['put_wall','the put wall','the put wall']].forEach(function(L){
+      var v = Number(d[L[0]]); if(!isFinite(v) || v <= 0) return;
+      var gap = Math.abs(spot / v - 1);
+      if(gap < best){ best = gap; near = { v:v, name:L[1], label:L[2], under: spot < v }; }
+    });
+    if(!near) return;
+    var pct = (best * 100).toFixed(1), side = near.under ? 'under' : 'over';
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'live';
+    b.textContent = CUR + ' ' + pct + '% ' + side + ' ' + near.label;
+    b.dataset.q = CUR + ' is trading ' + pct + '% ' + side + ' ' + near.name + ' at ' + near.v +
+      '. What has usually happened from here, and how many sessions is that based on?';
+    b.onclick = function(){ if(window.novoAsk) window.novoAsk(this.dataset.q); };
+    row.insertBefore(b, row.firstChild);
+  }
+
   function render(){
     if(!STATE) return;
     renderDealer(); renderStrip(); renderMeta(); renderAnalogues();
+    if (STATE.chat_drop && window.novoChatDrop) window.novoChatDrop(STATE.chat_drop);
+    liveChip();
     // First real payload has landed: drop the skeleton. From here a "—" means the value is genuinely
     // absent (after hours, a level with no data) rather than not here YET — which is the whole point
     // of the distinction, and what a single dash for both states was destroying.
@@ -1208,6 +1237,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   /* Advertise the shortcut only where there is a keyboard to press it on. Width is the wrong test --
      a tablet is wide and still has no Ctrl key, which is exactly how "Ctrl K" ended up on one. */
   @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
+  /* NoVo left something. The bubble is the only place it can show, since the drop lands in a panel
+     that is closed by default -- so the dot has to survive until the panel is actually opened. */
+  #novo-ask-bubble.has-drop{border-color:#22d3ee;color:#eaf3ff;
+    box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 0 24px rgba(34,211,238,.26)}
+  #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
+    background:#22d3ee;box-shadow:0 0 9px rgba(34,211,238,.9)}
+  #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
+  @keyframes novoDrop{0%,100%{opacity:1}50%{opacity:.3}}
+  @media (prefers-reduced-motion:reduce){ #novo-ask-bubble.has-drop .dot{animation:none} }
   /* Reduced motion is not a nice-to-have here: a flashing value is exactly the kind of movement that
      hurts people who asked the OS to stop it. The flash still fires as a static tint so the INFORMATION
      (this number just moved, this way) survives — only the animation is removed. */
@@ -1248,6 +1286,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   #novo-ask .quick{display:none;gap:6px;padding:9px 11px 2px;overflow-x:auto;scrollbar-width:none}
   #novo-ask .quick::-webkit-scrollbar{display:none}
   #novo-ask .quick.on{display:flex}
+  /* The one chip that is not canned. Accented so it is legible as a reading of the tape rather than
+     a seventh stock question, and it always leads the row. */
+  #novo-ask .quick button.live{border-color:rgba(34,211,238,.5);color:#cfefff;
+    background:rgba(34,211,238,.08)}
+  #novo-ask .quick button.live:hover{border-color:#22d3ee;color:#eaf3ff}
   #novo-ask .quick button{flex:0 0 auto;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.28);
     color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
   #novo-ask .quick button:hover{border-color:#22d3ee;color:#eaf3ff}
@@ -1261,7 +1304,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 
-<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this tape&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
+<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this tape&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
 
 <div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
   <header>
@@ -1311,7 +1354,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var busy = false;
   window.novoAskOpen = function(on){
     document.getElementById('novo-ask').classList.toggle('on', !!on);
-    document.getElementById('novo-ask-bubble').style.display = on ? 'none' : 'flex';
+    var _b = document.getElementById('novo-ask-bubble');
+    _b.style.display = on ? 'none' : 'flex';
+    // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
+    if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask NoVo, the AI market analyst'); }
     if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
@@ -1380,6 +1426,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   window.novoAskQuick = function(){
     var q = document.getElementById('novo-ask-quick');
     if (q) q.classList.toggle('on', !document.querySelector('#novo-ask .intro'));
+  };
+
+  // NoVo speaking FIRST. The note rides the live payload the dashboard already polls, so all this has
+  // to decide is whether it is new: the id is dated, and the seen-id is kept on the device beside the
+  // transcript it belongs to. It enters the log as an ordinary NoVo turn, which means it persists,
+  // scrolls and clears exactly like an answer he gave -- and travels back as context on the next ask,
+  // so "what did you mean by that?" works without any special case.
+  window.novoChatDrop = function(cd){
+    if (!cd || !cd.id || !cd.text) return;
+    var seen = null; try { seen = localStorage.getItem('novo_drop_seen'); } catch(_){}
+    if (seen === cd.id) return;
+    try { localStorage.setItem('novo_drop_seen', cd.id); } catch(_){}
+    var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+    var m = { r: '', x: cd.text };
+    TURNS.push(m); saveTurns(); renderTurn(m); window.novoAskQuick();
+    var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
+    var panel = document.getElementById('novo-ask');
+    if (!panel || !panel.classList.contains('on')) {
+      var b = document.getElementById('novo-ask-bubble');
+      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'NoVo left you a note'); }
+    }
   };
   window.novoAskClear = function(){
     TURNS = [];

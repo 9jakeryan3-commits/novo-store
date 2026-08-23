@@ -46,7 +46,7 @@ const declarations = [
   {
     name: "get_dealer_levels",
     description:
-      "The CURRENT live dealer positioning read for one ticker: spot, gamma flip, call wall, put wall, net GEX, " +
+      "The CURRENT live dealer positioning read for ONE ticker: spot, gamma flip, call wall, put wall, net GEX, " +
       "gravity, today's expected move, ATM IV and the regime label. This is the paid real-time map — always prefer " +
       "it over search_journal for 'where is X right now' questions.",
     parameters: {
@@ -58,7 +58,8 @@ const declarations = [
   {
     name: "get_gamma_profile",
     description:
-      "Strike-by-strike dealer gamma for one ticker, sampled every few minutes through today's session. Use for " +
+      "Strike-by-strike dealer gamma for ONE ticker, sampled every few minutes through today's session. To " +
+      "compare how two tickers are positioned, call this once per ticker. Use for " +
       "'how has gamma built or drained today' and 'which strikes are heaviest' — get_dealer_levels gives only the " +
       "summary levels, not the curve.",
     parameters: {
@@ -73,7 +74,8 @@ const declarations = [
   {
     name: "get_session_history",
     description:
-      "What NoVo has actually logged across past sessions for one ticker, and how many sessions that covers. Use " +
+      "What NoVo has actually logged across past sessions for ONE ticker, and how many sessions that covers. Call " +
+      "once per ticker to compare their histories. Use " +
       "for 'usually', 'how often', 'tends to' questions instead of guessing. Always report the session count.",
     parameters: {
       type: "object",

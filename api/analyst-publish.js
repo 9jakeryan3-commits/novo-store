@@ -185,7 +185,9 @@ async function _memberTier(email) {
   } catch (e) { console.error('[analyst-publish] tier resolve:', e.message); return null; }
 }
 
-// ── PUBLIC ARCHIVE (served here as GET so it doesn't add a 13th serverless function — Hobby cap is 12) ──
+// ── PUBLIC ARCHIVE (folded in here as a GET rather than its own function — the account is on Pro, so
+//    this is no longer working around the Hobby 12-function cap it was originally written for; it stays
+//    folded because the archive shares this file's blob helpers and secret-derived paths) ──
 async function _loadJson(prefix, token) {
   try {
     const { blobs } = await list({ prefix, token });
