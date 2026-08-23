@@ -291,6 +291,32 @@ async function handleArchive(req, res) {
 }
 
 export default async function handler(req, res) {
+  // Recent desk notes as JSON, for the member portal on app.novo-aitrading.app. The archive itself is
+  // already public HTML, so this exposes nothing new -- it just saves the portal scraping a page.
+  if (req.method === 'GET' && req.query && 'feed' in req.query) {
+    const _o = String(req.headers.origin || '');
+    if (_o === 'https://app.novo-aitrading.app' || _o === 'https://novo-options.trade') {
+      res.setHeader('Access-Control-Allow-Origin', _o);
+      res.setHeader('Vary', 'Origin');
+    }
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+    let idx = await _loadJson('analyst-archive/index.json', process.env.BLOB_READ_WRITE_TOKEN);
+    if (!Array.isArray(idx)) idx = [];
+    const now = Date.now();
+    const n = Math.min(Math.max(parseInt(req.query.n, 10) || 5, 1), 20);
+    const out = idx
+      .filter((e) => e && e.slug && (!e.publishAfter || now >= e.publishAfter))
+      .sort((a, b) => (b.publishAfter || 0) - (a.publishAfter || 0))
+      .slice(0, n)
+      .map((e) => ({
+        slug: e.slug,
+        title: e.title || e.slug,
+        published: e.publishAfter || null,
+        url: `${SITE}/analyst/archive/${e.slug}`,
+      }));
+    return res.status(200).json({ reads: out });
+  }
+
   // Members live-view feed (token-gated) — the /analyst/live dashboard polls this every few seconds.
   if (req.method === 'GET' && req.query && 'live' in req.query) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
