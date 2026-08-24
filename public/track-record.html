@@ -477,9 +477,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     // Everything the page scores, not just the live map -- otherwise the header says 23 sessions
     // while a claim below it says 1,008. Falls back to the live-only fields if the engine is older.
-    $('tr-meta').textContent = Number(d.sessions_scored || d.sessions_logged).toLocaleString()
+    // Two spans, said as two spans. The scored record starts in 2020 because that is when the
+    // engine began logging dealer maps; the price history runs far longer and is price only.
+    // Stating them in one breath as a single number would be the averaging error this page
+    // exists to avoid.
+    var _meta = Number(d.sessions_scored || d.sessions_logged).toLocaleString()
       + ' sessions scored, ' + (d.scored_from || d.from) + ' to ' + (d.scored_to || d.to)
       + ' · ' + Number(d.snapshots).toLocaleString() + ' snapshots.';
+    if (d.price_base_rates && d.price_base_rates.from) {
+      var _y = new Date().getFullYear() - Number(String(d.price_base_rates.from).slice(0, 4));
+      _meta += ' Plus ' + _y + ' years of daily price history per ticker.';
+    }
+    $('tr-meta').textContent = _meta;
 
     var em = '', fl = '';
     ['SPY','QQQ','IWM'].forEach(function(tk){
