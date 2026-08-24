@@ -438,6 +438,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" style="margin-top:16px;">
+    <div class="lbl">The tape itself</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">How these tickers actually behave</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Daily closes, 21&ndash;27 years. <b>Price only</b> &mdash; no dealer map, no gamma, no walls, no open interest. Kept apart from the claims above because it runs over a different window on different data, and averaging the two would flatter both.</p>
+    <div id="tr-price"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">Every number here carries its window and its sample size, and if a claim stops holding this page says so. It is NoVo's own log, not an independent audit, and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">If a claim stops holding, this page will say so.</p>
@@ -595,6 +602,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         + sub('the structural bias matched the next hour <b>' + au.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(au.n) + ')</span>')
       : '';
+
+    // The long-horizon price block. Rendered only when the engine ships it, and every row
+    // carries its own n -- the sample sizes differ a lot between them (thousands of days for the
+    // sigma bands, hundreds for the gap and follow-through rows).
+    var pb = d.price_base_rates;
+    if (pb && pb.tickers) {
+      var pr = '';
+      ['SPY','QQQ','IWM'].forEach(function(tk){
+        var t = pb.tickers[tk]; if (!t) return;
+        function row(label, c, note){
+          if (!c) return '';
+          return '<div style="display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--bdr);font-size:13px;">'
+               + '<span style="color:var(--txt2);flex:1;min-width:0;">' + label + '</span>'
+               + '<b style="color:var(--txt1);font-variant-numeric:tabular-nums;">' + c.rate + '%</b>'
+               + '<span class="muted" style="font-size:11.5px;min-width:74px;text-align:right;">n=' + nn(c.n) + (note || '') + '</span>'
+               + '</div>';
+        }
+        pr += '<div style="margin-bottom:16px;">'
+            + '<div style="display:flex;align-items:baseline;gap:9px;margin-bottom:2px;">'
+            +   '<b style="color:var(--txt1);font-size:15px;">' + tk + '</b>'
+            +   '<span class="muted" style="font-size:11.5px;">' + t.from + ' to ' + t.to + ' &middot; ' + nn(t.days) + ' sessions</span>'
+            + '</div>'
+            + row('Close inside &plusmn;1&sigma; of the 20-day range', t.inside_1sigma,
+                  t.inside_1sigma ? ' &middot; normal ' + t.inside_1sigma.gaussian + '%' : '')
+            + row('Close inside &plusmn;2&sigma;', t.inside_2sigma,
+                  t.inside_2sigma ? ' &middot; normal ' + t.inside_2sigma.gaussian + '%' : '')
+            + row('Gap down &gt;0.5% filled the same day', t.gap_down_filled)
+            + row('Gap up &gt;0.5% filled the same day', t.gap_up_filled)
+            + row('Green the day after a &minus;1.5% session', t.green_after_hard_down,
+                  t.green_after_hard_down ? ' &middot; median ' + t.green_after_hard_down.median_next_pct + '%' : '')
+            + '<div style="padding:6px 0;border-top:1px solid var(--bdr);font-size:12.5px;color:var(--txt2);">'
+            +   'A typical day moves <b style="color:var(--txt1);">' + t.typical_day_pct + '%</b>; '
+            +   'one day in ten moves more than <b style="color:var(--txt1);">' + t.big_day_pct + '%</b>.'
+            + '</div>'
+            + '</div>';
+      });
+      // The honest headline in this block is the 2-sigma row, so say it rather than leaving it
+      // to be spotted: the 1-sigma band is calibrated and the 2-sigma band is not.
+      pr += '<div style="font-size:12.5px;color:var(--txt2);line-height:1.65;border-top:1px solid var(--bdr);padding-top:10px;">'
+          + 'The &plusmn;1&sigma; band lands about where a normal distribution says it should. The &plusmn;2&sigma; band does not '
+          + '&mdash; it comes up short on all three, which is the tails being fatter than the model. '
+          + 'Read the outer band as optimistic. <span class="muted">' + pb.basis + '.</span></div>';
+      $('tr-price').innerHTML = pr;
+    } else {
+      // No block from the engine means no card. An empty panel under a heading promising
+      // 21 years of history reads as broken, and a heading with nothing under it is worse
+      // than no heading.
+      var _pc = $('tr-price') && $('tr-price').closest('.card');
+      if (_pc) _pc.style.display = 'none';
+    }
 
     var pz = d.pulse_signal || {};
     if (pz.enough) {
