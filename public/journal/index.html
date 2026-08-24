@@ -1578,7 +1578,7 @@ nav { position: relative; }
       </div>
     </div>
   </div>
-  <script>(function(){var f=document.getElementById('cta-sub');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('cta-email').value.trim();var m=document.getElementById('cta-sub-msg');m.style.color='#8aacc8';m.textContent='...';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You are in - thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong - try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error - try again.';}});})();</script>
+  
 </section>
 
 </main>
@@ -1592,9 +1592,7 @@ nav { position: relative; }
   <div>© 2026 NoVo Options Trading. Editorial content is for education only — not financial advice. Trading involves substantial risk of loss. Market data shown is delayed/illustrative.</div>
 </footer>
 
-<script>
-(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#9fb6d1';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
-</script>
+
 <script src="/journal/search.js?v=b597669b" defer></script>
 <script defer src="/chat-widget.js?v=fef2bd4d"></script>
 <script>

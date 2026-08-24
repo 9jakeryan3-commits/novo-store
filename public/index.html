@@ -26,7 +26,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo Options Trading — the 0DTE dealer map for SPY, QQQ &amp; IWM</title>
-<meta name="description" content="The options dealer map for SPY, QQQ and IWM - net GEX, the gamma flip, the walls and the expected move. Read it, get the analyst&rsquo;s read, trade the level in one click.">
+<meta name="description" content="The options dealer map for SPY, QQQ and IWM — net GEX, the gamma flip, the walls and the expected move. Read it, then trade the level in one click.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-options.trade/">
@@ -941,9 +941,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
-<script>
-(function(){var f=document.getElementById('fb-sub');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('fb-email').value.trim();var m=document.getElementById('fb-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='Subscribed — check your inbox.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
-</script>
+
 
 
 <div class="disclaimer">
@@ -1202,9 +1200,7 @@ document.addEventListener('keydown',function(ev){
   if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoNavToggle();document.querySelector('.nav-menu-btn').focus();}
 });
 </script>
-<script>
-(function(){var f=document.getElementById('np-subscribe');if(!f)return;f.addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('np-email').value.trim();var m=document.getElementById('np-sub-msg');m.style.color='#8aacc8';m.textContent='…';try{var r=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});if(r.ok){m.style.color='#10b981';m.textContent='You’re in — thanks for subscribing.';f.reset();}else{var d=await r.json().catch(function(){return{};});m.style.color='#f43f5e';m.textContent=d.error||'Something went wrong — try again.';}}catch(_){m.style.color='#f43f5e';m.textContent='Network error — try again.';}});})();
-</script>
+
 <script>
 function novoMoreToggle(e){
   if(e){e.stopPropagation();}
