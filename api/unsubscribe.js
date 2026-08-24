@@ -115,7 +115,9 @@ module.exports = async (req, res) => {
 // every email and cannot drift. Set MAIL_POSTAL_ADDRESS to the street/city/ZIP only.
 // Deliberately NOT "LLC" -- NoVo is a trade name today, and claiming an entity that does not exist
 // yet is a misrepresentation in exactly the message class that has to be accurate.
-const SENDER = 'NoVo Options Trading';
+// The legal entity, not the brand mark: CAN-SPAM wants the sender identified alongside the
+// physical address, and postalHtml renders `${SENDER} - ${MAIL_POSTAL_ADDRESS}`.
+const SENDER = 'NoVo Options Trading LLC';
 
 function postalHtml(color) {
   const a = String(process.env.MAIL_POSTAL_ADDRESS || '').trim();
