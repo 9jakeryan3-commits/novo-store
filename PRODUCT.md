@@ -3,7 +3,7 @@
 The single source of truth for **what is free and what is paid**. If a claim on the site
 disagrees with this file, one of them is a bug — check the code column and fix whichever is wrong.
 
-Last verified against the deployed site and engine: **2026-08-18**.
+Last verified against the deployed site and engine: **2026-08-23**.
 
 > **Keep this current.** Any change to what a tier includes — a feature shipped, retired, moved
 > across the paywall, or repriced — updates this file in the *same commit* as the page copy.
@@ -15,7 +15,7 @@ Last verified against the deployed site and engine: **2026-08-18**.
 
 | | Price | Trial | Includes |
 |---|---|---|---|
-| **Free** | $0 | — | No account for most of it; email only for the list + Discord |
+| **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
 | **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + execution |
 
@@ -30,9 +30,13 @@ Last verified against the deployed site and engine: **2026-08-18**.
 
 ## FREE — no account, no card
 
+Open to anyone, no sign-in. Note what is **not** here: the gamma flip and the expected move
+moved behind a free account (see the next section). `api/levels.js` enforces it — without the
+`x-novo-key` header it strips both fields and reports `gated: ['flip','expectedMove']`.
+
 | What | Where it lives |
 |---|---|
-| Dealer levels, **delayed** — gamma flip, call wall, put wall, expected move, spot | `/market-data`, `/market-data/{spy,qqq,iwm}` ← `api/levels.js` |
+| Dealer levels, **delayed** — call wall, put wall, spot (**not** flip or expected move) | `/market-data`, `/market-data/{spy,qqq,iwm}` ← `api/levels.js` |
 | Fear gauge — VIX / VXN / RVX ranked against their own 1-year history | market-data pages |
 | **ATM IV and IV rank**, per ticker | `api/levels.js?iv=` — free by decision, it is a commodity metric |
 | Market Pulse (fear/greed), sector heatmap, 24/5 futures ribbon | `api/market-pulse.js`, `api/heatmap.js` |
@@ -47,7 +51,29 @@ Last verified against the deployed site and engine: **2026-08-18**.
 | 5 comparison pages, and the methodology page | `/compare/*`, `/analyst/methodology` |
 | Embeddable fear-gauge widget | `/embed-pulse` |
 
-**Free with an email, no card:** the Sunday Week Ahead, new articles as they drop, the NoVo Discord.
+---
+
+## FREE ACCOUNT — still no card
+
+Created at `/signup` on the control plane. **There is no email-only signup anywhere any more** —
+as of 2026-08-23 every capture on the site (the pricing card plus 1,054 page footers) asks for an
+account instead. Signing up adds the free list; subscribing moves the contact to the Analyst list.
+
+| What | Where it lives |
+|---|---|
+| **The member portal** — the whole point of the account | `control-plane/app.py` → `/portal` |
+| **The dealer ladder** — call wall, **gamma flip**, spot, put wall and the **expected-move band**, on SPY, QQQ and IWM | portal ← `api/levels.js` with `x-novo-key` |
+| Sectors today — 11 sector chips by the day's move | portal ← `api/heatmap.js` |
+| Today's movers — top 8 of the liquid universe by absolute move | portal ← `api/trending.js` |
+| Futures positioning, Market Pulse, fear gauges, next catalysts | portal ← `api/positioning.js`, `api/market-pulse.js`, `api/calendar.js` |
+| Recent desk notes, the calculators and the learn links | portal ← `api/analyst-publish.js?feed=1` |
+| A direct **Discord** link, and account/billing facts | portal, `/status` |
+| The emails — Mid-Day Tape Review each trading day, the Sunday Week Ahead, new articles | Resend "Market Notes" list |
+
+Still **delayed** data, same public feed the market-data pages read. The live map is the paid line.
+
+**Where the account is managed:** `/signup`, `/status` (settings, billing, delete account) —
+all on `app.novo-aitrading.app`, not the store.
 
 ---
 
@@ -130,10 +156,10 @@ free one. The free tier is genuinely large, so a thin paid card inverts the pitc
 
 | Page | Free | Paid |
 |---|---|---|
-| `/plans` | 11 | Analyst 14 · Trader 18 |
-| `/` | 11 | Analyst 13 |
-| `/analyst` | 11 | Trader 11 (cross-sell) |
-| `/trader` | 11 | Analyst 13 (cross-sell) |
+| `/plans` | 12 | Analyst 14 · Trader 18 |
+| `/` | 12 | Analyst 13 |
+| `/analyst` | 12 | Trader 11 (cross-sell) |
+| `/trader` | 12 | Analyst 13 (cross-sell) |
 
 Each product page shows Free plus the **other** tier as the cross-sell. Change one card, change all
 four — they are copy-pasted per page, not included. See [[verify-fix-count-not-page]].
@@ -145,6 +171,7 @@ four — they are copy-pasted per page, not included. See [[verify-fix-count-not
 | What does the Analyst dashboard actually render? | `public/analyst-live.html` |
 | What does the Trader dashboard render? | `NoVo-Pulse/c2_dashboard.py` |
 | What does the AI analyst have access to? | `api/_lib/tools.js`, `api/analyst-ask.js` |
-| What does a free visitor get? | `api/levels.js` + the `market-data*` pages |
+| What does an anonymous visitor get? | `api/levels.js` + the `market-data*` pages |
+| What does a free **account** get? | `NoVo-Pulse/control-plane/app.py` → `_free_snapshot`, `/portal` |
 | What does checkout actually charge? | `api/checkout-analyst.js`, `api/checkout-sub*.js` |
 | What is promised in writing? | `public/license.html`, `refund-policy.html`, `api/chat.js` |
