@@ -447,7 +447,7 @@ const handler = async (req, res) => {
       if (!_r.existed) {         // skip re-welcoming on a Stripe retry of the same event (they were already added)
         try {
           await resend.emails.send({
-            from: 'The NoVo Journal <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
+            from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
             replyTo: 'support@novo-options.trade', to: [email],
             subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
           });

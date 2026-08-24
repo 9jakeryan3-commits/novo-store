@@ -20,7 +20,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Broadcasts get Resend's own opt-out via the merge tag; the transactional send below cannot, so it
 // uses the signed link. Same endpoint either way.
 const { link: unsubLink, postalHtml } = require('./unsubscribe.js');
-const FROM = process.env.ANALYST_FROM_EMAIL || 'The NoVo Journal <analyst@novo-aitrading.app>';
+// These are market reads, not journal entries -- the sender says so. (The Journal keeps its own
+// name in skills/journal_publisher.py, which sends the actual articles.)
+const FROM = process.env.ANALYST_FROM_EMAIL || 'NoVo - AI Market Analyst <analyst@novo-aitrading.app>';
 
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
