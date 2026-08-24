@@ -547,17 +547,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // flip_regime block -- which renders earlier in this handler -- made the first call:
       // the function declaration hoists, the var's value does not. That threw, killed the
       // whole .then(), and left every panel on the page reading 'Loading...'.
-      var SG = { strong: 'var(--green)', clear: '#22d3ee', weak: '#f59e0b', indistinguishable: 'var(--txt3)' };
+      var SG = { 'strong': 'var(--green)', 'small edge': '#22d3ee', 'early': '#f59e0b', 'inconclusive': 'var(--txt3)' };
       var col = SG[c.strength] || 'var(--txt3)';
-      return ' <span title="distance from no effect, in standard errors" style="margin-left:8px;font-size:10px;'
+      // The badge shows whichever axis is SHORT. For an early claim the useful number is the
+      // sample -- a 70% hit rate is not weak, it is unfinished, and quoting sigma at it says the
+      // wrong thing. For everything else the useful number is the distance from chance.
+      var tail = (c.strength === 'early')
+        ? (c.sample != null ? ' &middot; n=' + nn(c.sample) : '')
+        : (c.z != null ? ' &middot; ' + c.z + 'σ' : '');
+      var tip = (c.strength === 'early')
+        ? 'a large effect, but not yet enough sessions to rule out chance'
+        : 'distance from no effect, in standard errors';
+      return ' <span title="' + tip + '" style="margin-left:8px;font-size:10px;'
            + 'font-weight:800;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;color:' + col
            + ';border:1px solid ' + col + ';border-radius:999px;padding:2px 8px;">' + c.strength
-           + (c.z != null ? ' &middot; ' + c.z + 'σ' : '') + '</span>';
+           + tail + '</span>';
     }
     function hd(tk, verdict, ok, c){
       // Indistinguishable overrides the verdict outright. Leaving "holds" next to a grade that
       // says otherwise would be the trust signal doing the opposite of its job.
-      if (c && c.strength === 'indistinguishable') { verdict = 'not yet distinguishable from chance'; ok = null; }
+      // Only inconclusive overrides -- small AND unconfirmed has no business saying "holds".
+      // An EARLY claim keeps its verdict: 70% over 20 sessions is a real observation, and burying
+      // it under a caution would be the opposite error.
+      if (c && c.strength === 'inconclusive') { verdict = 'not yet distinguishable from chance'; ok = null; }
       return '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
            + ' <span style="font-weight:600;color:' + (ok === null ? 'var(--txt3)' : (ok ? 'var(--green)' : 'var(--red)'))
            + ';">' + verdict + '</span>' + sg(c) + '</div>';
