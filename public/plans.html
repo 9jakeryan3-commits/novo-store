@@ -97,13 +97,18 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .card { position: relative; display: flex; flex-direction: column; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 26px 24px; }
   .card.feat-cyan { border-color: rgba(34,211,238,0.55); box-shadow: 0 18px 50px rgba(34,211,238,0.10); }
   .card.feat-green { border-color: rgba(16,185,129,0.6); box-shadow: 0 18px 54px rgba(16,185,129,0.14); }
+  .card.feat-amber { border-color: rgba(245,158,11,0.42); box-shadow: 0 18px 50px rgba(245,158,11,0.09); }
   .tag { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
   .tag.cyan { background: var(--cyan); color: #04121a; }
   .tag.green { background: var(--green); color: #111a14; }
+  /* Free joins the pattern every other card on this page already follows: a badge with a
+     matching accent. Amber is what the free card already wears on the other three pages. */
+  .tag.amber { background: #f59e0b; color: #121316; }
   .card h2 { font-size: 21px; margin-bottom: 4px; }
   .card .kicker { font-size: 13px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
   .card.feat-cyan .kicker { color: var(--cyan); }
   .card.feat-green .kicker { color: var(--green); }
+  .card.feat-amber .kicker { color: #f59e0b; }
   .price { display: flex; align-items: baseline; gap: 3px; margin: 6px 0 2px; }
   .price .cur { font-size: 20px; font-weight: 700; color: var(--txt1); align-self: flex-start; margin-top: 6px; }
   .price .num { font-size: 44px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk', sans-serif; line-height: 1; }
@@ -318,12 +323,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="grid">
 
     <!-- FREE -->
-    <div class="card">
+    <div class="card feat-amber">
+      <div class="tag amber">No cost</div>
       <div class="kicker">Data, tools &amp; the Journal</div>
       <h2>Free</h2>
       <div class="price"><span class="cur">$</span><span class="num">0</span><span class="per">/forever</span></div>
       <div class="subnote">always free · no card</div>
-      <div class="roi">More than most tools charge for— free account, no card.</div>
+      <div class="roi">More than most tools charge for &mdash; free account, no card.</div>
       <ul class="feats">
         <li class="chk"><b><a href="/market-data" style="color:inherit;text-decoration:underline;text-underline-offset:2px;text-decoration-color:#22d3ee">Dealer levels, 15–30 minutes delayed</a></b> — gamma flip, call wall, put wall &amp; expected move on SPY, QQQ and IWM</li>
         <li class="chk"><b>Fear gauge</b> — VIX, VXN and RVX ranked against 36 years of their own history, not a one-year window &mdash; plus ATM IV and IV rank</li>
