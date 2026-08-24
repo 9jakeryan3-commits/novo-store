@@ -519,7 +519,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:6px;">' + tk
            + ' <span style="font-weight:600;color:' + (f.holds ? 'var(--green)' : 'var(--red)') + ';">'
            + (f.holds ? 'holds · ' + f.ratio + 'x further in negative gamma' : 'does not hold in this window')
-           + '</span></div>'
+           + '</span>' + sg(f) + '</div>'
            + '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:3px;">positive gamma &mdash; median hour '
            + f.positive_median_pct + '% <span class="muted">(n=' + Number(f.positive_n).toLocaleString() + ')</span></div>'
            + bar(f.positive_median_pct, mx, '#10b981')
@@ -537,10 +537,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // One renderer for all of them: a verdict, then the numbers that produced it, then the sample.
     // A rate is never shown without its n — a claim scored on forty snapshots and one scored on four
     // thousand read identically as a percentage, and only one of them means anything.
-    function hd(tk, verdict, ok){
+    // A claim that clears its threshold is not the same as a claim that separates from chance.
+    // "holds" only ever asked ratio>1 or rate>50%, so a coin flipped 81 times reads identically to
+    // a real edge measured over thousands. The badge says how far it actually sits from no effect,
+    // in standard errors -- and where that distance is not there, the verdict stops saying holds.
+    var SG = { strong: 'var(--green)', clear: '#22d3ee', weak: '#f59e0b', indistinguishable: 'var(--txt3)' };
+    function sg(c){
+      if (!c || !c.strength) return '';
+      var col = SG[c.strength] || 'var(--txt3)';
+      return ' <span title="distance from no effect, in standard errors" style="margin-left:8px;font-size:10px;'
+           + 'font-weight:800;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;color:' + col
+           + ';border:1px solid ' + col + ';border-radius:999px;padding:2px 8px;">' + c.strength
+           + (c.z != null ? ' &middot; ' + c.z + 'σ' : '') + '</span>';
+    }
+    function hd(tk, verdict, ok, c){
+      // Indistinguishable overrides the verdict outright. Leaving "holds" next to a grade that
+      // says otherwise would be the trust signal doing the opposite of its job.
+      if (c && c.strength === 'indistinguishable') { verdict = 'not yet distinguishable from chance'; ok = null; }
       return '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
            + ' <span style="font-weight:600;color:' + (ok === null ? 'var(--txt3)' : (ok ? 'var(--green)' : 'var(--red)'))
-           + ';">' + verdict + '</span></div>';
+           + ';">' + verdict + '</span>' + sg(c) + '</div>';
     }
     function sub(s){ return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:10px;">' + s + '</div>'; }
     function nn(v){ return Number(v).toLocaleString(); }
@@ -551,7 +567,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var g = t.gravity_pull || {};
       if (g.enough) {
-        gv += hd(tk, g.holds ? 'pins &mdash; ' + g.pin_ratio + '× quieter' : 'no dampening in this window', !!g.holds)
+        gv += hd(tk, g.holds ? 'pins &mdash; ' + g.pin_ratio + '× quieter' : 'no dampening in this window', !!g.holds, g)
             + sub('on gravity (within 0.10%) &rarr; median next hour <b>' + g.near_median_move_pct
                   + '%</b> <span class="muted">(n=' + nn(g.near_n) + ')</span>'
                   + ' &middot; 0.50%+ away &rarr; <b>' + g.far_median_move_pct + '%</b> <span class="muted">(n='
@@ -570,7 +586,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var s2 = t.skew_signal || {};
       if (s2.enough) {
-        sk += hd(tk, s2.holds ? 'holds &mdash; ' + s2.ratio + '× further' : 'the two do not separate', !!s2.holds)
+        sk += hd(tk, s2.holds ? 'holds &mdash; ' + s2.ratio + '× further' : 'the two do not separate', !!s2.holds, s2)
             + sub('steep (&ge; ' + s2.high_threshold + ') &rarr; median next hour <b>' + s2.high_median_move_pct
                   + '%</b> <span class="muted">(n=' + nn(s2.high_n) + ')</span>'
                   + ' &middot; flat (&le; ' + s2.low_threshold + ') &rarr; <b>' + s2.low_median_move_pct
@@ -586,7 +602,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var L = t.line_record || {};
       if (L.enough) {
-        ln += hd(tk, L.holds ? 'holds' : 'does not hold in this window', !!L.holds)
+        ln += hd(tk, L.holds ? 'holds' : 'does not hold in this window', !!L.holds, L)
             + sub('direction right <b>' + L.direction_rate + '%</b> &middot; the level itself held <b>'
                   + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n)
                   + ')</span>');
@@ -600,14 +616,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     var b = d.bias_record || {};
     $('tr-bias').innerHTML = b.enough
-      ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds)
+      ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds, b)
         + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(b.n) + ')</span>')
       : '';
 
     var au = d.audit_record || {};
     $('tr-audit').innerHTML = au.enough
-      ? hd('The hourly audit', au.holds ? 'holds' : 'does not hold in this window', !!au.holds)
+      ? hd('The hourly audit', au.holds ? 'holds' : 'does not hold in this window', !!au.holds, au)
         + sub('the structural bias matched the next hour <b>' + au.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(au.n) + ')</span>')
       : '';
