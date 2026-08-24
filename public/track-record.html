@@ -541,9 +541,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // "holds" only ever asked ratio>1 or rate>50%, so a coin flipped 81 times reads identically to
     // a real edge measured over thousands. The badge says how far it actually sits from no effect,
     // in standard errors -- and where that distance is not there, the verdict stops saying holds.
-    var SG = { strong: 'var(--green)', clear: '#22d3ee', weak: '#f59e0b', indistinguishable: 'var(--txt3)' };
     function sg(c){
       if (!c || !c.strength) return '';
+      // The palette lives INSIDE sg. As a `var` above it, it was still undefined when the
+      // flip_regime block -- which renders earlier in this handler -- made the first call:
+      // the function declaration hoists, the var's value does not. That threw, killed the
+      // whole .then(), and left every panel on the page reading 'Loading...'.
+      var SG = { strong: 'var(--green)', clear: '#22d3ee', weak: '#f59e0b', indistinguishable: 'var(--txt3)' };
       var col = SG[c.strength] || 'var(--txt3)';
       return ' <span title="distance from no effect, in standard errors" style="margin-left:8px;font-size:10px;'
            + 'font-weight:800;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;color:' + col
