@@ -152,7 +152,7 @@ async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub 
 
 // Analyst price ids (mirror webhook-sub.js) — the RELIABLE tier signal; metadata.tier is strippable/mutable.
 const ANALYST_PRICE_IDS = new Set([
-  process.env.STRIPE_PRICE_ANALYST_79, process.env.STRIPE_PRICE_ANALYST_YEARLY_790,
+  process.env.STRIPE_PRICE_ANALYST, process.env.STRIPE_PRICE_ANALYST_YEARLY,
   'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',   // $129 / $1,290 — kept: existing subs
   'price_1U59pFApyfMAkbeEhEDpToGK', 'price_1U59pFApyfMAkbeEDzNHEJbD',   // $129 / $1,290
 ].filter(Boolean));

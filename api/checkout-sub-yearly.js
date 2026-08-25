@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       // Trader $2,000/yr. Hardcoded on purpose - see checkout-sub.js.
-      line_items: [{ price: 'price_1U5QD0ApyfMAkbeEolFRb6gD', quantity: 1 }],
+      line_items: [{ price: 'price_1U8R1cB1Bq29OALaUL53wxgD', quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,

@@ -35,8 +35,8 @@ module.exports = async (req, res) => {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
-  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST_79 || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $129 — raised 2026-08-16)
-  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY_790 || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $1,290)
+  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $129 — raised 2026-08-16)
+  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $1,290)
   const priceId = (plan === 'yearly') ? YEARLY_790 : MONTHLY_79;
 
   try {

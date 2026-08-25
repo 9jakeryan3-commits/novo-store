@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       // Trader $209/mo. Hardcoded on purpose: a stale STRIPE_PRICE_SUB_ID env override
       // silently beat the committed value and could have billed a $1 test price.
-      line_items: [{ price: 'price_1U5QCzApyfMAkbeEwzZTsogm', quantity: 1 }],
+      line_items: [{ price: 'price_1U8R0zB1Bq29OALaAdZzFw8S', quantity: 1 }],
       mode: 'subscription',
       success_url: 'https://app.novo-aitrading.app/status',
       cancel_url: `${SITE}/#pricing`,
