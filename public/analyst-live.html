@@ -1332,7 +1332,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     padding:5px 11px;cursor:pointer}
   #novo-ask .clr:hover{color:#eaf3ff;border-color:#22d3ee}
   #novo-ask .x{background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
-  #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px}
+  #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
+    position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
+  @media (prefers-reduced-motion:reduce){ #novo-ask .log{scroll-behavior:auto} }
+  #novo-ask #novo-ask-pad{flex:0 0 auto}
   #novo-ask .m{font-size:13.5px;line-height:1.65;color:var(--txt1,#eaf3ff);white-space:pre-wrap;align-self:stretch}
   /* Your side of the conversation, drawn the way a chat client draws it: a bubble on the right,
      NoVo's answers running full width on the left. The asymmetry does what no label could -- you
@@ -1435,6 +1438,13 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     _b.style.display = on ? 'none' : 'flex';
     // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
     if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask NoVo, the AI market analyst'); }
+    // Position on OPEN, not when the message arrived: everything measures zero while the panel is
+    // display:none, so a drop or a restored transcript can only be placed once it is on screen.
+    if (on) {
+      var _lg = document.getElementById('novo-ask-log');
+      if (PINNED) pinTop(PINNED, 1);
+      else if (_lg) { _lg.style.scrollBehavior = 'auto'; _lg.scrollTop = _lg.scrollHeight; _lg.style.scrollBehavior = ''; }
+    }
     if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
@@ -1475,6 +1485,14 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var sameDay = d.toDateString() === n.toDateString();
     return sameDay ? fmtClock(ms) : (d.toLocaleDateString([], { weekday: 'short' }) + ' ' + fmtClock(ms));
   }
+  // Everything appended has to land ABOVE the spacer, or the spacer stops being the last thing
+  // in the log and the whole pin-to-top measurement is off by its height.
+  function logAdd(node){
+    var log = document.getElementById('novo-ask-log');
+    var p = document.getElementById('novo-ask-pad');
+    if (p && p.parentNode === log) log.insertBefore(node, p); else log.appendChild(node);
+    return node;
+  }
   function add(cls, text, ts){
     var log = document.getElementById('novo-ask-log');
     var d = document.createElement('div'); d.className = 'm ' + (cls||''); d.textContent = text;
@@ -1484,7 +1502,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       try { w.title = new Date(ts).toLocaleString(); } catch(_){}
       d.appendChild(w);
     }
-    log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+    logAdd(d); log.scrollTop = log.scrollHeight; return d;
   }
   // Relative stamps go stale sitting on screen, which is the exact failure they exist to prevent.
   // One interval re-renders them all; it costs nothing and it is what makes the panel feel live
@@ -1493,10 +1511,45 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var ns = document.querySelectorAll('#novo-ask-log .when[data-t]');
     for (var i = 0; i < ns.length; i++) ns[i].textContent = fmtWhen(Number(ns[i].getAttribute('data-t')));
   }, 30000);
+  // An answer lands with YOUR question at the top of the view, the way every chat app does it,
+  // instead of dropping you at the tail of a 600-word read with the question scrolled off above.
+  // When the answer is shorter than the panel there is nothing to scroll into, so a spacer grows
+  // underneath -- just enough for the question to reach the top -- and collapses again the moment
+  // the content is taller than the view. Same trick Gemini and ChatGPT use; without it a short
+  // answer simply refuses to move.
+  var PINNED = null, _pinT = null;
+  function padEl(){
+    var log = document.getElementById('novo-ask-log');
+    var p = document.getElementById('novo-ask-pad');
+    if (!p) { p = document.createElement('div'); p.id = 'novo-ask-pad'; p.setAttribute('aria-hidden', 'true'); }
+    if (p.parentNode !== log) log.appendChild(p);
+    return p;
+  }
+  function pinTop(el, instant){
+    var log = document.getElementById('novo-ask-log');
+    if (!log || !el || el.parentNode !== log) return;
+    PINNED = el;
+    // A hidden panel measures as zero, so nothing can be positioned yet -- remember what to pin and
+    // let novoAskOpen do it for real. This is the normal case for a drop, which lands while closed.
+    if (!log.clientHeight) return;
+    var p = padEl();
+    // Measure with the spacer out of the flow, otherwise last pass's height inflates this one's.
+    p.style.display = 'none';
+    var below = log.scrollHeight - el.offsetTop;
+    var need = log.clientHeight - below - 12;   // 12 = the flex gap the spacer itself introduces
+    if (need > 6) { p.style.height = need + 'px'; p.style.display = 'block'; }
+    if (instant) log.style.scrollBehavior = 'auto';
+    log.scrollTop = Math.max(0, el.offsetTop - 8);
+    if (instant) setTimeout(function(){ log.style.scrollBehavior = ''; }, 0);
+  }
+  window.addEventListener('resize', function(){
+    if (!PINNED) return;
+    clearTimeout(_pinT); _pinT = setTimeout(function(){ pinTop(PINNED); }, 120);
+  });
   function srcLine(text){
     var log = document.getElementById('novo-ask-log');
     var k = document.createElement('div'); k.className = 'src'; k.textContent = text;
-    log.appendChild(k); return k;
+    logAdd(k); return k;
   }
 
   // The transcript lived only in the DOM, so a reload erased what you asked and what it answered.
@@ -1508,9 +1561,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     try { localStorage.setItem(CHAT_KEY, JSON.stringify({ t: Date.now(), turns: TURNS.slice(-CHAT_MAX) })); } catch(_){}
   }
   function renderTurn(m){
-    add(m.r === 'you' ? 'you' : '', m.x, m.t);
+    var el = add(m.r === 'you' ? 'you' : '', m.x, m.t);
     if (m.c) srcLine(m.c);
     if (m.s) srcLine(m.s);
+    return el;
   }
   function loadTurns(){
     try {
@@ -1521,8 +1575,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       if (!TURNS.length) return;
       var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
       window.novoAskQuick();
-      TURNS.forEach(renderTurn);
+      var last = null;
+      TURNS.forEach(function(m){ var el = renderTurn(m); if (m.r === 'you') last = el; });
       var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
+      if (last) pinTop(last);
     } catch(_){}
   }
   // Clearing has to wipe all three: the in-memory turns (which travel to the model as context), the
@@ -1550,8 +1606,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     // it. Using Date.now() here would stamp a 12:30 read with the time you happened to open the
     // panel -- which is precisely the confusion this whole change exists to remove.
     var m = { r: '', x: cd.text, t: (cd.ts ? cd.ts * 1000 : Date.now()) };
-    TURNS.push(m); saveTurns(); renderTurn(m); window.novoAskQuick();
-    var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
+    TURNS.push(m); saveTurns();
+    var el = renderTurn(m); window.novoAskQuick();
+    // NoVo speaking first has no question above it, so the note itself is what pins -- a long drop
+    // should open at its first line rather than its last.
+    pinTop(el);
     var panel = document.getElementById('novo-ask');
     if (!panel || !panel.classList.contains('on')) {
       var b = document.getElementById('novo-ask-bubble');
@@ -1562,7 +1621,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     TURNS = [];
     try { localStorage.removeItem(CHAT_KEY); } catch(_){}
     var log = document.getElementById('novo-ask-log');
-    if (log) log.innerHTML = INTRO_HTML;
+    if (log) log.innerHTML = INTRO_HTML;   // takes the spacer with it; padEl() rebuilds it on demand
+    PINNED = null;
     var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
     window.novoAskQuick();
   };
@@ -1583,7 +1643,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     // it twice would have NoVo answering an echo of itself.
     var hist = TURNS.slice(-6).map(function(m){ return { role: m.r === 'you' ? 'user' : 'novo', text: m.x }; });
     var _now = Date.now();
-    add('you', q, _now); TURNS.push({ r: 'you', x: q, t: _now }); saveTurns();
+    var _qel = add('you', q, _now); TURNS.push({ r: 'you', x: q, t: _now }); saveTurns();
     // Name the step, and move through them. NoVo really does hit the map, then the tape, then its
     // own logged sessions -- this is the shape of the work, not a fake progress bar.
     var thinking = add('', '');
@@ -1596,6 +1656,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       _si = Math.min(_si + 1, _stages.length - 1); _sp.textContent = _stages[_si];
     }, 2600);
     var _stopThinking = function(){ clearInterval(_stageTimer); thinking.remove(); };
+    // Pin as soon as the question is in: the working state then plays directly under it rather
+    // than at the bottom of wherever you happened to be scrolled.
+    pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
       var r = await fetch('/api/analyst-ask', {
@@ -1607,6 +1670,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       if (!d.ok) {
         var em = d.error || 'NoVo is unavailable right now.', _et = Date.now();
         add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns();
+        pinTop(_qel);
       }
       else {
         var _at = Date.now();
@@ -1634,9 +1698,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
           srcLine(_turn.s);
         }
         TURNS.push(_turn); saveTurns();
-        log.scrollTop = log.scrollHeight;
+        // Re-pin rather than scroll to the bottom: the answer is now the tall thing on screen and
+        // you want to start reading it at its first line.
+        pinTop(_qel);
       }
-    } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); }
+    } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
   };
 })();
