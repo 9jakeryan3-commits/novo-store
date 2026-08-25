@@ -547,6 +547,16 @@ nav { position: relative; }
   <div class="fut" id="fut-row"></div>
 </div>
 
+<!-- OFF-EXCHANGE SHORT VOLUME -->
+<div class="container sec">
+  <div class="card">
+    <div class="lbl">Off-exchange flow</div>
+    <h2 class="h2" style="font-size:20px;margin-bottom:4px;">Short volume, ranked</h2>
+    <p class="sub" style="margin:0 0 14px;font-size:13.5px;">The share of off-exchange volume marked short, from FINRA, ranked against each ticker&rsquo;s own last 120 sessions. Mostly market makers hedging &mdash; read it as how one-sided the tape was, not as a bearish vote.</p>
+    <div id="sv-list"><div class="muted">Loading&hellip;</div></div>
+  </div>
+</div>
+
 <!-- TRENDING + CALENDAR -->
 <div class="container sec">
   <div class="tc-grid">
@@ -783,9 +793,32 @@ function copyEmbed(btn){
   async function loadCal(){ try{ var r=await fetch('/api/calendar',{cache:'no-store'}); if(r.ok) renderCal((await r.json()).events); }catch(_){} }
 
 
-  loadPulse(); loadFut(); loadPoll(); loadHeat(); loadTrend(); loadCal();
+  // ---- off-exchange short volume ----
+  // The percentile carries the meaning, so it gets the emphasis: SPY sits in the fifties most
+  // days, and a bare 55% tells a reader nothing. Under 20 samples the engine sends rank=null
+  // rather than a number computed off five points, and this prints that honestly.
+  function renderSV(d){
+    var box=$('sv-list'); if(!box) return;
+    var sv=(d&&d.ok&&d.shortVolume)||null;
+    if(!sv){ box.innerHTML='<div class="muted">Not published yet.</div>'; return; }
+    var out='';
+    ['SPY','QQQ','IWM'].forEach(function(tk){
+      var v=sv[tk]; if(!v||v.short_pct==null) return;
+      var r=v.rank, col = (r==null)?'var(--txt2)':(r>=80?'#f43f5e':(r<=20?'#10b981':'var(--txt1)'));
+      var rank=(v.rank_ord)?(v.rank_ord+' pct'):'rank building';
+      out+='<div class="crow"><span class="cdate" style="min-width:52px;font-weight:800;color:var(--txt1)">'+tk+'</span>'
+         + '<span style="flex:1"><span class="cev" style="color:'+col+';font-weight:800">'+Number(v.short_pct).toFixed(1)+'%</span>'
+         + '<br><span class="muted" style="font-size:12px">'+rank+(v.label?(' &middot; '+esc(v.label)):'')
+         + (v.median_pct!=null?(' &middot; median '+Number(v.median_pct).toFixed(1)+'%'):'')+'</span></span>'
+         + '<span class="muted" style="font-size:11.5px">'+esc(v.date||'')+'</span></div>';
+    });
+    box.innerHTML = out || '<div class="muted">Not published yet.</div>';
+  }
+  async function loadSV(){ try{ var r=await fetch('/api/market-internals',{cache:'no-store'}); if(r.ok) renderSV(await r.json()); }catch(_){} }
+
+  loadPulse(); loadFut(); loadPoll(); loadHeat(); loadTrend(); loadCal(); loadSV();
   setInterval(loadPulse, 120000); setInterval(loadFut, 60000); setInterval(loadHeat, 300000);
-  setInterval(loadTrend, 300000); setInterval(loadCal, 3600000);
+  setInterval(loadTrend, 300000); setInterval(loadCal, 3600000); setInterval(loadSV, 900000);
 })();
 </script>
 <script src="/ticker-live.js?v=f0dd9ed7" defer></script>
