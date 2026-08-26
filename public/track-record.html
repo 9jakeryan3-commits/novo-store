@@ -390,16 +390,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim three</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Line&rsquo;s level-breaks hold</h2>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Price owns the level it broke</h2>
     <div class="plain">
-      <p>The Line is an alert: when price crosses a level NoVo tracks, it fires &mdash; either price <i>reclaimed</i> the level (bullish) or <i>lost</i> it (bearish). <b>Both scores below are settled one hour later.</b></p>
-      <ul>
-        <li><b>Direction</b> &mdash; an hour later, is price higher than when it fired? Lower, if the call was bearish?</li>
-        <li><b>Did the level hold</b> &mdash; did price stay above the level that entire hour (or below it, on a bearish call), never once dipping back through?</li>
-      </ul>
-      <p>One touch back through is a fail, even if the hour ends far past the level. That is why the second number is the low one: price crosses a level and pokes back through it constantly. Read the alert for direction, and do not lean a stop on the level behind it.</p>
+      <p>The Line fires the moment price crosses a level NoVo tracks &mdash; the alert goes out within about 36 cents of the level itself. One hour later, is price still on the far side of it? <b>That is the number below.</b> A reclaim has to be higher, a loss has to be lower.</p>
+      <p>It rarely gets there cleanly. Price usually dips back through the level at least once before the hour is out, so this says the break tends to stick &mdash; not that the level behind it is somewhere to rest a stop.</p>
     </div>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Two questions per fire: did price go the way the call said, and did the level hold behind it.</p>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Scored one hour after each fire, per ticker.</p>
     <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
   </div>
 
@@ -672,10 +668,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var L = t.line_record || {};
       if (L.enough) {
-        ln += hd(tk, L.holds ? 'holds' : 'does not hold in this window', !!L.holds, L)
-            + sub('direction right <b>' + L.direction_rate + '%</b> &middot; the level itself held <b>'
-                  + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n)
-                  + ')</span>');
+        // ONE number. The level-held rate used to sit beside this one and it graded a claim NoVo
+        // never makes -- the alert's own body is branches ("Above X -> next test Y. Back below ->
+        // Z is the next shelf"), explicitly conditions rather than predictions. Publishing a score
+        // against a bar the product never set for itself is not honesty, it is noise.
+        ln += hd(tk, L.holds ? 'owns it more often than not' : 'does not own it in this window', !!L.holds, L)
+            + sub('still on the far side an hour later <b>' + L.direction_rate + '%</b> of the time '
+                  + '<span class="muted">(n=' + nn(L.n) + ')</span>');
       } else { }
 
       // Claim seven. No strength badge on purpose: sg() grades a claim against a 50% baseline, and
