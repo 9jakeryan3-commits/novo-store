@@ -803,9 +803,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         : '');
       $('tr-pulse').innerHTML = mix + ['low','mid','high'].map(function(k){
         var x = pz[k] || {};
-        return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:6px;">' + k
-             + ' pulse &rarr; next session median <b>' + x.median_next_pct + '%</b>, up ' + x.up_rate
-             + '% <span class="muted">(n=' + (x.n||0) + ')</span></div>';
+        // A band with nothing in it says so. It used to print "null%, up null%" the moment one
+        // of the three was empty, which is most of the early record.
+        return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:6px;">' + k + ' pulse &rarr; '
+             + (x.n ? ('next session median <b>' + x.median_next_pct + '%</b>, up ' + x.up_rate
+                       + '% <span class="muted">(n=' + x.n + ')</span>')
+                    : '<span class="muted">no session has read this band yet</span>') + '</div>';
       }).join('');
     } else {
       $('tr-pulse').innerHTML = '';
