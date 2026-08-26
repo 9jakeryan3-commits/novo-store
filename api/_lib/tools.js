@@ -136,6 +136,9 @@ const declarations = [
       "containment, whether price travels further per hour in negative gamma, whether GRAVITY dampens movement around it (it PINS, it does not attract) " +
       "toward it, whether the WALLS hold, whether steep SKEW precedes a WIDER hour (it measures volatility, never direction), whether the squeeze SCALE is " +
       "real, how THE LINE's level-breaks resolved, the lean NoVo states on the open, and the pulse against the next " +
+      "session. Several claims ALSO carry an `archive` block -- the same question re-asked over ~4,500 reconstructed " +
+      "sessions back to 2008, graded on the session after each close. Quote it as a backtest, with its window and n, " +
+      "and never merged with the live figure beside it. " +
       "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
     parameters: { type: "object", properties: {} },
@@ -470,6 +473,7 @@ function makeExecutors(ctx = {}) {
     for (const [tk, t] of Object.entries(snap.tickers)) {
       const e = t.expected_move || {}, f = t.flip_regime || {},
             g = t.gravity_pull || {}, w = t.wall_respect || {}, wb = t.wall_base_rate || {},
+            ar = t.archive || {},
             sk = t.skew_signal || {}, sq = t.squeeze_bands || {}, ln = t.line_record || {};
       out[tk] = {
         expectedMove: e.sessions
@@ -494,6 +498,25 @@ function makeExecutors(ctx = {}) {
         // Days price never came near the wall are excluded, so these are not "how often is the
         // wall right", they are "price is at the wall, now what". BACKFILL: never quote these
         // pooled with the live numbers, and say the window when citing them.
+        // THE RECONSTRUCTED ARCHIVE -- the same claims asked of ~4,500 sessions back to 2008
+        // instead of the few dozen NoVo has logged live. Dealer maps rebuilt from each session's
+        // CLOSING chain and graded on the session after, so every cell is a forward test.
+        //
+        // Quoting rules, and they matter: this is a BACKTEST. Never pool it with the live numbers
+        // beside it, never average the two, and always give the window and the n. The horizon
+        // differs too -- live cells are measured on the next HOUR, these on the next SESSION's
+        // range, so "1.59x further" and "1.03x further" are not in conflict, they are different
+        // instruments. Say which one you are quoting.
+        archive: ar.enough ? {
+          from: ar.from, to: ar.to, horizon: ar.horizon, source: "reconstructed daily maps",
+          expectedMove: ar.expected_move || null,
+          flipRegime: ar.flip_regime || null,
+          gravity: ar.gravity || null,
+          skew: ar.skew || null,
+          reading: "the flip and skew results are the strongest evidence NoVo has for its own thesis; " +
+                   "gravity's dampening does NOT survive to the next session and should be stated as an " +
+                   "intraday effect, not a daily one",
+        } : null,
         wallBaseRate: wb.enough ? {
           call: wb.call, put: wb.put, from: wb.from, to: wb.to, source: "reconstructed daily maps",
           reading: "price GOES THROUGH a wall far more often than it is turned away by one",

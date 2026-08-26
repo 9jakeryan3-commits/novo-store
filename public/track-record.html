@@ -533,6 +533,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + (bt.enough ? '<div class="muted" style="font-size:12px;margin-top:3px;">backtested '
                + String(bt.first).slice(0,4) + '&ndash;' + String(bt.last).slice(0,4) + ': <b style="color:var(--txt1)">'
                + Number(bt.inside).toLocaleString() + ' of ' + Number(bt.sessions).toLocaleString() + '</b> &middot; ' + pct(bt.rate) + '</div>' : '')
+           + arch(t.archive, (t.archive && t.archive.expected_move)
+               ? ('closed inside the band <b style="color:var(--txt1)">' + t.archive.expected_move.inside_pct
+                  + '%</b> of ' + nn(t.archive.expected_move.n) + ' sessions') : '')
            + '</div>';
       }
       var f = t.flip_regime || {};
@@ -552,6 +555,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + '</div>';
       } else {
       }
+      // The claim NoVo is built on, asked of 17 years instead of 22 sessions. Daily RANGE, not
+      // the hourly move above -- named so, because they are not the same measurement.
+      var af = t.archive && t.archive.flip_regime;
+      if (af) fl += arch(t.archive, 'the session travelled <b style="color:var(--txt1)">' + af.ratio
+           + '&times;</b> further after a close in negative gamma &mdash; median range '
+           + af.negative_gamma_range_pct + '% vs ' + af.positive_gamma_range_pct + '% '
+           + '<span class="muted">(n=' + nn(af.n_negative_gamma_range_pct) + ' vs '
+           + nn(af.n_positive_gamma_range_pct) + ')</span>');
     });
     $('tr-em').innerHTML = em;
     $('tr-flip').innerHTML = fl;
@@ -609,6 +620,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     function sub(s){ return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:10px;">' + s + '</div>'; }
     function nn(v){ return Number(v).toLocaleString(); }
+    // A line from the reconstructed archive. Muted and separate from the live cell above it on
+    // purpose: a 17-year daily figure and a 22-session hourly one answer the same question with
+    // different instruments, and merging them would let a backtest borrow a live record's
+    // credibility -- the same rule _expected_move_backtest already follows.
+    function arch(a, body){
+      if (!a || !a.enough) return '';
+      var win = String(a.from||'').slice(0,4) + '&ndash;' + String(a.to||'').slice(0,4);
+      return '<div class="muted" style="font-size:12px;margin-top:3px;">reconstructed ' + win
+           + ': ' + body + '</div>';
+    }
 
     var gv='', wl='', sk='', sq='', ln='', wb='';
     ['SPY','QQQ','IWM'].forEach(function(tk){
@@ -675,6 +696,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
         wb += '</div>';
       }
+      // Gravity, and the archive does NOT reproduce it. Kept on the page rather than dropped:
+      // the live cell measures the hour after price SITS on gravity, this measures the session
+      // after price CLOSED on it, and the honest read is that the dampening is an intraday
+      // effect that has washed out by the next day. Hiding the null would be the dishonest half.
+      var ag = t.archive && t.archive.gravity;
+      if (ag) gv += arch(t.archive, 'over the next SESSION the dampening does not hold up &mdash; '
+           + 'median range ' + ag.on_gravity_range_pct + '% sitting on it vs ' + ag.away_range_pct
+           + '% away <span class="muted">(n=' + nn(ag.n_on_gravity_range_pct) + ' vs '
+           + nn(ag.n_away_range_pct) + ')</span>');
+
+      var as_ = t.archive && t.archive.skew;
+      if (as_) sk += arch(t.archive, 'steep skew preceded a <b style="color:var(--txt1)">' + as_.ratio
+           + '&times;</b> wider session &mdash; median range ' + as_.steep_range_pct + '% vs '
+           + as_.flat_range_pct + '% <span class="muted">(n=' + nn(as_.n_steep_range_pct) + ' each side)</span>');
     });
     $('tr-grav').innerHTML  = gv;
     $('tr-wall').innerHTML  = wb;
