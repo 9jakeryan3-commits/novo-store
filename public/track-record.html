@@ -369,9 +369,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card">
     <div class="lbl">Claim one</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The open&rsquo;s bias</h2>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Scored open to close. Neutral calls are not scored.</p>
-    <div id="tr-bias"><div class="muted">Loading&hellip;</div></div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">NoVo&rsquo;s lean on the open</h2>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every pre-market note commits to a direction for the session ahead. Scored open to close. There is no neutral to hide in.</p>
+    <div id="tr-lean"><div class="muted">Loading&hellip;</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;">
@@ -542,7 +542,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     // a real edge measured over thousands. The badge says how far it actually sits from no effect,
     // in standard errors -- and where that distance is not there, the verdict stops saying holds.
     function sg(c){
-      if (!c || !c.strength) return '';
+      if (!c) return '';
+      // A claim under the significance floor gets no grade -- but a bare percentage with no badge
+      // beside it reads as settled. NEW carries the sample instead, so three sessions look like
+      // three sessions.
+      if (!c.strength) {
+        if (c.sample == null) return '';
+        return ' <span title="too few sessions to grade yet -- the rate is real, the sample is small"'
+             + ' style="margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.9px;'
+             + 'text-transform:uppercase;white-space:nowrap;color:var(--txt3);border:1px solid var(--txt3);'
+             + 'border-radius:999px;padding:2px 8px;">new &middot; n=' + nn(c.sample) + '</span>';
+      }
       // The palette lives INSIDE sg. As a `var` above it, it was still undefined when the
       // flip_regime block -- which renders earlier in this handler -- made the first call:
       // the function declaration hoists, the var's value does not. That threw, killed the
@@ -630,10 +640,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     $('tr-sqz').innerHTML   = sq;
     $('tr-line').innerHTML  = ln;
 
-    var b = d.bias_record || {};
-    $('tr-bias').innerHTML = b.enough
-      ? hd('The open', b.holds ? 'holds' : 'does not hold in this window', !!b.holds, b)
-        + sub('the published bias matched the session <b>' + b.correct_rate + '%</b> of the time '
+    // Renamed from bias_record along with the engine, not aliased. What sat here before scored the
+    // overnight gap (>= +0.15% bullish, <= -0.15% bearish) under a heading that read as NoVo's own
+    // call -- and that rule is a coin flip: 50.9% across 3,844 SPY gap days. Keeping the old key as
+    // a fallback would have quietly restored it the first time the engine lagged a deploy.
+    var b = d.lean_record || {};
+    $('tr-lean').innerHTML = b.enough
+      ? hd('The lean', b.holds ? 'holds' : 'does not hold in this window', !!b.holds, b)
+        + sub('the direction NoVo committed to matched the session <b>' + b.correct_rate + '%</b> of the time '
               + '<span class="muted">(n=' + nn(b.n) + ')</span>')
       : '';
 

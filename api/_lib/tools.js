@@ -135,7 +135,7 @@ const declarations = [
       "How NoVo's own published claims have actually scored against its logged history: expected-move " +
       "containment, whether price travels further per hour in negative gamma, whether GRAVITY dampens movement around it (it PINS, it does not attract) " +
       "toward it, whether the WALLS hold, whether steep SKEW precedes a WIDER hour (it measures volatility, never direction), whether the squeeze SCALE is " +
-      "real, how THE LINE's level-breaks resolved, the bias on the open, and the pulse against the next " +
+      "real, how THE LINE's level-breaks resolved, the lean NoVo states on the open, and the pulse against the next " +
       "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
     parameters: { type: "object", properties: {} },
@@ -502,16 +502,22 @@ function makeExecutors(ctx = {}) {
                               : { enough: false, n: ln.n || 0, note: ln.note || "accruing" },
       };
     }
-    const br = snap.bias_record || {};
+    const lr = snap.lean_record || {};
     return {
       tickers: out,
-      // the most public claim the product makes: the BULLISH/BEARISH tag on the OPEN's read, graded
+      // the most public claim the product makes: the direction NoVo commits to on the open, graded
       // open-to-close. Only the Pre-Market Primer counts -- Mid-Day reads a session already half
-      // resolved, the Closing Bell is a summary, and the Weekly takes a view on the week. `scored`
-      // says which, so this is never quoted as though every note were graded.
-      biasRecord: br.enough
-        ? { correctRate: br.correct_rate, n: br.n, neutral: br.neutral, holds: br.holds, scored: br.scored }
-        : { enough: false, n: br.n || 0, note: br.note || "accruing" },
+      // resolved, the Closing Bell is a summary, and the Weekly takes a view on the week.
+      //
+      // This used to be `biasRecord`, and it was not a claim at all: the tag it scored was the
+      // overnight gap (>= +0.15% BULLISH, <= -0.15% BEARISH, flat NEUTRAL). That rule is right
+      // 50.9% of the time across 3,844 SPY gap days, so the 68.2% it once reported was luck with
+      // a label on it. Renamed as well as rewired, deliberately -- a stale key here is how a
+      // coin flip gets quoted in a chat answer as NoVo's own hit rate.
+      leanRecord: lr.enough
+        ? { correctRate: lr.correct_rate, n: lr.n, holds: lr.holds, scored: lr.scored,
+            strength: lr.strength || null }
+        : { enough: false, n: lr.n || 0, note: lr.note || "no lean scored yet" },
       // pulse graded FORWARD, against the next session — same-session would be circular
       pulseSignal: snap.pulse_signal || null,
       sessionsLogged: snap.sessions_logged || null,

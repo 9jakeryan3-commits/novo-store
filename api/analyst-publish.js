@@ -221,11 +221,11 @@ async function _latestArchivedRead(token) {
     return read;
   } catch (_) { return null; }
 }
-function _biasPill(bias) {
+function _biasPill(bias, lbl) {
   if (!bias) return '';
   const m = { BULLISH: ['rgba(16,185,129,0.12)', '#34d399', 'rgba(16,185,129,0.45)'], BEARISH: ['rgba(239,68,68,0.12)', '#f87171', 'rgba(239,68,68,0.45)'], NEUTRAL: ['rgba(148,163,184,0.12)', '#b3c2d6', 'rgba(148,163,184,0.4)'] }[String(bias).toUpperCase()];
   if (!m) return '';
-  return `<span class="pill" style="background:${m[0]};color:${m[1]};border:1px solid ${m[2]};">Structural Bias &middot; ${esc(String(bias).toUpperCase())}</span>`;
+  return `<span class="pill" style="background:${m[0]};color:${m[1]};border:1px solid ${m[2]};">${esc(lbl || 'Structural Bias')} &middot; ${esc(String(bias).toUpperCase())}</span>`;
 }
 function _levelsTable(levels) {
   if (!Array.isArray(levels) || !levels.length) return '';
@@ -265,7 +265,7 @@ async function handleArchive(req, res) {
     }
     const bt = esc(rd.text || '').replace(/(^|\n)(THE READ|KEY LEVELS|STRUCTURAL POSTURE|WHAT TO WATCH|WHAT CHANGED|WHAT IT MEANS|BOTTOM LINE|THE SETUP|THE RECAP|TOMORROW'S SETUP|THE WEEK AHEAD|CATALYSTS|SCENARIOS|LEVELS TO WATCH|FLOW DYNAMICS|EVENT PLAYBOOK|DEALER POSITIONING MAP|DEALER POSITIONING)/g, '$1<b>$2</b>');
     const desc = (rd.text || '').replace(/\s+/g, ' ').slice(0, 155);
-    const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure" onerror="this.style.display='none'">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
+    const inner = `<article><div class="muted">${esc(rd.dateLabel || '')} &middot; NoVo Analyst</div><h1>${esc(rd.title)}</h1>${_biasPill(rd.bias, rd.biasLabel)}<div class="card">${rd.chartUrl ? `<img class="chart" src="${esc(rd.chartUrl)}" alt="SPY session chart — levels &amp; structure" onerror="this.style.display='none'">` : ''}<div class="body">${bt}</div>${_levelsTable(rd.levels)}</div><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">This read landed hours ago for subscribers.</div><div class="muted" style="margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;">The Open, The Close, and The Week Ahead hit your inbox before the bell &mdash; plus real-time &lsquo;The Line&rsquo; level-break alerts in Discord.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div><p style="margin-top:24px;"><a href="${SITE}/analyst/archive">&larr; All past reads</a></p></article>`;
     // A published desk note is an Article — it had none, so the archive was invisible as content.
     const ld = JSON.stringify({
       "@context": "https://schema.org", "@type": "Article",
@@ -775,6 +775,10 @@ async function _promotePublicLevels(state) {
   const upsell = (body.upsell || 'pulse').toString().toLowerCase();    // 'pulse' | 'analyst'
   const chartB64 = (body.chart_b64 || '').toString().trim();           // optional session-chart PNG (base64)
   const bias = (body.bias || '').toString().trim();                    // BULLISH | BEARISH | NEUTRAL
+  // What the pill CALLS the value. The pre-market note sends "NoVo's lean", because that is what it
+  // now is -- a direction NoVo commits to and is scored on. Everything else keeps "Structural Bias":
+  // the Close and the Weekly describe a session that already happened and forecast nothing.
+  const biasLabel = (body.bias_label || '').toString().trim();
   const levels = Array.isArray(body.levels) ? body.levels : [];        // [{label, price, kind}]
   const pill = (body.pill || '').toString().trim();                    // regime-alert pill text
   const pillKind = (body.pill_kind || '').toString().toLowerCase();    // amplify | absorb | warn | calm
@@ -806,10 +810,10 @@ async function _promotePublicLevels(state) {
     } catch (e) { console.error('[analyst-publish] chart upload failed:', e.message); }
   }
 
-  // Structural-bias pill (dark) + a support/resistance levels table (replaces the old text KEY LEVELS).
+  // The directional pill (dark) + a support/resistance levels table (replaces the old text KEY LEVELS).
   const _biasMap = { BULLISH:{bg:'rgba(16,185,129,0.12)',fg:'#34d399',bd:'rgba(16,185,129,0.45)'}, BEARISH:{bg:'rgba(239,68,68,0.12)',fg:'#f87171',bd:'rgba(239,68,68,0.45)'}, NEUTRAL:{bg:'rgba(148,163,184,0.12)',fg:'#b3c2d6',bd:'rgba(148,163,184,0.4)'} };
   const _bc = _biasMap[bias.toUpperCase()];
-  const biasPill = _bc ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_bc.bg};color:${_bc.fg};border:1px solid ${_bc.bd};font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">Structural Bias &middot; ${esc(bias.toUpperCase())}</span></div>` : '';
+  const biasPill = _bc ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_bc.bg};color:${_bc.fg};border:1px solid ${_bc.bd};font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">${esc(biasLabel || 'Structural Bias')} &middot; ${esc(bias.toUpperCase())}</span></div>` : '';
   const _pillMap = { amplify:{bg:'rgba(239,68,68,0.13)',fg:'#f87171',bd:'rgba(239,68,68,0.5)'}, warn:{bg:'rgba(245,158,11,0.13)',fg:'#fbbf24',bd:'rgba(245,158,11,0.5)'}, absorb:{bg:'rgba(41,98,255,0.16)',fg:'#6ea8fe',bd:'rgba(41,98,255,0.5)'}, calm:{bg:'rgba(16,185,129,0.12)',fg:'#34d399',bd:'rgba(16,185,129,0.45)'} };
   const _pc = _pillMap[pillKind] || _pillMap.warn;
   const alertPill = pill ? `<div style="margin:0 0 16px;"><span style="display:inline-block;background:${_pc.bg};color:${_pc.fg};border:1px solid ${_pc.bd};font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px;">&#9889; Regime &middot; ${esc(pill)}</span></div>` : '';
@@ -854,7 +858,7 @@ async function _promotePublicLevels(state) {
       const _prose = _splitAt >= 0 ? text.slice(0, _splitAt).trim() : text;
       const _data = _splitAt >= 0 ? text.slice(_splitAt).trim() : '';
       const fields = [];
-      if (bias) fields.push({ name: 'Structural Bias', value: bias.toUpperCase(), inline: true });
+      if (bias) fields.push({ name: biasLabel || 'Structural Bias', value: bias.toUpperCase(), inline: true });
       if (pill) fields.push({ name: 'Regime', value: pill, inline: true });
       if (Array.isArray(levels) && levels.length) {
         const line = arr => arr.map(l => `${l.label} — **${Number(l.price).toFixed(2)}**`).join('\n');
@@ -931,7 +935,7 @@ async function _promotePublicLevels(state) {
       else if (/week ahead|weekly|the week/.test(t)) { kslug = 'the-week-ahead'; delayH = 16; }
       const slug = `${etDate}-${kslug}`;
       const publishAfter = nowMs + delayH * 3600 * 1000;
-      const readObj = { slug, title, text, bias, levels, chartUrl, label, dateLabel: etDate, publishAfter, createdAt: nowMs };
+      const readObj = { slug, title, text, bias, biasLabel, levels, chartUrl, label, dateLabel: etDate, publishAfter, createdAt: nowMs };
       await put(`analyst-archive/reads/${slug}.json`, JSON.stringify(readObj),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N.
