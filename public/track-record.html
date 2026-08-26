@@ -114,6 +114,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .h2 { font-size:clamp(20px,3vw,26px); font-weight:800; color:var(--txt1); letter-spacing:-.5px; margin:0 0 6px; }
   .sub { font-size:14.5px; color:var(--txt2); max-width:640px; margin:0 0 22px; }
   .plain { font-size:15px; line-height:1.6; color:var(--txt1); max-width:660px; margin:6px 0 7px; }
+  .plain p { margin:0 0 7px; }
+  .plain p:last-child { margin-bottom:0; }
+  .plain ul { margin:0 0 8px; padding-left:19px; }
+  .plain li { margin:0 0 5px; }
   .card { background:var(--navy2); border:1px solid var(--bdr); border-radius:14px; padding:22px; }
   .muted { color:var(--txt3); font-size:12px; }
 
@@ -371,7 +375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card">
     <div class="lbl">Claim one</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">NoVo&rsquo;s lean on the open</h2>
-    <p class="plain">Before the bell, NoVo says which way it thinks the day goes. This is how often it was right.</p>
+    <p class="plain">Before the bell, NoVo says which way it thinks the day goes. It is settled at that day&rsquo;s close, opening price against closing price. This is how often it was right.</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Every pre-market note commits to a direction for the session ahead. Scored open to close. There is no neutral to hide in.</p>
     <div id="tr-lean"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -387,7 +391,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim three</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The Line&rsquo;s level-breaks hold</h2>
-    <p class="plain">When price breaks a level NoVo is watching, it sends an alert. Two separate things can go right: price keeps going that way, and the level it broke starts acting as a floor or a ceiling. Both are scored, because the second one mostly does not.</p>
+    <div class="plain">
+      <p>The Line is an alert: when price crosses a level NoVo tracks, it fires &mdash; either price <i>reclaimed</i> the level (bullish) or <i>lost</i> it (bearish). <b>Both scores below are settled one hour later.</b></p>
+      <ul>
+        <li><b>Direction</b> &mdash; an hour later, is price higher than when it fired? Lower, if the call was bearish?</li>
+        <li><b>Did the level hold</b> &mdash; did price stay above the level that entire hour (or below it, on a bearish call), never once dipping back through?</li>
+      </ul>
+      <p>One touch back through is a fail, even if the hour ends far past the level. That is why the second number is the low one: price crosses a level and pokes back through it constantly. Read the alert for direction, and do not lean a stop on the level behind it.</p>
+    </div>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Two questions per fire: did price go the way the call said, and did the level hold behind it.</p>
     <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -403,7 +414,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim five</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The gamma flip changes how price behaves</h2>
-    <p class="plain">Dealers who sell options hedge them, and that hedging either calms the market down or shoves moves along &mdash; the gamma flip is the price where it switches. So price should travel further on the shoving side. This asks whether it does.</p>
+    <p class="plain">Dealers who sell options hedge them, and that hedging either calms the market down or shoves moves along &mdash; the gamma flip is the price where it switches. So over the hour that follows, price should travel further on the shoving side. This asks whether it does.</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Below the flip, dealer hedging runs with the move. If that is true, the same ticker should travel further in an hour when net gamma is negative.</p>
     <div id="tr-flip"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -411,7 +422,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim six</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Gravity pins price where it sits</h2>
-    <p class="plain">Gravity is the price with the heaviest options positioning packed around it. The question is not whether price gets dragged there &mdash; it is whether price goes quiet once it is sitting on it.</p>
+    <p class="plain">Gravity is the price with the heaviest options positioning packed around it. The question is not whether price gets dragged there &mdash; it is whether the next hour goes quiet once price is sitting on it.</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Concentrated gamma dampens movement around itself, so the test is volatility rather than attraction: is the next hour quieter when price sits on gravity?</p>
     <div id="tr-grav"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -419,7 +430,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim seven</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The walls hold</h2>
-    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. This asks whether they act like a ceiling and a floor.</p>
+    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. This asks whether they act like a ceiling and a floor over the hour that follows.</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Call wall as resistance, put wall as support, read against the extreme of the next hour &mdash; a wall pierced and recovered did not hold.</p>
     <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -435,7 +446,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim nine</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The squeeze scale means something</h2>
-    <p class="plain">NoVo scores squeeze pressure from 0 to 100, and a higher score is meant to mean a bigger move is coming. This checks whether the steps of that scale actually separate.</p>
+    <p class="plain">NoVo scores squeeze pressure from 0 to 100, and a higher score is meant to mean a bigger move over the hour that follows. This checks whether the steps of that scale actually separate.</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">The signal escalates at 25, 50 and 75. A higher score should precede a bigger move.</p>
     <div id="tr-sqz"><div class="muted">Loading&hellip;</div></div>
   </div>
