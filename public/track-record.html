@@ -429,9 +429,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim seven</div>
-    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The walls hold</h2>
-    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. This asks whether they act like a ceiling and a floor over the hour that follows.</p>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Call wall as resistance, put wall as support, read against the extreme of the next hour &mdash; a wall pierced and recovered did not hold.</p>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Walls are not barriers</h2>
+    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. Everyone treats them as a ceiling and a floor. This is what actually happened on the days price reached one &mdash; measured across that whole session, from a map built off the previous close.</p>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Days price never came near the wall are dropped, not counted as holds &mdash; counting those is how a level ends up looking infallible. Reconstructed maps, 2008&ndash;2025, kept apart from the live log.</p>
     <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
   </div>
 
@@ -610,7 +610,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function sub(s){ return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:10px;">' + s + '</div>'; }
     function nn(v){ return Number(v).toLocaleString(); }
 
-    var gv='', wl='', sk='', sq='', ln='';
+    var gv='', wl='', sk='', sq='', ln='', wb='';
     ['SPY','QQQ','IWM'].forEach(function(tk){
       var t = d.tickers && d.tickers[tk]; if (!t) return;
 
@@ -656,9 +656,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + L.level_held_rate + '%</b> <span class="muted">(n=' + nn(L.n)
                   + ')</span>');
       } else { }
+
+      // Claim seven. No strength badge on purpose: sg() grades a claim against a 50% baseline, and
+      // "price got through it 69% of the time" is a measurement, not a coin-flip claim. The sample
+      // rides in the line itself instead.
+      var wbr = t.wall_base_rate;
+      if (wbr && wbr.enough) {
+        wb += '<div style="margin-bottom:13px;">'
+            + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
+            + ' <span style="font-weight:600;color:var(--txt2);">price goes through them</span></div>';
+        [['call','call wall'],['put','put wall']].forEach(function(w){
+          var x = wbr[w[0]]; if (!x) return;
+          wb += '<div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:4px;">'
+              + w[1] + ' &mdash; got through <b style="color:var(--txt1);">' + x.got_through_pct + '%</b>'
+              + ' of the times price reached it <span class="muted">(n=' + nn(x.n) + ')</span><br>'
+              + '<span class="muted">turned away ' + x.turned_away_pct + '% &middot; broke and closed through '
+              + x.closed_through_pct + '% &middot; broke and closed back ' + x.closed_back_pct + '%</span></div>';
+        });
+        wb += '</div>';
+      }
     });
     $('tr-grav').innerHTML  = gv;
-    $('tr-wall').innerHTML  = wl;
+    $('tr-wall').innerHTML  = wb;
     $('tr-skew').innerHTML  = sk;
     $('tr-sqz').innerHTML   = sq;
     $('tr-line').innerHTML  = ln;

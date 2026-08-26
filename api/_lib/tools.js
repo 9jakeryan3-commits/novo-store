@@ -469,7 +469,7 @@ function makeExecutors(ctx = {}) {
     const out = {};
     for (const [tk, t] of Object.entries(snap.tickers)) {
       const e = t.expected_move || {}, f = t.flip_regime || {},
-            g = t.gravity_pull || {}, w = t.wall_respect || {},
+            g = t.gravity_pull || {}, w = t.wall_respect || {}, wb = t.wall_base_rate || {},
             sk = t.skew_signal || {}, sq = t.squeeze_bands || {}, ln = t.line_record || {};
       out[tk] = {
         expectedMove: e.sessions
@@ -489,6 +489,15 @@ function makeExecutors(ctx = {}) {
                                  farMovePct: g.far_median_move_pct, farN: g.far_n,
                                  pullCloserRate: g.pull_closer_rate, pullN: g.pull_n } : null,
         wallRespect: w.enough ? { callHeldRate: w.call_wall_held_rate, putHeldRate: w.put_wall_held_rate, callN: w.call_n, putN: w.put_n } : null,
+        // What a wall DOES once price reaches it, over the reconstructed archive back to 2008 --
+        // a different question from wallRespect, which asks whether it contained the next hour.
+        // Days price never came near the wall are excluded, so these are not "how often is the
+        // wall right", they are "price is at the wall, now what". BACKFILL: never quote these
+        // pooled with the live numbers, and say the window when citing them.
+        wallBaseRate: wb.enough ? {
+          call: wb.call, put: wb.put, from: wb.from, to: wb.to, source: "reconstructed daily maps",
+          reading: "price GOES THROUGH a wall far more often than it is turned away by one",
+        } : null,
         // Skew measures VOLATILITY, not direction. Index skew is positive almost always, so its level
         // is not a directional call — the tested claim is that skew steep FOR THIS TICKER precedes a
         // wider hour than skew that is flat for it. Never quote this as a bearish signal.
