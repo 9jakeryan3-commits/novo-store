@@ -86,7 +86,7 @@ const declarations = [
   {
     name: "search_journal",
     description:
-      "Semantic search over NoVo's own writing: 1,000+ Journal articles on mechanics, plus NoVo's own logged " +
+      "Semantic search over my own writing: 1,000+ Journal articles on mechanics, plus my own logged " +
       "market observations. Use for 'why does X happen', 'what does Y mean', 'what have you seen like this'. Call " +
       "again with a refined query if the first results miss.",
     parameters: {
@@ -95,7 +95,7 @@ const declarations = [
         query: { type: "string" },
         source: {
           type: "string", enum: ["journal", "memory", "any"],
-          description: "Mechanics articles (journal), NoVo's own observations (memory), or both (any, default).",
+          description: "Mechanics articles (journal), my own observations (memory), or both (any, default).",
         },
       },
       required: ["query"],
@@ -132,7 +132,7 @@ const declarations = [
   {
     name: "get_track_record",
     description:
-      "How NoVo's own published claims have actually scored against its logged history: expected-move " +
+      "How my own published claims have actually scored against my logged history: expected-move " +
       "containment, whether price travels further per hour in negative gamma, whether GRAVITY dampens movement around it (it PINS, it does not attract) " +
       "toward it, whether the WALLS hold, whether steep SKEW precedes a WIDER hour (it measures volatility, never direction), whether the squeeze SCALE is " +
       "real, how THE LINE's level-breaks resolved, the lean NoVo states on the open, and the pulse against the next " +
@@ -147,11 +147,11 @@ const declarations = [
     name: "get_base_rates",
     description:
       "What has ACTUALLY happened next, historically, from a given dealer-map state — conditional base rates " +
-      "built from NoVo's own logged snapshots. Cells are keyed by regime (short/long gamma), distance to the " +
+      "built from my own logged snapshots. Cells are keyed by regime (short/long gamma), distance to the " +
       "gamma flip (below_far/below_near/at_line/above_near/above_far) and volatility tercile (low/mid/high), " +
       "each with the median move 15m and 60m forward and into the close, plus how often it resolved upward. " +
       "Use for 'how often does', 'what usually happens when', 'is that normal', 'what's the edge here'. " +
-      "Also returns `signals`: how NoVo's OWN calls have scored — the squeeze state and the tape's sweep bias " +
+      "Also returns `signals`: how my OWN calls have scored — the squeeze state and the tape's sweep bias " +
       "graded against what price actually did over the next hour (correct_rate is directional accuracy; " +
       "dormant/balanced make no claim and are never scored). Use it when asked whether a signal is worth " +
       "trusting, and be straight when the record is thin or poor — an honest miss is worth more than a spun one. " +
@@ -169,7 +169,7 @@ const declarations = [
   {
     name: "get_recent_reads",
     description:
-      "NoVo's own recent desk notes — date, kind, the BIAS it published, and an excerpt. Use when asked " +
+      "my own recent desk notes — date, kind, the BIAS it published, and an excerpt. Use when asked " +
       "what you said earlier, whether you have changed your view, or to compare a past call with what " +
       "actually happened. This is your own record, not the archive: quote it as yours, and if an earlier " +
       "read did not hold up, say so plainly rather than reframing it.",
@@ -264,7 +264,7 @@ function makeExecutors(ctx = {}) {
       query: q,
       results: hits.map((h) => ({
         title: h.t,
-        kind: h.s === "memory" ? "NoVo's own read" : "Journal",
+        kind: h.s === "memory" ? "my own earlier read" : "Journal",
         url: h.u || null,
         excerpt: String(h.x || "").slice(0, 700),
       })),
@@ -554,7 +554,7 @@ function makeExecutors(ctx = {}) {
       pulseSignal: snap.pulse_signal || null,
       sessionsLogged: snap.sessions_logged || null,
       from: snap.from || null, to: snap.to || null,
-      note: "NoVo's own log, self-reported and self-scored — not an independent audit, and not the " +
+      note: "my own log, self-reported and self-scored — not an independent audit, and not the " +
             "record of any trade. Always state the sample size alongside any rate from here.",
     };
   }
