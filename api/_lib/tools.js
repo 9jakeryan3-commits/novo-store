@@ -157,7 +157,16 @@ const declarations = [
       "trusting, and be straight when the record is thin or poor — an honest miss is worth more than a spun one. " +
       "CRITICAL: quote a cell ONLY when usable is true. n counts ~60s snapshots and is autocorrelated — " +
       "`sessions` is the real denominator, so a cell with sessions=1 is one afternoon, not evidence, no matter " +
-      "how large n looks. Say the sample size out loud whenever you cite a number from here.",
+      "how large n looks. Say the sample size out loud whenever you cite a number from here. " +
+      "TWO HORIZONS, and they are not interchangeable. `cells` is my own intraday tape: what happened over " +
+      "the next 15 and 60 minutes. It starts when I began logging, so it grows one session a day and its " +
+      "session counts are small on purpose. `daily` is the SAME buckets read off maps reconstructed back to " +
+      "2008 and graded on the NEXT SESSION open-to-close — hundreds of sessions per cell. Use the intraday " +
+      "one for anything inside the day, which is most 0DTE questions; reach for `daily` when the question is " +
+      "about the shape of a setup rather than the next hour, or when the intraday cell is thin and the honest " +
+      "answer needs weight behind it. NEVER average them, never present one as the other, and always say " +
+      "which clock a number is on — \"6 sessions intraday\" and \"252 sessions since 2008\" are both true " +
+      "and answer different questions. `daily` is reconstructed, not traded: say so when you lean on it.",
     parameters: {
       type: "object",
       properties: {
@@ -439,6 +448,19 @@ function makeExecutors(ctx = {}) {
         cells,
         byTimeOfDay: (t.by_tod || []).filter((c) => (only ? c.usable : true)),
         signals: t.signals || null,
+        // The next-session block, reconstructed to 2008. Same shape, different clock -- kept under its
+        // own key so nothing downstream can quietly fold it into the intraday medians.
+        daily: t.daily
+          ? {
+              source: t.daily.source,
+              horizon: t.daily.horizon,
+              scored: t.daily.scored,
+              window: t.daily.window,
+              minSessions: t.daily.min_sessions,
+              usableCells: t.daily.usable_cells,
+              cells: (t.daily.cells || []).filter((c) => (only ? c.usable : true)),
+            }
+          : null,
       };
     }
     if (!Object.keys(out).length) return { error: "unknown symbol" };
