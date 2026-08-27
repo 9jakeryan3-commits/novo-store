@@ -609,7 +609,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // Only inconclusive overrides -- small AND unconfirmed has no business saying "holds".
       // An EARLY claim keeps its verdict: 70% over 20 sessions is a real observation, and burying
       // it under a caution would be the opposite error.
-      if (c && c.strength === 'inconclusive') { verdict = 'not yet distinguishable from chance'; ok = null; }
+      // Also fires on strength null/undefined, which is WEAKER evidence than 'inconclusive' -- it is
+      // below the significance floor entirely, so there is no grade to give. Testing only for the
+      // literal string let the thinnest claims through the guard written to catch them: the lean and
+      // the hourly audit shipped `{n:1, correct_rate:0, holds:false, strength:null}` and the page
+      // printed "does not hold in this window" in red, which is NoVo publishing 0% about itself off
+      // one observation. A claim that cannot be graded cannot render a verdict either.
+      if (c && (!c.strength || c.strength === 'inconclusive')) { verdict = 'not yet distinguishable from chance'; ok = null; }
       return '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
            + ' <span style="font-weight:600;color:' + (ok === null ? 'var(--txt3)' : (ok ? 'var(--green)' : 'var(--red)'))
            + ';">' + verdict + '</span>' + sg(c) + '</div>';
