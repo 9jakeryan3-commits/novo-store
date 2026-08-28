@@ -551,10 +551,24 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 
 <script>
 (function(){
-  var TOKEN = null, STATE = null, CUR = "SPY";
+  /* Same as the crypto map: the ticker survives a reload, hash first so a shared link opens
+     on the index the sender meant. Read BEFORE the token-strip replaceState below. */
+  var TICK_KEY = 'novo_analyst_ticker';
+  function tickFromHash(){
+    var h = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim().toUpperCase();
+    return /^[A-Z]{1,6}$/.test(h) ? h : '';
+  }
+  function tickStored(){
+    try { return (localStorage.getItem(TICK_KEY) || '').toUpperCase(); } catch(_) { return ''; }
+  }
+  function rememberTick(t){
+    try { localStorage.setItem(TICK_KEY, t); } catch(_){}
+    try { history.replaceState(null, '', location.pathname + '#' + t); } catch(_){}
+  }
+  var TOKEN = null, STATE = null, CUR = tickFromHash() || tickStored() || "SPY";
   var qs = new URLSearchParams(location.search);
   // token from URL (magic link) → persist; else from storage
-  if (qs.get('t')) { TOKEN = qs.get('t'); try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}; history.replaceState(null,'', '/analyst/live'); }
+  if (qs.get('t')) { TOKEN = qs.get('t'); try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}; history.replaceState(null,'', '/analyst/live' + (location.hash || '')); }
   if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
   var $ = function(id){ return document.getElementById(id); };
   var _escH = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
@@ -834,7 +848,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       var div = document.createElement('div'); div.className='lv-mini';
       div.innerHTML = '<div class="t">'+_escH(d.ticker)+' <span style="color:var(--txt2);font-weight:600;">'+_f(d.spot)+'</span></div>'+
         '<div class="r"><span class="'+(pos?'grn':'red')+'">'+(pos?'dampening':'amplifying')+'</span> · GEX '+_gexMoney(d.net_gex)+(d.em_daily!=null?(' · EM ±'+(d.em_daily_pct||0).toFixed(1)+'%'):'')+(d.skew_pts!=null?(' · skew '+(d.skew_pts>=0?'+':'')+d.skew_pts.toFixed(1)):'')+'</div>';
-      div.addEventListener('click', function(){ CUR=d.ticker; renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); liveChip(); });
+      div.addEventListener('click', function(){ CUR=d.ticker; rememberTick(CUR); renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); liveChip(); });
       el.appendChild(div);
     });
   }
@@ -1173,6 +1187,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 
   function render(){
     if(!STATE) return;
+    // The restored ticker is only good if the payload actually carries it.
+    var _tk = (STATE.indices||[]).map(function(d){ return d.ticker; });
+    if (_tk.length && _tk.indexOf(CUR) < 0) CUR = _tk.indexOf('SPY') >= 0 ? 'SPY' : _tk[0];
+    if (_tk.length) rememberTick(CUR);
     renderDealer(); renderStrip(); renderMeta(); renderAnalogues();
     if (STATE.chat_drop && window.novoChatDrop) window.novoChatDrop(STATE.chat_drop);
     liveChip();

@@ -569,13 +569,29 @@ const px = n => n==null ? '—' : (n>=1000 ? n.toLocaleString(undefined,{maximum
    NOT grant this product: /api/crypto-map separately checks for a live Crypto Market Map
    subscription in Stripe and answers 402 if there isn't one. Analyst does not include
    this map. ---- */
-let TOKEN = null, SNAP = null, CUR = 'BTC', BOOK = null;
+/* The coin survives a reload. The hash outranks the stored value so a link someone sends
+   opens on the coin THEY meant; the stored value covers a plain reload of a plain URL. */
+const COIN_KEY = 'novo_crypto_coin';
+function coinFromHash(){
+  const h = decodeURIComponent((location.hash || '').replace(/^#/, '')).trim().toUpperCase();
+  return /^[A-Z0-9]{1,12}$/.test(h) ? h : '';
+}
+function coinStored(){
+  try { return (localStorage.getItem(COIN_KEY) || '').toUpperCase(); } catch(_) { return ''; }
+}
+function rememberCoin(c){
+  try { localStorage.setItem(COIN_KEY, c); } catch(_){}
+  // replaceState, not location.hash: clicking through twenty coins should not bury the page
+  // the user arrived on under twenty history entries.
+  try { history.replaceState(null, '', location.pathname + location.search + '#' + c); } catch(_){}
+}
+let TOKEN = null, SNAP = null, CUR = coinFromHash() || coinStored() || 'BTC', BOOK = null;
 (function(){
   const qs = new URLSearchParams(location.search);
   if (qs.get('t')) {
     TOKEN = qs.get('t');
     try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}
-    history.replaceState(null,'','/crypto/live');
+    history.replaceState(null,'','/crypto/live' + (location.hash || ''));
   }
   if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
 })();
@@ -872,7 +888,7 @@ function drawRail(filter=''){
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
   document.querySelectorAll('.coin').forEach(el=>
-    el.onclick=()=>{CUR=el.dataset.c;BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+    el.onclick=()=>{CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
 }
 
 /* ---------------- coin ---------------- */
@@ -1108,9 +1124,22 @@ async function load(){
     (b.median_round_trip_pct?`<div class="dstat"><span>Median round trip</span><b>${b.median_round_trip_pct.toFixed(3)}%</b></div>`:'')+
     `<div class="dstat"><span>Last pass</span><b>${SNAP.age_min!=null?SNAP.age_min+'m ago':'\u2014'}</b></div>`;
   if(window._askShow) window._askShow();
-  if(!SNAP.coins[CUR]) CUR=Object.keys(SNAP.coins)[0];
+  // A remembered coin can drop out of the map, and a hash is just whatever someone typed,
+  // so the restored value is checked against the payload before anything is drawn.
+  if(!SNAP.coins[CUR]) CUR = SNAP.coins.BTC ? 'BTC' : Object.keys(SNAP.coins)[0];
+  rememberCoin(CUR);
   drawRail(); drawCoin();
 }
+
+// Back, forward, or a pasted /crypto/live#SOL once the page is already open.
+window.addEventListener('hashchange', function(){
+  const c = coinFromHash();
+  if(c && SNAP && SNAP.coins[c] && c !== CUR){
+    CUR = c; BOOK = null;
+    try { localStorage.setItem(COIN_KEY, c); } catch(_){}
+    drawRail(); drawCoin();
+  }
+});
 
 (function(){
   var busy = false;
