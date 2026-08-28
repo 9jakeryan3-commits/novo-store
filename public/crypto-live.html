@@ -237,10 +237,10 @@ tr:last-child td{border-bottom:none}
 <!-- ===== LOGIN GATE ===== -->
 <div id="login" class="lv-login hidden">
   <h1>Crypto <span class="accent">Map</span></h1>
-  <p>The live dealer map across every coin Robinhood trades — gamma by strike on the six with options books, leverage positioning on the rest. Sign in to your member portal, then open the Crypto Market Map from there.</p>
+  <p>The live dealer map across all 89 coins — gamma by strike on the six with a real options book, leverage positioning on the rest. Sign in to your member portal, then open the Crypto Market Map from there.</p>
   <a class="lv-btn" href="https://app.novo-aitrading.app">Go to the member portal &rarr;</a>
   <div id="lmsg" class="lv-msg"></div>
-  <p style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Don&rsquo;t have the Crypto Market Map? <a href="/crypto">See what it shows and subscribe &rarr;</a></p>
+  <p id="lv-alt" style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Don&rsquo;t have the Crypto Market Map? <a href="/crypto">See what it shows and subscribe &rarr;</a></p>
 </div>
 
 <!-- ===== DASHBOARD ===== -->
@@ -747,8 +747,17 @@ async function load(){
     // the session is fine, the subscription is what is missing.
     $('#login').classList.remove('hidden'); $('#app').classList.add('hidden');
     $('#login').querySelector('h1').innerHTML='Crypto <span class="accent">Market Map</span>';
-    $('#login').querySelector('p').textContent='The Crypto Market Map is its own subscription, separate from Analyst and Trader.';
-    var b2=$('#login').querySelector('.lv-btn'); b2.textContent='See plans →'; b2.setAttribute('href','/crypto');
+    $('#login').querySelector('p').innerHTML =
+      'Dealer gamma by strike on the six cryptos with a real options book — the call wall, the '
+      + 'put wall and the gamma flip, across two venues. Funding per venue across six venues, never '
+      + 'blended. 24-hour liquidation flow. What a round trip actually costs you at retail, all 89 '
+      + 'ranked. And <b>NoVo</b>, who reads this map and the equity dealer map, answering off both.';
+    var b2=$('#login').querySelector('.lv-btn');
+    b2.textContent='Start the 7-day free trial — $79/mo';
+    b2.setAttribute('href','/crypto#pricing');
+    var alt=document.getElementById('lv-alt');
+    if(alt) alt.innerHTML='Free first? Funding, open interest, 24-hour liquidations and the BTC and ETH '
+      + 'gamma read are on the <a href="/market-data#crypto">market data page</a>, no account needed.';
     $('#lmsg').textContent=''; return;
   }
   if(!r.ok){
