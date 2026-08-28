@@ -229,6 +229,14 @@
       "destination": "/positioning.html"
     },
     {
+      "source": "/crypto",
+      "destination": "/crypto.html"
+    },
+    {
+      "source": "/crypto/live",
+      "destination": "/crypto-live.html"
+    },
+    {
       "source": "/ai",
       "destination": "/ai.html"
     },

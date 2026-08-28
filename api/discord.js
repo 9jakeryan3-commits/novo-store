@@ -36,6 +36,7 @@ module.exports = async (req, res) => {
       }
       const customerId = sess.customer;
       const isAnalyst = sess.metadata?.tier === 'analyst';
+      const isCrypto = sess.metadata?.tier === 'crypto';   // own product — return them to its page
 
       const tokRes = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -86,7 +87,7 @@ module.exports = async (req, res) => {
         } catch (e) { console.error(`[discord] role grant failed for ${uid}: ${e.message}`); }
       }
       const dstate = granted ? 'connected' : 'failed';
-      res.writeHead(302, { Location: isAnalyst ? `${SITE}/analyst?welcome=1&discord=${dstate}` : `${SITE}/analyst?discord=${dstate}` });
+      res.writeHead(302, { Location: isCrypto ? `${SITE}/crypto?discord=${dstate}` : isAnalyst ? `${SITE}/analyst?welcome=1&discord=${dstate}` : `${SITE}/analyst?discord=${dstate}` });
       return res.end();
     } catch (e) { console.error('[discord cb]', e.message); return back('error'); }
   }

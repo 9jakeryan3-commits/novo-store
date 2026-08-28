@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-adsense-account" content="ca-pub-4434105753461088">
+<script>
+(function(){var h=location.hostname;
+if(h!=='novo-options.trade'&&h!=='www.novo-options.trade')return;
+var s=document.createElement('script');s.async=true;
+s.src='https://www.googletagmanager.com/gtag/js?id=G-4EMKLHBB6F';
+document.head.appendChild(s);
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
+gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Crypto Market Map · NoVo</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --navy:#0e0e10; --navy2:#17171a; --panel:#111113; --sunk:#0b0b0d;
+  --bdr:#2c2c30; --bdr2:#242428;
+  --txt1:#f0f0ee; --txt2:#a8a8a8; --txt3:#6e6e6e; --txt4:#565660;
+  --green:#10b981; --green2:#34d399; --red:#f43f5e; --amber:#f59e0b; --cyan:#22d3ee;
+  /* purple is this product's accent. --amber stays semantic (medium confidence / warn). */
+  --cx:#a78bfa; --cx-deep:#7c3aed; --cx-line:rgba(167,139,250,.30);
+  --mono:'Geist Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--navy);color:var(--txt1);font-family:var(--sans);font-size:13px}
+.hidden{display:none!important}
+a{color:var(--cyan)}
+
+/* login gate */
+.lv-login{max-width:560px;margin:0 auto;padding:96px 24px;text-align:center}
+.lv-login h1{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:0 0 14px}
+.lv-login .accent{color:var(--cx)}
+.lv-login p{color:var(--txt2);line-height:1.6;margin:0 0 24px}
+.lv-btn{display:inline-block;padding:12px 26px;border-radius:9px;border:0;
+  background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#120a24;font-weight:800;
+  font-size:14px;text-decoration:none}
+.lv-msg{margin-top:16px;font-size:12.5px;color:var(--red);min-height:18px}
+
+/* shell */
+#app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid var(--bdr2);background:var(--panel)}
+.brand{font-weight:800;font-size:14px;letter-spacing:-.01em;text-decoration:none;color:var(--txt1)}
+.brand span{color:var(--cx)}
+.hstat{display:flex;gap:13px;margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--txt4);flex-wrap:wrap;align-items:center}
+.hstat b{color:var(--txt2);font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px}
+.dot.stale{background:var(--amber)}
+main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
+.col{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr) transparent}
+.col::-webkit-scrollbar{width:7px}.col::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+#rail{border-right:1px solid var(--bdr2);background:var(--sunk)}
+#side{border-left:1px solid var(--bdr2);background:var(--sunk)}
+#center{padding:14px 16px 48px}
+
+.railhead{position:sticky;top:0;background:var(--sunk);padding:9px 12px 6px;border-bottom:1px solid var(--bdr2);z-index:2}
+#search{width:100%;background:var(--navy2);border:1px solid var(--bdr);color:var(--txt1);
+  font-family:var(--mono);font-size:11px;padding:5px 8px;border-radius:3px;outline:none}
+#search:focus{border-color:var(--cx)}
+.bandhead{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--txt4);padding:11px 12px 5px}
+.coin{display:grid;grid-template-columns:1fr auto;gap:8px;padding:5px 12px;cursor:pointer;
+  border-left:2px solid transparent;align-items:baseline}
+.coin:hover{background:var(--navy2)}
+.coin.on{background:var(--navy2);border-left-color:var(--cx)}
+.coin .c{font-family:var(--mono);font-size:11.5px;font-weight:600}
+.coin.on .c{color:var(--cx)}
+.coin .p{font-family:var(--mono);font-size:10px;color:var(--txt4)}
+
+.panel{background:var(--panel);border:1px solid var(--bdr2);border-radius:5px;margin-bottom:12px}
+.ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
+.ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
+.ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto}
+.pb{padding:12px}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:2px;font-weight:600}
+.t-hi{background:rgba(16,185,129,.14);color:var(--green2)}
+.t-md{background:rgba(245,158,11,.14);color:var(--amber)}
+.t-lo{background:rgba(244,63,94,.14);color:var(--red)}
+.t-n{background:var(--navy2);color:var(--txt4)}
+
+#head{display:flex;align-items:flex-end;gap:15px;margin-bottom:13px;flex-wrap:wrap}
+#sym{font-family:'Space Grotesk','Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
+#px{font-family:var(--mono);font-size:19px;color:var(--txt2);line-height:1}
+#headmeta{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.bookbtn{font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--bdr);
+  background:var(--panel);color:var(--txt3);border-radius:3px;cursor:pointer}
+.bookbtn.on{border-color:var(--cx);color:var(--cx)}
+
+/* The level ladder. The Analyst dashboard states levels as a rail of rows - label, a plain
+   English meaning, the price, and the distance from spot - with spot boxed in the middle.
+   That reads far faster than a stat grid, and it is the brand's grammar for "where price
+   reacts", so the crypto map uses the same one. */
+.lad{display:flex;flex-direction:column;margin:2px 0 4px}
+.lrow{display:grid;grid-template-columns:16px 1fr auto auto;gap:0 14px;align-items:center;padding:11px 0}
+.lrail{position:relative;width:16px;align-self:stretch;display:flex;align-items:center;justify-content:center}
+.lrail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--bdr)}
+.lrow:first-child .lrail::before{top:50%}
+.lrow:last-child .lrail::before{bottom:50%}
+.ldot{width:9px;height:9px;border-radius:50%;position:relative;z-index:1}
+.lname{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt2);font-weight:700;display:block}
+.lsub{font-size:12.5px;color:var(--txt4);margin-top:2px;display:block}
+.lval{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:-.02em;text-align:right}
+.ldist{font-family:var(--mono);font-size:12px;color:var(--txt4);text-align:right;min-width:62px}
+.lrow.spot{background:rgba(167,139,250,.07);border:1px solid var(--cx-line);border-radius:9px;
+  padding:12px 14px;margin:3px 0}
+.lrow.spot .lname{color:var(--cx)}
+.lrow.spot .lval{color:var(--cx);font-size:23px}
+
+/* Metric strip — the Analyst dashboard states secondary metrics as a labelled row of
+   values, not as prose. Same grammar here. */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;background:var(--bdr2)}
+.mcell{background:var(--panel);padding:11px 13px}
+.mcell .mk{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4);margin-bottom:4px}
+.mcell .mv{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.mcell .ms{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-top:3px}
+/* Regime gauge — the crypto twin of the Analyst's Gamma Squeeze meter. */
+.gauge{padding:12px 14px}
+.gauge-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.gauge-h .gk{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4)}
+.gauge-h .gv{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700}
+.gauge-t{height:4px;border-radius:2px;background:var(--bdr2);position:relative}
+.gauge-d{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%)}
+.gauge-n{font-size:12px;color:var(--txt4);margin-top:8px;line-height:1.5}
+/* Breadth — impossible on three tickers, so it is the crypto map's own panel. */
+.bre{display:flex;flex-direction:column;gap:7px}
+.brow{display:grid;grid-template-columns:64px 1fr auto;gap:9px;align-items:center;font-family:var(--mono);font-size:11px}
+.brow .bn{color:var(--txt2)}
+.brow .bv{color:var(--txt4);font-variant-numeric:tabular-nums}
+.bbar{height:5px;border-radius:2px;background:var(--bdr2);overflow:hidden}
+.bbar i{display:block;height:100%;border-radius:2px}
+#gamma{width:100%;display:block}
+.legend{display:flex;gap:14px;padding:7px 12px 0;font-family:var(--mono);font-size:10px;color:var(--txt4);flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:1px;background:var(--bdr2)}
+.cell{background:var(--panel);padding:12px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4);margin-bottom:3px}
+.cell .v{font-family:var(--mono);font-size:19px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+.cell .s{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:2px}
+.up{color:var(--green2)} .dn{color:var(--red)} .am{color:var(--amber)} .nu{color:var(--txt2)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--bdr2);align-items:baseline}
+.kv:last-child{border-bottom:none}
+.kv .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt4)}
+.kv .v{font-family:var(--mono);font-size:12.5px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+th{text-align:right;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4);font-weight:500;padding:0 0 6px;border-bottom:1px solid var(--bdr2)}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:5px 0;border-bottom:1px solid var(--bdr2);color:var(--txt2)}
+tr:last-child td{border-bottom:none}
+.rd{padding:9px 0;border-bottom:1px solid var(--bdr2)}
+.rd:last-child{border-bottom:none}
+.rdh{display:flex;gap:7px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.rdk{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--cx)}
+.rdt{font-family:var(--mono);font-size:9px;color:var(--txt4);margin-left:auto}
+.rdc{font-size:12px;line-height:1.45;color:var(--txt2)}
+.empty{color:var(--txt4);font-size:11.5px;padding:14px 0;text-align:center;font-family:var(--mono)}
+#spark{width:100%;height:46px;display:block}
+.liq{display:flex;flex-direction:column;gap:6px}
+.liqrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-family:var(--mono);font-size:11px}
+.liqbar{height:5px;border-radius:1px;display:block}
+.liqv{color:var(--txt2);font-variant-numeric:tabular-nums}
+
+/* ---- NoVo, the analyst. Same endpoint the Analyst dashboard uses, same knowledge:
+   NoVo reads both maps because NoVo is the house analyst, not a per-product bot. ---- */
+#ask{position:fixed;right:18px;bottom:18px;z-index:40;width:min(420px,calc(100vw - 36px));
+  display:flex;flex-direction:column;align-items:flex-end;gap:9px;pointer-events:none}
+#ask>*{pointer-events:auto}
+/* A FIELD, not a chat bubble. A round pill with a presence dot in the corner is the exact
+   visual grammar of Intercom and Drift, and it frames the analyst as support staff. This is
+   a command input: squared, muted placeholder, shortcut printed on the end. Mirrors the
+   Analyst dashboard's #novo-ask-bubble, in this product's purple. */
+#askpill{display:flex;align-items:center;gap:9px;padding:11px 12px 11px 14px;border-radius:10px;
+  border:1px solid rgba(167,139,250,.42);cursor:pointer;min-width:264px;text-align:left;
+  background:linear-gradient(180deg,#1d1630,#130f1f);color:#ddd3f2;font-weight:600;font-size:13.5px;
+  font-family:var(--sans);
+  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(167,139,250,.42),inset 0 1px 0 rgba(255,255,255,.05)}
+#askpill:hover{border-color:var(--cx);color:#f3eeff;
+  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.6),inset 0 1px 0 rgba(255,255,255,.07)}
+#askpill .caret{color:var(--cx);font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
+#askpill kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;color:var(--txt3);
+  border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;background:rgba(255,255,255,.03)}
+@media (max-width:640px){ #askpill{min-width:0} }
+/* Advertise the shortcut only where there is a keyboard. Width is the wrong test - a tablet
+   is wide and still has no Ctrl key. */
+@media (pointer:coarse){ #askpill kbd{display:none} }
+#askbox{display:none;flex-direction:column;width:100%;max-height:min(560px,70vh);
+  background:var(--panel);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;
+  box-shadow:0 18px 50px -14px rgba(0,0,0,.85)}
+#askbox.on{display:flex}
+#askhead{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--bdr2);background:var(--navy2)}
+#askhead b{font-size:13px;font-weight:800}
+#askhead span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4)}
+#askx{margin-left:auto;background:none;border:0;color:var(--txt3);cursor:pointer;font-size:17px;line-height:1;padding:2px 4px}
+#asklog{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:12px;min-height:120px}
+.msg{font-size:13.5px;line-height:1.55}
+.msg.me{align-self:flex-end;max-width:85%;background:var(--navy2);border:1px solid var(--bdr2);
+  padding:8px 11px;border-radius:10px 10px 2px 10px;color:var(--txt1)}
+.msg.no{color:var(--txt2);white-space:pre-wrap}
+.msg.no b{color:var(--txt1)}
+.msg.err{color:var(--red);font-family:var(--mono);font-size:12px}
+#askform{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr2);background:var(--navy2)}
+#askin{flex:1;background:var(--panel);border:1px solid var(--bdr);color:var(--txt1);border-radius:7px;
+  padding:9px 11px;font-size:13px;font-family:var(--sans);outline:none;resize:none;max-height:96px}
+#askin:focus{border-color:var(--cx)}
+#asksend{background:var(--cx);color:#120a24;border:0;border-radius:7px;padding:0 15px;font-weight:800;
+  cursor:pointer;font-size:13px;font-family:var(--sans)}
+#asksend:disabled{opacity:.5;cursor:default}
+.askhint{font-family:var(--mono);font-size:10px;color:var(--txt4);padding:0 13px 11px}
+.askhint b{color:var(--cx);cursor:pointer;font-weight:500}
+@media(max-width:720px){#ask{right:10px;bottom:10px;width:calc(100vw - 20px)}}
+@media(max-width:1100px){main{grid-template-columns:170px 1fr}#side{display:none}}
+@media(max-width:720px){main{grid-template-columns:1fr}#rail{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN GATE ===== -->
+<div id="login" class="lv-login hidden">
+  <h1>Crypto <span class="accent">Map</span></h1>
+  <p>The live dealer map across every coin Robinhood trades — gamma by strike on the six with options books, leverage positioning on the rest. Sign in to your member portal, then open the Crypto Market Map from there.</p>
+  <a class="lv-btn" href="https://app.novo-aitrading.app">Go to the member portal &rarr;</a>
+  <div id="lmsg" class="lv-msg"></div>
+  <p style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Don&rsquo;t have the Crypto Market Map? <a href="/crypto">See what it shows and subscribe &rarr;</a></p>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="app" class="hidden">
+  <header>
+    <a class="brand" href="/crypto">NoVo <span>Crypto Map</span></a>
+    <div class="hstat" id="hstat"></div>
+  </header>
+  <main>
+    <div class="col" id="rail"></div>
+    <div class="col" id="center">
+      <div id="head"><div id="sym">&mdash;</div><div id="px"></div><div id="headmeta"></div></div>
+      <div id="body"></div>
+    </div>
+    <div class="col" id="side"></div>
+  </main>
+
+<div id="ask" class="hidden">
+  <div id="askbox">
+    <div id="askhead"><b>NoVo</b><span>analyst</span>
+      <button id="askx" type="button" aria-label="Close">&times;</button></div>
+    <div id="asklog"></div>
+    <div class="askhint">Try <b data-q="How is BTC positioned right now?">how is BTC positioned</b>
+      &middot; <b data-q="Where did the liquidations hit in the last 24 hours?">liquidations</b>
+      &middot; <b data-q="Which coin is cheapest to trade on Robinhood right now?">cheapest to trade</b></div>
+    <form id="askform"><textarea id="askin" rows="1" placeholder="Ask NoVo about this map..."></textarea>
+      <button id="asksend" type="submit">Ask</button></form>
+  </div>
+  <button id="askpill" type="button" aria-label="Ask NoVo about this map"><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this map&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
+</div>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const money = n => n==null ? '—' : (Math.abs(n)>=1e9 ? '$'+(n/1e9).toFixed(2)+'B'
+  : Math.abs(n)>=1e6 ? '$'+(n/1e6).toFixed(1)+'M' : Math.abs(n)>=1e3 ? '$'+(n/1e3).toFixed(0)+'K' : '$'+n.toFixed(0));
+const px = n => n==null ? '—' : (n>=1000 ? n.toLocaleString(undefined,{maximumFractionDigits:0})
+  : n>=1 ? n.toFixed(4) : n.toPrecision(4));
+
+/* ---- Identity vs entitlement.
+   The token is the site's shared 7-day HMAC and proves only WHO the caller is. It does
+   NOT grant this product: /api/crypto-map separately checks for a live Crypto Market Map
+   subscription in Stripe and answers 402 if there isn't one. Analyst does not include
+   this map. ---- */
+let TOKEN = null, SNAP = null, CUR = 'BTC', BOOK = null;
+(function(){
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('t')) {
+    TOKEN = qs.get('t');
+    try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}
+    history.replaceState(null,'','/crypto/live');
+  }
+  if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
+})();
+function showLogin(msg){
+  $('#login').classList.remove('hidden'); $('#app').classList.add('hidden');
+  if(msg) $('#lmsg').textContent = msg;
+}
+
+/* ---------------- regime gauge + vol row ---------------- */
+function gauge(g){
+  // Position on the scale is |net GEX| relative to a whole-book reference, clamped. The
+  // Analyst's squeeze meter reads the same way: how firmly is the dealer book pinning.
+  const pos = Math.max(4, Math.min(96, 50 + (g.net_gex>=0?1:-1) * Math.min(46, Math.abs(g.net_gex)/2e6)));
+  const damp = g.net_gex >= 0;
+  const label = damp ? 'DAMPENED' : 'AMPLIFIED';
+  const col = damp ? 'var(--green2)' : 'var(--red)';
+  return `<div class="gauge">
+    <div class="gauge-h"><span class="gk">Gamma regime</span><span class="gv" style="color:${col}">${label}</span></div>
+    <div class="gauge-t"><span class="gauge-d" style="left:${pos}%;background:${col};box-shadow:0 0 10px ${col}"></span></div>
+    <div class="gauge-n">${damp
+      ? 'dealers long gamma — hedging leans against the move, so ranges hold and breaks fail more often'
+      : 'dealers short gamma — hedging leans with the move, so breaks extend'} &middot; 24/7 market, no close</div>
+  </div>`;
+}
+
+function volRow(d,g){
+  const c=[];
+  if(d.dvol){
+    c.push(`<div class="mcell"><div class="mk">DVOL</div><div class="mv am">${d.dvol.value.toFixed(1)}</div>
+      <div class="ms">crypto VIX &middot; Deribit</div></div>`);
+    const em=d.dvol.implied_daily_pct, lo=g.spot*(1-em/100), hi=g.spot*(1+em/100);
+    c.push(`<div class="mcell"><div class="mk">Expected move &middot; 1d</div>
+      <div class="mv nu" style="font-size:14px">${px(lo)} – ${px(hi)}</div>
+      <div class="ms">&plusmn;${em.toFixed(2)}% &middot; DVOL/20</div></div>`);
+  }
+  if(d.skew){
+    const sk=d.skew.skew_pts, puts=sk>0;
+    c.push(`<div class="mcell"><div class="mk">Skew &middot; near ATM</div>
+      <div class="mv ${puts?'dn':'up'}">${sk>0?'+':''}${sk.toFixed(1)}</div>
+      <div class="ms">${puts?'puts bid over calls':'calls bid over puts'}</div></div>`);
+  }
+  if(d.chg){
+    if(d.chg.d1!=null) c.push(`<div class="mcell"><div class="mk">24 hours</div>
+      <div class="mv ${d.chg.d1>=0?'up':'dn'}">${d.chg.d1>=0?'+':''}${d.chg.d1.toFixed(2)}%</div>
+      <div class="ms">no open, no close</div></div>`);
+    c.push(`<div class="mcell"><div class="mk">7 days</div>
+      <div class="mv ${d.chg.d7>=0?'up':'dn'}">${d.chg.d7>=0?'+':''}${d.chg.d7.toFixed(2)}%</div>
+      <div class="ms">hourly closes</div></div>`);
+  }
+  return c.length ? `<div class="mgrid">${c.join('')}</div>` : '';
+}
+
+/* ---------------- level ladder ---------------- */
+function ladder(g){
+  const rows=[];
+  const dist=k=>((k/g.spot-1)*100);
+  const flipFar = g.flip_zone!=null && Math.abs(dist(g.flip_zone))>12;
+  if(g.call_wall) rows.push({n:'Call wall',s:'resistance / pin',v:g.call_wall,c:'var(--green2)'});
+  rows.push({n:'Spot',s:null,v:g.spot,c:'var(--cx)',spot:true});
+  if(g.flip_zone!=null) rows.push({n:'Gamma flip',s:flipFar?'the regime line · far, not actionable':'the regime line',v:g.flip_zone,c:flipFar?'var(--txt4)':'var(--amber)'});
+  if(g.put_wall) rows.push({n:'Put wall',s:'support',v:g.put_wall,c:'var(--red)'});
+  rows.sort((a,b)=>b.v-a.v);
+  return '<div class="lad">'+rows.map(function(r){
+    if(r.spot) return '<div class="lrow spot"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
+      +'<span class="lname">Spot</span><span class="lval">'+px(r.v)+'</span><span class="ldist"></span></div>';
+    return '<div class="lrow"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
+      +'<span><span class="lname">'+r.n+'</span><span class="lsub">'+(r.s||'')+'</span></span>'
+      +'<span class="lval" style="color:'+r.c+'">'+px(r.v)+'</span>'
+      +'<span class="ldist">'+(dist(r.v)>=0?'+':'')+dist(r.v).toFixed(2)+'%</span></div>';
+  }).join('')+'</div>';
+}
+
+/* ---------------- gamma chart ---------------- */
+function drawGamma(g){
+  const cv=$('#gamma'); if(!cv||!g||!g.strikes||!g.strikes.length) return;
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=370;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+'px';
+  const x=cv.getContext('2d'); x.scale(dpr,dpr); x.clearRect(0,0,W,H);
+  const spot=g.spot;
+  const sorted=[...g.strikes].sort((a,b)=>Math.abs(b.dg)-Math.abs(a.dg));
+  const total=sorted.reduce((t,s)=>t+Math.abs(s.dg),0)||1;
+  let acc=0; const keep=new Set();
+  for(const s of sorted){acc+=Math.abs(s.dg);keep.add(s.k);if(acc/total>=0.97)break;}
+  let lo=Math.min(...keep), hi=Math.max(...keep);
+  for(const lv of [spot,g.call_wall,g.put_wall]) if(lv){lo=Math.min(lo,lv);hi=Math.max(hi,lv);}
+  const pad=(hi-lo)*0.06||spot*0.01; lo-=pad; hi+=pad;
+  const band=g.strikes.filter(s=>s.k>=lo&&s.k<=hi); if(!band.length) return;
+  const maxG=Math.max(...band.map(s=>Math.abs(s.dg)))||1;
+  const padL=70,padR=18,padT=12,padB=14, plotW=W-padL-padR, plotH=H-padT-padB;
+  const yOf=k=>padT+plotH-((k-lo)/(hi-lo))*plotH;
+  const negMax=Math.max(...band.map(s=>s.dg<0?Math.abs(s.dg):0),0);
+  const zero=padL+plotW*Math.min(0.34,Math.max(0.10,negMax/maxG*0.34));
+  x.strokeStyle='#242428'; x.lineWidth=1;
+  x.beginPath(); x.moveTo(zero,padT); x.lineTo(zero,padT+plotH); x.stroke();
+  const barH=Math.max(3,Math.min(13,plotH/band.length-1.5));
+  for(const s of band){
+    const w=(Math.abs(s.dg)/maxG)*(s.dg>=0?(W-padR-zero):(zero-padL));
+    const y=yOf(s.k)-barH/2;
+    x.fillStyle=s.dg>=0?'rgba(16,185,129,.78)':'rgba(244,63,94,.78)';
+    if(s.dg>=0) x.fillRect(zero,y,w,barH); else x.fillRect(zero-w,y,w,barH);
+  }
+  x.font='9px "Geist Mono",monospace'; x.textAlign='right'; x.fillStyle='#565660';
+  const step=Math.max(1,Math.ceil(band.length/18));
+  band.forEach((s,i)=>{if(i%step)return;
+    x.fillText(s.k>=1000?Math.round(s.k).toLocaleString():s.k.toPrecision(4),padL-8,yOf(s.k)+3);});
+  const levels=[
+    {k:g.call_wall,c:'#10b981',t:'CALL WALL '+px(g.call_wall),d:[5,3]},
+    {k:spot,c:'#f0f0ee',t:'SPOT '+px(spot),d:[]},
+    {k:g.put_wall,c:'#f43f5e',t:'PUT WALL '+px(g.put_wall),d:[5,3]},
+    {k:g.flip_zone,c:'#f59e0b',t:'FLIP '+px(g.flip_zone),d:[2,3]},
+  ].filter(l=>l.k!=null&&l.k>=lo&&l.k<=hi).sort((a,b)=>yOf(a.k)-yOf(b.k));
+  let lastY=-99;
+  for(const l of levels){
+    const y=yOf(l.k);
+    x.save(); x.setLineDash(l.d); x.strokeStyle=l.c; x.lineWidth=1.25; x.globalAlpha=.85;
+    x.beginPath(); x.moveTo(padL,y); x.lineTo(W-padR,y); x.stroke(); x.restore();
+    const ly=Math.max(y-4,lastY+11); lastY=ly;
+    x.font='600 9px "Geist Mono",monospace'; x.textAlign='left';
+    const w=x.measureText(l.t).width;
+    x.fillStyle='rgba(14,14,16,.82)'; x.fillRect(padL+3,ly-8,w+6,10);
+    x.fillStyle=l.c; x.fillText(l.t,padL+6,ly);
+  }
+}
+
+/* ---------------- rail ---------------- */
+function drawRail(filter=''){
+  const f=filter.toUpperCase();
+  const all=Object.entries(SNAP.coins).map(([k,v])=>({asset:k,...v}));
+  const rows=all.filter(c=>c.asset.includes(f));
+  const bands={A:'Band A · dealer map',B:'Band B · positioning',C:'Band C · spot only'};
+  let h=`<div class="railhead"><input id="search" placeholder="filter ${all.length} coins" value="${filter}"></div>`;
+  for(const b of ['A','B','C']){
+    const grp=rows.filter(c=>c.band===b).sort((x,y)=>(y.oi_usd||0)-(x.oi_usd||0));
+    if(!grp.length) continue;
+    h+=`<div class="bandhead">${bands[b]} · ${grp.length}</div>`;
+    for(const c of grp) h+=`<div class="coin ${c.asset===CUR?'on':''}" data-c="${c.asset}">
+      <span class="c">${c.asset}</span><span class="p">${c.price?px(c.price):''}</span></div>`;
+  }
+  $('#rail').innerHTML=h;
+  $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
+    $('#search').setSelectionRange(v.length,v.length);};
+  document.querySelectorAll('.coin').forEach(el=>
+    el.onclick=()=>{CUR=el.dataset.c;BOOK=null;drawRail(filter);drawCoin();});
+}
+
+/* ---------------- coin ---------------- */
+function drawCoin(){
+  const d=SNAP.coins[CUR]; if(!d) return;
+  const tc=d.true_cost, g=d.gamma, pos=d.positioning;
+  $('#sym').textContent=CUR;
+  $('#px').textContent=tc?px(tc.price):(d.price?px(d.price):'');
+  const cls={high:'t-hi',medium:'t-md',low:'t-lo',suspect:'t-lo'}[d.confidence]||'t-n';
+  $('#headmeta').innerHTML=`<span class="tag ${cls}">${d.confidence} confidence</span>`+
+    `<span class="tag t-n">band ${d.band}</span><span class="tag t-n">${d.panels.length} panels</span>`;
+
+  let h='';
+  if(g){
+    const flipFar = g.flip_zone!=null && Math.abs(g.flip_zone/g.spot-1)>0.12;
+    h+=`<div class="panel"><div class="ph"><h2>Dealer gamma by strike</h2>
+      <span class="sub">${g.settle} book · expiry ${String(g.expiry).replace('T',' ').replace('Z',' UTC')}</span></div>
+      <div class="pb" style="padding-bottom:2px">
+        <div style="border:1px solid ${g.net_gex>=0?'rgba(16,185,129,.35)':'rgba(244,63,94,.35)'};border-radius:9px;padding:14px 16px;background:${g.net_gex>=0?'rgba(16,185,129,.05)':'rgba(244,63,94,.05)'};margin-bottom:6px">
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+            <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4)">Net GEX</span>
+            <span style="font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.02em" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'+':''}${money(g.net_gex)}</span>
+            <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4)">${g.net_gex>=0?'long gamma':'short gamma'}</span>
+          </div>
+          <div style="margin-top:7px;font-size:13.5px" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)'}</div>
+        </div>
+        ${ladder(g)}
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--txt4);padding:8px 2px 2px;border-top:1px solid var(--bdr2);margin-top:4px">
+          <span>chain OI <b style="color:var(--txt2)">${g.chain_oi?g.chain_oi.toLocaleString(undefined,{maximumFractionDigits:0}):'—'} ${CUR}</b></span>
+          <span>${g.strikes.length} strikes</span>
+          <span>${g.settle} book</span>
+        </div>
+      </div>
+      ${gauge(g)}
+      ${volRow(d,g)}
+      <canvas id="gamma"></canvas>
+      <div class="legend"><span><i style="background:#10b981"></i>positive gamma</span>
+        <span><i style="background:#f43f5e"></i>negative gamma</span>
+        <span><i style="background:#f0f0ee"></i>spot</span>
+        <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
+  }
+  if(pos&&(pos.funding.length||pos.open_interest.length)){
+    h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
+      <span class="sub">per venue · never blended · trusted rows only</span></div><div class="pb">
+      <table><thead><tr><th>Venue</th><th>Funding</th><th>Annualised</th><th>Open interest</th></tr></thead><tbody>`;
+    const oi=Object.fromEntries(pos.open_interest.map(o=>[o.venue,o.oi_usd]));
+    const vs=[...new Set([...pos.funding.map(f=>f.venue),...pos.open_interest.map(o=>o.venue)])].sort();
+    for(const v of vs){
+      const f=pos.funding.find(z=>z.venue===v);
+      h+=`<tr><td>${v}</td>
+        <td class="${f?(f.rate>0?'up':f.rate<0?'dn':''):''}">${f?(f.rate*100).toFixed(5)+'%':'—'}</td>
+        <td class="${f?(f.annualized_pct>0?'up':f.annualized_pct<0?'dn':''):''}">${f?f.annualized_pct.toFixed(1)+'%':'—'}</td>
+        <td>${oi[v]?money(oi[v]):'—'}</td></tr>`;
+    }
+    h+=`</tbody></table><div class="kv" style="margin-top:9px"><span class="k">Total open interest</span>
+      <span class="v nu">${money(pos.total_oi_usd)}</span></div></div></div>`;
+  }
+  h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
+    <span class="sub">claims, scored when the horizon passes</span></div><div class="pb">`;
+  h+=(d.readings&&d.readings.length)?d.readings.map(r=>`<div class="rd"><div class="rdh">
+      <span class="rdk">${r.kind.replace(/_/g,' ')}</span>
+      ${r.correct==null?'<span class="tag t-n">open</span>':(r.correct?'<span class="tag t-hi">correct</span>':'<span class="tag t-lo">wrong</span>')}
+      <span class="rdt">${String(r.ts_utc).slice(11,16)} UTC · ${r.horizon_min}m</span></div>
+      <div class="rdc">${r.claim}</div></div>`).join('')
+    :`<div class="empty">no readings yet for ${CUR}</div>`;
+  h+=`</div></div>`;
+  $('#body').innerHTML=h;
+  if(g) drawGamma(g);
+
+  let s='';
+  if(tc){
+    s+=`<div class="panel"><div class="ph"><h2>True cost to trade</h2></div><div class="pb">
+      <div class="kv"><span class="k">Round trip</span><span class="v ${tc.round_trip_pct>2?'dn':'am'}">${tc.round_trip_pct.toFixed(3)}%</span></div>
+      <div class="kv"><span class="k">Buy spread</span><span class="v nu">${tc.buy_spread_pct.toFixed(3)}%</span></div>
+      <div class="kv"><span class="k">Sell spread</span><span class="v nu">${tc.sell_spread_pct.toFixed(3)}%</span></div>
+      <div class="kv"><span class="k">Cheapness rank</span><span class="v nu">${tc.cheapness_rank} / ${Object.keys(SNAP.coins).length}</span></div>
+      <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+        Robinhood's own disclosed markup, at your fee tier.</div></div></div>`;
+  }
+  // 24h liquidation flow for THIS coin — forced selling, the crypto answer to a squeeze.
+  const liq=(SNAP.health&&SNAP.health.liquidations_24h||[]).filter(x=>x.asset_code===CUR);
+  if(liq.length){
+    const byVenue={};
+    for(const x of liq){ byVenue[x.venue]=byVenue[x.venue]||{long:0,short:0}; byVenue[x.venue][x.side]+=x.usd||0; }
+    const rows=Object.entries(byVenue).sort((a,b)=>(b[1].long+b[1].short)-(a[1].long+a[1].short)).slice(0,5);
+    const mx=Math.max(...rows.map(([,v])=>v.long+v.short),1);
+    let L=0,S=0; for(const x of liq){ if(x.side==='long') L+=x.usd||0; else S+=x.usd||0; }
+    s+=`<div class="panel"><div class="ph"><h2>Liquidations · 24h</h2>
+      <span class="sub">${L>=S?'longs':'shorts'} hit harder</span></div><div class="pb">
+      <div class="kv"><span class="k">Longs forced out</span><span class="v dn">${money(L)}</span></div>
+      <div class="kv"><span class="k">Shorts forced out</span><span class="v up">${money(S)}</span></div>
+      <div class="liq" style="margin-top:10px">` +
+      rows.map(([v,o])=>{const t=o.long+o.short;const lw=t?(o.long/t*100):0;
+        return `<div class="liqrow"><span>${v}</span><span class="liqv">${money(t)}</span></div>
+        <span class="liqbar" style="width:${Math.max(6,(t/mx)*100)}%;background:linear-gradient(90deg,var(--red) ${lw}%,var(--green) ${lw}%)"></span>`;}).join('') +
+      `</div><div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.5;font-family:var(--mono)">
+        red = longs liquidated · green = shorts</div></div></div>`;
+  }
+
+  if(d.spark && d.spark.length>4){
+    const ch=((d.spark[d.spark.length-1]/d.spark[0])-1)*100;
+    s+=`<div class="panel"><div class="ph"><h2>Price · 7d</h2>
+      <span class="sub ${ch>=0?'up':'dn'}">${ch>=0?'+':''}${ch.toFixed(2)}%</span></div>
+      <div class="pb"><canvas id="spark"></canvas></div></div>`;
+  }
+
+  // Funding lean — who is paying to hold. The crypto answer to the Analyst's "live lean".
+  const fr=(d.positioning&&d.positioning.funding)||[];
+  if(fr.length){
+    const paid=fr.filter(f=>f.rate>0).length, recv=fr.filter(f=>f.rate<0).length;
+    const ann=fr.map(f=>f.annualized_pct).filter(v=>v!=null);
+    const hi=Math.max(...ann), lo=Math.min(...ann);
+    const lean = paid>recv ? 'longs paying' : recv>paid ? 'shorts paying' : 'balanced';
+    const lcol = paid>recv ? 'up' : recv>paid ? 'dn' : 'nu';
+    s+=`<div class="panel"><div class="ph"><h2>Funding lean</h2>
+      <span class="sub">${fr.length} venues</span></div><div class="pb">
+      <div class="kv"><span class="k">Who is paying</span><span class="v ${lcol}">${lean}</span></div>
+      <div class="kv"><span class="k">Widest venue</span><span class="v up">${hi.toFixed(0)}%</span></div>
+      <div class="kv"><span class="k">Narrowest</span><span class="v ${lo<0?'dn':'nu'}">${lo.toFixed(0)}%</span></div>
+      <div class="kv"><span class="k">Spread</span><span class="v am">${(hi-lo).toFixed(0)} pts</span></div>
+      <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+        A published price for how crowded one side is. The gap between venues is the read.</div></div></div>`;
+  }
+
+  // Breadth — structurally impossible on three tickers, so it is this map's own panel.
+  const B=SNAP.breadth||{};
+  if(B.cheapest&&B.cheapest.length){
+    const mk=(rows,col)=>rows.slice(0,4).map(function(r){
+      const v=r[1]; const w=Math.max(8,Math.min(100,(v/ (B.priciest&&B.priciest.length?B.priciest[B.priciest.length-1][1]:v) )*100));
+      return `<div class="brow"><span class="bn">${r[0]}</span>
+        <span class="bbar"><i style="width:${w}%;background:${col}"></i></span>
+        <span class="bv">${v.toFixed(2)}%</span></div>`;}).join('');
+    s+=`<div class="panel"><div class="ph"><h2>Cost to trade &middot; all ${B.coins||89}</h2>
+      <span class="sub">median ${B.median_round_trip_pct?B.median_round_trip_pct.toFixed(2):'—'}%</span></div><div class="pb">
+      <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--green2);margin-bottom:7px">Cheapest</div>
+      <div class="bre">${mk(B.cheapest,'var(--green)')}</div>
+      <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--red);margin:12px 0 7px">Priciest</div>
+      <div class="bre">${mk([...B.priciest].reverse(),'var(--red)')}</div>
+      <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.5;font-family:var(--mono)">
+        Robinhood's own disclosed markup, round trip.</div></div></div>`;
+  }
+
+  // Track record — "this setup, historically" is the Analyst's; here it is the scored log.
+  const BR=(SNAP.health&&SNAP.health.base_rates)||[];
+  s+=`<div class="panel"><div class="ph"><h2>My record</h2>
+    <span class="sub">self-scored</span></div><div class="pb">`;
+  s+= BR.length ? BR.map(function(r){
+      return `<div class="kv"><span class="k">${r.kind.replace(/_/g,' ')}</span>
+        <span class="v ${r.hit_rate>=50?'up':'dn'}">${r.hit_rate}% <span style="color:var(--txt4);font-size:10px">n=${r.n}</span></span></div>`;
+    }).join('')
+    : `<div class="empty">no claims resolved yet &mdash; the first score at the 08:00 UTC expiry</div>`;
+  s+=`<div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+      My own log, self-reported and self-scored. Not an independent audit.</div></div></div>`;
+
+  s+=`<div class="panel"><div class="ph"><h2>Coverage</h2></div><div class="pb">
+    <div class="kv"><span class="k">Funding venues</span><span class="v nu">${d.funding_venues}</span></div>
+    <div class="kv"><span class="k">OI venues</span><span class="v nu">${d.perp_venues}</span></div>
+    <div class="kv"><span class="k">Hourly bars</span><span class="v nu">${d.bars}</span></div>
+    <div class="kv"><span class="k">Bar density</span><span class="v ${d.bar_density>=0.9?'up':'am'}">${d.bar_density}</span></div>
+    <div class="kv"><span class="k">Min order</span><span class="v nu">${d.min_order_size}</span></div>
+    <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+      Panels are granted by measured inputs. Nothing renders on data we do not have.</div></div></div>`;
+  $('#side').innerHTML=s;
+  drawSpark(d.spark||[]);
+}
+
+function drawSpark(v){
+  const cv=$('#spark'); if(!cv||!v||v.length<2) return;
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=46;
+  cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+  const lo=Math.min(...v),hi=Math.max(...v),rng=(hi-lo)||1,up=v[v.length-1]>=v[0];
+  x.beginPath();
+  v.forEach((y,i)=>{const px2=i/(v.length-1)*W,py=H-5-((y-lo)/rng)*(H-10);i?x.lineTo(px2,py):x.moveTo(px2,py)});
+  x.strokeStyle=up?'#34d399':'#f43f5e';x.lineWidth=1.5;x.stroke();
+  x.lineTo(W,H);x.lineTo(0,H);x.closePath();
+  x.fillStyle=up?'rgba(52,211,153,.10)':'rgba(244,63,94,.10)';x.fill();
+}
+
+/* ---------------- load ---------------- */
+async function load(){
+  if(!TOKEN){ showLogin(); return; }
+  let r;
+  try { r = await fetch('/api/crypto-map?t='+encodeURIComponent(TOKEN)); }
+  catch(_){ showLogin('Could not reach the map. Try again in a moment.'); return; }
+  if(r.status===401){
+    try{ localStorage.removeItem('novo_live_t'); }catch(_){}
+    TOKEN=null; showLogin('That session expired. Sign in again from the member portal.'); return;
+  }
+  if(r.status===402){
+    // Signed in, but this is a SEPARATE product from Analyst. Do not clear the token —
+    // the session is fine, the subscription is what is missing.
+    $('#login').classList.remove('hidden'); $('#app').classList.add('hidden');
+    $('#login').querySelector('h1').innerHTML='Crypto <span class="accent">Market Map</span>';
+    $('#login').querySelector('p').textContent='The Crypto Market Map is its own subscription, separate from Analyst and Trader.';
+    var b2=$('#login').querySelector('.lv-btn'); b2.textContent='See plans →'; b2.setAttribute('href','/crypto');
+    $('#lmsg').textContent=''; return;
+  }
+  if(!r.ok){
+    let m='The crypto collector is not reporting right now.';
+    try{ const j=await r.json(); if(j&&j.error) m=j.error; }catch(_){}
+    showLogin(m); return;
+  }
+  SNAP = await r.json();
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  const b=SNAP.breadth||{}, hl=SNAP.health||{};
+  const stale=(SNAP.age_min!=null&&SNAP.age_min>20);
+  $('#hstat').innerHTML=
+    `<span><span class="dot ${stale?'stale':''}"></span><b>${Object.keys(SNAP.coins).length}</b> coins</span>`+
+    `<span><b>${hl.snapshots||0}</b> snapshots</span>`+
+    `<span><b>${hl.quarantined||0}</b> quarantined</span>`+
+    (b.median_round_trip_pct?`<span>median RT <b>${b.median_round_trip_pct.toFixed(3)}%</b></span>`:'')+
+    `<span>${SNAP.age_min!=null?SNAP.age_min+'m ago':''}</span>`;
+  if(window._askShow) window._askShow();
+  if(!SNAP.coins[CUR]) CUR=Object.keys(SNAP.coins)[0];
+  drawRail(); drawCoin();
+}
+
+/* ---- NoVo. Same /api/analyst-ask the Analyst dashboard calls, same token, same tools.
+   He answers crypto because get_crypto_map / get_crypto_breadth were added to his
+   toolset - not because a separate crypto bot exists. ---- */
+(function(){
+  var box=$('#askbox'), log=$('#asklog'), inp=$('#askin'), send=$('#asksend'), busy=false;
+  function add(cls,txt){ var d=document.createElement('div'); d.className='msg '+cls;
+    d.textContent=txt; log.appendChild(d); log.scrollTop=log.scrollHeight; return d; }
+  $('#askpill').onclick=function(){ box.classList.toggle('on');
+    if(box.classList.contains('on')){ inp.focus();
+      if(!log.children.length) add('no','I read both maps - the equity dealer map and this one. Ask me where a coin is positioned, what funding is doing, or what it actually costs you to trade it here.'); } };
+  $('#askx').onclick=function(){ box.classList.remove('on'); };
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){ e.preventDefault(); $('#askpill').click(); }
+    if(e.key==='Escape') box.classList.remove('on');
+  });
+  document.querySelectorAll('.askhint b').forEach(function(b){
+    b.onclick=function(){ inp.value=b.dataset.q; ask(); };
+  });
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask(); } });
+  $('#askform').onsubmit=function(e){ e.preventDefault(); ask(); };
+  async function ask(){
+    var q=(inp.value||'').trim();
+    if(!q||busy||!TOKEN) return;
+    busy=true; send.disabled=true; inp.value='';
+    add('me',q);
+    var think=add('no','thinking...');
+    try{
+      var r=await fetch('/api/analyst-ask',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({t:TOKEN,q:q,question:q})});
+      var j=await r.json().catch(function(){return null;});
+      if(r.status===401){ think.className='msg err'; think.textContent='That session expired - sign in again from the member portal.'; }
+      else if(!r.ok){ think.className='msg err'; think.textContent=(j&&j.error)||'Could not reach NoVo.'; }
+      else { think.className='msg no'; think.textContent=(j&&(j.answer||j.text||j.reply))||'No answer came back.'; }
+    }catch(_){ think.className='msg err'; think.textContent='Could not reach NoVo.'; }
+    busy=false; send.disabled=false; log.scrollTop=log.scrollHeight;
+  }
+  window._askShow=function(){ $('#ask').classList.remove('hidden'); };
+})();
+
+load();
+setInterval(load, 90000);
+window.addEventListener('resize',()=>{ if(SNAP) drawCoin(); });
+</script>
+</body>
+</html>

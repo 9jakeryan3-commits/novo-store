@@ -151,6 +151,16 @@ async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub 
 }
 
 // Analyst price ids (mirror webhook-sub.js) — the RELIABLE tier signal; metadata.tier is strippable/mutable.
+const CRYPTO_PRICE_IDS = new Set([
+  process.env.STRIPE_PRICE_CRYPTO, process.env.STRIPE_PRICE_CRYPTO_YEARLY,
+  'price_1U9EU0B1Bq29OALajbT8DWJS', 'price_1U9EUsB1Bq29OALaYh2QODHA',   // $79 / $790
+].filter(Boolean));
+function _subIsCrypto(sub) {
+  if (sub?.metadata?.tier === 'crypto') return true;
+  try { return (sub?.items?.data || []).some(it => CRYPTO_PRICE_IDS.has(it?.price?.id)); }
+  catch (_) { return false; }
+}
+
 const ANALYST_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_ANALYST, process.env.STRIPE_PRICE_ANALYST_YEARLY,
   'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',   // $129 / $1,290 — kept: existing subs
@@ -181,7 +191,11 @@ async function _memberTier(email) {
       const subs = await _stripe.subscriptions.list({ customer: id, status: 'all', limit: 20 });
       for (const s of subs.data) {
         if (!LIVE.includes(s.status)) continue;
-        if (_subIsAnalyst(s)) sawAnalyst = true; else return 'trader';   // any live non-analyst sub = Trader
+        if (_subIsAnalyst(s)) { sawAnalyst = true; continue; }
+        if (_subIsCrypto(s)) continue;    // Crypto is its own product — NOT Trader, and it
+                                          // owns no engine, so squeeze pushes must NOT be
+                                          // suppressed for a Crypto-only member.
+        return 'trader';                  // any other live paid sub = Trader
       }
     }
     return sawAnalyst ? 'analyst' : null;

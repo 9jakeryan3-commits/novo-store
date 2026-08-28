@@ -18,11 +18,22 @@ Last verified against the deployed site and engine: **2026-08-23**.
 | **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
 | **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + execution |
+| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + NoVo. **Its own product** — not included with Analyst or Trader, and neither is included with it |
 
 - **7-day money-back on the first payment, both plans.** Trader has no trial, so this is its
   evaluation window. Stated in `license.html`, `refund-policy.html`, `help.html`, `api/chat.js`,
   and under the Trader button on `plans.html`.
 - **Price for life** — the rate you subscribe at holds while the subscription stays active.
+- **Free follows the market, not the product.** We give away what the market already gives
+  away and sell what the market sells. On the crypto side that was checked, not assumed:
+  CoinGlass's free tier publishes funding, open interest and 24h liquidations; cryptogamma.io
+  publishes a free BTC/ETH gamma dashboard off the public Deribit API. So those are free at
+  `/api/crypto-free` too. What every competitor charges for — **history**, all-coin breadth,
+  gamma by strike, walls and the flip, API access — is the subscription, along with the two
+  things nobody sells at any price: Robinhood's disclosed cost-to-trade, and NoVo.
+- The equity map's "the map stays gated" rule does **not** carry to crypto. That rule exists
+  because OPRA options data is licensed; Deribit's is free and public. Charging for a BTC
+  gamma summary would mean charging for something the market hands out.
 - Cancel any time from the Stripe billing portal; access runs to the end of the paid period.
 - One Terms of Service: **`/license`**. `/terms` 308s to it.
 

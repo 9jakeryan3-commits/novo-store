@@ -44,6 +44,30 @@ function ageOf(ts) {
 // ── declarations (Gemini / Vertex functionDeclarations format) ──────────────────
 const declarations = [
   {
+    name: "get_crypto_map",
+    description:
+      "The CURRENT live NoVo Crypto Market Map read for ONE coin. Returns what coverage that coin actually has, " +
+      "and only the panels the data supports: dealer gamma (spot, net GEX, flip zone, call and put walls) for the " +
+      "six coins with real options books - BTC, ETH, SOL, XRP, AVAX, HYPE - plus leverage positioning (funding and " +
+      "open interest PER VENUE, never blended) and Robinhood's own disclosed buy/sell markup. Use for any 'where is " +
+      "BTC positioned', 'what is funding on X', or 'what does it cost to trade X' question. Coins outside the 89 " +
+      "Robinhood trades are not covered.",
+    parameters: {
+      type: "object",
+      properties: { coin: { type: "string", description: "Asset code, e.g. BTC, ETH, SOL, DOGE, HYPE." } },
+      required: ["coin"],
+    },
+  },
+  {
+    name: "get_crypto_breadth",
+    description:
+      "The CROSS-SECTIONAL crypto read across all 89 coins at once: median round-trip cost, the cheapest and " +
+      "priciest coins to trade on Robinhood, the largest open interest, and 24h liquidation flow by coin and side. " +
+      "Use for 'what is crypto doing overall', 'which coin is cheapest to trade', 'where did the liquidations hit'. " +
+      "This is the crypto equivalent of market internals - there is no per-coin call that answers it.",
+    parameters: { type: "object", properties: {} },
+  },
+  {
     name: "get_dealer_levels",
     description:
       "The CURRENT live dealer positioning read for ONE ticker: spot, gamma flip, call wall, put wall, net GEX, " +
@@ -581,10 +605,93 @@ function makeExecutors(ctx = {}) {
     };
   }
 
+  // ── NoVo Crypto Market Map ──────────────────────────────────────────────────────────
+  // Reads the same KV snapshot the gated crypto dashboard reads, published by the owner
+  // box each pass. NoVo is the analyst for BOTH products, so adding these here makes it
+  // crypto-capable in the Analyst dashboard and the Crypto dashboard at once - there is
+  // no second assistant and no second knowledge base.
+  //
+  // NOTE ON ENTITLEMENT: this is NoVo's own knowledge, not a customer data feed. The
+  // crypto MAP is gated at /api/crypto-map; what NoVo knows is not partitioned, because
+  // NoVo is the house analyst rather than a per-seat entitlement.
+  async function _cryptoSnap() {
+    if (!r) return null;
+    let snap = null;
+    try { snap = await r.get("crypto:map:live"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    return (snap && snap.coins) ? snap : null;
+  }
+
+  async function get_crypto_map({ coin }) {
+    const code = String(coin || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!code) return { error: "name a coin, e.g. BTC" };
+    const snap = await _cryptoSnap();
+    if (!snap) return { error: "the crypto collector is not reporting right now" };
+    const c = snap.coins[code];
+    if (!c) {
+      return { error: `${code} is not one of the 89 coins Robinhood trades, so I have no map for it`,
+               covered: Object.keys(snap.coins).slice(0, 12) };
+    }
+    const out = {
+      coin: code, asOf: snap.as_of, band: c.band, confidence: c.confidence,
+      panelsAvailable: c.panels, price: c.price,
+      note: "panels are granted by measured inputs - if a panel is absent the data is not " +
+            "there, and I should say so rather than estimate it.",
+    };
+    if (c.true_cost) {
+      out.robinhoodCost = {
+        roundTripPct: c.true_cost.round_trip_pct,
+        buySpreadPct: c.true_cost.buy_spread_pct,
+        sellSpreadPct: c.true_cost.sell_spread_pct,
+        cheapnessRank: c.true_cost.cheapness_rank,
+        note: "Robinhood's OWN disclosed markup, read back from its API. Nobody else publishes this.",
+      };
+    }
+    if (c.gamma) {
+      out.dealerGamma = {
+        settlementBook: c.gamma.settle, expiry: c.gamma.expiry, spot: c.gamma.spot,
+        netGex: c.gamma.net_gex, flipZone: c.gamma.flip_zone,
+        callWall: c.gamma.call_wall, putWall: c.gamma.put_wall, chainOi: c.gamma.chain_oi,
+        note: "Deribit. One contract is 1 coin, not 100. A flip more than ~12% from spot is " +
+              "real but not actionable - say so rather than quoting it as a level.",
+      };
+    }
+    if (c.positioning) {
+      out.leverage = {
+        fundingByVenue: c.positioning.funding,
+        openInterestByVenue: c.positioning.open_interest,
+        totalOiUsd: c.positioning.total_oi_usd,
+        note: "PER VENUE and never averaged - venues have different participants, and the " +
+              "disagreement between them is itself the read.",
+      };
+    }
+    if (c.readings && c.readings.length) out.myRecentReads = c.readings;
+    return out;
+  }
+
+  async function get_crypto_breadth() {
+    const snap = await _cryptoSnap();
+    if (!snap) return { error: "the crypto collector is not reporting right now" };
+    const b = snap.breadth || {};
+    const h = snap.health || {};
+    return {
+      asOf: snap.as_of, coins: Object.keys(snap.coins).length,
+      medianRoundTripPct: b.median_round_trip_pct,
+      cheapestToTrade: b.cheapest, priciestToTrade: b.priciest,
+      largestOpenInterest: b.largest_oi,
+      liquidations24h: h.liquidations_24h || [],
+      myBaseRates: h.base_rates || [],
+      note: "cost figures are Robinhood's own disclosed markup. Liquidations are forced flow, " +
+            "not positioning. Base rates are my own scored claims, self-reported - always " +
+            "give the sample size with any rate.",
+    };
+  }
+
   return {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
     get_base_rates, get_recent_reads,
+    get_crypto_map, get_crypto_breadth,
   };
 }
 

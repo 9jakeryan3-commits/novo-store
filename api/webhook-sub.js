@@ -69,6 +69,7 @@ async function _customerFromChargeEvent(evtType, obj) {
 const { isReservedEmail } = require('./_lib/reserved-email.js');
 const ANALYST_AUDIENCE = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const FREE_AUDIENCE = process.env.RESEND_AUDIENCE_ID;   // the free "Market Notes" list — kept DISJOINT from Analyst
+const CRYPTO_AUDIENCE = process.env.RESEND_CRYPTO_AUDIENCE_ID;   // optional; unset = skip cleanly
 const DISCORD_GUILD = process.env.DISCORD_GUILD_ID || '1522967079400112198';
 const DISCORD_ROLE = process.env.DISCORD_ROLE_ID || '1522999999565398047';
 async function discordRevokeRole(discordId) {
@@ -99,9 +100,32 @@ function subIsAnalyst(sub) {
   catch (_) { return false; }
 }
 
+// NoVo Crypto Market Map — its OWN product. Like Analyst it has NO license and NO instance;
+// unlike Analyst it does not include the equity read, so it never joins the Analyst audience.
+const CRYPTO_PRICE_IDS = new Set([
+  process.env.STRIPE_PRICE_CRYPTO, process.env.STRIPE_PRICE_CRYPTO_YEARLY,
+  'price_1U9EU0B1Bq29OALajbT8DWJS', 'price_1U9EUsB1Bq29OALaYh2QODHA',   // $79 / $790 — prod_V9XZrb8qBEdzoI
+].filter(Boolean));
+function subIsCrypto(sub) {
+  if (sub?.metadata?.tier === 'crypto') return true;
+  try { return (sub?.items?.data || []).some(it => CRYPTO_PRICE_IDS.has(it?.price?.id)); }
+  catch (_) { return false; }
+}
+
+// THE branch that matters. This file was written for two tiers, so its logic was
+// "not Analyst == Trader" and every non-Analyst sub was sent down the license path.
+// A Crypto sub has no license either, so ask the question that is actually being asked:
+// does this tier own a trading instance? Only Trader does.
+function subHasLicense(sub) { return !subIsAnalyst(sub) && !subIsCrypto(sub); }
+
 async function isAnalystSub(subscriptionId) {
   try { const s = await stripe.subscriptions.retrieve(subscriptionId); return subIsAnalyst(s); }
   catch { return false; }
+}
+
+async function subIdHasLicense(subscriptionId) {
+  try { const s = await stripe.subscriptions.retrieve(subscriptionId); return subHasLicense(s); }
+  catch { return false; }   // unknown -> do NOT touch the license server
 }
 // Small retry so a single transient Resend blip doesn't leave an audience move half-done (e.g. removed from
 // Analyst but never re-added to the free list on cancel → subscriber silently on NEITHER list).
@@ -216,7 +240,10 @@ async function hasActiveTraderSub(email, excludeSubId) {
   const LIVE = ['active', 'trialing', 'past_due', 'unpaid'];
   const hit = async (custId) => {
     const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
-    return subs.data.some(s => s.id !== excludeSubId && s.metadata?.tier !== 'analyst' && LIVE.includes(s.status));
+    // 'not analyst' used to mean Trader. With a third product that is false: a Crypto sub
+    // would read as an active Trader and cancel a legitimate Analyst checkout as a
+    // "reverse duplicate". Exclude both non-Trader tiers explicitly.
+    return subs.data.some(s => s.id !== excludeSubId && !subIsAnalyst(s) && !subIsCrypto(s) && LIVE.includes(s.status));
   };
   try {
     const seen = new Set();
@@ -386,6 +413,19 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
+    // NoVo Crypto Market Map: its own product. No license, no provisioning, and NOT the
+    // Analyst audience — a Crypto subscriber did not buy the SPY/QQQ/IWM read. Must sit
+    // ABOVE the Trader path: falling through would provision a trading licence AND run the
+    // "Trader includes Analyst" upgrade, which RETIRES the customer's paid Analyst sub.
+    if (obj?.metadata?.tier === 'crypto') {
+      if (CRYPTO_AUDIENCE) {
+        try { await _retry(() => resend.contacts.create({ audienceId: CRYPTO_AUDIENCE, email, unsubscribed: false }), 2); }
+        catch (e) { if (!/exist|already/i.test(e.message || '')) console.error(`[webhook-sub] crypto audience add failed: ${e.message}`); }
+      }
+      console.log(`[webhook-sub] Crypto Market Map subscriber ${email} — no license, no Analyst audience`);
+      return res.status(200).json({ received: true, tier: 'crypto' });
+    }
+
     // NoVo Analyst ($69 email tier): add to the Analyst audience + send its welcome, then STOP — no license,
     // no portal, no provisioning.
     if (obj?.metadata?.tier === 'analyst') {
@@ -532,7 +572,7 @@ const handler = async (req, res) => {
     // reason, and gating on it could leave a paying customer suspended forever.
     // activateSub is idempotent: a no-op on the initial create / already-active keys,
     // and the license row may not exist yet on the very first invoice (404, swallowed).
-    if (subscriptionId && !(await isAnalystSub(subscriptionId))) {  // Analyst subs have no license to activate
+    if (subscriptionId && (await subIdHasLicense(subscriptionId))) {  // Analyst AND Crypto subs have no license to activate
       try {
         await activateSub(subscriptionId);
       } catch (err) {
@@ -553,7 +593,7 @@ const handler = async (req, res) => {
   // ── Payment failed → suspend access ──────────────────────────────────────
   else if (event.type === 'invoice.payment_failed') {
     const subscriptionId = invoiceSubId(obj);
-    if (subscriptionId && !(await isAnalystSub(subscriptionId))) {  // Analyst subs have no license to suspend
+    if (subscriptionId && (await subIdHasLicense(subscriptionId))) {  // Analyst AND Crypto subs have no license to suspend
       try {
         await suspendSub(subscriptionId);
       } catch (err) {
@@ -582,6 +622,20 @@ const handler = async (req, res) => {
         console.error(`[webhook-sub] analyst cancel failed — sub:${subscriptionId} error:${err.message}`);
         if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
         return res.status(500).json({ error: 'analyst cancel failed, will retry' });
+      }
+    } else if (subIsCrypto(obj)) {   // Crypto cancel → drop its audience only. No license exists to cancel.
+      try {
+        const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
+        if (CRYPTO_AUDIENCE && cust?.email) {
+          try { await _retry(() => resend.contacts.remove({ audienceId: CRYPTO_AUDIENCE, email: cust.email }), 2); } catch (_) {}
+        }
+        // Deliberately NOT touching the Analyst audience, the free list or the Discord role:
+        // this customer may hold a live Analyst or Trader sub that still earns all three.
+        console.log(`[webhook-sub] crypto cancel — sub:${subscriptionId}`);
+      } catch (err) {
+        console.error(`[webhook-sub] crypto cancel failed — sub:${subscriptionId} error:${err.message}`);
+        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
+        return res.status(500).json({ error: 'crypto cancel failed, will retry' });
       }
     } else if (subscriptionId) {
       try {
