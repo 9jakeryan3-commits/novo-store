@@ -484,7 +484,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="lv-status">
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
-      <span id="sess" class="lv-sess"></span>
+      <span id="sess" class="lv-sess" title="Age of the collector's last full pass. The book, funding, liquidations and cost refresh every 5 minutes; spot and net GEX stream continuously."></span>
     </div>
     <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
   </header>
@@ -987,6 +987,7 @@ function drawRail(filter=''){
 }
 
 /* ---------------- coin ---------------- */
+let _lastDrawn = null;
 function drawCoin(){
   const d=SNAP.coins[CUR]; if(!d) return;
   const tc=d.true_cost, g=d.gamma, pos=d.positioning;
@@ -1052,9 +1053,14 @@ function drawCoin(){
     :`<div class="empty">no readings yet for ${CUR}</div>`;
   h+=`</div></div>`;
   $('#body').innerHTML=h;
-  // Restart the entrance: the class is already on the element from the last coin, and an
-  // animation does not replay just because its subject was replaced.
-  const _bd=$('#body'); _bd.classList.remove('swap'); void _bd.offsetWidth; _bd.classList.add('swap');
+  // The entrance is a response to PICKING a coin. load() also lands here every 90s from its
+  // own interval, and replaying the stagger for a background refresh - usually of the same
+  // five-minute snapshot - is just the page twitching at you. So it fires only when the coin
+  // actually changed; the class still has to be removed first, because an animation does not
+  // replay merely because its subject was replaced.
+  const _bd=$('#body');
+  _bd.classList.remove('swap');
+  if(_lastDrawn !== CUR){ void _bd.offsetWidth; _bd.classList.add('swap'); _lastDrawn = CUR; }
   if(g) drawGamma(g);
   if(window.cxLive) window.cxLive.attach(CUR, g);   // stream spot for THIS coin; stops the previous socket
   if(window.cxLive && cxLive.resetTick) cxLive.resetTick();  // BTC -> SOL is not a tick
@@ -1221,7 +1227,9 @@ async function load(){
     `<div class="dstat"><span>Snapshots stored</span><b>${(hl.snapshots||0).toLocaleString()}</b></div>`+
     `<div class="dstat"><span>Quarantined</span><b>${hl.quarantined||0}</b></div>`+
     (b.median_round_trip_pct?`<div class="dstat"><span>Median round trip</span><b>${b.median_round_trip_pct.toFixed(3)}%</b></div>`:'')+
-    `<div class="dstat"><span>Last pass</span><b>${SNAP.age_min!=null?SNAP.age_min+'m ago':'\u2014'}</b></div>`;
+    `<div class="dstat"><span>Last pass</span><b>${SNAP.age_min!=null?SNAP.age_min+'m ago':'\u2014'}</b></div>`+
+    `<div class="dstat"><span>Pass cadence</span><b>every 5 min</b></div>`+
+    `<div class="dstat"><span>Spot &amp; net GEX</span><b>streamed</b></div>`;
   if(window._askShow) window._askShow();
   // A remembered coin can drop out of the map, and a hash is just whatever someone typed,
   // so the restored value is checked against the payload before anything is drawn.
