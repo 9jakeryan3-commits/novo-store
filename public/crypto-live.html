@@ -50,10 +50,58 @@ a{color:var(--cyan)}
 /* shell */
 #app{display:grid;grid-template-rows:auto 1fr;height:100vh}
 header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid var(--bdr2);background:var(--panel)}
-.brand{font-weight:800;font-size:14px;letter-spacing:-.01em;text-decoration:none;color:var(--txt1)}
-.brand span{color:var(--cx)}
-.hstat{display:flex;gap:13px;margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--txt4);flex-wrap:wrap;align-items:center}
-.hstat b{color:var(--txt2);font-weight:600}
+/* Brand, live status and settings gear: the Analyst dashboard's header, sized for this
+   page's compact app bar. */
+.lv-brand{display:flex;align-items:center;gap:9px;text-decoration:none}
+.lv-brand img{height:26px;width:auto;display:block}
+.wm{display:flex;flex-direction:column;line-height:1}
+.wm-1{font-size:18px;font-weight:800;color:var(--txt1);letter-spacing:-.5px}
+.wm-2{font-size:8.5px;font-weight:700;letter-spacing:2.6px;text-transform:uppercase;color:var(--cx);margin-top:4px;white-space:nowrap}
+.lv-brand{flex:0 0 auto}
+.lv-status{margin-left:auto;min-width:0;display:flex;align-items:center;gap:11px;justify-content:flex-end}
+.lv-live{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green)}
+.lv-live .dot{width:8px;height:8px;margin-right:0;box-shadow:0 0 8px var(--green);animation:lvpulse 2s infinite}
+.lv-live.stale{color:var(--amber)}
+.lv-live.stale .dot{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:none}
+@keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.35}}
+.lv-sess{color:var(--txt3);font-size:12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* The status reads long on a desktop bar and short on a phone one; the pill beside it
+   already says LIVE, so 'updated ... ago' is 140px saying what 'ago' says. */
+.lv-sess .sm{display:none}
+.lv-sess b{color:var(--txt2);font-weight:700}
+.lv-gear{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;
+  border:1px solid var(--bdr);color:var(--txt2);font:inherit;font-size:12px;font-weight:700;
+  padding:7px 12px;border-radius:9px;cursor:pointer}
+.lv-gear:hover{border-color:var(--cx);color:var(--txt1)}
+/* Settings drawer */
+.lv-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;
+  transition:opacity .2s ease;z-index:9990}
+.lv-scrim.on{opacity:1;pointer-events:auto}
+.lv-drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--navy);
+  border-left:1px solid var(--bdr);z-index:9991;overflow-y:auto;transform:translateX(100%);
+  transition:transform .24s cubic-bezier(.22,1,.36,1)}
+.lv-drawer.on{transform:none}
+.lv-drawer .dh{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--bdr);
+  position:sticky;top:0;background:var(--navy);z-index:1}
+.lv-drawer .dh b{color:var(--txt1);font-size:15px}
+.lv-drawer .dh button{margin-left:auto;background:none;border:0;color:var(--txt2);font-size:22px;line-height:1;cursor:pointer}
+.lv-drawer .db{padding:4px 18px 26px}
+.lv-drawer .dgrp{color:var(--txt3);font-size:10.5px;font-weight:800;letter-spacing:1.8px;
+  text-transform:uppercase;margin:20px 0 6px}
+.lv-drawer .dlink{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--bdr);
+  color:var(--txt2);text-decoration:none;font-size:13.5px}
+.lv-drawer .dlink:hover{color:var(--txt1)}
+.lv-drawer .dlink .ar{margin-left:auto;color:var(--txt3)}
+.nf-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--bdr)}
+.nf-k{color:var(--txt1);font-size:13.5px;font-weight:600}
+.nf-s{color:var(--txt3);font-size:11.5px;line-height:1.45;margin-top:3px}
+.nf-btn{margin-left:auto;flex:0 0 auto;background:var(--navy2);border:1px solid var(--bdr);color:var(--txt2);
+  font:inherit;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none}
+.nf-btn:hover{border-color:var(--cx);color:var(--txt1)}
+.nf-btn:disabled{opacity:.5;cursor:default;border-color:var(--bdr)}
+.dstat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--bdr);
+  font-size:12.5px;color:var(--txt3)}
+.dstat b{color:var(--txt1);font-family:var(--mono);font-weight:600}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px}
 .dot.stale{background:var(--amber)}
 main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
@@ -221,9 +269,17 @@ tr:last-child td{border-bottom:none}
      and it shows on a phone: the brand stacked to three lines, the venue table pushed the
      panel sideways, and the ask pill sat on top of the last row of content. */
   @media (max-width:560px){
-    header .brand{font-size:15px;white-space:nowrap}
-    header .brand span{display:inline}
-    .hstat{font-size:10px;gap:8px;flex-wrap:wrap;row-gap:2px}
+    .wm-1{font-size:15px}
+    .wm-2{font-size:8px;letter-spacing:2.1px}
+    .lv-brand img{height:22px}
+    header{gap:10px;padding:8px 12px}
+    .lv-status{gap:9px}
+    .lv-sess{font-size:11px}
+    .lv-sess .lg{display:none}
+    .lv-sess .sm{display:inline}
+    /* the word costs more width than it earns once the bar is this tight */
+    .lv-gear{padding:7px 10px;font-size:13px}
+    .lv-gear .gl{display:none}
     #sym{font-size:30px}
     #px{font-size:17px}
     /* Wide tables scroll inside their own panel rather than stretching it. */
@@ -297,6 +353,19 @@ tr:last-child td{border-bottom:none}
   #novo-ask input:focus{border-color:#a78bfa}
   #novo-ask button.go{background:#a78bfa;border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
+/* Below ~375px the bar is wider than the phone. Nothing is dropped - the type tightens. */
+@media(max-width:374px){
+  header{gap:8px;padding:8px 10px}
+  .lv-brand{gap:7px}
+  .lv-brand img{height:20px}
+  .wm-1{font-size:14px}
+  .wm-2{font-size:7px;letter-spacing:1.2px}
+  .lv-live{font-size:9.5px;letter-spacing:1.4px;gap:5px}
+  .lv-live .dot{width:7px;height:7px}
+  .lv-status{gap:8px}
+  .lv-sess{font-size:10.5px}
+  .lv-gear{padding:6px 8px}
+}
 </style>
 </head>
 <body>
@@ -313,8 +382,15 @@ tr:last-child td{border-bottom:none}
 <!-- ===== DASHBOARD ===== -->
 <div id="app" class="hidden">
   <header>
-    <span class="brand">NoVo <span>Crypto Map</span></span>
-    <div class="hstat" id="hstat"></div>
+    <div class="lv-brand">
+      <img src="/novo-coin.png?v=1" alt="" width="160" height="160" decoding="async">
+      <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Crypto Market Map</span></span>
+    </div>
+    <div class="lv-status">
+      <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
+      <span id="sess" class="lv-sess"></span>
+    </div>
+    <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
   </header>
   <main>
     <div class="col" id="rail"></div>
@@ -324,6 +400,31 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="col" id="side"></div>
   </main>
+
+<div class="lv-scrim" id="lv-scrim" onclick="lvSettings(0)"></div>
+<div class="lv-drawer" id="lv-drawer" role="dialog" aria-label="Settings" aria-modal="true">
+  <div class="dh"><b>Settings</b>
+    <button type="button" onclick="lvSettings(0)" aria-label="Close">&times;</button></div>
+  <div class="db">
+    <div class="dgrp">This map</div>
+    <div class="nf-row" id="nf-install-row">
+      <div><div class="nf-k">Install the app</div><div class="nf-s">Put the map on your home screen &mdash; full screen, no browser chrome</div></div>
+      <button class="nf-btn" id="nf-install" type="button" onclick="cxInstall.go()">Install</button>
+    </div>
+    <div class="nf-row">
+      <div><div class="nf-k">Discord community</div><div class="nf-s">Live discussion and daily tips</div></div>
+      <a class="nf-btn" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join &rarr;</a>
+    </div>
+    <div class="dgrp">Collector</div>
+    <div id="dstats"></div>
+    <div class="dgrp">Account</div>
+    <a class="dlink" href="https://app.novo-aitrading.app/portal">Member portal<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="https://app.novo-aitrading.app/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/crypto">What this map is built from<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/market-data#crypto">Free crypto data<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
+  </div>
+</div>
 
 <button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this map&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
 
@@ -383,6 +484,16 @@ const $ = s => document.querySelector(s);
    dashboard they cannot open yet. Chrome only fires it once per page load, so it has to
    be captured immediately and revealed later rather than waited for.
 --------------------------------------------------------------------------------- */
+// The drawer owns the screen while it is open, so the page behind it must not scroll.
+window.lvSettings = function(on){
+  var d=document.getElementById('lv-drawer'), sc=document.getElementById('lv-scrim');
+  if(!d||!sc) return;
+  d.classList.toggle('on',!!on); sc.classList.toggle('on',!!on);
+  document.body.style.overflow = on ? 'hidden' : '';
+  if(on && window.cxInstall) cxInstall.syncRow();
+};
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') window.lvSettings(0); });
+
 var cxInstall = (function(){
   var deferred = null, entered = false;
   function standalone(){
@@ -412,6 +523,23 @@ var cxInstall = (function(){
     if(!deferred || !entered || standalone()) return;
     var b = pill(); if(b) b.style.display = 'block';
   }
+  // The Settings row is the second way in. Chrome only hands over one beforeinstallprompt,
+  // so the row and the pill share it rather than each holding their own.
+  function syncRow(){
+    var btn = document.getElementById('nf-install');
+    if(!btn) return;
+    if(standalone()){ btn.textContent='Installed'; btn.disabled=true; }
+    else if(deferred){ btn.textContent='Install'; btn.disabled=false; }
+    else { btn.textContent='Browser menu'; btn.disabled=true; }
+  }
+  async function go(){
+    if(!deferred) return;
+    deferred.prompt();
+    try { await deferred.userChoice; } catch(e){}
+    deferred = null;
+    var b = document.getElementById('cxInstall'); if(b) b.style.display='none';
+    syncRow();
+  }
   window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred = e; show(); });
   window.addEventListener('appinstalled', function(){
     var b = document.getElementById('cxInstall'); if(b) b.style.display='none';
@@ -421,7 +549,7 @@ var cxInstall = (function(){
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/crypto/sw.js', {scope:'/crypto/'}).catch(function(){});
   }
-  return { entered: function(){ entered = true; show(); } };
+  return { entered: function(){ entered = true; show(); }, go: go, syncRow: syncRow };
 })();
 
 const money = n => n==null ? '—' : (Math.abs(n)>=1e9 ? '$'+(n/1e9).toFixed(2)+'B'
@@ -956,12 +1084,22 @@ async function load(){
   if(window.cxInstall) cxInstall.entered();   // subscriber is in - now offer the install
   const b=SNAP.breadth||{}, hl=SNAP.health||{};
   const stale=(SNAP.age_min!=null&&SNAP.age_min>20);
-  $('#hstat').innerHTML=
-    `<span><span class="dot ${stale?'stale':''}"></span><b>${Object.keys(SNAP.coins).length}</b> coins</span>`+
-    `<span><b>${hl.snapshots||0}</b> snapshots</span>`+
-    `<span><b>${hl.quarantined||0}</b> quarantined</span>`+
-    (b.median_round_trip_pct?`<span>median RT <b>${b.median_round_trip_pct.toFixed(3)}%</b></span>`:'')+
-    `<span>${SNAP.age_min!=null?SNAP.age_min+'m ago':''}</span>`;
+  // Crypto trades 24/7, so this pill is not a session clock like the Analyst's - there is no
+  // close to report. It states whether the collector's last pass is current.
+  $('#live').classList.toggle('stale',stale);
+  $('#live-t').textContent = stale ? 'STALE' : 'LIVE';
+  const _age = SNAP.age_min;
+  $('#sess').innerHTML = `<b>${Object.keys(SNAP.coins).length}</b> coins &middot; `
+    + `<span class="lg">${_age==null?'no pass yet':_age<1?'updated just now':'updated '+_age+'m ago'}</span>`
+    + `<span class="sm">${_age==null?'no pass':_age<1?'just now':_age+'m'}</span>`;
+  // Snapshots, quarantine and round-trip cost are numbers you check, not numbers you watch -
+  // they crowded the bar into three wrapped lines on a phone. They live in Settings now.
+  $('#dstats').innerHTML=
+    `<div class="dstat"><span>Coins mapped</span><b>${Object.keys(SNAP.coins).length}</b></div>`+
+    `<div class="dstat"><span>Snapshots stored</span><b>${(hl.snapshots||0).toLocaleString()}</b></div>`+
+    `<div class="dstat"><span>Quarantined</span><b>${hl.quarantined||0}</b></div>`+
+    (b.median_round_trip_pct?`<div class="dstat"><span>Median round trip</span><b>${b.median_round_trip_pct.toFixed(3)}%</b></div>`:'')+
+    `<div class="dstat"><span>Last pass</span><b>${SNAP.age_min!=null?SNAP.age_min+'m ago':'\u2014'}</b></div>`;
   if(window._askShow) window._askShow();
   if(!SNAP.coins[CUR]) CUR=Object.keys(SNAP.coins)[0];
   drawRail(); drawCoin();
