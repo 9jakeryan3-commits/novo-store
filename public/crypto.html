@@ -586,10 +586,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .cx .compound-callout{ background:var(--cx-soft); border-color:var(--cx-line); }
 .cx .compound-callout span{ color:inherit; }
 
-.btn-crypto{ background:linear-gradient(180deg,#a78bfa,#7c3aed); color:#120a24; border:none; padding:16px 42px;
+/* Hollow, not a solid fill. Every other product CTA on the site is a see-through button with a
+   coloured border and its own glow -- .btn-secondary with .analyst-glow / .trader-glow -- and this
+   one shipped as a filled purple gradient, which read as a different site. Same shape as the others
+   now, in the crypto accent. */
+.btn-crypto{ background:rgba(255,255,255,.03); color:var(--cx); border:1px solid var(--cx); padding:16px 42px;
   border-radius:11px; font-weight:800; font-size:16px; cursor:pointer; font-family:inherit;
-  transition:transform .15s, box-shadow .15s; box-shadow:0 8px 28px rgba(124,58,237,.35); }
-.btn-crypto:hover{ transform:translateY(-2px); box-shadow:0 12px 34px rgba(124,58,237,.5); }
+  transition:border-color .15s, background .15s, transform .15s; }
+.btn-crypto:hover{ transform:translateY(-2px); border-color:var(--cx); background:rgba(167,139,250,.08); }
 .btn-crypto:disabled{ opacity:.6; transform:none; cursor:default; }
 @keyframes cryptoGlow{ 0%,100%{ box-shadow:0 0 14px rgba(167,139,250,.22);} 50%{ box-shadow:0 0 26px rgba(167,139,250,.42);} }
 .crypto-glow{ animation:cryptoGlow 2.6s ease-in-out infinite; }
