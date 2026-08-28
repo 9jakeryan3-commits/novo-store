@@ -298,6 +298,21 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .mini-lv .up{color:var(--green,#10b981);} .mini-lv .dn{color:#f43f5e;}
 </style>
   <link rel="stylesheet" href="/polish.css?v=3174dc56">
+
+<style>
+  .cx-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .cx-card{background:var(--navy,#0e0e10);border:1px solid var(--bdr,#2c2c30);border-radius:9px;padding:14px 16px}
+  .cx-card .cxn{font-weight:800;font-size:15px;color:var(--txt1,#f0f0ee)}
+  .cx-card .cxg{font-family:'Geist Mono',ui-monospace,monospace;font-size:22px;font-weight:700;letter-spacing:-.02em;margin:6px 0 3px}
+  .cx-card .cxr{font-size:12.5px;line-height:1.5}
+  .cx-card .cxm{font-size:11.5px;color:var(--txt3,#6e6e6e);margin-top:6px;font-family:'Geist Mono',ui-monospace,monospace}
+  .cx-tbl{width:100%;border-collapse:collapse;font-family:'Geist Mono',ui-monospace,monospace;font-size:12px}
+  .cx-tbl th{text-align:right;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#6e6e6e);font-weight:500;padding:0 0 6px;border-bottom:1px solid var(--bdr,#2c2c30)}
+  .cx-tbl th:first-child,.cx-tbl td:first-child{text-align:left}
+  .cx-tbl td{text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr,#2c2c30);color:var(--txt2,#a8a8a8)}
+  .cx-tbl tr:last-child td{border-bottom:none}
+  .cx-up{color:#34d399}.cx-dn{color:#f43f5e}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -600,6 +615,21 @@ nav { position: relative; }
 <!-- ad slot 2 (shelved — re-add the display <ins> unit here, slot 5131852801) -->
 
 <!-- WHAT IS THIS (SEO) -->
+
+<!-- FREE CRYPTO — the layers the market already gives away, so we do too -->
+<div class="container sec" id="crypto">
+  <div class="card">
+    <div class="lbl">Crypto &middot; live 24/7</div>
+    <h2 class="h2" style="font-size:20px;margin-bottom:4px;">Crypto dealer gamma, funding &amp; liquidations</h2>
+    <p class="sub" style="margin:0 0 14px;font-size:13.5px;">Net dealer gamma on BTC and ETH from the Deribit options book, and leverage positioning per venue across the coins Robinhood trades. Free, public data, updating around the clock.</p>
+    <div id="cx-gamma" class="cx-cards"><div class="muted">Loading&hellip;</div></div>
+    <div id="cx-fund" style="margin-top:16px"></div>
+    <p class="sub" style="margin:14px 0 0;font-size:12.5px;">
+      Gamma by strike, the walls and the flip, liquidation clusters, what a round trip costs you,
+      and NoVo reading all of it &rarr; <a href="/crypto" style="color:#a78bfa;font-weight:700;">the Crypto Market Map</a>.</p>
+  </div>
+</div>
+
 <div class="container sec">
   <div class="lbl">About</div>
   <h2 class="h2">What is the NoVo Market Pulse?</h2>
@@ -859,5 +889,51 @@ document.addEventListener('keydown',function(ev){
 });
 </script>
   <script defer src="/polish.js?v=5da1c169"></script>
+
+<script>
+/* Free crypto layer. Deliberately the SAME layers the market already publishes for
+   nothing — funding, open interest, liquidations, and the BTC/ETH gamma read. The
+   strike ladder, the walls, the flip, cost-to-trade and NoVo are the subscription. */
+(function(){
+  var M=function(n){ if(n==null) return '—';
+    var a=Math.abs(n);
+    return a>=1e9?'$'+(n/1e9).toFixed(2)+'B':a>=1e6?'$'+(n/1e6).toFixed(1)+'M':a>=1e3?'$'+(n/1e3).toFixed(0)+'K':'$'+n.toFixed(0); };
+  function card(d){
+    if(!d || !d.gammaSummary) return '';
+    var g=d.gammaSummary, pos=g.netGex>=0;
+    return '<div class="cx-card"><div class="cxn">'+d.coin+'</div>'
+      +'<div class="cxg '+(pos?'cx-up':'cx-dn')+'">'+(pos?'+':'')+M(g.netGex)+'</div>'
+      +'<div class="cxr '+(pos?'cx-up':'cx-dn')+'">'+g.regime+'</div>'
+      +'<div class="cxm">net dealer gamma per 1% &middot; '+g.settlementBook+' book</div></div>';
+  }
+  function fundRows(list){
+    var rows=list.filter(function(x){return x && x.funding && x.funding.length;});
+    if(!rows.length) return '';
+    var h='<table class="cx-tbl"><thead><tr><th>Coin</th><th>Venues</th><th>Funding spread</th><th>Open interest</th></tr></thead><tbody>';
+    rows.forEach(function(d){
+      var ann=d.funding.map(function(f){return f.annualized_pct;}).filter(function(v){return v!=null;});
+      if(!ann.length) return;
+      var hi=Math.max.apply(null,ann), lo=Math.min.apply(null,ann);
+      h+='<tr><td>'+d.coin+'</td><td>'+d.funding.length+'</td>'
+        +'<td><span class="'+(hi>0?'cx-up':'cx-dn')+'">'+hi.toFixed(0)+'%</span> / <span class="'+(lo>0?'cx-up':'cx-dn')+'">'+lo.toFixed(0)+'%</span></td>'
+        +'<td>'+M(d.totalOiUsd)+'</td></tr>';
+    });
+    return h+'</tbody></table>';
+  }
+  var COINS=['BTC','ETH','SOL','XRP','DOGE','HYPE'];
+  Promise.all(COINS.map(function(c){
+    return fetch('/api/crypto-free?coin='+c).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+  })).then(function(all){
+    var ok=all.filter(Boolean);
+    var g=document.getElementById('cx-gamma');
+    var cards=ok.map(card).filter(Boolean).join('');
+    g.innerHTML = cards || '<div class="muted">Crypto data is refreshing.</div>';
+    document.getElementById('cx-fund').innerHTML = fundRows(ok);
+  }).catch(function(){
+    var g=document.getElementById('cx-gamma');
+    if(g) g.innerHTML='<div class="muted">Crypto data is refreshing.</div>';
+  });
+})();
+</script>
 </body>
 </html>
