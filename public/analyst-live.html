@@ -1283,14 +1283,17 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      placeholder text, and the shortcut printed on the end of it. */
   #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
     padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(34,211,238,.42);cursor:pointer;
-    background:linear-gradient(180deg,#12283a,#0d1a26);color:#cfe4f2;font-weight:600;font-size:13.5px;
+    /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
+       against and the button goes soft; the same glow over the page's own dark reads as
+       an outline. Same treatment as the crypto map's bubble. */
+    background:linear-gradient(180deg,var(--navy2),#0b0b0d);color:var(--txt1);font-weight:600;font-size:13.5px;
     min-width:264px;text-align:left;
     box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(34,211,238,.45),inset 0 1px 0 rgba(255,255,255,.05)}
-  #novo-ask-bubble:hover{border-color:#22d3ee;color:#eaf3ff;
+  #novo-ask-bubble:hover{border-color:#22d3ee;color:var(--txt1);
     box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(34,211,238,.62),inset 0 1px 0 rgba(255,255,255,.07)}
   #novo-ask-bubble .caret{color:#22d3ee;font-weight:800;text-shadow:0 0 10px rgba(34,211,238,.75)}
   #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
-    color:var(--txt3,#6f8bab);border:1px solid var(--bdr,#22303f);border-radius:6px;padding:2px 6px;
+    color:var(--txt3);border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
   /* The field has to fit a phone. */
   @media (max-width:640px){ #novo-ask-bubble{min-width:0} }
@@ -1299,7 +1302,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
   /* NoVo left something. The bubble is the only place it can show, since the drop lands in a panel
      that is closed by default -- so the dot has to survive until the panel is actually opened. */
-  #novo-ask-bubble.has-drop{border-color:#22d3ee;color:#eaf3ff;
+  #novo-ask-bubble.has-drop{border-color:#22d3ee;color:var(--txt1);
     box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 0 24px rgba(34,211,238,.26)}
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
     background:#22d3ee;box-shadow:0 0 9px rgba(34,211,238,.9)}
