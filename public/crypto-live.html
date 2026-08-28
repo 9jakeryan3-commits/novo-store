@@ -30,6 +30,32 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
   /* purple is this product's accent. --amber stays semantic (medium confidence / warn). */
   --cx:#a78bfa; --cx-deep:#7c3aed; --cx-line:rgba(167,139,250,.30);
   --mono:'Geist Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  /* Motion. Two durations only: --dur-1 for a state a finger is holding (press, hover),
+     --dur-2 for something that travels (a drawer, a panel arriving). One easing curve, so
+     everything on the page decelerates the same way. */
+  --dur-1:.13s; --dur-2:.22s; --ease:cubic-bezier(.22,1,.36,1);
+  /* Radius scale. Was nine arbitrary values between 1px and 11px, with panels rounder-
+     cornered than the controls sitting inside them. Three steps and a pill: a control is
+     always tighter than the surface it sits on. */
+  --r-bar:2px; --r-1:5px; --r-2:9px; --r-3:12px; --r-pill:999px;
+}
+/* Anything a finger or cursor can act on says so. Declared once, here, rather than left to
+   each component to remember - which is how 102 of 123 of them came to say nothing. */
+a, button, input, select, summary, [role="button"], .coin, .lv-mini, .nf-btn, .dlink {
+  transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+              color var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease),
+              transform var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease);
+}
+button:active, [role="button"]:active, .coin:active, .nf-btn:active { transform: translateY(1px); }
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible,
+.coin:focus-visible {
+  outline: 2px solid var(--cx); outline-offset: 2px; border-radius: var(--r-1);
+}
+/* A page that moves is a page some people cannot use. Everything above is a nicety; none of
+   it is information, so all of it goes. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important;
+                           transition-duration:.001ms !important; scroll-behavior:auto !important; }
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -64,6 +90,22 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .lv-live.stale{color:var(--amber)}
 .lv-live.stale .dot{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:none}
 @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* A streamed tick used to change the number and say nothing about which way it went. The
+   tint is the direction, held just long enough to catch peripherally. */
+@keyframes cxTickUp{0%{background:rgba(52,211,153,.28)}100%{background:transparent}}
+@keyframes cxTickDn{0%{background:rgba(244,63,94,.28)}100%{background:transparent}}
+.tick-up,.tick-dn{border-radius:var(--r-1);padding:0 3px;margin:0 -3px}
+.tick-up{animation:cxTickUp .6s var(--ease)}
+.tick-dn{animation:cxTickDn .6s var(--ease)}
+/* Switching coins replaced one wall of numbers with another in a single frame. The panels
+   arrive in sequence instead, so the swap reads as a move to a different coin. */
+@keyframes cxIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+#body.swap>.panel{animation:cxIn .30s var(--ease) both}
+#body.swap>.panel:nth-child(2){animation-delay:.035s}
+#body.swap>.panel:nth-child(3){animation-delay:.07s}
+#body.swap>.panel:nth-child(4){animation-delay:.10s}
+#body.swap>.panel:nth-child(5){animation-delay:.13s}
+#body.swap>.panel:nth-child(n+6){animation-delay:.16s}
 .lv-sess{color:var(--txt3);font-size:12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* The status reads long on a desktop bar and short on a phone one; the pill beside it
    already says LIVE, so 'updated ... ago' is 140px saying what 'ago' says. */
@@ -71,8 +113,8 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .lv-sess b{color:var(--txt2);font-weight:700}
 .lv-gear{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;
   border:1px solid var(--bdr);color:var(--txt2);font:inherit;font-size:12px;font-weight:700;
-  padding:7px 12px;border-radius:9px;cursor:pointer}
-.lv-gear:hover{border-color:var(--cx);color:var(--txt1)}
+  padding:7px 12px;border-radius:var(--r-2);cursor:pointer}
+.lv-gear:hover{border-color:var(--cx);color:var(--txt1);background:rgba(167,139,250,.07)}
 /* Settings drawer */
 .lv-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;
   transition:opacity .2s ease;z-index:9990}
@@ -96,7 +138,7 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .nf-k{color:var(--txt1);font-size:13.5px;font-weight:600}
 .nf-s{color:var(--txt3);font-size:11.5px;line-height:1.45;margin-top:3px}
 .nf-btn{margin-left:auto;flex:0 0 auto;background:var(--navy2);border:1px solid var(--bdr);color:var(--txt2);
-  font:inherit;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none}
+  font:inherit;font-size:11.5px;font-weight:700;padding:9px 14px;border-radius:var(--r-2);cursor:pointer;text-decoration:none}
 .nf-btn:hover{border-color:var(--cx);color:var(--txt1)}
 .nf-btn:disabled{opacity:.5;cursor:default;border-color:var(--bdr)}
 .dstat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--bdr);
@@ -107,30 +149,56 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .col{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr) transparent}
 .col::-webkit-scrollbar{width:7px}.col::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
-#rail{border-right:1px solid var(--bdr2);background:var(--sunk)}
-#side{border-left:1px solid var(--bdr2);background:var(--sunk)}
+/* Both rails scroll UNDER fixed furniture - the install pill over the left, the ask
+   bubble over the right - and neither reserved room for it, so the last coin and the
+   bottom of the record panel were permanently covered. */
+#rail{border-right:1px solid var(--bdr2);background:var(--sunk);padding-bottom:64px}
+#side{border-left:1px solid var(--bdr2);background:var(--sunk);padding-bottom:72px}
 #center{padding:14px 16px 48px}
+/* Below 640px the install pill sits ABOVE the ask bubble, so the two of them occupy
+   ~120px of the bottom edge and the column has to scroll clear of both. */
+@media(max-width:640px){#center{padding-bottom:132px}}
 
 .railhead{position:sticky;top:0;background:var(--sunk);padding:9px 12px 6px;border-bottom:1px solid var(--bdr2);z-index:2}
 #search{width:100%;background:var(--navy2);border:1px solid var(--bdr);color:var(--txt1);
-  font-family:var(--mono);font-size:11px;padding:5px 8px;border-radius:3px;outline:none}
-#search:focus{border-color:var(--cx)}
+  font-family:var(--mono);font-size:11px;padding:6px 9px;border-radius:var(--r-2);outline:none}
+#search:hover{border-color:var(--txt4)}
+#search:focus{border-color:var(--cx);box-shadow:0 0 0 3px rgba(167,139,250,.13)}
 .bandhead{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--txt4);padding:11px 12px 5px}
-.coin{display:grid;grid-template-columns:1fr auto;gap:8px;padding:5px 12px;cursor:pointer;
+.coin{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 12px;cursor:pointer;
   border-left:2px solid transparent;align-items:baseline}
+/* The row is the product's primary control and there are ninety of them, so it earns a
+   real hover: the accent edge grows in from nothing rather than appearing, and the row
+   shifts a hair toward the cursor. */
 .coin:hover{background:var(--navy2)}
-.coin.on{background:var(--navy2);border-left-color:var(--cx)}
-.coin .c{font-family:var(--mono);font-size:11.5px;font-weight:600}
+.coin:hover .c{color:var(--txt1)}
+.coin:hover .p{color:var(--txt2)}
+.coin.on{background:var(--navy2);border-left-color:var(--cx);
+  box-shadow:inset 0 0 22px -12px var(--cx)}
+.coin .c{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  transition:color var(--dur-1) var(--ease)}
 .coin.on .c{color:var(--cx)}
-.coin .p{font-family:var(--mono);font-size:10px;color:var(--txt4)}
+.coin .p{font-family:var(--mono);font-size:10px;color:var(--txt4);
+  font-variant-numeric:tabular-nums;transition:color var(--dur-1) var(--ease)}
+/* A finger is not a cursor: 25px rows are a miss-tap. Only on coarse pointers, so the
+   desktop rail keeps its density. */
+@media (pointer:coarse){
+  .coin{padding:12px 12px;min-height:44px}
+  .lv-gear{min-height:44px;min-width:44px;justify-content:center}
+  #search{min-height:44px}
+  /* the drawer is reached by thumb too */
+  .lv-drawer .dh button{min-width:44px;min-height:44px;font-size:26px}
+  .lv-drawer .dlink{padding:14px 0}
+  .nf-btn{min-height:44px}
+}
 
-.panel{background:var(--panel);border:1px solid var(--bdr2);border-radius:5px;margin-bottom:12px}
+.panel{background:var(--panel);border:1px solid var(--bdr2);border-radius:var(--r-3);margin-bottom:12px}
 .ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
 .ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
 .ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto}
 .pb{padding:12px}
-.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:2px;font-weight:600}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:var(--r-1);font-weight:600}
 .t-hi{background:rgba(16,185,129,.14);color:var(--green2)}
 .t-md{background:rgba(245,158,11,.14);color:var(--amber)}
 .t-lo{background:rgba(244,63,94,.14);color:var(--red)}
@@ -180,7 +248,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .gauge-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
 .gauge-h .gk{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4)}
 .gauge-h .gv{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700}
-.gauge-t{height:4px;border-radius:2px;background:var(--bdr2);position:relative}
+.gauge-t{height:4px;border-radius:var(--r-bar);background:var(--bdr2);position:relative}
 .gauge-d{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%)}
 .gauge-n{font-size:12px;color:var(--txt4);margin-top:8px;line-height:1.5}
 /* Breadth — impossible on three tickers, so it is the crypto map's own panel. */
@@ -188,11 +256,11 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .brow{display:grid;grid-template-columns:64px 1fr auto;gap:9px;align-items:center;font-family:var(--mono);font-size:11px}
 .brow .bn{color:var(--txt2)}
 .brow .bv{color:var(--txt4);font-variant-numeric:tabular-nums}
-.bbar{height:5px;border-radius:2px;background:var(--bdr2);overflow:hidden}
-.bbar i{display:block;height:100%;border-radius:2px}
+.bbar{height:5px;border-radius:var(--r-bar);background:var(--bdr2);overflow:hidden}
+.bbar i{display:block;height:100%;border-radius:var(--r-bar)}
 #gamma{width:100%;display:block}
 .legend{display:flex;gap:14px;padding:7px 12px 0;font-family:var(--mono);font-size:10px;color:var(--txt4);flex-wrap:wrap}
-.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:var(--r-bar);margin-right:5px;vertical-align:-1px}
 
 .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:1px;background:var(--bdr2)}
 .cell{background:var(--panel);padding:12px 13px}
@@ -219,7 +287,7 @@ tr:last-child td{border-bottom:none}
 #spark{width:100%;height:46px;display:block}
 .liq{display:flex;flex-direction:column;gap:6px}
 .liqrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-family:var(--mono);font-size:11px}
-.liqbar{height:5px;border-radius:1px;display:block}
+.liqbar{height:5px;border-radius:var(--r-bar);display:block}
 .liqv{color:var(--txt2);font-variant-numeric:tabular-nums}
 
 /* ---- NoVo, the analyst. Same endpoint the Analyst dashboard uses, same knowledge:
@@ -240,7 +308,11 @@ tr:last-child td{border-bottom:none}
        becomes a full-screen picker instead: the coin name in the header is the trigger, the
        filter and the band grouping come along, and picking a coin closes it. */
     #rail{display:block;position:fixed;inset:0;z-index:60;background:var(--navy);
-          overflow-y:auto;padding:14px 14px 28px;
+          overflow-y:auto;
+          /* Shorthand, so it RESETS the padding-bottom reserved on #rail above. The
+             picker is full-screen here and the install pill floats over it, so it needs
+             more room than the desktop rail, not less. */
+          padding:14px 14px 124px;
           transform:translateY(100%);visibility:hidden;
           transition:transform .22s ease, visibility .22s}
     body.rail-open #rail{transform:none;visibility:visible}
@@ -248,7 +320,7 @@ tr:last-child td{border-bottom:none}
     /* On a phone the coin name IS the picker for the other 89 coins, so it has to
        read as a control and not as a heading. */
     #sym{cursor:pointer;display:inline-flex;align-items:center;gap:9px;
-      border:1px solid var(--bdr);border-radius:11px;padding:3px 11px 4px;
+      border:1px solid var(--bdr);border-radius:var(--r-3);padding:3px 11px 4px;
       background:var(--navy2);-webkit-tap-highlight-color:transparent}
     #sym::after{content:"\25BE";display:inline-block;color:var(--cx);font-size:.52em;
       font-weight:900;line-height:1;transition:transform .18s ease}
@@ -258,7 +330,7 @@ tr:last-child td{border-bottom:none}
   }
   #railclose{display:none;position:sticky;top:0;z-index:2;width:100%;
     background:var(--navy2);border:1px solid var(--bdr);color:var(--txt2);
-    border-radius:9px;padding:9px;font-family:var(--mono);font-size:12px;
+    border-radius:var(--r-2);padding:11px;font-family:var(--mono);font-size:12px;
     letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;cursor:pointer}
   .tt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
   .tt th{text-align:left;font-weight:600;color:var(--txt4);padding:4px 6px;border-bottom:1px solid var(--bdr2);
@@ -270,7 +342,7 @@ tr:last-child td{border-bottom:none}
   .hrow{display:flex;align-items:center;gap:8px;margin-bottom:3px}
   .hlab{font-family:var(--mono);font-size:10px;color:var(--txt4);width:34px;flex:none;text-align:right}
   .hcells{display:flex;gap:1px;flex:1}
-  .hc{flex:1;height:16px;border-radius:1px}
+  .hc{flex:1;height:16px;border-radius:var(--r-bar)}
   /* MOBILE ---------------------------------------------------------------
      This page shipped with five media queries against the Analyst dashboard's nineteen,
      and it shows on a phone: the brand stacked to three lines, the venue table pushed the
@@ -298,8 +370,18 @@ tr:last-child td{border-bottom:none}
   }
   /* ---- NoVo ask panel: ported from the Analyst dashboard so the two behave identically.
      Palette remapped to this page's tokens; the logic is unchanged. ---- */
+  /* Two pieces of fixed furniture that did not know about each other: measured 16x32px of
+     overlap at 390px. Below 640px the install pill goes ABOVE the ask bubble instead of
+     beside it, which is the only arrangement that fits. */
+  .cx-install{position:fixed;bottom:16px;left:16px;z-index:9998;border:none;cursor:pointer;
+    background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;
+    padding:11px 16px;border-radius:var(--r-2);font:700 12px/1 var(--sans);
+    letter-spacing:.5px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+  .cx-install[hidden]{display:none}
+  .cx-install:hover{filter:brightness(1.07)}
+  @media (max-width:640px){ .cx-install{bottom:70px;left:12px} }
   #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
-    padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(167,139,250,.42);cursor:pointer;
+    padding:11px 12px 11px 14px;border-radius:var(--r-2);border:1px solid rgba(167,139,250,.42);cursor:pointer;
     background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
     min-width:264px;text-align:left;
     box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -307,7 +389,7 @@ tr:last-child td{border-bottom:none}
     box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.62),inset 0 1px 0 rgba(255,255,255,.07)}
   #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
   #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
-    color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:6px;padding:2px 6px;
+    color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:var(--r-1);padding:2px 6px;
     background:rgba(255,255,255,.03)}
   #novo-ask-bubble.has-drop{border-color:#a78bfa;color:var(--txt1);
     box-shadow:0 0 0 1px rgba(167,139,250,.35), 0 0 24px rgba(167,139,250,.26)}
@@ -355,10 +437,10 @@ tr:last-child td{border-bottom:none}
     color:var(--txt2);font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
   #novo-ask .quick button:hover{border-color:#a78bfa;color:var(--txt1)}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,var(--bdr))}
-  #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,var(--bdr));border-radius:10px;
+  #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,var(--bdr));border-radius:var(--r-2);
     padding:10px 12px;color:var(--txt1);font-size:13.5px;outline:none}
   #novo-ask input:focus{border-color:#a78bfa}
-  #novo-ask button.go{background:#a78bfa;border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
+  #novo-ask button.go{background:#a78bfa;border:0;border-radius:var(--r-2);color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
 /* Below ~375px the bar is wider than the phone. Nothing is dropped - the type tightens. */
 @media(max-width:374px){
@@ -372,6 +454,13 @@ tr:last-child td{border-bottom:none}
   .lv-status{gap:8px}
   .lv-sess{font-size:10.5px}
   .lv-gear{padding:6px 8px}
+}
+/* Touch sizing for the two fixed pieces. It has to live at the END of the sheet: both
+   set their own padding further down than the pointer:coarse block above, and a media
+   query adds no specificity - only order decides. */
+@media (pointer:coarse){
+  #novo-ask-bubble{padding-top:13px;padding-bottom:13px}
+  .cx-install{min-height:44px;padding-top:15px;padding-bottom:15px}
 }
 </style>
 </head>
@@ -513,22 +602,22 @@ var cxInstall = (function(){
     b = document.createElement('button');
     b.id = 'cxInstall';
     b.textContent = '⤓  Install app';
-    b.style.cssText = 'position:fixed;bottom:16px;left:16px;z-index:9998;'
-      + 'background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;border:none;'
-      + 'padding:11px 16px;border-radius:9px;font:700 12px/1 system-ui,sans-serif;'
-      + 'letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
+    // Look lives in the sheet, not here: an inline style outranks every rule in the
+    // stylesheet, so a padding set from script cannot be adjusted for a touch screen.
+    b.className = 'cx-install';
+    b.hidden = true;
     b.onclick = async function(){
       if(!deferred) return;
       deferred.prompt();
       try { await deferred.userChoice; } catch(e){}
-      deferred = null; b.style.display = 'none';
+      deferred = null; b.hidden = true;
     };
     document.body.appendChild(b);
     return b;
   }
   function show(){
     if(!deferred || !entered || standalone()) return;
-    var b = pill(); if(b) b.style.display = 'block';
+    var b = pill(); if(b) b.hidden = false;
   }
   // The Settings row is the second way in. Chrome only hands over one beforeinstallprompt,
   // so the row and the pill share it rather than each holding their own.
@@ -544,12 +633,12 @@ var cxInstall = (function(){
     deferred.prompt();
     try { await deferred.userChoice; } catch(e){}
     deferred = null;
-    var b = document.getElementById('cxInstall'); if(b) b.style.display='none';
+    var b = document.getElementById('cxInstall'); if(b) b.hidden = true;
     syncRow();
   }
   window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred = e; show(); });
   window.addEventListener('appinstalled', function(){
-    var b = document.getElementById('cxInstall'); if(b) b.style.display='none';
+    var b = document.getElementById('cxInstall'); if(b) b.hidden = true;
   });
   // Network-only worker: this dashboard renders a snapshot that moves every few minutes,
   // and a cached shell would show a subscriber stale positioning and call it live.
@@ -559,8 +648,14 @@ var cxInstall = (function(){
   return { entered: function(){ entered = true; show(); }, go: go, syncRow: syncRow };
 })();
 
-const money = n => n==null ? '—' : (Math.abs(n)>=1e9 ? '$'+(n/1e9).toFixed(2)+'B'
-  : Math.abs(n)>=1e6 ? '$'+(n/1e6).toFixed(1)+'M' : Math.abs(n)>=1e3 ? '$'+(n/1e3).toFixed(0)+'K' : '$'+n.toFixed(0));
+/* '$-30.7M' put the sign between the currency and the number, which is not how a negative
+   amount is written anywhere else on the page or off it. Sign first, real minus, and the
+   magnitude formatted off the absolute value. */
+const money = n => { if(n==null) return '—';
+  const sg = n<0 ? '\u2212' : '', a = Math.abs(n);
+  return sg + (a>=1e9 ? '$'+(a/1e9).toFixed(2)+'B'
+    : a>=1e6 ? '$'+(a/1e6).toFixed(1)+'M'
+    : a>=1e3 ? '$'+(a/1e3).toFixed(0)+'K' : '$'+a.toFixed(0)); };
 const px = n => n==null ? '—' : (n>=1000 ? n.toLocaleString(undefined,{maximumFractionDigits:0})
   : n>=1 ? n.toFixed(4) : n.toPrecision(4));
 
@@ -957,8 +1052,12 @@ function drawCoin(){
     :`<div class="empty">no readings yet for ${CUR}</div>`;
   h+=`</div></div>`;
   $('#body').innerHTML=h;
+  // Restart the entrance: the class is already on the element from the last coin, and an
+  // animation does not replay just because its subject was replaced.
+  const _bd=$('#body'); _bd.classList.remove('swap'); void _bd.offsetWidth; _bd.classList.add('swap');
   if(g) drawGamma(g);
   if(window.cxLive) window.cxLive.attach(CUR, g);   // stream spot for THIS coin; stops the previous socket
+  if(window.cxLive && cxLive.resetTick) cxLive.resetTick();  // BTC -> SOL is not a tick
 
   let s='';
   if(tc){
@@ -1461,6 +1560,13 @@ window.cxLive = (function(){
     const l=el('lgex-live'); if(l) l.classList.add('hidden');
   }
 
+  let _lastSpot = null;
+  function cxFlash(node, up){
+    if(!node) return;
+    node.classList.remove('tick-up','tick-dn');
+    void node.offsetWidth;                       // forces the animation to start over
+    node.classList.add(up ? 'tick-up' : 'tick-dn');
+  }
   function paint(v, spot){
     const box=el('lgex-box'), val=el('lgex-val'), lab=el('lgex-lab'), sub=el('lgex-sub');
     if(!box||!val) return;
@@ -1482,7 +1588,13 @@ window.cxLive = (function(){
       const lad=document.querySelector('.lad');
       if(lad){
         const sv=lad.querySelector('[data-spot] .lval');
-        if(sv) sv.textContent = px(spot);
+        if(sv){
+          // Direction first, then the value: the tint is only meaningful against the
+          // previous print, and _lastSpot resets per coin so a switch never fakes a tick.
+          if(_lastSpot!=null && spot!==_lastSpot) cxFlash(sv, spot>_lastSpot);
+          sv.textContent = px(spot);
+        }
+        _lastSpot = spot;
         lad.querySelectorAll('[data-lv]').forEach(function(row){
           const lv=parseFloat(row.getAttribute('data-lv'));
           const d=row.querySelector('.ldist');
@@ -1542,6 +1654,7 @@ window.cxLive = (function(){
   }
 
   return {
+    resetTick: function(){ _lastSpot = null; },
     attach: function(c, g){
       stop();
       coin = c; snap = g; tries = 0;
