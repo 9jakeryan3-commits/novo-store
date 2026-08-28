@@ -742,7 +742,7 @@ function volRow(d,g){
 
 /* ---------------- level ladder ---------------- */
 function ladder(g){
-  const rows=[];
+  let rows=[];
   const dist=k=>((k/g.spot-1)*100);
   const flipFar = g.flip_zone!=null && Math.abs(dist(g.flip_zone))>12;
   if(g.call_wall) rows.push({n:'Call wall',s:'resistance / pin',v:g.call_wall,c:'var(--green2)'});
@@ -753,6 +753,19 @@ function ladder(g){
   // the same ladder as the walls or a reader has to hold two pictures at once.
   if(g.max_pain) rows.push({n:'Max pain',s:'least payout at expiry',v:g.max_pain,c:'var(--txt3)'});
   if(g.abs_gamma_strike) rows.push({n:'Heaviest gamma',s:'where hedging concentrates',v:g.abs_gamma_strike,c:'#a78bfa'});
+  // Levels COINCIDE, and often: measured across the six books, four of them had two of
+  // these landing on the same strike. Rendered as separate rows they read as a duplicate
+  // - same price, same distance, twice - when the coincidence is the opposite of noise.
+  // A put wall that IS the heaviest gamma strike is a stronger level than either alone,
+  // so they merge into one row that says so. Spot never merges: it is the reference the
+  // others are measured against, not another level.
+  const merged=[];
+  rows.forEach(function(r){
+    const hit = r.spot ? null : merged.find(function(m){ return !m.spot && m.v===r.v; });
+    if(hit){ hit.n += ' · ' + r.n.toLowerCase(); hit.s = [hit.s, r.s].filter(Boolean).join(' · '); }
+    else merged.push(Object.assign({}, r));
+  });
+  rows = merged;
   rows.sort((a,b)=>b.v-a.v);
   return '<div class="lad">'+rows.map(function(r){
     if(r.spot) return '<div class="lrow spot" data-spot="1"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
@@ -1698,8 +1711,13 @@ window.cxLive = (function(){
       // a redraw queued for the PREVIOUS coin would paint its spot onto this one
       if(_chartDue){ clearTimeout(_chartDue); _chartDue = null; } },
     attach: function(c, g){
-      stop();
+      // snap and coin FIRST. stop() reverts the panel to the PUBLISHED values, and it
+      // reads them off `snap` - so running it while snap still points at the coin we are
+      // leaving painted that coin's spot and net GEX into this coin's ladder, and every
+      // distance was then recomputed against the wrong price. It is why ETH's ladder read
+      // BTC's spot with its levels at -96%, corrected only when the next tick arrived.
       coin = c; snap = g; tries = 0;
+      stop();
       if(g && g.curve && IDX[c]) connect();
     },
     stop: stop
