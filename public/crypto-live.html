@@ -194,6 +194,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 }
 
 .panel{background:var(--panel);border:1px solid var(--bdr2);border-radius:var(--r-3);margin-bottom:12px}
+.rdn{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:5px;letter-spacing:.04em}
 .ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
 .ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
 .ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto}
@@ -1045,11 +1046,23 @@ function drawCoin(){
   }
   h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
     <span class="sub">claims, scored when the horizon passes</span></div><div class="pb">`;
-  h+=(d.readings&&d.readings.length)?d.readings.map(r=>`<div class="rd"><div class="rdh">
+  // A standing observation is re-emitted every pass, so four rows could be one claim with
+  // its countdown decremented. Collapse a RUN of the same unscored kind to its newest and
+  // say how long it has stood - nothing is dropped here, and the corpus keeps every claim,
+  // which is what the base rates are computed from. A scored claim carries its own verdict
+  // and never collapses into another.
+  const _runs=[];
+  (d.readings||[]).forEach(r=>{
+    const prev=_runs[_runs.length-1];
+    if(prev && prev.r.kind===r.kind && prev.r.correct==null && r.correct==null){
+      prev.n++; prev.since=r.ts_utc;          // readings run newest-first
+    } else _runs.push({r:r, n:1, since:r.ts_utc});
+  });
+  h+=_runs.length?_runs.map(({r,n,since})=>`<div class="rd"><div class="rdh">
       <span class="rdk">${r.kind.replace(/_/g,' ')}</span>
       ${r.correct==null?'<span class="tag t-n">open</span>':(r.correct?'<span class="tag t-hi">correct</span>':'<span class="tag t-lo">wrong</span>')}
       <span class="rdt">${String(r.ts_utc).slice(11,16)} UTC · ${r.horizon_min}m</span></div>
-      <div class="rdc">${r.claim}</div></div>`).join('')
+      <div class="rdc">${r.claim}</div>${n>1?`<div class="rdn">standing since ${String(since).slice(11,16)} UTC · restated ${n}&times;</div>`:''}</div>`).join('')
     :`<div class="empty">no readings yet for ${CUR}</div>`;
   h+=`</div></div>`;
   $('#body').innerHTML=h;
@@ -1568,7 +1581,7 @@ window.cxLive = (function(){
     const l=el('lgex-live'); if(l) l.classList.add('hidden');
   }
 
-  let _lastSpot = null;
+  let _lastSpot = null, _chartDue = null;
   function cxFlash(node, up){
     if(!node) return;
     node.classList.remove('tick-up','tick-dn');
@@ -1594,6 +1607,23 @@ window.cxLive = (function(){
     // in the ladder was quietly stale. A live tick moves all of it or none of it.
     if(spot!=null){
       const lad=document.querySelector('.lad');
+      // Every surface that shows this coin's price, not just the two that were wired up.
+      // The header is the biggest number on the page; leaving it on the pass value while
+      // the ladder under it moved is what made the page look broken.
+      const pxEl=document.getElementById('px');
+      if(pxEl) pxEl.textContent = px(spot);
+      const railOn=document.querySelector('.coin.on .p');
+      if(railOn) railOn.textContent = px(spot);
+      // The chart's SPOT line is painted into a canvas, so it can only follow by redrawing.
+      // Throttled to once a second: the line moving is worth a redraw, sixty of them a
+      // second are not.
+      if(snap && typeof drawGamma==='function'){
+        snap.spot = spot;
+        if(!_chartDue) _chartDue = setTimeout(function(){
+          _chartDue = null;
+          try { drawGamma(snap); } catch(_){}
+        }, 1000);
+      }
       if(lad){
         const sv=lad.querySelector('[data-spot] .lval');
         if(sv){
@@ -1662,7 +1692,9 @@ window.cxLive = (function(){
   }
 
   return {
-    resetTick: function(){ _lastSpot = null; },
+    resetTick: function(){ _lastSpot = null;
+      // a redraw queued for the PREVIOUS coin would paint its spot onto this one
+      if(_chartDue){ clearTimeout(_chartDue); _chartDue = null; } },
     attach: function(c, g){
       stop();
       coin = c; snap = g; tries = 0;
