@@ -59,9 +59,20 @@ function _subIsCrypto(sub) {
 // The dashboard polls every 90s. A Stripe round trip per poll would be slow and would
 // burn rate limit, so a positive verdict is cached briefly. Cache is short precisely so a
 // cancellation takes effect in minutes rather than at token expiry.
+// Comped seats: owner testing and free/comped accounts, which have no Stripe subscription at
+// all. The control plane already treats COMP_EMAILS as every product; without the same list
+// here the portal would mint a valid token and this endpoint would still answer 402, so the
+// one account that exists to test the product is the one account that cannot open it.
+// Same variable name and same semantics as the control plane, so there is one list to keep.
+const COMP = new Set(
+  String(process.env.COMP_EMAILS || "")
+    .split(",").map(e => e.trim().toLowerCase()).filter(Boolean)
+);
+
 async function hasCryptoSub(email) {
   const norm = String(email || "").trim().toLowerCase();
   if (!norm) return false;
+  if (COMP.has(norm)) return true;
   if (!_stripe || CRYPTO_PRICE_IDS.size === 0) return false;   // not configured yet -> closed, not open
 
   const r = kv();
