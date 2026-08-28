@@ -59,6 +59,25 @@ const declarations = [
     },
   },
   {
+    name: "get_crypto_history",
+    description:
+      "The crypto corpus BEHIND the live map - what a number has done historically, not just " +
+      "what it is now. Every live figure placed against its own distribution: funding per venue " +
+      "with its percentile, mean, standard deviation and sample size; open interest and cost to " +
+      "trade the same way; net GEX with how often dealers have been short gamma and how much of " +
+      "the time spot has sat above the flip; daily series for trend. Also my own base rates - what " +
+      "each kind of claim has actually resolved to, with n - and the coverage behind all of it. " +
+      "Use this for ANY question with a historical shape: 'is this funding unusual', 'how often " +
+      "does this happen', 'what has this setup resolved to', 'is this cheap by its own standards'. " +
+      "A percentile needs at least 8 samples or it is not published; say so rather than guess.",
+    parameters: {
+      type: "object",
+      properties: {
+        coin: { type: "string", description: "Asset code, e.g. BTC. Omit for base rates and coverage only." },
+      },
+    },
+  },
+  {
     name: "get_crypto_breadth",
     description:
       "The CROSS-SECTIONAL crypto read across all 89 coins at once: median round-trip cost, the cheapest and " +
@@ -622,6 +641,37 @@ function makeExecutors(ctx = {}) {
     return (snap && snap.coins) ? snap : null;
   }
 
+  async function _cryptoHist() {
+    if (!r) return null;
+    let h = null;
+    try { h = await r.get("crypto:map:history"); } catch (_) { h = null; }
+    if (typeof h === "string") { try { h = JSON.parse(h); } catch (_) { h = null; } }
+    return (h && h.coins) ? h : null;
+  }
+
+  async function get_crypto_history({ coin } = {}) {
+    const h = await _cryptoHist();
+    if (!h) return { error: "the crypto history rollup has not been published yet" };
+    const ageMin = h.received ? Math.round((Date.now() - h.received) / 60000) : null;
+    const base = {
+      asOfMinutesAgo: ageMin,
+      baseRates: h.base_rates || {},
+      openClaims: h.open_claims,
+      coverage: h.coverage || {},
+      note: "percentiles are the CURRENT value's rank within that series' own full history. " +
+            "A null percentile means fewer than 8 samples - too thin to rank, and I should " +
+            "say the sample is thin rather than quote a number.",
+    };
+    const code = String(coin || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!code) return { ...base, coinsCovered: Object.keys(h.coins).length };
+    const c = h.coins[code];
+    if (!c) {
+      return { ...base, error: `no history for ${code}`,
+               coinsCovered: Object.keys(h.coins).length };
+    }
+    return { coin: code, ...base, history: c };
+  }
+
   async function get_crypto_map({ coin }) {
     const code = String(coin || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (!code) return { error: "name a coin, e.g. BTC" };
@@ -691,7 +741,7 @@ function makeExecutors(ctx = {}) {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
     get_base_rates, get_recent_reads,
-    get_crypto_map, get_crypto_breadth,
+    get_crypto_map, get_crypto_breadth, get_crypto_history,
   };
 }
 
