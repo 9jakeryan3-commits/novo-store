@@ -374,6 +374,32 @@ function ladder(g){
    chain arrives whole, 13 expiries deep, and everything past the front one used to be
    parsed and dropped. Nothing here costs an extra request.
 --------------------------------------------------------------------------------- */
+function venuePanel(g){
+  const v=(g&&g.venues)||[]; if(v.length<2) return '';
+  const named={inverse:'Deribit · coin-margined',linear:'Deribit · USDC',okx:'OKX'};
+  // Two venues can disagree about the REGIME - one says dealers dampen, the other says
+  // they amplify. That disagreement is the thing a one-venue map cannot show, so it gets
+  // called out rather than buried in a table.
+  const signs=new Set(v.filter(x=>x.net_gex!=null).map(x=>x.net_gex>=0));
+  const split=signs.size>1;
+  const rows=v.map(function(x){
+    const pos=(x.net_gex||0)>=0;
+    return `<tr><td>${named[x.settle]||x.settle}</td>`
+      +`<td class="num ${pos?'up':'dn'}">${x.net_gex!=null?(pos?'+':'')+money(x.net_gex):'—'}</td>`
+      +`<td class="num">${x.flip_zone!=null?px(x.flip_zone):'—'}</td>`
+      +`<td class="num">${x.max_pain!=null?px(x.max_pain):'—'}</td>`
+      +`<td class="num">${x.chain_oi!=null?Math.round(x.chain_oi).toLocaleString():'—'}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>By venue</h2>`
+    +`<span class="sub">${v.length} books${split?' · they disagree':''}</span></div><div class="pb">`
+    +`<table class="tt"><thead><tr><th>Book</th><th class="num">Net GEX</th><th class="num">Flip</th>`
+    +`<th class="num">Max pain</th><th class="num">Chain OI</th></tr></thead><tbody>${rows}</tbody></table>`
+    +`<div class="fnote">${split
+        ? 'The books disagree on the sign: one has dealers dampening, the other amplifying. Size the read by the book carrying the open interest.'
+        : 'Both books agree on the regime. The larger chain OI is the one setting the level.'}</div>`
+    +`</div></div>`;
+}
+
 function exposures(g){
   if(!g) return '';
   const has = g.dex!=null || g.vanna_exp!=null || g.charm_exp!=null || g.pc_oi_ratio!=null;
@@ -566,7 +592,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h += exposures(g) + termPanel(g) + skewPanel(g) + heatPanel(g);
+    h += venuePanel(g) + exposures(g) + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
