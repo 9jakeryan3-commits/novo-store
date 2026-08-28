@@ -366,7 +366,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- CRYPTO MARKET MAP -->
     <div class="card feat-purple">
       <div class="tag purple">Crypto</div>
-      <div class="kicker">The crypto dealer map &middot; 89 coins &middot; NoVo included</div>
+      <div class="kicker">The crypto dealer map &middot; <span data-coincount>89</span> coins &middot; NoVo included</div>
       <h2>Crypto Market Map</h2>
       <div class="toggle" id="cx-toggle">
         <button type="button" id="cx-mo" class="on-purple" onclick="setCryptoPlan('monthly')">Monthly</button>
@@ -376,7 +376,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="subnote" id="cx-note">per month &middot; cancel any time</div>
       <span class="trialpill">&#9733; 7-day free trial &middot; cancel anytime</span>
       <div class="roi">Dealer gamma on the six cryptos that have a real options book &mdash; and the leverage map on everything else.</div>
-      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Crypto GEX tools run <b style="color:var(--txt1);">$39&ndash;$79/mo</b> for four coins and no analyst. <b style="color:#a78bfa;">The Crypto Market Map is $79</b> &mdash; gamma on six books, funding per venue, 24-hour liquidations, your real cost to trade on all eighty-nine, and NoVo reading all of it.</div>
+      <div style="margin:2px 0 8px;padding:11px 13px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.22);border-radius:9px;font-size:12.5px;line-height:1.5;color:var(--txt2);">Crypto GEX tools run <b style="color:var(--txt1);">$39&ndash;$79/mo</b> for four coins and no analyst. <b style="color:#a78bfa;">The Crypto Market Map is $79</b> &mdash; gamma on six books, funding per venue, 24-hour liquidations, your real cost to trade on all <span data-coincount="words">eighty-nine</span>, and NoVo reading all of it.</div>
       <ul class="feats">
         <li class="chk"><b>Dealer gamma by strike</b> &mdash; BTC, ETH, SOL, XRP, AVAX and HYPE, with the call wall, the put wall and the gamma flip</li>
         <li class="chk"><b>The 08:00 UTC expiry ladder</b> &mdash; crypto expires daily, so pinning repeats 365 times a year instead of twelve</li>
@@ -712,5 +712,6 @@ function cryptoCheckout(){
    .catch(function(){ b.disabled=false; b.textContent=t; alert('Could not start checkout.'); });
 }
 </script>
+<script src="/coin-count.js" defer></script>
 </body>
 </html>
