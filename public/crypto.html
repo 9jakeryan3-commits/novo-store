@@ -344,12 +344,21 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .price-guarantee strong { color: var(--green); }
 
   /* ── FAQ ── */
-  .faq-list { max-width: 700px; }
+  /* Centred, not just narrow: without the auto margins this sat 24px from its
+     container's left edge and 96px from the right, 36px off the heading above it. */
+  .faq-list { max-width: 700px; margin-left: auto; margin-right: auto; }
   details.faq-item { border: 1px solid var(--bdr); border-radius: 8px; margin-bottom: 8px; background: var(--navy2); }
+  details.faq-item:hover { border-color: var(--cx-line); }
+  details.faq-item[open] { border-color: var(--cx-line); background: var(--cx-soft); }
   summary.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; font-size: 15px; font-weight: 600; color: var(--txt1); cursor: pointer; list-style: none; gap: 16px; }
   summary.faq-q::-webkit-details-marker { display: none; }
-  summary.faq-q::after { content: '+'; color: var(--blue); font-size: 20px; font-weight: 300; flex-shrink: 0; line-height: 1; }
-  details[open] summary.faq-q::after { content: '−'; }
+  /* The page's accent, not the site's blue: this pseudo-element was the one var(--blue)
+     the .cx override block never reached. And the mark ROTATES into a close rather than
+     swapping character, because a content swap is the one thing that cannot animate. */
+  summary.faq-q::after { content: '+'; color: var(--cx); font-size: 22px; font-weight: 300;
+    flex-shrink: 0; line-height: 1; transition: transform .22s cubic-bezier(.22,1,.36,1), color .14s ease; }
+  details[open] summary.faq-q::after { transform: rotate(135deg); }
+  summary.faq-q:hover::after { color: var(--txt1); }
   .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--bdr); }
   .faq-a strong { color: var(--txt1); }
 
@@ -526,6 +535,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
    Purple is this product's. Everything rides the site's own components and only
    re-tints them, so the page inherits the brand rather than imitating it. */
 :root{ --cx:#a78bfa; --cx-deep:#7c3aed; --cx-soft:rgba(167,139,250,.10); --cx-line:rgba(167,139,250,.28); }
+
+/* ── Interaction baseline ─────────────────────────────────────────────────────
+   65 of this page's interactive elements declared no transition, so most of it
+   changed state in a single frame or not at all. Declared once here rather than
+   left to each component, which is how so many came to miss it. Cards are named
+   explicitly instead of using a wildcard: a blanket transition on everything
+   fights the scroll-reveal, which animates opacity and transform of its own. */
+.cx a, .cx button, .cx summary, .cx .hero-chip, .cx .price-card, .cx .ai-card,
+.cx .cost-card, .cx .loop-card, .cx .split-card, .cx .covcard, .cx .pain-item {
+  transition: color .14s cubic-bezier(.22,1,.36,1),
+              background-color .14s cubic-bezier(.22,1,.36,1),
+              border-color .14s cubic-bezier(.22,1,.36,1),
+              box-shadow .14s cubic-bezier(.22,1,.36,1),
+              transform .14s cubic-bezier(.22,1,.36,1);
+}
+/* A card that lifts says it is a thing; a card that lifts and does nothing lies.
+   Only the ones that are actually a link or a control get the lift. */
+.cx a.hero-chip:hover, .cx .price-card:hover, .cx .ai-card:hover, .cx .loop-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cx-line);
+}
+.cx a:active, .cx button:active { transform: translateY(1px); }
+.cx a:focus-visible, .cx button:focus-visible, .cx summary:focus-visible {
+  outline: 2px solid var(--cx); outline-offset: 3px; border-radius: 5px;
+}
+/* The page already stops its reveal and its ticker for reduced motion in three
+   separate places; this covers everything added above and anything added later. */
+@media (prefers-reduced-motion: reduce){
+  .cx *, .cx *::before, .cx *::after {
+    transition-duration: .001ms !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .cx a:hover, .cx .price-card:hover, .cx .ai-card:hover, .cx .loop-card:hover { transform: none; }
+}
 
 .cx .hero-badge{ border-left-color:var(--cx); color:var(--cx); }
 .cx .hero h1 span{ background:linear-gradient(92deg,#a78bfa,#7c3aed 65%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
