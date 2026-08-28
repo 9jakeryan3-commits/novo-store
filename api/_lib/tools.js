@@ -219,6 +219,31 @@ const declarations = [
     },
   },
   {
+    name: "get_market_internals",
+    description:
+      "The market internals I collect daily and had no way to quote until now: the VIX TERM " +
+      "STRUCTURE (VIX9D, VIX, VIX3M, VIX6M with its shape and front-vs-3m spread), FINRA " +
+      "off-exchange SHORT VOLUME per ticker with its own percentile, and OPTIONS PARTICIPATION " +
+      "against each ticker's own recent baseline. " +
+      "Use it for 'what is the vol curve doing', 'is the front bid', 'is short volume unusual', " +
+      "'is participation heavy today'. " +
+      "SHORT VOLUME IS A FLOW, NOT SHORT INTEREST -- it is one day's off-exchange executions, most " +
+      "of it market makers hedging, so frame it as one-sidedness and NEVER as bearishness. Quote " +
+      "the percentile, not the bare ratio: 55% means nothing on its own because SPY sits in the " +
+      "fifties most days, and below 20 samples the rank comes back null rather than a number that " +
+      "would look authoritative. " +
+      "EVERYTHING HERE IS DATED. `termStructure.as_of` is the OLDEST of its four legs and the " +
+      "options-volume rows carry `as_of` -- these are daily closes, so on an active session the " +
+      "newest value is usually YESTERDAY'S. Say the date when you quote them; never present a " +
+      "prior close as the current print.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "SPY, QQQ or IWM. Omit for all three." },
+      },
+    },
+  },
+  {
     name: "get_recent_reads",
     description:
       "my own recent desk notes — date, kind, the BIAS it published, and an excerpt. Use when asked " +
@@ -470,6 +495,32 @@ function makeExecutors(ctx = {}) {
   // The scored record behind /track-record, read from the same key the public page serves. The
   // analyst was answering "how often does SPY close inside the expected move" with "I have not
   // logged that" while the site published the count — its own strongest evidence, out of reach.
+  async function get_market_internals({ symbol } = {}) {
+    if (!r) return { error: "market internals unavailable" };
+    let snap = null;
+    try { snap = await r.get("novo:market_internals"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    if (!snap) return { error: "no market internals published yet" };
+
+    const want = symbol ? [String(symbol).toUpperCase()] : TICKERS;
+    const pick = (obj) => {
+      if (!obj) return null;
+      const out = {};
+      for (const t of want) if (obj[t]) out[t] = obj[t];
+      return Object.keys(out).length ? out : null;
+    };
+    return {
+      // The curve is not per-ticker: VIX is the SPY-side construct and the shape is a market-wide
+      // statement, so it is returned whole rather than filtered by symbol.
+      termStructure: snap.termStructure || null,
+      shortVolume: pick(snap.shortVolume),
+      optionsVolume: pick(snap.optionsVolume),
+      publishedAt: snap.received || snap.generated || null,
+      note: "Daily closes. Every block carries its own as_of -- quote the date, and never read a "
+          + "prior close as the current print.",
+    };
+  }
+
   async function get_base_rates({ symbol, usable_only } = {}) {
     if (!r) return { error: "base rates unavailable" };
     let snap = null;
@@ -744,7 +795,7 @@ function makeExecutors(ctx = {}) {
   return {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
-    get_base_rates, get_recent_reads,
+    get_base_rates, get_recent_reads, get_market_internals,
     get_crypto_map, get_crypto_breadth, get_crypto_history,
   };
 }
