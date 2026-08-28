@@ -1038,7 +1038,7 @@ function drawCoin(){
       const f=pos.funding.find(z=>z.venue===v);
       h+=`<tr><td>${v}</td>
         <td class="${f?(f.rate>0?'up':f.rate<0?'dn':''):''}">${f?(f.rate*100).toFixed(5)+'%':'—'}</td>
-        <td class="${f?(f.annualized_pct>0?'up':f.annualized_pct<0?'dn':''):''}">${f?f.annualized_pct.toFixed(1)+'%':'—'}</td>
+        <td class="${f&&f.annualized_pct!=null?(f.annualized_pct>0?'up':f.annualized_pct<0?'dn':''):''}">${f&&f.annualized_pct!=null?f.annualized_pct.toFixed(1)+'%':'—'}</td>
         <td>${oi[v]?money(oi[v]):'—'}</td></tr>`;
     }
     h+=`</tbody></table><div class="kv" style="margin-top:9px"><span class="k">Total open interest</span>
@@ -1120,15 +1120,17 @@ function drawCoin(){
   if(fr.length){
     const paid=fr.filter(f=>f.rate>0).length, recv=fr.filter(f=>f.rate<0).length;
     const ann=fr.map(f=>f.annualized_pct).filter(v=>v!=null);
-    const hi=Math.max(...ann), lo=Math.min(...ann);
+    // Math.max of an empty list is -Infinity, which would print as a value.
+    const hi=ann.length?Math.max(...ann):null, lo=ann.length?Math.min(...ann):null;
+    const pc=v=>v==null?'—':v.toFixed(0)+'%';
     const lean = paid>recv ? 'longs paying' : recv>paid ? 'shorts paying' : 'balanced';
     const lcol = paid>recv ? 'up' : recv>paid ? 'dn' : 'nu';
     s+=`<div class="panel"><div class="ph"><h2>Funding lean</h2>
       <span class="sub">${fr.length} venues</span></div><div class="pb">
       <div class="kv"><span class="k">Who is paying</span><span class="v ${lcol}">${lean}</span></div>
-      <div class="kv"><span class="k">Widest venue</span><span class="v up">${hi.toFixed(0)}%</span></div>
-      <div class="kv"><span class="k">Narrowest</span><span class="v ${lo<0?'dn':'nu'}">${lo.toFixed(0)}%</span></div>
-      <div class="kv"><span class="k">Spread</span><span class="v am">${(hi-lo).toFixed(0)} pts</span></div>
+      <div class="kv"><span class="k">Widest venue</span><span class="v up">${pc(hi)}</span></div>
+      <div class="kv"><span class="k">Narrowest</span><span class="v ${lo!=null&&lo<0?'dn':'nu'}">${pc(lo)}</span></div>
+      <div class="kv"><span class="k">Spread</span><span class="v am">${hi!=null&&lo!=null?(hi-lo).toFixed(0)+' pts':'—'}</span></div>
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
         A published price for how crowded one side is. The gap between venues is the read.</div></div></div>`;
   }
