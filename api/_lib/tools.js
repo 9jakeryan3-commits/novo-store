@@ -660,7 +660,11 @@ function makeExecutors(ctx = {}) {
       coverage: h.coverage || {},
       note: "percentiles are the CURRENT value's rank within that series' own full history. " +
             "A null percentile means fewer than 8 samples - too thin to rank, and I should " +
-            "say the sample is thin rather than quote a number.",
+            "say the sample is thin rather than quote a number. On baseRates, n_claims is NOT " +
+            "the evidence: a claim fires every pass, so one coin in one session makes dozens " +
+            "that all resolve together. n_cells (distinct coin-day) is the real denominator. " +
+            "If trustworthy is false I must NOT quote the hit rate as a base rate - I give the " +
+            "cell count and the caveat, and say it is an early reading.",
     };
     const code = String(coin || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (!code) return { ...base, coinsCovered: Object.keys(h.coins).length };
