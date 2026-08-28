@@ -814,18 +814,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <!-- PRICE -->
-<section style="padding:64px 0 84px;">
-  <div class="container" style="text-align:center;">
-    <div class="compound-callout">
-      <h2 class="section-title" style="margin-bottom:10px;">The map, and the analyst who reads it.</h2>
-      <p class="compound-sub" style="font-size:16px;color:var(--txt2);line-height:1.7;max-width:560px;margin:0 auto 8px;font-weight:400;">Every coin Robinhood trades, mapped. NoVo included.</p>
-      <div class="price-row">
-        <span class="price-big">$79</span>
-        <span class="price-alt">per month &nbsp;&middot;&nbsp; or <b>$790</b> a year</span>
-      </div>
-      <p style="font-size:13px;color:var(--txt3);margin:0 0 22px;font-weight:400;">7 days free. Cancel any time before it bills.</p>
-      <button type="button" class="btn-crypto" onclick="cryptoCheckout(this)">Start the free trial &rarr;</button>
+<section id="pricing" style="padding:64px 0 84px;">
+  <div class="container">
+    <div class="section-label" style="text-align:center;color:#a78bfa;">Pricing</div>
+    <h2 class="section-title" style="text-align:center;">The map, and the analyst who reads it.</h2>
+    <p class="section-sub" style="margin:0 auto 40px;text-align:center;">Every coin Robinhood trades, mapped &mdash; and <b style="color:#a78bfa;">NoVo</b>, who reads this map and the equity dealer map, included.</p>
+
+    <div class="price-card" style="--accent-bar:linear-gradient(90deg,#a78bfa,#7c3aed);border-top-color:#a78bfa;position:relative;max-width:820px;margin:0 auto;background:linear-gradient(180deg,rgba(167,139,250,0.07),var(--navy2) 42%);border-color:rgba(167,139,250,0.34);box-shadow:0 24px 70px rgba(0,0,0,0.5),0 0 54px rgba(167,139,250,0.11);">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#a78bfa;color:#12091f;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:999px;white-space:nowrap;">&starf; The Crypto Dealer Map</div>
+      <div class="price-name" style="color:#a78bfa;">Crypto Market Map</div>
+      <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">89 coins &middot; six options books &middot; NoVo included &middot; no broker needed</div>
+      <div class="price-amount"><sup>$</sup>79<span style="font-size:28px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
+      <div class="price-once">per month &nbsp;&middot;&nbsp; or $790/yr &nbsp;&middot;&nbsp; cancel any time</div>
+      <div style="font-size:13.5px;color:#a78bfa;font-weight:800;margin-top:8px;">&starf; 7-day free trial &middot; cancel anytime</div>
+      <div class="price-roi" style="color:#a78bfa;">The positioning that moves crypto is public. Almost nobody puts it in one place.</div>
+      <ul class="price-features" style="column-count:2;column-gap:44px;max-width:820px;margin-left:auto;margin-right:auto;text-align:left;">
+        <li><b style="color:var(--txt1)">Dealer gamma by strike</b> &mdash; BTC, ETH, SOL, XRP, AVAX and HYPE, every book that exists</li>
+        <li><b style="color:var(--txt1)">The call wall, the put wall and the gamma flip</b> &mdash; where hedging turns from damping to amplifying</li>
+        <li><b style="color:var(--txt1)">The 08:00 UTC expiry ladder</b> &mdash; crypto expires daily, so pinning repeats 365 times a year</li>
+        <li><b style="color:var(--txt1)">DVOL and the expected move</b> &mdash; the crypto VIX, and the daily move it implies</li>
+        <li>Near-ATM skew &mdash; puts bid over calls, or the reverse</li>
+        <li><b style="color:var(--txt1)">Funding per venue</b> &mdash; six venues, never blended into one number that describes no market</li>
+        <li><b style="color:var(--txt1)">24-hour liquidation flow</b> &mdash; longs and shorts split, per coin</li>
+        <li><b style="color:var(--txt1)">Open interest and the price/OI regime</b> &mdash; new longs, new shorts, covering or liquidation</li>
+        <li><b style="color:var(--txt1)">What a round trip actually costs you</b> &mdash; Robinhood's own disclosed markup, all 89 ranked</li>
+        <li>Hourly bars with genuine exchange volume behind the percentiles</li>
+        <li>Quality-screened prices &mdash; a venue that disagrees with the rest is quarantined, not averaged in</li>
+        <li><b style="color:var(--txt1)">Every call NoVo makes, scored</b> &mdash; with the sample size on every rate</li>
+        <li><b style="color:var(--txt1)">NoVo &mdash; the AI market analyst</b> &mdash; the same one that reads the equity dealer map, with the live crypto map in front of him, answering off all of it</li>
+        <li>The whole map on your phone &mdash; installable, no broker connection required</li>
+      </ul>
+      <button type="button" class="price-btn" style="background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;max-width:460px;margin-left:auto;margin-right:auto;display:block;box-shadow:0 8px 26px rgba(167,139,250,0.30);" onclick="cryptoCheckout(this,'monthly')">Start free &mdash; 7-day trial</button>
+      <button type="button" class="price-btn-secondary" style="max-width:460px;margin-left:auto;margin-right:auto;display:block;border-color:#a78bfa;color:#a78bfa;" onclick="cryptoCheckout(this,'yearly')">Or pay yearly &mdash; $790/yr &nbsp;&middot;&nbsp; 2 months free</button>
+      <div style="font-size:12.5px;font-weight:700;letter-spacing:0.2px;color:#a78bfa;text-align:center;margin:12px auto 0;">&#128274; Lock in your price &mdash; your rate never rises while your subscription stays active</div>
+      <p class="price-secure">Secure checkout via Stripe &nbsp;&middot;&nbsp; cancel any time</p>
+      <p data-ckt-msg style="text-align:center;color:var(--red);font-size:13px;margin:8px 0 0;min-height:16px;"></p>
     </div>
+
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--txt3);">Free first? Current funding, open interest, 24-hour liquidations and the BTC and ETH gamma read are on the <a href="/market-data#crypto" style="color:#a78bfa;font-weight:700;">market data page</a>, no account. &nbsp;&middot;&nbsp; <a href="/plans" style="color:#a78bfa;font-weight:700;">All plans &rarr;</a></p>
   </div>
 </section>
 
@@ -845,7 +871,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
 function cryptoCheckout(btn, plan){
   var t=btn.textContent; btn.disabled=true; btn.textContent='One moment...';
-  var msg=document.getElementById('ckt-msg');
+  var card=btn.closest('.price-card, .compound-callout, .hero');
+  var msg=(card && card.querySelector('[data-ckt-msg]')) || document.getElementById('ckt-msg');
   fetch('/api/checkout-crypto',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({plan:plan||'monthly'})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
