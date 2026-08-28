@@ -47,6 +47,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <meta name="twitter:description" content="Dealer gamma by strike on the six cryptos with real options books, funding per venue, 24-hour liquidation flow, and what a round trip actually costs you on all 89 coins Robinhood trades - with NoVo, the AI market analyst, included.">
 <meta name="twitter:image" content="https://novo-options.trade/og-home.png?v=4">
 <link rel="canonical" href="https://novo-options.trade/crypto">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which coins does the NoVo Crypto Market Map cover?","acceptedAnswer":{"@type":"Answer","text":"All 89 coins Robinhood trades. Dealer gamma by strike is on the six with a real options book - BTC, ETH, SOL, XRP, AVAX and HYPE - and funding, open interest, liquidation flow and your true cost to trade run across the book."}},{"@type":"Question","name":"Where does the crypto dealer map data come from?","acceptedAnswer":{"@type":"Answer","text":"Deribit for the options book and DVOL, six perp venues for funding and open interest, OKX for liquidations, Coinbase for hourly bars with real exchange volume, and Robinhood's own API for the coin universe and its disclosed markup."}},{"@type":"Question","name":"What is the gamma flip in crypto?","acceptedAnswer":{"@type":"Answer","text":"The price where dealer hedging changes sign. Above it, hedging leans against the move and dampens it. Below it, hedging goes with the move and amplifies it. Crypto expires at 08:00 UTC every day, so that level is re-drawn far more often than it is in equities."}},{"@type":"Question","name":"Is any crypto data free?","acceptedAnswer":{"@type":"Answer","text":"Current funding by venue, open interest, 24-hour liquidations and the BTC and ETH gamma read are free on the market data page, with no account."}},{"@type":"Question","name":"Does the Crypto Market Map trade for me?","acceptedAnswer":{"@type":"Answer","text":"No. It is a map and an analyst. You keep every decision and every click."}},{"@type":"Question","name":"Can I cancel the Crypto Market Map?","acceptedAnswer":{"@type":"Answer","text":"Any time, in one click. The first 7 days are free - cancel before it ends and you pay nothing."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -519,7 +520,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a class="nav-portal" aria-label="Member portal" href="https://app.novo-aitrading.app/portal" title="Member portal — manage your subscription &amp; open your dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-portal-txt">Portal</span></a>
     </div>
   </div>
-</nav><style>
+</nav>
+<div class="ticker" id="cxticker" hidden><div class="ticker-row"><span class="ticker-tag"><span class="dot"></span>Crypto</span><div class="ticker-track"><div class="ticker-inner" id="cxticker-inner"></div></div></div></div><style>
 /* ── NoVo Crypto accent: PURPLE ────────────────────────────────────────────────
    Cyan/blue is Analyst. Green is the site's success/accent. Orange is the free tier.
    Purple is this product's. Everything rides the site's own components and only
@@ -686,6 +688,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
+<!-- WHO IT IS FOR -->
+<section style="padding:64px 0;">
+  <div class="container">
+    <div class="pain-intro" style="text-align:center;">Built for one kind of trader</div>
+    <h2 class="section-title" style="text-align:center;">You already read the tape. This reads the book.</h2>
+    <p class="section-sub" style="text-align:center;max-width:640px;margin:0 auto 26px;">
+      Crypto never closes, and the positioning that moves it is public. Almost nobody puts it in one place.</p>
+    <div class="for-grid">
+      <div class="for-card no">
+        <h3 class="red">The tab stack</h3>
+        <ul>
+          <li><span class="mark" style="color:var(--red);">&#10005;</span>A gamma tool that covers four coins</li>
+          <li><span class="mark" style="color:var(--red);">&#10005;</span>A funding dashboard that blends venues into one number that describes no market</li>
+          <li><span class="mark" style="color:var(--red);">&#10005;</span>Liquidations in a Telegram channel, after the wick</li>
+          <li><span class="mark" style="color:var(--red);">&#10005;</span>A guess at what the spread just cost you</li>
+          <li><span class="mark" style="color:var(--red);">&#10005;</span>Nobody to ask what any of it means at 3am</li>
+        </ul>
+      </div>
+      <div class="for-card yes">
+        <h3 style="color:#a78bfa;">One map</h3>
+        <ul>
+          <li><span class="mark">&#10003;</span>Gamma by strike, the walls and the flip on every crypto with a real options book</li>
+          <li><span class="mark">&#10003;</span>Funding per venue, never blended &mdash; the disagreement is the signal</li>
+          <li><span class="mark">&#10003;</span>24-hour liquidation flow, per coin, longs and shorts split</li>
+          <li><span class="mark">&#10003;</span>Your real round trip, read from Robinhood&rsquo;s own disclosed markup</li>
+          <li><span class="mark">&#10003;</span>NoVo, who reads all of it and answers in plain English</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- WHAT IT SHOWS -->
 <section class="pain" style="background:var(--navy);">
@@ -722,6 +756,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
+<!-- VS CRYPTO GEX TOOLS -->
+<section style="padding:64px 0;">
+  <div class="container">
+    <div class="pain-intro" style="text-align:center;">The comparison</div>
+    <h2 class="section-title" style="text-align:center;">What a crypto GEX tool leaves out.</h2>
+    <p class="section-sub" style="text-align:center;max-width:620px;margin:0 auto 26px;">
+      The gamma map is the part everyone builds. It is the smallest part of what moves a perp.</p>
+    <div class="cost-compare">
+      <div class="cost-compare-title">The Crypto Market Map vs a crypto GEX tool</div>
+      <table>
+        <thead><tr><th></th><th style="color:#a78bfa;">Crypto Market Map</th><th>Crypto GEX tools</th></tr></thead>
+        <tbody>
+          <tr><td>Dealer gamma by strike, walls, the flip</td><td class="cost-novo">&#10003; every book that exists</td><td>&#10003; four coins</td></tr>
+          <tr><td>The 08:00 UTC expiry ladder</td><td class="cost-novo">&#10003;</td><td>&#10003;</td></tr>
+          <tr><td>Funding, per venue and never blended</td><td class="cost-novo">&#10003; six venues</td><td>&mdash;</td></tr>
+          <tr><td>24-hour liquidation flow per coin</td><td class="cost-novo">&#10003;</td><td>&mdash;</td></tr>
+          <tr><td>Open interest and the price/OI regime</td><td class="cost-novo">&#10003;</td><td>&mdash;</td></tr>
+          <tr><td>What a round trip actually costs you</td><td class="cost-novo">&#10003; all 89 ranked</td><td>&mdash;</td></tr>
+          <tr><td>Every call scored, with the sample size</td><td class="cost-novo">&#10003;</td><td>&mdash;</td></tr>
+          <tr><td>An AI market analyst who reads all of it</td><td class="cost-novo">&#10003; NoVo</td><td>&mdash;</td></tr>
+          <tr><td>Price</td><td class="cost-novo">$79/mo</td><td>$39&ndash;$79/mo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 
 <!-- FREE VS PAID -->
 <section class="pain" style="background:var(--navy2);">
@@ -735,6 +796,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
+<!-- FAQ -->
+<section style="padding:64px 0;">
+  <div class="container" style="max-width:820px;">
+    <div class="pain-intro" style="text-align:center;">Common questions</div>
+    <h2 class="section-title" style="text-align:center;">Before you start the trial.</h2>
+    <div class="faq-list" style="margin-top:26px;">
+      <details class="faq-item"><summary class="faq-q">Which coins does it cover?</summary><div class="faq-a">All 89 coins Robinhood trades. Dealer gamma by strike is on the six with a real options book &mdash; BTC, ETH, SOL, XRP, AVAX and HYPE &mdash; and funding, open interest, liquidation flow and your true cost to trade run across the book.</div></details>
+      <details class="faq-item"><summary class="faq-q">Where does the data come from?</summary><div class="faq-a">Deribit for the options book and DVOL, six perp venues for funding and open interest, OKX for liquidations, Coinbase for hourly bars with real exchange volume, and Robinhood&rsquo;s own API for the coin universe and its disclosed markup. Nothing is scraped from a screenshot or averaged from an aggregator.</div></details>
+      <details class="faq-item"><summary class="faq-q">What is the gamma flip, in crypto?</summary><div class="faq-a">The price where dealer hedging changes sign. Above it, hedging leans against the move and dampens it. Below it, hedging goes with the move and amplifies it. Crypto expires at 08:00 UTC every day, so that level is re-drawn far more often than it is in equities.</div></details>
+      <details class="faq-item"><summary class="faq-q">Is any of it free?</summary><div class="faq-a">Current funding by venue, open interest, 24-hour liquidations and the BTC and ETH gamma read are free on the <a href="/market-data#crypto" style="color:#a78bfa;">market data</a> page, with no account.</div></details>
+      <details class="faq-item"><summary class="faq-q">Does it trade for me?</summary><div class="faq-a">No. It is a map and an analyst. You keep every decision and every click.</div></details>
+      <details class="faq-item"><summary class="faq-q">Can I cancel?</summary><div class="faq-a">Any time, in one click. The first 7 days are free &mdash; cancel before it ends and you pay nothing.</div></details>
+    </div>
+  </div>
+</section>
+
 
 <!-- PRICE -->
 <section style="padding:64px 0 84px;">
@@ -807,6 +884,50 @@ document.addEventListener('keydown',function(ev){
   if(ev.key==='Escape'&&p&&p.classList.contains('open')){novoNavToggle();document.querySelector('.nav-menu-btn').focus();}
 });
 </script>
+<script>
+/* Live crypto strip. Reads /api/crypto-free once - the same public snapshot the free
+   tier serves - and paints price, 24h change and an 8-point sparkline. Hidden until it
+   has real numbers, so a cold cache or a wedged collector shows nothing rather than
+   zeros or a skeleton. */
+(function(){
+  var WANT=['BTC','ETH','SOL','XRP','DOGE','HYPE','LINK','AVAX'];
+  var box=document.getElementById('cxticker'), inner=document.getElementById('cxticker-inner');
+  if(!box||!inner) return;
+  function fmt(p){
+    if(p==null) return '';
+    var a=Math.abs(p);
+    return a>=1000 ? p.toLocaleString(undefined,{maximumFractionDigits:0})
+         : a>=1    ? p.toFixed(2)
+         : a>=0.01 ? p.toFixed(4) : p.toFixed(6);
+  }
+  function poly(sp,up){
+    if(!sp||sp.length<2) return '';
+    var lo=Math.min.apply(null,sp), hi=Math.max.apply(null,sp), rng=(hi-lo)||1;
+    var pts=sp.map(function(v,i){
+      return (i*(100/(sp.length-1))).toFixed(0)+','+(34-((v-lo)/rng)*28).toFixed(0);
+    }).join(' ');
+    return '<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">'
+      +'<polyline fill="none" stroke="'+(up?'#10b981':'#f43f5e')+'" stroke-width="2" points="'+pts+'"/></svg>';
+  }
+  function tick(d){
+    var up=(d.chg24h||0)>=0;
+    return '<span class="tick"><span class="t-name">'+d.coin+'</span>'
+      +'<span class="t-val">'+fmt(d.price)+'</span>'
+      +(d.chg24h==null?'':'<span class="t-chg '+(up?'up':'dn')+'">'+(up?'+':'')+Number(d.chg24h).toFixed(2)+'%</span>')
+      +poly(d.spark,up)+'</span>';
+  }
+  fetch('/api/crypto-free').then(function(r){return r.ok?r.json():null;}).then(function(j){
+    if(!j||!j.list) return;
+    var by={}; j.list.forEach(function(x){ by[x.coin]=x; });
+    var rows=WANT.map(function(c){return by[c];}).filter(function(x){return x&&x.price!=null;});
+    if(!rows.length) return;
+    var html=rows.map(tick).join('');
+    inner.innerHTML=html+html;          // duplicated once so the marquee loops seamlessly
+    box.hidden=false;
+  }).catch(function(){});
+})();
+</script>
+<script src="/ga-events.js"></script>
 <script src="/polish.js" defer></script>
 </body>
 </html>

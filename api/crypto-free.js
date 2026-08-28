@@ -93,9 +93,20 @@ module.exports = async (req, res) => {
   // The full-universe listing stays deliberately thin: codes, band and price. The
   // cross-sectional read - cheapest to trade, largest OI, breadth - is the paid product,
   // the same way CoinGlass locks "all coins".
-  const list = Object.entries(snap.coins).map(([code, c]) => ({
-    coin: code, band: c.band, price: c.price,
-  }));
+  // Price, 24h change and an 8-point sparkline. All three are free on every exchange in
+  // the world, so they are free here - and one call to this endpoint is what drives the
+  // live crypto strip on /crypto. The spark is downsampled to the 8 points the strip's
+  // polyline draws; the full series stays behind the paywall with the rest of the history.
+  const list = Object.entries(snap.coins).map(([code, c]) => {
+    const row = { coin: code, band: c.band, price: c.price };
+    if (c.chg && c.chg.d1 != null) row.chg24h = c.chg.d1;
+    const sp = c.spark;
+    if (Array.isArray(sp) && sp.length >= 8) {
+      const step = (sp.length - 1) / 7;
+      row.spark = Array.from({ length: 8 }, (_, i) => sp[Math.round(i * step)]);
+    }
+    return row;
+  });
   return res.status(200).json({
     as_of: snap.as_of, coins: list.length, list,
     note: "Current funding, open interest and 24h liquidations are free per coin. " +
