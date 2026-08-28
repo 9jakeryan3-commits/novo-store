@@ -219,6 +219,17 @@ tr:last-child td{border-bottom:none}
 @media(max-width:720px){#ask{right:10px;bottom:10px;width:calc(100vw - 20px)}}
 @media(max-width:1100px){main{grid-template-columns:170px 1fr}#side{display:none}}
 @media(max-width:720px){main{grid-template-columns:1fr}#rail{display:none}}
+  .tt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+  .tt th{text-align:left;font-weight:600;color:var(--txt4);padding:4px 6px;border-bottom:1px solid var(--bdr2);
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .tt td{padding:4px 6px;border-bottom:1px solid var(--bdr2);color:var(--txt2)}
+  .tt td.num,.tt th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tt tbody tr:last-child td{border-bottom:none}
+  .fnote{font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.5;font-family:var(--mono)}
+  .hrow{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .hlab{font-family:var(--mono);font-size:10px;color:var(--txt4);width:34px;flex:none;text-align:right}
+  .hcells{display:flex;gap:1px;flex:1}
+  .hc{flex:1;height:16px;border-radius:1px}
 </style>
 </head>
 <body>
@@ -343,6 +354,10 @@ function ladder(g){
   rows.push({n:'Spot',s:null,v:g.spot,c:'var(--cx)',spot:true});
   if(g.flip_zone!=null) rows.push({n:'Gamma flip',s:flipFar?'the regime line · far, not actionable':'the regime line',v:g.flip_zone,c:flipFar?'var(--txt4)':'var(--amber)'});
   if(g.put_wall) rows.push({n:'Put wall',s:'support',v:g.put_wall,c:'var(--red)'});
+  // Max pain and the heaviest-gamma strike are levels, not statistics - they sit on
+  // the same ladder as the walls or a reader has to hold two pictures at once.
+  if(g.max_pain) rows.push({n:'Max pain',s:'least payout at expiry',v:g.max_pain,c:'var(--txt3)'});
+  if(g.abs_gamma_strike) rows.push({n:'Heaviest gamma',s:'where hedging concentrates',v:g.abs_gamma_strike,c:'#a78bfa'});
   rows.sort((a,b)=>b.v-a.v);
   return '<div class="lad">'+rows.map(function(r){
     if(r.spot) return '<div class="lrow spot"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
@@ -352,6 +367,92 @@ function ladder(g){
       +'<span class="lval" style="color:'+r.c+'">'+px(r.v)+'</span>'
       +'<span class="ldist">'+(dist(r.v)>=0?'+':'')+dist(r.v).toFixed(2)+'%</span></div>';
   }).join('')+'</div>';
+}
+
+/* ---------------- BOOK EXPOSURES, TERM STRUCTURE, SKEW, HEATMAP ------------------
+   All four come from the SAME book-summary call the front-expiry gamma came from - the
+   chain arrives whole, 13 expiries deep, and everything past the front one used to be
+   parsed and dropped. Nothing here costs an extra request.
+--------------------------------------------------------------------------------- */
+function exposures(g){
+  if(!g) return '';
+  const has = g.dex!=null || g.vanna_exp!=null || g.charm_exp!=null || g.pc_oi_ratio!=null;
+  if(!has) return '';
+  const row=(k,v,sub,cls)=>`<div class="kv"><span class="k">${k}${sub?`<span class="lsub"> ${sub}</span>`:''}</span>`
+    +`<span class="v ${cls||''}">${v}</span></div>`;
+  let h=`<div class="panel"><div class="ph"><h2>Book exposures</h2>`
+    +`<span class="sub">front expiry · dealer sign</span></div><div class="pb">`;
+  if(g.dex!=null)        h+=row('Net delta (DEX)', money(g.dex), 'dollar delta', g.dex>=0?'up':'dn');
+  if(g.vanna_exp!=null)  h+=row('Vanna', money(g.vanna_exp), 'per vol point', g.vanna_exp>=0?'up':'dn');
+  if(g.charm_exp!=null)  h+=row('Charm', money(g.charm_exp), 'delta drift per day', g.charm_exp>=0?'up':'dn');
+  if(g.pc_oi_ratio!=null){
+    const pc=g.pc_oi_ratio;
+    h+=row('Put / call OI', pc.toFixed(2), pc>1?'puts outnumber calls':'calls outnumber puts', pc>1?'dn':'up');
+  }
+  return h+`</div></div>`;
+}
+
+function termPanel(g){
+  const t=(g&&g.term)||[]; if(t.length<2) return '';
+  const rows=t.slice(0,10).map(function(x){
+    const d = x.days<1 ? (x.days*24).toFixed(0)+'h' : x.days.toFixed(0)+'d';
+    return `<tr><td>${d}</td><td class="num">${x.atm_iv!=null?x.atm_iv.toFixed(1)+'%':'—'}</td>`
+      +`<td class="num">${x.oi!=null?Math.round(x.oi).toLocaleString():'—'}</td>`
+      +`<td class="num">${x.pc!=null?x.pc.toFixed(2):'—'}</td>`
+      +`<td class="num">${x.max_pain!=null?px(x.max_pain):'—'}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Term structure</h2>`
+    +`<span class="sub">${t.length} expiries</span></div><div class="pb">`
+    +`<table class="tt"><thead><tr><th>Expiry</th><th class="num">ATM IV</th>`
+    +`<th class="num">OI</th><th class="num">P/C</th><th class="num">Max pain</th></tr></thead>`
+    +`<tbody>${rows}</tbody></table>`
+    +`<div class="fnote">Front-month IV above the back months is backwardation — the market is paying up for the near date.</div>`
+    +`</div></div>`;
+}
+
+function skewPanel(g){
+  const c=(g&&g.skew_curve)||[]; if(c.length<4) return '';
+  const pts=c.filter(r=>r[1]!=null||r[2]!=null);
+  const ivs=pts.flatMap(r=>[r[1],r[2]]).filter(v=>v!=null);
+  if(!ivs.length) return '';
+  const lo=Math.min(...ivs), hi=Math.max(...ivs), rng=(hi-lo)||1;
+  const ks=pts.map(r=>r[0]), kmin=Math.min(...ks), kmax=Math.max(...ks), krng=(kmax-kmin)||1;
+  const X=k=>((k-kmin)/krng*100).toFixed(2), Y=v=>(96-((v-lo)/rng)*88).toFixed(2);
+  const line=(idx,col)=>{
+    const seg=pts.filter(r=>r[idx]!=null).map(r=>`${X(r[0])},${Y(r[idx])}`).join(' ');
+    return seg?`<polyline fill="none" stroke="${col}" stroke-width="1.6" points="${seg}"/>`:'';
+  };
+  const sx = (g.spot!=null && g.spot>=kmin && g.spot<=kmax)
+    ? `<line x1="${X(g.spot)}" y1="2" x2="${X(g.spot)}" y2="98" stroke="var(--txt4)" stroke-width="0.6" stroke-dasharray="2 2"/>` : '';
+  return `<div class="panel"><div class="ph"><h2>IV skew</h2>`
+    +`<span class="sub">front book · by strike</span></div><div class="pb">`
+    +`<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:150px">`
+    +`${sx}${line(2,'var(--red)')}${line(1,'var(--green2)')}</svg>`
+    +`<div class="fnote"><span style="color:var(--red)">puts</span> above `
+    +`<span style="color:var(--green2)">calls</span> is downside being bid. `
+    +`Dashed line is spot.</div></div></div>`;
+}
+
+function heatPanel(g){
+  const h=(g&&g.heatmap)||[]; if(!h.length) return '';
+  const all=h.flatMap(e=>e.cells.map(c=>c[1])).filter(v=>v!=null);
+  if(!all.length) return '';
+  const mx=Math.max(...all.map(Math.abs))||1;
+  const body=h.map(function(e){
+    const d = e.days<1 ? (e.days*24).toFixed(0)+'h' : e.days.toFixed(0)+'d';
+    const cells=e.cells.map(function(c){
+      const v=c[1], a=Math.min(1,Math.abs(v)/mx);
+      const col = v>=0 ? `rgba(16,185,129,${(0.10+a*0.75).toFixed(3)})`
+                       : `rgba(244,63,94,${(0.10+a*0.75).toFixed(3)})`;
+      return `<span class="hc" style="background:${col}" title="${px(c[0])} · ${money(v)}"></span>`;
+    }).join('');
+    return `<div class="hrow"><span class="hlab">${d}</span><span class="hcells">${cells}</span></div>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Gamma heatmap</h2>`
+    +`<span class="sub">strike × expiry · ±15%</span></div><div class="pb">${body}`
+    +`<div class="fnote"><span style="color:var(--green2)">green</span> = dealers long gamma at that strike, `
+    +`<span style="color:var(--red)">red</span> = short. Darker is heavier. Strikes run low to high, left to right.</div>`
+    +`</div></div>`;
 }
 
 /* ---------------- gamma chart ---------------- */
@@ -465,6 +566,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
+    h += exposures(g) + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
