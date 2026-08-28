@@ -392,10 +392,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lbl">Claim three</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Price owns the level it broke</h2>
     <div class="plain">
-      <p>The Line fires the moment price crosses a level NoVo tracks &mdash; the alert goes out within about 36 cents of the level itself. One hour later, is price still on the far side of it? <b>That is the number below.</b> A reclaim has to be higher, a loss has to be lower.</p>
-      <p>It rarely gets there cleanly. Price usually dips back through the level at least once before the hour is out, so this says the break tends to stick &mdash; not that the level behind it is somewhere to rest a stop.</p>
-    </div>
-    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Scored one hour after each fire, per ticker.</p>
+      <p>The Line fires when price crosses a level NoVo tracks. An hour later: is price still on that side, and did it reach the next level on the map?</p></div>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Scored one hour after each fire, per ticker. The target is the nearest dealer level beyond the one that broke.</p>
     <div id="tr-line"><div class="muted">Loading&hellip;</div></div>
   </div>
 
@@ -678,14 +676,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         // never makes -- the alert's own body is branches ("Above X -> next test Y. Back below ->
         // Z is the next shelf"), explicitly conditions rather than predictions. Publishing a score
         // against a bar the product never set for itself is not honesty, it is noise.
+        // still_beyond_rate, NOT direction_rate. The label said "still on the far side an hour
+        // later" and rendered direction, which measures the same endpoint against the price at the
+        // FIRE rather than against the level -- a different question wearing this one's words. The
+        // honest number is also the better one: SPY 66.3% against the 55.4% that was showing.
         ln += hd(tk, L.holds ? 'owns it more often than not' : 'does not own it in this window', !!L.holds, L)
-            + sub('still on the far side an hour later <b>' + L.direction_rate + '%</b> of the time '
-                  + '<span class="muted">(n=' + nn(L.n) + ')</span>');
+            + sub('still on that side an hour later <b>'
+                  + (L.still_beyond_rate != null ? L.still_beyond_rate : L.direction_rate)
+                  + '%</b> of the time <span class="muted">(n=' + nn(L.n) + ')</span>')
+            + (L.reached_next_rate != null
+                ? sub('reached the next level on the map inside the hour <b>' + L.reached_next_rate
+                      + '%</b> of the time <span class="muted">(n=' + nn(L.reached_next_n) + ')</span>')
+                : '');
       } else { }
 
       // Claim seven. No strength badge on purpose: sg() grades a claim against a 50% baseline, and
       // "price got through it 69% of the time" is a measurement, not a coin-flip claim. The sample
       // rides in the line itself instead.
+      // The hourly counterpart to claim seven. That one asks whether price got through the wall
+      // across a whole SESSION off a prior-close map; this asks the trader's question -- it broke,
+      // so did the break stick an hour later? Live snapshots only: the reconstructed archive holds
+      // one map per session and has no intraday path, so this cannot be backfilled and starts small.
+      var br = t.wall_respect && t.wall_respect.break_return;
+      if (br && (br.call.breaks || br.put.breaks)) {
+        var brl = '';
+        [['call', br.call], ['put', br.put]].forEach(function (p) {
+          if (!p[1].breaks) return;
+          brl += sub(p[0] + ' wall broke on <b>' + nn(p[1].breaks) + '</b> session'
+                     + (p[1].breaks === 1 ? '' : 's')
+                     + ' &mdash; price was back behind it an hour later <b>'
+                     + p[1].back_behind_rate + '%</b> of the time' + sg(p[1]));
+        });
+        wb += '<div style="margin-bottom:13px;">'
+            + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">'
+            + tk + ' <span style="font-weight:600;color:var(--txt3);">when the wall does break</span></div>'
+            + brl + '</div>';
+      }
+
       var wbr = t.wall_base_rate;
       if (wbr && wbr.enough) {
         wb += '<div style="margin-bottom:13px;">'
