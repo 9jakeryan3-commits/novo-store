@@ -23,6 +23,9 @@ BRANCH=$(git branch --show-current)
 # deploy and tells you to commit -- which is the point.
 node scripts/build-sitemap.js
 node scripts/stamp-assets.js
+#   - every coin count on /crypto was hand-typed and drifted: the page claimed 89 coins and 82
+#     with leverage positioning while the collector was publishing 90 and 83
+node scripts/sync-crypto-counts.js
 
 # lastmod is read from git, so the commit that ships a content change also moves the
 # dates the sitemap records -- meaning the sitemap is always exactly one commit behind
