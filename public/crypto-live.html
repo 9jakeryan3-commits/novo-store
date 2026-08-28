@@ -230,6 +230,16 @@ tr:last-child td{border-bottom:none}
   .hlab{font-family:var(--mono);font-size:10px;color:var(--txt4);width:34px;flex:none;text-align:right}
   .hcells{display:flex;gap:1px;flex:1}
   .hc{flex:1;height:16px;border-radius:1px}
+  .askintro{font-size:12.5px;line-height:1.6;color:var(--txt3);padding:0 2px 10px;border-bottom:1px solid var(--bdr2);margin-bottom:9px}
+  .askhint{display:flex;flex-wrap:wrap;gap:6px}
+  .askhint b{display:inline-block;font-weight:600;font-size:11.5px;color:var(--txt2);cursor:pointer;
+    padding:5px 10px;border:1px solid var(--bdr);border-radius:999px;background:var(--panel2);
+    transition:border-color .15s,color .15s,background .15s}
+  .askhint b:hover{border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,.08)}
+  #askclr{margin-left:auto;margin-right:6px;background:none;border:1px solid var(--bdr);color:var(--txt3);
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;
+    border-radius:999px;cursor:pointer}
+  #askclr:hover{border-color:#a78bfa;color:#a78bfa}
 </style>
 </head>
 <body>
@@ -260,12 +270,25 @@ tr:last-child td{border-bottom:none}
 
 <div id="ask" class="hidden">
   <div id="askbox">
-    <div id="askhead"><b>NoVo</b><span>analyst</span>
+    <div id="askhead"><b>NoVo</b><span>AI market analyst</span>
+      <button id="askclr" type="button">Clear</button>
       <button id="askx" type="button" aria-label="Close">&times;</button></div>
     <div id="asklog"></div>
-    <div class="askhint">Try <b data-q="How is BTC positioned right now?">how is BTC positioned</b>
-      &middot; <b data-q="Where did the liquidations hit in the last 24 hours?">liquidations</b>
-      &middot; <b data-q="Which coin is cheapest to trade on Robinhood right now?">cheapest to trade</b></div>
+    <!-- The Analyst dashboard opens with what he actually reads and a shelf of starting
+         questions; this opened with three inline words. Same analyst, same treatment. -->
+    <div class="askintro">Ask about this map, a coin, or what is moving it. I read this map and
+      the equity dealer map, every claim I have logged and how each one scored, and the whole
+      archive &mdash; so I can tell you what a setup like this has resolved to before, and over
+      how many samples.</div>
+    <div class="askhint">
+      <b data-q="How is BTC positioned right now?">How is BTC positioned?</b>
+      <b data-q="How far is spot from the gamma flip, and what does that mean here?">Where is spot against the flip?</b>
+      <b data-q="Where did the liquidations hit in the last 24 hours, and which side got carried out?">Who got liquidated?</b>
+      <b data-q="Which venues disagree on funding right now, and what does the disagreement imply?">Which venues disagree?</b>
+      <b data-q="What is the term structure telling me about the front expiry?">What is term structure saying?</b>
+      <b data-q="Which coin is cheapest to trade right now on a round trip?">Cheapest to trade?</b>
+      <b data-q="What has a setup like this one resolved to before, and over how many samples?">What has this setup done before?</b>
+    </div>
     <form id="askform"><textarea id="askin" rows="1" placeholder="Ask NoVo about this map..."></textarea>
       <button id="asksend" type="submit">Ask</button></form>
   </div>
@@ -276,6 +299,9 @@ tr:last-child td{border-bottom:none}
 
 <script>
 const $ = s => document.querySelector(s);
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id==='askclr'){ const l=document.getElementById('asklog'); if(l) l.innerHTML=''; }
+});
 const money = n => n==null ? '—' : (Math.abs(n)>=1e9 ? '$'+(n/1e9).toFixed(2)+'B'
   : Math.abs(n)>=1e6 ? '$'+(n/1e6).toFixed(1)+'M' : Math.abs(n)>=1e3 ? '$'+(n/1e3).toFixed(0)+'K' : '$'+n.toFixed(0));
 const px = n => n==null ? '—' : (n>=1000 ? n.toLocaleString(undefined,{maximumFractionDigits:0})
@@ -374,6 +400,30 @@ function ladder(g){
    chain arrives whole, 13 expiries deep, and everything past the front one used to be
    parsed and dropped. Nothing here costs an extra request.
 --------------------------------------------------------------------------------- */
+function histPanel(){
+  // The Analyst dashboard's signature panel is "this setup, historically" - a hit rate with
+  // the sample size beside it. It is the difference between a claim and a track record, and
+  // the crypto map had the numbers in the snapshot and showed them nowhere.
+  const br=(SNAP&&SNAP.health&&SNAP.health.base_rates)||[];
+  if(!br.length) return '';
+  const label={gamma_pin:'Gamma pin into the 08:00 UTC expiry',
+               oi_quadrant:'Price / open-interest regime',
+               funding_extreme:'Funding at an extreme',
+               cost_anomaly:'Cost-to-trade anomaly'};
+  const rows=br.filter(function(b){return b && b.n;}).map(function(b){
+    const r=b.hit_rate, strong=r>=55, weak=r<=45;
+    // n is the honesty. A rate without one is a number pretending to be evidence.
+    const thin=b.n<30;
+    return `<div class="kv"><span class="k">${label[b.kind]||b.kind}`
+      +`<span class="lsub"> n=${b.n.toLocaleString()}${thin?' · thin':''}</span></span>`
+      +`<span class="v ${strong?'up':(weak?'dn':'')}">${r.toFixed(1)}%</span></div>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>This setup, historically</h2>`
+    +`<span class="sub">scored claims, not backtest</span></div><div class="pb">${rows}`
+    +`<div class="fnote">Every claim is written down before its horizon passes and scored when it does. `
+    +`The sample size is on every line - a rate without one is not evidence.</div></div></div>`;
+}
+
 function venuePanel(g){
   const v=(g&&g.venues)||[]; if(v.length<2) return '';
   const named={inverse:'Deribit · coin-margined',linear:'Deribit · USDC',okx:'OKX'};
@@ -592,7 +642,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h += venuePanel(g) + exposures(g) + termPanel(g) + skewPanel(g) + heatPanel(g);
+    h += venuePanel(g) + exposures(g) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
