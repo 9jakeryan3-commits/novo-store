@@ -1,22 +1,22 @@
-// api/crypto-free.js — the PUBLIC crypto read.
+// api/crypto-free.js - the PUBLIC crypto read.
 //
 // House rule: give away what the market already gives away, sell what the market sells.
 // So this endpoint was drawn from what competitors actually publish for free, checked
 // rather than assumed:
 //
 //   FREE ELSEWHERE, therefore free here
-//     · funding rates, open interest, 24h liquidations   — CoinGlass free tier, Coinalyze, Velo
-//     · BTC/ETH gamma SUMMARY off the public Deribit API — cryptogamma.io publishes this free
-//     · spot price                                        — every exchange API
+//     * funding rates, open interest, 24h liquidations   - CoinGlass free tier, Coinalyze, Velo
+//     * BTC/ETH gamma SUMMARY off the public Deribit API - cryptogamma.io publishes this free
+//     * spot price                                        - every exchange API
 //
 //   PAID ELSEWHERE (or nowhere), therefore sold
-//     · history of any of it        — CoinGlass locks 6/12/24-month; Laevitas gives 1 week
-//     · gamma BY STRIKE, walls, flip — GammaFlip charges $39
-//     · gamma on SOL/XRP/AVAX/HYPE   — GammaFlip charges; AVAX and HYPE nobody has at all
-//     · the 89-coin breadth board    — CoinGlass locks "all coins"
-//     · Robinhood's disclosed markup — exists nowhere at any price
-//     · scored claims and base rates — exists nowhere
-//     · NoVo                         — the AI tier starts at $149 elsewhere
+//     * history of any of it        - CoinGlass locks 6/12/24-month; Laevitas gives 1 week
+//     * gamma BY STRIKE, walls, flip - GammaFlip charges $39
+//     * gamma on SOL/XRP/AVAX/HYPE   - GammaFlip charges; AVAX and HYPE nobody has at all
+//     * the 89-coin breadth board    - CoinGlass locks "all coins"
+//     * Robinhood's disclosed markup - exists nowhere at any price
+//     * scored claims and base rates - exists nowhere
+//     * NoVo                         - the AI tier starts at $149 elsewhere
 //
 // NOTE the equity map's "the map stays gated" rule deliberately does NOT apply here. That
 // rule exists because OPRA options data is licensed. Deribit's is free and public, and a
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
   function pub(code, c) {
     const out = {
       coin: code, band: c.band, price: c.price,
-      // current snapshot only — no series, because history is what this market charges for
+      // current snapshot only - no series, because history is what this market charges for
       funding: (c.positioning && c.positioning.funding) || [],
       openInterest: (c.positioning && c.positioning.open_interest) || [],
       totalOiUsd: (c.positioning && c.positioning.total_oi_usd) || null,
@@ -59,8 +59,8 @@ module.exports = async (req, res) => {
         expiry: c.gamma.expiry,
         spot: c.gamma.spot,
         netGex: c.gamma.net_gex,
-        regime: c.gamma.net_gex >= 0 ? "positive — dealers dampen moves"
-                                     : "negative — dealers amplify moves",
+        regime: c.gamma.net_gex >= 0 ? "positive - dealers dampen moves"
+                                     : "negative - dealers amplify moves",
       };
     }
     return out;
@@ -76,7 +76,7 @@ module.exports = async (req, res) => {
   }
 
   // The full-universe listing stays deliberately thin: codes, band and price. The
-  // cross-sectional read — cheapest to trade, largest OI, breadth — is the paid product,
+  // cross-sectional read - cheapest to trade, largest OI, breadth - is the paid product,
   // the same way CoinGlass locks "all coins".
   const list = Object.entries(snap.coins).map(([code, c]) => ({
     coin: code, band: c.band, price: c.price,
@@ -88,7 +88,7 @@ module.exports = async (req, res) => {
   });
 };
 
-// What this coin has behind the paywall — named, never valued. Tells a visitor what they
+// What this coin has behind the paywall - named, never valued. Tells a visitor what they
 // are missing without leaking any of it.
 function paidTeaser(code, c) {
   const has = [];

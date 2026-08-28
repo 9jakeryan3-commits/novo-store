@@ -120,7 +120,7 @@ module.exports = async (req, res) => {
   let raw = null;
   try { raw = await r.get("crypto:map:live"); }
   catch (_) { return res.status(503).json({ error: "store read failed" }); }
-  if (!raw) return res.status(503).json({ error: "no live snapshot — the crypto collector is not reporting" });
+  if (!raw) return res.status(503).json({ error: "no live snapshot - the crypto collector is not reporting" });
 
   let snap = raw;
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch { snap = null; } }
