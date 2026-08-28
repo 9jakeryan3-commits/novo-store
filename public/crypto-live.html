@@ -13,7 +13,8 @@ function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
 gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
 </script>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="/crypto-live.webmanifest">
 <title>Crypto Market Map · NoVo</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="/favicon.ico">
@@ -299,6 +300,57 @@ tr:last-child td{border-bottom:none}
 
 <script>
 const $ = s => document.querySelector(s);
+/* ---------------- INSTALL PROMPT ------------------------------------------------
+   Analyst offers this and the Crypto Market Map did not, so a paying crypto subscriber
+   had no way to install the thing they bought.
+
+   The event is captured on load but the pill is held back until the dashboard has
+   ACTUALLY rendered. beforeinstallprompt fires on the page, not on the subscription -
+   showing it on the sign-in gate or the 402 wall would invite someone to install a
+   dashboard they cannot open yet. Chrome only fires it once per page load, so it has to
+   be captured immediately and revealed later rather than waited for.
+--------------------------------------------------------------------------------- */
+var cxInstall = (function(){
+  var deferred = null, entered = false;
+  function standalone(){
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || window.navigator.standalone === true;
+  }
+  function pill(){
+    var b = document.getElementById('cxInstall');
+    if (b || standalone()) return b;
+    b = document.createElement('button');
+    b.id = 'cxInstall';
+    b.textContent = '⤓  Install app';
+    b.style.cssText = 'position:fixed;bottom:16px;left:16px;z-index:9998;'
+      + 'background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;border:none;'
+      + 'padding:11px 16px;border-radius:9px;font:700 12px/1 system-ui,sans-serif;'
+      + 'letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
+    b.onclick = async function(){
+      if(!deferred) return;
+      deferred.prompt();
+      try { await deferred.userChoice; } catch(e){}
+      deferred = null; b.style.display = 'none';
+    };
+    document.body.appendChild(b);
+    return b;
+  }
+  function show(){
+    if(!deferred || !entered || standalone()) return;
+    var b = pill(); if(b) b.style.display = 'block';
+  }
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred = e; show(); });
+  window.addEventListener('appinstalled', function(){
+    var b = document.getElementById('cxInstall'); if(b) b.style.display='none';
+  });
+  // Network-only worker: this dashboard renders a snapshot that moves every few minutes,
+  // and a cached shell would show a subscriber stale positioning and call it live.
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/crypto/sw.js', {scope:'/crypto/'}).catch(function(){});
+  }
+  return { entered: function(){ entered = true; show(); } };
+})();
+
 document.addEventListener('click', function(e){
   if(e.target && e.target.id==='askclr'){ const l=document.getElementById('asklog'); if(l) l.innerHTML=''; }
 });
@@ -823,6 +875,7 @@ async function load(){
   }
   SNAP = await r.json();
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  if(window.cxInstall) cxInstall.entered();   // subscriber is in - now offer the install
   const b=SNAP.breadth||{}, hl=SNAP.health||{};
   const stale=(SNAP.age_min!=null&&SNAP.age_min>20);
   $('#hstat').innerHTML=
