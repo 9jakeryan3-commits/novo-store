@@ -52,6 +52,21 @@ module.exports = async (req, res) => {
       openInterest: (c.positioning && c.positioning.open_interest) || [],
       totalOiUsd: (c.positioning && c.positioning.total_oi_usd) || null,
     };
+    // 24h liquidations. This endpoint has always PROMISED these in its note and never
+    // returned them, because until the OKX feed landed the table was empty. Totals only:
+    // the free tier is the current picture, and the history is the subscription.
+    const liq = ((snap.health && snap.health.liquidations_24h) || []).filter(x => x.asset_code === code);
+    if (liq.length) {
+      let longUsd = 0, shortUsd = 0;
+      for (const x of liq) {
+        if (x.side === "long") longUsd += x.usd || 0; else shortUsd += x.usd || 0;
+      }
+      out.liquidations24h = {
+        longsForcedOut: Math.round(longUsd),
+        shortsForcedOut: Math.round(shortUsd),
+        venues: Array.from(new Set(liq.map(x => x.venue))),
+      };
+    }
     if (c.gamma && FREE_GAMMA.has(code)) {
       // The headline number only. Strikes, walls and the flip are the paid layer.
       out.gammaSummary = {

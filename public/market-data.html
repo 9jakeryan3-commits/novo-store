@@ -909,14 +909,19 @@ document.addEventListener('keydown',function(ev){
   function fundRows(list){
     var rows=list.filter(function(x){return x && x.funding && x.funding.length;});
     if(!rows.length) return '';
-    var h='<table class="cx-tbl"><thead><tr><th>Coin</th><th>Venues</th><th>Funding spread</th><th>Open interest</th></tr></thead><tbody>';
+    var h='<table class="cx-tbl"><thead><tr><th>Coin</th><th>Venues</th><th>Funding spread</th><th>Open interest</th><th>Liquidations &middot; 24h</th></tr></thead><tbody>';
     rows.forEach(function(d){
       var ann=d.funding.map(function(f){return f.annualized_pct;}).filter(function(v){return v!=null;});
       if(!ann.length) return;
       var hi=Math.max.apply(null,ann), lo=Math.min.apply(null,ann);
       h+='<tr><td>'+d.coin+'</td><td>'+d.funding.length+'</td>'
         +'<td><span class="'+(hi>0?'cx-up':'cx-dn')+'">'+hi.toFixed(0)+'%</span> / <span class="'+(lo>0?'cx-up':'cx-dn')+'">'+lo.toFixed(0)+'%</span></td>'
-        +'<td>'+M(d.totalOiUsd)+'</td></tr>';
+        +'<td>'+M(d.totalOiUsd)+'</td>'
+        // longs and shorts forced out, red over green - the same reading the paid map gives
+        +'<td>'+(d.liquidations24h
+            ? '<span class="cx-dn">'+M(d.liquidations24h.longsForcedOut)+'</span> / '
+              +'<span class="cx-up">'+M(d.liquidations24h.shortsForcedOut)+'</span>'
+            : '&mdash;')+'</td></tr>';
     });
     return h+'</tbody></table>';
   }
