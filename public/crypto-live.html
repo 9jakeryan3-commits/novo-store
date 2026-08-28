@@ -438,9 +438,9 @@ function ladder(g){
   if(g.abs_gamma_strike) rows.push({n:'Heaviest gamma',s:'where hedging concentrates',v:g.abs_gamma_strike,c:'#a78bfa'});
   rows.sort((a,b)=>b.v-a.v);
   return '<div class="lad">'+rows.map(function(r){
-    if(r.spot) return '<div class="lrow spot"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
+    if(r.spot) return '<div class="lrow spot" data-spot="1"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
       +'<span class="lname">Spot</span><span class="lval">'+px(r.v)+'</span><span class="ldist"></span></div>';
-    return '<div class="lrow"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
+    return '<div class="lrow" data-lv="'+r.v+'"><span class="lrail"><span class="ldot" style="background:'+r.c+'"></span></span>'
       +'<span><span class="lname">'+r.n+'</span><span class="lsub">'+(r.s||'')+'</span></span>'
       +'<span class="lval" style="color:'+r.c+'">'+px(r.v)+'</span>'
       +'<span class="ldist">'+(dist(r.v)>=0?'+':'')+dist(r.v).toFixed(2)+'%</span></div>';
@@ -965,8 +965,11 @@ window.cxLive = (function(){
   function revert(){
     alive=false;
     const d=el('lgex-dot'); if(d) d.classList.add('hidden');
+    // Pass the PUBLISHED spot back in, not null - otherwise the ladder keeps whatever the
+    // last live tick left behind and quietly presents it as the pass value. paint() re-shows
+    // the live line, so it is hidden AFTER, not before.
+    if(snap) paint(snap.net_gex, snap.spot);
     const l=el('lgex-live'); if(l) l.classList.add('hidden');
-    if(snap) paint(snap.net_gex, null);                       // back to the published pass
   }
 
   function paint(v, spot){
@@ -982,6 +985,24 @@ window.cxLive = (function(){
       sub.className = pos ? 'up' : 'dn';
       sub.textContent = pos ? 'positive — dealers dampen (grind / mean-revert)'
                             : 'negative — dealers amplify (moves extend)';
+    }
+    // The ladder measured every distance off the PASS spot while the box above it showed a
+    // streamed one, so the panel displayed two different spots at once and every percentage
+    // in the ladder was quietly stale. A live tick moves all of it or none of it.
+    if(spot!=null){
+      const lad=document.querySelector('.lad');
+      if(lad){
+        const sv=lad.querySelector('[data-spot] .lval');
+        if(sv) sv.textContent = px(spot);
+        lad.querySelectorAll('[data-lv]').forEach(function(row){
+          const lv=parseFloat(row.getAttribute('data-lv'));
+          const d=row.querySelector('.ldist');
+          if(d && isFinite(lv) && spot>0){
+            const pc=(lv/spot-1)*100;
+            d.textContent=(pc>=0?'+':'')+pc.toFixed(2)+'%';
+          }
+        });
+      }
     }
     const line=el('lgex-live');
     if(line && spot!=null && snap){
