@@ -176,54 +176,35 @@ tr:last-child td{border-bottom:none}
 
 /* ---- NoVo, the analyst. Same endpoint the Analyst dashboard uses, same knowledge:
    NoVo reads both maps because NoVo is the house analyst, not a per-product bot. ---- */
-#ask{position:fixed;right:18px;bottom:18px;z-index:40;width:min(420px,calc(100vw - 36px));
-  display:flex;flex-direction:column;align-items:flex-end;gap:9px;pointer-events:none}
-#ask>*{pointer-events:auto}
 /* A FIELD, not a chat bubble. A round pill with a presence dot in the corner is the exact
    visual grammar of Intercom and Drift, and it frames the analyst as support staff. This is
    a command input: squared, muted placeholder, shortcut printed on the end. Mirrors the
    Analyst dashboard's #novo-ask-bubble, in this product's purple. */
-#askpill{display:flex;align-items:center;gap:9px;padding:11px 12px 11px 14px;border-radius:10px;
-  border:1px solid rgba(167,139,250,.42);cursor:pointer;min-width:264px;text-align:left;
-  background:linear-gradient(180deg,#1d1630,#130f1f);color:#ddd3f2;font-weight:600;font-size:13.5px;
-  font-family:var(--sans);
-  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(167,139,250,.42),inset 0 1px 0 rgba(255,255,255,.05)}
-#askpill:hover{border-color:var(--cx);color:#f3eeff;
-  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.6),inset 0 1px 0 rgba(255,255,255,.07)}
-#askpill .caret{color:var(--cx);font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
-#askpill kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;color:var(--txt3);
-  border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;background:rgba(255,255,255,.03)}
-@media (max-width:640px){ #askpill{min-width:0} }
+@media (max-width:640px){ #novo-ask-bubble{min-width:0} }
 /* Advertise the shortcut only where there is a keyboard. Width is the wrong test - a tablet
    is wide and still has no Ctrl key. */
-@media (pointer:coarse){ #askpill kbd{display:none} }
-#askbox{display:none;flex-direction:column;width:100%;max-height:min(560px,70vh);
-  background:var(--panel);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;
-  box-shadow:0 18px 50px -14px rgba(0,0,0,.85)}
-#askbox.on{display:flex}
-#askhead{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--bdr2);background:var(--navy2)}
-#askhead b{font-size:13px;font-weight:800}
-#askhead span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4)}
-#askx{margin-left:auto;background:none;border:0;color:var(--txt3);cursor:pointer;font-size:17px;line-height:1;padding:2px 4px}
-#asklog{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:12px;min-height:120px}
-.msg{font-size:13.5px;line-height:1.55}
-.msg.me{align-self:flex-end;max-width:85%;background:var(--navy2);border:1px solid var(--bdr2);
-  padding:8px 11px;border-radius:10px 10px 2px 10px;color:var(--txt1)}
-.msg.no{color:var(--txt2);white-space:pre-wrap}
-.msg.no b{color:var(--txt1)}
-.msg.err{color:var(--red);font-family:var(--mono);font-size:12px}
-#askform{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr2);background:var(--navy2)}
-#askin{flex:1;background:var(--panel);border:1px solid var(--bdr);color:var(--txt1);border-radius:7px;
-  padding:9px 11px;font-size:13px;font-family:var(--sans);outline:none;resize:none;max-height:96px}
-#askin:focus{border-color:var(--cx)}
-#asksend{background:var(--cx);color:#120a24;border:0;border-radius:7px;padding:0 15px;font-weight:800;
-  cursor:pointer;font-size:13px;font-family:var(--sans)}
-#asksend:disabled{opacity:.5;cursor:default}
-.askhint{font-family:var(--mono);font-size:10px;color:var(--txt4);padding:0 13px 11px}
-.askhint b{color:var(--cx);cursor:pointer;font-weight:500}
+@media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
 @media(max-width:720px){#ask{right:10px;bottom:10px;width:calc(100vw - 20px)}}
 @media(max-width:1100px){main{grid-template-columns:170px 1fr}#side{display:none}}
-@media(max-width:720px){main{grid-template-columns:1fr}#rail{display:none}}
+@media(max-width:720px){
+    main{grid-template-columns:1fr}
+    /* The rail was simply display:none here, which took 89 of the 90 coins with it. It
+       becomes a full-screen picker instead: the coin name in the header is the trigger, the
+       filter and the band grouping come along, and picking a coin closes it. */
+    #rail{display:block;position:fixed;inset:0;z-index:60;background:var(--navy);
+          overflow-y:auto;padding:14px 14px 28px;
+          transform:translateY(100%);visibility:hidden;
+          transition:transform .22s ease, visibility .22s}
+    body.rail-open #rail{transform:none;visibility:visible}
+    body.rail-open{overflow:hidden}
+    #sym{cursor:pointer}
+    #sym::after{content:' be';color:var(--txt3);font-size:.6em;vertical-align:middle}
+    #railclose{display:block}
+  }
+  #railclose{display:none;position:sticky;top:0;z-index:2;width:100%;
+    background:var(--navy2);border:1px solid var(--bdr);color:var(--txt2);
+    border-radius:9px;padding:9px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;cursor:pointer}
   .tt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
   .tt th{text-align:left;font-weight:600;color:var(--txt4);padding:4px 6px;border-bottom:1px solid var(--bdr2);
     font-size:10px;letter-spacing:.08em;text-transform:uppercase}
@@ -235,16 +216,6 @@ tr:last-child td{border-bottom:none}
   .hlab{font-family:var(--mono);font-size:10px;color:var(--txt4);width:34px;flex:none;text-align:right}
   .hcells{display:flex;gap:1px;flex:1}
   .hc{flex:1;height:16px;border-radius:1px}
-  .askintro{font-size:12.5px;line-height:1.6;color:var(--txt3);padding:0 2px 10px;border-bottom:1px solid var(--bdr2);margin-bottom:9px}
-  .askhint{display:flex;flex-wrap:wrap;gap:6px}
-  .askhint b{display:inline-block;font-weight:600;font-size:11.5px;color:var(--txt2);cursor:pointer;
-    padding:5px 10px;border:1px solid var(--bdr);border-radius:999px;background:var(--panel2);
-    transition:border-color .15s,color .15s,background .15s}
-  .askhint b:hover{border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,.08)}
-  #askclr{margin-left:auto;margin-right:6px;background:none;border:1px solid var(--bdr);color:var(--txt3);
-    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;
-    border-radius:999px;cursor:pointer}
-  #askclr:hover{border-color:#a78bfa;color:#a78bfa}
   /* MOBILE ---------------------------------------------------------------
      This page shipped with five media queries against the Analyst dashboard's nineteen,
      and it shows on a phone: the brand stacked to three lines, the venue table pushed the
@@ -262,6 +233,70 @@ tr:last-child td{border-bottom:none}
     .hcells{min-width:280px}
     .hrow{overflow-x:auto}
   }
+  /* ---- NoVo ask panel: ported from the Analyst dashboard so the two behave identically.
+     Palette remapped to this page's tokens; the logic is unchanged. ---- */
+  #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
+    padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(167,139,250,.42);cursor:pointer;
+    background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
+    min-width:264px;text-align:left;
+    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+  #novo-ask-bubble:hover{border-color:#a78bfa;color:var(--txt1);
+    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(34,211,238,.62),inset 0 1px 0 rgba(255,255,255,.07)}
+  #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;text-shadow:0 0 10px rgba(34,211,238,.75)}
+  #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
+    color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:6px;padding:2px 6px;
+    background:rgba(255,255,255,.03)}
+  #novo-ask-bubble.has-drop{border-color:#a78bfa;color:var(--txt1);
+    box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 0 24px rgba(34,211,238,.26)}
+  #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
+    background:#a78bfa;box-shadow:0 0 9px rgba(34,211,238,.9)}
+  #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
+  #novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
+    width:min(calc(100vw - 36px),980px);
+    height:min(calc(100dvh - 36px),560px);display:none;flex-direction:column;border-radius:14px;overflow:hidden;
+    background:var(--navy,#0b1220);border:1px solid var(--bdr,var(--bdr));box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  #novo-ask.on{display:flex}
+  #novo-ask header{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--bdr,var(--bdr))}
+  #novo-ask header b{color:var(--txt1);font-size:15px}
+  #novo-ask header span{color:var(--txt2,var(--txt2));font-size:11.5px;display:block;margin-top:1px}
+  #novo-ask .clr{margin-left:auto;background:none;border:1px solid var(--bdr,var(--bdr));border-radius:999px;
+    color:var(--txt2,var(--txt2));font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 11px;cursor:pointer}
+  #novo-ask .clr:hover{color:var(--txt1);border-color:#a78bfa}
+  #novo-ask .x{background:none;border:0;color:var(--txt2,var(--txt2));font-size:20px;cursor:pointer;line-height:1}
+  #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
+    position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
+  #novo-ask #novo-ask-pad{flex:0 0 auto}
+  #novo-ask .m{font-size:13.5px;line-height:1.65;color:var(--txt1,var(--txt1));white-space:pre-wrap;align-self:stretch}
+  #novo-ask .m.you{align-self:flex-end;max-width:min(78%,560px);
+    background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.30);
+    border-radius:14px 14px 4px 14px;padding:9px 13px;
+    color:#d3f2fb;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.28)}
+  #novo-ask .m .when{margin-left:9px;font-size:10.5px;font-weight:600;color:var(--txt3,var(--txt3));
+    white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.02em;vertical-align:baseline}
+  #novo-ask .m.you .when{color:rgba(186,232,246,.62)}
+  #novo-ask .m.think{color:var(--txt3,var(--txt3))}
+  #novo-ask .m.think .dots::after{content:'';animation:novoDots 1.4s steps(4,end) infinite}
+  #novo-ask .src{font-size:11px;color:var(--txt3,var(--txt3));line-height:1.6;border-top:1px solid var(--bdr,var(--bdr));padding-top:7px}
+  #novo-ask .intro{font-size:13px;color:var(--txt2,var(--txt2));line-height:1.65}
+  #novo-ask .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  #novo-ask .chips button{background:rgba(255,255,255,.04);border:1px solid var(--bdr,var(--bdr));color:var(--txt2,var(--txt2));
+    font-size:11.5px;padding:7px 10px;border-radius:9px;cursor:pointer;text-align:left}
+  #novo-ask .quick{display:none;gap:6px;padding:9px 11px 2px;overflow-x:auto;scrollbar-width:none}
+  #novo-ask .quick::-webkit-scrollbar{display:none}
+  #novo-ask .quick.on{display:flex}
+  #novo-ask .quick button.live{border-color:rgba(34,211,238,.5);color:#cfefff;
+    background:rgba(34,211,238,.08)}
+  #novo-ask .quick button.live:hover{border-color:#a78bfa;color:var(--txt1)}
+  #novo-ask .quick button{flex:0 0 auto;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.28);
+    color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  #novo-ask .quick button:hover{border-color:#a78bfa;color:var(--txt1)}
+  #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,var(--bdr))}
+  #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,var(--bdr));border-radius:10px;
+    padding:10px 12px;color:var(--txt1);font-size:13.5px;outline:none}
+  #novo-ask input:focus{border-color:#a78bfa}
+  #novo-ask button.go{background:#a78bfa;border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
+  #novo-ask button.go:disabled{opacity:.45;cursor:default}
 </style>
 </head>
 <body>
@@ -278,7 +313,7 @@ tr:last-child td{border-bottom:none}
 <!-- ===== DASHBOARD ===== -->
 <div id="app" class="hidden">
   <header>
-    <a class="brand" href="/crypto">NoVo <span>Crypto Map</span></a>
+    <span class="brand">NoVo <span>Crypto Map</span></span>
     <div class="hstat" id="hstat"></div>
   </header>
   <main>
@@ -290,31 +325,48 @@ tr:last-child td{border-bottom:none}
     <div class="col" id="side"></div>
   </main>
 
-<div id="ask" class="hidden">
-  <div id="askbox">
-    <div id="askhead"><b>NoVo</b><span>AI market analyst</span>
-      <button id="askclr" type="button">Clear</button>
-      <button id="askx" type="button" aria-label="Close">&times;</button></div>
-    <div id="asklog"></div>
-    <!-- The Analyst dashboard opens with what he actually reads and a shelf of starting
-         questions; this opened with three inline words. Same analyst, same treatment. -->
-    <div class="askintro">Ask about this map, a coin, or what is moving it. I read this map and
-      the equity dealer map, every claim I have logged and how each one scored, and the whole
-      archive &mdash; so I can tell you what a setup like this has resolved to before, and over
-      how many samples.</div>
-    <div class="askhint">
-      <b data-q="How is BTC positioned right now?">How is BTC positioned?</b>
-      <b data-q="How far is spot from the gamma flip, and what does that mean here?">Where is spot against the flip?</b>
-      <b data-q="Where did the liquidations hit in the last 24 hours, and which side got carried out?">Who got liquidated?</b>
-      <b data-q="Which venues disagree on funding right now, and what does the disagreement imply?">Which venues disagree?</b>
-      <b data-q="What is the term structure telling me about the front expiry?">What is term structure saying?</b>
-      <b data-q="Which coin is cheapest to trade right now on a round trip?">Cheapest to trade?</b>
-      <b data-q="What has a setup like this one resolved to before, and over how many samples?">What has this setup done before?</b>
+<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this map&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
+
+<div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
+  <header>
+    <div>
+      <b>NoVo</b>
+      <span>AI market analyst</span>
     </div>
-    <form id="askform"><textarea id="askin" rows="1" placeholder="Ask NoVo about this map..."></textarea>
-      <button id="asksend" type="submit">Ask</button></form>
+    <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
+    <button class="x" onclick="novoAskOpen(0)" aria-label="Close">&times;</button>
+  </header>
+  <div class="log" id="novo-ask-log">
+    <div class="intro">
+      Ask about this map, a coin, or what is moving it. I read this map and the equity dealer
+      map, every claim I have logged and how each one scored, and the whole archive &mdash; so
+      I can tell you what a setup like this has resolved to before, and over how many samples.
+      <div class="chips">
+        <button onclick="novoAsk(this.textContent)">How is BTC positioned right now?</button>
+        <button onclick="novoAsk(this.textContent)">Where is spot against the gamma flip?</button>
+        <button onclick="novoAsk(this.textContent)">Where did the liquidations hit in the last 24 hours?</button>
+        <button onclick="novoAsk(this.textContent)">Which venues disagree, and what does that imply?</button>
+        <button onclick="novoAsk(this.textContent)">What is the term structure telling me?</button>
+        <button onclick="novoAsk(this.textContent)">Which coin is cheapest to trade right now?</button>
+        <button onclick="novoAsk(this.textContent)">What has a setup like this resolved to before?</button>
+      </div>
+    </div>
   </div>
-  <button id="askpill" type="button" aria-label="Ask NoVo about this map"><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this map&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
+  <!-- Short LABELS, full questions in data-q: the row stays one line and scannable, while the
+       model still gets a properly-formed question rather than two words. -->
+  <div class="quick" id="novo-ask-quick" aria-label="Quick questions">
+    <button type="button" data-q="Read this crypto dealer map right now." onclick="novoAsk(this.dataset.q)">The map</button>
+    <button type="button" data-q="What are the key levels on this coin right now?" onclick="novoAsk(this.dataset.q)">Key levels</button>
+    <button type="button" data-q="What has a setup like this resolved to before?" onclick="novoAsk(this.dataset.q)">This setup</button>
+    <button type="button" data-q="What is funding doing across the venues?" onclick="novoAsk(this.dataset.q)">Funding</button>
+    <button type="button" data-q="Where did the liquidations hit in the last 24 hours?" onclick="novoAsk(this.dataset.q)">Liquidations</button>
+    <button type="button" data-q="Which coin is cheapest to trade right now on a round trip?" onclick="novoAsk(this.dataset.q)">Cheapest</button>
+    <button type="button" data-q="How accurate have your published crypto calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
+  </div>
+  <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
+    <input id="novo-ask-q" placeholder="Ask about this map&hellip;" autocomplete="off" maxlength="600">
+    <button class="go" id="novo-ask-go" type="submit">Ask</button>
+  </form>
 </div>
 
 </div>
@@ -372,9 +424,6 @@ var cxInstall = (function(){
   return { entered: function(){ entered = true; show(); } };
 })();
 
-document.addEventListener('click', function(e){
-  if(e.target && e.target.id==='askclr'){ const l=document.getElementById('asklog'); if(l) l.innerHTML=''; }
-});
 const money = n => n==null ? '—' : (Math.abs(n)>=1e9 ? '$'+(n/1e9).toFixed(2)+'B'
   : Math.abs(n)>=1e6 ? '$'+(n/1e6).toFixed(1)+'M' : Math.abs(n)>=1e3 ? '$'+(n/1e3).toFixed(0)+'K' : '$'+n.toFixed(0));
 const px = n => n==null ? '—' : (n>=1000 ? n.toLocaleString(undefined,{maximumFractionDigits:0})
@@ -688,7 +737,7 @@ function drawRail(filter=''){
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
   document.querySelectorAll('.coin').forEach(el=>
-    el.onclick=()=>{CUR=el.dataset.c;BOOK=null;drawRail(filter);drawCoin();});
+    el.onclick=()=>{CUR=el.dataset.c;BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
 }
 
 /* ---------------- coin ---------------- */
@@ -918,44 +967,281 @@ async function load(){
   drawRail(); drawCoin();
 }
 
-/* ---- NoVo. Same /api/analyst-ask the Analyst dashboard calls, same token, same tools.
-   He answers crypto because get_crypto_map / get_crypto_breadth were added to his
-   toolset - not because a separate crypto bot exists. ---- */
 (function(){
-  var box=$('#askbox'), log=$('#asklog'), inp=$('#askin'), send=$('#asksend'), busy=false;
-  function add(cls,txt){ var d=document.createElement('div'); d.className='msg '+cls;
-    d.textContent=txt; log.appendChild(d); log.scrollTop=log.scrollHeight; return d; }
-  $('#askpill').onclick=function(){ box.classList.toggle('on');
-    if(box.classList.contains('on')){ inp.focus();
-      if(!log.children.length) add('no','I read both maps - the equity dealer map and this one. Ask me where a coin is positioned, what funding is doing, or what it actually costs you to trade it here.'); } };
-  $('#askx').onclick=function(){ box.classList.remove('on'); };
-  document.addEventListener('keydown',function(e){
-    if((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){ e.preventDefault(); $('#askpill').click(); }
-    if(e.key==='Escape') box.classList.remove('on');
-  });
-  document.querySelectorAll('.askhint b').forEach(function(b){
-    b.onclick=function(){ inp.value=b.dataset.q; ask(); };
-  });
-  inp.addEventListener('keydown',function(e){
-    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); ask(); } });
-  $('#askform').onsubmit=function(e){ e.preventDefault(); ask(); };
-  async function ask(){
-    var q=(inp.value||'').trim();
-    if(!q||busy||!TOKEN) return;
-    busy=true; send.disabled=true; inp.value='';
-    add('me',q);
-    var think=add('no','thinking...');
-    try{
-      var r=await fetch('/api/analyst-ask',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({t:TOKEN,q:q,question:q})});
-      var j=await r.json().catch(function(){return null;});
-      if(r.status===401){ think.className='msg err'; think.textContent='That session expired - sign in again from the member portal.'; }
-      else if(!r.ok){ think.className='msg err'; think.textContent=(j&&j.error)||'Could not reach NoVo.'; }
-      else { think.className='msg no'; think.textContent=(j&&(j.answer||j.text||j.reply))||'No answer came back.'; }
-    }catch(_){ think.className='msg err'; think.textContent='Could not reach NoVo.'; }
-    busy=false; send.disabled=false; log.scrollTop=log.scrollHeight;
+  var busy = false;
+  window.novoAskOpen = function(on){
+    document.getElementById('novo-ask').classList.toggle('on', !!on);
+    var _b = document.getElementById('novo-ask-bubble');
+    _b.style.display = on ? 'none' : 'flex';
+    // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
+    if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask NoVo, the AI market analyst'); }
+    // Position on OPEN, not when the message arrived: everything measures zero while the panel is
+    // display:none, so a drop or a restored transcript can only be placed once it is on screen.
+    if (on) {
+      var _lg = document.getElementById('novo-ask-log');
+      if (PINNED) pinTop(PINNED, 1);
+      else if (_lg) { _lg.style.scrollBehavior = 'auto'; _lg.scrollTop = _lg.scrollHeight; _lg.style.scrollBehavior = ''; }
+    }
+    if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
+  };
+
+  // Summoned like a tool: Cmd/Ctrl-K from anywhere, "/" when you are not already typing, Esc to
+  // dismiss. The badge prints the modifier THIS machine actually uses — a mac glyph on a Windows box
+  // reads as someone else's product.
+  var NOVO_MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '');
+  (function(){
+    var k = document.querySelector('#novo-ask-bubble kbd');
+    if (k) k.textContent = NOVO_MAC ? '⌘K' : 'Ctrl K';
+  })();
+  function novoAskTyping(el){
+    return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
-  window._askShow=function(){ $('#ask').classList.remove('hidden'); };
+  document.addEventListener('keydown', function(e){
+    var panel = document.getElementById('novo-ask');
+    if (!panel) return;
+    var open = panel.classList.contains('on');
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); window.novoAskOpen(!open); return; }
+    if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
+    // "/" is a shortcut only when it is not a character someone is trying to type.
+    if (e.key === '/' && !open && !novoAskTyping(document.activeElement)) { e.preventDefault(); window.novoAskOpen(1); }
+  });
+  // Every message carries WHEN it was said. This is not decoration: NoVo's lunch drop sits in the
+  // log for the rest of the session quoting levels from 12:30, and without a time on it a member
+  // reading at 4pm has no way to know the numbers moved. A stale-but-correct read that LOOKS live
+  // is the worst thing this product can show.
+  function fmtClock(ms){
+    try { return new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+    catch(_) { return ''; }
+  }
+  function fmtWhen(ms){
+    if (!ms) return '';
+    var age = Date.now() - ms;
+    if (age < 45000) return 'just now';
+    if (age < 3600000) return Math.round(age / 60000) + 'm ago';
+    var d = new Date(ms), n = new Date();
+    var sameDay = d.toDateString() === n.toDateString();
+    return sameDay ? fmtClock(ms) : (d.toLocaleDateString([], { weekday: 'short' }) + ' ' + fmtClock(ms));
+  }
+  // Everything appended has to land ABOVE the spacer, or the spacer stops being the last thing
+  // in the log and the whole pin-to-top measurement is off by its height.
+  function logAdd(node){
+    var log = document.getElementById('novo-ask-log');
+    var p = document.getElementById('novo-ask-pad');
+    if (p && p.parentNode === log) log.insertBefore(node, p); else log.appendChild(node);
+    return node;
+  }
+  function add(cls, text, ts){
+    var log = document.getElementById('novo-ask-log');
+    var d = document.createElement('div'); d.className = 'm ' + (cls||''); d.textContent = text;
+    if (ts) {
+      var w = document.createElement('span'); w.className = 'when'; w.setAttribute('data-t', ts);
+      w.textContent = fmtWhen(ts);
+      try { w.title = new Date(ts).toLocaleString(); } catch(_){}
+      d.appendChild(w);
+    }
+    logAdd(d); log.scrollTop = log.scrollHeight; return d;
+  }
+  // Relative stamps go stale sitting on screen, which is the exact failure they exist to prevent.
+  // One interval re-renders them all; it costs nothing and it is what makes the panel feel live
+  // rather than like a page that was printed once.
+  setInterval(function(){
+    var ns = document.querySelectorAll('#novo-ask-log .when[data-t]');
+    for (var i = 0; i < ns.length; i++) ns[i].textContent = fmtWhen(Number(ns[i].getAttribute('data-t')));
+  }, 30000);
+  // An answer lands with YOUR question at the top of the view, the way every chat app does it,
+  // instead of dropping you at the tail of a 600-word read with the question scrolled off above.
+  // When the answer is shorter than the panel there is nothing to scroll into, so a spacer grows
+  // underneath -- just enough for the question to reach the top -- and collapses again the moment
+  // the content is taller than the view. Same trick Gemini and ChatGPT use; without it a short
+  // answer simply refuses to move.
+  var PINNED = null, _pinT = null;
+  function padEl(){
+    var log = document.getElementById('novo-ask-log');
+    var p = document.getElementById('novo-ask-pad');
+    if (!p) { p = document.createElement('div'); p.id = 'novo-ask-pad'; p.setAttribute('aria-hidden', 'true'); }
+    if (p.parentNode !== log) log.appendChild(p);
+    return p;
+  }
+  function pinTop(el, instant){
+    var log = document.getElementById('novo-ask-log');
+    if (!log || !el || el.parentNode !== log) return;
+    PINNED = el;
+    // A hidden panel measures as zero, so nothing can be positioned yet -- remember what to pin and
+    // let novoAskOpen do it for real. This is the normal case for a drop, which lands while closed.
+    if (!log.clientHeight) return;
+    var p = padEl();
+    // Measure with the spacer out of the flow, otherwise last pass's height inflates this one's.
+    p.style.display = 'none';
+    var below = log.scrollHeight - el.offsetTop;
+    var need = log.clientHeight - below - 12;   // 12 = the flex gap the spacer itself introduces
+    if (need > 6) { p.style.height = need + 'px'; p.style.display = 'block'; }
+    if (instant) log.style.scrollBehavior = 'auto';
+    log.scrollTop = Math.max(0, el.offsetTop - 8);
+    if (instant) setTimeout(function(){ log.style.scrollBehavior = ''; }, 0);
+  }
+  window.addEventListener('resize', function(){
+    if (!PINNED) return;
+    clearTimeout(_pinT); _pinT = setTimeout(function(){ pinTop(PINNED); }, 120);
+  });
+  function srcLine(text){
+    var log = document.getElementById('novo-ask-log');
+    var k = document.createElement('div'); k.className = 'src'; k.textContent = text;
+    logAdd(k); return k;
+  }
+
+  // The transcript lived only in the DOM, so a reload erased what you asked and what it answered.
+  // localStorage keeps it on the device -- nothing transits, no server state, no cost. It expires
+  // after a day ON PURPOSE: this is a live map, and yesterday's answers quote levels that have since
+  // moved, so holding them longer invites reading a stale number as a current one.
+  var TURNS = [], CHAT_KEY = 'novo_ask_log_crypto', CHAT_TTL = 24 * 60 * 60 * 1000, CHAT_MAX = 40;
+  function saveTurns(){
+    try { localStorage.setItem(CHAT_KEY, JSON.stringify({ t: Date.now(), turns: TURNS.slice(-CHAT_MAX) })); } catch(_){}
+  }
+  function renderTurn(m){
+    var el = add(m.r === 'you' ? 'you' : '', m.x, m.t);
+    if (m.c) srcLine(m.c);
+    if (m.s) srcLine(m.s);
+    return el;
+  }
+  function loadTurns(){
+    try {
+      var raw = localStorage.getItem(CHAT_KEY); if (!raw) return;
+      var o = JSON.parse(raw);
+      if (!o || !Array.isArray(o.turns) || !o.t || (Date.now() - o.t) > CHAT_TTL) { localStorage.removeItem(CHAT_KEY); return; }
+      TURNS = o.turns.slice(-CHAT_MAX);
+      if (!TURNS.length) return;
+      var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+      window.novoAskQuick();
+      var last = null;
+      TURNS.forEach(function(m){ var el = renderTurn(m); if (m.r === 'you') last = el; });
+      var log = document.getElementById('novo-ask-log'); if (log) log.scrollTop = log.scrollHeight;
+      if (last) pinTop(last);
+    } catch(_){}
+  }
+  // Clearing has to wipe all three: the in-memory turns (which travel to the model as context), the
+  // stored copy, and the rendered log. Dropping any one leaves the conversation half-alive -- a cleared
+  // screen that still sends what you thought you deleted would be the worst of the three to get wrong.
+  // The intro and the quick row are two states of the same thing, so one function owns which is
+  // visible rather than three call sites each remembering to.
+  window.novoAskQuick = function(){
+    var q = document.getElementById('novo-ask-quick');
+    if (q) q.classList.toggle('on', !document.querySelector('#novo-ask .intro'));
+  };
+
+  // NoVo speaking FIRST. The note rides the live payload the dashboard already polls, so all this has
+  // to decide is whether it is new: the id is dated, and the seen-id is kept on the device beside the
+  // transcript it belongs to. It enters the log as an ordinary NoVo turn, which means it persists,
+  // scrolls and clears exactly like an answer he gave -- and travels back as context on the next ask,
+  // so "what did you mean by that?" works without any special case.
+  window.novoChatDrop = function(cd){
+    if (!cd || !cd.id || !cd.text) return;
+    var seen = null; try { seen = localStorage.getItem('novo_drop_seen_crypto'); } catch(_){}
+    if (seen === cd.id) return;
+    try { localStorage.setItem('novo_drop_seen_crypto', cd.id); } catch(_){}
+    var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+    // cd.ts is when NoVo WROTE it (unix seconds from the engine), not when this browser rendered
+    // it. Using Date.now() here would stamp a 12:30 read with the time you happened to open the
+    // panel -- which is precisely the confusion this whole change exists to remove.
+    var m = { r: '', x: cd.text, t: (cd.ts ? cd.ts * 1000 : Date.now()) };
+    TURNS.push(m); saveTurns();
+    var el = renderTurn(m); window.novoAskQuick();
+    // NoVo speaking first has no question above it, so the note itself is what pins -- a long drop
+    // should open at its first line rather than its last.
+    pinTop(el);
+    var panel = document.getElementById('novo-ask');
+    if (!panel || !panel.classList.contains('on')) {
+      var b = document.getElementById('novo-ask-bubble');
+      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'NoVo left you a note'); }
+    }
+  };
+  window.novoAskClear = function(){
+    TURNS = [];
+    try { localStorage.removeItem(CHAT_KEY); } catch(_){}
+    var log = document.getElementById('novo-ask-log');
+    if (log) log.innerHTML = INTRO_HTML;   // takes the spacer with it; padEl() rebuilds it on demand
+    PINNED = null;
+    var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
+    window.novoAskQuick();
+  };
+  var INTRO_HTML = (function(){ var l = document.getElementById('novo-ask-log'); return l ? l.innerHTML : ''; })();
+  loadTurns();
+  // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
+  // storage key it persists to instead, which is what the push-notification code already does.
+  function tok(){
+    try { var u = new URLSearchParams(location.search).get('t'); if (u) return u; } catch(_){}
+    try { return localStorage.getItem('novo_live_t') || ''; } catch(_){ return ''; }
+  }
+  window.novoAsk = async function(q){
+    q = (q||'').trim(); if (!q || busy) return;
+    var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
+    window.novoAskQuick();
+    document.getElementById('novo-ask-q').value = '';
+    // Snapshot the prior turns BEFORE this question joins them -- it travels in `question`, and sending
+    // it twice would have NoVo answering an echo of itself.
+    var hist = TURNS.slice(-6).map(function(m){ return { role: m.r === 'you' ? 'user' : 'novo', text: m.x }; });
+    var _now = Date.now();
+    var _qel = add('you', q, _now); TURNS.push({ r: 'you', x: q, t: _now }); saveTurns();
+    // Name the step, and move through them. NoVo really does hit the map, then the tape, then its
+    // own logged sessions -- this is the shape of the work, not a fake progress bar.
+    var thinking = add('', '');
+    thinking.className = 'm think';
+    var _stages = ['Reading the map', 'Checking the tape', 'Pulling levels', 'Working through it'],
+        _si = 0, _sp = document.createElement('span'), _dt = document.createElement('span');
+    _dt.className = 'dots'; _sp.textContent = _stages[0];
+    thinking.appendChild(_sp); thinking.appendChild(_dt);
+    var _stageTimer = setInterval(function(){
+      _si = Math.min(_si + 1, _stages.length - 1); _sp.textContent = _stages[_si];
+    }, 2600);
+    var _stopThinking = function(){ clearInterval(_stageTimer); thinking.remove(); };
+    // Pin as soon as the question is in: the working state then plays directly under it rather
+    // than at the bottom of wherever you happened to be scrolled.
+    pinTop(_qel);
+    busy = true; document.getElementById('novo-ask-go').disabled = true;
+    try{
+      var r = await fetch('/api/analyst-ask', {
+        method:'POST', headers:{'content-type':'application/json'},
+        body: JSON.stringify({ question: q, t: tok() || null, history: hist })
+      });
+      var d = await r.json();
+      _stopThinking();
+      if (!d.ok) {
+        var em = d.error || 'NoVo is unavailable right now.', _et = Date.now();
+        add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns();
+        pinTop(_qel);
+      }
+      else {
+        var _at = Date.now();
+        add('', d.answer, _at);
+        var _turn = { r: 'novo', x: d.answer, t: _at };
+        var log = document.getElementById('novo-ask-log');
+        // What it looked up, then what it read. A failed lookup is shown too \u2014 that is the
+        // difference between an answer you can check and one you have to take on faith.
+        if (d.lookups && d.lookups.length) {
+          var names = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
+            get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
+            get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date', get_track_record:'track record',
+            search_news:'headlines' };
+          var seen = {}, parts = [];
+          d.lookups.forEach(function(l){
+            var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
+            if (seen[n]) return; seen[n] = 1;
+            parts.push(l.ok ? n : n + ' (no data)');
+          });
+          if (parts.length) { _turn.c = 'Checked: ' + parts.join(' \u00b7 '); srcLine(_turn.c); }
+        }
+        if (d.sources && d.sources.length) {
+          _turn.s = 'Sources: ' + d.sources.map(function(x){
+            return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' \u00b7 ');
+          srcLine(_turn.s);
+        }
+        TURNS.push(_turn); saveTurns();
+        // Re-pin rather than scroll to the bottom: the answer is now the tall thing on screen and
+        // you want to start reading it at its first line.
+        pinTop(_qel);
+      }
+    } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
+    busy = false; document.getElementById('novo-ask-go').disabled = false;
+  };
 })();
 
 load();
@@ -1089,6 +1375,26 @@ window.cxLive = (function(){
     },
     stop: stop
   };
+})();
+
+/* The coin name is the picker trigger on a phone. Bound once, and a no-op on desktop where
+   the rail is always visible - the CSS decides which world we are in, not the JS. */
+(function(){
+  var sym=document.getElementById('sym');
+  if(sym) sym.addEventListener('click', function(){
+    if(window.matchMedia('(max-width:720px)').matches)
+      document.body.classList.toggle('rail-open');
+  });
+  var rail=document.getElementById('rail');
+  if(rail){
+    var b=document.createElement('button');
+    b.id='railclose'; b.type='button'; b.textContent='✕  Close';
+    b.onclick=function(){ document.body.classList.remove('rail-open'); };
+    rail.insertBefore(b, rail.firstChild);
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape') document.body.classList.remove('rail-open');
+  });
 })();
 
 setInterval(load, 90000);
