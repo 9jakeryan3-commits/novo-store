@@ -443,13 +443,13 @@ function drawCoin(){
     h+=`<div class="panel"><div class="ph"><h2>Dealer gamma by strike</h2>
       <span class="sub">${g.settle} book · expiry ${String(g.expiry).replace('T',' ').replace('Z',' UTC')}</span></div>
       <div class="pb" style="padding-bottom:2px">
-        <div style="border:1px solid ${g.net_gex>=0?'rgba(16,185,129,.35)':'rgba(244,63,94,.35)'};border-radius:9px;padding:14px 16px;background:${g.net_gex>=0?'rgba(16,185,129,.05)':'rgba(244,63,94,.05)'};margin-bottom:6px">
+        <div id="lgex-box" style="border:1px solid ${g.net_gex>=0?'rgba(16,185,129,.35)':'rgba(244,63,94,.35)'};border-radius:9px;padding:14px 16px;background:${g.net_gex>=0?'rgba(16,185,129,.05)':'rgba(244,63,94,.05)'};margin-bottom:6px">
           <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
             <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4)">Net GEX</span>
-            <span style="font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.02em" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'+':''}${money(g.net_gex)}</span>
-            <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4)">${g.net_gex>=0?'long gamma':'short gamma'}</span>
+            <span id="lgex-val" style="font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.02em" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'+':''}${money(g.net_gex)}</span>
+            <span id="lgex-lab" style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4)">${g.net_gex>=0?'long gamma':'short gamma'}</span><span id="lgex-dot" class="hidden" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa">&#9679; live</span>
           </div>
-          <div style="margin-top:7px;font-size:13.5px" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)'}</div>
+          <div id="lgex-sub" style="margin-top:7px;font-size:13.5px" class="${g.net_gex>=0?'up':'dn'}">${g.net_gex>=0?'positive — dealers dampen (grind / mean-revert)':'negative — dealers amplify (moves extend)'}</div><div id="lgex-live" class="hidden" style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--txt4)"></div>
         </div>
         ${ladder(g)}
         <div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--txt4);padding:8px 2px 2px;border-top:1px solid var(--bdr2);margin-top:4px">
@@ -493,6 +493,7 @@ function drawCoin(){
   h+=`</div></div>`;
   $('#body').innerHTML=h;
   if(g) drawGamma(g);
+  if(window.cxLive) window.cxLive.attach(CUR, g);   // stream spot for THIS coin; stops the previous socket
 
   let s='';
   if(tc){
@@ -683,6 +684,117 @@ async function load(){
 })();
 
 load();
+/* ---------------- LIVE GAMMA ----------------------------------------------------
+   The pass runs every five minutes. Net GEX, the regime and the distance to the flip
+   all move with SPOT, and spot moves constantly - so waiting five minutes to redraw
+   the one number people watch is the whole gap between this and a $29 tool.
+
+   The book is the slow half: open interest and IV per strike barely move between
+   passes. Spot is the fast half. So the collector ships `gamma.curve` - net GEX
+   evaluated at 61 hypothetical spot levels across +/-12%, the same shifted-gamma scan
+   that finds the flip - and this streams spot from Deribit's PUBLIC index channel and
+   interpolates. No account and no key: the Deribit country ban blocks trading accounts,
+   not public market data, which is the same reason the collector can read the book.
+
+   Two rules it must never break:
+     * never extrapolate. Outside the curve's range it stops and the pass values stand.
+     * never show stale as live. On any disconnect the LIVE dot goes and the numbers
+       revert to what the pass actually published.
+--------------------------------------------------------------------------------- */
+window.cxLive = (function(){
+  const IDX = {BTC:'btc_usd',ETH:'eth_usd',SOL:'sol_usd',XRP:'xrp_usd',AVAX:'avax_usd',HYPE:'hype_usd'};
+  let ws=null, coin=null, snap=null, tries=0, retry=null, alive=false;
+
+  function interp(c, x){
+    if(!c || c.length < 2) return null;
+    if(x < c[0][0] || x > c[c.length-1][0]) return null;      // outside the book we modelled
+    let lo=0, hi=c.length-1;
+    while(hi-lo > 1){ const m=(lo+hi)>>1; if(c[m][0] <= x) lo=m; else hi=m; }
+    const x0=c[lo][0], y0=c[lo][1], x1=c[hi][0], y1=c[hi][1];
+    return x1===x0 ? y0 : y0 + (y1-y0)*(x-x0)/(x1-x0);
+  }
+
+  function el(id){ return document.getElementById(id); }
+
+  function revert(){
+    alive=false;
+    const d=el('lgex-dot'); if(d) d.classList.add('hidden');
+    const l=el('lgex-live'); if(l) l.classList.add('hidden');
+    if(snap) paint(snap.net_gex, null);                       // back to the published pass
+  }
+
+  function paint(v, spot){
+    const box=el('lgex-box'), val=el('lgex-val'), lab=el('lgex-lab'), sub=el('lgex-sub');
+    if(!box||!val) return;
+    const pos = v >= 0;
+    val.textContent = (pos?'+':'') + money(v);
+    val.className = pos ? 'up' : 'dn';
+    if(lab) lab.textContent = pos ? 'long gamma' : 'short gamma';
+    box.style.borderColor = pos ? 'rgba(16,185,129,.35)' : 'rgba(244,63,94,.35)';
+    box.style.background  = pos ? 'rgba(16,185,129,.05)' : 'rgba(244,63,94,.05)';
+    if(sub){
+      sub.className = pos ? 'up' : 'dn';
+      sub.textContent = pos ? 'positive — dealers dampen (grind / mean-revert)'
+                            : 'negative — dealers amplify (moves extend)';
+    }
+    const line=el('lgex-live');
+    if(line && spot!=null && snap){
+      const f = snap.flip_zone;
+      const dist = (f!=null && f>0) ? ((spot/f - 1)*100) : null;
+      line.textContent = 'spot ' + spot.toLocaleString(undefined,{maximumFractionDigits:spot<10?4:0})
+        + (dist!=null ? '  ·  ' + (dist>=0?'+':'') + dist.toFixed(2) + '% from the flip' : '');
+      line.classList.remove('hidden');
+    }
+  }
+
+  function stop(){
+    if(retry){ clearTimeout(retry); retry=null; }
+    if(ws){ try{ ws.onclose=null; ws.close(); }catch(_){ } ws=null; }
+    revert();
+  }
+
+  function connect(){
+    const chan = IDX[coin];
+    if(!chan || !snap || !snap.curve) return;
+    let sock;
+    try { sock = new WebSocket('wss://www.deribit.com/ws/api/v2'); }
+    catch(_){ return; }
+    ws = sock;
+    sock.onopen = function(){
+      tries = 0;
+      sock.send(JSON.stringify({jsonrpc:'2.0',id:1,method:'public/subscribe',
+        params:{channels:['deribit_price_index.'+chan]}}));
+    };
+    sock.onmessage = function(ev){
+      let m; try { m = JSON.parse(ev.data); } catch(_){ return; }
+      if(m.method !== 'subscription') return;
+      const d = m.params && m.params.data; if(!d || d.price == null) return;
+      const v = interp(snap.curve, d.price);
+      if(v == null){ revert(); return; }            // moved outside the modelled band
+      alive = true;
+      const dot=el('lgex-dot'); if(dot) dot.classList.remove('hidden');
+      paint(v, d.price);
+    };
+    sock.onclose = function(){
+      ws=null; revert();
+      if(tries < 6 && coin){                        // backoff, then give up quietly
+        tries++;
+        retry = setTimeout(connect, Math.min(30000, 1000 * Math.pow(2, tries)));
+      }
+    };
+    sock.onerror = function(){ try{ sock.close(); }catch(_){ } };
+  }
+
+  return {
+    attach: function(c, g){
+      stop();
+      coin = c; snap = g; tries = 0;
+      if(g && g.curve && IDX[c]) connect();
+    },
+    stop: stop
+  };
+})();
+
 setInterval(load, 90000);
 window.addEventListener('resize',()=>{ if(SNAP) drawCoin(); });
 </script>
