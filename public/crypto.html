@@ -26,7 +26,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo Crypto Market Map - dealer gamma, funding and liquidations across every Robinhood coin, read by NoVo</title>
-<meta name="description" content="Dealer gamma by strike on the six cryptos with real options books, plus funding, open interest and liquidation flow across all 89 coins Robinhood trades - and NoVo, the AI analyst who reads it with you.">
+<meta name="description" content="Dealer gamma by strike on the six cryptos with real options books, plus funding, open interest and liquidation flow across all 89 coins Robinhood trades - and NoVo, the AI market analyst, included.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://novo-options.trade/crypto">
@@ -521,10 +521,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </nav><style>
 /* ── NoVo Crypto accent: PURPLE ────────────────────────────────────────────────
-   Cyan/blue is Analyst. Orange stays the free-tier and existing-product accent.
-   Purple is this product's, and only this product's. Everything below rides the
-   site's own components (.hero, .hero-badge, .hero-chip, .pain, .stats …) and
-   only re-tints them, so the page inherits the brand rather than imitating it. */
+   Cyan/blue is Analyst. Green is the site's success/accent. Orange is the free tier.
+   Purple is this product's. Everything rides the site's own components and only
+   re-tints them, so the page inherits the brand rather than imitating it. */
 :root{ --cx:#a78bfa; --cx-deep:#7c3aed; --cx-soft:rgba(167,139,250,.10); --cx-line:rgba(167,139,250,.28); }
 
 .cx .hero-badge{ border-left-color:var(--cx); color:var(--cx); }
@@ -536,7 +535,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .cx .pain-x{ color:var(--cx); }
 .cx .pain-resolve{ background:linear-gradient(135deg,rgba(167,139,250,.09) 0%,rgba(124,58,237,.05) 100%); border-color:var(--cx-line); }
 .cx .pain-resolve strong{ color:var(--cx); }
+/* .compound-callout is green by default AND paints every <span> inside it green —
+   which turned the $79 price green on the live page. Re-tint the box and stop the
+   span rule reaching the price. */
 .cx .compound-callout{ background:var(--cx-soft); border-color:var(--cx-line); }
+.cx .compound-callout span{ color:inherit; }
 
 .btn-crypto{ background:linear-gradient(180deg,#a78bfa,#7c3aed); color:#120a24; border:none; padding:16px 42px;
   border-radius:11px; font-weight:800; font-size:16px; cursor:pointer; font-family:inherit;
@@ -545,9 +548,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .btn-crypto:disabled{ opacity:.6; transform:none; cursor:default; }
 @keyframes cryptoGlow{ 0%,100%{ box-shadow:0 0 14px rgba(167,139,250,.22);} 50%{ box-shadow:0 0 26px rgba(167,139,250,.42);} }
 .crypto-glow{ animation:cryptoGlow 2.6s ease-in-out infinite; }
-
 .cx .stat-val{ color:var(--cx); }
-.cx-free .stat-val{ color:#f59e0b; }
+
 .split{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-top:26px; text-align:left; }
 .split-card{ background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:22px; }
 .split-card.free{ border-left:3px solid #f59e0b; }
@@ -556,10 +558,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .split-card.free h4{ color:#f59e0b; }
 .split-card.paid h4{ color:var(--cx); }
 .split-card p{ font-size:14.5px; line-height:1.65; color:var(--txt2); margin:0; }
-.price-row{ display:flex; align-items:baseline; gap:12px; justify-content:center; flex-wrap:wrap; margin:6px 0 4px; }
-.price-big{ font-family:'Space Grotesk',sans-serif; font-size:52px; font-weight:900; letter-spacing:-2px; color:var(--txt1); line-height:1; }
-.price-alt{ color:var(--txt2); font-size:15px; }
-.price-alt b{ color:var(--txt1); }
+
+/* price — explicit colours so nothing upstream can tint it */
+.price-row{ display:flex; align-items:baseline; gap:14px; justify-content:center; flex-wrap:wrap; margin:8px 0 4px; }
+.price-big{ font-family:'Space Grotesk',sans-serif; font-size:56px; font-weight:900; letter-spacing:-2px;
+  color:var(--txt1)!important; line-height:1; }
+.price-alt{ color:var(--txt2)!important; font-size:15px; }
+.price-alt b{ color:var(--txt1)!important; }
+
+/* what NoVo answers — a transcript, not a feature list */
+.qa{ display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:26px; text-align:left; }
+.qa-item{ background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:18px 20px; }
+.qa-q{ font-size:14.5px; font-weight:700; color:var(--txt1); margin:0 0 8px; display:flex; gap:8px; align-items:flex-start; }
+.qa-q::before{ content:"›"; color:var(--cx); font-weight:900; flex-shrink:0; }
+.qa-a{ font-size:13.5px; line-height:1.6; color:var(--txt2); margin:0; }
+.qa-tag{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  color:var(--cx); background:var(--cx-soft); border-radius:4px; padding:3px 8px; margin-bottom:10px; }
+
+.covgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-top:24px; text-align:left; }
+.covcard{ background:var(--navy); border:1px solid var(--bdr); border-radius:10px; padding:18px 20px; }
+.covcard .cvn{ font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:900; letter-spacing:-1px; color:var(--cx); line-height:1; }
+.covcard .cvt{ font-size:13.5px; font-weight:700; color:var(--txt1); margin:8px 0 5px; }
+.covcard .cvd{ font-size:13px; line-height:1.55; color:var(--txt3); margin:0; }
 </style>
 
 <div id="main" tabindex="-1"></div>
@@ -572,27 +592,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h1>Crypto has a dealer map.<br><span>Now it has an analyst.</span></h1>
     <p class="hero-tagline"><b>89 coins</b> &middot; gamma by strike, funding, liquidations <span style="white-space:nowrap">&middot; read by NoVo</span></p>
     <p>Dealer gamma on the six cryptos that have a real options book &mdash; the flip, the walls, the 08:00 UTC expiry. Funding <b style="color:var(--txt1);">per venue</b>, never blended. Liquidation flow. And what a round trip <b style="color:var(--txt1);">actually costs you</b> on Robinhood, read back from Robinhood&rsquo;s own disclosed markup.</p>
-    <p style="font-size:19px;color:var(--txt1);max-width:660px;">The crypto tools that draw gamma have no analyst. The tools with an AI analyst <b style="color:var(--cx);">read equities only</b>. <b style="color:var(--green);">NoVo reads both, as one body of knowledge.</b></p>
+    <p style="font-size:19px;color:var(--txt1);max-width:660px;">And <b style="color:var(--cx);">NoVo comes with it</b> &mdash; not a crypto bot, but the analyst who reads the whole market.</p>
 
     <div class="hero-chips" aria-label="What the crypto map shows">
       <span class="hero-chip">Dealer gamma by strike</span>
       <span class="hero-chip">Gamma flip</span>
       <span class="hero-chip">Call / Put walls</span>
       <span class="hero-chip">08:00 UTC expiry ladder</span>
+      <span class="hero-chip">DVOL &amp; expected move</span>
+      <span class="hero-chip">Near-ATM skew</span>
       <span class="hero-chip">Funding by venue</span>
       <span class="hero-chip">Open interest</span>
       <span class="hero-chip">Liquidation flow</span>
       <span class="hero-chip">Price / OI regime</span>
-      <span class="hero-chip">Spot&ndash;perp basis</span>
       <span class="hero-chip"><b>True cost to trade</b></span>
-      <span class="hero-chip">Coverage confidence</span>
       <span class="hero-chip">Scored base rates</span>
     </div>
-
-    <a href="/crypto/live" class="hero-ask" style="display:inline-flex;align-items:center;gap:10px;max-width:560px;margin:0 auto 26px;padding:12px 18px;background:var(--navy2);border:1px solid var(--cx-line);border-radius:12px;text-decoration:none;text-align:left;">
-      <span style="font-size:17px;line-height:1;">&#129518;</span>
-      <span style="font-size:14px;color:var(--txt2);line-height:1.5;"><b style="color:var(--cx);">NoVo</b> &mdash; the analyst inside NoVo Options Trading. He has this map in front of him while you talk to him.</span>
-    </a>
 
     <div class="hero-cta">
       <button type="button" class="btn-crypto crypto-glow" onclick="cryptoCheckout(this)">Start the 7-day free trial &mdash; $79/mo &rarr;</button>
@@ -623,48 +638,101 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </section>
 
-<!-- THE PROBLEM -->
+<!-- NOVO: THE REAL PITCH -->
 <section class="pain">
   <div class="container">
-    <div class="pain-intro">What you get everywhere else</div>
-    <h2>A chart, and good luck.</h2>
-    <div class="pain-grid">
+    <div class="pain-intro">Included, not extra</div>
+    <h2>You are not buying a crypto bot.</h2>
+    <p style="font-size:17px;color:var(--txt2);max-width:660px;margin:0 auto 8px;line-height:1.75;">
+      NoVo is the analyst inside NoVo Options Trading. He reads dealer positioning on SPY, QQQ and IWM.
+      He reads options flow, gamma, skew, vanna and charm. He reads the economic calendar, earnings dates,
+      the VIX regime and the headlines. He reads this crypto map. <b style="color:var(--txt1);">All of it is
+      one body of knowledge</b>, and all of it answers when you ask him a question here.</p>
+    <p style="font-size:17px;color:var(--txt2);max-width:660px;margin:0 auto;line-height:1.75;">
+      Every other crypto tool that has an AI gave it crypto and stopped.
+      <b style="color:var(--cx);">Ask NoVo whether crypto is leading or lagging the equity risk impulse
+      and he can actually answer</b>, because he is looking at both.</p>
+
+    <div class="qa">
+      <div class="qa-item"><span class="qa-tag">Crypto</span>
+        <p class="qa-q">Where is BTC positioned right now?</p>
+        <p class="qa-a">Reads the live gamma book &mdash; net GEX, the walls, the flip, and how far the 08:00 UTC expiry is. Not a guess from a chart.</p></div>
+      <div class="qa-item"><span class="qa-tag">Cross-asset</span>
+        <p class="qa-q">Is crypto risk-on ahead of the equity open?</p>
+        <p class="qa-a">Crypto trades the weekend and equities do not. NoVo holds both maps, so he can compare them rather than describe one.</p></div>
+      <div class="qa-item"><span class="qa-tag">Cost</span>
+        <p class="qa-q">What does it actually cost me to trade PEPE?</p>
+        <p class="qa-a">Robinhood publishes its own markup per coin, per side. He reads it back and ranks it against the other 88.</p></div>
+      <div class="qa-item"><span class="qa-tag">Markets</span>
+        <p class="qa-q">What is on the calendar that could move this?</p>
+        <p class="qa-a">Economic releases, earnings dates and headline sentiment &mdash; the same tools he uses on the equity side, available here.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section style="padding:64px 0;">
+  <div class="container">
+    <div class="pain-intro" style="text-align:center;">What you get everywhere else</div>
+    <h2 class="section-title" style="text-align:center;">A chart, and good luck.</h2>
+    <div class="pain-grid" style="margin-top:26px;">
       <div class="pain-item"><span class="pain-x">&times;</span><p>Gamma on <strong>four coins</strong>, and nothing that tells you what it means.</p></div>
       <div class="pain-item"><span class="pain-x">&times;</span><p>Funding from six venues <strong>averaged into one number</strong> that describes no market.</p></div>
       <div class="pain-item"><span class="pain-x">&times;</span><p>No idea what the trade <strong>actually costs you</strong> until after you have taken it.</p></div>
       <div class="pain-item"><span class="pain-x">&times;</span><p>A tool that never says <strong>&ldquo;I do not have that data&rdquo;</strong> &mdash; it just draws something.</p></div>
     </div>
     <div class="pain-resolve">
-      <p>NoVo reads the equity dealer map and the crypto market as one body of knowledge, tells you when a crypto concept has no equity equivalent, and declines to quote a number he does not trust.
-      <strong>Ask him where BTC is positioned. He reads it, rather than guessing.</strong></p>
+      <p>Every panel on the map is granted by measured inputs. A coin with one funding venue gets no funding panel. A thin price series gets no percentile. A venue whose price disagrees with the rest is quarantined before it reaches you.
+      <strong>NoVo declines to quote a number he does not trust.</strong></p>
     </div>
   </div>
 </section>
 
 <!-- WHAT IT SHOWS -->
-<section style="padding:64px 0;">
+<section class="pain" style="background:var(--navy);">
   <div class="container">
     <h2 class="section-title" style="text-align:center;">What it shows that nothing else does</h2>
     <div class="split" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr));">
-      <div class="split-card paid"><h4>Your real cost</h4><p>Robinhood publishes its own markup per coin, per side. The map reads it back and ranks all 89, so you know what a round trip costs before you take it &mdash; at your fee tier, not a headline rate.</p></div>
+      <div class="split-card paid"><h4>Your real cost</h4><p>Robinhood publishes its own markup per coin, per side. The map reads it back and ranks all 89, so you know what a round trip costs before you take it &mdash; at your fee tier, not a headline rate. Nobody else can build this.</p></div>
       <div class="split-card paid"><h4>Liquidation flow</h4><p>Forced selling at prices you can work out in advance from open interest and leverage. The crypto answer to a gamma squeeze: flow that has to happen, whether anyone wants it to or not.</p></div>
       <div class="split-card paid"><h4>Funding, per venue</h4><p>A published price for how crowded one side is &mdash; no equity equivalent exists. When one venue pays 60% annualised and another pays nothing, that gap is the read.</p></div>
-      <div class="split-card paid"><h4>Claims that get scored</h4><p>NoVo states what he thinks, with a horizon, and the map keeps the result. Deribit expires at 08:00 UTC every day, so a pinning study gets 365 samples a year instead of twelve.</p></div>
+      <div class="split-card paid"><h4>Claims that get scored</h4><p>NoVo states what he thinks, with a horizon, and the map keeps the result. Deribit expires at 08:00 UTC every single day, so a pinning study gets 365 samples a year instead of twelve.</p></div>
       <div class="split-card paid"><h4>Coverage you can see</h4><p>Every panel is granted by measured inputs. One funding venue means no funding panel. A thin series gets no percentile. Nothing renders on data that is not there.</p></div>
       <div class="split-card paid"><h4>One analyst, not two</h4><p>There is no separate crypto bot. The same NoVo answers in both dashboards off one shared body of knowledge, so what he learns reading equities is there when you ask about crypto.</p></div>
     </div>
   </div>
 </section>
 
+<!-- WHERE THE DATA COMES FROM -->
+<section style="padding:64px 0;">
+  <div class="container">
+    <div class="pain-intro" style="text-align:center;">Under the map</div>
+    <h2 class="section-title" style="text-align:center;">Six venues, one clock.</h2>
+    <p style="font-size:16px;color:var(--txt2);max-width:620px;margin:0 auto;line-height:1.7;text-align:center;">
+      Nothing here is scraped from a screenshot or averaged from an aggregator. Every number is pulled
+      from the venue that made it.</p>
+    <div class="covgrid">
+      <div class="covcard"><div class="cvn">Deribit</div><div class="cvt">The options book</div>
+        <p class="cvd">The overwhelming majority of crypto options open interest. Gamma, greeks, open interest by strike, and DVOL.</p></div>
+      <div class="covcard"><div class="cvn">6 venues</div><div class="cvt">Leverage</div>
+        <p class="cvd">Binance, Bybit, OKX, Kraken, Hyperliquid and dYdX. Kept separate, because they disagree and the disagreement is the signal.</p></div>
+      <div class="covcard"><div class="cvn">Coinbase</div><div class="cvt">Real volume</div>
+        <p class="cvd">Hourly bars with genuine exchange volume behind them, so a percentile means something.</p></div>
+      <div class="covcard"><div class="cvn">Robinhood</div><div class="cvt">Your actual cost</div>
+        <p class="cvd">The coin universe and Robinhood&rsquo;s own disclosed buy and sell markup, read straight from its API.</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- FREE VS PAID -->
-<section class="pain" style="background:var(--navy);">
+<section class="pain" style="background:var(--navy2);">
   <div class="container">
     <div class="pain-intro" style="color:#f59e0b;">How we price</div>
     <h2>Free follows the market.</h2>
     <p style="font-size:16px;color:var(--txt2);max-width:620px;margin:0 auto;line-height:1.7;">We give away what the market already gives away, and sell what the market sells. You should not pay us for something CoinGlass hands out.</p>
     <div class="split">
       <div class="split-card free"><h4>Free, on every coin</h4><p>Current funding by venue, open interest, 24-hour liquidations, and the BTC and ETH gamma read &mdash; the things Coinalyze, CoinGlass and cryptogamma.io already publish for nothing.</p></div>
-      <div class="split-card paid"><h4>The subscription</h4><p>Gamma by strike, the walls and the flip across all six books. History and percentiles. What a round trip costs you on Robinhood. Every call NoVo has made and how it scored. And NoVo himself.</p></div>
+      <div class="split-card paid"><h4>The subscription</h4><p>Gamma by strike, the walls and the flip across all six books. DVOL, expected move and skew. History and percentiles. What a round trip costs you on Robinhood. Every call NoVo has made and how it scored. And NoVo himself.</p></div>
     </div>
   </div>
 </section>
@@ -674,18 +742,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container" style="text-align:center;">
     <div class="compound-callout">
       <h2 class="section-title" style="margin-bottom:10px;">A product of its own.</h2>
-      <p style="font-size:16px;color:var(--txt2);line-height:1.7;max-width:560px;margin:0 auto 22px;">The Crypto Market Map is sold on its own. You do not need Analyst or Trader to use it, and neither one includes it.</p>
+      <p class="compound-sub" style="font-size:16px;color:var(--txt2);line-height:1.7;max-width:560px;margin:0 auto 8px;font-weight:400;">The Crypto Market Map is sold on its own. You do not need Analyst or Trader to use it, and neither one includes it. NoVo is included with it.</p>
       <div class="price-row">
         <span class="price-big">$79</span>
         <span class="price-alt">per month &nbsp;&middot;&nbsp; or <b>$790</b> a year</span>
       </div>
-      <p style="font-size:13px;color:var(--txt3);margin:0 0 22px;">7 days free. Cancel any time before it bills.</p>
+      <p style="font-size:13px;color:var(--txt3);margin:0 0 22px;font-weight:400;">7 days free. Cancel any time before it bills.</p>
       <button type="button" class="btn-crypto" onclick="cryptoCheckout(this)">Start the free trial &rarr;</button>
     </div>
   </div>
 </section>
 
 </div>
+<div class="disclaimer">
+  <div class="container">
+    <p>NoVo Options Trading is a software tool for market analysis and for executing trades you initiate. It is not financial advice. Past performance of any trading system does not guarantee future results. Options trading involves significant risk of loss and is not appropriate for all investors. You are responsible for all trading decisions, risk configuration, and capital management. Use in paper mode before deploying real capital.</p>
+    <p style="margin-top:12px;">NoVo Options Trading never takes custody of your funds. It executes trades through your own broker API keys and never holds, transfers, or accesses your money — your capital remains in your own brokerage accounts at all times.</p>
+    <div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Home</a><a href="/analyst" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Analyst</a><a href="/trader" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Trader</a><a href="/crypto" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Crypto</a><a href="/plans" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Plans</a><a href="/track-record" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Track record</a><a href="/market-data" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Market Data</a><a href="/market-data/spy" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">SPY gamma</a><a href="/market-data/qqq" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">QQQ gamma</a><a href="/market-data/iwm" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">IWM gamma</a><a href="/positioning" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Futures positioning</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/options-101" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Options 101</a><a href="/0dte" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">0DTE Guide</a><a href="/learn/options-basics-greeks" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Basics &amp; the Greeks</a><a href="/learn/0dte-options" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">0DTE options</a><a href="/learn/gamma-gex-dealer-positioning" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Gamma &amp; dealer positioning</a><a href="/learn/volatility-market-structure" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Volatility &amp; structure</a><a href="/learn/risk-management" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Risk management</a><a href="/journal/" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">The Journal</a><a href="/options-glossary" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Glossary</a><a href="/tradingview" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">TradingView script</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/tools/expected-move" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Expected Move</a><a href="/tools/max-pain-calculator" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Max Pain</a><a href="/tools/position-size-calculator" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Position Size</a><a href="/tools/options-profit-calculator" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Options P&amp;L</a><a href="/tools/options-greeks-calculator" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Greeks</a><a href="/economic-calendar" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Economic Calendar</a><a href="/market-holidays" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Market Holidays</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/compare/best-0dte-tools" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Best 0DTE Tools</a><a href="/compare/best-gamma-gex-tools" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Best GEX Tools</a><a href="/compare/novo-vs-spotgamma" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">vs SpotGamma</a><a href="/compare/novo-vs-unusual-whales" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">vs Unusual Whales</a><a href="/compare/novo-vs-option-alpha" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">vs Option Alpha</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/about" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">About</a><a href="/faq" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">FAQ</a><a href="/help" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Help</a><a href="/getting-started" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Getting Started</a><a href="/security" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Security</a><a href="/analyst/archive" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Read Archive</a><a href="/analyst/methodology" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Methodology</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="/license" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Terms</a><a href="/risk-disclosure" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Risk</a><a href="/refund-policy" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Refunds</a><a href="/privacy" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Privacy</a><a href="/license" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">License</a></div><div style="margin:0 0 8px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"><a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Discord</a> &middot; <a href="https://www.reddit.com/user/novo_algotrades" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Reddit</a> &middot; <a href="https://stocktwits.com/0dte_NoVo" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">StockTwits</a> &middot; <a href="https://x.com/0dte_NoVo" target="_blank" rel="noopener" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">X</a> &middot; <a href="mailto:general@novo-options.trade" style="color:var(--txt2);text-decoration:none;font-weight:600;font-size:13px;">Contact</a></div>
+    <p style="margin-top:16px;">Questions? <a href="mailto:general@novo-options.trade" style="color:var(--txt2);font-weight:600;">general@novo-options.trade</a> &nbsp;·&nbsp; Support: <a href="mailto:support@novo-options.trade" style="color:var(--txt2);font-weight:600;">support@novo-options.trade</a></p>
+    <p style="margin-top:16px;font-weight:800;color:#22d3ee;letter-spacing:1px;font-size:13px;">NoVo — from zero to trading</p>
+    <p style="margin-top:12px;">© 2026 NoVo Options Trading. All rights reserved.</p>
+  </div>
+</div>
+
 
 <script>
 function cryptoCheckout(btn, plan){
