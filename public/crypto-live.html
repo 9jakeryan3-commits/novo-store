@@ -206,6 +206,26 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .t-n{background:var(--navy2);color:var(--txt4)}
 
 #head{display:flex;align-items:flex-end;gap:15px;margin-bottom:13px;flex-wrap:wrap}
+/* The read strip. One row, and it must never be the thing that makes the page scroll sideways --
+   min-width:0 on the flexing child plus ellipsis on the text, because the claim is written by the
+   model and its length is not something this layout gets to assume. */
+#readstrip{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;
+  border:1px solid var(--bdr);border-radius:var(--r-2);background:var(--panel);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden}
+#readstrip:hover{border-color:var(--cx-line)}
+#readstrip .rs-ico{flex:0 0 auto;font-size:13px;line-height:1}
+#readstrip .rs-body{flex:1 1 auto;min-width:0;max-width:100%}
+#readstrip .rs-line{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:12.5px;color:var(--txt2);line-height:1.5}
+#readstrip .rs-line + .rs-line{color:var(--txt3);font-size:11.5px}
+#readstrip .rs-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt4)}
+#readstrip .rs-more{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--cx);white-space:nowrap}
+@media(max-width:720px){
+  /* Two lines is a luxury on a phone: one read, and the count. */
+  #readstrip .rs-line + .rs-line{display:none}
+  #readstrip{padding:8px 11px;gap:8px}
+}
 #sym{font-family:'Space Grotesk','Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
 #px{font-family:var(--mono);font-size:19px;color:var(--txt2);line-height:1}
 #headmeta{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
@@ -485,13 +505,14 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="lv-status">
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
-      <span id="sess" class="lv-sess" title="Age of the collector's last full pass. The book, funding, liquidations and cost refresh every 5 minutes; spot and net GEX stream continuously."></span>
+      
     </div>
     <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
   </header>
   <main>
     <div class="col" id="rail"></div>
     <div class="col" id="center">
+      <div id="readstrip" hidden></div>
       <div id="head"><div id="sym">&mdash;</div><div id="px"></div><div id="headmeta"></div></div>
       <div id="body"></div>
     </div>
@@ -1028,6 +1049,30 @@ function drawRail(filter=''){
       document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
 }
 
+/* ---------------- the read strip ----------------
+   Deliberately shows the CLAIM, not just that something happened. "BTC · gamma pin" tells you a
+   rule fired; the claim tells you what it said, which is the part worth glancing at. */
+function _ago(ts){
+  if(!ts) return '';
+  var t = Date.parse(String(ts).replace(' ','T'));
+  if(!t) return '';
+  var m = Math.max(0, Math.round((Date.now()-t)/60000));
+  return m<1 ? 'just now' : m<60 ? m+'m ago' : Math.round(m/60)+'h ago';
+}
+function drawReadStrip(){
+  const el = $('#readstrip'); if(!el) return;
+  const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
+  if(!fd.length){ el.hidden = true; return; }
+  el.hidden = false;
+  const rows = fd.slice(0,2).map(r =>
+    `<span class="rs-line"><b style="color:var(--txt1)">${r.asset_code}</b>
+       <span class="rs-k">${KINDLABEL[r.kind]||r.kind}</span> &middot; ${r.claim||''}
+       <span style="color:var(--txt4)">&middot; ${_ago(r.ts_utc)}</span></span>`).join('');
+  el.innerHTML = `<span class="rs-ico">\u26a1</span><span class="rs-body">${rows}</span>`+
+    `<span class="rs-more">${fd.length} reads &rsaquo;</span>`;
+  el.onclick = () => { FEED = true; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed(); };
+}
+
 /* ---------------- what just fired ----------------
    Every claim the signals made across the whole book, newest first, WITH the resolved ones. A feed
    of predictions with the outcomes quietly dropped is a highlight reel; showing what happened next
@@ -1394,12 +1439,8 @@ async function load(){
   // close to report. It states whether the collector's last pass is current.
   $('#live').classList.toggle('stale',stale);
   $('#live-t').textContent = stale ? 'STALE' : 'LIVE';
-  const _age = SNAP.age_min;
   const _nchain = Array.isArray(SNAP.chain) ? SNAP.chain.length : 0;
-  $('#sess').innerHTML = `<b>${Object.keys(SNAP.coins).length}</b> coins`
-    + (_nchain ? ` &middot; <b>${_nchain}</b> chain` : '') + ' &middot; '
-    + `<span class="lg">${_age==null?'no pass yet':_age<1?'updated just now':'updated '+_age+'m ago'}</span>`
-    + `<span class="sm">${_age==null?'no pass':_age<1?'just now':_age+'m'}</span>`;
+  // Header stays the brand, the LIVE state and the gear. Nothing else earns the room on a phone.
   // Snapshots, quarantine and round-trip cost are numbers you check, not numbers you watch -
   // they crowded the bar into three wrapped lines on a phone. They live in Settings now.
   $('#dstats').innerHTML=
@@ -1419,6 +1460,7 @@ async function load(){
   // A selected chain token is re-resolved from the NEW payload rather than left pointing at the old
   // object, so a refresh updates its numbers instead of freezing them.
   if(TOK) TOK=(SNAP.chain||[]).find(x=>x.address===TOK.address&&x.network===TOK.network)||null;
+  drawReadStrip();
   drawRail(); if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
 }
 
