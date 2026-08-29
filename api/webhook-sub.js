@@ -281,7 +281,7 @@ function analystWelcomeHtml(connectUrl) {
       </div>` : ''}
       <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Want it raw &amp; live?</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> executes it live in your own broker account, within your rules &mdash; non-custodial. <a href="https://novo-options.trade" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;">This is the read. <b style="color:#eaf3ff">NoVo Trader</b> draws it live on the tape, with an hourly structural audit beside it. <a href="https://novo-options.trade" style="color:#34d399;font-weight:700;text-decoration:none;">See NoVo Trader &rarr;</a></div>
       </div>
       <div style="margin-top:22px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.06);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Don't need these in your inbox?</div>
@@ -305,7 +305,7 @@ function welcomeEmailHtml(connectUrl) {
   <div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;padding:34px 32px;">
     <div style="text-align:center;">
       <img src="https://novo-options.trade/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
-      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; One-Click Execution</div>
+      <div style="font-size:11px;letter-spacing:3px;color:#10b981;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Trader &mdash; The Live Dealer Map</div>
     </div>
 
     <h1 style="color:#eaf3ff;font-size:22px;margin:0 0 10px;">Welcome to NoVo Trader &mdash; you're all set.</h1>

@@ -60,9 +60,9 @@
     <h2>The price column is a volatility</h2>
     <p>Crypto venues typically show the mark as an <em>implied volatility</em> alongside the premium, and traders quote each other in vol rather than in currency. That is not decoration: it is the working convention, for the reasons in <a href="/journal/why-crypto-options-are-quoted-in-volatility.html">why crypto options are quoted in volatility</a>.</p>
     <p>The practical consequence is that two strikes are compared by their vol, not their price. A premium being higher tells you almost nothing on its own; the vol tells you whether it is actually expensive.</p>
-    <h2>The size column is one coin, not a hundred</h2>
-    <p>A US equity option covers 100 shares. A crypto option is typically <strong>one coin</strong>. So an open interest figure that looks small next to an equity chain may be nothing of the kind &mdash; and any dollar-gamma calculation that carries the equity multiplier across is wrong by a factor of a hundred.</p>
-    <p>This is the single most common arithmetic error made by traders arriving from equities, and it is silent: the numbers all compute.</p>
+    <h2>The size column is not 100, and not always 1</h2>
+    <p>A US equity option covers 100 shares. Crypto has no equivalent constant: the coin-settled BTC and ETH contracts are one coin, while the linear altcoin options are not &mdash; AVAX is 100 per contract, TRX is 10,000. So an open interest figure means nothing until you know which product produced it, and a dollar-gamma calculation using the wrong multiplier is wrong by orders of magnitude in either direction.</p>
+    <p>This is the single most common arithmetic error made by traders arriving from equities, and it is silent: the numbers all compute. See <a href="/journal/crypto-option-contract-specs.html">check the contract multiplier</a>.</p>
     <h2>There are more expiries than you expect</h2>
     <p>Daily, weekly, monthly and quarterly all coexist, because crypto <a href="/journal/bitcoin-options-expiry-0800-utc.html">expires every day at 08:00 UTC</a>. A chain defaulting to the nearest expiry is showing you a very short-dated book, and the open interest that actually matters usually sits further out on the Fridays and month ends &mdash; the layout in <a href="/journal/crypto-option-expiry-calendar.html">the crypto expiry calendar</a>.</p>
     <h2>Two chains for one coin</h2>

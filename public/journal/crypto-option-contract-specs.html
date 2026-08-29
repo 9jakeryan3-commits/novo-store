@@ -7,32 +7,32 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>One Coin Per Contract, and Why That Matters | NoVo Options Trading</title>
-<meta name="description" content="A crypto option typically covers one coin, not a hundred shares. Carrying the equity multiplier across produces figures wrong by two orders of magnitude.">
+<title>Check the Contract Multiplier Before You Compute Anything | NoVo Options Trading</title>
+<meta name="description" content="A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.">
 <meta name="theme-color" content="#121316">
 <link rel="canonical" href="https://novo-options.trade/journal/crypto-option-contract-specs.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-options.trade/journal/crypto-option-contract-specs.html">
-<meta property="og:title" content="One Coin Per Contract, and Why That Matters">
-<meta property="og:description" content="A crypto option typically covers one coin, not a hundred shares. Carrying the equity multiplier across produces figures wrong by two orders of magnitude.">
+<meta property="og:title" content="Check the Contract Multiplier Before You Compute Anything">
+<meta property="og:description" content="A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="One Coin Per Contract, and Why That Matters">
-<meta name="twitter:description" content="A crypto option typically covers one coin, not a hundred shares. Carrying the equity multiplier across produces figures wrong by two orders of magnitude.">
+<meta name="twitter:title" content="Check the Contract Multiplier Before You Compute Anything">
+<meta name="twitter:description" content="A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=faaebd47">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "One Coin Per Contract, and Why That Matters", "description": "A crypto option typically covers one coin, not a hundred shares. Carrying the equity multiplier across produces figures wrong by two orders of magnitude.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=3", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-option-contract-specs.html", "articleSection": "Crypto Options 101", "wordCount": 294, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Check the Contract Multiplier Before You Compute Anything", "description": "A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=3", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-option-contract-specs.html", "articleSection": "Crypto Options 101", "wordCount": 294, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "One Coin Per Contract, and Why That Matters", "item": "https://novo-options.trade/journal/crypto-option-contract-specs.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Check the Contract Multiplier Before You Compute Anything", "item": "https://novo-options.trade/journal/crypto-option-contract-specs.html"}]}
 </script>
 </head>
 <body>
@@ -48,24 +48,28 @@
 
 <main class="wrap">
 <article class="article">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/crypto">Crypto Market Structure</a><span class="sep">&rsaquo;</span><span class="cur">One Coin Per Contract, and Why That Matters</span></nav>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/crypto">Crypto Market Structure</a><span class="sep">&rsaquo;</span><span class="cur">Check the Contract Multiplier Before You Compute Anything</span></nav>
   <header class="article-head">
     <div class="kicker">Crypto Options 101</div>
-    <h1>One Coin Per Contract, and Why That Matters</h1>
+    <h1>Check the Contract Multiplier Before You Compute Anything</h1>
     <p class="standfirst">The contract multiplier is the least interesting specification in options and the one most likely to silently ruin a calculation when you change market.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>A US listed equity option controls 100 shares. That 100 is so universal it stops being a number you think about &mdash; it is baked into every mental shortcut about premium, notional and exposure.</p>
-    <p>A crypto option typically controls <strong>one coin</strong>. Some venues use fractions of a coin for higher-priced assets. Neither is 100.</p>
+    <p>Crypto has no such constant, and that is the point. <strong>The multiplier is a property of the individual product, not of the market.</strong></p>
+    <h2>Three different answers on one venue</h2>
+    <p>The coin-settled BTC and ETH contracts are <strong>one coin</strong> each. The linear, USDC-settled altcoin options are not: an AVAX contract covers <strong>100 AVAX</strong>, and a TRX contract covers <strong>10,000 TRX</strong>.</p>
+    <p>So a trader who learned &ldquo;crypto options are one coin&rdquo; from the BTC chain and applied it to the TRX chain is out by four orders of magnitude. The correction for the equity habit is not a different constant &mdash; it is that there is no constant.</p>
     <h2>Where it goes wrong</h2>
-    <p><strong>Notional.</strong> The exposure of one contract is roughly the coin price, not a hundred times it. A book with a given contract count is a hundredth of the notional an equity trader&rsquo;s instinct suggests.</p>
-    <p><strong>Dollar gamma.</strong> Any dealer map multiplies open interest by gamma and by a multiplier. Use 100 on a chain where the multiplier is 1 and every figure &mdash; net GEX, wall size, the flip&rsquo;s sensitivity &mdash; is a hundred times too large. The shape of the map survives; the magnitudes are fiction, which is worse than an obvious error because the picture still looks right.</p>
-    <p><strong>Comparing books.</strong> Comparing crypto open interest against equity open interest by contract count compares two different units. It has to be converted to notional first, and then converted correctly.</p>
-    <h2>The other specs worth checking</h2>
-    <p>Strike increments are coarser relative to price than on a liquid equity, which affects how precisely a wall can sit. Minimum tick sizes are quoted in the settlement currency. And the settlement type &mdash; <a href="/journal/usdc-settled-vs-coin-settled-options.html">coin or stablecoin</a> &mdash; changes the payoff shape, not just the currency of the payout.</p>
-    <h2>The habit that prevents it</h2>
-    <p>Read the contract specification once per venue and per product, and write down the multiplier before computing anything. It is a thirty-second check that protects every downstream number, and it is the sort of error that survives review precisely because nobody re-derives a constant they think they know.</p>
+    <p><strong>Notional.</strong> Contract count means nothing without the multiplier. Comparing open interest between two chains by counting contracts compares quantities in different units.</p>
+    <p><strong>Dollar gamma.</strong> A dealer map multiplies open interest by gamma and by a multiplier. Get the multiplier wrong and the shape of the map survives while every magnitude is fiction &mdash; worse than an obvious error, because the picture still looks right.</p>
+    <p><strong>Cross-book comparison.</strong> This is why figures should be computed and reported per book rather than aggregated, the same argument as in <a href="/journal/usdc-settled-vs-coin-settled-options.html">settlement currency decides what the numbers mean</a>.</p>
+    <h2>The other specs that vary the same way</h2>
+    <p>Strike increments are coarser relative to price than on a liquid equity, which affects how precisely a wall can sit. Tick sizes are quoted in the settlement currency. And settlement type &mdash; coin or stablecoin &mdash; changes the payoff shape itself, not just the currency, per <a href="/journal/inverse-options-and-nonlinear-payoff.html">inverse options</a>.</p>
+    <h2>The habit that prevents all of it</h2>
+    <p>Read the contract specification once per product, and write the multiplier down before computing anything. It is a thirty-second check protecting every downstream number, and it is exactly the sort of error that survives review &mdash; because nobody re-derives a constant they believe they already know.</p>
+
   </div>
 </article>
 <div class="related"><h3>Related reading</h3><ul><li><a href="/journal/funding-extremes-and-what-follows.html"><span class="rk">Perps &amp; Funding</span>Funding Extremes: What Actually Follows</a></li><li><a href="/journal/isolated-vs-cross-margin.html"><span class="rk">Margin &amp; Liquidation</span>Isolated vs Cross Margin: Which Account Is at Risk</a></li><li><a href="/journal/portfolio-margin-for-crypto-options.html"><span class="rk">Crypto Options 101</span>Portfolio Margin: Margined on Risk, Not on Positions</a></li><li><a href="/journal/the-dollar-and-crypto.html"><span class="rk">Crypto Macro</span>The Dollar Is the Denominator</a></li><li><a href="/journal/what-crypto-market-structure-data-costs.html"><span class="rk">Crypto FAQ</span>What Crypto Market-Structure Data Costs</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>

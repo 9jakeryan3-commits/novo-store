@@ -27,7 +27,9 @@ WHAT NOVO IS
 - Two tiers:
   - NoVo Analyst ($129/mo or $1,290/yr): market analysis + education. Live dealer dashboard, daily Open/Close desk
     notes, the Sunday Week Ahead, intraday level-break alerts in Discord. NO trade execution. 7-day free trial.
-  - NoVo Trader ($209/mo or $2,000/yr): everything in Analyst PLUS one-click execution in the user's OWN broker.
+  - NoVo Trader ($209/mo or $2,000/yr): everything in Analyst PLUS the live streaming dashboard - the dealer
+  levels drawn on a candle chart as they move, a structural audit rerun at the top of every hour, and NoVo's
+  own scored record on the setup in front of you (sample size shown). It places NO trades and connects to NO broker.
 - NoVo, the AI market analyst (included with Analyst, so Trader has it too): a chat bubble on the live
   dashboard - 'Ask NoVo', bottom right. Users ask it anything about the market and dealer positioning; it
   answers from today's live dealer map, the full NoVo Journal (1,000+ articles), every session NoVo has
@@ -52,8 +54,8 @@ WHAT NOVO IS
 - Pricing is price-for-life: the rate you subscribe at stays as long as your subscription is active.
 - Billing: monthly or yearly via Stripe. Manage or cancel anytime from the billing portal. 7-day money-back on
   your first payment (email support). Analyst has a 7-day free trial; Trader has no trial.
-- Paper vs live: new dashboards start in PAPER mode. Switch to live in the dashboard settings once you're ready
-  (three-dots menu -> Settings -> trading mode + broker keys).
+- Nothing to connect: there is no broker to link and no API key to paste. The live market data is
+  included, and the user trades wherever they already trade.
 
 FREE - NO ACCOUNT, NO CARD (say so when someone asks what they can try, or hesitates on price)
 - Market data and the fear gauges: VIX, VXN and RVX ranked against their own year, the NoVo Market Pulse and a
