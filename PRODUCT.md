@@ -18,9 +18,9 @@ Last verified against the deployed site and engine: **2026-08-23**.
 | **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
 | **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + execution |
-| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + NoVo. **Its own product** — not included with Analyst or Trader, and neither is included with it |
+| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo. **Its own product** — not included with Analyst or Trader, and neither is included with it |
 
-- **7-day money-back on the first payment, both plans.** Trader has no trial, so this is its
+- **7-day money-back on the first payment, all three plans.** Trader has no trial, so this is its
   evaluation window. Stated in `license.html`, `refund-policy.html`, `help.html`, `api/chat.js`,
   and under the Trader button on `plans.html`.
 - **Price for life** — the rate you subscribe at holds while the subscription stays active.
@@ -148,6 +148,27 @@ layer underneath. Nothing in this section appears on any free page.
 Alpaca optional, paper. Non-custodial: NoVo can place and manage orders, never move money.
 
 ---
+
+## What the Crypto Market Map actually covers
+
+Two halves, and the copy should never describe it as one brokerage's product list.
+
+- **The coin half — ~91 mapped, 90 of them Robinhood-tradable.** `analyst.universe()` returns every
+  coin with venue coverage worth reading, plus any coin carrying a real options book. TRX is the
+  91st: a live Deribit book that Robinhood does not list. **Cost to trade is the ONE number scoped
+  to the tradable 90** — it is read back from a broker's disclosed markup, so "all 90 coins" is
+  correct in a cost sentence and wrong everywhere else.
+- **Seven options books**, not six: BTC, ETH, SOL, XRP, AVAX, HYPE **and TRX**. Synced to the copy
+  via `<span data-bookcount>`. BTC and ETH also carry the US-listed ETF book (IBIT / ETHA) beside
+  the crypto one — but an ETF book must never be the DEFAULT for a coin, or the page renders an
+  ETF share price under a coin header.
+- **The on-chain half — 200+ tokens** on Solana and Robinhood Chain. No options book, no perp, so
+  no gamma: the read is liquidity structure. Keyed on contract ADDRESS, never ticker.
+- **Total ≈ 270 tokens.** The rail says "filter N tokens" from that total.
+
+**Claims to avoid** (all were on the site and all are refutable): "every book that exists",
+"the gamma tools stop at four coins", and any competitor price band quoted as the market — one
+vendor publishes gamma on ~10 currencies for less than $79. Say "most stop at two to four".
 
 ## Standing rules this offering depends on
 
