@@ -17,7 +17,7 @@ Last verified against the deployed site and engine: **2026-08-23**.
 |---|---|---|---|
 | **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
-| **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + execution |
+| **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + the live streaming map |
 | **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo. **Its own product** — not included with Analyst or Trader, and neither is included with it |
 
 - **7-day money-back on the first payment, all three plans.** Trader has no trial, so this is its
@@ -133,14 +133,15 @@ layer underneath. Nothing in this section appears on any free page.
 
 ## NoVo Trader — $209/mo · includes all of Analyst
 
-- **Dealer read at ~5 seconds**, scalping chart streaming at 10 updates a second
-- **One-click execution** in your own broker — **you click every entry, always**
-- **Automated exits only** — TP1/TP2, trailing stops, hard stop broker-side on **Tradier and
-  tastytrade** (Alpaca falls back to the software exit engine)
-- Adaptive-Urgent execution — crosses the spread in under a second, capped slippage
-- Analyst Score + conviction-weighted position sizing
-- **DTE dial 0–5, defaulting to 0**
-- Live tape + full options chain, paper mode, trade journal + performance analytics
+- **The live dealer map, streamed** — the levels drawn on a candle chart that moves with the tape
+- **Every level labelled in the pane** — gamma flip, call and put walls, gravity, expected-move
+  bands, VWAP, opening range, and the pre-market / after-hours / prior-day highs and lows
+- **Structural audit rerun at the top of every hour** — macro bias, levels, patterns, thesis
+- **What NoVo Knows** — base rates for the setup in front of you, **each with its sample size**
+- **Run Analysis** — ask for a fresh read on demand, any time
+- Market Intel strip — VIX, macro, retail state, RVOL, tape imbalance, net GEX, squeeze, score
+- Live tape + full options chain for SPY, QQQ and IWM; live market data included
+- Placed trades, broker connections and API keys are **not** part of this product
 - Regime · Retail State · RVOL · Tape Imbalance
 - **No push notifications** — by design; you are on the dashboard when you trade
 
