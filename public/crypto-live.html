@@ -1021,10 +1021,14 @@ function drawRail(filter=''){
   let h=`<div class="railhead"><input id="search" placeholder="filter ${total} tokens" value="${filter}"></div>`;
   const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
   if (fd.length) {
-    const fresh = fd.filter(r => !r.resolved_utc).length;
-    h += `<div class="bandhead">What just fired &middot; ${fd.length}</div>
+    // REAL counts, not the length of the page. `feed` is capped at 60 rows, so this read 60 all
+    // day whatever fired -- and "open" was worse: filtering unresolved over a window whose newest
+    // rows are unresolved by definition, it saturated at the cap and could never move off it.
+    const fresh = _reads('open', fd.filter(r => !r.resolved_utc).length);
+    const fired = _reads('last_24h', fd.length);
+    h += `<div class="bandhead">What just fired &middot; ${n0(fired)}</div>
       <div class="coin ${FEED?'on':''}" data-feed="1">
-        <span class="c">Live reads</span><span class="p">${fresh} open</span></div>`;
+        <span class="c">Live reads</span><span class="p">${n0(fresh)} open</span></div>`;
   }
   for(const b of ['A','B','C']){
     const grp=rows.filter(c=>c.band===b).sort((x,y)=>(y.oi_usd||0)-(x.oi_usd||0));
@@ -1076,7 +1080,7 @@ function drawReadStrip(){
        <span class="rs-k">${KINDLABEL[r.kind]||r.kind}</span> &middot; ${r.claim||''}
        <span style="color:var(--txt4)">&middot; ${_ago(r.ts_utc)}</span></span>`).join('');
   el.innerHTML = `<span class="rs-ico">\u26a1</span><span class="rs-body">${rows}</span>`+
-    `<span class="rs-more">${fd.length} reads &rsaquo;</span>`;
+    `<span class="rs-more">${n0(_reads('last_24h', fd.length))} reads &rsaquo;</span>`;
   el.onclick = () => { FEED = true; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed(); };
 }
 
@@ -1088,16 +1092,25 @@ const KINDLABEL = {
   gamma_pin: 'Gamma pin', funding_extreme: 'Funding extreme',
   oi_quadrant: 'OI regime', cost_anomaly: 'Cost anomaly',
 };
+// The counts the collector ships alongside the 60-row page, with the old len(feed) derivation as
+// the fallback -- KV holds a snapshot for 2h, so the first loads after a deploy predate them.
+function _reads(k, fb){ const R = (typeof SNAP !== 'undefined') && SNAP && SNAP.reads;
+  return (R && R[k] != null) ? R[k] : fb; }
+const n0 = n => Number(n || 0).toLocaleString();
 function drawFeed(){
   const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
   $('#sym').textContent = 'What just fired';
   $('#px').textContent = '';
-  const open = fd.filter(r=>!r.resolved_utc).length, done = fd.length - open;
+  // Book-wide, not window-wide. The list below is the newest 60 and now says so -- "every claim
+  // I made" was true when it was written and stopped being true the moment the cap went on.
+  const open = _reads('open', fd.filter(r=>!r.resolved_utc).length);
+  const done = _reads('settled', fd.length - fd.filter(r=>!r.resolved_utc).length);
+  const all  = _reads('total', fd.length);
   $('#headmeta').innerHTML =
-    `<span class="tag t-n">${open} still open</span><span class="tag t-n">${done} settled</span>`;
+    `<span class="tag t-n">${n0(open)} still open</span><span class="tag t-n">${n0(done)} settled</span>`;
 
   let h = `<div class="panel"><div class="ph"><h2>Live reads across the book</h2>
-    <span class="sub">newest first &middot; every claim I made, and how it went</span></div>
+    <span class="sub">newest ${fd.length} of ${n0(all)} &middot; how each one went</span></div>
     <div class="pb" style="padding:2px 0">`;
   if(!fd.length){
     h += `<div class="empty">nothing yet this session</div>`;

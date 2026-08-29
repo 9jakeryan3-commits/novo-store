@@ -161,6 +161,10 @@ module.exports = async (req, res) => {
     // What just fired, across the whole book. Public: the collector filters this to the crypto
     // asset class before it is published, so the private chain tickets cannot reach it.
     feed: snap.feed || [],
+    // The real counts behind that 60-row page. This response is a field-by-field rebuild -- the
+    // same whitelist crypto-ingest.js removed after it silently dropped chain, then alerts, then
+    // feed -- so a new section has to be named HERE or it never reaches the browser.
+    reads: snap.reads || null,
     breadth: snap.breadth, health: snap.health,
     ...(priv && snap.alerts ? { alerts: snap.alerts } : {}),
   });
