@@ -326,7 +326,7 @@ tr:last-child td{border-bottom:none}
 @media(max-width:1100px){main{grid-template-columns:170px 1fr}#side{display:none}}
 @media(max-width:720px){
     main{grid-template-columns:1fr}
-    /* The rail was simply display:none here, which took 89 of the 91 coins with it. It
+    /* The rail was simply display:none here, which took 89 of the 90 coins with it. It
        becomes a full-screen picker instead: the coin name in the header is the trigger, the
        filter and the band grouping come along, and picking a coin closes it. */
     #rail{display:block;position:fixed;inset:0;z-index:60;background:var(--navy);
@@ -339,7 +339,7 @@ tr:last-child td{border-bottom:none}
           transition:transform .22s ease, visibility .22s}
     body.rail-open #rail{transform:none;visibility:visible}
     body.rail-open{overflow:hidden}
-    /* On a phone the coin name IS the picker for the other 90 coins, so it has to
+    /* On a phone the coin name IS the picker for the other 89 coins, so it has to
        read as a control and not as a heading. */
     #sym{cursor:pointer;display:inline-flex;align-items:center;gap:9px;
       border:1px solid var(--bdr);border-radius:var(--r-3);padding:3px 11px 4px;
@@ -491,7 +491,7 @@ tr:last-child td{border-bottom:none}
 <!-- ===== LOGIN GATE ===== -->
 <div id="login" class="lv-login hidden">
   <h1>Crypto <span class="accent">Map</span></h1>
-  <p>The live dealer map across all 91 coins — gamma by strike on the <span data-bookcount>7</span> with a real options book, leverage positioning on the rest. Sign in to your member portal, then open the Crypto Market Map from there.</p>
+  <p>The live dealer map across all 90 coins — gamma by strike on the <span data-bookcount>7</span> with a real options book, leverage positioning on the rest. Sign in to your member portal, then open the Crypto Market Map from there.</p>
   <a class="lv-btn" href="https://app.novo-aitrading.app">Go to the member portal &rarr;</a>
   <div id="lmsg" class="lv-msg"></div>
   <p id="lv-alt" style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Don&rsquo;t have the Crypto Market Map? <a href="/crypto">See what it shows and subscribe &rarr;</a></p>
