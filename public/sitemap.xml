@@ -121,6 +121,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/0dte-scalping</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/0dte-short-term-rates-edge.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -191,6 +196,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/about-novo</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/above-vwap-below-vwap.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -247,6 +257,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/ai-signal-vs-ai-execution.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/ai-systems</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -726,6 +741,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/charting</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/chasing-the-entry.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -787,6 +807,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/common-algo-trading-mistakes.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/compare</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -982,6 +1007,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/dealer-0dte-gamma-at-the-money.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/dealer-flow</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -2826,6 +2856,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/options-101</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/options-analytics-vs-execution-cockpit.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3306,6 +3341,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/risk-discipline</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/risk-of-ruin.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3722,6 +3762,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/straddles-and-strangles.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/strategy-execution</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4277,6 +4322,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/volatility-expansion-scalp.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/volatility-macro</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>

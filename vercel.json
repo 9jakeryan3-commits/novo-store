@@ -405,8 +405,48 @@
       "destination": "/help.html"
     },
     {
+      "source": "/journal/dealer-flow",
+      "destination": "/journal/dealer-flow.html"
+    },
+    {
+      "source": "/journal/options-101",
+      "destination": "/journal/options-101.html"
+    },
+    {
+      "source": "/journal/charting",
+      "destination": "/journal/charting.html"
+    },
+    {
+      "source": "/journal/compare",
+      "destination": "/journal/compare.html"
+    },
+    {
+      "source": "/journal/0dte-scalping",
+      "destination": "/journal/0dte-scalping.html"
+    },
+    {
+      "source": "/journal/strategy-execution",
+      "destination": "/journal/strategy-execution.html"
+    },
+    {
+      "source": "/journal/risk-discipline",
+      "destination": "/journal/risk-discipline.html"
+    },
+    {
+      "source": "/journal/volatility-macro",
+      "destination": "/journal/volatility-macro.html"
+    },
+    {
       "source": "/journal/crypto",
       "destination": "/journal/crypto.html"
+    },
+    {
+      "source": "/journal/ai-systems",
+      "destination": "/journal/ai-systems.html"
+    },
+    {
+      "source": "/journal/about-novo",
+      "destination": "/journal/about-novo.html"
     },
     {
       "source": "/analyst/methodology",
