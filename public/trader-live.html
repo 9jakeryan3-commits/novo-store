@@ -1,0 +1,2885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#17171a">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/trader-live.webmanifest">
+
+<script>
+/* ── /trader/live bootstrap ──────────────────────────────────────────────────────────────────────
+   The page renders on novo-options.trade; the data comes off NoVo's own box. Those are two origins,
+   so there is no shared cookie and nothing here can authenticate itself.
+
+   The member token (the same 7-day one /analyst/live and /crypto/live use) is exchanged at
+   /api/trader-live, which verifies it, checks Stripe for a live Trader subscription, and returns a
+   ticket that expires in five minutes. The ticket is the only credential that ever touches the
+   socket -- deliberately, because a socket URL ends up in devtools and in screenshots, and the
+   member token would be a stolen session if it lived there.
+
+   Expiry is checked at CONNECT, not per frame, so an open tab keeps streaming all day. It is the
+   RECONNECT that needs a fresh ticket -- which is why reconnection re-runs the handshake instead of
+   reusing the URL it already had. */
+(function(){
+  var qs = new URLSearchParams(location.search);
+  var TOKEN = qs.get('t');
+  if (TOKEN) {
+    try { localStorage.setItem('novo_live_t', TOKEN); } catch(_){}
+    history.replaceState(null, '', '/trader/live' + (location.hash || ''));
+  }
+  if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
+
+  window.NOVO_API = '';
+  window.NOVO_WS = '';
+  window.NOVO_TICKET = '';
+
+  /* Every data call carries the ticket: the box has no cookie from this origin. */
+  window.NOVO_URL = function(path){
+    if (!window.NOVO_API) return path;
+    return window.NOVO_API + path + (path.indexOf('?') >= 0 ? '&' : '?')
+           + 't=' + encodeURIComponent(window.NOVO_TICKET);
+  };
+
+  function gate(html){
+    var el = document.getElementById('gate');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'gate';
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;'
+        + 'justify-content:center;background:#0b0b0d;color:#e7e7ea;font:14px/1.6 system-ui,sans-serif;'
+        + 'text-align:center;padding:24px;';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = html;
+  }
+
+  var _handshakeAt = 0;
+  window.novoHandshake = async function(){
+    if (!TOKEN) {
+      gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Sign in to open the Trader dashboard</div>'
+         + '<a href="/portal" style="color:#22d3ee">Go to the member portal &rarr;</a></div>');
+      return false;
+    }
+    try {
+      var r = await fetch('/api/trader-live?t=' + encodeURIComponent(TOKEN), { cache: 'no-store' });
+      if (r.status === 401) {
+        try { localStorage.removeItem('novo_live_t'); } catch(_){}
+        TOKEN = null;
+        gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Your session expired</div>'
+           + '<a href="/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
+        return false;
+      }
+      if (r.status === 402) {
+        gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">'
+           + 'The live Trader dashboard needs a Trader subscription</div>'
+           + '<a href="/trader" style="color:#22d3ee">See Trader &rarr;</a></div>');
+        return false;
+      }
+      if (!r.ok) { return false; }
+
+      var d = await r.json();
+      window.NOVO_WS = d.ws || '';
+      window.NOVO_API = d.api || '';
+      var mt = /[?&]t=([^&]+)/.exec(window.NOVO_WS);
+      window.NOVO_TICKET = mt ? decodeURIComponent(mt[1]) : '';
+      _handshakeAt = Date.now();
+      var g = document.getElementById('gate'); if (g) g.remove();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  /* Reconnect re-runs the handshake: the old ticket is very likely dead by now. */
+  window.novoReconnect = async function(){
+    if (await window.novoHandshake()) {
+      try { connectTelemetry(); } catch(_){}
+    } else {
+      setTimeout(window.novoReconnect, 5000);
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', async function(){
+    if (await window.novoHandshake()) {
+      try { connectTelemetry(); } catch(_){}
+      try { loadNovoChart(); } catch(_){}
+    }
+  });
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js', {scope:'/trader/'}).catch(function(){});
+// Trade-alert push prompt REMOVED (2026-08-13). A trader watching the dashboard is
+// already in the trade — the "Enable trade alerts" pill sat over the control panel asking
+// permission for something nobody needed. The service worker above stays: it is what makes
+// the Install App / standalone PWA mode work.
+// One-tap "Install App" prompt — converts the dashboard from a browser tab into a standalone app so
+// every launch after is full-screen app-mode. Floating fixed pill (no layout impact); auto-hides once
+// installed or when already running standalone.
+(function(){
+  var dp=null;
+  function standalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+  function pill(){
+    var b=document.getElementById('novoInstall');
+    if(b||standalone())return b;
+    b=document.createElement('button');
+    b.id='novoInstall'; b.textContent='⤓  Install App';
+    b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#1a4a8a,#2a5298);color:#f0f0ee;border:none;padding:11px 16px;border-radius:8px;font:600 12px/1 system-ui,sans-serif;letter-spacing:1px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
+    b.onclick=async function(){ if(!dp)return; dp.prompt(); try{await dp.userChoice;}catch(e){} dp=null; b.style.display='none'; };
+    (document.body||document.documentElement).appendChild(b);
+    return b;
+  }
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); dp=e; var b=pill(); if(b&&!standalone()) b.style.display='block'; });
+  window.addEventListener('appinstalled',function(){ var b=document.getElementById('novoInstall'); if(b)b.style.display='none'; });
+})();
+</script>
+<title>NoVo Trader</title>
+<style>
+@font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root {
+  --bg:    #09090b;
+  --bg1:   #111113;
+  --bg2:   #17171a;
+  --bg3:   #0a0a0d;
+  --bdr:   #2c2c30;
+  --bdr2:  #1c1c20;
+  --txt1:  #f0f0ee;
+  --txt2:  #a8a8a8;
+  --txt3:  #6e6e6e;
+  --blu:   #a8aebb;
+  --grn:   #10b981;
+  --red:   #f43f5e;
+  --amb:   #f59e0b;
+  --pur:   #9a9aa3;
+  --cyn:   #22d3ee;
+  --blu-d: rgba(168,174,187,.12);
+  --grn-d: rgba(16,185,129,.12);
+  --red-d: rgba(244,63,94,.12);
+  --pur-d: rgba(167,139,250,.12);
+  --amb-d: rgba(245,158,11,.10);
+  --font:  'Geist Mono','JetBrains Mono','Consolas',monospace;
+  --sans:  system-ui,-apple-system,'Segoe UI',sans-serif;
+  --blue:  #3b82f6;
+  --radius: 0px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { height: 100%; }
+body { min-height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--txt1);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ TOPBAR ════════════════════════════════════════════════════════════ */
+#topbar {
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: linear-gradient(180deg, #17171a 0%, #0c0c0f 100%);
+  border-bottom: 1px solid var(--bdr);
+  box-shadow: 0 1px 20px rgba(0,0,0,.5), 0 0 0 1px rgba(168,174,187,.08) inset;
+  gap: 0;
+}
+
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 900; font-size: 15px; letter-spacing: 3px; color: #fff;
+  margin-right: 20px; font-family: var(--font);
+}
+.brand-tri { color: var(--blu); font-size: 13px; filter: drop-shadow(0 0 8px rgba(168,174,187,.7)); }
+.brand-sub { font-size: 8px; letter-spacing: 4px; color: var(--txt3); font-weight: 600; font-family: var(--sans); }
+.brand-ver { font-size: 8px; letter-spacing: 1px; color: var(--txt3); opacity: 0.4; font-weight: 500; margin-left: -4px; font-family: var(--sans); }
+
+.tb-sep { width: 1px; height: 22px; background: var(--bdr); margin: 0 14px; }
+
+#hdr-mode {
+  font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  padding: 3px 10px; border: 1px solid; border-radius: 3px;
+}
+/* PAPER = neutral grey (it's practice), LIVE = green (real money is on) — 2026-07-17, Jake. */
+.hm-paper { color: var(--txt3); border-color: rgba(148,163,184,.30); background: rgba(148,163,184,.08); }
+.hm-live  { color: var(--grn);  border-color: rgba(16,185,129,.35);  background: var(--grn-d); }
+#hdr-broker { color: var(--txt3); font-size: 9.5px; letter-spacing: 1px; margin-left: 10px; }
+
+.tb-right { margin-left: auto; display: flex; align-items: stretch; height: 48px; }
+.ts {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-end;
+  padding: 0 16px; border-left: 1px solid var(--bdr);
+}
+.ts-k { font-size: 7px; letter-spacing: 2px; color: var(--txt3); text-transform: uppercase; font-family: var(--sans); }
+.ts-v { font-size: 14px; font-weight: 800; letter-spacing: .5px; }
+#hdr-pnl { font-size: 20px; letter-spacing: -0.5px; }
+
+.tb-conn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px; border-left: 1px solid var(--bdr);
+}
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--amb); box-shadow: 0 0 8px var(--amb);
+  transition: background .3s, box-shadow .3s;
+}
+#hdr-conn-text {
+  font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  color: var(--amb); transition: color .3s;
+}
+
+.hdr-menu-wrap { position: relative; flex-shrink: 0; }
+.hdr-menu-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 48px;
+  background: none; border: none; border-left: 1px solid var(--bdr);
+  color: var(--txt2); font-size: 22px; cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.hdr-menu-btn:hover { color: var(--txt1); background: rgba(255,255,255,.04); }
+.hdr-dropdown {
+  display: none; position: absolute; right: 0; top: 48px; z-index: 200;
+  background: var(--bg2); border: 1px solid var(--bdr);
+  border-radius: 6px; min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6);
+  overflow: hidden;
+}
+.hdr-dropdown.open { display: block; }
+.hdr-dd-item {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 12px 16px;
+  background: none; border: none; border-bottom: 1px solid var(--bdr2);
+  color: var(--txt2); font-size: 11px; font-weight: 700;
+  letter-spacing: .8px; text-transform: uppercase; text-decoration: none;
+  font-family: var(--sans); cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.hdr-dd-item:last-child { border-bottom: none; }
+.hdr-dd-item:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
+.hdr-dd-logout:hover { color: var(--red); background: rgba(244,63,94,.08); }
+.hdr-dd-wipe:hover { color: var(--red); background: rgba(244,63,94,.08); }
+
+/* ═══ ALERT ════════════════════════════════════════════════════════════ */
+#alert-banner {
+  flex: 0 0 auto; display: none; align-items: center; justify-content: space-between;
+  padding: 5px 16px;
+  background: rgba(244,63,94,.06);
+  border-bottom: 1px solid rgba(244,63,94,.4);
+}
+#alert-text { color: var(--red); font-weight: 800; font-size: 11px; }
+.ax { background: none; border: none; color: var(--txt3); cursor: pointer; font-size: 14px; font-family: var(--font); }
+.ax:hover { color: var(--red); }
+#pm-warn-banner {
+  flex: 0 0 auto; display: none; align-items: center; justify-content: space-between;
+  padding: 5px 16px;
+  background: rgba(251,191,36,.06);
+  border-bottom: 1px solid rgba(251,191,36,.35);
+}
+#pm-warn-text { color: #fbbf24; font-weight: 800; font-size: 11px; }
+.ax-warn { background: none; border: none; color: var(--txt3); cursor: pointer; font-size: 14px; font-family: var(--font); }
+.ax-warn:hover { color: #fbbf24; }
+
+/* ═══ WORKSPACE ════════════════════════════════════════════════════════ */
+#workspace {
+  flex: 1 1 0;
+  display: grid;
+  grid-template-columns: 400px 1fr 400px;
+  gap: 0;
+  overflow: hidden;
+}
+#col-capital { order: 1; }
+#col-feed    { order: 2; border-right: 1px solid var(--bdr); }
+#col-intel   { order: 3; border-right: none; }
+@media (min-width: 769px) {
+  #workspace { min-height: calc(100vh - 48px); }
+}
+
+
+
+.col {
+  border-right: 1px solid var(--bdr);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.col:last-child { border-right: none; }
+.col-scroll { overflow-y: auto; }
+
+/* ═══ CARD ═════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--bdr);
+  flex-shrink: 0;
+}
+
+/* ── polish kit (2026-08-20) ───────────────────────────────────────────────────────────────────
+   The dashboard had 41 hover rules and 27 transitions but no press feedback, no keyboard focus
+   states and no reduced-motion handling at all. All additive: nothing below moves a layout. */
+:root { --ease: cubic-bezier(.2,.7,.3,1); --dur-1: .12s; --dur-2: .22s; }
+
+/* VALUE FLASH — when a readout moves, say which way. Background only, ~half a second: a number you
+   are mid-read must never move, resize or re-colour. Deliberately NOT applied to the hero price,
+   which reprices every few seconds during RTH — a permanently blinking headline is noise, not juice. */
+@keyframes novoflash-up { from { background-color: rgba(52,211,153,.20); } to { background-color: transparent; } }
+@keyframes novoflash-dn { from { background-color: rgba(244,63,94,.20); }  to { background-color: transparent; } }
+.nvf-up { animation: novoflash-up .55s var(--ease); border-radius: 4px; }
+
+/* SKELETON — "—" was doing two jobs, "still loading" and "no data", which look identical and mean
+   opposite things: you could not tell an empty off-hours field from a dashboard that had not answered
+   yet. Until real values arrive every slot shimmers; after that a dash means genuinely absent. */
+@keyframes novoskel { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
+body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .spy-hero-px, body.skel .spy-hero-chg {
+  color: transparent !important;
+  background-image: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.10) 37%, rgba(255,255,255,.04) 63%);
+  background-size: 400% 100%;
+  animation: novoskel 1.4s var(--ease) infinite;
+  border-radius: 5px; display: inline-block; min-width: 58px;
+}
+body.skel .spy-hero-px { min-width: 132px; }
+@media (prefers-reduced-motion: reduce){
+  body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .spy-hero-px, body.skel .spy-hero-chg {
+    animation: none !important; }
+}
+.nvf-dn { animation: novoflash-dn .55s var(--ease); border-radius: 4px; }
+
+/* FIT AND FINISH — one press, one ring, everywhere. focus-visible so a mouse click never draws a
+   ring but Tab always does. */
+button, .cmd-btn, .cmd-links a, .tab, .lv-mini { transition: background-color var(--dur-1) var(--ease),
+  border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease); }
+button:active, .cmd-btn:active, .cmd-links a:active { transform: translateY(1px); }
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--cyn, #22d3ee); outline-offset: 2px; border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce){
+  /* The flash degrades to a static tint rather than disappearing — someone who asked the OS to stop
+     animation should still be told which number moved. */
+  .nvf-up, .nvf-dn { animation: none !important; }
+  .nvf-up { background-color: rgba(52,211,153,.16); }
+  .nvf-dn { background-color: rgba(244,63,94,.16); }
+  button, .cmd-btn, .cmd-links a, .tab, .lv-mini { transition: none !important; }
+  button:active, .cmd-btn:active, .cmd-links a:active { transform: none; }
+  .bar-fill, .sqz-fill { transition: none !important; }
+}
+.card.grow { flex: 1 1 0; overflow: hidden; display: flex; flex-direction: column; }
+#col-feed .card.grow { overflow: visible; }
+
+.ch {
+  height: 28px;
+  display: flex; align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--bdr);
+  background: linear-gradient(180deg, rgba(255,255,255,.025) 0%, rgba(0,0,0,.28) 100%);
+  position: relative;
+  gap: 9px;
+  border-top: 1px solid rgba(168,174,187,.25);
+}
+.ch-title {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--txt2); font-family: var(--sans);
+}
+.ch-subtitle {
+  margin-left: 6px; font-size: 8px; font-weight: 500; letter-spacing: .3px;
+  text-transform: none; color: var(--txt3); font-family: var(--sans);
+}
+.ch-accent { display: none; }
+.ch.ca, .ch.cg, .ch.cp, .ch.cc { border-top-color: rgba(168,174,187,.28); border-left: 3px solid rgba(168,174,187,.32); padding-left: 11px; }
+/* Card body accent — left border only, institutional */
+.card:has(.ch.ca), .card:has(.ch.cg), .card:has(.ch.cc), .card:has(.ch.cp) { border-left: 2px solid rgba(168,174,187,.22); }
+.ch-badge {
+  margin-left: auto; font-size: 7.5px; font-weight: 700; letter-spacing: 1px;
+  color: var(--txt3); cursor: pointer; text-transform: uppercase;
+}
+.ch-badge:hover { color: var(--txt1); }
+
+/* ═══ DATA ROWS ════════════════════════════════════════════════════════ */
+.dr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 12px;
+  transition: background .1s;
+  border-bottom: 1px solid rgba(255,255,255,.018);
+}
+.dr:last-of-type { border-bottom: none; }
+.dr:hover { background: rgba(255,255,255,.03); }
+.dk { color: var(--txt3); font-size: 9px; font-family: var(--sans); letter-spacing: .4px; text-transform: uppercase; }
+.dv { font-weight: 800; font-size: 14.5px; color: var(--txt1); letter-spacing: -.3px; }
+
+.dsec {
+  font-size: 8.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--txt3); padding: 5px 12px 4px;
+  background: rgba(0,0,0,.2);
+  border-top: 1px solid var(--bdr);
+  border-bottom: 1px solid var(--bdr);
+  font-family: var(--sans);
+}
+.div-line { height: 1px; background: var(--bdr); margin: 0; }
+
+.bar-row { display: flex; align-items: center; padding: 5px 12px; }
+.bar-lbl { color: var(--txt3); font-size: 10px; flex: 0 0 78px; font-family: var(--sans); }
+.bar-val { font-weight: 800; font-size: 13px; width: 52px; text-align: right; flex-shrink: 0; }
+/* Indicator bars (Analyst Score, Gamma Squeeze): taller, rounded, with faint 50%/75% scale ticks on the
+   track so a value reads against a threshold. The fill uses currentColor for BOTH its body and its glow, so
+   JS colors the bar by value with a single style.color set (green/amber/grey etc.). */
+.bar-track { height: 10px; flex: 1 1 auto; margin-left: 10px; border-radius: 6px; overflow: hidden; position: relative;
+  background:
+    linear-gradient(90deg, transparent calc(50% - .75px), rgba(255,255,255,.16) 50%, transparent calc(50% + .75px)),
+    linear-gradient(90deg, transparent calc(75% - .75px), rgba(255,255,255,.11) 75%, transparent calc(75% + .75px)),
+    rgba(255,255,255,.06);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.bar-fill  { height: 100%; border-radius: 6px; width: 0; color: var(--cyn);
+  transition: width .5s ease, color .3s ease;
+  background: currentColor; box-shadow: 0 0 9px currentColor, inset 0 1px 0 rgba(255,255,255,.28); }
+.spy-hero { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; border-top: 1px solid var(--bdr2); border-bottom: 1px solid var(--bdr); background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.22)); }
+.spy-hero-l { display: flex; flex-direction: column; gap: 2px; }
+.spy-hero-tkr { font-family: var(--font); font-size: 15px; font-weight: 900; letter-spacing: 2px; color: var(--txt1); }
+.spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
+.spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
+.spy-hero-chg { font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--txt3); }
+
+/* color helpers */
+.cblue  { color: var(--txt1) !important; }
+.cgreen { color: var(--grn) !important; }
+.cred   { color: var(--red) !important; }
+.camb   { color: var(--txt1) !important; }
+.cpur   { color: var(--txt1) !important; }
+.ccyn   { color: var(--txt1) !important; }
+.cdim   { color: var(--txt3) !important; }
+
+/* ═══ RISK INPUTS ══════════════════════════════════════════════════════ */
+.inp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bdr2); }
+.inp-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--bdr2); }
+.inp-cell { background: var(--bg1); padding: 6px 12px; display: flex; flex-direction: column; gap: 3px; }
+.inp-cell.full { grid-column: 1 / -1; }
+.inp-lbl { font-size: 9px; letter-spacing: 0.5px; color: var(--txt3); text-transform: uppercase; font-family: var(--sans); }
+.inp {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  color: var(--txt1);
+  font-family: var(--font); font-size: 11px; font-weight: 700;
+  padding: 4px 7px; width: 100%; border-radius: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.inp:focus { outline: none; border-color: var(--cyn); box-shadow: 0 0 0 2px rgba(34,211,238,.15); }
+input.inp[type=number] { -moz-appearance: textfield; appearance: textfield; }
+input.inp[type=number]::-webkit-outer-spin-button,
+input.inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper { display: inline-flex; align-items: center; gap: 3px; }
+.stepper .inp { text-align: center; }
+.step-btn { width: 20px; height: 20px; flex-shrink: 0; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 4px; color: var(--txt2); font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; user-select: none; }
+.step-btn:hover { background: rgba(34,211,238,.15); border-color: var(--cyn); color: var(--cyn); }
+.step-btn:active { transform: scale(.92); }
+.inp.ig { color: var(--grn); }
+.inp.ir { color: var(--red); }
+.inp.ia { color: var(--txt1); }
+
+.sec-lbl {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--txt3); padding: 10px 16px 5px;
+  border-top: 1px solid var(--bdr2); margin-top: 2px; font-family: var(--sans);
+}
+.sec-lbl:first-of-type { border-top: none; margin-top: 0; }
+
+/* ═══ AGGRESSION / MODE BUTTONS ════════════════════════════════════════ */
+.agg-row { display: flex; gap: 1px; background: var(--bdr2); }
+.agg-btn {
+  flex: 1; background: var(--bg1); border: none;
+  color: var(--txt3); font-family: var(--font); font-size: 8.5px; font-weight: 900;
+  letter-spacing: .8px; text-transform: uppercase; padding: 8px 2px; cursor: pointer;
+  transition: .12s;
+}
+.agg-btn:hover { color: var(--txt1); background: var(--bg2); }
+.agg-btn.a-cons { background: var(--blu);  color: #fff; }
+.agg-btn.a-bal  { background: var(--grn);  color: #fff; }
+.agg-btn.a-agg  { background: var(--amb);  color: #000; }
+
+.thresh-row {
+  padding: 4px 14px 5px; font-size: 9px; color: var(--txt3);
+  border-bottom: 1px solid var(--bdr2);
+}
+.thresh-row span { color: var(--cyn); font-weight: 700; }
+
+.risk-notice {
+  background: rgba(245,158,11,.10);
+  border: 1px solid rgba(245,158,11,.35);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #f59e0b;
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+.deploy-btn {
+  width: 100%; padding: 12px 0;
+  background: linear-gradient(180deg, rgba(168,174,187,.18) 0%, rgba(168,174,187,.10) 100%);
+  border: 1px solid rgba(168,174,187,.35);
+  border-radius: 0;
+  color: var(--blu); font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: .15s;
+}
+.deploy-btn:hover {
+  background: linear-gradient(180deg, rgba(168,174,187,.28) 0%, rgba(168,174,187,.18) 100%);
+  border-color: var(--blu);
+  box-shadow: 0 0 12px rgba(168,174,187,.2);
+}
+
+/* ═══ MODE / GATE / CMD CONTROLS ═══════════════════════════════════════ */
+.mode-row { display: flex; gap: 1px; background: var(--bdr2); }
+.mode-btn {
+  flex: 1; background: var(--bg1); border: none;
+  color: var(--txt3); font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase; padding: 10px 2px; cursor: pointer;
+  transition: .12s;
+}
+.mode-btn:hover { color: var(--txt1); background: var(--bg2); }
+.mode-btn.m-paper { background: var(--grn-d); color: var(--grn); border: 1px solid rgba(16,185,129,.3); }
+.mode-btn.m-live  { background: var(--red-d);  color: var(--red);  border: 1px solid rgba(244,63,94,.3); }
+#mode-pending { font-size: 8px; color: var(--amb); padding: 4px 14px; display: none; letter-spacing: .3px; }
+
+
+/* Exit-ladder arm switches. Each one qualifies the number beside it — a TP% with its rung
+   disarmed is inert — so it sits IN that field's label row rather than as a separate bank of
+   buttons competing with Deploy. Fixed width + a status dot so the row never reflows when it
+   flips and the state reads at a glance down the column. */
+.inp-lbl.has-arm{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.arm{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  min-width:60px;padding:2px 8px;
+  border:1px solid currentColor;border-radius:999px;
+  background:rgba(255,255,255,.04);
+  font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.7px;line-height:1.6;
+  color:var(--grn);cursor:pointer;vertical-align:middle;
+  transition:background .12s,color .12s,opacity .12s;
+}
+.arm::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor;flex:0 0 auto}
+.arm:hover{background:rgba(255,255,255,.10)}
+.arm:active{transform:scale(.95)}
+.arm.off{color:var(--txt3);background:transparent;opacity:.75}
+.arm.off::before{box-shadow:none}
+.arm-hint{color:var(--txt3);font-weight:400;letter-spacing:.2px;text-transform:none}
+/* ── Risk presets: 4 saved-setting slots, lives INSIDE #card-risk so it
+      travels with the node when the desktop layout moves the card into the
+      settings drawer (see the relocation block in initLayout). ─────────── */
+.preset-pills {
+  display: flex; flex-wrap: nowrap; gap: 6px; padding: 10px 12px 0;
+}
+/* The clear (x) is a SIBLING of the pill inside this wrapper, not a child of it —
+   a <button> may not contain another <button>, browsers unnest it. */
+.preset-slot { position: relative; flex: 1 1 0; min-width: 0; display: flex; }
+.preset-pill {
+  flex: 1 1 auto; min-width: 0;
+  background: rgba(255,255,255,.025);
+  border: 1px solid currentColor; border-radius: 6px;
+  color: var(--amb); padding: 7px 4px;
+  font-family: var(--font); font-size: 9px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: inset 0 0 12px -7px currentColor;
+  transition: background .12s, box-shadow .12s, transform .07s;
+}
+.preset-pill:hover { background: rgba(255,255,255,.07); box-shadow: inset 0 0 16px -6px currentColor; }
+.preset-pill:active { transform: scale(.95); }
+.preset-pill.empty { color: var(--txt3); border-style: dashed; font-weight: 400; box-shadow: none; }
+.preset-pill.busy  { opacity: .5; pointer-events: none; }
+.preset-clear {
+  position: absolute; top: 0; right: 0;
+  width: 13px; height: 13px; line-height: 12px; text-align: center;
+  font-family: var(--font); font-size: 10px; font-weight: 700;
+  color: var(--txt3); background: transparent; border: 0; padding: 0; cursor: pointer;
+}
+.preset-clear:hover { color: var(--red); }
+.preset-hint { padding: 5px 12px 0; font-size: 9px; color: var(--txt3); letter-spacing: .3px; }
+.cmd-links {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 12px 12px;
+}
+.cmd-links a {
+  font-family: var(--sans); font-size: 9.5px; font-weight: 700; letter-spacing: .5px; text-align: center;
+  text-transform: uppercase; color: var(--txt3); cursor: pointer; text-decoration: none;
+  padding: 6px 4px; border: 1px solid var(--bdr); border-radius: 6px; background: rgba(255,255,255,.025); transition: .12s;
+}
+.cmd-links a:hover { color: var(--txt1); border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.06); }
+.cmd-link-sep { display: none; }
+
+/* ─── Command grid ───────────────────────────────────────────────────── */
+.cmd-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; padding: 10px 12px 12px;
+}
+/* Midday chop lockout (owner box, 12:00-1:45 ET) — the visual half of the engine's hard entry block. */
+.chop-lock {
+  display: none; align-items: center; justify-content: center; gap: 7px; margin: 8px 12px 0;
+  font: 800 11px/1 var(--sans, system-ui); letter-spacing: 1.5px; color: #f59e0b;
+  background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.4); border-radius: 7px; padding: 8px 10px;
+}
+.cmd-btn.locked-out { opacity: .32; filter: grayscale(1); pointer-events: none; cursor: not-allowed; }
+.cmd-btn {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--bdr);
+  border-radius: 7px;
+  color: var(--txt1);
+  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 10px 6px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.cmd-btn:hover {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.16);
+  color: var(--txt1);
+}
+.cmd-btn:active { transform: translateY(0); box-shadow: none; }
+
+/* ── ONE RECIPE FOR EVERY COMMAND BUTTON (2026-07-17) ────────────────────────────────────────────
+   transparent bg + a .55 border + `inset 0 0 14px -9px` inner glow; on hover a .10 wash, a .85
+   border, a lighter label and a slightly wider glow. Hue is the ONLY thing that changes between
+   them. c-grn / c-red / c-amb were built this way; c-blu predates it (flat .12 tint, .4 border, no
+   inner glow) and read cheap next to them — and I copied c-blu's shape when adding c-gry, so Start
+   AND Stop both looked washed out beside Buy Calls / Buy Puts / Take Profit / Close All.
+   If you add a colour, copy this block and change only the hue. */
+
+/* Activate — blue */
+.cmd-btn.c-blu {
+  color: #93c5fd;
+  background: transparent;
+  border-color: rgba(59,130,246,.55);
+  box-shadow: inset 0 0 14px -9px #3b82f6;
+}
+.cmd-btn.c-blu:hover {
+  background: rgba(59,130,246,.10);
+  border-color: rgba(59,130,246,.85);
+  color: #bfdbfe;
+  box-shadow: inset 0 0 16px -8px #3b82f6;
+}
+
+/* Halt / manual — NEUTRAL grey (2026-07-17, Jake: Start and Stop "arent profit and loss buttons").
+   On this dashboard green and red are MONEY (P&L, win/loss) and DIRECTION (calls/puts). Start and Stop
+   are neither — they're a mode switch — so wearing the P&L palette made them read as good news / bad
+   news. Grey says "NoVo isn't entering on his own", which is what Stop now MEANS (manual mode), not an
+   error state. Red is freed to mean only puts and losses. */
+.cmd-btn.c-gry {
+  color: #cbd5e1;
+  background: transparent;
+  border-color: rgba(148,163,184,.55);
+  box-shadow: inset 0 0 14px -9px #94a3b8;
+}
+.cmd-btn.c-gry:hover {
+  background: rgba(148,163,184,.10);
+  border-color: rgba(148,163,184,.85);
+  color: #e2e8f0;
+  box-shadow: inset 0 0 16px -8px #94a3b8;
+}
+
+/* Halt — dark red tint */
+.cmd-btn.c-red {
+  color: #fca5a5;
+  background: transparent;
+  border-color: rgba(244,63,94,.55);
+  box-shadow: inset 0 0 14px -9px #f43f5e;
+}
+.cmd-btn.c-red:hover {
+  background: rgba(244,63,94,.10);
+  border-color: rgba(244,63,94,.85);
+  color: #fecaca;
+  box-shadow: inset 0 0 16px -8px #f43f5e;
+}
+
+/* TP toggles — purple tint */
+.cmd-btn.c-pur {
+  color: var(--pur);
+  background: rgba(167,139,250,.07);
+  border-color: rgba(167,139,250,.35);
+}
+.cmd-btn.c-pur:hover {
+  background: rgba(167,139,250,.14);
+  border-color: rgba(167,139,250,.65);
+  color: #d8b4fe;
+}
+
+/* Take Profit — dark green tint */
+.cmd-btn.c-grn {
+  color: #86efac;
+  background: transparent;
+  border-color: rgba(34,197,94,.55);
+  box-shadow: inset 0 0 14px -9px #22c55e;
+}
+.cmd-btn.c-grn:hover {
+  background: rgba(34,197,94,.10);
+  border-color: rgba(34,197,94,.85);
+  color: #bbf7d0;
+  box-shadow: inset 0 0 16px -8px #22c55e;
+}
+
+/* Liquidate — amber tint, most prominent */
+.cmd-btn.c-amb {
+  color: #fcd34d;
+  background: transparent;
+  border-color: rgba(245,158,11,.55);
+  box-shadow: inset 0 0 14px -9px #f59e0b;
+}
+.cmd-btn.c-amb:hover {
+  background: rgba(245,158,11,.10);
+  border-color: rgba(245,158,11,.85);
+  color: #fde68a;
+  box-shadow: inset 0 0 16px -8px #f59e0b;
+}
+
+.cmd-btn.span2  { grid-column: 1/-1; }
+.cmd-btn.cmd-primary { font-size: 11px; padding: 12px 6px; letter-spacing: .9px; }
+.cmd-btn.cmd-liquidate { font-size: 11px; padding: 12px 6px; letter-spacing: 1.2px; }
+
+/* ═══ TABLES ═══════════════════════════════════════════════════════════ */
+table { width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: var(--sans); }
+thead th {
+  text-align: left; padding: 7px 16px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--txt3); border-bottom: 1px solid var(--bdr2);
+  background: rgba(11,21,39,.6); font-family: var(--sans);
+}
+thead th:last-child, tbody td:last-child { text-align: right; padding-right: 16px; }
+tbody td { padding: 8px 16px; border-bottom: 1px solid var(--bdr2); color: var(--txt1); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(168,174,187,.05); }
+/* Narrow column tables — tighter cell padding to keep all columns visible */
+#col-intel table thead th,
+#col-intel table tbody td { padding-left: 10px; padding-right: 10px; }
+#col-intel table thead th:last-child,
+#col-intel table tbody td:last-child { padding-right: 10px; }
+.t-empty { text-align: center !important; color: var(--txt3) !important; font-style: italic; padding: 16px 0 !important; }
+
+/* ═══ POSITION CARDS ════════════════════════════════════════════════════ */
+.pos-card {
+  padding: 13px 16px; border-bottom: 1px solid var(--bdr2);
+  background: linear-gradient(180deg, rgba(16,185,129,.05) 0%, transparent 100%);
+}
+.pos-card:last-child { border-bottom: none; }
+.pos-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: nowrap; margin-bottom: 6px; }
+.pos-sym { font-weight: 900; font-size: 14px; color: var(--txt1); letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pos-pnl { font-weight: 900; font-size: 22px; letter-spacing: -0.5px; white-space: nowrap; flex-shrink: 0; }
+.pos-meta { display: flex; gap: 14px; font-size: 11px; color: var(--txt2); font-family: var(--sans); }
+.pm span { color: var(--txt1); font-weight: 700; }
+
+/* ═══ LEDGER GRID ════════════════════════════════════════════════════════ */
+.ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bdr2); }
+.ledger-col { background: var(--bg1); padding: 16px 18px; }
+.ledger-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--txt3); margin-bottom: 10px; font-family: var(--sans); }
+.ledger-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; font-family: var(--sans); }
+.ledger-k { color: var(--txt2); font-family: var(--sans); }
+.ledger-v { font-weight: 700; }
+.ledger-pnl { font-size: 36px; font-weight: 900; margin-top: 12px; letter-spacing: -1px; line-height: 1; }
+
+/* ═══ LOG / INTEL PANELS ════════════════════════════════════════════════ */
+.log-area {
+  /* was #040a14 — a navy "terminal" background left over from an older palette. Every other panel
+     sits on --bg2, so the feeds (trade log / activity / analysis) read as a different product.
+     Matches the dashboard now; the trade-log rows keep their own tinted left-border cards. */
+  flex: 1 1 0; overflow-y: auto; min-height: 0;
+  background: var(--bg2);
+  padding: 12px 16px;
+  font-size: 11.5px; line-height: 1.7;
+}
+#intel-output { color: var(--txt2); font-family: var(--sans); font-size: 12px; line-height: 1.75; }
+#card-intel .log-area { overflow-y: auto; }
+#terminal-output {}
+
+/* ── Trade Log Cards ── */
+.tl-card{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 12px;margin-bottom:3px;border-radius:4px;border-left:3px solid transparent;gap:10px;}
+.tl-entry{border-left-color:#f59e0b;background:rgba(245,158,11,0.05);}
+.tl-exit-win{border-left-color:#10b981;background:rgba(16,185,129,0.04);}
+.tl-exit-loss{border-left-color:#ef4444;background:rgba(239,68,68,0.04);}
+.tl-alert{border-left-color:#6b7280;background:rgba(107,114,128,0.04);}
+.tl-left{flex:1;min-width:0;}
+.tl-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.tl-badge{display:inline-block;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 7px;border-radius:3px;margin-bottom:4px;font-family:var(--sans);}
+.tl-badge-entry{background:rgba(245,158,11,0.15);color:#f59e0b;}
+.tl-badge-win{background:rgba(16,185,129,0.15);color:#10b981;}
+.tl-badge-loss{background:rgba(239,68,68,0.15);color:#ef4444;}
+.tl-badge-alert{background:rgba(107,114,128,0.15);color:#9ca3af;}
+.tl-contract{font-size:12px;font-weight:700;color:var(--txt1);font-family:var(--font);letter-spacing:0.5px;}
+.tl-sub{font-size:10px;color:var(--txt3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;font-family:var(--sans);}
+.tl-pnl{font-size:16px;font-weight:900;font-family:var(--font);letter-spacing:-0.5px;}
+.tl-pnl-win{color:#10b981;}
+.tl-pnl-loss{color:#ef4444;}
+.tl-time{font-size:9px;color:var(--txt3);font-family:var(--font);}
+
+/* ── Activity Feed ── */
+.term-live-row{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:6px;position:sticky;top:0;z-index:2;font-family:var(--sans);background:#252830;border:1px solid #353849;}
+.term-live-row.armed{background:#252830;border:1px solid #f59e0b;box-shadow:0 0 18px rgba(245,158,11,0.45),0 0 40px rgba(245,158,11,0.15);}
+.term-live-row.live{background:#252830;border:1px solid #10b981;box-shadow:0 0 18px rgba(16,185,129,0.45),0 0 40px rgba(16,185,129,0.15);}
+.term-live-row.halted{background:#252830;border:1px solid #ef4444;box-shadow:0 0 18px rgba(239,68,68,0.45),0 0 40px rgba(239,68,68,0.15);}
+.term-live-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:tld 1.6s ease-in-out infinite;}
+@keyframes tld{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.25;transform:scale(0.6);}}
+.term-live-lbl{font-size:9px;font-weight:900;letter-spacing:2.5px;font-family:var(--sans);}
+.term-live-ticker{font-size:12px;font-weight:700;color:var(--txt1);font-family:var(--font);letter-spacing:1px;}
+.term-live-price{font-size:16px;font-weight:900;font-family:var(--font);letter-spacing:-0.5px;}
+.term-live-status{font-size:9px;color:var(--txt3);margin-left:auto;letter-spacing:0.5px;}
+.pp-btn{background:transparent;border:none;color:var(--txt3);font-size:9px;font-weight:700;padding:3px 9px;border-radius:12px;cursor:pointer;font-family:var(--sans);letter-spacing:.5px;transition:color .15s,background .15s;}
+.pp-btn.pp-active{background:#22c55e;color:#000;}
+.term-sys{padding:3px 0;font-size:10px;color:var(--txt3);border-bottom:1px solid rgba(255,255,255,0.02);line-height:1.5;}
+.term-event{padding:4px 0;font-size:10.5px;color:var(--txt2);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
+.term-warn{padding:4px 0;font-size:10.5px;color:var(--amb);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
+.term-err{padding:4px 0;font-size:10.5px;color:var(--red);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
+.term-validator{padding:4px 0;font-size:10.5px;color:var(--cyn);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
+
+/* ── Analysis Feed Sections ── */
+.intel-report-title{font-size:14px;font-weight:900;color:var(--txt1);letter-spacing:-0.5px;margin-bottom:2px;font-family:var(--font);}
+.intel-report-sub{font-size:10px;color:var(--txt3);margin-bottom:14px;font-family:var(--sans);}
+.intel-section{margin-bottom:12px;}
+.intel-section-lbl{font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;color:var(--txt3);display:block;padding:8px 0 6px;border-bottom:1px solid var(--bdr);margin-top:14px;margin-bottom:8px;font-family:var(--sans);}
+.intel-section-body{font-size:12px;color:var(--txt2);line-height:1.8;font-family:var(--sans);}
+.intel-bias{display:inline-block;padding:3px 14px;border-radius:4px;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:1.5px;border:1px solid;}
+.intel-bias-bear{color:var(--red);border-color:rgba(244,63,94,.5);background:rgba(244,63,94,.08);}
+.intel-bias-bull{color:var(--grn);border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.08);}
+.intel-bias-neut{color:var(--txt2);border-color:var(--bdr);background:rgba(255,255,255,.03);}
+.intel-levels{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:4px;}
+.intel-lvl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 9px;background:rgba(255,255,255,.02);border-left:2px solid var(--bdr);}
+.intel-lvl-k{font-family:var(--sans);font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.3px;}
+.intel-lvl-v{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--txt1);white-space:nowrap;}
+
+/* ═══ SCROLLBARS ════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e3255; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2d4a7a; }
+
+/* ═══ PERFORMANCE PANEL ════════════════════════════════════════════════ */
+.perf-kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--bdr2); margin-bottom:2px; border-left: 3px solid rgba(249,115,22,.5); }
+.perf-kpi { background:var(--bg1); padding:12px 8px; text-align:center; }
+.perf-kpi-val { font-size:17px; font-weight:900; font-family:var(--font); color:var(--txt1); }
+.perf-kpi-lbl { font-size:8.5px; letter-spacing:1px; text-transform:uppercase; color:var(--txt3); margin-top:3px; font-family:var(--sans); }
+#journal-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 24px;
+  background: linear-gradient(90deg, rgba(249,115,22,.10) 0%, rgba(249,115,22,.03) 40%, transparent 70%);
+  border-top: 2px solid #f97316;
+  border-bottom: 1px solid rgba(249,115,22,.25);
+}
+#journal-divider .jd-title {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #f97316;
+}
+#journal-divider .jd-sub {
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--txt3);
+}
+#journal-divider .jd-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(249,115,22,.3), transparent);
+}
+#journal-divider #perf-days-label {
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 4px 10px;
+  background: rgba(249,115,22,.12);
+  border: 1px solid rgba(249,115,22,.35);
+  border-radius: 4px;
+  color: #f97316;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+#journal-divider #journal-reset-btn {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--sans);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  background: rgba(239,68,68,.10);
+  border: 1px solid rgba(239,68,68,.35);
+  border-radius: 4px;
+  color: #ef4444;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+#journal-divider #journal-reset-btn:hover {
+  background: rgba(239,68,68,.22);
+  border-color: rgba(239,68,68,.6);
+}
+#col-perf {
+  display: flex;
+  flex-direction: column;
+}
+#perf-top {
+  display: flex;
+}
+/* LEFT column (2026-07-30, Jake): stats sidebar + Daily Log stacked, 1/3 width; Trade Log takes the rest. */
+#perf-left {
+  flex: 0 0 calc(100% / 3);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--bdr);
+  min-height: 0;
+  overflow-y: auto;
+}
+#perf-sidebar { border-radius: 0; }
+#perf-daily { border-radius: 0; border-top: 1px solid var(--bdr); }
+#perf-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* Trade Log fills the whole right side, full height — the same flex:1 the Daily Log used to fill with. */
+#perf-tradelog { flex: 1; display: flex; flex-direction: column; border-radius: 0; }
+#perf-tradelog .tl-scroll-wrap { flex: 1; overflow: auto; }
+#perf-daily .ch, #perf-tradelog .ch { border-left: 3px solid rgba(249,115,22,.45); padding-left: 13px; }
+#perf-sidebar .div-line { margin: 3px 16px; }
+#perf-sidebar .dr { padding: 6px 16px; }
+.tl-scroll-wrap { overflow-x: auto; }
+.tl-scroll-wrap table { width: 100%; }
+/* Daily Log: nine columns in a narrow column had nowhere to go, so the table compressed instead of
+   overflowing — "Avg Win" broke onto two lines and the last columns were simply cut off with no way to
+   reach them. The wrapper gives it the same sideways scroll the Trade Log has; nowrap stops the headers
+   folding; the min-width is what actually forces the overflow, since width:100% alone just shrinks to
+   fit. On a desktop-width column it exceeds the min-width and no scrollbar appears. */
+#perf-daily .tl-scroll-wrap table { min-width: 560px; }
+#perf-daily thead th, #perf-daily tbody td { white-space: nowrap; }
+/* right-align all numeric cols (everything except the label col) in journal tables */
+#col-perf table thead th:not(:first-child),
+#col-perf table tbody td:not(:first-child) { text-align: right; }
+/* mobile journal header */
+#journal-mob-header {
+  display: none;
+  padding: 11px 16px;
+  background: linear-gradient(90deg, rgba(249,115,22,.12) 0%, transparent 70%);
+  border-bottom: 1px solid rgba(249,115,22,.25);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #f97316;
+  border-top: 2px solid #f97316;
+}
+
+/* ═══ MOBILE ═══════════════════════════════════════════════════════════ */
+#mobile-tabs { display: none; }
+.trade-log-mobile-card { display: none; min-height: 300px; }
+.trade-log-mobile-card .log-area { min-height: 255px; flex: 1 1 255px; }
+
+@media (max-width: 768px) {
+  html, body { overflow: hidden; height: 100%; }
+  /* The Risk & Sizing drawer link is DESKTOP-ONLY. _mountRisk() relocates #card-risk to #risk-drawer on
+     desktop and inline to #col-capital on mobile — same 769px boundary this query uses, so the two can't
+     disagree — which left this link opening an empty drawer on top of a panel already on screen. */
+  #risk-drawer-link { display: none; }
+  #journal-divider { display: none; }
+  #journal-mob-header { display: block; }
+  #col-perf { display: none; position: fixed; top: 48px; left: 0; right: 0; bottom: 52px;
+              overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; background: var(--bg); z-index: 50;
+              flex-direction: column; border-top: none; }
+  #col-perf.mob-active { display: flex; }
+  #perf-top { flex-direction: column; }
+  #perf-left { flex: none; width: 100%; border-right: none; overflow-y: visible; }
+  #perf-sidebar { flex: none; width: 100%; border-right: none; }
+  #perf-main { flex: none; }
+  #perf-tradelog { flex: none; min-height: 320px; }
+  #col-perf .card { border-right: none; border-bottom: 1px solid var(--bdr); border-radius: 0; }
+  body { font-size: 13px; }
+
+  #topbar { padding: 0 10px; gap: 4px; }
+  .brand-sub, #hdr-broker, .tb-sep { display: none; }
+  #hdr-session-ts { display: none; }
+  #hdr-conn-text  { display: none; }
+  .ts { padding: 0 8px; }
+  .ts-v { font-size: 12px; }
+
+  #workspace {
+    grid-template-columns: 1fr;
+    /* vh first as the fallback for browsers that don't support dvh; dvh second
+       so it overrides in browsers that do. dvh = dynamic viewport height —
+       shrinks/grows with the mobile address bar instead of the static 100vh,
+       which overshoots the real visible area and was clipping content on
+       shorter phones. (Was previously declared in the wrong order, so the
+       dvh line never actually took effect.) */
+    height: calc(100vh - 48px - 52px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 48px - 52px - env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
+
+  .col {
+    display: none !important;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-right: none;
+    /* Pad bottom so last item (LIQUIDATE) scrolls clear of the fixed tab bar */
+    padding-bottom: 72px;
+  }
+  .col.mob-active { display: flex !important; }
+
+  /* col-feed (ANALYSIS tab): no column-level scroll. Analysis Feed is
+     sized to its own content (never clipped, never scrolls) and Execution
+     Terminal absorbs whatever height is left over and scrolls internally —
+     that's normal for a live log feed. The inline height on #col-feed
+     doesn't know about the mobile tab bar, so force it to match
+     #workspace's already-correct calculation. */
+  #col-feed { flex-direction: column !important; height: 100% !important; overflow-y: auto !important; padding-bottom: 0 !important; }
+  #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
+  #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
+  /* Mobile has an Analysis tab too -- it is this column. The panel is a base display:none, so it
+     needs turning on here as well, and the three columns stack. */
+  #col-feed .trade-log-desktop-card { display: none !important; }
+  #col-feed #card-intel     { flex: 1 1 0 !important; min-height: 0; overflow: hidden !important; border-bottom: none !important; }
+  #col-feed #card-intel .log-area { flex: 1 1 0 !important; height: auto; max-height: none; overflow-y: auto; min-height: 0; background: transparent; font-size: 11.5px; line-height: 1.75; padding: 12px 16px 72px; }
+  /* MOBILE ANALYSIS TAB. #col-feed is a fixed-height flex column and #card-intel is flex:1 1 0, so it
+     grows into whatever is left -- which was the whole tab until the intelligence panel became its
+     sibling. Three stacked columns then took the height, #card-intel shrank toward zero, and its
+     overflow:hidden erased the Analysis Feed entirely.
+     Both are content-sized now and #col-feed does the scrolling, which it was already set up to do.
+     These rules MUST stay after the two above: same specificity, both !important, so order decides.
+     An earlier attempt at exactly this sat a few lines higher and silently lost. */
+  #col-feed #card-intel    { flex: 0 0 auto !important; overflow: visible !important; }
+  #col-feed #card-intel .log-area { flex: 0 0 auto !important; height: auto !important;
+                                    max-height: none !important; overflow: visible !important;
+                                    padding-bottom: 24px; }
+  #col-feed #card-brain    { display: flex !important; flex-direction: column;
+                             flex: 0 0 auto !important; border-bottom: none !important; }
+  #col-feed #card-brain .brain-grid { grid-template-columns: 1fr; }
+  #col-feed #card-brain .brain-col  { padding: 12px 16px 14px; min-height: 0; }
+  /* BOTTOM CLEARANCE. #mobile-tabs is position:fixed at 52px + the iPhone home-bar inset, so whatever
+     ends up LAST in a scrolling mobile column sits under it and its final rows are unreadable. Written
+     as :last-child and derived from the nav's own height, so it follows the last card around instead of
+     being re-tuned every time the order changes -- the previous fix was a bare 72px pinned to
+     #card-intel's log-area, which stopped being last the moment the panel landed beneath it, and
+     ignored the safe-area inset besides. */
+  #col-feed > .card:last-child { padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 18px); }
+  /* mobile trade log card: show on CAPITAL tab */
+  .trade-log-mobile-card   { display: flex !important; flex-direction: column; order: -1; }
+  #card-tactical           { order: 0; }
+  /* Control Panel (#card-tactical) sits ABOVE Risk & Allocation on the narrow/mobile layout.
+     _mountRisk() appends #card-risk into #col-capital AFTER #card-tactical is mounted, so with both
+     at the default order:0 the DOM order put Risk first. Bumping card-risk's order renders it below the
+     Control Panel. (Active Capital stays on top — it's earlier in the DOM at order:0.) */
+  #card-risk               { order: 1; }
+
+
+  /* Touch targets */
+  .cmd-btn, .mode-btn, .agg-btn { padding: 13px 8px; font-size: 10.5px; }
+  .deploy-btn { padding: 13px 0; }
+  .inp { min-height: 40px; font-size: 14px; padding: 6px 10px; }
+  .dr  { padding: 7px 14px; }
+  .bar-row { padding: 7px 14px; }
+  tbody td { padding: 9px 14px; }
+
+  /* Mobile tab bar */
+  #mobile-tabs {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 52px;
+    /* Extend into iPhone home-bar safe area */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(52px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg1);
+    border-top: 1px solid var(--bdr);
+    box-shadow: 0 -4px 20px rgba(0,0,0,.5);
+    z-index: 1000;
+  }
+  .mob-tab {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px;
+    background: none; border: none;
+    border-top: 2px solid transparent;
+    color: var(--txt3);
+    font-family: var(--font);
+    font-size: 7.5px; font-weight: 900; letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-tab.mob-active { color: var(--blu); border-top-color: var(--blu); }
+  .mob-tab-icon { font-size: 17px; line-height: 1; }
+  /* Pinned quick-trade bar — visible only on the SIGNAL (chart) tab, pinned directly above the tab bar */
+  body[data-mtab="2"] #mob-fire-bar {
+    display: flex; flex-direction: column; gap: 6px;
+    position: fixed; left: 0; right: 0;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+    z-index: 999; padding: 7px 8px;
+    background: var(--bg1); border-top: 1px solid var(--bdr);
+    box-shadow: 0 -6px 18px rgba(0,0,0,.5);
+  }
+  /* clear the chart-levels list past the fire bar (taller when a position line shows) + the nav */
+  body[data-mtab="2"] #col-intel { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  /* Entry now happens from the pinned fire bar on the TRADE (chart) tab — drop the Buy buttons from the RISK
+     tab's Control Panel on mobile. Take Profit / Liquidate stay there for managing. */
+  #buy-call, #buy-put { display: none; }
+}
+
+/* Pinned quick-trade fire bar — hidden until shown on the mobile SIGNAL tab (above). Buttons reuse the Control
+   Panel's cmd-btn glow recipe (c-grn/c-red/c-amb) so they match it exactly; only the size is tuned for 4-across. */
+#mob-fire-bar { display: none; }
+#mob-fire-bar .mfb-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+#mob-fire-bar .cmd-btn { padding: 13px 4px; font-size: 12px; letter-spacing: .8px; border-radius: 8px; -webkit-tap-highlight-color: transparent; }
+/* position line on the pinned bar — auto-hidden when flat (empty), shows the live position while on the chart */
+#mob-pos { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 1px 3px 3px; font-family: var(--sans); }
+#mob-pos:empty { display: none; }
+#mob-pos .mp-sym { font-weight: 900; font-size: 13px; letter-spacing: .5px; color: var(--txt1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#mob-pos .mp-pnl { font-weight: 900; font-size: 14px; letter-spacing: -.2px; white-space: nowrap; flex-shrink: 0; }
+
+/* ── Very narrow screens (Z Fold outer, compact phones ≤430px) ────────── */
+@media (max-width: 430px) {
+  /* Drop the topbar P&L and clock on truly tiny screens */
+  #topbar .ts { display: none !important; }
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   SaaS DESKTOP OVERVIEW (2026-07-14) — desktop breakpoint ONLY.
+   The three .col wrappers ARE the mobile tab system (.col.mob-active), so the
+   markup is left alone; at desktop the columns become `display:contents` and
+   their cards drop into ONE workspace grid, placed by named area. Mobile never
+   sees any of this and is byte-for-byte unchanged.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* MOBILE DEFAULTS — every SaaS-only element is OFF here and switched on inside the desktop
+   media query below. #kpi-row needs no rule: it's nested inside #saas-header. #saas-nav DOES,
+   because it lives in the topbar (not the header) and would otherwise render in the 48px
+   mobile bar. */
+#saas-header { display: none; }
+/* Desktop Analysis view only -- every rule for these sits inside the 769px query. */
+#card-brain { display: none; }
+/* Panel typography lives at TOP LEVEL, not in the 769px query. #card-brain is display:none
+   by default and only the Analysis views switch it on, so these are inert everywhere else --
+   and mobile has an Analysis tab too. Scoping them to desktop shipped the markup to mobile
+   with no flex on .brain-row, so every label ran straight into its value. */
+/* The intelligence row: three panels, equal width, sized to their content. */
+#card-brain .brain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px; background: var(--bdr); }
+#card-brain .brain-col { background: var(--bg2); padding: 10px 14px 12px; min-width: 0;
+  min-height: 158px; }   /* reserved, so arriving data fills the panel instead of growing it */
+#card-brain .brain-h { font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--txt3); margin-bottom: 8px; }
+#card-brain .brain-lead { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+#card-brain .brain-sub { font-size: 11px; color: var(--txt3); line-height: 1.45; }
+#card-brain .brain-row { display: flex; justify-content: space-between; align-items: baseline;
+  gap: 10px; padding: 3px 0; font-size: 11.5px; border-top: 1px solid var(--bdr2); }
+#card-brain .brain-row:first-of-type { border-top: none; }
+#card-brain .brain-row .bl { color: var(--txt3); }
+#card-brain .brain-row .bv { font-variant-numeric: tabular-nums; }
+#card-brain .b-up { color: var(--grn); } #card-brain .b-dn { color: var(--red); }
+#card-brain .b-mute { color: var(--txt3); }
+#card-brain .brain-note { font-size: 10.5px; color: var(--txt3); margin-top: 8px; line-height: 1.5; }
+
+#act-last, #act-caret { display: none; }
+.strip-break { display: none; }
+#saas-nav    { display: none; }
+
+@media (min-width: 769px) {
+  /* FIXED HEADER STACK — the command strip + KPI row are CHROME, not content. They sit
+     between #topbar and #workspace as flex siblings, so they never scroll away (the
+     first pass put them inside #workspace, which scrolls, and they vanished). */
+  /* One surface across the whole strip. #card-tactical inherits .card's var(--bg2) panel fill (#17171a),
+     while Market Intel beside it is transparent over the page's #09090b -- so the buttons sat on a
+     visibly lighter block than the readouts next to them. The header owns the background now and both
+     cards go transparent on it; .card's border-bottom is cleared too, since the header draws its own. */
+  #saas-header { display: flex; align-items: center; gap: 14px; flex: 0 0 auto;
+    /* The buttons became the first item when the sides flipped, so they sat hard against the window
+       edge with nothing before them. This is the inset the strip used to provide. */
+    padding-left: 16px;
+    background: var(--bg); border-bottom: 1px solid var(--bdr); }
+  #saas-header > .card { background: none; border-bottom: none; }
+  /* ONE row, nowrap. All eight readouts measured ~1153px against ~1160px available -- overflowing by a
+     hair, which is why it kept dropping Analyst Score onto a second line. The padding below went 14px ->
+     9px in the same pass, which buys back ~80px across eight readouts and lands it near 1073px.
+     That headroom is sized against the WIDEST state, not the one on screen: the squeeze value swings
+     from "Quiet" to "Building - 43/100" and Net GEX from "-1.1B" to "-293.45M", a ~120px range between
+     them. Measuring a quiet moment and calling it fixed is how this drifts back mid-session.
+     nowrap makes a second row impossible rather than unlikely -- and left-aligned, the strip fills the
+     empty half of the header beside the action buttons, which is what it was moved here to do. */
+  #saas-header #card-mktintel { flex: 1 1 auto; min-width: 0; order: 2;
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 2px 0; background: none; border: none; padding: 5px 12px; overflow: hidden; }
+  /* Active by default, switched off at 1850px+. A full-width zero-height flex item forces the wrap to
+     happen HERE rather than wherever the values ran out of room -- so the two rows are 6 + 2 every
+     time, instead of moving as "Quiet" becomes "Building - 43/100". */
+  #saas-header #card-mktintel .strip-break { display: block; flex: 0 0 100%; height: 0; }
+  #saas-header #card-mktintel .strip-break + .bar-row { border-left: none; padding-left: 0 !important; }
+  #saas-header #card-tactical { flex: 0 0 auto; order: 1; margin-left: 0; }
+  /* the panel's own furniture is panel furniture — the section title and the squeeze driver line are
+     both dead weight in a one-line strip */
+  #saas-header #card-mktintel .dsec,
+  #saas-header #card-mktintel #t-sqz-drv-row { display: none; }
+  /* Every readout is the SAME shape — label, value, hairline divider — so it reads as one instrument
+     panel rather than eight things dropped in a row. The meters lose their bars here on purpose: a 60px
+     stub floating between text baselines was the thing making the strip look bolted on, and the value
+     beside it ("Off-hrs", "62/100") is the part being read anyway. The bars stay on mobile, where the
+     panel has room to be a panel. */
+  #saas-header #card-mktintel .dr,
+  #saas-header #card-mktintel .bar-row { display: inline-flex; align-items: baseline; gap: 7px;
+    padding: 1px 9px !important; border: none; border-left: 1px solid var(--bdr2); background: none;
+    white-space: nowrap; justify-content: flex-start; transition: none; }
+  /* !important earns its place exactly once here: the Analyst Score row carries an INLINE
+     style="padding-bottom:12px" for the panel layout, and an inline style outranks any selector.
+     Left alone it makes that row 12px taller, and centre alignment then lifts its text ~6px above
+     every other readout — which is the "not in line with the rest" that survived two passes. */
+  #saas-header #card-mktintel .dr:hover { background: none; }
+  #saas-header #card-mktintel .dsec + .dr { border-left: none; padding-left: 0; }
+  /* The base rows are PANEL rows: .dr is space-between (label left, value pinned right across a full-width
+     card), .bar-lbl is a fixed 78px box and .bar-val a 52px right-aligned one. In a strip those turn into
+     "GAMMA SQUEEZEOff-hrs" (a 13-character label overflowing its 78px box straight into the value) and
+     "ANALYST SCORE" followed by a 52px hole with a dash at the end of it. Overriding font-size and
+     min-width did nothing because none of those three properties are font-size or min-width. Reset the
+     box model itself: every label and value sizes to its own text, and the gap does the spacing. */
+  #saas-header #card-mktintel .dk,
+  #saas-header #card-mktintel .bar-lbl { flex: 0 0 auto; width: auto; min-width: 0;
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--txt3); }
+  #saas-header #card-mktintel .dv,
+  #saas-header #card-mktintel .bar-val { flex: 0 0 auto; width: auto; text-align: left; font-size: 12.5px; }
+  #saas-header #card-mktintel .bar-track { display: none; }
+  /* Short labels in the STRIP only. The values are the reading and cannot be abbreviated -- "Momentum
+     Building" is a longer retail state than "Chop" by ~90px, and on a long-value day that overflow
+     landed on the last readout, clipping "17/100" to "17/". Shortening the LABELS buys ~195px back,
+     which is more than the widest value swing costs. The full words stay in the markup and stay on
+     mobile, where the panel has room -- so the two can never drift out of sync. */
+  #saas-header #card-mktintel .dk[data-short],
+  #saas-header #card-mktintel .bar-lbl[data-short] { font-size: 0; }
+  #saas-header #card-mktintel .dk[data-short]::after,
+  #saas-header #card-mktintel .bar-lbl[data-short]::after {
+    content: attr(data-short); font-size: 9px; letter-spacing: 1px; }
+  #workspace {
+    /* THREE equal tracks. The top keeps its 2:1 feel by spanning 2 of 3 (the chart side
+       gets ~66%, the right rail ~33%), and the bottom becomes a true 3-across row:
+       Trade Log | Activity Feed | Analysis Feed. */
+    grid-template-columns: 1fr 1fr 1fr;
+    align-content: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 1px;
+    background: var(--bdr);
+    /* P&L chart sits LEFT, directly under the Today/7-Day P&L KPI cards it belongs to;
+       SPY takes the wide right two-thirds and SPANS TWO ROWS.
+       Why the span: when both charts shared one tall row, the P&L chart stretched to SPY's
+       height at a THIRD of its width — a tall narrow box that looked absurd (worst when the
+       day is flat and it's just an empty "No data" panel). Spanning lets SPY stay tall while
+       the P&L chart takes only the first row, which also lifts the Trade Log up to start
+       directly beneath it instead of waiting for a full-height chart row to end. */
+    /* Active Capital sits in col 1 BETWEEN the P&L chart and the Trade Log — it's capital
+       info, so it belongs under the P&L chart, and it takes that height from the Trade Log.
+       Moving it out of col 3 lets NoVo's Status span rows 3-4, so it rises to meet the SPY
+       chart and sits EVEN with Market Intel. Row heights are unchanged — only the map moved. */
+    /* 2026-08-20 (Jake): the chart takes the WHOLE right side. It spanned rows 1-2 and stopped
+       two-thirds down, with Market Intel and Chart Levels filling the space underneath it — on a
+       scalping screen the chart is the instrument and everything else is reference. Market Intel
+       moves into the command strip, whose left half was empty next to the action buttons — six
+       key/value readouts and two meters read perfectly well as a status bar, and read badly as a
+       tall panel of mostly blank rows. Chart Levels is retired here entirely because the levels now
+       label themselves in the pane. Mobile is untouched — it keeps both panels and the stacked order. */
+    grid-template-areas:
+      "pnl      spy      spy"
+      "capital  spy      spy"
+      "log      spy      spy"
+      "log      spy      spy";
+    /* FIT TO SCREEN — one page, no scrolling. #workspace is flex:1 1 0 in the body column,
+       so fr rows divide exactly the space left under the topbar + header. Charts get the
+       lion's share (they were short with dead space under them); NoVo's Status gets a real
+       track instead of being squeezed into its own scrollbar. Panels that still overflow
+       scroll INSIDE themselves; the page itself never scrolls. */
+    /* Row 1 sets BOTH the P&L chart's height and where the Trade Log starts (they're stacked
+       in col 1). 0.95fr put the log at 27% down — too high. Row 2 is shrunk by the same amount
+       row 1 grows, so SPY (which spans rows 1-2) keeps its height and rows 3-4 are untouched. */
+    /* Rows 3/4 = Active Capital / NoVo's Status. Capital never holds more than one position,
+       so it only needs ~one card; Status has 2 meters + 4 rows (~250px) and was being squeezed
+       into its own scrollbar. Height moved 3 -> 4. Their SUM is unchanged, so Market Intel
+       (which spans both) and everything above it stay exactly put. */
+    grid-template-rows: minmax(0, 2.25fr) minmax(0, 0.7fr) minmax(0, 0.7fr) minmax(0, 1.35fr);
+    overflow: hidden;
+    min-height: 0;
+  }
+  /* every card must be allowed to shrink inside its track, else content forces the page taller */
+  #workspace > .card, .col > .card { min-height: 0; overflow: hidden; }
+  #card-mktintel, #card-active-capital, #card-novostatus { overflow-y: auto; }
+
+  /* SPY chart fills its track instead of a fixed 420px that overflows the viewport */
+  #card-spy { display: flex; flex-direction: column; min-height: 0; }
+  #card-spy > div[style*="margin:8px"] { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+  #card-spy #novo-chart { flex: 1 1 auto; height: auto !important; min-height: 0; }
+  /* the SPY hero was a tall padded band of dead space — trimmed further so the chart itself
+     gets the height (it shares row 1 with the P&L chart, so the only way to make JUST the
+     SPY chart taller is to give back its own card's chrome). */
+  #card-spy .spy-hero { padding: 5px 14px; }
+  #card-spy .spy-hero-px { font-size: 19px; line-height: 1.1; }
+  #card-spy .spy-hero-chg { font-size: 10.5px; }
+  #card-spy .spy-hero-tkr { font-size: 13px; }
+  #card-spy > div[style*="margin:8px"] { margin: 4px 12px 4px !important; }
+  #card-spy #novo-chart-legend { padding: 4px 2px 0 !important; }
+
+  #card-pnl { display: flex; flex-direction: column; min-height: 0; }
+  /* PnL card renders like MOBILE now (2026-07-24, Jake): the top KPI row was removed, so the
+     headline (#pc-head) and the Trades/Record/Win%/P&L stats grid (#pc-stats-grid) show HERE
+     under the chart instead of being hidden as duplicates of the KPI row. The canvas still
+     flex-grows (below), so the chart itself keeps room to grow above the pinned stats. */
+  /* canvas fills the card instead of a fixed 190px band with dead space under it.
+     renderPortfolioChart now reads H from cv.clientHeight, so it redraws at this height. */
+  #pc-canvas-wrap { flex: 1 1 auto; min-height: 0; display: flex; padding: 6px 0 0 !important; }
+  #card-pnl #portfolio-chart { flex: 1 1 auto; height: 100% !important; min-height: 0; }
+  /* ── VIEW SWITCHING (SaaS header buttons) ─────────────────────────────────────
+     Overview = chart + trade log + intel + right rail. Act/Anl and Journal are their
+     OWN views, reached from the header — nothing is deleted, just not all at once. */
+  body.v-overview #card-activity,
+  body.v-overview #card-intel      { display: none !important; }
+  body.v-overview #card-brain      { display: none !important; }
+  /* #journal-divider is a SIBLING of #col-perf, not a child — hiding col-perf alone left the
+     "PERFORMANCE JOURNAL // AUDIT TRAIL" bar stranded at the bottom of every view. */
+  body.v-overview #col-perf,
+  body.v-overview #journal-divider { display: none !important; }
+  body.v-feeds    #journal-divider { display: none !important; }
+  body.v-journal  #journal-divider { display: flex !important; }
+
+  /* Was "activity feed" side by side, which gave half the view to eleven boot lines that never
+     change after startup. The Activity Feed is diagnostics: it collapses to a one-line status strip
+     and the Analysis Feed takes the full width, with NoVo's own history underneath it. */
+  body.v-feeds #workspace {
+    grid-template-columns: 1fr;
+    grid-template-areas: "activity" "feed" "brain";
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  body.v-feeds #card-brain { display: flex; }
+  /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
+     outranks any selector -- which is why the existing area rules below carry !important. Same here. */
+  body.v-feeds #card-activity { grid-area: activity !important; }
+  body.v-feeds #card-intel    { grid-area: feed !important; }
+  #card-brain                 { grid-area: brain !important; }
+  /* Collapsed is the DEFAULT. Expanding is a debugging act, not a trading one. */
+  #card-activity.collapsed .log-area { display: none; }
+  #card-activity .ch { cursor: pointer; }
+  #act-last { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; font-size: 11px; color: var(--txt3); margin-left: 10px; }
+  #card-activity:not(.collapsed) #act-last { display: none; }
+  #act-caret { display: inline; font-size: 9px; color: var(--txt3); margin-left: 8px; }
+
+  /* #card-mktintel is NOT in this list: _mountStrip moves it into #saas-header, where it is chrome
+     that belongs on every view. Hiding it per-view dates from when Market Intel was a workspace card,
+     and left the command strip blank on the Analysis tab. */
+  body.v-feeds #card-spy, body.v-feeds #card-pnl,
+  body.v-feeds #card-active-capital, body.v-feeds #card-novostatus,
+  body.v-feeds #card-tradelog      { display: none !important; }
+  body.v-feeds #col-perf           { display: none !important; }
+
+  body.v-journal #workspace        { display: none !important; }
+  body.v-journal #col-perf         { display: flex !important; }
+
+  /* header nav buttons — in the TOPBAR, beside the brand */
+  #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; margin-left: 18px; align-self: center; }
+  .navbtn {
+    background: rgba(255,255,255,.03); border: 1px solid var(--bdr); border-radius: 6px;
+    color: var(--txt3); font-family: var(--sans); font-size: 9.5px; font-weight: 700;
+    letter-spacing: .8px; text-transform: uppercase; padding: 7px 13px; cursor: pointer;
+    transition: .12s;
+  }
+  .navbtn:hover { color: var(--txt1); border-color: rgba(255,255,255,.18); }
+  .navbtn.on { background: rgba(34,211,238,.12); border-color: rgba(34,211,238,.45); color: var(--cyn); }
+
+  /* ARMED row, relocated into the topbar — compact, no big glow (keeps the
+     armed/live/halted BORDER colour those classes set; only kills the bloom). */
+  #topbar #term-live-row {
+    position: static !important; padding: 3px 10px !important;
+    /* margin-right: it was butting straight into the SESSION column's border (they're flex
+       siblings and .ts has no left margin, only a border-left). */
+    margin: 0 14px 0 0 !important;
+    border-radius: 3px !important; box-shadow: none !important; background: transparent !important;
+    align-self: center; gap: 7px; flex: 0 0 auto;
+  }
+  #topbar #term-live-row .term-live-status { display: none; }
+  #topbar #term-live-row .term-live-lbl { font-size: 8.5px; letter-spacing: 2px; }
+  #topbar #term-live-row .term-live-ticker { font-size: 11px; }
+  #topbar #term-live-row .term-live-price { font-size: 13px; }
+  /* flatten the columns so their cards become direct grid items */
+  .col { display: contents !important; }
+
+  #kpi-row             { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--bdr); }
+  #card-spy            { grid-area: spy; }
+  #card-mktintel       { grid-area: intel; }
+  #card-pnl            { grid-area: pnl; }
+  #card-active-capital { grid-area: capital; }
+  /* Chart Levels is display:none on desktop rather than merely unplaced: an element whose grid-area
+     no longer exists in the template gets auto-placed, which would silently push a new implicit row
+     onto the grid and shorten everything above it. */
+  #card-novostatus     { display: none; }
+  /* these three carry INLINE grid-column/grid-row from the old col-feed grid — must be beaten */
+  #card-tradelog       { grid-area: log      !important; border-right: none !important; }
+  #card-activity       { grid-area: activity !important; }
+  #card-intel          { grid-area: feed     !important; }
+  /* Risk & Allocation moves to the Settings drawer — see #risk-drawer */
+  #card-risk           { display: none; }
+
+  /* The feed/log cards must be real flex columns that FILL their grid row, so .log-area
+     (flex:1 1 0) actually resolves to a height instead of collapsing to nothing. */
+  #card-tradelog, #card-activity, #card-intel {
+    display: flex !important; flex-direction: column; overflow: hidden; min-height: 0;
+  }
+  #card-tradelog .log-area, #card-activity .log-area, #card-intel .log-area {
+    flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto;
+  }
+  /* EXCEPT in the Analysis view, where the activity row is sized `auto` rather than filling a track.
+     flex:1 1 0 against an auto-height row resolves to zero, so expanding showed a single clipped
+     line. An explicit height is the only thing that means anything here. */
+  body.v-feeds #card-activity:not(.collapsed) .log-area {
+    flex: 0 0 auto; height: 260px; max-height: 40vh; overflow-y: auto;
+  }
+
+  .col > .card, #workspace > .card { border-right: none; }
+  /* (the old fixed 420px chart height lived here — superseded by the flex rule above, which
+     lets the chart fill its grid track so the page fits the viewport with no scrolling) */
+
+  /* KPI cards — real tokens, sharp, flat, mono values */
+  .kpi { background: var(--bg2); padding: 12px 16px 13px; border-top: 2px solid transparent; }
+  .kpi.k-grn { border-top-color: rgba(16,185,129,.5); }
+  .kpi.k-blu { border-top-color: rgba(168,174,187,.35); }
+  .kpi.k-amb { border-top-color: rgba(245,158,11,.45); }
+  .kpi-k { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--txt3); font-family: var(--sans); font-weight: 700; }
+  .kpi-v { font-size: 24px; font-weight: 900; letter-spacing: -1px; line-height: 1.05; margin-top: 5px; color: var(--txt1); }
+  .kpi-s { font-size: 9px; color: var(--txt3); margin-top: 3px; font-family: var(--sans); letter-spacing: .3px; }
+
+  /* Control Panel reads as a command STRIP up top, not a tall card */
+  #card-tactical { display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+  #card-tactical .ch { display: none; }
+  #card-tactical .cmd-grid { display: flex; gap: 6px; padding: 6px 0; margin-left: auto; flex: 0 0 auto; }
+  #card-tactical .cmd-btn { padding: 8px 15px; }
+  #card-tactical .cmd-links { display: flex; gap: 6px; padding: 6px 0; flex: 0 0 auto; }
+  #card-tactical .cmd-links a { padding: 8px 11px; }
+}
+/* ONE ROW, but only where one row actually fits. The action buttons are a fixed ~730px and the eight
+   readouts ~1073px, so a single line needs ~1830px of header. Below that the previous nowrap rule did
+   not make it fit -- it made the overflow silent, clipping Gamma Squeeze mid-value and dropping
+   Analyst Score off the edge entirely. A trading readout that disappears without a trace is worse than
+   one that moved to a second line.
+   So: wrap is the DEFAULT and this is the exception, rather than the other way round. Above 1850px the
+   break switches off and the strip is the single dense line it was designed to be. */
+@media (min-width: 1850px) {
+  #saas-header #card-mktintel { flex-wrap: nowrap; gap: 0; }
+  #saas-header #card-mktintel .strip-break { display: none; }
+  /* display:none does not remove it from the DOM, so `.strip-break + .bar-row` still matches and would
+     strip the divider off Gamma Squeeze mid-row. Put it back. */
+  #saas-header #card-mktintel .strip-break + .bar-row {
+    border-left: 1px solid var(--bdr2); padding-left: 9px !important; }
+}
+
+/* ── Settings drawer (desktop): Risk & Allocation lives here now ── */
+#risk-drawer { display: none; }
+@media (min-width: 769px) {
+  #risk-drawer {
+    display: block; position: fixed; top: 48px; right: 0; bottom: 0; width: 420px; z-index: 400;
+    background: var(--bg1); border-left: 1px solid var(--bdr); box-shadow: -12px 0 40px rgba(0,0,0,.6);
+    overflow-y: auto; transform: translateX(100%); transition: transform .18s ease;
+  }
+  #risk-drawer.open { transform: translateX(0); }
+  #risk-drawer #card-risk { display: block !important; border-bottom: none; }
+  #risk-drawer-hd { display: flex; align-items: center; height: 34px; padding: 0 12px; border-bottom: 1px solid var(--bdr); background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.28)); }
+  #risk-drawer-hd span { font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--txt2); font-family: var(--sans); }
+  #risk-drawer-x { margin-left: auto; background: none; border: none; color: var(--txt3); font-size: 16px; cursor: pointer; font-family: var(--font); }
+  #risk-drawer-x:hover { color: var(--txt1); }
+}
+
+/* ── TRIAL MODE: hide the proprietary panels + show the locked banner (activated by body.trial-mode) ── */
+.trial-mode .trial-lock { display: none !important; }
+#trial-banner { display: none; }
+.trial-mode #trial-banner { display: block; background: linear-gradient(90deg,#16223a,#101d33); border-bottom: 1px solid var(--bdr); color: var(--txt1); font-size: 12px; font-weight: 700; letter-spacing: .03em; text-align: center; padding: 7px 12px; }
+.trial-mode #trial-banner b { color: var(--grn); }
+</style>
+</head>
+<body class="product skel">
+<div id="trial-banner">🔒 <b>Trial mode</b> — running in paper. Settings, live trading &amp; NoVo's signal scores unlock with <b>Pulse</b>.</div>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="brand">
+    <span class="brand-tri">&#x25B2;</span>
+    NOVO
+    <span class="brand-sub">Trading Dashboard</span>
+    <span class="brand-ver">trader-live</span>
+  </div>
+  <span class="tb-sep"></span>
+  <span id="hdr-mode" class="hm-paper">PAPER</span>
+  <span id="hdr-broker"></span>
+
+  <!-- SaaS view-switchers, in the TOPBAR beside the brand (the v9 pattern). Desktop only. -->
+  <div id="saas-nav">
+    <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
+    <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
+  </div>
+
+  <div class="tb-right">
+    <!-- ARMED / LIVE / HALTED row, RELOCATED into the topbar-right (2026-07-14).
+         Pre-placed on purpose: every creator in the JS does
+           let row = getElementById('term-live-row'); if(!row){ ...; terminal.insertBefore(row, ...) }
+         so having it already exist means that branch NEVER runs — it's never injected into the
+         Activity Feed, and all three update sites write to it here, in place. Zero changes to the
+         update logic. Side benefit: the feed's [CLEAR] wipes terminal-output.innerHTML, which used
+         to destroy this row until the next STALKER tick; up here it survives. -->
+    <div id="term-live-row" class="term-live-row halted">
+      <span class="term-live-dot" style="background:#ef4444;"></span><span class="term-live-lbl" style="color:#ef4444;">Studying...</span><span class="term-live-ticker">SPY</span><span class="term-live-price" style="color:var(--txt3);">&mdash;</span>
+    </div>
+    <div class="ts" id="hdr-session-ts">
+      <span class="ts-k">Session</span>
+      <span id="hdr-session" class="ts-v" style="color:var(--txt2)">—</span>
+    </div>
+    <div class="ts">
+      <span class="ts-k">7-Day P&amp;L</span>
+      <span id="hdr-pnl" class="ts-v">$0.00</span>
+    </div>
+    <div class="ts">
+      <span class="ts-k">Eastern</span>
+      <span id="hdr-clock" class="ts-v" style="color:var(--cyn)">--:--:--</span>
+    </div>
+    <div class="tb-conn">
+      <span id="hdr-conn-dot" class="conn-dot"></span>
+      <span id="hdr-conn-text">LINKING</span>
+    </div>
+    <div class="hdr-menu-wrap">
+      <button class="hdr-menu-btn" onclick="toggleHdrMenu(event)" title="Menu">&#8942;</button>
+      <div class="hdr-dropdown" id="hdr-dropdown">
+        <a class="hdr-dd-item hdr-dd-logout" href="/portal">Back to portal</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="alert-banner">
+  <span id="alert-text"></span>
+  <button class="ax" onclick="dismissAlert()">&#x2715;</button>
+</div>
+<div id="pm-warn-banner">
+  <span id="pm-warn-text"></span>
+  <button class="ax-warn" onclick="dismissPmWarn()">&#x2715;</button>
+</div>
+
+<!-- WORKSPACE -->
+<!-- ══ SaaS FIXED HEADER (desktop only) ══════════════════════════════════════════
+     Chrome, not content: sits between #topbar and #workspace as a flex sibling so it
+     NEVER scrolls away. #card-tactical (the Control Panel) is MOVED in here at runtime
+     by JS at the desktop breakpoint and moved back to #col-capital on mobile.
+     KPI values are MIRRORED from the live elements — no new fetch, no duplicate ids. -->
+<div id="saas-header">
+  <!-- KPI row removed 2026-07-24 (Jake): its data (Today/Trades/Record/Win%/P&L) now shows under the
+       PnL chart like mobile, and Regime lives in Market Intel. The header holds only the Control Panel
+       (moved in by _mountStrip), so removing this strip lets the SPY + PnL charts expand up. -->
+</div>
+
+<div id="workspace">
+
+  <!-- ── COL 1: Market Intel + RISK ─────────────────────────── -->
+  <div id="col-intel" class="col col-scroll">
+
+    <!-- SPY headline + chart -->
+    <div class="card" id="card-spy">
+      <div class="spy-hero">
+        <div class="spy-hero-l"><div class="spy-hero-tkr">SPY</div><div class="spy-hero-sub">S&amp;P 500</div></div>
+        <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
+      </div>
+      <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
+
+      <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
+      <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+      <div style="margin:8px 14px 8px;">
+        <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
+        <!-- The chart level legend moved to the "Chart Levels" panel (was card-novostatus) 2026-07-17 so it's readable. -->
+      </div>
+
+    </div>
+
+    <!-- Market Intel -->
+    <div class="card" id="card-mktintel">
+      <div class="dsec">Market Intel</div>
+      <div class="dr"><span class="dk">VIX</span><span id="t-vix" class="dv">—</span></div>
+      <div class="dr"><span class="dk">Macro</span><span id="t-regime" class="dv">—</span></div>
+      <div class="dr"><span class="dk" data-short="RETAIL">Retail State</span><span id="t-retail" class="dv">—</span></div>
+      <div class="dr"><span class="dk">RVOL</span><span id="t-rvol" class="dv">—</span></div>
+      <div class="dr"><span class="dk" data-short="TAPE">Tape Imbalance</span><span id="t-imb" class="dv">—</span></div>
+      <div class="dr trial-lock"><span class="dk" data-short="GEX">Net GEX</span><span id="t-gex" class="dv">—</span></div>
+      <!-- Gamma-squeeze meter (2026-07-24): short-gamma break intensity + direction, colored by state, with a
+           driver line under it. Fed by novo_state:squeeze (scan loop, RTH) — the Trader mirror of the Analyst hero. -->
+      <!-- Row break for narrow desktops. Inert above 1850px, where all eight readouts fit on one line.
+           Below that the header cannot hold them beside the ~730px action buttons, and the choice is a
+           deterministic second row or silently clipping whatever falls off the right edge. -->
+      <div class="strip-break"></div>
+      <div class="bar-row trial-lock">
+        <span class="bar-lbl" data-short="SQUEEZE">Gamma Squeeze</span>
+        <span id="t-sqz" class="bar-val">—</span>
+        <div class="bar-track"><div id="t-sqz-bar" class="bar-fill" style="width:0%"></div></div>
+      </div>
+      <div id="t-sqz-drv-row" class="trial-lock" style="display:none;font-size:11px;line-height:1.35;color:var(--txt3);padding:0 12px 8px 152px">
+        <span id="t-sqz-drv">—</span>
+      </div>
+      <div class="bar-row trial-lock" style="padding-bottom:12px">
+        <span class="bar-lbl" data-short="SCORE">Analyst Score</span>
+        <span id="t-apex" class="bar-val">0/100</span>
+        <div class="bar-track"><div id="t-apex-bar" class="bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Chart Levels — the SPY chart's level legend lives here now (2026-07-17), as a readable 2-col
+         grid instead of the cramped 9px strip under the chart. MOBILE ONLY as of 2026-08-20: on desktop
+         the levels label themselves in the chart pane and this card is display:none, so the chart can
+         take the full right side. The card-novostatus id is kept for the mobile stacking order. Analyst Score lives in Market Intel; Intuition +
+         Tactical Bias/Age removed 2026-07-24; Cooldown + Heartbeat removed. Legend is populated by the chart poller via
+         #novo-chart-legend (getElementById by id — works wherever the element lives). -->
+    <div class="card" id="card-novostatus">
+      <div class="dsec">Chart Levels</div>
+      <div id="novo-chart-legend" style="padding:2px 0 4px;"></div>
+    </div>
+
+    <!-- right column cleared 2026-07-09 (Apex Signal Tuner + Performance removed) — new panel goes here -->
+
+  </div>
+
+
+  <!-- ── COL 3: INTEL + TERMINAL + CHART ───────────────────────────── -->
+  <div id="col-feed" class="col" style="display:grid;grid-template-columns:1fr;grid-template-rows:1fr 2fr;height:calc(100vh - 48px);">
+
+
+
+    <div id="card-intel" class="card" style="grid-column:1;grid-row:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div class="ch ca">
+        <span class="ch-title">Analysis Feed</span>
+        <span class="ch-badge" onclick="document.getElementById('intel-output').textContent='Awaiting command...';">[CLEAR]</span>
+      </div>
+      <div class="log-area"><div id="intel-output">Awaiting command...</div></div>
+    </div>
+
+    <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
+    <div id="card-brain" class="card" style="flex-direction:column;overflow:hidden;">
+      <div class="ch">
+        <span class="ch-title">What NoVo Knows</span>
+        <span id="brain-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
+      </div>
+      <div class="brain-grid">
+        <div class="brain-col" id="brain-setup"><div class="brain-h">This setup</div></div>
+        <div class="brain-col" id="brain-record"><div class="brain-h">Its own record</div></div>
+        <div class="brain-col" id="brain-today"><div class="brain-h">Today</div></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+<nav id="mobile-tabs">
+  <!-- Indices 2 and 3 are deliberate: the CSS and the Analysis poll both gate on data-mtab,
+       so renumbering to 0/1 would break them silently. data-tab drives the active styling now
+       that the button position no longer equals the view index. -->
+  <button class="mob-tab" data-tab="2" onclick="switchMobileTab(2)">
+    <span class="mob-tab-icon">&#9672;</span>
+    <span>CHART</span>
+  </button>
+  <button class="mob-tab" data-tab="3" onclick="switchMobileTab(3)">
+    <span class="mob-tab-icon">&#9707;</span>
+    <span>ANALYSIS</span>
+  </button>
+</nav>
+
+
+<script>
+const terminal = document.getElementById('terminal-output');
+const intelDisplay = document.getElementById('intel-output');
+const tradeLogEl = document.getElementById('trade-log-output');
+const tradeLogMobileEl = document.getElementById('trade-log-mobile-output');
+const printedLogs = new Set();
+const tradePrinted = new Set();
+
+function stripEmoji(s) {
+  return (s || '').replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '').replace(/^[ \t]+|[ \t]+$/gm, '');
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function fmtOptionSymbol(raw) {
+  const s = raw || '';
+  const m = s.match(/^([A-Z]{1,6})(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/);
+  if (!m) return escHtml(s.slice(-16));
+  const [, root, yr, mm, dd, cp, strikeRaw] = m;
+  const strike = parseInt(strikeRaw, 10) / 1000;
+  const strikeStr = strike % 1 === 0 ? strike.toFixed(0) : strike.toFixed(2);
+  return `${root} ${parseInt(mm, 10)}/${parseInt(dd, 10)}/${yr} ${cp}$${strikeStr}`;
+}
+
+function fmtOCC(occ) {
+  const m = occ.match(/^([A-Z]+)\d{6}([CP])(\d+)/);
+  if (!m) return occ;
+  const strike = (parseInt(m[3]) / 1000).toFixed(0);
+  return `${m[1]} $${strike}${m[2]}`;
+}
+
+
+
+function logTerminal(rawMsg, type) {
+  // The Activity Feed panel it appended into was removed with the execution layer, and its source
+  // (c2_log_stream) is no longer sent. The STALKER branch below still runs -- that one drives the
+  // status pill price, not the terminal -- so this guards only the append path rather than gutting
+  // 41 call sites.
+  // STALKER → drop the live SPY price into the status pill's price slot; never append. The pill's
+  // label (Analyzing/Studying) + color (trading state) are owned by _setNovoStatus, not touched here.
+  if (/\[STALKER\]/.test(rawMsg)) {
+    const mP = rawMsg.match(/@\s*\$([\d.]+)/);
+    const _lr = document.getElementById('term-live-row');
+    if (_lr && mP) { const _pe=_lr.querySelector('.term-live-price'); if(_pe){ _pe.textContent='$'+mP[1]; _pe.style.color='var(--cyn)'; } }
+    return;
+  }
+
+  const msg = stripEmoji(rawMsg);
+  let displayMsg = msg;
+  if (!/\[/.test(displayMsg)) {
+    const t = new Date().toLocaleTimeString('en-US',{hour12:false});
+    displayMsg = `[${t}] ${displayMsg}`;
+  }
+
+  const d = document.createElement('div');
+  if (/\[SYSTEM\]|Command listener|Memory init|position.*restored|Signal engine|Night watch|Breadth monitor|Macro state|bias (updated|refreshed)|Volume baseline|Watchdog|Circuit Breaker|Autonomous Exit|NoVo Headless|ARMED|Core v[\d]/i.test(msg)) {
+    d.className = 'term-sys';
+  } else if (/VALIDATOR/i.test(msg)) {
+    d.className = 'term-validator';
+  } else if (/HALT|CRASH|FATAL|BLOCKED|REFUSED/i.test(msg)) {
+    d.className = 'term-err';
+  } else if (/⚠|WARN|FAILED|TIMEOUT|UNKNOWN|FLIP|FALLBACK/i.test(msg)) {
+    d.className = 'term-warn';
+  } else {
+    d.className = 'term-event';
+  }
+  d.textContent = displayMsg;
+  if (!terminal) return;   // no Activity Feed panel in the read-only build
+  terminal.appendChild(d);
+  // Cap the terminal to ~300 nodes (2026-07-20 latency fix). It used to grow unbounded — over a multi-hour
+  // session the node count climbed into the thousands, and each append's scrollHeight reflow scales with that
+  // count, so the terminal got progressively slower all session. Trimming from the top keeps append + the
+  // reflow below O(300) = flat, which also makes the per-line scroll read cheap.
+  while (terminal.childElementCount > 300) terminal.removeChild(terminal.firstChild);
+  terminal.parentElement.scrollTop = terminal.parentElement.scrollHeight;
+}
+
+// Single source of truth for the risk form: [input id, payload key, default, coercion].
+// Deploy, preset-save and preset-apply all go through this, so the three can never
+// drift apart the way three hand-written field lists would.
+const RISK_FIELDS = [
+  ['cfg-alloc',       'allocation',            100, 'f'  ],
+  ['cfg-sl',          'sl_pct',                 15, 'abs'],
+  ['cfg-tp1',         'tp1_pct',                20, 'f'  ],
+  ['cfg-tp2',         'tp2_pct',                30, 'f'  ],
+  ['cfg-tstd',        'trail_std_pct',           7, 'abs'],
+  ['cfg-trun',        'trail_runner_pct',        5, 'abs'],
+  ['cfg-t1act',       'trail_std_act_pct',      10, 'f'  ],
+  ['cfg-t2act',       'trail_runner_act_pct',   20, 'f'  ],
+  ['cfg-call-offset', 'call_strike_offset',      3, 'i'  ],
+  ['cfg-put-offset',  'put_strike_offset',       3, 'i'  ],
+  ['cfg-dte-target',  'dte_target',              1, 'dte'],
+  ['cfg-sm-low',      'size_mult_low',        0.75, 'f'  ],
+  ['cfg-sm-mid',      'size_mult_mid',         1.0, 'f'  ],
+  ['cfg-sm-high',     'size_mult_high',       1.25, 'f'  ],
+  // Which rungs are armed. Same list as the numbers on purpose — deploy, preset-save and
+  // preset-apply all read this one table, so an arm-switch cannot drift out of a preset the
+  // way it would if it were wired separately.
+  ['arm-sl',          'sl_on',                true, 'arm'],
+  ['arm-tp1',         'tp1_on',               true, 'arm'],
+  ['arm-tp2',         'tp2_on',               true, 'arm'],
+  ['arm-ts1',         'ts1_on',               true, 'arm'],
+  ['arm-ts2',         'ts2_on',               true, 'arm'],
+];
+
+
+
+
+
+/* ── Risk preset slots ────────────────────────────────────────────────────
+   Four slots in redis (novo_config:risk_presets). Tap an EMPTY slot to save
+   the current form under a name; tap a FILLED slot to load it and deploy in
+   one click. Presets are validated server-side by the same pydantic bounds a
+   manual deploy uses, so a slot can't hold a value the form would reject. */
+let _presets = {};
+let _hasPosition = false;
+
+
+
+
+
+
+
+const _dirtyInputs = new Set();
+
+
+const TRIGGER_DEFAULTS={trend_apex_floor:32,confluence_floor:50,apex_high_floor:80,nuclear_rvol_floor:4.5,preset:'balanced'};
+let _lastEntryConfig={...TRIGGER_DEFAULTS};
+
+
+const SUGGEST_INPUT_MAP={trend_apex_floor:'trig-trend',confluence_floor:'trig-conf',apex_high_floor:'trig-high',nuclear_rvol_floor:'trig-nuke'};
+
+
+
+
+async function sendCommand(cmd){
+  logTerminal(`> CMD: ${cmd.toUpperCase()}`,'sys');
+  try {
+    const r=await fetch(NOVO_URL('/api/command/' + cmd),{method:'POST',headers:{'Content-Type':'application/json'}});
+    const d=await r.json();
+    logTerminal(d.status==='success'?'✓ Transmitted.':`✗ ${d.message}`,'sys');
+  } catch(e){ logTerminal(`✗ ${e}`,'sys'); }
+}
+
+// MANUAL ENTRY (2026-07-16) — you take the trade, NoVo executes it. ONE CLICK, NO CONFIRM.
+//
+// No trading control on this dashboard ever prompts. Close All liquidates every position through
+// sendCommand() with no dialog, and NoVo opens positions autonomously all day without asking anyone —
+// a modal on a deliberate Buy click was both inconsistent with that and the exact friction this
+// feature exists to remove. On a fast tape the setup is gone by the time you've read a dialog.
+//
+//
+// The 3s debounce stays. It is not a confirmation, it's a double-fire guard — the operator cannot
+// usefully click Buy twice inside 3 seconds, and two positions is the one outcome that would hurt.
+// The engine also consumes the flag on read, so this is the second lock on that door, not the first.
+let _mbBusy=false;
+
+
+
+
+
+
+
+function toggleHdrMenu(e){
+  e.stopPropagation();
+  document.getElementById('hdr-dropdown').classList.toggle('open');
+}
+document.addEventListener('click',function(){
+  const d=document.getElementById('hdr-dropdown');
+  if(d) d.classList.remove('open');
+});
+
+// Placeholder for a value the RTH scan loop has not written. Weekend / pre-market / after-hours /
+// closed all mean "not computed yet", not "broken" — only a gap DURING 09:30-16:00 is a real gap.
+function _staleLbl(){
+  try{
+    const o = {}; const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',
+      weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+    parts.forEach(p=>{ o[p.type]=p.value; });
+    const mins = parseInt(o.hour,10)*60 + parseInt(o.minute,10);
+    const wknd = o.weekday==='Sat' || o.weekday==='Sun';
+    return (wknd || mins < 570 || mins >= 960) ? 'Off-hrs' : '—';
+  }catch(_e){ return '—'; }
+}
+
+function dismissAlert(){
+  const b=document.getElementById('alert-banner');
+  if(b){b.style.display='none';b.dataset.dismissed='1';}
+  // no server round trip: /api/alert/dismiss is not part of the read-only service.
+}
+function dismissPmWarn(){
+  const b=document.getElementById('pm-warn-banner');
+  if(b){b.style.display='none';b.dataset.dismissed='1';}
+  // no server round trip: /api/alert/dismiss is not part of the read-only service.
+}
+
+let _isTradingDay=true;
+function tickClock(){
+  const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour12:false,weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(new Date());
+  const o={}; p.forEach(x=>{o[x.type]=x.value;});
+  const clk=document.getElementById('hdr-clock');
+  if(clk) clk.textContent=`${o.hour}:${o.minute}:${o.second}`;
+  const mins=parseInt(o.hour)*60+parseInt(o.minute);
+  const wknd=o.weekday==='Sat'||o.weekday==='Sun';
+  let lbl,col;
+  if(wknd||!_isTradingDay)        {lbl='CLOSED'; col='var(--txt3)';}
+  else if(mins>=570&&mins<960)    {lbl='OPEN';   col='var(--grn)';}
+  else if(mins>=240&&mins<570)    {lbl='PRE-MKT';col='var(--amb)';}
+  else if(mins>=960&&mins<1200)   {lbl='AFT-HRS';col='var(--amb)';}
+  else                            {lbl='CLOSED'; col='var(--txt3)';}
+  const s=document.getElementById('hdr-session');
+  if(s){s.textContent=lbl;s.style.color=col;}
+  // NoVo status pill: a pure market-session light. TEXT + COLOR both follow the session —
+  // "Analyzing.."/green while OPEN, "Studying..."/red otherwise. Independent of trading state.
+  _novoMktOpen = (lbl==='OPEN');
+  _setNovoStatus();
+}
+// The ONE writer of the status pill (2026-07-17, Jake). Everything else only feeds it: tickClock sets
+// _novoMktOpen (the session) and the STALKER tick pokes the live price. Text AND colour both follow the
+// market session (green/Analyzing open, red/Studying closed) — the pill is NOT a trading-state signal.
+let _novoMktOpen=false;
+function _setNovoStatus(){
+  const _lr=document.getElementById('term-live-row');
+  if(!_lr) return;
+  // Pure market-session light — nothing to do with trading state (Jake, 2026-07-20).
+  const open=_novoMktOpen;
+  const col=open?'#10b981':'#ef4444';                    // green = market OPEN, red = market CLOSED
+  const txt=open?'Analyzing..':'Studying...';            // Analyzing while the market is open, Studying when closed
+  const _pe=_lr.querySelector('.term-live-price');
+  const price=_pe?_pe.textContent:'—';              // preserve the live price the STALKER feed put in
+  _lr.className='term-live-row '+(open?'live':'halted');
+  _lr.innerHTML='<span class="term-live-dot" style="background:'+col+';"></span>'
+    +'<span class="term-live-lbl" style="color:'+col+';">'+txt+'</span>'
+    +'<span class="term-live-ticker">'+(window._novoExecTkr||'SPY')+'</span>'
+    +'<span class="term-live-price" style="color:var(--txt3);">'+price+'</span>';
+}
+setInterval(tickClock,1000); tickClock();
+
+let ws;
+let _updating=false;
+function connectTelemetry(){
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  if(!NOVO_WS){ return; }   // no ticket yet -- the bootstrap calls connectTelemetry() once it has one
+  ws=new WebSocket(NOVO_WS);
+
+  ws.onopen=()=>{
+    if(_updating){ location.reload(); return; }
+    logTerminal('\u{1F7E2} Connected to Apex Core Telemetry Engine.','sys');
+    if(typeof _setNovoStatus==='function') _setNovoStatus();   // repaint the status pill via its single writer
+    document.getElementById('t-status').textContent='ONLINE';
+    document.getElementById('t-status').className='dv cgreen';
+    const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
+    dot.style.background='var(--grn)'; dot.style.boxShadow='0 0 8px var(--grn)';
+    txt.textContent='LINKED'; txt.style.color='var(--grn)';
+  };
+
+  // Live-price applier (2026-07-30): shared by the heavy telemetry frame AND the fast {type:'px'} tick lane so
+  // the header price + chart-tip glide + change render identically from either. Cheap enough to run at ~10Hz.
+  function _applyLivePx(spy, prevClose){
+    spy=parseFloat(spy||0); if(!(spy>0)) return;
+    if(prevClose!==undefined && prevClose!==null){ var _p=parseFloat(prevClose)||0; if(_p>0) window._spyPrev=_p; }
+    var e=document.getElementById('t-spy'); if(e) e.textContent='$'+spy.toFixed(2);
+    try{
+      if(_novoTipLive && _novoSeries && _novoLastCandle && _novoLastCandle.time){
+        var _ref=_novoLastCandle.open||_novoLastCandle.close||0;   // reject a tip >0.6% off the bar open (frozen/bad-tick guard)
+        if(_ref>0 && Math.abs(spy/_ref-1)<=0.006){
+          _novoLastCandle.close=spy;
+          if(spy>_novoLastCandle.high) _novoLastCandle.high=spy;
+          if(spy<_novoLastCandle.low)  _novoLastCandle.low =spy;
+          _novoSeries.update(_novoLastCandle);
+        }
+      }
+    }catch(_e){}
+    var ce=document.getElementById('t-spy-chg');
+    if(ce){
+      var prev=parseFloat(window._spyPrev||0);
+      if(prev>0){ var usd=spy-prev, up=usd>=0; ce.textContent=(up?'▲':'▼')+' '+(up?'+':'')+(usd/prev*100).toFixed(2)+'% · $'+Math.abs(usd).toFixed(2); ce.style.color=up?'var(--grn)':'var(--red)'; }
+      else { ce.textContent='—'; ce.style.color='var(--txt3)'; }
+    }
+  }
+  ws.onmessage=function(ev){
+    let data;try{data=JSON.parse(ev.data);}catch(e){return;};
+    if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: ~10Hz tick — price/tip/change + open-position P&L, skip the heavy handler
+    if(data.trial){document.body.classList.add('trial-mode');}
+
+
+
+    if(data.cognitive){
+      const c=data.cognitive;
+      // STALENESS GATE (2026-07-28): the cognitive engine only writes global_cognitive_state while the cash
+      // session is open (main.py), and the hash has no TTL — so overnight/weekends, or on any Resonance/Intuition
+      // API outage, the LAST read persists and would show a frozen "RISK-ON / FOMO" as if live. Gate on
+      // snapshot_ts (>30min = stale), matching the engine's own consumer (mab_router: UNKNOWN when age>1800s).
+      const _cogStale = c.snapshot_ts ? (Date.now()/1000 - parseFloat(c.snapshot_ts)) > 1800 : false;
+      const _rg=document.getElementById('t-regime'), _rt=document.getElementById('t-retail');
+      if(_rg){ _rg.textContent=_cogStale?_staleLbl():(c.regime_state||'UNKNOWN').replace(/_/g,' '); _rg.style.color=_cogStale?'var(--txt3)':''; }
+      if(_rt){ _rt.textContent=_cogStale?_staleLbl():(c.retail_state||'UNKNOWN').replace(/_/g,' '); _rt.style.color=_cogStale?'var(--txt3)':''; }
+      // Intuition score removed from the dashboard 2026-07-24 (Jake) — a coarse 5-min LLM tension gauge that
+      // duplicated Retail State + the chart's flip line. retail_state above still rides the same model call.
+    }
+
+    if(data.live_telem){
+      const lt=data.live_telem;
+      // STALENESS GATE (2026-07-28): rvol/tape/analyst-score are written ONLY inside the RTH scan loop and the
+      // live_telemetry hash has no TTL, so they FREEZE at 16:00 (and on any mid-session scan stall) — showing
+      // stale order-flow as if live. The squeeze tile beside them already goes "Off-hrs" at ts>180s; match it.
+      // (spy_price/net_gex/flip/VIX are intentionally kept live/last-good by the server override above.)
+      const _telemStale = lt.ts ? (Date.now()/1000 - parseFloat(lt.ts)) > 180 : false;
+      // A dash says "nothing here" and stops. Outside RTH these fields are not missing, they are not
+      // COMPUTED — the scan loop only runs 09:30-16:00 — and that is a different thing to see at 09:45
+      // than at 20:45. Say which: "Off-hrs" when the session explains it, "—" only when the value is
+      // absent DURING RTH, which is the case actually worth noticing. The squeeze tile beside them has
+      // read "Off-hrs" all along; this just stops the rest of the strip disagreeing with it.
+      // Header ticker + long name follow the engine's selected market (SPY/QQQ/IWM), so the hero and nav pill
+      // stop saying "SPY / S&P 500" when the chart is actually on QQQ or IWM.
+      if(lt.exec_ticker){
+        const _tk=String(lt.exec_ticker).toUpperCase();
+        const _nm={SPY:'S&P 500',QQQ:'Nasdaq 100',IWM:'Russell 2000'}[_tk]||_tk;
+        if(window._novoExecTkr!==_tk){
+          window._novoExecTkr=_tk;
+          document.querySelectorAll('.spy-hero-tkr').forEach(function(el){el.textContent=_tk;});
+          document.querySelectorAll('.spy-hero-sub').forEach(function(el){el.textContent=_nm;});
+          document.querySelectorAll('.term-live-ticker').forEach(function(el){el.textContent=_tk;});
+        }
+      }
+      // Header price + chart-tip glide + change go through the shared applier (also driven by the fast
+      // {type:'px'} tick lane at ~10Hz). The heavy frame passes the fresh prev-close so the fast lane can
+      // compute the change % between heavy frames. (2026-07-30)
+      _applyLivePx(lt.spy_price, lt.spy_prev_close);
+      // The fast-lane refactor (2026-07-30) moved the price/tip render into _applyLivePx, but the Net GEX
+      // display below still needs the spot LOCALLY to rescale to the per-1% convention (gexRaw × spy × 0.01).
+      // Without this, `spy` is undefined at that line and the WHOLE handler throws a ReferenceError there —
+      // blanking Net GEX, VIX, the squeeze meter, and the Active Capital positions panel (everything after it),
+      // while price + PnL (rendered before it, plus the fast px lane) keep moving. Keep this declaration.
+      const spy = parseFloat(lt.spy_price||0);
+      const apex=parseFloat(lt.apex_score||0);
+      const _apxEl=document.getElementById('t-apex');
+      const ab=document.getElementById('t-apex-bar');
+      // Color by signal strength so the bar READS at a glance: strong (>=66) green, moderate (>=33) amber,
+      // weak grey. currentColor drives both the fill and its glow. Stale -> _staleLbl() grey, empty bar.
+      const _apxCol = _telemStale?'var(--txt3)':(apex>=66?'var(--grn)':apex>=33?'var(--amb)':'var(--txt3)');
+      if(_apxEl){_apxEl.textContent=_telemStale?_staleLbl():`${Math.round(apex)}/100`;_apxEl.style.color=_apxCol;}
+      if(ab){ ab.style.width=(_telemStale?0:apex)+'%'; ab.style.color=_apxCol; }
+      const rvol=parseFloat(lt.rvol||0),rs=parseInt(lt.rvol_samples||0);
+      const re=document.getElementById('t-rvol');
+      if(re){ if(_telemStale){re.textContent=_staleLbl();re.style.color='var(--txt3)';} else {re.textContent=`${rvol.toFixed(2)}x${rs<3?` (${rs}/3)`:''}`;re.style.color=rvol>=2?'var(--red)':rvol>=1.2?'var(--amb)':'var(--txt2)';} }
+      const imb=parseFloat(lt.tape_imbalance||0);
+      const ie=document.getElementById('t-imb');
+      if(ie){ if(_telemStale){ie.textContent=_staleLbl();ie.style.color='var(--txt3)';} else {ie.textContent=(imb>0?'+':'')+imb.toFixed(1)+'%';ie.style.color=imb>20?'var(--grn)':imb<-20?'var(--red)':'var(--txt1)';} }
+      // Display net GEX in the industry per-1%-move convention (× spot × 0.01) to match the Analyst desk.
+      // The engine keeps the RAW per-$1 value internally — its trading gates (_GEX_DEADBAND / gamma floor)
+      // are tuned to that scale, so only the DISPLAY is rescaled here, never the trading math.
+      const gexRaw=parseFloat(lt.net_gex||0);
+      const gex = spy>0 ? gexRaw*spy*0.01 : null;   // no spot -> can't scale to the per-1% display; show '—', never the raw per-$1 value
+      const ge=document.getElementById('t-gex');
+      if(ge){ if(gex===null){ ge.textContent='—'; ge.style.color=''; } else { const a=Math.abs(gex);ge.textContent=(gex>=0?'+':'')+(a>=1e9?(gex/1e9).toFixed(1)+'B':a>=1e6?(gex/1e6).toFixed(2)+'M':(gex/1e3).toFixed(0)+'k');ge.style.color=gex<0?'var(--red)':'var(--grn)'; } }
+      const _fmtM=(v)=>{const x=parseFloat(v||0);return (x>=0?'+':'')+(Math.abs(x)>=1e6?(x/1e6).toFixed(1)+'M':(x/1e3).toFixed(0)+'k');};
+      // Book Delta/Theta/Vega removed from the Trader dashboard 2026-07-10 — no trading edge (4 studies:
+      // never vary in sign, coin-flip on magnitude) and noise to the Trader. Still fed to the Analyst desk
+      // notes via _book_positioning_read(telemetry) — that reads telemetry directly, not the dashboard.
+      const flip=parseFloat(lt.flip_zone||0);
+      if(flip>0){const fe=document.getElementById('t-flip');if(fe)fe.textContent=`$${flip.toFixed(2)}`;}
+      const vix=parseFloat(lt.vix||0);
+      // Off-hours this shows the 4pm CLOSING VIX — that's the right reference after the bell, not a stale
+      // number (see the server note). The else only fires when telemetry carries no VIX at all (engine never
+      // wrote one): "—" beats the original `if(vix>0)`, which silently froze the last value on screen.
+      {const ve=document.getElementById('t-vix');
+       if(ve){ if(vix>0){ve.textContent=vix.toFixed(2);ve.style.color=vix>=25?'var(--red)':vix>=18?'var(--amb)':'var(--grn)';}
+               else {ve.textContent='—';ve.style.color='var(--txt3)';} }}
+    }
+
+    if(data.gex_flip_ts){
+      const am=Math.round((Date.now()/1000-parseFloat(data.gex_flip_ts))/60);
+      const fe=document.getElementById('t-flip-age');
+      if(fe){fe.textContent=am<60?`${am}m ago`:`${Math.round(am/60)}h ago`;fe.style.color=am<=5?'var(--red)':am<=20?'var(--amb)':'var(--txt3)';}
+    }
+
+    // Gamma-squeeze meter: score drives the bar width, state drives the color (dormant grey → building/armed
+    // amber → firing = direction green/red), label is the driver sentence. Goes to "Off-hrs" when the scan
+    // stops writing (ts >180s stale). Mirrors the Analyst dashboard's squeeze hero.
+    if(data.squeeze){
+      const sq=data.squeeze, st=(sq.state||'dormant'), sc=parseInt(sq.score||0), dir=(sq.direction||'flat');
+      const stale = sq.ts ? (Date.now()/1000 - parseInt(sq.ts)) > 180 : true;
+      const el=document.getElementById('t-sqz'), bar=document.getElementById('t-sqz-bar');
+      const drow=document.getElementById('t-sqz-drv-row'), drv=document.getElementById('t-sqz-drv');
+      let col='var(--txt3)', txt='—', w=0, showDrv=false;
+      if(!stale){
+        const arrow = dir==='up' ? '▲' : dir==='down' ? '▼' : '';
+        if(st==='firing'){ col = dir==='up' ? 'var(--grn)' : 'var(--red)'; txt=`Firing ${arrow} · ${sc}/100`; w=sc; }
+        else if(st==='armed'||st==='building'){ col='var(--amb)'; txt=`${st.charAt(0).toUpperCase()+st.slice(1)} ${arrow} · ${sc}/100`; w=sc; }
+        else { col='var(--txt3)'; txt='Quiet'; w=0; }   // dormant — still explain WHY via the driver line below
+        w=Math.max(0,Math.min(100,w));
+        showDrv=true;   // always show the regime read (incl. "long gamma — dampened" / "short gamma, off the line")
+      } else { txt='Off-hrs'; }
+      if(el){ el.textContent=txt; el.style.color=col; }
+      if(bar){ bar.style.width=w+'%'; bar.style.color=col; }   // fill + glow follow currentColor
+      if(drow&&drv){ if(showDrv && sq.label && sq.label!=='—'){ drv.textContent=sq.label; drow.style.display=''; } else { drow.style.display='none'; } }
+    }
+
+
+    // Tactical Bias / Bias Age removed from the dashboard 2026-07-24 (Jake) — a slow AI chart-read opinion that
+    // competed with the real directional inputs (squeeze direction, net GEX sign, walls). novo_state:visual_bias
+    // is still published for the trial teaser + server-side use; it just no longer renders a tile here.
+
+    const hbe=document.getElementById('t-core-hb');
+    if(hbe){hbe.textContent=data.core_hb?'ALIVE':'NO SIGNAL';hbe.style.color=data.core_hb?'var(--txt1)':'var(--red)';}
+
+    const cde=document.getElementById('t-cooldown');
+    if(cde){
+      if(data.cooldowns&&Object.keys(data.cooldowns).length>0){
+        const now=Date.now()/1000,parts=[];
+        for(const[tk,exp]of Object.entries(data.cooldowns)){const rem=Math.max(0,parseInt(exp)-now);if(rem>0){const m=Math.floor(rem/60),s=Math.floor(rem%60);parts.push(`${tk}:${m}m${s}s`);}}
+        if(parts.length){cde.textContent=parts.join(' · ');cde.style.color='var(--amb)';}
+        else{cde.textContent='CLEAR';cde.style.color='var(--txt1)';}
+      } else{cde.textContent='CLEAR';cde.style.color='var(--txt1)';}
+    }
+
+    if('trading_day' in data) _isTradingDay=data.trading_day;
+    const ab=document.getElementById('alert-banner'),at=document.getElementById('alert-text');
+    if(ab&&at){
+      if(data.c2_alert){
+        if(data.c2_alert!==ab.dataset.lastAlert){delete ab.dataset.dismissed;ab.dataset.lastAlert=data.c2_alert;}  // a NEW/changed alert re-shows even after a prior dismiss — don't blind the operator to the next refusal (2026-07-30)
+        if(!ab.dataset.dismissed){at.textContent=data.c2_alert;ab.style.display='flex';}
+      } else{ab.style.display='none';delete ab.dataset.dismissed;delete ab.dataset.lastAlert;}
+    }
+    const pb=document.getElementById('pm-warn-banner'),pt=document.getElementById('pm-warn-text');
+    if(pb&&pt){
+      if(data.pm_warning&&!pb.dataset.dismissed){pt.textContent=data.pm_warning;pb.style.display='flex';}
+      else if(!data.pm_warning){pb.style.display='none';delete pb.dataset.dismissed;}
+    }
+
+
+
+
+
+
+    // MAB execution-router panel removed 2026-07-30 — one Adaptive-Urgent entry, no arms to score.
+    // (Server may still send a legacy `data.mab` from lingering mab:strategy:* keys; intentionally ignored.)
+
+
+    _hasPosition = false;   // no positions are ever sent to this service
+
+    if(data.intel_text&&intelDisplay){
+      if(intelDisplay.dataset.raw!==data.intel_text){
+        intelDisplay.dataset.raw=data.intel_text;
+        const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        function colorize(t){
+          t=t.replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--txt1);font-weight:700;">$1</strong>');
+          t=t.replace(/(\$[\d,]+\.?\d*|[-+]?\d+\.?\d*%)/g,'<span style="color:var(--cyn);font-weight:600;">$1</span>');
+          // (inline green/red/amber sentiment-word coloring removed 2026-07-13 — single colored words mid-sentence
+          //  read tacky; the prose stays clean neutral text, with bold emphasis + cyan numbers only.)
+          return t;
+        }
+        const lines=stripEmoji(data.intel_text).split('\n');
+        let html='';
+        let i=0;
+        // Section header: line (stripped of **) has ALL-CAPS label before first colon
+        const _DESK_LABELS=['THE READ','STRUCTURAL POSTURE','WHAT TO WATCH','WHAT CHANGED','WHAT IT MEANS','KEY LEVELS','THE OPEN','THE CLOSE','THE WEEK AHEAD','THE SETUP','THE TAKEAWAY'];
+        function isSHdr(line){
+          const s=line.replace(/\*\*/g,'').trim();
+          if(_DESK_LABELS.indexOf(s.toUpperCase())>=0) return true;   // standalone desk-note label, no colon
+          const ci=s.indexOf(':');
+          if(ci<3||ci>30) return false;
+          const lbl=s.slice(0,ci);
+          return /^[A-Z]/.test(lbl)&&lbl===lbl.toUpperCase();
+        }
+        function parseSHdr(line){
+          const s=line.replace(/\*\*/g,'').trim();
+          const ci=s.indexOf(':');
+          if(ci<0) return {label:s.trim(), body:''};
+          return {label:s.slice(0,ci).trim(), body:s.slice(ci+1).trim()};
+        }
+        // Title block
+        while(i<lines.length){
+          const l=lines[i];
+          if(!l.trim()){i++;break;}
+          if(isSHdr(l)) break;
+          if(i===0) html+=`<div class="intel-report-title">${esc(l.trim().replace(/^\[+\s*/,'').replace(/\s*\]+$/,''))}</div>`;
+          else html+=`<div class="intel-report-sub">${esc(l.trim())}</div>`;
+          i++;
+        }
+        // Section blocks
+        while(i<lines.length){
+          const l=lines[i];
+          if(!l.trim()){i++;continue;}
+          if(isSHdr(l)){
+            const {label,body}=parseSHdr(l);
+            const U=label.toUpperCase();
+            const bodyLines=[];
+            if(body) bodyLines.push(body);
+            i++;
+            while(i<lines.length&&lines[i].trim()&&!isSHdr(lines[i])){
+              bodyLines.push(lines[i].trim());
+              i++;
+            }
+            const rawBody=bodyLines.join(' ');
+            let bodyHtml;
+            if(U.indexOf('PATTERN')>=0){
+              // Observed Patterns: always render as a sentiment-colored pill (green if bullish-
+              // leaning, red if bearish-leaning) so BOTH directions get the box — not just text
+              // that happens to start with a bias word. Checked before the bias branch below.
+              const bt=rawBody.trim();
+              const cls=/BEAR/i.test(bt)?'intel-bias-bear':/BULL/i.test(bt)?'intel-bias-bull':'intel-bias-neut';
+              bodyHtml=`<span class="intel-bias ${cls}">${esc(bt)}</span>`;
+            } else if(U.indexOf('BIAS')>=0 || /^(BULLISH|BEARISH|NEUTRAL)\b/i.test(rawBody.trim())){
+              const bt=rawBody.trim();
+              const cls=/BEAR/i.test(bt)?'intel-bias-bear':/BULL/i.test(bt)?'intel-bias-bull':'intel-bias-neut';
+              bodyHtml=`<span class="intel-bias ${cls}">${esc(bt)}</span>`;
+            } else if(U.indexOf('LEVEL')>=0){
+              const items=rawBody.split(/[,;]+/).map(function(x){return x.trim();}).filter(Boolean);
+              let cells='';
+              items.forEach(function(it){
+                const m=it.match(/^(.*?)[\s:]+([\d][\d.,]*)$/);
+                if(m){cells+=`<div class="intel-lvl"><span class="intel-lvl-k">${esc(m[1].trim())}</span><span class="intel-lvl-v">${esc(m[2].trim())}</span></div>`;}
+                else{cells+=`<div class="intel-lvl"><span class="intel-lvl-k">${esc(it)}</span><span class="intel-lvl-v"></span></div>`;}
+              });
+              bodyHtml=`<div class="intel-levels">${cells}</div>`;
+            } else {
+              bodyHtml=colorize(esc(rawBody));
+            }
+            html+=`<div class="intel-section"><div class="intel-section-lbl">${esc(label)}</div><div class="intel-section-body">${bodyHtml}</div></div>`;
+          } else {
+            html+=`<div class="intel-section-body">${colorize(esc(l))}</div>`;
+            i++;
+          }
+        }
+        intelDisplay.innerHTML=html;
+        const _la=intelDisplay.parentElement;
+        _la.scrollTop=_la.scrollHeight;
+      }
+    }
+
+  };
+
+  ws.onclose=function(){
+    logTerminal('⚠️ Connection to Apex Core lost. Reconnecting in 3s...','sys');
+    document.getElementById('t-status').textContent='OFFLINE';
+    document.getElementById('t-status').className='dv cred';
+    const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
+    dot.style.background='var(--red)'; dot.style.boxShadow='0 0 8px var(--red)';
+    txt.textContent='OFFLINE'; txt.style.color='var(--red)';
+    setTimeout(connectTelemetry,3000);
+  };
+  ws.onerror=ev=>ev.target.close();
+}
+
+function switchMobileTab(idx) {
+  const cols = [
+    document.getElementById('col-perf'),     // 0 JOURNAL
+    document.getElementById('col-capital'),  // 1 TRADE
+    document.getElementById('col-intel'),    // 2 SIGNAL (chart)
+    document.getElementById('col-feed')      // 3 ANALYSIS
+  ];
+  cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
+  document.body.setAttribute('data-mtab', String(idx));   // drives the pinned quick-trade bar on the SIGNAL tab
+  if (idx === 2) setTimeout(loadNovoChart, 60);   // SIGNAL tab (col-intel) shown → refresh now that it finally has a width, so the zoom/view applies
+  if (idx === 3) setTimeout(function(){ try{ window.brainTick(); }catch(e){} }, 60);
+}
+if (window.matchMedia('(max-width: 768px)').matches) switchMobileTab(2);   // open on the TRADE (chart) tab
+
+
+// ── NoVo live SPY chart — candles (Tradier) + NoVo's OWN levels & entry/exit markers ──
+// Minimum price window the chart will show, in dollars. The open is only a couple of
+// dollars wide, so without a floor the scale snaps to it and the candles read as noise.
+// Raise for a wider view, lower to zoom in. Mobile runs tighter: the chart panel is a
+// fraction of the height there, so the same span squashes the candles flat again.
+// Re-read on every autoscale rather than cached, so a rotate/resize picks the right one.
+// The dollar window the chart opens on. These ARE dollars, 1:1 with what renders --
+// pinning scaleMargins below is what made that true. $2 on a phone; the desk is $10 now that
+// the chart owns the full right side — at a third of that height $4 was the ceiling before the
+// candles flattened into a ribbon, and the extra height is exactly what buys the wider window.
+const _NOVO_MIN_SPAN_DESK=10.0, _NOVO_MIN_SPAN_MOB=2.0;   // desk view widened to $10 (Jake, 2026-08-20) now the chart is full height — $4 was sized for a chart a third this tall
+// Padding above and below the data, as a fraction of the plot height. Kept small and
+// EXPLICIT so the window we ask for is the window that shows.
+const _NOVO_SCALE_PAD=0.06;
+function _novoMinSpan(){
+  try{ return window.matchMedia('(min-width: 769px)').matches ? _NOVO_MIN_SPAN_DESK : _NOVO_MIN_SPAN_MOB; }
+  catch(_e){ return _NOVO_MIN_SPAN_DESK; }
+}
+let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
+function _initNovoChart(){
+  if(_novoSeries) return true;
+  if(!window.LightweightCharts) return false;              // CDN lib not ready yet — retry next tick
+  const el=document.getElementById('novo-chart'); if(!el) return false;
+  _novoChart=LightweightCharts.createChart(el,{
+    autoSize:true,
+    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit'},
+    grid:{vertLines:{color:'rgba(255,255,255,0.035)'},horzLines:{color:'rgba(255,255,255,0.035)'}},
+    // scaleMargins MUST be pinned. The library defaults (top .2 / bottom .1) consume 30%
+    // of the plot on top of whatever range autoscaleInfoProvider returns, so a forced $5
+    // window rendered as 5/0.7 = $7.1 and the lock looked like it was not working.
+    rightPriceScale:{borderColor:'rgba(255,255,255,0.08)',scaleMargins:{top:_NOVO_SCALE_PAD,bottom:_NOVO_SCALE_PAD}},
+    timeScale:{borderColor:'rgba(255,255,255,0.08)',timeVisible:true,secondsVisible:false,rightOffset:8},  // level tags are back on the axis (2026-08-20), so the last candle needs real clearance or it prints underneath them
+    crosshair:{mode:LightweightCharts.CrosshairMode.Normal}
+  });
+  _novoSeries=_novoChart.addCandlestickSeries({
+    upColor:'#34d399',downColor:'#f43f5e',borderUpColor:'#34d399',borderDownColor:'#f43f5e',
+    wickUpColor:'#34d399',wickDownColor:'#f43f5e',
+    autoscaleInfoProvider: orig => {          // expand the price scale so nearby level lines stay visible
+      const r=orig();
+      if(r && r.priceRange){
+        let mn=r.priceRange.minValue, mx=r.priceRange.maxValue;
+        if(_novoLevelVals.length) _novoLevelVals.forEach(v=>{ if(isFinite(v)){ mn=Math.min(mn,v); mx=Math.max(mx,v); } });
+        // Floor the view at a readable span. At the open the whole session is a couple of
+        // dollars wide, so the scale would otherwise snap to that and every wick looks the
+        // same size; and pre-2026-08-13 the expected-move bounds were force-fed into this
+        // range (765.29 / 783.95 = an $18 window), which squashed the candles to a ribbon.
+        // Candles still drive the scale once the day is wider than this.
+        // The VISIBLE span is this range divided by (1 - top - bottom margin), so to land
+        // on a $5/$6 window we must ask for a proportionally SMALLER range. Getting this
+        // wrong is what made the "$5 lock" open at $8.
+        const span=mx-mn, _min=_novoMinSpan()*(1-2*_NOVO_SCALE_PAD);
+        if(isFinite(span) && span<_min){
+          const mid=(mx+mn)/2, half=_min/2;
+          mn=mid-half; mx=mid+half;
+        }
+        r.priceRange.minValue=mn; r.priceRange.maxValue=mx;
+      }
+      return r;
+    }
+  });
+  // VWAP as a real line series — a curve that moves each bar, NOT a flat price line. Orange, no axis tag.
+  _novoVwap=_novoChart.addLineSeries({color:'#f59e0b',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  // EMA9 (white) + EMA21 (navy) — the engine's real session EMAs, reseeded daily at 04:00 (correct at the open).
+  _novoEma9 =_novoChart.addLineSeries({color:'#f0f0ee',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  _novoEma21=_novoChart.addLineSeries({color:'#3556b8',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  return true;
+}
+async function loadNovoChart(){
+  try{
+    if(!_initNovoChart()) return;
+    const r=await fetch(NOVO_URL('/api/spy-chart')); if(!r.ok) return;
+    const d=await r.json();
+    if(d.candles && d.candles.length){
+      const _firstT = d.candles[0].time;
+      // GLITCH FIX (2026-07-17): a transient partial/degraded /api/spy-chart response returns FEWER bars
+      // for the SAME session. The session only GROWS during RTH, so "same anchor, fewer candles" is bad
+      // data, not a real shrink — the old code setData'd the short set straight onto the chart, which IS
+      // the "lost some candles then came back" glitch (the next good poll restored them). Keep the good
+      // chart and skip this poll. Only a genuine new session — the first bar's time changes — legitimately
+      // resets to fewer bars, and that path re-fits the opening window.
+      if(_novoHasData && _firstT === _novoFirstT && d.candles.length < _novoBarCount){
+        return;
+      }
+      if(!_novoHasData || _firstT !== _novoFirstT || d.candles.length > _novoBarCount+1){
+        _novoSeries.setData(d.candles); _novoHasData=true;   // first load / new session / gap → full set
+        if(_firstT !== _novoFirstT) _novoRanged=false;       // new session anchor → re-fit the opening window
+      } else {
+        _novoSeries.update(d.candles[d.candles.length-1]);   // steady state → smooth-update the forming candle
+      }
+      _novoFirstT = _firstT;
+      _novoBarCount = d.candles.length;
+      // LIVE-TIP HANDOFF (2026-07-17): keep a copy of the forming (last) candle so the WS telemetry frame
+      // can glide its close between the 2s polls (see the ws.onmessage tip-update). The 2s poll still OWNS
+      // bar structure — adding a new minute, correcting O/H/L — this only lets the CURRENT bar's close track
+      // the 2s live quote at WS frame rate (~2Hz) instead of stepping once per poll. On a minute rollover the
+      // poll replaces this within one bar-cache cycle, so the tip can't drift onto a stale bar for long.
+      _novoLastCandle = Object.assign({}, d.candles[d.candles.length-1]);
+      _novoTipLive = (d.tip_live === true);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
+      // Opening window. Candles are 1-min (Tradier interval=1min), so bars == minutes.
+      //   DESKTOP: last 2 HOURS = 120 bars (2026-07-16, Jake).
+      //   MOBILE:  75 bars — the chart is ~1/4 the width there, and a wide window is an unreadable smear.
+      // Initial view ONLY: _novoRanged latches after the first successful set, so panning and zooming
+      // afterwards are never fought.
+      // Set it ONLY once the chart actually has a width. On MOBILE the chart's column (col-intel) starts
+      // as a HIDDEN tab (0px), and a range set on a zero-size chart silently fails — which is why the zoom
+      // never took on phones. Defer + retry every poll until the container is really sized.
+      //
+      // (The comment here used to say "Open on the last 6 HOURS … 6h = 360 bars" directly above a line
+      // that used 180. The value had been changed and the prose hadn't; the variable was still named
+      // _bars6h while holding 3h. Naming it for what it IS so the next edit can't inherit the lie.)
+      if(!_novoRanged){
+        const _el=document.getElementById('novo-chart');
+        if(_el && _el.clientWidth>0){
+          const _n=d.candles.length;
+          // 1-min candles → bars == minutes. Desktop opens on the last 5 HOURS (300 bars, Jake 2026-08-20,
+          // up from 180 — the chart now owns the full right side, so it has the width to show them);
+          // mobile stays tighter at 75 (its narrow width can't show even 3h legibly).
+          const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
+          const _openBars = _desk ? 300 : 75;
+          // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
+          // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
+          // candles ran under the level tags, which are ~100px wide. Scale it with the bar count instead
+          // of hard-coding: ~100px of room whatever the window. Mobile draws no tags, so it needs almost none.
+          const _rightPad = _desk ? Math.ceil(_openBars * 0.08) : 4;
+          requestAnimationFrame(()=>{ try{
+            _novoChart.timeScale().applyOptions({rightOffset:_rightPad});
+            _novoChart.timeScale().setVisibleLogicalRange({from:Math.max(0,_n-_openBars),to:_n+_rightPad});
+            _novoRanged=true;
+          }catch(_e){} });
+        }
+      }
+    }
+    // Overlays (VWAP/EMA/markers) — only re-setData when they ACTUALLY CHANGED (2026-07-30). The server
+    // recomputes them on a 10s candle-cache TTL, so ~4 of 5 polls carried byte-identical arrays; setData
+    // rebuilds+repaints the whole series each time, which was the bulk of the chart jank. A cheap change
+    // signature gates it — no redraw when nothing moved.
+    const _vlast=(d.vwap&&d.vwap.length)?d.vwap[d.vwap.length-1]:null;
+    const _ovSig=(d.vwap?d.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')+'|'+(d.markers?d.markers.length:0);
+    if(_ovSig!==_novoOvSig){
+      _novoOvSig=_ovSig;
+      if(_novoVwap){ _novoVwap.setData(d.vwap||[]); }   // VWAP curve
+      if(_novoEma9){ _novoEma9.setData(d.ema9||[]); }   // EMA9 white
+      if(_novoEma21){ _novoEma21.setData(d.ema21||[]); } // EMA21 navy
+      _novoSeries.setMarkers(d.markers||[]);
+    }
+    // FLIP/CW/PW/GRAV are the engine's own dealer levels (the ones _level_trigger fires on) — cyan for the
+    // gamma flip, dark blue for the gravity magnet (a blue pair with the flip), green/red for the walls.
+    // Opening Range is light pink; After-Hours purple; Prior-Day near-white.
+    const lc={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7'};
+    // In-pane level titles, TradingView-style, so the chart can carry its own legend and the Chart
+    // Levels panel is not the only place to read a number off. DESKTOP ONLY: fifteen titles on a phone
+    // chart is not a legend, it is a wall, and the panel still shows them there.
+    const _lvlTitle={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
+      'EM_HI':'EM ▲','EM_LO':'EM ▼','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
+      'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
+    const _wantTitles = (window.innerWidth >= 769);
+    // ── LEVELS, TradingView-style ────────────────────────────────────────────────────────────────────
+    // A THIN SOLID segment starting at the bar that SET the level, running to the newest bar — not a dotted
+    // line spanning the whole chart, which implied the level existed before it was set. Origin times come
+    // from d.level_from (server-derived in /api/spy-chart). No origin -> fall back to the old full-width
+    // price line so an unknown level still shows rather than silently vanishing.
+    //
+    // This poll runs every 2s, so the series are built ONCE and then only EXTENDED: tearing down and
+    // re-adding 5 series every 2 seconds would churn the chart for nothing. Rebuild only when the drawn set
+    // actually changes (a level's price moves, or one crosses the $2 in-play boundary); otherwise just
+    // update() the right edge onto the newest bar.
+    const leg=[], px=(+d.price)||null;
+    const _lastT = (d.candles && d.candles.length) ? d.candles[d.candles.length-1].time : null;
+    const _firstT = (d.candles && d.candles.length) ? d.candles[0].time : null;
+    const _lvlFrom = d.level_from || {};
+    const _drawn = [];
+    _novoLevelVals=[];
+    for(const lbl in (d.levels||{})){
+      const c=lc[lbl]||'#94a3b8', v=+d.levels[lbl];
+      // VWAP is drawn as a moving line series (above) — skip its flat price line, but keep it in the legend.
+      if(lbl!=='VWAP'){
+        // DRAW EVERY LEVEL. There used to be a `Math.abs(v-px)<=2.0` gate here, so anything more than $2
+        // from spot was legend-only and never appeared on the chart — that's why YDL kept "vanishing"
+        // (750.20 vs 754.68 = $4.48 away). It reads as a missing level, not as a filter.
+        _drawn.push([lbl, v, (_lvlFrom[lbl]||null)]);
+        // ...but only let NEAR levels stretch the price scale. _novoLevelVals feeds the candle series'
+        // autoscaleInfoProvider, so pushing every level would drag the range out to CW 760 / FLIP 749.43
+        // and squash the candles into a band. Far levels still draw — they just get clipped if they're
+        // off-screen, which is exactly how TradingView behaves: the level exists, the scale doesn't chase it.
+        // EM_LO/EM_HI used to be forced in here regardless of distance. The expected move is
+        // a whole-day envelope — ~$18 wide on a 14 VIX — so anchoring the scale to it made the
+        // chart unusable from the open. They still DRAW; they just don't drag the scale, same
+        // as every other far level.
+        if(px!==null && Math.abs(v-px)<=2.0) _novoLevelVals.push(v);
+      }
+      // (legend rows built below, in the fixed High/Low-paired order with full names)
+    }
+    // LEGEND — SPLIT PANEL (2026-07-17, Jake): dealer/reference lines up top full-width (VWAP, Gamma Flip,
+    // Gravity, Call Wall, Put Wall); then the session High/Low pairs split Highs-left / Lows-right, so each
+    // High sits directly across from its Low. Reuses the .dr/.dk/.dv row style (identical to Market Intel).
+    // Only levels the engine actually sent are shown.
+    const _lrow=function(lbl,name){
+      if(!(d.levels && (lbl in d.levels))) return '';
+      const c=lc[lbl]||'#94a3b8';
+      return `<div class="dr" style="padding:3px 12px"><span class="dk" style="color:${c}">${name}</span><span class="dv" style="font-size:12px">${(+d.levels[lbl]).toFixed(2)}</span></div>`;
+    };
+    const _hdr='font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;padding:4px 12px 2px';
+    const _anchors=_lrow('VWAP','VWAP')+_lrow('FLIP','Gamma Flip')+_lrow('GRAV','Gravity')+_lrow('CW','Call Wall')+_lrow('PW','Put Wall')+_lrow('EM_HI','Exp Move &#9650;')+_lrow('EM_LO','Exp Move &#9660;');
+    const _highs=_lrow('ORH','Opening Range')+_lrow('PMH','Pre-Market')+_lrow('AHH','After-Hours')+_lrow('YDH','Prior-Day');
+    const _lows =_lrow('ORL','Opening Range')+_lrow('PML','Pre-Market')+_lrow('AHL','After-Hours')+_lrow('YDL','Prior-Day');
+    leg.push(_anchors
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;border-top:1px solid var(--bdr2);margin-top:2px;padding-top:2px">'
+      + '<div><div style="'+_hdr+'">Highs</div>'+_highs+'</div>'
+      + '<div><div style="'+_hdr+'">Lows</div>'+_lows+'</div>'
+      + '</div>');
+    const _sig = JSON.stringify(_drawn);
+    if(_sig !== _novoLvlSig){
+      for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){} }
+      for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){} }
+      _novoLines={}; _novoLvlSeries={};
+      _drawn.forEach(function(row){
+        const lbl=row[0], v=row[1], from=row[2], c=lc[lbl]||'#94a3b8';
+        // ALWAYS draw a SOLID, FULL-WIDTH line (first bar -> newest bar). Two bugs killed here:
+        // (1) dotted: a transient null origin used to fall back to a dotted price line and, because the extend
+        //     branch below only touches solid series, it stayed STUCK dotted until the next rebuild.
+        // (2) left-edge jump: anchoring the segment to the per-level origin `from` made the line's left edge
+        //     flicker between a partial segment and full width as `from` resolved/unresolved frame to frame.
+        // Jake's call: just keep the full line. Anchor every level at _firstT — one stable horizontal line,
+        // never dotted, never jumping. (autoscaleInfoProvider:()=>null — the candle series' provider already
+        // expands the scale from _novoLevelVals.) `from` is intentionally unused now.
+        const _anchor = _firstT;
+        if(_anchor && _lastT){
+          // A series `title` rides on its last-value axis label, so the level reads "VWAP 764.93" on the
+          // price scale instead of being an anonymous coloured line you have to match against a side panel.
+          // This replaces an earlier attempt at an in-pane price-line title, which drew nothing: the line
+          // here is a LINE SERIES, and the price-line label belongs to a different object entirely.
+          // Only levels inside the visible price range render a label, so the axis stays readable.
+          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles,crosshairMarkerVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
+          s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
+          _novoLvlSeries[lbl]=s;
+        } else {
+          // No candles at all (chart still loading) — a solid, not dotted, full-width line as the last resort.
+          _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),axisLabelVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
+        }
+      });
+      _novoLvlSig=_sig;
+    } else if(_lastT){
+      _drawn.forEach(function(row){
+        const s=_novoLvlSeries[row[0]];
+        if(s){ try{ s.update({time:_lastT, value:row[1]}); }catch(_e){} }   // extend onto the newest bar
+      });
+    }
+    // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
+    leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
+      + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
+      + '<span style="color:#facc15">&#9679; win exit</span><span style="color:#94a3b8">&#9679; loss exit</span></div>');
+    const lg=document.getElementById('novo-chart-legend'); if(lg) lg.innerHTML=leg.join('');
+  }catch(e){console.error('novo chart:',e);}
+}
+loadNovoChart();
+(function _nc(){ Promise.resolve(loadNovoChart()).catch(function(){}).finally(function(){ setTimeout(_nc, 4000); }); })();   // self-scheduling: next tick only AFTER the last completes (no pile-up). 4s not 2s (2026-07-30): the 0.5s WS keeps the price + forming bar live, so this heavy 5-day fetch/parse only needs to refresh bar structure — halving it cuts jank with no visible lag
+
+// Midday chop lockout — the visual half of the engine's owner-box entry block (11:45-2:00 ET). Greys the Buy
+// buttons + shows the chip so you SEE the wall instead of testing it. Owner box only (a hosted body is skipped).
+function _updateChopLock(){
+  try{
+    if(document.body.classList.contains('novo-hosted')) return;   // owner box only — matches the engine's not-_HOSTED gate
+    var h=0,m=0,wd='';
+    new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'})
+      .formatToParts(new Date()).forEach(function(p){ if(p.type==='hour')h=parseInt(p.value,10); else if(p.type==='minute')m=parseInt(p.value,10); else if(p.type==='weekday')wd=p.value; });
+    var mins=h*60+m;
+    // Midday chop lock DISABLED 2026-07-30 (Jake: "don't need it"). To restore: locked=(wd!=='Sat'&&wd!=='Sun')&&mins>=(12*60)&&mins<(13*60+45)
+    var locked=false;
+    ['buy-call','buy-put'].forEach(function(id){ var b=document.getElementById(id); if(b){ b.disabled=locked; b.classList.toggle('locked-out',locked); } });
+    var chip=document.getElementById('chop-lock'); if(chip) chip.style.display=locked?'flex':'none';
+  }catch(_e){}
+}
+_updateChopLock(); setInterval(_updateChopLock, 20000);
+
+connectTelemetry();
+
+
+var _activePeriod='1D';
+var _pcPts=null,_pcGeo=null,_pcHoverX=null;
+// ── RACE GUARD (2026-07-16) ─────────────────────────────────────────────────────────────────────
+// loadPortfolioChart() has THREE concurrent callers — switchPeriod() on click, the perf render at
+// `if (_activePeriod !== '1D')`, and a self-scheduling 2s poller. The poller guards against ITSELF
+// (next tick only after the last completes) but nothing guarded them against EACH OTHER, and there
+// was no request token. So: the poller's fetch(?days=1) is in flight, you click 1W, that fires
+// fetch(?days=7) — and whichever response lands LAST won the canvas. Land the 1D one second and you
+// get 1D data drawn under an active 1W pill. A fresh chance to lose that race arrived every 2s.
+//
+// Worse, the function re-read the GLOBAL _activePeriod after its awaits, so a mid-flight switch
+// half-applied: chart points from one period, stat boxes from another — the chart and its own
+// numbers disagreeing.
+//
+// Fix: bump a sequence on entry, CAPTURE the period into `_per`, and never read the global again.
+// Any response whose token has been superseded is dropped on the floor. All DOM writes happen after
+// the last await with no yield in between, so _activePeriod cannot change underneath them.
+var _pcSeq=0;
+var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-market), whatever period the chart shows
+// _pcPer = the period the pc-* DOM elements currently hold data for. NOT the same thing as
+// _activePeriod, which is the period the user has CLICKED — and the gap between those two is a
+// second race, separate from the fetch race below:
+//   click 1W -> _activePeriod flips instantly -> _kpi()'s own 2s timer fires before the fetch lands
+//   -> it takes the 1W branch and reads pc-total, which still holds TODAY's -$140 -> the Period P&L
+//   card flashes the 1D number, then corrects when the fetch returns.
+// The card was reading stale DATA under a fresh LABEL because the label came from the click and the
+// value came from the DOM: two sources of truth. So the KPI row branches on _pcPer — what the data
+// IS — never on what was clicked. Mismatched, it simply doesn't move until real data arrives.
+
+// ══ SaaS DESKTOP OVERVIEW (2026-07-14) ══════════════════════════════════════════
+// Two jobs, both additive — no existing handler, id, poller or endpoint is touched.
+(function(){
+  var _isDesk=function(){ try{ return window.matchMedia('(min-width: 769px)').matches; }catch(_e){ return true; } };
+
+
+  // ARMED/LIVE/HALTED row: topbar at desktop, back INSIDE the Activity Feed on mobile.
+  // It's pre-placed in the topbar so logTerminal's `if(!row){...terminal.insertBefore}` never
+  // fires — which on mobile would mean the feed silently LOSES its live row (and the row would
+  // render at full size, glow and all, inside the 48px bar). Moving the node keeps one element,
+  // so all three writers still resolve it either way and mobile looks exactly as it always did.
+  function _mountLiveRow(){
+    try{
+      var row=document.getElementById('term-live-row');
+      var tb=document.querySelector('#topbar .tb-right');
+      var term=document.getElementById('terminal-output');
+      if(!row) return;
+      if(_isDesk()){
+        if(tb && row.parentElement!==tb) tb.insertBefore(row, tb.firstChild);
+      }else{
+        if(term && row.parentElement!==term) term.insertBefore(row, term.firstChild);
+      }
+    }catch(e){}
+  }
+
+  // Control Panel -> fixed header at desktop (moved, not cloned — same reason as Risk:
+  // cloning would duplicate the command-button ids and break sendCommand wiring).
+  // Mobile puts it straight back into #col-capital, where #card-tactical{order:0} places it.
+  // ── VALUE FLASH ──────────────────────────────────────────────────────────────────────────────
+  // Tints a readout green or red when it moves. ADDITIVE by design: it observes the DOM instead of
+  // hooking the pollers, so no existing update path changes and the worst a bug here can do is fail
+  // to tint -- never corrupt a number on a trading surface.
+  //
+  // Seeded on the first pass so a load does not flash the whole panel, and batched to one scan per
+  // frame because a poll touches dozens of nodes at once. The hero price is excluded on purpose: it
+  // reprices every few seconds in RTH and a permanently blinking headline is noise.
+  (function(){
+    if(!window.MutationObserver || !window.WeakMap) return;
+    var root = document.body;
+    var SEL = '.dv, .bar-val, .kpi-v, #t-gex, #t-vix';
+    var last = new WeakMap(), seeded = false, queued = false;
+    function num(t){
+      // strip symbols BEFORE matching: "-$4.6B" keeps its sign only if the "$" is gone first,
+      // otherwise a bare /-?\d+/ starts at the digit and reads deeper short gamma as a rise.
+      var m = String(t == null ? '' : t).replace(/[$,\s]/g,'').match(/-?\d+(?:\.\d+)?/);
+      return m ? parseFloat(m[0]) : null;
+    }
+    function scan(){
+      queued = false;
+      var els = root.querySelectorAll(SEL), _live = false;
+      for (var i = 0; i < els.length; i++){
+        var el = els[i], v = num(el.textContent);
+        if (v == null) continue;
+        _live = true;
+        var prev = last.get(el);
+        last.set(el, v);
+        if (!seeded || prev == null || prev === v) continue;
+        var cls = v > prev ? 'nvf-up' : 'nvf-dn';
+        el.classList.remove('nvf-up','nvf-dn');
+        void el.offsetWidth;                    // reflow so a repeat move restarts the tint
+        el.classList.add(cls);
+        (function(e, c){ setTimeout(function(){ e.classList.remove(c); }, 620); })(el, cls);
+      }
+      seeded = true;
+      // The scanner already knows the instant real numbers exist, so it retires the skeleton too --
+      // no need to find whichever of the many pollers happens to answer first.
+      if (_live && document.body.classList.contains('skel')) document.body.classList.remove('skel');
+    }
+    new MutationObserver(function(){
+      if (queued) return;
+      queued = true;
+      (window.requestAnimationFrame || setTimeout)(scan, 16);
+    }).observe(root, { subtree: true, childList: true, characterData: true });
+    // Never shimmer forever: if nothing ever answers, fall back to the real placeholders. A skeleton
+    // that outlives the request promises data that is not coming, which is worse than a dash.
+    setTimeout(function(){ document.body.classList.remove('skel'); }, 12000);
+    scan();
+  })();
+
+  function _mountStrip(){
+    try{
+      var h=document.getElementById('saas-header'), t=document.getElementById('card-tactical');
+      if(!h||!t) return;
+      if(_isDesk()){ if(t.parentElement!==h) h.insertBefore(t, h.firstChild); }
+      else { var cap=document.getElementById('col-capital'); if(cap && t.parentElement!==cap) cap.appendChild(t); }
+      // Market Intel rides along. Six key/value readouts and two meters are a STATUS BAR, not a panel:
+      // as a panel they were a tall column of mostly blank rows eating the space under the chart, and the
+      // strip beside the action buttons was empty. MOVED, not cloned — the poller writes to #t-vix,
+      // #t-gex and friends by id, and a clone would give it two of each and update the wrong one.
+      var mi=document.getElementById('card-mktintel');
+      if(mi){
+        if(_isDesk()){ if(mi.parentElement!==h) h.insertBefore(mi, h.firstChild); }
+        else {
+          var ci=document.getElementById('col-intel'), ns=document.getElementById('card-novostatus');
+          // back to its own column on mobile, and BEFORE Chart Levels — appending would silently
+          // reorder the stack the mobile layout was built around.
+          if(ci && mi.parentElement!==ci){ if(ns && ns.parentElement===ci) ci.insertBefore(mi, ns); else ci.appendChild(mi); }
+        }
+      }
+    }catch(e){}
+  }
+  // View switcher. Charts are measured on layout, so a chart revealed by a view change
+  // must be nudged — same reason the mobile switchTab() re-calls loadNovoChart().
+  window.setView=function(v){
+    try{
+      var b=document.body;
+      b.classList.remove('v-overview','v-feeds','v-journal');
+      b.classList.add('v-'+v);
+      var btns=document.querySelectorAll('.navbtn');
+      for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on', btns[i].getAttribute('data-v')===v);
+      setTimeout(function(){
+        try{ if(typeof loadNovoChart==='function') loadNovoChart(); }catch(_e){}
+        try{ if(v==='feeds' && typeof window.brainTick==='function') window.brainTick(); }catch(_e){}
+      }, 60);
+    }catch(e){}
+  };
+  // Mirror the newest line into the collapsed strip with an observer rather than by editing the
+  // append path -- lines arrive from several places and none of them should have to know about this.
+  (function(){
+    var t=document.getElementById('terminal-output'), s=document.getElementById('act-last');
+    if(!t||!s||!window.MutationObserver) return;
+    var sync=function(){ var l=t.lastElementChild;
+      s.textContent = l ? (l.textContent||'').trim().slice(0,170) : 'idle'; };
+    new MutationObserver(sync).observe(t,{childList:true,subtree:true});
+    sync();
+  })();
+
+  // == What NoVo Knows ==================================================================
+  function _bn(v,d,suf){ return (v===null||v===undefined||v!==v)?'&mdash;':Number(v).toFixed(d===undefined?2:d)+(suf||''); }
+  function _bs(v,d){ if(v===null||v===undefined||v!==v) return '&mdash;';
+    var n=Number(v); return (n>0?'+':'')+n.toFixed(d===undefined?3:d)+'%'; }
+  function _brw(l,v,cls){ return '<div class="brain-row"><span class="bl">'+l+'</span><span class="bv '+(cls||'')+'">'+v+'</span></div>'; }
+
+  function renderBrain(d){
+    if(!d||!d.ok) return;
+    var st=d.setup||{}, tr=d.track||{}, se=d.session||{}, el;
+
+    // what is on screen right now, and what it has done before
+    var reg=st.regime||'';
+    var h='<div class="brain-h">This setup</div><div class="brain-lead">'
+        + (reg ? reg.charAt(0).toUpperCase()+reg.slice(1) : '&mdash;') + '</div>'
+        + '<div class="brain-sub">'+_bs(st.dist_flip_pct,2)+' from the flip &middot; VIX '+_bn(st.vix,2)+'</div>';
+    var c=st.cell;
+    if(c){
+      h+='<div style="height:9px"></div>';
+      ['fwd15','fwd60','into_close'].forEach(function(k,i){
+        var o=c[k]; if(!o) return;
+        var lbl=['Next 15 min','Next 60 min','Into the close'][i], up=o.up_rate;
+        var cls=(up===null||up===undefined)?'b-mute':(up>=55?'b-up':(up<=45?'b-dn':'b-mute'));
+        h+=_brw(lbl,_bs(o.median,3)+' &middot; '+_bn(up,1,'% up'),cls);
+      });
+      h+='<div class="brain-note">'+(st.scope||'')+' &middot; '+c.sessions+' sessions &middot; '+c.n+' snapshots</div>';
+    }
+    el=document.getElementById('brain-setup'); if(el) el.innerHTML=h;
+
+    // how the claims themselves have scored
+    var r='<div class="brain-h">Its own record</div>';
+    var em=tr.expected_move;
+    if(em&&em.sessions){
+      r+='<div class="brain-lead" style="color:'+(em.rate>=em.baseline?'var(--grn)':'var(--txt)')+'">'+_bn(em.rate,0,'%')+'</div>'
+       + '<div class="brain-sub">of sessions closed inside the expected move ('+em.inside+'/'+em.sessions+'), against a '+em.baseline+'% baseline</div>'
+       + '<div style="height:9px"></div>';
+    }
+    var g=tr.gravity_pull;
+    if(g&&g.enough) r+=_brw('Gravity pins',_bn(g.pin_ratio,2,'&times; quieter'),g.holds?'b-up':'b-mute');
+    var sk=tr.skew_signal;
+    if(sk&&sk.enough) r+=_brw('Skew, top vs bottom',_bn(sk.ratio,2,'&times; bigger'),sk.holds?'b-up':'b-mute');
+    var fr=tr.flip_regime;
+    if(fr&&fr.enough) r+=_brw('Short vs long gamma, live',_bn(fr.ratio,2,'&times;'),fr.holds?'b-up':'b-mute');
+    // The same question over 4,513 reconstructed sessions. Its own row, never merged with the live
+    // one: a 17-year daily figure and a few dozen logged hours are different instruments.
+    var ar=tr.archive;
+    if(ar&&ar.enough&&ar.flip_regime)
+      r+=_brw('Short vs long gamma, 2008-2025',_bn(ar.flip_regime.ratio,2,'&times;'),'b-up');
+    // "Walls held" was retired: it asked whether a wall contained the next hour from a live
+    // snapshot. This is what the site publishes now -- what price does on the sessions it actually
+    // REACHED the wall.
+    var wb=tr.wall_base_rate;
+    if(wb&&wb.enough&&wb.call&&wb.put)
+      r+=_brw('Price goes through the walls',_bn(wb.call.got_through_pct,0,'% call')+' / '+_bn(wb.put.got_through_pct,0,'% put'),'b-mute');
+    var sq=tr.squeeze_bands;
+    if(sq&&sq.bands) r+=_brw('Squeeze bands ordered',sq.monotonic?'yes':'no',sq.monotonic?'b-up':'b-dn');
+    var bi=d.lean_record;
+    if(bi&&bi.enough) r+=_brw('Open lean correct',_bn(bi.correct_rate,0,'%')+' of '+bi.n,bi.holds?'b-up':'b-dn');
+    var au=d.audit_record;
+    if(au&&au.enough) r+=_brw('Hourly audit correct',_bn(au.correct_rate,0,'%')+' of '+au.n,au.holds?'b-up':'b-dn');
+    var pu=d.pulse_signal;
+    if(pu&&pu.enough&&pu.low&&pu.high&&pu.low.median_next_pct!=null)
+      r+=_brw('Pulse fear vs greed',_bs(pu.low.median_next_pct,2)+' / '+_bs(pu.high.median_next_pct,2),'b-mute');
+    var ln=tr.line_record;
+    // One number. "Level held" graded a bar NoVo never sets for itself -- the alert's body is
+    // branches, not predictions -- and came off the site for that reason.
+    if(ln&&ln.enough) r+=_brw('The Line owns the level',_bn(ln.direction_rate,0,'%')+' of '+ln.n,ln.holds?'b-up':'b-dn');
+    el=document.getElementById('brain-record'); if(el) el.innerHTML=r;
+
+    // what kind of day this is
+    var ec=se.expiry_class||'', big=(ec==='monthly'||ec==='quarterly');
+    var t='<div class="brain-h">Today</div>'
+        + '<div class="brain-lead"'+(big?' style="color:var(--amb)"':'')+'>'
+        + (big ? (ec==='quarterly'?'Quarterly OPEX':'Monthly OPEX')
+               : (ec==='weekly'?'Weekly expiry':'No weekly expiry')) + '</div>'
+        + (big ? '<div class="brain-sub">A month of open interest rolls off today.</div>' : '')
+        + '<div style="height:9px"></div>';
+    t+=_brw('Sessions logged', se.sessions_logged||'&mdash;');
+    t+=_brw('Snapshots', (se.snapshots||0).toLocaleString());
+    t+=_brw('History from', se.window||'&mdash;');
+    var ev=d.events||[];
+    if(ev.length){
+      ev.slice(0,4).forEach(function(e){
+        t+=_brw((e.title||'').slice(0,34), ((e.meta&&e.meta.timeET)||'') || '&mdash;','b-mute'); });
+    } else {
+      t+='<div class="brain-note">No major prints today.</div>';
+    }
+    el=document.getElementById('brain-today'); if(el) el.innerHTML=t;
+  }
+
+  window.brainTick=function(){
+    // Desktop marks the view with a body class; mobile marks the tab with data-mtab. Gate on both,
+    // or the panel is live on one and permanently blank on the other.
+    if(!document.body.classList.contains('v-feeds')
+       && document.body.getAttribute('data-mtab')!=='3') return;
+    fetch(NOVO_URL('/api/brain'),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      try{
+        renderBrain(d);
+        var s=document.getElementById('brain-stamp');
+        if(s) s.textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+      }catch(e){}
+    }).catch(function(){});
+  };
+  setInterval(function(){ try{ window.brainTick(); }catch(e){} }, 60000);
+  setTimeout(function(){ try{ window.brainTick(); }catch(e){} }, 1200);
+
+  if(!/v-(overview|feeds)/.test(document.body.className)) document.body.classList.add('v-overview');
+
+  _mountStrip(); _mountLiveRow();
+  window.addEventListener('resize', function(){ _mountStrip(); _mountLiveRow(); });
+
+  // (2) KPI row — MIRRORS the live elements that are already being updated by the
+  //     existing pollers. No new fetch, no new endpoint, no duplicate ids. Same
+  //     pattern loadPortfolioChart() already uses to mirror j-* -> pc-*.
+  function _kpi(){
+    try{
+      var g=function(id){ return document.getElementById(id); };
+      var cp=function(src,dst,dflt){
+        var s=g(src), d=g(dst); if(!d) return;
+        var t=s?(s.textContent||'').trim():'';
+        d.textContent = t || dflt;
+        if(s && s.style && s.style.color) d.style.color=s.style.color;
+      };
+      var _t=function(id){ var e=g(id); return e?(e.textContent||'').trim():''; };
+      // BRANCH ON THE DATA, NOT THE CLICK. _pcPer is the period the pc-* elements actually hold;
+      // _activePeriod is what the user clicked, and it flips instantly while the fetch is still in
+      // flight. Using the click here made this row read the previous period's numbers under the new
+      // period's label for one tick — the "flashes the 1d pnl then goes back to 1w" bug.
+      var _per=(typeof _pcPer!=='undefined' && _pcPer) ? _pcPer : '1D';
+
+      // ── KPI 1: TODAY P&L — ALWAYS today, never follows the chart ──────────────────────────────
+      // Jake: "the first 1d kpi stat should show the 1d only and update with active capital."
+      // Fed from _todayLive (loadPortfolioChart), which is today's realized + open-position
+      // mark-to-market. It used to mirror pc-total on 1D and fall back to j-pnl elsewhere — and
+      // j-pnl is the journal's REALIZED-only number, so picking any other timeframe froze this
+      // card solid while a position was ticking. Now it's live on every timeframe.
+      var _tEl=g('kpi-today');
+      if(_tEl){
+        _tEl.textContent = (_todayLive==null) ? '$0.00'
+          : (Math.abs(_todayLive)<0.005 ? '$0.00' : (_todayLive>=0?'+$':'-$')+Math.abs(_todayLive).toFixed(2));
+      }
+      cp('t-regime','kpi-regime','—');
+
+      // ── KPIs 2/3/4 FOLLOW THE CHART ──────────────────────────────────────────────────────────
+      // pc-winrate / pc-trades / pc-record are already period-correct: loadPortfolioChart mirrors
+      // the journal's j-* into them on 1D and fills them from /api/performance?days=N otherwise.
+      // They were being fed from j-* directly here, which is why they read "today" no matter what
+      // the chart showed.
+      cp('pc-winrate','kpi-wr','0.0%');
+      cp('pc-trades','kpi-trades','0');
+      cp('pc-record','kpi-record','0W — 0L');
+      var _wrs=g('kpi-wr-s');
+      if(_wrs) _wrs.textContent=(_t('pc-stats-label')||'today').toLowerCase();
+
+      // KPI 2 follows the chart EXCEPT on 1D, where it shows the 7-day instead (Jake: "unless chart
+      // is on 1d then it shows 7 day so 1d isnt displayed two times") — KPI 1 already owns today,
+      // and two identical cards side by side is a wasted slot.
+      var _wkk=g('kpi-week-k'), _wks=g('kpi-week-s'), _wk=g('kpi-week');
+      if(_per==='1D'){
+        cp('hdr-pnl','kpi-week','$0.00');
+        if(_wkk) _wkk.textContent='7-Day P&L';
+        if(_wks) _wks.textContent='past 7 sessions';
+      }else{
+        cp('pc-total','kpi-week','$0.00');
+        if(_wkk) _wkk.textContent=(_t('pc-stats-label')||'Period')+' P&L';
+        if(_wks) _wks.textContent=(_t('pc-trades')||'0')+' trades · '+(_t('pc-record')||'');
+      }
+      // Colour by sign. Required for any card fed from pc-total: it's written with an explicit
+      // var(--txt1), so copying its colour renders the figure WHITE instead of green/red.
+      var _sign=function(el){
+        if(!el) return;
+        var _v=(el.textContent||'').replace(/[$\s,]/g,'');
+        el.style.color = /^[-−]/.test(_v) ? 'var(--red)'
+                       : (parseFloat(_v.replace(/[+]/,''))>0 ? 'var(--grn)' : 'var(--txt1)');
+      };
+      _sign(_wk); _sign(g('kpi-today'));
+
+      var sub=g('kpi-regime-sub');
+      if(sub) sub.textContent='RVOL '+(_t('t-rvol')||'—')+' · VIX '+(_t('t-vix')||'—');
+      var ts=g('kpi-today-sub');
+      if(ts) ts.textContent=(_t('j-trades')||'0')+' trades · '+(_t('j-record')||'0W — 0L');
+    }catch(e){}
+  }
+  // Exposed so loadPortfolioChart can refresh the row the instant new data lands, instead of leaving
+  // the previous period's numbers up for however long is left on this 2s tick. The interval stays as
+  // the heartbeat for everything else here (regime, RVOL/VIX) that isn't chart-driven.
+  window.__kpiRefresh = _kpi;
+  _kpi(); setInterval(_kpi, 2000);
+})();
+
+</script>
+</body>
+</html>

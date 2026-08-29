@@ -457,12 +457,20 @@
       "destination": "/analyst-live.html"
     },
     {
+      "source": "/trader/live",
+      "destination": "/trader-live.html"
+    },
+    {
       "source": "/analyst/sw.js",
       "destination": "/analyst-sw.js"
     },
     {
       "source": "/crypto/sw.js",
       "destination": "/crypto-sw.js"
+    },
+    {
+      "source": "/trader/sw.js",
+      "destination": "/trader-sw.js"
     }
   ],
   "functions": {
