@@ -58,23 +58,20 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "expected {as_of, coins:{...}, breadth, health}" });
   }
 
-  // This rebuilds the snapshot field by field rather than storing what arrived, which means a
-  // section added upstream is DROPPED here silently -- the collector reports a successful publish,
-  // the endpoint answers 200, and the new data simply never reaches KV. That is what happened to
-  // the chain half: it was collected, aggregated, published and rendered, and died on this line.
-  const payload = JSON.stringify({
+  // STORE WHAT ARRIVED. This used to rebuild the snapshot field by field, and that whitelist
+  // silently deleted a section THREE separate times -- chain, then alerts, then feed. The shape is
+  // identical every time: the collector reports a successful publish, this endpoint answers 200, KV
+  // never receives the data, and it surfaces later as "the dashboard is broken" in whatever renders
+  // it. Adding the missing field would have fixed today and guaranteed a fourth.
+  //
+  // A field list that fails closed is right for input you do not trust. This is not that: the body
+  // comes over the publish secret from a collector in this same codebase and is already bounded by
+  // MAX_BYTES. What must stay server-authoritative stays server-authoritative -- `received` is
+  // stamped here so a stale box cannot lie about its own freshness, and as_of falls back to now.
+  const payload = JSON.stringify(Object.assign({}, b, {
     as_of: b.as_of || new Date().toISOString(),
-    coins: b.coins,
-    // The on-chain tokens. Part of the map every crypto subscriber sees, just a different KIND of
-    // map: liquidity structure for tokens with no options book to draw gamma from.
-    chain: Array.isArray(b.chain) ? b.chain : [],
-    // My own graded calls on those tokens. Stored for everyone and GATED on read in crypto-map.js,
-    // so widening who can see them is a one-line change there rather than a collector redeploy.
-    alerts: (b.alerts && typeof b.alerts === "object") ? b.alerts : null,
-    breadth: b.breadth || null,
-    health: b.health || null,
     received: Date.now(),
-  });
+  }));
   if (payload.length > MAX_BYTES) {
     return res.status(413).json({ error: `snapshot ${payload.length}b exceeds ${MAX_BYTES}b` });
   }
@@ -85,7 +82,12 @@ module.exports = async (req, res) => {
     // 2h TTL: long enough to survive a collector restart or a quiet stretch, short enough
     // that a dead box shows as stale rather than silently serving yesterday's map.
     await r.set("crypto:map:live", payload, { ex: 7200 });
-    return res.status(200).json({ ok: true, bytes: payload.length, coins: Object.keys(b.coins).length, chain: (b.chain||[]).length, alerts: ((b.alerts&&b.alerts.open)||[]).length });
+    const shape = {};
+    for (const k of Object.keys(b)) {
+      const v = b[k];
+      shape[k] = Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : typeof v);
+    }
+    return res.status(200).json({ ok: true, bytes: payload.length, sections: shape });
   } catch (e) {
     return res.status(500).json({ error: String(e && e.message || e).slice(0, 140) });
   }

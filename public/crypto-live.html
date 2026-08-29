@@ -209,6 +209,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 /* The read strip. One row, and it must never be the thing that makes the page scroll sideways --
    min-width:0 on the flexing child plus ellipsis on the text, because the claim is written by the
    model and its length is not something this layout gets to assume. */
+#readstrip[hidden]{display:none}
 #readstrip{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;
   border:1px solid var(--bdr);border-radius:var(--r-2);background:var(--panel);
   cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden}
