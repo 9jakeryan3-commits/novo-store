@@ -1211,7 +1211,7 @@ function drawCoin(){
   if(g){
     const flipFar = g.flip_zone!=null && Math.abs(g.flip_zone/g.spot-1)>0.12;
     h+=`<div class="panel"><div class="ph"><h2>Dealer gamma by strike</h2>
-      <span class="sub">${g.settle} book · expiry ${String(g.expiry).replace('T',' ').replace('Z',' UTC')}</span></div>
+      <span class="sub">${g.is_etf_book?'<b style="color:var(--amber)">'+g.settle.toUpperCase()+' shares</b> · ':''}${g.settle} book · expiry ${String(g.expiry).replace('T',' ').replace('Z',' UTC')}</span></div>
       <div class="pb" style="padding-bottom:2px">
         <div id="lgex-box" style="border:1px solid ${g.net_gex>=0?'rgba(16,185,129,.35)':'rgba(244,63,94,.35)'};border-radius:9px;padding:14px 16px;background:${g.net_gex>=0?'rgba(16,185,129,.05)':'rgba(244,63,94,.05)'};margin-bottom:6px">
           <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
@@ -1223,7 +1223,7 @@ function drawCoin(){
         </div>
         ${ladder(g)}
         <div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--txt4);padding:8px 2px 2px;border-top:1px solid var(--bdr2);margin-top:4px">
-          <span>chain OI <b style="color:var(--txt2)">${g.chain_oi?g.chain_oi.toLocaleString(undefined,{maximumFractionDigits:0}):'—'} ${CUR}</b></span>
+          <span>chain OI <b style="color:var(--txt2)">${g.chain_oi?g.chain_oi.toLocaleString(undefined,{maximumFractionDigits:0}):'—'} ${g.oi_unit||CUR}</b></span>
           <span>${g.strikes.length} strikes</span>
           <span>${g.settle} book</span>
         </div>
