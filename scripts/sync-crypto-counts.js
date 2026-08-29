@@ -67,6 +67,14 @@ function get(url) {
   // the number is telling someone how much they get.
   const CHAIN_STEP = 50;
   const chain = Math.floor((Number(feed.chain) || 0) / CHAIN_STEP) * CHAIN_STEP;
+
+  // How many tools the analyst can actually call, counted off the declarations themselves.
+  let tools = 0;
+  try {
+    tools = require('../api/_lib/tools.js').declarations.length;
+  } catch (e) {
+    console.warn('!! could not count analyst tools (' + e.message + ') -- leaving that number alone');
+  }
   if (!total || !bandA) {
     console.warn('!! crypto counts look wrong (total=' + total + ' A=' + bandA + ') -- not writing');
     return;
@@ -86,6 +94,7 @@ function get(url) {
   const rules = [
     ['data-coincount span', /(<span data-coincount>)\d+(<\/span>)/g, '$1' + total + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+\+?(<\/span>)/g, '$1' + chain + '+$2'],
+    ...(tools ? [['data-toolcount span', /(<span data-toolcount>)\d+(<\/span>)/g, '$1' + tools + '$2']] : []),
     // Plain-text twin. index and faq carry this sentence inside JSON-LD as well as in the visible
     // page, and a <span> would corrupt the structured data -- so those say the number in words and
     // this keeps them level with the marker version.
@@ -108,7 +117,7 @@ function get(url) {
     .map((f) => path.join(PUB, f))
     .filter((p) => {
       const t = fs.readFileSync(p, 'utf8');
-      return /data-coincount/.test(t) || /data-chaincount/.test(t)
+      return /data-coincount/.test(t) || /data-chaincount/.test(t) || /data-toolcount/.test(t)
           || /tokens on Solana/.test(t)
           || /\b(all|across)?\s?\d+ coins\b/i.test(t);
     });
@@ -133,5 +142,5 @@ function get(url) {
       + bandA + ' with a dealer map, ' + bandB + ' with leverage positioning, '
       + chain + '+ on-chain'
     : '.. crypto counts already current across ' + files.length + ' file(s) (' + total + ' coins, '
-      + bandA + ' A, ' + bandB + ' B, ' + chain + '+ chain)');
+      + bandA + ' A, ' + bandB + ' B, ' + chain + '+ chain, ' + tools + ' tools)');
 })();
