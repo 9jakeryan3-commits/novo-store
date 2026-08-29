@@ -985,19 +985,98 @@ function drawRail(filter=''){
   const all=Object.entries(SNAP.coins).map(([k,v])=>({asset:k,...v}));
   const rows=all.filter(c=>c.asset.includes(f));
   const bands={A:'Band A · dealer map',B:'Band B · positioning',C:'Band C · spot only'};
-  let h=`<div class="railhead"><input id="search" placeholder="filter ${all.length} coins" value="${filter}"></div>`;
+  // The chain half. Tolerates an older payload: a snapshot published before the collector carried
+  // it simply has no chain key, and the rail then looks exactly as it did before.
+  const chain=Array.isArray(SNAP.chain)?SNAP.chain:[];
+  const crows=chain.filter(t=>String(t.symbol||'').toUpperCase().includes(f));
+  const total=all.length+chain.length;
+  let h=`<div class="railhead"><input id="search" placeholder="filter ${total} tokens" value="${filter}"></div>`;
   for(const b of ['A','B','C']){
     const grp=rows.filter(c=>c.band===b).sort((x,y)=>(y.oi_usd||0)-(x.oi_usd||0));
     if(!grp.length) continue;
     h+=`<div class="bandhead">${bands[b]} · ${grp.length}</div>`;
-    for(const c of grp) h+=`<div class="coin ${c.asset===CUR?'on':''}" data-c="${c.asset}">
+    for(const c of grp) h+=`<div class="coin ${(!TOK&&c.asset===CUR)?'on':''}" data-c="${c.asset}">
       <span class="c">${c.asset}</span><span class="p">${c.price?px(c.price):''}</span></div>`;
+  }
+  // Ranked by TURNOVER, not depth. A reserve is a number a pool states about itself; volume is one
+  // the market produced, and one pool claims $446m of depth against $1.76m of daily trade.
+  for(const net of ['robinhood','solana']){
+    const grp=crows.filter(t=>t.network===net).sort((x,y)=>(y.vol_h24||0)-(x.vol_h24||0));
+    if(!grp.length) continue;
+    h+=`<div class="bandhead">${NETLABEL[net]||net} · liquidity · ${grp.length}</div>`;
+    for(const t of grp) h+=`<div class="coin ${(TOK&&TOK.address===t.address)?'on':''}"
+      data-tok="${t.address}" data-net="${t.network}">
+      <span class="c">${(t.symbol||'?')}${t.depth_suspect?' ⚠':''}</span>
+      <span class="p">${money(t.vol_h24)}</span></div>`;
   }
   $('#rail').innerHTML=h;
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
-  document.querySelectorAll('.coin').forEach(el=>
-    el.onclick=()=>{CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+  document.querySelectorAll('.coin[data-c]').forEach(el=>
+    el.onclick=()=>{TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+  document.querySelectorAll('.coin[data-tok]').forEach(el=>
+    el.onclick=()=>{TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
+      document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
+}
+
+/* ---------------- chain token ----------------
+   Deliberately NOT the coin view with the panels blanked. These tokens have no options book and no
+   major-venue perp, so gamma, the flip and the walls do not exist for them -- rendering those empty
+   would read as missing data rather than as inapplicable. What they have is depth, turnover and the
+   wallets behind it, which for an asset whose dominant risk is exit is the honest read. */
+let TOK = null;
+const NETLABEL = {robinhood:'Robinhood Chain', solana:'Solana'};
+function _pctv(n){ return n==null?'—':(n>=0?'+':'')+n.toFixed(1)+'%'; }
+function drawChainToken(){
+  const t=TOK; if(!t) return;
+  $('#sym').textContent=t.symbol||'?';
+  $('#px').textContent=t.price_usd!=null?px(t.price_usd):'';
+  $('#headmeta').innerHTML=
+    `<span class="tag t-n">${NETLABEL[t.network]||t.network}</span>`+
+    `<span class="tag t-n">${t.pools} pool${t.pools===1?'':'s'}</span>`+
+    (t.is_listed_asset?`<span class="tag t-hi">listed asset</span>`:`<span class="tag t-n">unlisted token</span>`)+
+    (t.depth_suspect?`<span class="tag t-lo">depth unconfirmed</span>`:'');
+  const flow=(t.buyers_h1||0)+(t.sellers_h1||0);
+  const lean=flow?(t.buyers_h1||0)/flow*100:null;
+  let h=`<div class="panel"><div class="ph"><h2>Liquidity structure</h2>
+    <span class="sub">${(t.dexes||[]).join(', ')||'—'}${t.ts_utc?' · '+t.ts_utc.slice(11,16)+' UTC':''}</span></div>
+    <div class="grid4">
+      <div class="cell"><div class="k">Pool depth</div>
+        <div class="v ${t.depth_suspect?'':'nu'}">${money(t.liquidity_usd)}</div>
+        <div class="s">${t.depth_suspect?'not corroborated by turnover':'summed across '+t.pools+' pool'+(t.pools===1?'':'s')}</div></div>
+      <div class="cell"><div class="k">Volume 24h</div><div class="v nu">${money(t.vol_h24)}</div>
+        <div class="s">${money(t.vol_h1)} in the last hour</div></div>
+      <div class="cell"><div class="k">Turnover</div>
+        <div class="v nu">${t.turnover_24h!=null?t.turnover_24h.toFixed(2)+'x':'—'}</div>
+        <div class="s">daily volume against depth</div></div>
+      <div class="cell"><div class="k">Wallets 1h</div>
+        <div class="v nu">${flow?flow.toLocaleString():'—'}</div>
+        <div class="s">${flow?t.buyers_h1+' buying · '+t.sellers_h1+' selling':'no trades this hour'}</div></div>
+      <div class="cell"><div class="k">Buy-side lean</div>
+        <div class="v ${lean==null?'':(lean>=50?'up':'dn')}">${lean==null?'—':lean.toFixed(0)+'%'}</div>
+        <div class="s">${lean==null?'no wallets to weigh':'of wallets touching it were buyers'}</div></div>
+      <div class="cell"><div class="k">Change 1h</div>
+        <div class="v ${t.chg_h1==null?'':(t.chg_h1>=0?'up':'dn')}">${_pctv(t.chg_h1)}</div>
+        <div class="s">deepest pool</div></div>
+      <div class="cell"><div class="k">Change 24h</div>
+        <div class="v ${t.chg_h24==null?'':(t.chg_h24>=0?'up':'dn')}">${_pctv(t.chg_h24)}</div>
+        <div class="s">deepest pool</div></div>
+      <div class="cell"><div class="k">Identity</div>
+        <div class="v" style="font-size:15px">${t.cg_id||'unresolved'}</div>
+        <div class="s">${t.is_listed_asset?'address matches the listed asset':(t.cg_id?'a known token, but not the one that owns this ticker':'address not in any registry')}</div></div>
+    </div></div>`;
+  h+=`<div class="panel"><div class="ph"><h2>Why this is not a dealer map</h2></div>
+    <div class="pb" style="padding:14px 16px;line-height:1.6;font-size:13px;opacity:.85">
+      ${t.symbol||'This token'} has no options book and no major-venue perp, so there is no gamma to
+      compute, no flip zone and no walls. Its dominant risk is getting out, not getting hedged — so
+      the map is depth, who is trading it, and whether that depth is real.
+      ${t.depth_suspect?'<br><br><b>Depth here is unconfirmed.</b> This token reports '+money(t.liquidity_usd)+
+      ' of reserve against '+money(t.vol_h24)+' of daily volume. A reserve is a number the pool states about itself; '+
+      'volume is one the market produced. Shown rather than hidden — but ranked on turnover so it cannot lead '+
+      'the board on a figure nothing corroborates.':''}
+    </div></div>`;
+  $('#body').innerHTML=h;
+  const side=$('#side'); if(side) side.innerHTML='';
 }
 
 /* ---------------- coin ---------------- */
@@ -1245,13 +1324,16 @@ async function load(){
   $('#live').classList.toggle('stale',stale);
   $('#live-t').textContent = stale ? 'STALE' : 'LIVE';
   const _age = SNAP.age_min;
-  $('#sess').innerHTML = `<b>${Object.keys(SNAP.coins).length}</b> coins &middot; `
+  const _nchain = Array.isArray(SNAP.chain) ? SNAP.chain.length : 0;
+  $('#sess').innerHTML = `<b>${Object.keys(SNAP.coins).length}</b> coins`
+    + (_nchain ? ` &middot; <b>${_nchain}</b> chain` : '') + ' &middot; '
     + `<span class="lg">${_age==null?'no pass yet':_age<1?'updated just now':'updated '+_age+'m ago'}</span>`
     + `<span class="sm">${_age==null?'no pass':_age<1?'just now':_age+'m'}</span>`;
   // Snapshots, quarantine and round-trip cost are numbers you check, not numbers you watch -
   // they crowded the bar into three wrapped lines on a phone. They live in Settings now.
   $('#dstats').innerHTML=
     `<div class="dstat"><span>Coins mapped</span><b>${Object.keys(SNAP.coins).length}</b></div>`+
+    (_nchain?`<div class="dstat"><span>Chain tokens</span><b>${_nchain}</b></div>`:'')+
     `<div class="dstat"><span>Snapshots stored</span><b>${(hl.snapshots||0).toLocaleString()}</b></div>`+
     `<div class="dstat"><span>Quarantined</span><b>${hl.quarantined||0}</b></div>`+
     (b.median_round_trip_pct?`<div class="dstat"><span>Median round trip</span><b>${b.median_round_trip_pct.toFixed(3)}%</b></div>`:'')+
@@ -1263,7 +1345,10 @@ async function load(){
   // so the restored value is checked against the payload before anything is drawn.
   if(!SNAP.coins[CUR]) CUR = SNAP.coins.BTC ? 'BTC' : Object.keys(SNAP.coins)[0];
   rememberCoin(CUR);
-  drawRail(); drawCoin();
+  // A selected chain token is re-resolved from the NEW payload rather than left pointing at the old
+  // object, so a refresh updates its numbers instead of freezing them.
+  if(TOK) TOK=(SNAP.chain||[]).find(x=>x.address===TOK.address&&x.network===TOK.network)||null;
+  drawRail(); if(TOK) drawChainToken(); else drawCoin();
 }
 
 // Back, forward, or a pasted /crypto/live#SOL once the page is already open.
