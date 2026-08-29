@@ -36,7 +36,10 @@
 
   /* Every data call carries the ticket: the box has no cookie from this origin. */
   window.NOVO_URL = function(path){
-    if (!window.NOVO_API) return path;
+    /* Empty until the handshake lands. Returning the bare path would send the call to the SITE
+       origin, where /api/spy-chart does not exist -- the page auto-loads the chart on DOMContentLoaded,
+       which runs before the ticket arrives. Callers check for '' and skip that round. */
+    if (!window.NOVO_API || !window.NOVO_TICKET) return '';
     return window.NOVO_API + path + (path.indexOf('?') >= 0 ? '&' : '?')
            + 't=' + encodeURIComponent(window.NOVO_TICKET);
   };
@@ -102,8 +105,11 @@
 
   window.addEventListener('DOMContentLoaded', async function(){
     if (await window.novoHandshake()) {
+      /* The page's own first attempt at these ran before the ticket existed and returned early,
+         so the handshake is what actually starts them. */
       try { connectTelemetry(); } catch(_){}
       try { loadNovoChart(); } catch(_){}
+      try { window.brainTick(); } catch(_){}
     }
   });
 })();
@@ -1145,6 +1151,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 @media (max-width: 430px) {
   /* Drop the topbar P&L and clock on truly tiny screens */
   #topbar .ts { display: none !important; }
+  /* The ⋮ menu was being pushed 13px off the right edge at 390px (measured), which makes the only
+     way back to the portal unreachable. The topbar is a flex row and the status pill had no upper
+     bound, so it took the width and the fixed item to its right went over the edge. Bound the pill
+     instead of hiding it -- what it says is NoVo's current state, the one thing on that row worth
+     keeping on a phone. */
+  #topbar { gap: 4px; }
+  #topbar .hdr-menu-wrap { flex: 0 0 auto; margin-left: auto; }
+  #topbar .brand-sub, #topbar .brand-ver { display: none; }
+  #term-live-row { max-width: 50vw; min-width: 0; overflow: hidden; }
+  #term-live-row .term-live-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 /* ══════════════════════════════════════════════════════════════════════════
    SaaS DESKTOP OVERVIEW (2026-07-14) — desktop breakpoint ONLY.
@@ -1262,7 +1278,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     /* THREE equal tracks. The top keeps its 2:1 feel by spanning 2 of 3 (the chart side
        gets ~66%, the right rail ~33%), and the bottom becomes a true 3-across row:
        Trade Log | Activity Feed | Analysis Feed. */
-    grid-template-columns: 1fr 1fr 1fr;
+    /* ONE column. The three-track map below existed to put the P&L chart, Active Capital and the
+       Trade Log down the left third; none of those exist in the read-only build, so a 3-track grid
+       left that third rendering as dead black space beside the chart. */
+    grid-template-columns: 1fr;
     align-content: start;
     overflow-y: auto;
     overflow-x: hidden;
@@ -1287,10 +1306,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        tall panel of mostly blank rows. Chart Levels is retired here entirely because the levels now
        label themselves in the pane. Mobile is untouched — it keeps both panels and the stacked order. */
     grid-template-areas:
-      "pnl      spy      spy"
-      "capital  spy      spy"
-      "log      spy      spy"
-      "log      spy      spy";
+      "spy"
+      "spy"
+      "spy"
+      "spy";
     /* FIT TO SCREEN — one page, no scrolling. #workspace is flex:1 1 0 in the body column,
        so fr rows divide exactly the space left under the topbar + header. Charts get the
        lion's share (they were short with dead space under them); NoVo's Status gets a real
@@ -1511,8 +1530,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <span class="brand-ver">trader-live</span>
   </div>
   <span class="tb-sep"></span>
-  <span id="hdr-mode" class="hm-paper">PAPER</span>
-  <span id="hdr-broker"></span>
+  <!-- The PAPER/LIVE badge and the broker name are gone: both describe how the owner's
+       account is set up, which is not a subscriber's business and was never theirs to see. -->
 
   <!-- SaaS view-switchers, in the TOPBAR beside the brand (the v9 pattern). Desktop only. -->
   <div id="saas-nav">
@@ -1535,10 +1554,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <span class="ts-k">Session</span>
       <span id="hdr-session" class="ts-v" style="color:var(--txt2)">—</span>
     </div>
-    <div class="ts">
-      <span class="ts-k">7-Day P&amp;L</span>
-      <span id="hdr-pnl" class="ts-v">$0.00</span>
-    </div>
+    <!-- 7-Day P&L removed with the execution layer. It has no source in this build, so it
+         rendered a permanent $0.00 -- which reads as a broken product, not an empty one. -->
     <div class="ts">
       <span class="ts-k">Eastern</span>
       <span id="hdr-clock" class="ts-v" style="color:var(--cyn)">--:--:--</span>
@@ -2328,7 +2345,8 @@ function _initNovoChart(){
 async function loadNovoChart(){
   try{
     if(!_initNovoChart()) return;
-    const r=await fetch(NOVO_URL('/api/spy-chart')); if(!r.ok) return;
+    const _u=NOVO_URL('/api/spy-chart'); if(!_u) return;   // pre-handshake: skip; the bootstrap retries
+    const r=await fetch(_u); if(!r.ok) return;
     const d=await r.json();
     if(d.candles && d.candles.length){
       const _firstT = d.candles[0].time;
@@ -2645,10 +2663,17 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 
   function _mountStrip(){
     try{
-      var h=document.getElementById('saas-header'), t=document.getElementById('card-tactical');
-      if(!h||!t) return;
-      if(_isDesk()){ if(t.parentElement!==h) h.insertBefore(t, h.firstChild); }
-      else { var cap=document.getElementById('col-capital'); if(cap && t.parentElement!==cap) cap.appendChild(t); }
+      var h=document.getElementById('saas-header');
+      if(!h) return;
+      // #card-tactical (the command strip) belonged to the execution layer and is gone. It used to be
+      // the FIRST thing this function looked up, and the `if(!t) return` meant its absence silently
+      // took Market Intel down with it -- the strip stayed a tall panel in the corner because nothing
+      // was left to move it. Market Intel is chrome and does not depend on it.
+      var t=document.getElementById('card-tactical');
+      if(t){
+        if(_isDesk()){ if(t.parentElement!==h) h.insertBefore(t, h.firstChild); }
+        else { var cap=document.getElementById('col-intel'); if(cap && t.parentElement!==cap) cap.appendChild(t); }
+      }
       // Market Intel rides along. Six key/value readouts and two meters are a STATUS BAR, not a panel:
       // as a panel they were a tall column of mostly blank rows eating the space under the chart, and the
       // strip beside the action buttons was empty. MOVED, not cloned — the poller writes to #t-vix,
@@ -2785,7 +2810,8 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
     // or the panel is live on one and permanently blank on the other.
     if(!document.body.classList.contains('v-feeds')
        && document.body.getAttribute('data-mtab')!=='3') return;
-    fetch(NOVO_URL('/api/brain'),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    var _b=NOVO_URL('/api/brain'); if(!_b) return;   // pre-handshake: skip
+    fetch(_b,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
       try{
         renderBrain(d);
         var s=document.getElementById('brain-stamp');
@@ -2849,7 +2875,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
       // and two identical cards side by side is a wasted slot.
       var _wkk=g('kpi-week-k'), _wks=g('kpi-week-s'), _wk=g('kpi-week');
       if(_per==='1D'){
-        cp('hdr-pnl','kpi-week','$0.00');
+        // hdr-pnl is gone; nothing to copy into the KPI slot.
         if(_wkk) _wkk.textContent='7-Day P&L';
         if(_wks) _wks.textContent='past 7 sessions';
       }else{
