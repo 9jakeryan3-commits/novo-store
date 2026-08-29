@@ -985,13 +985,21 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 .trade-log-mobile-card .log-area { min-height: 255px; flex: 1 1 255px; }
 
 @media (max-width: 768px) {
-  /* The pill is a STATUS chip on a phone, not the headline. Its compact rules used to live only in
-     the 430px query, so anything wider -- a ~500px window, a small tablet -- landed here with no
-     width bound and the full 18px + 40px glow, took the topbar's flex space, and shouted louder than
-     the price. Bounded and de-glowed; the colour still carries the state. */
-  #topbar #term-live-row { max-width: 46vw; min-width: 0; overflow: hidden; flex: 0 1 auto; }
+  /* A STATUS CHIP, not the headline. Two things made it shout on a phone: it kept the full 18px +
+     40px glow, and it kept the DESKTOP padding and type -- 10px/14px padding, a 16px price, 9px
+     tracked-out label. Bounding it alone was not enough; at 46vw it still ate nearly half the
+     topbar. Compact type, tight padding, a third of the width, and no glow. The border colour still
+     carries the state, which is the only job it has up here. */
+  #topbar #term-live-row {
+    max-width: 32vw; min-width: 0; flex: 0 1 auto; overflow: hidden;
+    padding: 4px 7px; gap: 5px; border-radius: 5px; margin-bottom: 0; }
+  #topbar #term-live-row .term-live-status { display: none; }
+  #topbar #term-live-row .term-live-dot { width: 5px; height: 5px; }
   #topbar #term-live-row .term-live-lbl {
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    font-size: 7.5px; letter-spacing: 1px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  #topbar #term-live-row .term-live-ticker { font-size: 9.5px; letter-spacing: .5px; }
+  #topbar #term-live-row .term-live-price { font-size: 10.5px; }
   #topbar .term-live-row.armed,
   #topbar .term-live-row.live,
   #topbar .term-live-row.halted { box-shadow: none; }
@@ -1082,6 +1090,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      #card-intel's log-area, which stopped being last the moment the panel landed beneath it, and
      ignored the safe-area inset besides. */
   #col-feed > .card:last-child { padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 18px); }
+  /* The install prompt is position:fixed bottom-right from an inline style, so on a phone it landed
+     ON TOP of the tab bar and covered RUN -- the newest button on the page, hidden by a prompt the
+     moment a first-time visitor arrives. Lifted above the bar using the same 52px + inset the
+     clearance rule above is derived from; !important because the inline style would otherwise win. */
+  #novoInstall {
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 14px) !important;
+    right: 12px !important; }
   /* mobile trade log card: show on CAPITAL tab */
   .trade-log-mobile-card   { display: flex !important; flex-direction: column; order: -1; }
   #card-tactical           { order: 0; }
