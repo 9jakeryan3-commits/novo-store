@@ -333,14 +333,14 @@ function welcomeEmailHtml(connectUrl) {
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">1</div></td>
           <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Go to <strong style="color:#eaf3ff;">app.novo-aitrading.app</strong> and create your account using <strong style="color:#eaf3ff;">this email address</strong>.</td></tr>
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">2</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Connect your <strong style="color:#eaf3ff;">Tradier + Alpaca</strong> keys &mdash; validated against the brokers.</td></tr>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Open the dashboard from your portal &mdash; <strong style="color:#eaf3ff;">nothing to connect</strong>.</td></tr>
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">3</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Your private dashboard goes live automatically &mdash; AI pre-configured, <strong style="color:#eaf3ff;">paper trading immediately</strong>.</td></tr>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">The dealer map is live immediately &mdash; AI included, <strong style="color:#eaf3ff;">pick SPY, QQQ or IWM</strong>.</td></tr>
       <tr><td style="vertical-align:top;padding:0 12px 0 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">4</div></td>
           <td style="vertical-align:top;color:#c2d2e6;font-size:14px;line-height:1.55;">Open it in any browser, or install it as an app on your desktop or phone.</td></tr>
     </table>
 
-    <p style="color:#c2d2e6;font-size:14px;line-height:1.6;margin:22px 0 0;">Start in paper mode (the default) and watch it run before switching to live.</p>
+    <p style="color:#c2d2e6;font-size:14px;line-height:1.6;margin:22px 0 0;">Pick SPY, QQQ or IWM and the dealer map draws itself &mdash; switch between them whenever you want.</p>
 
     <div style="background:rgba(245,158,11,0.08);border:1px solid #3a3c42;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#e8c48f;line-height:1.6;">
       <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
