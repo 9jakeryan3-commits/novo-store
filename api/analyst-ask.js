@@ -210,6 +210,126 @@ function search(idx, q, k = 6, minMemory = 2) {
   return picked.sort((a, b) => b.score - a.score);
 }
 
+// WHAT THE READER IS ACTUALLY LOOKING AT. Client-supplied and echoed into a prompt, so it is
+// shape-checked and bounded rather than trusted.
+function _focus(f) {
+  if (!f || typeof f !== 'object') return null;
+  const str = (v, n) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, n) : null);
+  if (f.kind === 'chain_token') {
+    const addr = str(f.address, 80);
+    return addr ? { kind: 'chain_token', symbol: str(f.symbol, 24), address: addr, network: str(f.network, 24) } : null;
+  }
+  const code = str(f.code, 24);
+  return code ? { kind: 'coin', code: code.toUpperCase() } : null;
+}
+
+// A PROMPT SLICE, NOT THE MAP. The crypto snapshot is ~350KB and nearly all of it is chart arrays --
+// the strike ladder, the 7d sparkline, the vol curve, the heatmap, the term structure. Those are
+// pixels; the read lives in the scalars beside them.
+//
+// Dropped by SHAPE as well as by name, deliberately. A whitelist would silently lose the next field
+// the map grows -- that has already cost this pipeline four fields on the publish side alone -- while
+// a length cap catches the next chart array nobody remembered to tell this function about.
+const _CHART_KEYS = new Set(['strikes', 'curve', 'term', 'heatmap', 'skew_curve', 'spark']);
+function _trim(o, maxLen = 12) {
+  if (Array.isArray(o)) return o.length > maxLen ? undefined : o.map((x) => _trim(x, maxLen));
+  if (o && typeof o === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(o)) {
+      if (_CHART_KEYS.has(k)) continue;
+      const t = _trim(v, maxLen);
+      if (t !== undefined) out[k] = t;
+    }
+    return out;
+  }
+  return o;
+}
+
+// THE CRYPTO SURFACE'S OWN LIVE NUMBERS. The equity dealer read has always been inlined on every
+// question while crypto was only an INVENTORY -- counts, breadth, health. So an open question asked
+// on the crypto dashboard was answered from the only real figures in front of the model, which were
+// SPY, QQQ and IWM. Parity is the fix: on that surface the coin on screen and the cross-sectional
+// flow arrive the same way the equity map does. Per-coin detail beyond the focused one is still a
+// tool call.
+function _cryptoLead(cs, focus) {
+  const out = { as_of: cs.as_of };
+
+  if (focus && focus.kind === 'chain_token') {
+    const t = (cs.chain || []).find((x) => x.address === focus.address && x.network === focus.network);
+    out.on_screen = t
+      ? Object.assign({ kind: 'chain_token' }, _trim(t))
+      : { kind: 'chain_token', symbol: focus.symbol, network: focus.network, note: 'no longer in the current snapshot' };
+  } else if (focus && focus.kind === 'coin') {
+    const c = cs.coins && cs.coins[focus.code];
+    out.on_screen = c
+      ? Object.assign({ kind: 'coin', code: focus.code }, _trim(c))
+      : { kind: 'coin', code: focus.code, note: 'not in the current snapshot' };
+  }
+
+  // What just fired across the whole book, newest first, resolved outcomes attached. This is the
+  // feed the dashboard renders, and it is what "what is going on" is actually asking for.
+  if (Array.isArray(cs.feed) && cs.feed.length) out.just_fired = cs.feed.slice(0, 8);
+
+  // 24h liquidation flow, summed exactly the way the panel sums it (side is 'long' | 'short').
+  // On a market with no overnight, this is the "what happened while you were asleep" figure.
+  const liq = (cs.health && cs.health.liquidations_24h) || [];
+  if (liq.length) {
+    const byCoin = {}, byVenue = {};
+    let longs = 0, shorts = 0;
+    for (const x of liq) {
+      const u = Number(x.usd) || 0;
+      if (x.side === 'long') longs += u; else shorts += u;
+      byCoin[x.asset_code] = (byCoin[x.asset_code] || 0) + u;
+      byVenue[x.venue] = (byVenue[x.venue] || 0) + u;
+    }
+    const top = (m, n) => Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, n)
+      .map(([k, v]) => [k, Math.round(v)]);
+    out.liquidations_24h = {
+      longs_forced_out_usd: Math.round(longs),
+      shorts_forced_out_usd: Math.round(shorts),
+      by_coin: top(byCoin, 8),
+      by_venue: top(byVenue, 5),
+      note: 'summed across every venue and every coin in the book, last 24h',
+    };
+  }
+  return out;
+}
+
+// WHICH MAP IS ON SCREEN, AND THEREFORE WHICH ONE LEADS. Both dashboards POST an identical body to
+// this endpoint, so it could not tell them apart. Asked "what up?" on the crypto map it opened with
+// three bullets of SPY/QQQ/IWM dealer structure, told the reader the market was closed for the
+// weekend and to enjoy the weekend off the screen -- on a 24/7 product, beside a panel showing
+// $2.9M of liquidations in the last day. One analyst, both maps, but the map in front of the reader
+// is the one the answer starts from.
+function surfaceBlock(surface, focus) {
+  const L = [];
+  if (surface === 'crypto') {
+    L.push('WHERE THIS QUESTION CAME FROM: the CRYPTO dashboard. The crypto map is what is on the',
+      'reader\'s screen, so it LEADS. An open question -- "what up", "what is going on", "anything',
+      'moving" -- is answered from crypto FIRST: what just fired, the coin in front of them, funding,',
+      'liquidation flow, what it costs to trade. Equities are the CROSS-READ underneath, a line or two,',
+      'and only when the equity map says something about risk appetite that the crypto map does not.',
+      'Crypto figures are in MARKET DATA under crypto_live; use them before reaching for a tool.');
+    if (focus && focus.kind === 'coin') {
+      L.push(`The reader has ${focus.code} open. Answer about ${focus.code} unless the question names something else.`);
+    } else if (focus && focus.kind === 'chain_token') {
+      L.push(`The reader has the on-chain token ${focus.symbol || '(unnamed)'} on ${focus.network || 'chain'} open.`,
+        'It has no options book, no perp and no gamma, so the flip and the walls do not exist for it --',
+        'read it on depth, turnover and wallets, and do not apologise for panels that never applied.');
+    }
+  } else {
+    L.push('WHERE THIS QUESTION CAME FROM: the EQUITY dashboard. The SPY/QQQ/IWM dealer map is what is',
+      'on the reader\'s screen, so it LEADS. An open question is answered from the equity map first:',
+      'the session, the flip, the walls, net GEX, the vol regime. Crypto is the CROSS-READ underneath,',
+      'a line or two, and only when it says something the equity map does not -- it trades 24/7 and',
+      'often moves before the US open, which is when it earns the mention.');
+  }
+  L.push('This decides ORDER and EMPHASIS only. It never decides what you are willing to answer: a',
+    'question about the other map is answered in full, from the tools if you were not handed it, and a',
+    'COVERAGE question is answered identically on both surfaces because there is one archive.');
+  return L.join('\n') + '\n\n';
+}
+
 const SYSTEM = `You are NoVo — the market analyst inside NoVo Options Trading. You read dealer positioning on SPY, QQQ and IWM for traders working intraday, mostly 0DTE, AND the crypto dealer map: gamma by strike on the cryptos with a real options book, funding per venue, open interest, liquidation flow and true cost to trade across every coin the map covers.
 
 ONE ANALYST, BOTH MAPS. There is no separation between them and no such thing as a market that is “not your field”. Everything NoVo Options Trading ingests is yours to read: equities, index options, crypto, volatility, positioning, the macro calendar. You are the same analyst in whichever dashboard the question arrives from — the equity map or the crypto map — with the same memory, the same record and the same tools. Never tell anyone a market is outside your beat, and never suggest they ask somewhere else. If you need crypto data while answering in the equity dashboard, or equity data while answering in the crypto one, CALL THE TOOL and answer. The two maps also inform each other: crypto trades 24/7 and often moves before the US open, and risk appetite is one thing across both. You have read this map since the tool went live: every session gets logged, every read gets written up, and both sit in your own archive. When you cite that archive you are citing your own track record, not borrowed research — say so, and say how many sessions it covers.
@@ -261,7 +381,7 @@ You can call read-only lookups for what you were not handed: the live dealer rea
 GROUNDING
 - The date, the time and the market's open/closed state come from RIGHT NOW at the top of the prompt, and from nowhere else. Never work out what day it is from a timestamp in MARKET DATA, from the newest session in your archive, or from anything you remember. The map is frequently from an earlier session than today; that says nothing about today's date.
 - The chain tokens in that inventory are a COUNT, not the data. When a question names a memecoin or asks what is moving on-chain, call get_chain_token - do not answer that you only cover the 90 coins, because you do not. Those tokens have no options book and no major-venue perp, so gamma, the flip and the walls do not exist for them: read them on depth, turnover and wallets, and never apologise for panels that were never applicable.
-- MARKET DATA carries BOTH maps: the equity dealer read and, under the crypto key, what the crypto map currently holds — coins tracked, which of them have real gamma books, the on-chain tokens, breadth and corpus counts. When you are asked what you cover, how much data you have, or how long you have been logging, ANSWER FROM BOTH. The answer must not change depending on which dashboard the question came from — it is one archive. Per-coin crypto detail is a tool call; the inventory is already in front of you.
+- MARKET DATA carries BOTH maps: the equity dealer read and, under the crypto key, what the crypto map currently holds — coins tracked, which of them have real gamma books, the on-chain tokens, breadth and corpus counts. When you are asked what you cover, how much data you have, or how long you have been logging, ANSWER FROM BOTH. A COVERAGE answer must not change depending on which dashboard the question came from — it is one archive. What DOES change is which map you LEAD with: the dashboard names the map on the reader's screen, and an open-ended question is answered from that map first, with the other as the cross-read. WHERE THIS QUESTION CAME FROM, near the top of the prompt, says which. Per-coin crypto detail is a tool call — except on the crypto dashboard, where the coin on screen and the book's liquidation flow are already in front of you under crypto_live.
 - Every number you state comes from MARKET DATA or from a lookup you actually ran in this conversation. If it is in neither, say you do not have it. Never estimate a level, never invent a statistic.
 - When you lean on logged history, state the session count. A few dozen sessions is a count, not "usually".
 - A volatility reading on its own is not information. When MARKET DATA carries a percentile for it, give the scale: "VIX 15.1, the 33rd percentile since 1990 but the 13th of the last two years" is a read; "VIX is 15.1" is a readout. Same for the term structure — VIX9D above VIX3M means the FRONT is bid, which for 0DTE is the thing that matters.
@@ -324,6 +444,11 @@ module.exports = async (req, res) => {
     .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }))
     .filter((m) => m.text);
 
+  // Which dashboard is asking, and what it has open. Default 'equity': an older cached page sends
+  // neither, and leading with the equity map is what this endpoint has always done.
+  const surface = (req.body && req.body.surface) === 'crypto' ? 'crypto' : 'equity';
+  const focus = _focus(req.body && req.body.focus);
+
   try {
     const idx = await loadIndex();
     if (!idx) return res.status(503).json({ error: 'the analyst index has not been published yet' });
@@ -355,7 +480,7 @@ module.exports = async (req, res) => {
     // every question to answer none of them better; the per-coin detail is what the tools are for.
     // What belongs here is the INVENTORY -- what I hold, how much of it, how fresh -- because that
     // is what a coverage question asks and it must not depend on a tool call landing.
-    let cryptoInv = null;
+    let cryptoInv = null, cryptoLead = null;
     try {
       let cs = await r.get('crypto:map:live');
       if (typeof cs === 'string') cs = JSON.parse(cs);
@@ -371,6 +496,11 @@ module.exports = async (req, res) => {
           breadth: cs.breadth,
           health: cs.health,
         };
+
+        // ...and on the crypto dashboard, the live crypto FIGURES too -- see _cryptoLead. The
+        // inventory above answers "what do you cover"; it cannot open a market read, which is why
+        // the equity numbers won every open question asked on that surface.
+        if (surface === 'crypto') cryptoLead = _cryptoLead(cs, focus);
       }
     } catch (_) {}
 
@@ -404,9 +534,10 @@ module.exports = async (req, res) => {
   })();
 
   const prompt =
-      nowBlock(lastSession) +
+      nowBlock(lastSession, surface) +
+      surfaceBlock(surface, focus) +
       convo +
-      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv })}\n\n` +
+      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 

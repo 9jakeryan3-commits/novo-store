@@ -1712,9 +1712,20 @@ window.addEventListener('hashchange', function(){
     pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
+      // WHICH MAP, AND WHICH COIN. This body was byte-identical to the equity dashboard's, so the
+      // endpoint could not tell the two apart: asked "what up?" here it opened with three bullets of
+      // SPY/QQQ/IWM dealer structure, never mentioned the coin filling the screen, and told a reader
+      // on a 24/7 market to enjoy the weekend off the screen. FEED means the cross-book feed is open
+      // rather than any one coin, so there is deliberately nothing focused to send.
+      var focus = null;
+      try {
+        if (!FEED) focus = TOK
+          ? { kind:'chain_token', symbol:TOK.symbol, address:TOK.address, network:TOK.network }
+          : { kind:'coin', code:CUR };
+      } catch(_e){}
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ question: q, t: tok() || null, history: hist })
+        body: JSON.stringify({ question: q, t: tok() || null, history: hist, surface:'crypto', focus:focus })
       });
       var d = await r.json();
       _stopThinking();

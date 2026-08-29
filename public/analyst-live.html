@@ -1682,9 +1682,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
+      // Name the surface. 'equity' is also the endpoint's default, but a page that states which map
+      // it is stops being one silent default away from leading with the wrong one.
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ question: q, t: tok() || null, history: hist })
+        body: JSON.stringify({ question: q, t: tok() || null, history: hist, surface:'equity' })
       });
       var d = await r.json();
       _stopThinking();

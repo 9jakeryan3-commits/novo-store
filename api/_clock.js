@@ -168,21 +168,39 @@ function marketState(d = new Date()) {
  * matters: without it a model looking at Friday's map on a Saturday concludes it is Friday. Naming
  * the gap explicitly is what stops the inference.
  */
-function nowBlock(lastSessionDate) {
+function nowBlock(lastSessionDate, surface) {
   const s = marketState();
+  const isCrypto = surface === 'crypto';
   const L = [
     'RIGHT NOW (authoritative — this is the current date and time; NEVER infer either from the data below):',
     `  Today is ${s.pretty}.`,
     `  Current time: ${s.timeET} (US Eastern).`,
-    `  Market status: ${s.note.charAt(0).toUpperCase() + s.note.slice(1)}.`,
   ];
-  if (s.phase === 'open' && s.minutesToClose != null) {
-    L.push(`  ${Math.floor(s.minutesToClose / 60)}h ${s.minutesToClose % 60}m left in the session.`);
-  } else if (s.nextOpen) {
-    L.push(`  Next open: ${s.nextOpen}.`);
+
+  // TWO MARKETS, TWO CLOCKS. This block only ever described the NYSE, so a question asked on the
+  // 24/7 crypto dashboard came back with "the market is closed for the weekend ... enjoy the weekend
+  // off the screen" while that same page was rendering live funding and $2.9M of liquidations from
+  // the last 24 hours. The equity session is still worth naming there — it is often the reason
+  // crypto is the only thing printing — but on that surface it is CONTEXT, never the status of the
+  // screen the reader is looking at.
+  if (isCrypto) {
+    L.push('  Crypto status: OPEN. Crypto trades 24/7 — no close, no weekend, no holiday, no session to wait for.',
+      '  Never tell a reader on this dashboard that the market is closed, that nothing happens until an open,',
+      '  or to step away until Monday. Something is always trading and this map is always live.',
+      `  US equity session (CONTEXT ONLY — not the market on this screen): ${s.note}.`);
+    if (s.phase !== 'open' && s.nextOpen) L.push(`  US equities next open: ${s.nextOpen}.`);
+  } else {
+    L.push(`  Market status: ${s.note.charAt(0).toUpperCase() + s.note.slice(1)}.`);
+    if (s.phase === 'open' && s.minutesToClose != null) {
+      L.push(`  ${Math.floor(s.minutesToClose / 60)}h ${s.minutesToClose % 60}m left in the session.`);
+    } else if (s.nextOpen) {
+      L.push(`  Next open: ${s.nextOpen}.`);
+    }
+    L.push('  Crypto trades 24/7 and is open right now regardless of the equity session above.');
   }
+
   if (lastSessionDate && lastSessionDate !== s.date) {
-    L.push(`  The dealer map below is from the last completed session (${lastSessionDate}), NOT from today.`,
+    L.push(`  The EQUITY dealer map below is from the last completed session (${lastSessionDate}), NOT from today.`,
       '  Do not report that session\'s date as today\'s date.');
   }
   return L.join('\n') + '\n\n';
