@@ -55,8 +55,19 @@ function get(url) {
   const total = Number(feed.coins) || list.length;
   const bandA = list.filter((x) => x.band === 'A').length;
   const bandB = list.filter((x) => x.band === 'B').length;
+  // The on-chain half. Rounded DOWN to a ten: it moves every pass as pools cross the liquidity
+  // floor, and copy reading "203" today and "197" tomorrow looks broken rather than live. A floor
+  // is also the safe direction to be wrong in for a claim about how much someone is getting.
+  const chain = Math.floor((Number(feed.chain) || 0) / 10) * 10;
   if (!total || !bandA) {
     console.warn('!! crypto counts look wrong (total=' + total + ' A=' + bandA + ') -- not writing');
+    return;
+  }
+  if (/data-chaincount/.test(fs.readFileSync(path.join(PUB, 'crypto.html'), 'utf8')) && !chain) {
+    // A page CLAIMS a chain count and the feed cannot back it. Writing 0 would turn a live number
+    // into an advertisement for having nothing; leaving the old one stale is the lesser wrong, and
+    // saying so loudly is how it gets noticed.
+    console.warn('!! chain count came back 0 while the pages claim one -- leaving them as they are');
     return;
   }
 
@@ -66,6 +77,7 @@ function get(url) {
   const keepCase = (n, tail) => (m) => m.slice(0, 3) + ' ' + n + ' ' + tail;
   const rules = [
     ['data-coincount span', /(<span data-coincount>)\d+(<\/span>)/g, '$1' + total + '$2'],
+    ['data-chaincount span', /(<span data-chaincount>)\d+(<\/span>)/g, '$1' + chain + '$2'],
     ['across N coins', /across \d+ coins/gi, 'across ' + total + ' coins'],
     ['all N coins', /\ball \d+ coins/gi, keepCase(total, 'coins')],
     ['all N ranked', /\ball \d+ ranked/gi, keepCase(total, 'ranked')],
@@ -84,7 +96,8 @@ function get(url) {
     .map((f) => path.join(PUB, f))
     .filter((p) => {
       const t = fs.readFileSync(p, 'utf8');
-      return /data-coincount/.test(t) || /\b(all|across)?\s?\d+ coins\b/i.test(t);
+      return /data-coincount/.test(t) || /data-chaincount/.test(t)
+          || /\b(all|across)?\s?\d+ coins\b/i.test(t);
     });
 
   let touched = 0;
@@ -104,7 +117,8 @@ function get(url) {
 
   console.log(touched
     ? '.. crypto counts synced across ' + touched + ' file(s) -> ' + total + ' coins, '
-      + bandA + ' with a dealer map, ' + bandB + ' with leverage positioning'
+      + bandA + ' with a dealer map, ' + bandB + ' with leverage positioning, '
+      + chain + '+ on-chain'
     : '.. crypto counts already current across ' + files.length + ' file(s) (' + total + ' coins, '
-      + bandA + ' A, ' + bandB + ' B)');
+      + bandA + ' A, ' + bandB + ' B, ' + chain + '+ chain)');
 })();

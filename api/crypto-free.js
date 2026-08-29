@@ -109,6 +109,12 @@ module.exports = async (req, res) => {
   });
   return res.status(200).json({
     as_of: snap.as_of, coins: list.length, list,
+    // COUNT ONLY, no rows. The on-chain half is part of the subscription like everything else
+    // here; what is free is knowing how much of it there is. The build reads this to keep the
+    // marketing count honest instead of it being typed once and going stale.
+    chain: Array.isArray(snap.chain) ? snap.chain.length : 0,
+    chain_networks: Array.isArray(snap.chain)
+      ? [...new Set(snap.chain.map((t) => t.network))].length : 0,
     note: "Current funding, open interest and 24h liquidations are free per coin. " +
           "Gamma by strike, walls, the flip zone, cost-to-trade, history and NoVo are the subscription.",
   });
