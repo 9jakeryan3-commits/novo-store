@@ -13,7 +13,16 @@
       var _tv = /subscribeYearly/.test(oc) ? 2000 : 209;
       gtag('event', 'begin_checkout', { currency: 'USD', value: _tv, items: [{ item_id: 'trader', item_name: 'NoVo Trader' }] });
     } else if (/startAnalystTrial|analystCheckout/.test(oc)) {
-      gtag('event', 'begin_checkout', { currency: 'USD', value: 129, items: [{ item_id: 'analyst', item_name: 'NoVo Analyst' }] });
+      // Yearly reported 129 like the monthly, so Ads valued an annual Analyst at a tenth of what it
+      // is worth. The Trader branch above already reads its plan out of the handler name; this did not.
+      var _av = /yearly/i.test(oc) ? 1290 : 129;
+      gtag('event', 'begin_checkout', { currency: 'USD', value: _av, items: [{ item_id: 'analyst', item_name: 'NoVo Analyst' }] });
+    } else if (/cryptoCheckout/.test(oc)) {
+      // The Crypto Market Map had NO branch at all, so not one $79 click has ever reached GA4 or Ads.
+      // A product whose checkouts are invisible cannot be bid on, cannot be optimised, and looks like
+      // it converts at zero -- which is indistinguishable from a product nobody wants.
+      var _cv = /yearly/i.test(oc) ? 790 : 79;
+      gtag('event', 'begin_checkout', { currency: 'USD', value: _cv, items: [{ item_id: 'crypto', item_name: 'NoVo Crypto Market Map' }] });
     }
   }, true);
 
