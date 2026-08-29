@@ -201,6 +201,176 @@
       "source": "/journal/what-is-implied-vs-realized-vol.html",
       "destination": "/journal/realized-vs-implied-volatility.html",
       "permanent": true
+    },
+    {
+      "source": "/journal/ai-signal-vs-ai-execution",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/ai-signal-vs-ai-execution.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/analysis-without-execution-half-a-trade",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/analysis-without-execution-half-a-trade.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/can-novo-be-hacked",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/can-novo-be-hacked.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/dealer-flow-tool-with-execution",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/dealer-flow-tool-with-execution.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/does-novo-handle-assignment",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/does-novo-handle-assignment.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/gamma-scanner-with-execution",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/gamma-scanner-with-execution.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/is-novo-safe",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/is-novo-safe.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/non-custodial-explained",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/non-custodial-explained.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-exit-ladder-anatomy",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-exit-ladder-anatomy.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-exit-ladder-explained",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-exit-ladder-explained.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/one-click-execution-explained",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/one-click-execution-explained.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/one-click-order-slippage",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/one-click-order-slippage.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/options-analytics-vs-execution-cockpit",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/options-analytics-vs-execution-cockpit.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/server-side-broker-stop",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/server-side-broker-stop.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/tradier-vs-alpaca-novo",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/tradier-vs-alpaca-novo.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-broker-does-novo-use",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-broker-does-novo-use.html",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-runs-laptop-closed",
+      "destination": "/trader",
+      "permanent": true
+    },
+    {
+      "source": "/journal/what-runs-laptop-closed.html",
+      "destination": "/trader",
+      "permanent": true
     }
   ],
   "rewrites": [
