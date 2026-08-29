@@ -98,7 +98,9 @@ module.exports = async (req, res) => {
   // live crypto strip on /crypto. The spark is downsampled to the 8 points the strip's
   // polyline draws; the full series stays behind the paywall with the rest of the history.
   const list = Object.entries(snap.coins).map(([code, c]) => {
-    const row = { coin: code, band: c.band, price: c.price };
+    // `tradable` has to ride along or the filter below silently passes every coin -- which is
+    // exactly what happened: the count read 91 on a sentence about what a broker charges.
+    const row = { coin: code, band: c.band, price: c.price, tradable: c.tradable !== false };
     if (c.chg && c.chg.d1 != null) row.chg24h = c.chg.d1;
     const sp = c.spark;
     if (Array.isArray(sp) && sp.length >= 8) {
