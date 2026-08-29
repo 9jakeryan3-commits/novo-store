@@ -78,6 +78,10 @@ function get(url) {
   const rules = [
     ['data-coincount span', /(<span data-coincount>)\d+(<\/span>)/g, '$1' + total + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+(<\/span>)/g, '$1' + chain + '$2'],
+    // Plain-text twin. index and faq carry this sentence inside JSON-LD as well as in the visible
+    // page, and a <span> would corrupt the structured data -- so those say the number in words and
+    // this keeps them level with the marker version.
+    ['across N tokens on Solana', /across \d+ tokens on Solana/g, 'across ' + chain + ' tokens on Solana'],
     ['across N coins', /across \d+ coins/gi, 'across ' + total + ' coins'],
     ['all N coins', /\ball \d+ coins/gi, keepCase(total, 'coins')],
     ['all N ranked', /\ball \d+ ranked/gi, keepCase(total, 'ranked')],
@@ -97,6 +101,7 @@ function get(url) {
     .filter((p) => {
       const t = fs.readFileSync(p, 'utf8');
       return /data-coincount/.test(t) || /data-chaincount/.test(t)
+          || /tokens on Solana/.test(t)
           || /\b(all|across)?\s?\d+ coins\b/i.test(t);
     });
 
