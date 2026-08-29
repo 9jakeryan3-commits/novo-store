@@ -372,7 +372,7 @@ module.exports = async (req, res) => {
     // through the session. The model chooses from a fixed, server-owned, read-only set; this runs
     // them and hands the results back as data. It still never executes anything and never computes
     // a number — the market/account line is enforced by what is absent from the tool list.
-    const exec = makeExecutors({ index: idx, embed, search });
+    const exec = makeExecutors({ index: idx, embed, search, email });
     const contents = [{ role: 'user', parts: [{ text: prompt }] }];
     const ledger = [];
     let answer = '';

@@ -145,8 +145,20 @@ module.exports = async (req, res) => {
     return res.status(200).json({ as_of: snap.as_of, age_min: ageMin, coin, data: one });
   }
 
+  // The chain half goes to every crypto subscriber: it is part of the map, just a different
+  // KIND of map -- liquidity structure for tokens that have no options book to draw gamma from.
+  //
+  // The ALERTS do not. They are the private half: rules whose thresholds rest on a few dozen
+  // resolved observations from one window, which is enough to trade on personally and nowhere near
+  // enough to sell. Gated to the comped account until the record is real, and gated HERE rather
+  // than by omitting them from the snapshot, so the day they are ready is a one-line change and
+  // not a collector redeploy.
+  const priv = COMP.has(String(email).trim().toLowerCase());
+
   return res.status(200).json({
     as_of: snap.as_of, age_min: ageMin,
-    coins: snap.coins, breadth: snap.breadth, health: snap.health,
+    coins: snap.coins, chain: snap.chain || [],
+    breadth: snap.breadth, health: snap.health,
+    ...(priv && snap.alerts ? { alerts: snap.alerts } : {}),
   });
 };

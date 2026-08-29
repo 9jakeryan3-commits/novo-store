@@ -44,6 +44,26 @@ function ageOf(ts) {
 // ── declarations (Gemini / Vertex functionDeclarations format) ──────────────────
 const declarations = [
   {
+    name: "get_chain_alerts",
+    description:
+      "MY OWN live alerts on on-chain tokens - the memecoin surface on Robinhood Chain and Solana, which is NOT " +
+      "the 90 coins Robinhood lists and has no options book, no perp and therefore no gamma. Returns the calls I " +
+      "currently have open, how the resolved ones actually went, and the baseline each is measured against. Use " +
+      "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
+      "These rules point the OPPOSITE way to intuition: a chain token bleeds by default, so a token up hard on " +
+      "the hour is a fade and depth arriving reads as exit liquidity. This is a private feature - if it returns " +
+      "not_entitled, say plainly that it is not part of their subscription and move on.",
+    parameters: {
+      type: "object",
+      properties: {
+        kind: {
+          type: "string",
+          description: "Optional filter: chain_pump_fade, chain_depth_influx, or chain_holds_bid.",
+        },
+      },
+    },
+  },
+  {
     name: "get_crypto_map",
     description:
       "The CURRENT live NoVo Crypto Market Map read for ONE coin. Returns what coverage that coin actually has, " +
@@ -273,6 +293,39 @@ const declarations = [
 // ctx supplies what only analyst-ask.js has: the loaded index and its embed/search pair.
 function makeExecutors(ctx = {}) {
   const r = kv();
+
+  // Comped seats only, for now. The thresholds behind these calls rest on a few dozen resolved
+  // observations from a single window -- enough to act on personally, nowhere near enough to sell.
+  // Gated on the SAME env list the control plane and the map endpoint use, so there is one list to
+  // keep rather than three that drift.
+  const COMP_SET = new Set(
+    String(process.env.COMP_EMAILS || "")
+      .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
+  );
+
+  async function get_chain_alerts({ kind } = {}) {
+    const who = String(ctx.email || "").trim().toLowerCase();
+    if (!who || !COMP_SET.has(who)) return { not_entitled: true };
+    if (!r) return { error: "live alerts unavailable" };
+    let snap = null;
+    try { snap = await r.get("crypto:map:live"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    const a = snap && snap.alerts;
+    if (!a) return { error: "no alerts published yet - the crypto collector is not reporting" };
+
+    const pick = (rows) => (kind ? (rows || []).filter((x) => x.kind === kind) : (rows || []));
+    return {
+      as_of: snap.as_of,
+      open: pick(a.open).slice(0, 25),
+      recent_resolved: pick(a.recent).slice(0, 25),
+      // The record travels WITH the calls on purpose. An alert shown without the base rate it beat
+      // is a tip, and 'meaningful' stays false until a rule has enough resolved claims to mean
+      // anything - state the count, never dress a hit rate on nine samples as evidence.
+      record: a.record,
+      baseline: a.baseline,
+      thresholds: a.thresholds,
+    };
+  }
 
   async function get_dealer_levels({ ticker }) {
     const tk = okTicker(ticker);
@@ -793,6 +846,7 @@ function makeExecutors(ctx = {}) {
   }
 
   return {
+    get_chain_alerts,
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
     get_base_rates, get_recent_reads, get_market_internals,
