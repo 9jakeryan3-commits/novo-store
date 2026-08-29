@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/about</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-08-29</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -471,6 +471,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/bitcoin-etf-flows-vs-price.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/bitcoin-gamma-exposure-explained.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -691,6 +696,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/can-you-read-dealer-positioning-on-altcoins.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/candlestick-basics.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -896,6 +906,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/correlation-blindness-in-crypto-portfolios.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/correlation-risk.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -947,6 +962,21 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/crypto</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/crypto-and-the-rates-cycle.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/crypto-as-a-risk-appetite-gauge.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/crypto-equity-correlation.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1232,6 +1262,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/do-trading-bots-really-work.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/do-you-need-options-data-to-trade-crypto.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1926,6 +1961,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/how-fresh-does-crypto-structure-data-need-to-be.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/how-gex-is-calculated.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -2272,6 +2312,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/is-ai-trading-profitable.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/is-crypto-gamma-data-free-anywhere.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -3181,6 +3226,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/overtrading-when-the-market-never-stops.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/paper-trading-0dte.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3996,6 +4046,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/stop-placement-in-thin-hours.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/stop-run-reversal.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -4141,6 +4196,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/the-dollar-and-crypto.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/the-dollar-index-dxy.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -4212,6 +4272,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/the-goal.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/the-halving-and-what-it-does-not-tell-you.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4382,6 +4447,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/trading-0dte-with-a-full-time-job.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/trading-a-market-with-no-close.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4776,6 +4846,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/what-a-crypto-dealer-map-cannot-tell-you.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/what-a-crypto-options-quote-means.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -4807,6 +4882,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-broker-does-novo-use.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/what-crypto-market-structure-data-costs.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -5436,6 +5516,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/what-to-check-before-trading-a-new-token.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/what-to-do-after-first-losing-streak.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -5562,6 +5647,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/why-consistency-beats-being-right.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/why-crypto-drawdowns-feel-different.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -5762,7 +5852,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/learn/0dte-options</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-08-29</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -5837,7 +5927,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/privacy</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-08-29</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
