@@ -158,6 +158,9 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     as_of: snap.as_of, age_min: ageMin,
     coins: snap.coins, chain: snap.chain || [],
+    // What just fired, across the whole book. Public: the collector filters this to the crypto
+    // asset class before it is published, so the private chain tickets cannot reach it.
+    feed: snap.feed || [],
     breadth: snap.breadth, health: snap.health,
     ...(priv && snap.alerts ? { alerts: snap.alerts } : {}),
   });

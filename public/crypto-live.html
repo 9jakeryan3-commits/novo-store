@@ -991,6 +991,13 @@ function drawRail(filter=''){
   const crows=chain.filter(t=>String(t.symbol||'').toUpperCase().includes(f));
   const total=all.length+chain.length;
   let h=`<div class="railhead"><input id="search" placeholder="filter ${total} tokens" value="${filter}"></div>`;
+  const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
+  if (fd.length) {
+    const fresh = fd.filter(r => !r.resolved_utc).length;
+    h += `<div class="bandhead">What just fired &middot; ${fd.length}</div>
+      <div class="coin ${FEED?'on':''}" data-feed="1">
+        <span class="c">Live reads</span><span class="p">${fresh} open</span></div>`;
+  }
   for(const b of ['A','B','C']){
     const grp=rows.filter(c=>c.band===b).sort((x,y)=>(y.oi_usd||0)-(x.oi_usd||0));
     if(!grp.length) continue;
@@ -1012,11 +1019,75 @@ function drawRail(filter=''){
   $('#rail').innerHTML=h;
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
+  document.querySelectorAll('.coin[data-feed]').forEach(el=>
+    el.onclick=()=>{FEED=true;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();});
   document.querySelectorAll('.coin[data-c]').forEach(el=>
-    el.onclick=()=>{TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+    el.onclick=()=>{FEED=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
   document.querySelectorAll('.coin[data-tok]').forEach(el=>
-    el.onclick=()=>{TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
+    el.onclick=()=>{FEED=false;TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
       document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
+}
+
+/* ---------------- what just fired ----------------
+   Every claim the signals made across the whole book, newest first, WITH the resolved ones. A feed
+   of predictions with the outcomes quietly dropped is a highlight reel; showing what happened next
+   is the entire difference between a track record and marketing. */
+const KINDLABEL = {
+  gamma_pin: 'Gamma pin', funding_extreme: 'Funding extreme',
+  oi_quadrant: 'OI regime', cost_anomaly: 'Cost anomaly',
+};
+function drawFeed(){
+  const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
+  $('#sym').textContent = 'What just fired';
+  $('#px').textContent = '';
+  const open = fd.filter(r=>!r.resolved_utc).length, done = fd.length - open;
+  $('#headmeta').innerHTML =
+    `<span class="tag t-n">${open} still open</span><span class="tag t-n">${done} settled</span>`;
+
+  let h = `<div class="panel"><div class="ph"><h2>Live reads across the book</h2>
+    <span class="sub">newest first &middot; every claim I made, and how it went</span></div>
+    <div class="pb" style="padding:2px 0">`;
+  if(!fd.length){
+    h += `<div class="empty">nothing yet this session</div>`;
+  }
+  for(const r of fd){
+    const settled = !!r.resolved_utc;
+    const win = r.correct === 1, lose = r.correct === 0;
+    const mark = !settled ? '<span style="color:var(--txt4)">open</span>'
+      : win ? '<span class="up">right</span>'
+      : lose ? '<span class="dn">wrong</span>'
+      : '<span style="color:var(--txt4)">&mdash;</span>';
+    h += `<div style="padding:11px 16px;border-top:1px solid var(--bdr2)">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">
+        <span><b style="color:var(--txt1)">${r.asset_code}</b>
+          <span style="color:var(--txt3);font-size:12px"> &middot; ${KINDLABEL[r.kind]||r.kind}</span></span>
+        <span style="font-size:12px;white-space:nowrap">${mark}
+          <span style="color:var(--txt4)"> ${String(r.ts_utc||'').slice(11,16)}</span></span>
+      </div>
+      <div style="color:var(--txt2);font-size:12.5px;line-height:1.55;margin-top:3px">${r.claim||''}</div>
+      ${settled && r.outcome!=null ? `<div style="color:var(--txt4);font-size:11.5px;margin-top:3px">
+        resolved ${(r.outcome>=0?'+':'')+r.outcome.toFixed(2)}% over ${r.horizon_min||0}m</div>` : ''}
+    </div>`;
+  }
+  h += `</div></div>`;
+
+  // The rates, with the caveat attached. A hit rate whose samples all came from one session is not
+  // a base rate, and saying so on the panel is cheaper than being asked about it later.
+  const br = (SNAP.health && SNAP.health.base_rates) || [];
+  if(br.length){
+    h += `<div class="panel"><div class="ph"><h2>How each kind has scored</h2>
+      <span class="sub">independent samples, not claim count</span></div><div class="grid4">`;
+    for(const b of br){
+      const n = b.n || b.samples || b.resolved || 0;
+      const hr = b.hit_rate!=null ? b.hit_rate : (b.rate!=null ? b.rate : null);
+      h += `<div class="cell"><div class="k">${KINDLABEL[b.kind]||b.kind}</div>
+        <div class="v nu">${hr!=null ? Math.round(hr*100)+'%' : '\u2014'}</div>
+        <div class="s">${n} resolved</div></div>`;
+    }
+    h += `</div></div>`;
+  }
+  $('#body').innerHTML = h;
+  const side=$('#side'); if(side) side.innerHTML='';
 }
 
 /* ---------------- chain token ----------------
@@ -1024,7 +1095,7 @@ function drawRail(filter=''){
    major-venue perp, so gamma, the flip and the walls do not exist for them -- rendering those empty
    would read as missing data rather than as inapplicable. What they have is depth, turnover and the
    wallets behind it, which for an asset whose dominant risk is exit is the honest read. */
-let TOK = null;
+let TOK = null, FEED = false;
 const NETLABEL = {robinhood:'Robinhood Chain', solana:'Solana'};
 function _pctv(n){ return n==null?'—':(n>=0?'+':'')+n.toFixed(1)+'%'; }
 function drawChainToken(){
@@ -1348,7 +1419,7 @@ async function load(){
   // A selected chain token is re-resolved from the NEW payload rather than left pointing at the old
   // object, so a refresh updates its numbers instead of freezing them.
   if(TOK) TOK=(SNAP.chain||[]).find(x=>x.address===TOK.address&&x.network===TOK.network)||null;
-  drawRail(); if(TOK) drawChainToken(); else drawCoin();
+  drawRail(); if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
 }
 
 // Back, forward, or a pasted /crypto/live#SOL once the page is already open.
