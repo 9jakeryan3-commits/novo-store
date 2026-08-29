@@ -1401,6 +1401,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
   /* header nav buttons — in the TOPBAR, beside the brand */
   #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; margin-left: 18px; align-self: center; }
+  /* An action, not a view. Cyan hairline so it reads as "do something" next to two toggles, without
+     shouting -- this page has exactly one button and it should not look like a trade control. */
+  .navbtn-run { border-color: rgba(34,211,238,.45) !important; color: var(--cyn) !important; }
+  .navbtn-run:hover { border-color: var(--cyn) !important; background: rgba(34,211,238,.08) !important; }
+  .navbtn-run[data-state="busy"] { opacity: .6; pointer-events: none; }
+  .navbtn-run[data-state="ok"]   { border-color: rgba(52,211,153,.6) !important; color: #34d399 !important; }
+  .navbtn-run[data-state="err"]  { border-color: rgba(244,63,94,.6)  !important; color: #f43f5e !important; }
   .navbtn {
     background: rgba(255,255,255,.03); border: 1px solid var(--bdr); border-radius: 6px;
     color: var(--txt3); font-family: var(--sans); font-size: 9.5px; font-weight: 700;
@@ -1537,6 +1544,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <div id="saas-nav">
     <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
     <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
+    <!-- Not a view switch, so it never carries the `on` state: it is an action that asks NoVo to
+         re-read the map right now. Placed beside the views because that is where the hand already is. -->
+    <button class="navbtn navbtn-run" id="btn-run" onclick="runAnalysis()" title="Ask NoVo to re-read the map now">Run Analysis</button>
   </div>
 
   <div class="tb-right">
@@ -1856,6 +1866,37 @@ async function sendCommand(cmd){
     logTerminal(d.status==='success'?'✓ Transmitted.':`✗ ${d.message}`,'sys');
   } catch(e){ logTerminal(`✗ ${e}`,'sys'); }
 }
+
+// RUN ANALYSIS — the only command this dashboard can send.
+//
+// sendCommand() reports through logTerminal(), and logTerminal has no terminal here: the Activity
+// Feed was part of the execution layer. Called directly, this button would fire, succeed, and give
+// the user nothing at all. So the state lives on the button.
+//
+// It reports SENT, not "done": the request is a nudge to the engine, and NoVo's answer arrives later
+// over the socket as intel_text. Claiming completion at the moment of the POST would be a lie with a
+// tick next to it -- so the label says the request landed, and the Analysis tab shows the answer when
+// there is one.
+window.runAnalysis = async function(){
+  var b = document.getElementById('btn-run');
+  if(!b || b.dataset.state === 'busy') return;
+  var label = b.dataset.label || (b.dataset.label = b.textContent);
+  b.dataset.state = 'busy'; b.textContent = 'Asking NoVo…';
+  var done = function(state, text){
+    b.dataset.state = state; b.textContent = text;
+    setTimeout(function(){ b.removeAttribute('data-state'); b.textContent = label; }, 2600);
+  };
+  try{
+    var u = (typeof NOVO_URL === 'function') ? NOVO_URL('/api/command/chart')
+                                             : location.origin + '/api/command/chart';
+    if(!u){ done('err', 'Not connected'); return; }
+    var r = await fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}});
+    if(!r.ok){ done('err', r.status === 401 ? 'Session expired' : 'Failed'); return; }
+    var d = await r.json();
+    done(d && d.status === 'success' ? 'ok' : 'err',
+         d && d.status === 'success' ? 'Sent — watch Analysis' : ((d && d.message) || 'Failed'));
+  }catch(e){ done('err', 'Failed'); }
+};
 
 // MANUAL ENTRY (2026-07-16) — you take the trade, NoVo executes it. ONE CLICK, NO CONFIRM.
 //
