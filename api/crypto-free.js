@@ -108,7 +108,17 @@ module.exports = async (req, res) => {
     return row;
   });
   return res.status(200).json({
-    as_of: snap.as_of, coins: list.length, list,
+    as_of: snap.as_of,
+    // The count used by the "all N coins" copy, which is specifically about COST TO TRADE -- a
+    // figure read back from a broker's disclosed markup, so it exists only for coins that broker
+    // lists. It is NOT the size of the map: the map is this plus every options-book coin without a
+    // retail listing, plus the on-chain surface. Reporting the full count here would have rewritten
+    // those cost claims into something false about a coin you cannot buy at retail.
+    coins: list.filter(function (c) { return c.tradable !== false; }).length,
+    mapped: list.length,
+    // How many carry a real options book, so the "six cryptos" claim stops being hand-typed.
+    books: list.filter(function (c) { return c.band === 'A'; }).length,
+    list,
     // COUNT ONLY, no rows. The on-chain half is part of the subscription like everything else
     // here; what is free is knowing how much of it there is. The build reads this to keep the
     // marketing count honest instead of it being typed once and going stale.

@@ -47,7 +47,7 @@ const declarations = [
     name: "get_chain_token",
     description:
       "One ON-CHAIN token from the memecoin surface on Solana and Robinhood Chain - the ~200 tokens " +
-      "OUTSIDE the 90 Robinhood coins. Use for any question naming a memecoin or chain token, for " +
+      "OUTSIDE the coin half of the map. Use for any question naming a memecoin or chain token, for " +
       "'what is moving on-chain', or to compare a chain token against the majors. Returns depth " +
       "summed across its pools, 24h and 1h volume, turnover, buyer/seller wallet counts, price " +
       "change, and whether the contract address is actually the listed asset it shares a ticker " +
@@ -66,7 +66,7 @@ const declarations = [
     name: "get_chain_alerts",
     description:
       "MY OWN live alerts on on-chain tokens - the memecoin surface on Robinhood Chain and Solana, which is NOT " +
-      "the 90 coins Robinhood lists and has no options book, no perp and therefore no gamma. Returns the calls I " +
+      "the coin half of the map: these have no options book, no perp and therefore no gamma. Returns the calls I " +
       "currently have open, how the resolved ones actually went, and the baseline each is measured against. Use " +
       "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
       "These rules point the OPPOSITE way to intuition: a chain token bleeds by default, so a token up hard on " +
