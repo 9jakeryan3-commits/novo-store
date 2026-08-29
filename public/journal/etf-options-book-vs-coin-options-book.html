@@ -7,32 +7,32 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DVOL: The Crypto VIX, and How to Read It | NoVo Options Trading</title>
-<meta name="description" content="DVOL is Deribit's 30-day implied volatility index for BTC and ETH, built the way VIX is. Divide it by 20 and you have the market's implied daily move.">
+<title>IBIT Is Not Bitcoin: Two Books, Two Maps | NoVo Options Trading</title>
+<meta name="description" content="BTC and ETH each sit under two options books - crypto-native and US-listed ETF. Different multipliers, hours and expiries; reading one as the other is an error.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-dvol-crypto-vix.html">
+<link rel="canonical" href="https://novo-options.trade/journal/etf-options-book-vs-coin-options-book.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-dvol-crypto-vix.html">
-<meta property="og:title" content="DVOL: The Crypto VIX, and How to Read It">
-<meta property="og:description" content="DVOL is Deribit's 30-day implied volatility index for BTC and ETH, built the way VIX is. Divide it by 20 and you have the market's implied daily move.">
+<meta property="og:url" content="https://novo-options.trade/journal/etf-options-book-vs-coin-options-book.html">
+<meta property="og:title" content="IBIT Is Not Bitcoin: Two Books, Two Maps">
+<meta property="og:description" content="BTC and ETH each sit under two options books - crypto-native and US-listed ETF. Different multipliers, hours and expiries; reading one as the other is an error.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="DVOL: The Crypto VIX, and How to Read It">
-<meta name="twitter:description" content="DVOL is Deribit's 30-day implied volatility index for BTC and ETH, built the way VIX is. Divide it by 20 and you have the market's implied daily move.">
+<meta name="twitter:title" content="IBIT Is Not Bitcoin: Two Books, Two Maps">
+<meta name="twitter:description" content="BTC and ETH each sit under two options books - crypto-native and US-listed ETF. Different multipliers, hours and expiries; reading one as the other is an error.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=6717ea62">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline": "DVOL: The Crypto VIX, and How to Read It","description": "DVOL is Deribit's 30-day implied volatility index for BTC and ETH, built the way VIX is. Divide it by 20 and you have the market's implied daily move.","image":"https://novo-options.trade/journal/covers/novo-cover.png?v=3","author":{"@type":"Organization","name":"NoVo Options Trading"},"publisher":{"@type":"Organization","name":"NoVo Options Trading","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}},"datePublished": "2026-08-28","dateModified": "2026-08-28","mainEntityOfPage":"https://novo-options.trade/journal/what-is-dvol-crypto-vix.html"}
+{"@context":"https://schema.org","@type":"Article","headline": "IBIT Is Not Bitcoin: Two Books, Two Maps","description": "BTC and ETH each sit under two options books - crypto-native and US-listed ETF. Different multipliers, hours and expiries; reading one as the other is an error.","image":"https://novo-options.trade/journal/covers/novo-cover.png?v=3","author":{"@type":"Organization","name":"NoVo Options Trading"},"publisher":{"@type":"Organization","name":"NoVo Options Trading","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}},"datePublished": "2026-08-29","dateModified": "2026-08-29","mainEntityOfPage":"https://novo-options.trade/journal/etf-options-book-vs-coin-options-book.html"}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"The Journal","item":"https://novo-options.trade/journal/"},{"@type":"ListItem","position":3,"name": "DVOL: The Crypto VIX, and How to Read It","item":"https://novo-options.trade/journal/what-is-dvol-crypto-vix.html"}]}
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"The Journal","item":"https://novo-options.trade/journal/"},{"@type":"ListItem","position":3,"name": "IBIT Is Not Bitcoin: Two Books, Two Maps","item":"https://novo-options.trade/journal/etf-options-book-vs-coin-options-book.html"}]}
 </script>
 </head>
 <body>
@@ -50,20 +50,26 @@
 <article class="article">
   <a class="back" href="/journal/">&larr; All articles</a>
   <header class="article-head">
-    <div class="kicker">Crypto Volatility</div>
-    <h1>DVOL: The Crypto VIX, and How to Read It</h1>
-    <p class="standfirst">Equities have VIX. Crypto has DVOL, and it does one thing VIX does not do conveniently: it converts to an implied daily move with a single division.</p>
+    <div class="kicker">Crypto Dealer Flow</div>
+    <h1>IBIT Is Not Bitcoin: Two Books, Two Maps</h1>
+    <p class="standfirst">BTC has a crypto options book and a US-listed ETF options book. Both are real, both produce a dealer map, and they are not interchangeable &mdash; the difference shows up as a wrong price under a right header.</p>
   </header>
-  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-28">Aug 28, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
+  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p><strong>DVOL</strong> is Deribit's implied volatility index, computed from the BTC and ETH options books in much the same way <a href="/journal/what-vix-actually-measures.html">VIX</a> is computed from SPX. It expresses the market's expectation of volatility over the next 30 days, annualised, in percentage points.</p>
-    <h2>The division that makes it useful</h2>
-    <p>An annualised volatility figure divided by roughly 20 gives you the expected <em>daily</em> move, because there are about 252 trading days in a year and the square root of 252 is close to 16 - and crypto, trading every day, is closer to 20. So <strong>DVOL 40 implies about a 2% daily move</strong>. DVOL 80 implies 4%.</p>
-    <p>That is a genuinely practical number. It sets the width you should expect a range to hold, tells you whether a 3% move is remarkable or routine, and gives you an expected-move band without needing to price a straddle.</p>
-    <h2>Level versus term structure</h2>
-    <p>The absolute level tells you less than its shape. When near-dated implied volatility sits above far-dated - <strong>backwardation</strong> - the market is pricing something soon. Contango, the normal state, means the near term is calm relative to the horizon.</p>
-    <p>Skew is the other half. Comparing near-the-money put and call implied volatility says which side is being bid. Take that comparison across the whole strike ladder and you measure wing convexity instead, where implied volatility is legitimately 100%+ and tells you nothing about directional demand.</p>
-    <p>DVOL covers BTC and ETH only; no altcoin has a deep enough options book to support an index. The <a href="/crypto">Crypto Market Map</a> shows DVOL, the implied daily move and near-the-money skew for both.</p>
+    <p>Since US spot ETFs listed options, Bitcoin and Ethereum have each sat under <strong>two independent options books</strong>: the crypto-native one, and the one on the ETF share. Both carry genuine open interest, both force genuine hedging, and both can be mapped. The mistake is treating a read of one as a read of the other.</p>
+    <h2>Four things that differ</h2>
+    <ul>
+      <li><strong>The underlying is not the same instrument.</strong> One is priced in coins, the other in ETF shares trading at a small fraction of a coin. A level from the share book is a share price, and it means nothing plotted against spot.</li>
+      <li><strong>The multiplier differs.</strong> A US-listed equity option covers 100 shares. A crypto-native contract is typically one coin. Carry a multiplier across out of habit and the dollar-gamma is wrong by orders of magnitude.</li>
+      <li><strong>The clock differs.</strong> The ETF book hedges during US market hours and then stops. The crypto book never stops. So the ETF map goes quiet overnight while spot keeps moving &mdash; and the gap between them at the open is not a signal, it is one book catching up to a market that never closed.</li>
+      <li><strong>Expiry cadence differs.</strong> Crypto-native options expire daily at 08:00 UTC. Listed ETF options run the standard equity calendar. Pinning behaviour therefore repeats on completely different schedules.</li>
+    </ul>
+    <h2>The failure this produces</h2>
+    <p>Worth naming precisely, because it is not a miscalculation. Rank the available books for a coin by size and the ETF book can come out on top purely because it is large. Make that the default book for the coin and every number rendered is arithmetically correct &mdash; and describes the wrong instrument. A share price appears beneath a coin header, carrying walls from a book that holds no coins.</p>
+    <p><strong>Nothing is broken, which is what makes it dangerous.</strong> There is no error to notice: no gap in the chart, no null, no warning. It is correct for the wrong thing, and it reads as authoritative right up until somebody checks the magnitude of the price against what a coin actually costs.</p>
+    <h2>Reading them together</h2>
+    <p>Two books over one asset is genuinely useful &mdash; they are different participants expressing different views, and where their walls disagree is worth knowing. The requirement is only that each stays labelled as itself. A level is a level <em>in a book</em>; carrying it across is not conversion, it is a category error.</p>
+    <p>The <a href="/crypto">NoVo Crypto Market Map</a> carries the ETF book beside the crypto one for BTC and ETH, each labelled by the book it comes from &mdash; and the crypto-native book is always the default for the coin.</p>
   </div>
 </article>
 <div class="cta">

@@ -23,8 +23,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="Dealer Long Gamma vs Short Gamma: The Regime That Sets the Day">
-<meta name="twitter:description" content="Dealers long gamma damp volatility; short gamma amplify it — the most important intraday regime read for SPY. The difference, explained.">
+<meta name="twitter:title" content="Bitcoin Gamma Exposure (GEX), Explained">
+<meta name="twitter:description" content="Bitcoin has a dealer map. Deribit carries almost all crypto options open interest, so BTC gamma exposure can be computed the same way it is for SPY - and it moves spot the same way.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=6717ea62">
@@ -65,7 +65,8 @@
     <p>That last distinction matters more in crypto than in equities. Crypto books are call-heavy, so walking cumulative gamma across the ladder puts the "flip" far below spot where deep out-of-the-money puts dominate. Solve it properly and you still often get a distant number - which is a real answer, not an error. A flip 18% away is not a level anyone will trade off.</p>
     <h2>What is genuinely different</h2>
     <p>Three things. Crypto expires <strong>every single day at 08:00 UTC</strong>, so pinning behaviour repeats daily rather than monthly. There is <strong>no close</strong>, so hedging is continuous rather than compressed into a session. And BTC and ETH trade as both coin-margined and USDC-settled books, which behave differently: the coin-margined one is collateralised in the same asset it is exposed to, and that reflexivity is what turns a drawdown into a cascade.</p>
-    <p>The <a href="/crypto">NoVo Crypto Market Map</a> computes this on the six cryptos that have a real options book, alongside funding and liquidation flow on everything else Robinhood trades.</p>
+    <p>The <a href="/crypto">NoVo Crypto Market Map</a> computes this on the <span data-bookcount>7</span> cryptos that have a real options book, alongside funding and liquidation flow on everything else Robinhood trades.</p>
+   <p>One caution when you go looking for the book: BTC now has two. See <a href="/journal/etf-options-book-vs-coin-options-book.html">why the ETF book is a different map</a>.</p>
   </div>
 </article>
 <div class="cta">

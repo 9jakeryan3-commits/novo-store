@@ -22,6 +22,10 @@ BRANCH=$(git branch --show-current)
 # If either rewrites anything, the tree goes dirty and the guard below stops the
 # deploy and tells you to commit -- which is the point.
 node scripts/build-sitemap.js
+#   - the journal search index drifted BOTH ways: 21 entries pointed at articles deleted in
+#     the duplicate merges, and all 8 crypto articles were missing -- the $79 product's whole
+#     education surface was unfindable in the Journal's own search box.
+node scripts/build-search-index.js
 node scripts/stamp-assets.js
 #   - every coin count on /crypto was hand-typed and drifted: the page claimed 89 coins and 82
 #     with leverage positioning while the collector was publishing 90 and 83
