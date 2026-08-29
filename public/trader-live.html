@@ -985,6 +985,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 .trade-log-mobile-card .log-area { min-height: 255px; flex: 1 1 255px; }
 
 @media (max-width: 768px) {
+  /* The pill is a STATUS chip on a phone, not the headline. Its compact rules used to live only in
+     the 430px query, so anything wider -- a ~500px window, a small tablet -- landed here with no
+     width bound and the full 18px + 40px glow, took the topbar's flex space, and shouted louder than
+     the price. Bounded and de-glowed; the colour still carries the state. */
+  #topbar #term-live-row { max-width: 46vw; min-width: 0; overflow: hidden; flex: 0 1 auto; }
+  #topbar #term-live-row .term-live-lbl {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #topbar .term-live-row.armed,
+  #topbar .term-live-row.live,
+  #topbar .term-live-row.halted { box-shadow: none; }
+
   html, body { overflow: hidden; height: 100%; }
   /* The Risk & Sizing drawer link is DESKTOP-ONLY. _mountRisk() relocates #card-risk to #risk-drawer on
      desktop and inline to #col-capital on mobile — same 769px boundary this query uses, so the two can't
@@ -1159,8 +1170,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #topbar { gap: 4px; }
   #topbar .hdr-menu-wrap { flex: 0 0 auto; margin-left: auto; }
   #topbar .brand-sub, #topbar .brand-ver { display: none; }
-  #term-live-row { max-width: 50vw; min-width: 0; overflow: hidden; }
-  #term-live-row .term-live-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* bounding lives in the 768px block now -- see the note there */
 }
 /* ══════════════════════════════════════════════════════════════════════════
    SaaS DESKTOP OVERVIEW (2026-07-14) — desktop breakpoint ONLY.
@@ -1404,6 +1414,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* An action, not a view. Cyan hairline so it reads as "do something" next to two toggles, without
      shouting -- this page has exactly one button and it should not look like a trade control. */
   .navbtn-run { border-color: rgba(34,211,238,.45) !important; color: var(--cyn) !important; }
+  /* the same action, in the bottom bar */
+  .mob-tab-run { color: var(--cyn); }
+  .mob-tab-run[data-state="busy"] { opacity: .6; pointer-events: none; }
+  .mob-tab-run[data-state="ok"]   { color: #34d399; }
+  .mob-tab-run[data-state="err"]  { color: #f43f5e; }
   .navbtn-run:hover { border-color: var(--cyn) !important; background: rgba(34,211,238,.08) !important; }
   .navbtn-run[data-state="busy"] { opacity: .6; pointer-events: none; }
   .navbtn-run[data-state="ok"]   { border-color: rgba(52,211,153,.6) !important; color: #34d399 !important; }
@@ -1546,7 +1561,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
     <!-- Not a view switch, so it never carries the `on` state: it is an action that asks NoVo to
          re-read the map right now. Placed beside the views because that is where the hand already is. -->
-    <button class="navbtn navbtn-run" id="btn-run" onclick="runAnalysis()" title="Ask NoVo to re-read the map now">Run Analysis</button>
+    <button class="navbtn navbtn-run" id="btn-run" data-run-btn onclick="runAnalysis()" title="Ask NoVo to re-read the map now">Run Analysis</button>
   </div>
 
   <div class="tb-right">
@@ -1718,6 +1733,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <span class="mob-tab-icon">&#9707;</span>
     <span>ANALYSIS</span>
   </button>
+  <!-- An ACTION, not a view: no data-tab, so switchMobileTab can never mark it active. -->
+  <button class="mob-tab mob-tab-run" data-run-btn onclick="runAnalysis()">
+    <span class="mob-tab-icon">&#8635;</span>
+    <span>RUN</span>
+  </button>
 </nav>
 
 
@@ -1878,13 +1898,28 @@ async function sendCommand(cmd){
 // tick next to it -- so the label says the request landed, and the Analysis tab shows the answer when
 // there is one.
 window.runAnalysis = async function(){
-  var b = document.getElementById('btn-run');
-  if(!b || b.dataset.state === 'busy') return;
-  var label = b.dataset.label || (b.dataset.label = b.textContent);
-  b.dataset.state = 'busy'; b.textContent = 'Asking NoVo…';
+  // Every Run button, not one id. The desktop button lives in #saas-nav, which is display:none on a
+  // phone -- driving it by id would fire the request and show the user nothing, which is the exact
+  // failure this handler exists to prevent.
+  var btns = [].slice.call(document.querySelectorAll('[data-run-btn]'));
+  if(!btns.length || btns[0].dataset.state === 'busy') return;
+  btns.forEach(function(b){
+    if(b.dataset.label === undefined){
+      // the bottom-bar button wraps its label in a <span>; keep the icon, swap only the text
+      var t = b.querySelector('span:last-child') || b;
+      b.dataset.label = t.textContent;
+    }
+  });
+  var setText = function(b, txt){
+    var t = b.querySelector('span:last-child') || b;
+    t.textContent = txt;
+  };
+  btns.forEach(function(b){ b.dataset.state = 'busy'; setText(b, 'Asking NoVo…'); });
   var done = function(state, text){
-    b.dataset.state = state; b.textContent = text;
-    setTimeout(function(){ b.removeAttribute('data-state'); b.textContent = label; }, 2600);
+    btns.forEach(function(b){ b.dataset.state = state; setText(b, text); });
+    setTimeout(function(){
+      btns.forEach(function(b){ b.removeAttribute('data-state'); setText(b, b.dataset.label); });
+    }, 2600);
   };
   try{
     var u = (typeof NOVO_URL === 'function') ? NOVO_URL('/api/command/chart')
