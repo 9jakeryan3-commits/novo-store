@@ -186,6 +186,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/a-ticker-is-not-a-token.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/above-vwap-below-vwap.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -1277,6 +1282,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/es-futures-vs-spy-options.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/etf-options-book-vs-coin-options-book.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -2682,6 +2692,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/on-balance-volume.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/on-chain-liquidity-vs-order-book.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
