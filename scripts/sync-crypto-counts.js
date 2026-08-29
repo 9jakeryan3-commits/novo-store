@@ -55,15 +55,18 @@ function get(url) {
   const total = Number(feed.coins) || list.length;
   const bandA = list.filter((x) => x.band === 'A').length;
   const bandB = list.filter((x) => x.band === 'B').length;
-  // The on-chain half, written as "200+". Rounded DOWN to a ten AND given a plus, because the raw
-  // figure oscillates every pass as pools cross the liquidity floor -- 206 one pass, 215 the next.
-  // A floor alone was not enough: it still flipped 200/210 between deploys, and since a rewritten
-  // tree halts the deploy, the churn was stopping releases. The plus makes the claim true across the
-  // whole range instead of exact for one pass.
-  // Rounded DOWN to a ten: it moves every pass as pools cross the liquidity
-  // floor, and copy reading "203" today and "197" tomorrow looks broken rather than live. A floor
-  // is also the safe direction to be wrong in for a claim about how much someone is getting.
-  const chain = Math.floor((Number(feed.chain) || 0) / 10) * 10;
+  // The on-chain half, written as "200+" and floored to a FIFTY.
+  //
+  // The raw figure oscillates every pass as pools cross the liquidity floor -- 206 one pass, 215 the
+  // next. Flooring to a ten was not coarse enough: it still flipped 200/210 between deploys, and
+  // because a rewritten tree halts the deploy, that churn was stopping releases mid-run. Fifty is
+  // wide enough that the number sits still while the book grows into it.
+  //
+  // Floored rather than rounded, and given a plus, so the claim is true across the whole range
+  // instead of exact for one pass -- and under-claiming is the safe direction to be wrong in when
+  // the number is telling someone how much they get.
+  const CHAIN_STEP = 50;
+  const chain = Math.floor((Number(feed.chain) || 0) / CHAIN_STEP) * CHAIN_STEP;
   if (!total || !bandA) {
     console.warn('!! crypto counts look wrong (total=' + total + ' A=' + bandA + ') -- not writing');
     return;
