@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       // silently beat the committed value and could have billed a $1 test price.
       line_items: [{ price: 'price_1U8R0zB1Bq29OALaAdZzFw8S', quantity: 1 }],
       mode: 'subscription',
-      success_url: 'https://app.novo-aitrading.app/status',
+      success_url: 'https://app.novo-aitrading.app/portal',
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
     });

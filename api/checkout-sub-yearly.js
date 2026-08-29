@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       // Trader $2,000/yr. Hardcoded on purpose - see checkout-sub.js.
       line_items: [{ price: 'price_1U8R1cB1Bq29OALaUL53wxgD', quantity: 1 }],
       mode: 'subscription',
-      success_url: 'https://app.novo-aitrading.app/status',
+      success_url: 'https://app.novo-aitrading.app/portal',
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
     });

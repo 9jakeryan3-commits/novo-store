@@ -843,7 +843,7 @@ function makeExecutors(ctx = {}) {
     if (!snap) return { error: "the crypto collector is not reporting right now" };
     const c = snap.coins[code];
     if (!c) {
-      return { error: `${code} is not one of the 89 coins Robinhood trades, so I have no map for it`,
+      return { error: `${code} is not one of the coins Robinhood trades, so I have no map for it`,
                covered: Object.keys(snap.coins).slice(0, 12) };
     }
     const out = {

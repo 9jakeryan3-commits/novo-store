@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
       // 7-day free trial, card collected up front — same as Analyst. Card-upfront converts
       // far better than the no-card trials the crypto tools run.
       subscription_data: { metadata: { tier: 'crypto', plan }, trial_period_days: 7 },
-      success_url: 'https://app.novo-aitrading.app/status',
+      success_url: 'https://app.novo-aitrading.app/portal',
       cancel_url: `${SITE}/crypto`,
       billing_address_collection: 'auto',
     });
