@@ -611,11 +611,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/ai-signal-vs-ai-execution.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/ai-systems</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -657,11 +652,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/american-vs-european-options.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/analysis-without-execution-half-a-trade.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1027,11 +1017,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/can-i-get-assigned-long-option.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/can-novo-be-hacked.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1471,11 +1456,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/dealer-flow-tool-with-execution.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/dealer-hedging-mean-reversion.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -1657,11 +1637,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/does-novo-give-signals.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/does-novo-handle-assignment.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -2087,11 +2062,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/gamma-scalping-explained.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/gamma-scanner-with-execution.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -2716,11 +2686,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/is-novo-safe.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/is-novo-worth-it.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3261,11 +3226,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/non-custodial-explained.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/not-overriding-your-stop.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3282,16 +3242,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/novo-desktop-vs-mobile.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/novo-exit-ladder-anatomy.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/novo-exit-ladder-explained.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -3396,16 +3346,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/one-click-execution-explained.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/one-click-order-slippage.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/one-house-zero-to-trading.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3482,11 +3422,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/options-101</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/options-analytics-vs-execution-cockpit.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4147,11 +4082,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/september-effect-spy.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/server-side-broker-stop.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4821,11 +4751,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/tradier-vs-alpaca-novo.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/trading-0dte-with-a-full-time-job.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -5262,11 +5187,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-autonomous-really-means.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-broker-does-novo-use.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -5882,11 +5802,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-percentage-of-traders-are-profitable.html</loc>
-    <lastmod>2026-08-29</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/what-runs-laptop-closed.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
