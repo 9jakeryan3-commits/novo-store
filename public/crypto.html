@@ -937,6 +937,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <script>
+// Terms gate, lifted from analyst.html unchanged so one agreement covers every product
+// and nobody is asked twice. Crypto was the one paid checkout taking money with no record
+// that the buyer had seen the Terms of Use.
+function requireTerms(fnName) {
+  if (localStorage.getItem('novo_terms_agreed') === '1') return true;
+  window._pendingBuy = fnName;
+  let m = document.getElementById('terms-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'terms-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,20,0.80);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML = '<div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;max-width:440px;width:100%;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,0.55);">' +
+      '<div style="font-size:19px;font-weight:800;color:#eaf3ff;margin-bottom:6px;">One quick step</div>' +
+      '<p style="font-size:14px;color:#8aacc8;line-height:1.55;margin:0 0 18px;">Before checkout, please confirm you agree to the terms of use.</p>' +
+      '<label style="display:flex;gap:11px;align-items:flex-start;cursor:pointer;font-size:14px;color:#cfe0f0;line-height:1.5;">' +
+      '<input type="checkbox" id="terms-check-input" style="margin-top:3px;width:17px;height:17px;flex-shrink:0;accent-color:#10b981;cursor:pointer;">' +
+      '<span>I have read and agree to the <a href="/license" target="_blank" rel="noopener" style="color:#3b82f6;font-weight:600;">NoVo Options Trading Terms of Use &amp; Risk Disclosure</a>.</span></label>' +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">' +
+      '<button type="button" onclick="closeTerms()" style="background:transparent;border:1px solid #2a3f60;color:#8aacc8;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Cancel</button>' +
+      '<button type="button" id="terms-continue" disabled onclick="acceptTerms()" style="background:#10b981;border:none;color:#111a14;padding:10px 22px;border-radius:8px;font-weight:800;cursor:pointer;font-size:14px;opacity:0.45;">Agree &amp; Continue</button></div></div>';
+    document.body.appendChild(m);
+    const cb = m.querySelector('#terms-check-input');
+    const btn = m.querySelector('#terms-continue');
+    cb.addEventListener('change', function () { btn.disabled = !cb.checked; btn.style.opacity = cb.checked ? '1' : '0.45'; });
+    m.addEventListener('click', function (e) { if (e.target === m) closeTerms(); });
+  } else {
+    m.style.display = 'flex';
+  }
+  document.body.style.overflow = 'hidden';
+  return false;
+}
+
+function closeTerms() {
+  const m = document.getElementById('terms-modal');
+  if (m) m.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function acceptTerms() {
+  const cb = document.getElementById('terms-check-input');
+  if (!cb || !cb.checked) return;
+  localStorage.setItem('novo_terms_agreed', '1');
+  closeTerms();
+  const fn = window._pendingBuy;
+  if (fn && typeof window[fn] === 'function') window[fn]();
+}
+
 // The kill switch that stops Analyst and Trader sales did not exist here, so pausing checkout
 // site-wide would have left the Crypto Market Map still selling. Same constant, same message,
 // same default of false -- flipping it now stops all three.
@@ -944,6 +991,15 @@ const SALES_PAUSED = false;
 const SALES_PAUSED_MESSAGE = "Checkout is briefly paused right now — please check back soon. Thanks for your patience!";
 function cryptoCheckout(btn, plan){
   if (SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
+  // acceptTerms() retries with NO arguments, so both are remembered first. Without this the
+  // retry arrives with btn undefined and throws on the next line -- the gate would work once
+  // and then break checkout for exactly the people who agreed to the terms.
+  if (btn) window._cryptoBtn = btn;
+  if (plan) window._cryptoPlan = plan;
+  btn = btn || window._cryptoBtn;
+  plan = plan || window._cryptoPlan || 'monthly';
+  if (!btn) return;
+  if (!requireTerms('cryptoCheckout')) return;
   var t=btn.textContent; btn.disabled=true; btn.textContent='One moment...';
   var card=btn.closest('.price-card, .compound-callout, .hero');
   var msg=(card && card.querySelector('[data-ckt-msg]')) || document.getElementById('ckt-msg');
