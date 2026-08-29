@@ -44,6 +44,25 @@ function ageOf(ts) {
 // ── declarations (Gemini / Vertex functionDeclarations format) ──────────────────
 const declarations = [
   {
+    name: "get_chain_token",
+    description:
+      "One ON-CHAIN token from the memecoin surface on Solana and Robinhood Chain - the ~200 tokens " +
+      "OUTSIDE the 90 Robinhood coins. Use for any question naming a memecoin or chain token, for " +
+      "'what is moving on-chain', or to compare a chain token against the majors. Returns depth " +
+      "summed across its pools, 24h and 1h volume, turnover, buyer/seller wallet counts, price " +
+      "change, and whether the contract address is actually the listed asset it shares a ticker " +
+      "with. These tokens have NO options book and NO major-venue perp, so there is no gamma, no " +
+      "flip and no walls for them - do not offer those and do not apologise for their absence; the " +
+      "read is liquidity structure. Omit the symbol argument to get the most active ones.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "Token ticker, e.g. PINK, WOFI, FONE. Optional." },
+        network: { type: "string", description: "Optional filter: solana or robinhood." },
+      },
+    },
+  },
+  {
     name: "get_chain_alerts",
     description:
       "MY OWN live alerts on on-chain tokens - the memecoin surface on Robinhood Chain and Solana, which is NOT " +
@@ -302,6 +321,43 @@ function makeExecutors(ctx = {}) {
     String(process.env.COMP_EMAILS || "")
       .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
   );
+
+  async function get_chain_token({ symbol, network } = {}) {
+    if (!r) return { error: "chain map unavailable" };
+    let snap = null;
+    try { snap = await r.get("crypto:map:live"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    const rows = (snap && Array.isArray(snap.chain)) ? snap.chain : null;
+    if (!rows) return { error: "no chain data published yet" };
+
+    let hits = rows;
+    if (network) hits = hits.filter((t) => t.network === String(network).toLowerCase());
+    if (symbol) {
+      const q = String(symbol).toUpperCase();
+      hits = hits.filter((t) => String(t.symbol || "").toUpperCase() === q);
+      if (!hits.length) {
+        return {
+          not_found: q,
+          // A ticker missing from the sweep is not proof it does not exist -- the sweep is the top
+          // pools by liquidity, so a small token is simply below the cut. Say that, do not say the
+          // token is not real.
+          note: "not in the current sweep - it covers the deepest pools per network, so a smaller "
+              + "token can be below the cut rather than nonexistent",
+          tracked: rows.length,
+        };
+      }
+      // A ticker can cover several DIFFERENT tokens: CYBERLEEK and WOFI each ran ten distinct
+      // Solana addresses on one pass. Return them all rather than picking one and calling it the
+      // answer -- which address it is, is the actual question.
+      return { as_of: snap.as_of, symbol: q, matches: hits.length, tokens: hits.slice(0, 6) };
+    }
+    return {
+      as_of: snap.as_of,
+      tracked: rows.length,
+      networks: [...new Set(rows.map((t) => t.network))],
+      most_active: hits.slice().sort((a, b) => (b.vol_h24 || 0) - (a.vol_h24 || 0)).slice(0, 12),
+    };
+  }
 
   async function get_chain_alerts({ kind } = {}) {
     const who = String(ctx.email || "").trim().toLowerCase();
@@ -846,6 +902,7 @@ function makeExecutors(ctx = {}) {
   }
 
   return {
+    get_chain_token,
     get_chain_alerts,
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
