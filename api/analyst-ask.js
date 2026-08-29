@@ -149,19 +149,32 @@ async function vertex(path, body) {
   const host = LOCATION === 'global' ? 'aiplatform.googleapis.com' : `${LOCATION}-aiplatform.googleapis.com`;
   const r = await fetch(`https://${host}/v1/projects/${sa.project_id}/locations/${LOCATION}/publishers/google/models/${path}`,
     { method: 'POST', headers: { authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) { console.error('[analyst-ask] vertex', r.status, (await r.text()).slice(0, 200)); return null; }
+  if (!r.ok) {
+    const body = (await r.text()).slice(0, 200);
+    console.error('[analyst-ask] vertex', r.status, body);
+    // NOT null. Returning null made a dead upstream indistinguishable from a model that simply
+    // produced no text, and both landed on a bare "no answer" with nothing logged for the user and
+    // no way for the caller to tell a 429 from an empty candidate. The caller decides what to say.
+    const e = new Error('vertex ' + r.status);
+    e.status = r.status;
+    e.body = body;
+    throw e;
+  }
   return r.json();
 }
 
 async function embed(text) {
   let v = null;
-  {
+  // vertex() throws on a bad status now so the tool loop can tell a dead upstream from a silent
+  // model. Embedding does NOT want that: its caller reads null and answers with a clear 'could not
+  // embed the question', and letting the throw escape would swap that for a generic 500.
+  try {
     const j = await vertex('gemini-embedding-001:predict', {
       instances: [{ content: text, task_type: 'RETRIEVAL_QUERY' }],
       parameters: { outputDimensionality: DIM },
     });
     v = j?.predictions?.[0]?.embeddings?.values || null;
-  }
+  } catch (_) { v = null; }
   if (!v) return null;
   let n = 0; for (const x of v) n += x * x; n = Math.sqrt(n) || 1;
   return v.map((x) => x / n);
@@ -247,6 +260,7 @@ You can call read-only lookups for what you were not handed: the live dealer rea
 
 GROUNDING
 - The date, the time and the market's open/closed state come from RIGHT NOW at the top of the prompt, and from nowhere else. Never work out what day it is from a timestamp in MARKET DATA, from the newest session in your archive, or from anything you remember. The map is frequently from an earlier session than today; that says nothing about today's date.
+- MARKET DATA carries BOTH maps: the equity dealer read and, under the crypto key, what the crypto map currently holds — coins tracked, which of them have real gamma books, the on-chain tokens, breadth and corpus counts. When you are asked what you cover, how much data you have, or how long you have been logging, ANSWER FROM BOTH. The answer must not change depending on which dashboard the question came from — it is one archive. Per-coin crypto detail is a tool call; the inventory is already in front of you.
 - Every number you state comes from MARKET DATA or from a lookup you actually ran in this conversation. If it is in neither, say you do not have it. Never estimate a level, never invent a statistic.
 - When you lean on logged history, state the session count. A few dozen sessions is a count, not "usually".
 - A volatility reading on its own is not information. When MARKET DATA carries a percentile for it, give the scale: "VIX 15.1, the 33rd percentile since 1990 but the 13th of the last two years" is a read; "VIX is 15.1" is a readout. Same for the term structure — VIX9D above VIX3M means the FRONT is bid, which for 0DTE is the thing that matters.
@@ -330,6 +344,35 @@ module.exports = async (req, res) => {
       ctx = typeof c === 'string' ? JSON.parse(c) : c;
     } catch (_) {}
 
+    // THE CRYPTO SIDE OF THE SAME MIND. This used to be reachable only if the model chose to call a
+    // tool, while the equity map was handed over on every question -- so "how many data points do
+    // you have" answered with equities alone in one dashboard and with both maps in the other. The
+    // prompt has always claimed one analyst across both; the grounding has to actually be that, or
+    // the claim rests on the model deciding to go looking.
+    //
+    // A SUMMARY, not the map. The full snapshot is ~350KB and inlining it would blow the context on
+    // every question to answer none of them better; the per-coin detail is what the tools are for.
+    // What belongs here is the INVENTORY -- what I hold, how much of it, how fresh -- because that
+    // is what a coverage question asks and it must not depend on a tool call landing.
+    let cryptoInv = null;
+    try {
+      let cs = await r.get('crypto:map:live');
+      if (typeof cs === 'string') cs = JSON.parse(cs);
+      if (cs && cs.coins) {
+        const codes = Object.keys(cs.coins);
+        cryptoInv = {
+          as_of: cs.as_of,
+          coins_tracked: codes.length,
+          coins: codes,
+          gamma_books: codes.filter((k) => cs.coins[k] && cs.coins[k].gamma).length,
+          chain_tokens: (cs.chain || []).length,
+          chain_networks: [...new Set((cs.chain || []).map((t) => t.network))],
+          breadth: cs.breadth,
+          health: cs.health,
+        };
+      }
+    } catch (_) {}
+
     const reference = hits.map((h) =>
       `[${h.s === 'memory' ? "my own earlier read" : 'Journal'}] ${h.t}\n${String(h.x).slice(0, 900)}`).join('\n\n');
 
@@ -362,7 +405,7 @@ module.exports = async (req, res) => {
   const prompt =
       nowBlock(lastSession) +
       convo +
-      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx })}\n\n` +
+      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 
@@ -380,9 +423,12 @@ module.exports = async (req, res) => {
     // my estimate. Model calls are the spend; tool calls are why there is more than one of them.
     let modelCalls = 0, toolCalls = 0;
 
+    let upstream = null;                 // why the model call died, if it did
     for (let round = 0; round < MAX_ROUNDS; round++) {
       modelCalls++;
-      const j = await callModel(`${MODEL}:generateContent`, {
+      let j;
+      try {
+        j = await callModel(`${MODEL}:generateContent`, {
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents,
         tools: [{ functionDeclarations: declarations }],
@@ -399,7 +445,14 @@ module.exports = async (req, res) => {
           // control thinking explicitly rather than inheriting the model default.
           thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
         },
-      });
+        });
+      } catch (e) {
+        upstream = e;
+        // A failure on a LATER round still has whatever the model already said; a failure on the
+        // first has nothing, and the difference matters to the person waiting. Either way, stop --
+        // retrying into an upstream that just refused spends the subscriber's wait on nothing.
+        break;
+      }
       const parts = j?.candidates?.[0]?.content?.parts || [];
       const calls = parts.filter((p) => p && p.functionCall).slice(0, MAX_CALLS_PER_ROUND);
       toolCalls += calls.length;
@@ -437,7 +490,20 @@ module.exports = async (req, res) => {
       contents.push({ role: 'user', parts: responses });
     }
 
-    if (!answer) return res.status(502).json({ error: 'no answer' });
+    if (!answer) {
+      // Say which of the two it was. "no answer" described the symptom and hid the cause, so a
+      // rate-limited model and a genuinely empty response looked identical on screen and identical
+      // in the logs -- which is how this sat unnoticed.
+      if (upstream) {
+        const busy = upstream.status === 429 || upstream.status === 503;
+        return res.status(502).json({
+          error: busy
+            ? 'I am rate limited right now — give it a moment and ask again.'
+            : 'I could not reach my model just then. Ask again.',
+        });
+      }
+      return res.status(502).json({ error: 'I came back with nothing there — ask me again.' });
+    }
     console.log(`[ASK] ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
