@@ -405,6 +405,10 @@
       "destination": "/help.html"
     },
     {
+      "source": "/journal/crypto",
+      "destination": "/journal/crypto.html"
+    },
+    {
       "source": "/analyst/methodology",
       "destination": "/analyst-methodology.html"
     },

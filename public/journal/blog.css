@@ -334,3 +334,25 @@ nav { position: relative; }
     .nav-logo img { height: 34px; }
     .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
   }
+
+/* Breadcrumb trail -- must stay in sync with the BreadcrumbList JSON-LD on the same page. */
+.crumbs{font-size:12.5px;color:var(--txt3);margin-bottom:20px;font-weight:600;line-height:1.7;}
+.crumbs a{color:var(--txt2);}
+.crumbs a:hover{color:var(--cyan);}
+.crumbs .sep{color:var(--txt3);margin:0 7px;}
+.crumbs .cur{color:var(--txt3);}
+/* Related articles -- internal linking, and the fix for pages stuck at the nav/footer link floor. */
+.related{margin:44px 0 0;padding-top:26px;border-top:1px solid var(--bdr);}
+.related h3{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin:0 0 14px;}
+.related ul{list-style:none;padding:0;margin:0;display:grid;gap:9px;}
+.related li{margin:0;}
+.related a{color:var(--txt1);font-weight:650;font-size:15.5px;text-decoration:none;line-height:1.45;}
+.related a:hover{color:var(--cyan);}
+.related .rk{display:block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin-bottom:2px;}
+/* Cluster hub */
+.hubgrid{display:grid;gap:26px;margin:30px 0 10px;}
+.hubsec h2{font-size:19px;font-weight:800;color:var(--txt1);margin:0 0 12px;padding-top:18px;border-top:1px solid var(--bdr);}
+.hubsec ul{list-style:none;padding:0;margin:0;display:grid;gap:10px;}
+.hubsec a{color:var(--txt1);font-weight:650;text-decoration:none;}
+.hubsec a:hover{color:var(--cyan);}
+.hubsec .hd{display:block;font-size:13.5px;color:var(--txt2);font-weight:400;margin-top:2px;line-height:1.5;}

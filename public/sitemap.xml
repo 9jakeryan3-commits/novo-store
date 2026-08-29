@@ -896,6 +896,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/crypto</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/crypto-funding-rates-explained.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -1092,6 +1097,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/desktop-setup-low-latency.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/dex-vs-cex-price-discovery.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1571,6 +1581,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/gas-fees-as-a-trading-cost.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/gdp-and-the-market.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -1706,6 +1721,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/holder-concentration-and-exit-risk.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/holding-0dte-into-close.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -1716,12 +1736,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/honeypots-and-unsellable-tokens.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/hosted-vs-self-hosted-automation.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://novo-options.trade/journal/hot-streak-position-size-creep.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/how-an-amm-prices-a-token.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -1981,6 +2011,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/impermanent-loss-and-why-liquidity-leaves.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/in-memory-state-trading.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -2231,6 +2266,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/liquidity-added-vs-pulled.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/liquidity-sweeps-prior-day.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -2417,6 +2457,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/menthorq-vs-unusual-whales.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/mev-and-sandwich-attacks.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -2951,6 +2996,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/pool-depth-is-not-volume.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/poor-mans-covered-call.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3301,6 +3351,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/routing-pools-vs-real-demand.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/rsi-divergence-at-a-level.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3486,6 +3541,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/slippage-and-price-impact-on-chain.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/slippage-in-position-sizing.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3502,6 +3562,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/smart-money-vs-retail.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/solana-vs-evm-liquidity-structure.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -3836,6 +3901,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/the-liquidity-lifecycle-of-a-new-token.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/the-martingale-trap.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3921,6 +3991,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/thin-liquidity-and-volatility.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/thinking-in-r-multiples.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -3937,6 +4012,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/tick-size-and-liquidity.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/tokenized-stocks-and-24-7-equity-exposure.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4841,6 +4921,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/what-is-robinhood-chain.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/what-is-rolling-an-option.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
@@ -4962,6 +5047,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/what-runs-laptop-closed.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/what-the-quote-asset-tells-you.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
@@ -5207,6 +5297,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/why-volatility-clusters.html</loc>
+    <lastmod>2026-08-29</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/why-wrapped-assets-exist.html</loc>
     <lastmod>2026-08-29</lastmod>
     <priority>0.6</priority>
   </url>
