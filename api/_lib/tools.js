@@ -2,9 +2,11 @@
 //
 // Function calling does not change the invariant analyst-ask.js already runs on: the model never
 // executes anything and never computes a number. It chooses which of a fixed, server-owned set of
-// READ-ONLY lookups it needs, and this file runs them. Nothing here writes, nothing here touches
-// trades.db, and nothing here can reach an account — the market/account line is enforced by what
-// is absent from this list, not by asking the model nicely.
+// lookups it needs, and this file runs them. Nothing here writes to a MARKET, an order, or an
+// account — trades.db is unreachable and the market/account line is enforced by what is absent
+// from this list, not by asking the model nicely. The only writes that exist belong to the READER
+// about the reader — their own memory and their own alerts — capped, guarded against
+// account-shaped content, and erasable by them in one sentence.
 //
 // Every executor is called in-process by analyst-ask.js. None of them self-fetch a sibling /api
 // route: a three-round tool loop would otherwise add six TLS handshakes and six cold starts before
@@ -205,10 +207,18 @@ const declarations = [
   },
   {
     name: "get_economic_calendar",
-    description: "Upcoming major US macro releases — FOMC, CPI, jobs, GDP, PCE, ISM — with date, ET time and consensus.",
+    description:
+      "Major US macro releases — FOMC, CPI, jobs, GDP, PCE, ISM — with date, ET time, consensus, " +
+      "previous, and the ACTUAL once a print lands. On a print day, pass days_back to read what " +
+      "the number actually did versus consensus — the beat or miss IS the story, and 'CPI printed " +
+      "0.4 vs 0.3 expected' beats 'CPI was today' every time. A surprise says volatility, never " +
+      "direction.",
     parameters: {
       type: "object",
-      properties: { days_ahead: { type: "integer", description: "Default 10, max 18." } },
+      properties: {
+        days_ahead: { type: "integer", description: "Default 10, max 18." },
+        days_back: { type: "integer", description: "Days of the recent past to include (0-5) — where actual-vs-consensus lives. Default 0." },
+      },
     },
   },
   {
@@ -316,6 +326,26 @@ const declarations = [
       type: "object",
       properties: { symbol: { type: "string", description: "Ticker, e.g. SPY, NVDA, ^VIX. Defaults to SPY." } },
       required: ["symbol"],
+    },
+  },
+  {
+    name: "update_reader_memory",
+    description:
+      "Remember or forget something THIS reader told you about their market interests and " +
+      "preferences - it persists across conversations. Use it the moment they state a lasting " +
+      "preference: 'I mostly trade IWM', 'I watch HYPE and SOL', 'keep answers short', 'stop " +
+      "mentioning crypto'. Use clear:true when they ask you to forget everything. NEVER store " +
+      "positions, sizes, accounts or P&L - the server refuses those shapes regardless. What you " +
+      "already know rides in the prompt under WHAT YOU KNOW ABOUT THIS READER; answer 'what do " +
+      "you know about me' from there and offer to correct it.",
+    parameters: {
+      type: "object",
+      properties: {
+        add_interests: { type: "array", items: { type: "string" }, description: "Tickers, coins or market topics they follow. Short phrases." },
+        remove_interests: { type: "array", items: { type: "string" } },
+        note: { type: "string", description: "One short preference, in their words. Market/style only." },
+        clear: { type: "boolean", description: "Erase everything on their request." },
+      },
     },
   },
   {
@@ -614,8 +644,9 @@ function makeExecutors(ctx = {}) {
     } catch (e) { return { error: `quote lookup failed for ${sym}` }; }
   }
 
-  async function get_economic_calendar({ days_ahead } = {}) {
+  async function get_economic_calendar({ days_ahead, days_back } = {}) {
     const days = Math.min(Math.max(Number(days_ahead) || 10, 1), 18);
+    const back = Math.min(Math.max(Number(days_back) || 0, 0), 5);
     const MAJOR = /\b(fed|fomc|interest rate|cpi|inflation|nonfarm|payroll|employment|unemployment|jobless|gdp|pce|retail sales|ism|consumer confidence|ppi)\b/i;
     const isUS = (c) => /united states|^us$|^u\.s\.?$/i.test(String(c || "").trim());
     const ymd = (d) => d.toISOString().slice(0, 10);
@@ -626,7 +657,8 @@ function makeExecutors(ctx = {}) {
     const out = [];
     try {
       const perDay = await Promise.all(
-        Array.from({ length: days }, async (_unused, i) => {
+        Array.from({ length: days + back }, async (_unused, idx) => {
+          const i = idx - back;   // negative = the recent past, where `actual` lives
           const real = new Date(Date.now() + i * 86400000);
           // Nasdaq buckets US events one calendar day late; api/calendar.js documents the +1 in detail.
           const q = new Date(real.getTime() + 86400000);
@@ -640,6 +672,7 @@ function makeExecutors(ctx = {}) {
               date: ymd(real),
               timeET: String(x.gmt || "").trim() || null,   // Nasdaq mislabels this "gmt"; it is ET
               event: String(x.eventName || "").trim(),
+              actual: String(x.actual || "").trim() || null,
               consensus: String(x.consensus || "").trim() || null,
               previous: String(x.previous || "").trim() || null,
             }));
@@ -647,7 +680,9 @@ function makeExecutors(ctx = {}) {
       for (const day of perDay) out.push(...day);   // Promise.all preserves order, so this stays date-ordered
     } catch (_) { /* fall through to whatever was collected */ }
     if (!out.length) return { error: "no calendar data available right now" };
-    return { events: out.slice(0, 14) };
+    return { events: out.slice(0, 20),
+             note: "actual-vs-consensus is the print-day story: a beat or miss is a SURPRISE, " +
+                   "not a direction call. actual is null until the print lands." };
   }
 
   // Nasdaq answers this one in prose, not fields — there is no structured date anywhere in the
@@ -957,6 +992,16 @@ function makeExecutors(ctx = {}) {
     try { h = await r.get("crypto:map:history"); } catch (_) { h = null; }
     if (typeof h === "string") { try { h = JSON.parse(h); } catch (_) { h = null; } }
     return (h && h.coins) ? h : null;
+  }
+
+  async function update_reader_memory(args = {}) {
+    const { updateMemory, indexMember } = require("./member-memory.js");
+    if (!ctx.email) return { error: "no signed-in reader" };
+    const out = await updateMemory(ctx.email, args);
+    if (out && out.ok && !out.cleared && (args.add_interests || []).length) {
+      await indexMember(ctx.email);
+    }
+    return out;
   }
 
   // ── the archive channel — the box answers, the store relays ─────────────────
@@ -1279,7 +1324,7 @@ function makeExecutors(ctx = {}) {
     get_base_rates, get_recent_reads, get_market_internals,
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
-    describe_archive, query_archive,
+    describe_archive, query_archive, update_reader_memory,
   };
 }
 

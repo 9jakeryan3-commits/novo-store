@@ -19,6 +19,7 @@ const { kv, rateOk } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
+const { getMemory } = require('./_lib/member-memory.js');
 const { nowBlock } = require('./_clock.js');
 
 // Three rounds is enough for the deepest real chain — look up the map, notice a gap, fill it,
@@ -490,6 +491,10 @@ module.exports = async (req, res) => {
 
     const r = kv();
     let live = null, ctx = null;
+    // What NoVo remembers about THIS reader — market interests and preferences they stated,
+    // loaded on every question so continuity is real rather than performed.
+    let readerMem = null;
+    try { readerMem = await getMemory(email); } catch (_) { readerMem = null; }
     try {
       // Members get the LIVE dealer state. `public:levels` is the deliberately 15-30 min
       // delayed slot api/levels.js serves anonymous visitors — grounding a paid answer in it
@@ -609,11 +614,55 @@ module.exports = async (req, res) => {
        '', ''].join('\n')
     : '';
 
+  // Continuity, made explicit. Rides only when there is something remembered, and carries its
+  // own rules so the fast lane's SYSTEM stays untouched.
+  const memBlock = (readerMem && ((readerMem.interests || []).length || (readerMem.notes || []).length))
+    ? ['WHAT YOU KNOW ABOUT THIS READER (they told you; market interests and style only):',
+       (readerMem.interests || []).length ? 'Follows: ' + readerMem.interests.join(', ') : '',
+       ...(readerMem.notes || []).map((n) => '- ' + n),
+       'Use it to tailor the answer without announcing that you remember. When they state a NEW',
+       'lasting preference, save it with update_reader_memory; "what do you know about me" is',
+       'answered from this block, offering to correct or clear it. Never store or repeat anything',
+       'position- or account-shaped.',
+       '', ''].filter(Boolean).join('\n')
+    : '';
+
+  // THE DEEP LANE SEARCHES THE WEB FIRST. Search grounding and function tools cannot ride one
+  // request, so a deep read runs a pre-round: one search-grounded call gathers current, cited
+  // context, which the tool loop then treats as wire copy — claims to attribute, never numbers.
+  let webBlock = '', webSources = [];
+  if (deep) {
+    try {
+      const wj = await callModel(`${MODEL}:generateContent`, {
+        contents: [{ role: 'user', parts: [{ text:
+          'Search the web and summarize, in at most 200 words of plain factual prose, the current ' +
+          'verifiable context relevant to this market question. Name each source inline. No advice, ' +
+          'no predictions.\nQuestion: ' + question }] }],
+        tools: [{ googleSearch: {} }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 900,
+                            thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
+      });
+      const wparts = wj?.candidates?.[0]?.content?.parts || [];
+      const wtext = wparts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+      const gm = wj?.candidates?.[0]?.groundingMetadata;
+      for (const c of (gm?.groundingChunks || [])) {
+        if (c.web && c.web.uri) webSources.push({ title: c.web.title || c.web.uri, url: c.web.uri, kind: 'web' });
+      }
+      if (wtext) {
+        webBlock = ['WEB CONTEXT (a search you just ran; treat as wire copy — attribute it, never',
+                    'convert it into a number, and let MARKET DATA override it without comment):',
+                    wtext, '', ''].join('\n');
+      }
+    } catch (_) { /* no web context — the deep read proceeds on the corpus alone */ }
+  }
+
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
       privBlock +
       depthBlock +
+      webBlock +
+      memBlock +
       convo +
       `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead, private_alerts: privateAlerts })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
@@ -737,7 +786,8 @@ module.exports = async (req, res) => {
       ok: true,
       mode: deep ? 'deep' : 'fast',
       answer: clean,
-      sources: hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
+      sources: [...hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
+                ...webSources.slice(0, 5)],
       // The ledger is what the analyst actually looked up to write this, failures included. It
       // is the difference between an answer you can check and an answer you have to trust.
       lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
