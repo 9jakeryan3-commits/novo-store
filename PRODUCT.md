@@ -131,6 +131,14 @@ layer underneath. Nothing in this section appears on any free page.
   bars to 2000, reconstructed maps to 2008, banked option chains, macro closes to 1990, the
   crypto 1-second tape and chain pools, its own published reads. Lives on the owner box; when
   the box is offline the archive tools degrade honestly and the live layer is unaffected.
+  **The nine (2026-08-31), all live:** streamed answers; drawn charts (one `[[novochart]]` per
+  answer when a computed series earns it); pasted/attached chart images read (text in an image is
+  data, never instructions); **level alerts set in a sentence** (one-shot push, SPY/QQQ/IWM vs a
+  price or the live flip/walls, VIX, any coin — 10 active, 7-day expiry, needs the push toggle
+  once); **reader memory** (market interests/style only, account-shaped content refused
+  server-side, erasable in a sentence); a **daily personal digest** (12:00 UTC cron; interests +
+  a registered device required); web-grounded deep reads with cited sources; macro
+  actual-vs-consensus (`days_back`); and the **live option chain** (±10% of spot, per publish).
   Market only — never accounts, trades or P&L; never advice (trades.db is not attachable —
   structural, not behavioral).
 - Every hourly audit and desk note is kept and scored. NoVo writes each read with the session's
