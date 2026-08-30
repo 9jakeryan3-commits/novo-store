@@ -40,13 +40,15 @@ node scripts/build-site-chrome.js
 # and would block every single deploy. When the ONLY thing regeneration touched is the
 # sitemap, that is this lag and nothing else, so commit it and carry on. Anything else
 # dirty is a real uncommitted change and still stops the deploy below.
+# public/journal/search-index.json is regenerated on every deploy too and moves whenever any
+# article title or dek moves, which is most deploys.
 # api/_lib/site-chrome.js is generated the same way, from the static header/footer, and moves
 # whenever the site's chrome or its ?v= hashes do. Same reasoning as the sitemap: if the ONLY
 # dirty paths are generated ones, that is the pipeline's own lag, not an uncommitted change.
-GEN_DIRT="$(git status --porcelain | grep -vE '^([ M?][ M?]) (public/sitemap\.xml|api/_lib/site-chrome\.js)$' || true)"
+GEN_DIRT="$(git status --porcelain | grep -vE '^([ M?][ M?]) (public/sitemap\.xml|api/_lib/site-chrome\.js|public/journal/search-index\.json)$' || true)"
 if [ -n "$(git status --porcelain)" ] && [ -z "$GEN_DIRT" ]; then
-  git add public/sitemap.xml api/_lib/site-chrome.js 2>/dev/null || true
-  git commit -q -m "generated: sitemap lastmod + site chrome"
+  git add public/sitemap.xml api/_lib/site-chrome.js public/journal/search-index.json 2>/dev/null || true
+  git commit -q -m "generated: sitemap lastmod, site chrome, search index"
   git push -q
   echo ".. generated files refreshed and pushed"
 fi
