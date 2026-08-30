@@ -145,8 +145,9 @@ layer underneath. Nothing in this section appears on any free page.
 - Regime · Retail State · RVOL · Tape Imbalance
 - **No push notifications** — by design; you are on the dashboard when you trade
 
-**Brokers:** Tradier *or* tastytrade for live (either is a complete setup — data and execution).
-Alpaca optional, paper. Non-custodial: NoVo can place and manage orders, never move money.
+**Brokers: none.** NoVo does not connect to a brokerage account, hold API keys, or place orders.
+You trade wherever you already trade. Non-custodial in the strongest sense: there is no connection
+through which NoVo could reach your money.
 
 ---
 

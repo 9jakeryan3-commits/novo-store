@@ -10,18 +10,22 @@
     if (/subscribeNow|subscribeYearly|traderCheckout/.test(oc)) {
       // Trader is $209/mo or $2,000/yr. These values feed Ads bidding — they have now gone stale twice
       // (once at $199, once at the $169 rise), so re-check them whenever price changes.
-      var _tv = /subscribeYearly/.test(oc) ? 2000 : 209;
+      // plans.html's monthly/yearly toggle stores the plan in a GLOBAL and never changes the
+      // onclick, so reading the attribute alone reported every annual sale at the monthly
+      // value -- $2,000 as 209. Fall back to the global the toggle actually sets.
+      var _yr = /yearly/i.test(oc) || window._traderPlan === 'yearly';
+      var _tv = _yr ? 2000 : 209;
       gtag('event', 'begin_checkout', { currency: 'USD', value: _tv, items: [{ item_id: 'trader', item_name: 'NoVo Trader' }] });
     } else if (/startAnalystTrial|analystCheckout/.test(oc)) {
       // Yearly reported 129 like the monthly, so Ads valued an annual Analyst at a tenth of what it
       // is worth. The Trader branch above already reads its plan out of the handler name; this did not.
-      var _av = /yearly/i.test(oc) ? 1290 : 129;
+      var _av = (/yearly/i.test(oc) || window._analystPlan === 'yearly') ? 1290 : 129;
       gtag('event', 'begin_checkout', { currency: 'USD', value: _av, items: [{ item_id: 'analyst', item_name: 'NoVo Analyst' }] });
     } else if (/cryptoCheckout/.test(oc)) {
       // The Crypto Market Map had NO branch at all, so not one $79 click has ever reached GA4 or Ads.
       // A product whose checkouts are invisible cannot be bid on, cannot be optimised, and looks like
       // it converts at zero -- which is indistinguishable from a product nobody wants.
-      var _cv = /yearly/i.test(oc) ? 790 : 79;
+      var _cv = (/yearly/i.test(oc) || window._cryptoPlan === 'yearly') ? 790 : 79;
       gtag('event', 'begin_checkout', { currency: 'USD', value: _cv, items: [{ item_id: 'crypto', item_name: 'NoVo Crypto Market Map' }] });
     }
   }, true);
