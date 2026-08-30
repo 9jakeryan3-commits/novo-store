@@ -126,7 +126,13 @@ layer underneath. Nothing in this section appears on any free page.
   corpus and chain tokens.
   **Ask for a "deep read"** and it takes the long lane — more lookups, wider retrieval, a
   structured desk report (capped at 8/hour; past that it answers in the fast lane).
-  Market only — never accounts, trades or P&L; never advice.
+  **The raw archives are queryable** (2026-08-30): describe_archive + query_archive give it a
+  read-only, sandboxed SELECT into the corpora behind every rollup — dealer snapshots, session
+  bars to 2000, reconstructed maps to 2008, banked option chains, macro closes to 1990, the
+  crypto 1-second tape and chain pools, its own published reads. Lives on the owner box; when
+  the box is offline the archive tools degrade honestly and the live layer is unaffected.
+  Market only — never accounts, trades or P&L; never advice (trades.db is not attachable —
+  structural, not behavioral).
 - Every hourly audit and desk note is kept and scored. NoVo writes each read with the session's
   earlier calls and its own record in hand.
 
