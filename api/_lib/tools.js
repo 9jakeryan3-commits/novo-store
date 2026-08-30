@@ -67,7 +67,8 @@ const declarations = [
     description:
       "MY OWN live alerts on on-chain tokens - the memecoin surface on Robinhood Chain and Solana, which is NOT " +
       "the coin half of the map: these have no options book, no perp and therefore no gamma. Returns the calls I " +
-      "currently have open, how the resolved ones actually went, and the baseline each is measured against. Use " +
+      "currently have open, how the resolved ones actually went, and the measured rule levels - each rule's " +
+      "target/stop and its triggered-vs-baseline rates - that every verdict rests on. Use " +
       "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
       "These rules point the OPPOSITE way to intuition: a chain token bleeds by default, so a token up hard on " +
       "the hour is a fade and depth arriving reads as exit liquidity. This is a private feature - if it returns " +
@@ -87,10 +88,11 @@ const declarations = [
     description:
       "The CURRENT live NoVo Crypto Market Map read for ONE coin. Returns what coverage that coin actually has, " +
       "and only the panels the data supports: dealer gamma (spot, net GEX, flip zone, call and put walls) for the " +
-      "six coins with real options books - BTC, ETH, SOL, XRP, AVAX, HYPE - plus leverage positioning (funding and " +
-      "open interest PER VENUE, never blended) and Robinhood's own disclosed buy/sell markup. Use for any 'where is " +
-      "BTC positioned', 'what is funding on X', or 'what does it cost to trade X' question. Coins outside the 89 " +
-      "Robinhood trades are not covered.",
+      "six coins with real options books - BTC, ETH, SOL, XRP, AVAX, HYPE - plus every book's headline with max " +
+      "pain and put/call OI ratio, DVOL (the crypto VIX, BTC and ETH, with its implied daily move), near-the-money " +
+      "put/call skew, leverage positioning (funding and open interest PER VENUE, never blended) and Robinhood's own " +
+      "disclosed buy/sell markup. Use for any 'where is BTC positioned', 'what is funding on X', 'how volatile is " +
+      "it priced', or 'what does it cost to trade X' question. Coins outside the 89 Robinhood trades are not covered.",
     parameters: {
       type: "object",
       properties: { coin: { type: "string", description: "Asset code, e.g. BTC, ETH, SOL, DOGE, HYPE." } },
@@ -378,8 +380,11 @@ function makeExecutors(ctx = {}) {
       // is a tip, and 'meaningful' stays false until a rule has enough resolved claims to mean
       // anything - state the count, never dress a hit rate on nine samples as evidence.
       record: a.record,
-      baseline: a.baseline,
-      thresholds: a.thresholds,
+      // The measured rule table: per-kind target/stop levels plus the triggered-vs-untriggered
+      // rates each verdict rests on. The feed ships `levels` + `min_samples` — the earlier
+      // `baseline`/`thresholds` keys never existed in the payload and always read undefined.
+      levels: a.levels,
+      min_samples: a.min_samples,
     };
   }
 
@@ -869,6 +874,26 @@ function makeExecutors(ctx = {}) {
         note: "Deribit. One contract is 1 coin, not 100. A flip more than ~12% from spot is " +
               "real but not actionable - say so rather than quoting it as a level.",
       };
+      // EVERY book's headline (crypto-settled, OKX, and the US ETF book where one exists),
+      // with max pain and the put/call OI ratio. Two venues disagreeing about the regime is
+      // a signal the primary-book summary above cannot show. An ETF book is a DIFFERENT
+      // instrument at a different price - never quote its walls under the coin's own price.
+      if (Array.isArray(c.gamma.venues) && c.gamma.venues.length) {
+        out.dealerGamma.allBooks = c.gamma.venues.map((v) => ({
+          settle: v.settle, spot: v.spot, netGex: v.net_gex, flipZone: v.flip_zone,
+          callWall: v.call_wall, putWall: v.put_wall, maxPain: v.max_pain,
+          putCallOiRatio: v.pc_oi_ratio, chainOi: v.chain_oi,
+        }));
+      }
+    }
+    // DVOL - the crypto VIX, Deribit-published for BTC and ETH only. DVOL/20 is the implied
+    // DAILY move, the cleanest expected-move read in this market.
+    if (c.dvol) out.dvol = { value: c.dvol.value, impliedDailyMovePct: c.dvol.implied_daily_pct };
+    // Near-the-money put-vs-call IV on the front book (strikes within 10% of spot) - the
+    // crypto equivalent of the equity map's put/call skew. Positive skew_pts = puts bid.
+    if (c.skew) {
+      out.skew = { putIvPct: c.skew.put_iv_pct, callIvPct: c.skew.call_iv_pct,
+                   skewPts: c.skew.skew_pts };
     }
     if (c.positioning) {
       out.leverage = {
