@@ -30,16 +30,25 @@ node scripts/stamp-assets.js
 #   - every coin count on /crypto was hand-typed and drifted: the page claimed 89 coins and 82
 #     with leverage positioning while the collector was publishing 90 and 83
 node scripts/sync-crypto-counts.js
+# Lift the site's real header/footer/CSS into api/_lib/site-chrome.js so the server-rendered
+# pages (/analyst/archive) match the static ones. AFTER stamp-assets and the counts, so the
+# extracted markup carries the current ?v= hashes and the current numbers.
+node scripts/build-site-chrome.js
 
 # lastmod is read from git, so the commit that ships a content change also moves the
 # dates the sitemap records -- meaning the sitemap is always exactly one commit behind
 # and would block every single deploy. When the ONLY thing regeneration touched is the
 # sitemap, that is this lag and nothing else, so commit it and carry on. Anything else
 # dirty is a real uncommitted change and still stops the deploy below.
-if [ "$(git status --porcelain)" = " M public/sitemap.xml" ]; then
-  git commit -q -m "sitemap: refresh lastmod (generated)" -- public/sitemap.xml
+# api/_lib/site-chrome.js is generated the same way, from the static header/footer, and moves
+# whenever the site's chrome or its ?v= hashes do. Same reasoning as the sitemap: if the ONLY
+# dirty paths are generated ones, that is the pipeline's own lag, not an uncommitted change.
+GEN_DIRT="$(git status --porcelain | grep -vE '^([ M?][ M?]) (public/sitemap\.xml|api/_lib/site-chrome\.js)$' || true)"
+if [ -n "$(git status --porcelain)" ] && [ -z "$GEN_DIRT" ]; then
+  git add public/sitemap.xml api/_lib/site-chrome.js 2>/dev/null || true
+  git commit -q -m "generated: sitemap lastmod + site chrome"
   git push -q
-  echo ".. sitemap lastmod refreshed and pushed"
+  echo ".. generated files refreshed and pushed"
 fi
 
 # Production is built from the local working tree, so it must equal the commit.
