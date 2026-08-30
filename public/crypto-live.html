@@ -1566,7 +1566,8 @@ window.addEventListener('hashchange', function(){
   }
   function add(cls, text, ts){
     var log = document.getElementById('novo-ask-log');
-    var d = document.createElement('div'); d.className = 'm ' + (cls||''); d.textContent = text;
+    var d = document.createElement('div'); d.className = 'm ' + (cls||'');
+    if (cls === 'you') d.textContent = text; else renderRich(d, text);
     if (ts) {
       var w = document.createElement('span'); w.className = 'when'; w.setAttribute('data-t', ts);
       w.textContent = fmtWhen(ts);
@@ -1622,6 +1623,164 @@ window.addEventListener('hashchange', function(){
     var k = document.createElement('div'); k.className = 'src'; k.textContent = text;
     logAdd(k); return k;
   }
+
+  // ── Wave 3: rich answers, charts, image attach, streaming ──────────────────
+  var NCOLOR = '#a78bfa';
+  var NAMES = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
+    get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
+    get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date', get_track_record:'track record',
+    search_news:'headlines', get_base_rates:'base rates', get_market_internals:'market internals',
+    get_vol_history:'vol history', get_futures_positioning:'futures positioning',
+    get_recent_reads:'my recent reads', get_crypto_map:'crypto map', get_crypto_breadth:'crypto breadth',
+    get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts',
+    get_chain_history:'chain history', get_market_breadth:'market breadth',
+    describe_archive:'archive schema', query_archive:'the raw archives',
+    update_reader_memory:'remembered that', set_alert:'alert set', list_alerts:'your alerts',
+    cancel_alert:'alert cancelled', get_live_chain:'live option chain' };
+  function checkedLine(lookups){
+    var seen = {}, parts = [];
+    (lookups || []).forEach(function(l){
+      var n = (NAMES[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
+      if (seen[n]) return; seen[n] = 1;
+      parts.push(l.ok ? n : n + ' (no data)');
+    });
+    return parts.join(' · ');
+  }
+  function drawNovoChart(spec){
+    try{
+      var xs = spec.x || [], ys = (spec.y || []).map(Number);
+      if (!ys.length || ys.length !== xs.length || ys.length > 60) return null;
+      for (var i = 0; i < ys.length; i++) if (!isFinite(ys[i])) return null;
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'margin:10px 0;padding:10px 12px;border:1px solid rgba(128,128,128,.25);border-radius:10px;';
+      if (spec.title){
+        var t = document.createElement('div'); t.textContent = String(spec.title).slice(0, 80);
+        t.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:.4px;opacity:.75;margin-bottom:6px;';
+        wrap.appendChild(t);
+      }
+      var W = 460, H = 140, P = 6, dpr = window.devicePixelRatio || 1;
+      var c = document.createElement('canvas');
+      c.width = W * dpr; c.height = H * dpr;
+      c.style.cssText = 'width:100%;max-width:' + W + 'px;height:' + H + 'px;display:block;';
+      var g = c.getContext('2d'); g.scale(dpr, dpr);
+      var mn = Math.min.apply(null, ys.concat([0])), mx = Math.max.apply(null, ys);
+      if (mx === mn) mx = mn + 1;
+      var toY = function(v){ return H - P - 12 - (v - mn) / (mx - mn) * (H - 2 * P - 24); };
+      g.strokeStyle = 'rgba(128,128,128,.35)';
+      g.beginPath(); g.moveTo(0, toY(Math.max(0, mn)) + .5); g.lineTo(W, toY(Math.max(0, mn)) + .5); g.stroke();
+      g.fillStyle = NCOLOR; g.strokeStyle = NCOLOR;
+      if (spec.type === 'line'){
+        g.lineWidth = 2; g.beginPath();
+        ys.forEach(function(v, i){
+          var x = P + i * (W - 2 * P) / Math.max(1, ys.length - 1);
+          i ? g.lineTo(x, toY(v)) : g.moveTo(x, toY(v));
+        });
+        g.stroke();
+      } else {
+        var bw = Math.max(2, (W - 2 * P) / ys.length - 2);
+        ys.forEach(function(v, i){
+          var x = P + i * (W - 2 * P) / ys.length, y0 = toY(Math.max(0, mn)), y1 = toY(v);
+          g.globalAlpha = .9;
+          g.fillRect(x, Math.min(y0, y1), bw, Math.max(1, Math.abs(y0 - y1)));
+        });
+        g.globalAlpha = 1;
+      }
+      g.fillStyle = 'rgba(140,150,160,.95)'; g.font = '9px system-ui';
+      g.textAlign = 'left';  g.fillText(String(xs[0]), P, H - 2);
+      g.textAlign = 'right'; g.fillText(String(xs[xs.length - 1]), W - P, H - 2);
+      g.fillText(String(Math.round(mx * 100) / 100), W - P, 9);
+      wrap.appendChild(c);
+      return wrap;
+    } catch(_e){ return null; }
+  }
+  function renderRich(el, text){
+    text = String(text == null ? '' : text);
+    var re = /\[\[novochart\s+(\{[\s\S]*?\})\]\]/g, last = 0, m;
+    while ((m = re.exec(text))){
+      if (m.index > last) el.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var spec = null; try { spec = JSON.parse(m[1]); } catch(_e){}
+      var cv = spec && drawNovoChart(spec);
+      el.appendChild(cv || document.createTextNode(''));
+      last = m.index + m[0].length;
+    }
+    el.appendChild(document.createTextNode(text.slice(last)));
+  }
+  function finishAnswer(d, _qel, el){
+    if (!d || !d.ok){
+      var em = (d && d.error) || 'NoVo is unavailable right now.', _et = Date.now();
+      if (el) el.remove();
+      add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
+      return;
+    }
+    var _at = Date.now();
+    var ansEl = el || add('', '');
+    ansEl.textContent = '';
+    renderRich(ansEl, d.answer);
+    var w = document.createElement('span'); w.className = 'when'; w.setAttribute('data-t', _at);
+    w.textContent = fmtWhen(_at);
+    try { w.title = new Date(_at).toLocaleString(); } catch(_e){}
+    ansEl.appendChild(w);
+    var _turn = { r: 'novo', x: d.answer, t: _at };
+    if (d.lookups && d.lookups.length){
+      var cl = checkedLine(d.lookups);
+      if (cl){ _turn.c = 'Checked: ' + cl; srcLine(_turn.c); }
+    }
+    if (d.sources && d.sources.length){
+      _turn.s = 'Sources: ' + d.sources.map(function(x){
+        return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' · ');
+      srcLine(_turn.s);
+    }
+    TURNS.push(_turn); saveTurns(); pinTop(_qel);
+  }
+  // paste or attach a chart image; it rides the next question
+  var PENDIMG = null;
+  function clearAttach(){ PENDIMG = null; var ch = document.getElementById('novo-ask-imgchip'); if (ch) ch.remove(); }
+  function setAttach(mime, data){
+    PENDIMG = { mime: mime, data: data };
+    var qi = document.getElementById('novo-ask-q'); if (!qi || !qi.form) return;
+    var ch = document.getElementById('novo-ask-imgchip');
+    if (!ch){
+      ch = document.createElement('div'); ch.id = 'novo-ask-imgchip';
+      ch.style.cssText = 'font-size:11px;padding:3px 9px;margin:5px 0 0;border:1px solid rgba(128,128,128,.4);border-radius:999px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;opacity:.85;';
+      ch.title = 'remove the attached image';
+      ch.onclick = clearAttach;
+      qi.form.parentNode.insertBefore(ch, qi.form.nextSibling);
+    }
+    ch.textContent = '📎 image attached ✕';
+  }
+  function ingestImage(file){
+    if (!file || String(file.type).indexOf('image/') !== 0) return;
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function(){
+      try {
+        var MAX = 1280, sc = Math.min(1, MAX / Math.max(img.width, img.height));
+        var cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(img.width * sc)); cv.height = Math.max(1, Math.round(img.height * sc));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        var du = cv.toDataURL('image/jpeg', 0.85);
+        setAttach('image/jpeg', du.slice(du.indexOf(',') + 1));
+      } catch(_e){}
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+  (function(){
+    var qi = document.getElementById('novo-ask-q'); if (!qi || !qi.form) return;
+    qi.addEventListener('paste', function(ev){
+      var its = (ev.clipboardData || {}).items || [];
+      for (var i = 0; i < its.length; i++){
+        if (its[i].type && its[i].type.indexOf('image/') === 0){ ingestImage(its[i].getAsFile()); ev.preventDefault(); break; }
+      }
+    });
+    var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
+    fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
+    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
+    bt.title = 'Attach a chart image — or just paste one';
+    bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
+    bt.onclick = function(){ fi.click(); };
+    qi.form.insertBefore(bt, qi);
+    qi.form.appendChild(fi);
+  })();
 
   // The transcript lived only in the DOM, so a reload erased what you asked and what it answered.
   // localStorage keeps it on the device -- nothing transits, no server state, no cost. It expires
@@ -1732,64 +1891,55 @@ window.addEventListener('hashchange', function(){
     pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
-      // WHICH MAP, AND WHICH COIN. This body was byte-identical to the equity dashboard's, so the
-      // endpoint could not tell the two apart: asked "what up?" here it opened with three bullets of
-      // SPY/QQQ/IWM dealer structure, never mentioned the coin filling the screen, and told a reader
-      // on a 24/7 market to enjoy the weekend off the screen. FEED means the cross-book feed is open
-      // rather than any one coin, so there is deliberately nothing focused to send.
+      // WHICH MAP, AND WHICH COIN. FEED means the cross-book feed is open rather than any one
+      // coin, so there is deliberately nothing focused to send.
       var focus = null;
       try {
         if (!FEED) focus = TOK
           ? { kind:'chain_token', symbol:TOK.symbol, address:TOK.address, network:TOK.network }
           : { kind:'coin', code:CUR };
       } catch(_e){}
+      var _body = { question: q, t: tok() || null, history: hist, surface: 'crypto', focus: focus, stream: true };
+      if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ question: q, t: tok() || null, history: hist, surface:'crypto', focus:focus })
+        body: JSON.stringify(_body)
       });
-      var d = await r.json();
-      _stopThinking();
-      if (!d.ok) {
-        var em = d.error || 'NoVo is unavailable right now.', _et = Date.now();
-        add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns();
-        pinTop(_qel);
-      }
-      else {
-        var _at = Date.now();
-        add('', d.answer, _at);
-        var _turn = { r: 'novo', x: d.answer, t: _at };
-        var log = document.getElementById('novo-ask-log');
-        // What it looked up, then what it read. A failed lookup is shown too \u2014 that is the
-        // difference between an answer you can check and one you have to take on faith.
-        if (d.lookups && d.lookups.length) {
-          var names = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
-            get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
-            get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date', get_track_record:'track record',
-            search_news:'headlines', get_base_rates:'base rates', get_market_internals:'market internals',
-            get_vol_history:'vol history', get_futures_positioning:'futures positioning',
-            get_recent_reads:'my recent reads', get_crypto_map:'crypto map', get_crypto_breadth:'crypto breadth',
-            get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts',
-            get_chain_history:'chain history', get_market_breadth:'market breadth',
-            describe_archive:'archive schema', query_archive:'the raw archives',
-            update_reader_memory:'remembered that', set_alert:'alert set', list_alerts:'your alerts',
-            cancel_alert:'alert cancelled', get_live_chain:'live option chain' };
-          var seen = {}, parts = [];
-          d.lookups.forEach(function(l){
-            var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
-            if (seen[n]) return; seen[n] = 1;
-            parts.push(l.ok ? n : n + ' (no data)');
-          });
-          if (parts.length) { _turn.c = 'Checked: ' + parts.join(' \u00b7 '); srcLine(_turn.c); }
+      var ctype = (r.headers.get('content-type') || '');
+      if (ctype.indexOf('text/event-stream') < 0) {
+        var d = await r.json();
+        _stopThinking();
+        finishAnswer(d, _qel, null);
+      } else {
+        var ansEl = null, chkEl = null, doneObj = null, errObj = null, acc = '';
+        var reader = r.body.getReader(), dec = new TextDecoder(), buf = '';
+        for(;;){
+          var st = await reader.read(); if (st.done) break;
+          buf += dec.decode(st.value, { stream: true });
+          var ix;
+          while ((ix = buf.indexOf('\n\n')) >= 0){
+            var frame = buf.slice(0, ix); buf = buf.slice(ix + 2);
+            if (frame.slice(0, 5) !== 'data:') continue;
+            var ev = null; try { ev = JSON.parse(frame.slice(5)); } catch(_e){ continue; }
+            if (ev.type === 'delta' && ev.text){
+              if (!ansEl){ _stopThinking(); ansEl = add('', ''); pinTop(_qel); }
+              acc += ev.text; ansEl.textContent = acc;
+            } else if (ev.type === 'lookups'){
+              if (!chkEl) chkEl = srcLine('');
+              chkEl.textContent = 'Checking: ' + checkedLine(ev.lookups);
+            } else if (ev.type === 'done'){ doneObj = ev; }
+            else if (ev.type === 'error'){ errObj = ev; }
+          }
         }
-        if (d.sources && d.sources.length) {
-          _turn.s = 'Sources: ' + d.sources.map(function(x){
-            return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' \u00b7 ');
-          srcLine(_turn.s);
+        _stopThinking();
+        if (chkEl) chkEl.remove();
+        if (errObj || !doneObj){
+          if (ansEl) ansEl.remove();
+          var em = (errObj && errObj.error) || 'NoVo is unavailable right now.', _et = Date.now();
+          add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
+        } else {
+          finishAnswer(doneObj, _qel, ansEl);
         }
-        TURNS.push(_turn); saveTurns();
-        // Re-pin rather than scroll to the bottom: the answer is now the tall thing on screen and
-        // you want to start reading it at its first line.
-        pinTop(_qel);
       }
     } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
