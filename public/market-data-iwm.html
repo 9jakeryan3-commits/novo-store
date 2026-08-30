@@ -118,6 +118,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lbl { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--cyan); margin-bottom:12px; }
   .h2 { font-size:clamp(20px,3vw,26px); font-weight:800; color:var(--txt1); letter-spacing:-.5px; margin:0 0 6px; }
   .sub { font-size:14.5px; color:var(--txt2); max-width:640px; margin:0 0 22px; }
+  /* Section heads and their standfirst are CENTERED, matching every other page on the site.
+     .sub carried margin:0 0 22px, so it hugged the left edge of a centered container while the
+     CTA and footer beside it were centered -- the mismatch Jake spotted on /market-data. */
+  .sec > .lbl, .sec > .h2, .sec > .sub { text-align: center; }
+  .sec > .sub { margin-left: auto; margin-right: auto; }
+
   .card { background:var(--navy2); border:1px solid var(--bdr); border-radius:14px; padding:22px; }
   .muted { color:var(--txt3); font-size:12px; }
 
