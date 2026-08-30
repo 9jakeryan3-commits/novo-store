@@ -469,6 +469,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="card" style="margin-top:16px;">
+    <div class="lbl">The crypto record</div>
+    <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">The same discipline, on the crypto map</h2>
+    <p class="plain">The crypto collector scores its own claims the way the engine scores the ten above &mdash; each one graded at its own horizon against the series it was made on, wins and losses both kept.</p>
+    <p class="sub" style="margin:0 0 12px;font-size:13.5px;">A young record, and it says so. A rate only counts once it has survived more than one market; until then the honest number is the independent coin-day count, not the percentage.</p>
+    <div id="tr-crypto"><div class="muted">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
     <h2 class="h2" style="font-size:19px;margin:0 0 8px;">How to read this</h2>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0 0 10px;">Every number here carries its window and its sample size, and if a claim stops holding this page says so. It is NoVo's own log, not an independent audit, and it is not a performance record of any trade &mdash; NoVo never takes a position, and nothing here says what price will do next.</p>
     <p style="font-size:14.5px;line-height:1.7;color:var(--txt2);margin:0;">If a claim stops holding, this page will say so.</p>
@@ -497,6 +505,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (!d || !d.ok) {
       $('tr-em').innerHTML = '<div class="muted">The record is unavailable right now.</div>';
       $('tr-flip').innerHTML = '';
+      // The late cards would otherwise sit on "Loading…" forever down this path.
+      var _cc0 = $('tr-crypto') && $('tr-crypto').closest('.card');
+      if (_cc0) _cc0.style.display = 'none';
       return;
     }
     // Everything the page scores, not just the live map -- otherwise the header says 23 sessions
@@ -829,6 +840,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // than no heading.
       var _pc = $('tr-price') && $('tr-price').closest('.card');
       if (_pc) _pc.style.display = 'none';
+    }
+
+    // ── the crypto half of the same record ────────────────────────────────────────────────────
+    // Served under d.crypto by /api/track-record from the collector's own scored claims. The
+    // rendering rule is inherited from the n=1 lesson above: an early reading NEVER wears a
+    // verdict or a colour — it gets the cell count and its own caveat, nothing else.
+    var cr = d.crypto;
+    if (cr && cr.baseRates && Object.keys(cr.baseRates).length) {
+      var CRK = {
+        gamma_pin: 'Spot finishes nearer the dominant call wall',
+        funding_extreme: 'Extreme funding squeezes the side paying it',
+        oi_quadrant: 'The price-and-open-interest quadrant carries forward',
+        cost_anomaly: 'An unusually wide Robinhood round-trip comes back in'
+      };
+      var chh = '';
+      Object.keys(cr.baseRates).sort().forEach(function(key){
+        var c = cr.baseRates[key]; if (!c) return;
+        var kind = key.split('@')[0], hor = key.split('@')[1] || '';
+        var label = CRK[kind] || kind.replace(/_/g, ' ');
+        var horTxt = hor ? hor.replace('m', '') + '-minute horizon' : '';
+        if (c.trustworthy) {
+          chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
+              + '<div style="display:flex;align-items:baseline;gap:12px;">'
+              +   '<span style="color:var(--txt2);font-size:13px;flex:1;min-width:0;line-height:1.4;">' + label + '</span>'
+              +   '<b style="color:var(--txt1);font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap;">' + c.rate + '%</b>'
+              + '</div>'
+              + '<div class="muted" style="font-size:11px;margin-top:3px;">' + nn(c.n_cells) + ' coin-days over '
+              + nn(c.n_days) + ' day' + (c.n_days === 1 ? '' : 's') + ' &middot; ' + nn(c.n_claims) + ' claims'
+              + (horTxt ? ' &middot; ' + horTxt : '') + '</div>'
+              + '</div>';
+        } else {
+          chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
+              + '<div style="display:flex;align-items:baseline;gap:12px;">'
+              +   '<span style="color:var(--txt2);font-size:13px;flex:1;min-width:0;line-height:1.4;">' + label + '</span>'
+              +   '<span title="not yet a base rate — too few independent samples" style="font-size:10px;font-weight:800;'
+              +   'letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;color:var(--txt3);'
+              +   'border:1px solid var(--txt3);border-radius:999px;padding:2px 8px;">early &middot; '
+              +   nn(c.n_cells) + ' coin-days</span>'
+              + '</div>'
+              + '<div class="muted" style="font-size:11px;margin-top:3px;line-height:1.5;">' + (c.caveat || 'accruing')
+              + (horTxt ? ' &middot; ' + horTxt : '') + '</div>'
+              + '</div>';
+        }
+      });
+      if (cr.openClaims != null) {
+        chh += '<div class="muted" style="font-size:11.5px;padding-top:8px;">' + nn(cr.openClaims)
+             + ' claims are open right now, awaiting their horizon.</div>';
+      }
+      $('tr-crypto').innerHTML = chh;
+    } else {
+      // Same rule as the price block: no data means no card, not an empty panel.
+      var _cc = $('tr-crypto') && $('tr-crypto').closest('.card');
+      if (_cc) _cc.style.display = 'none';
     }
 
     var pz = d.pulse_signal || {};

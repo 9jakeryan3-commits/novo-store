@@ -44,9 +44,28 @@ module.exports = async (req, res) => {
   // on every engine publish, so it revalidates in a minute and serves stale only while refreshing.
   res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=600");
   if (!r) return res.status(200).json({ ok: false, note: "unavailable" });
-  let snap = null;
+  let snap = null, ch = null;
   try { snap = await r.get(KEY); } catch (_) { snap = null; }
+  // Crypto is additive: if this read fails the equity record still serves whole.
+  try { ch = await r.get("crypto:map:history"); } catch (_) { ch = null; }
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+  if (typeof ch === "string") { try { ch = JSON.parse(ch); } catch (_) { ch = null; } }
   if (!snap) return res.status(200).json({ ok: false, note: "not published yet" });
+
+  // The CRYPTO half of the same record. The collector scores its own claims (gamma pin, funding
+  // extreme, OI quadrant, cost anomaly) exactly the way the equity engine scores its own — and a
+  // track record that shows one asset class while the analyst runs two reads as curated. Only the
+  // crypto-class aggregates ride here; each row carries `trustworthy` and its own caveat, and a
+  // row that has not survived more than one market says so instead of wearing a hit rate.
+  if (ch && ch.base_rates && Object.keys(ch.base_rates).length) {
+    snap.crypto = {
+      baseRates: ch.base_rates,
+      openClaims: ch.open_claims ?? null,
+      asOf: ch.received || null,
+      note: "Self-scored crypto claims, graded at their own horizons against the series each " +
+            "claim was made on. n_cells (independent coin-days) is the denominator that matters; " +
+            "a row with trustworthy:false is an early reading, not a base rate.",
+    };
+  }
   return res.status(200).json(snap);
 };

@@ -222,8 +222,10 @@ const declarations = [
       "real, how THE LINE's level-breaks resolved, the lean NoVo states on the open, and the pulse against the next " +
       "session. Several claims ALSO carry an `archive` block -- the same question re-asked over ~4,500 reconstructed " +
       "sessions back to 2008, graded on the session after each close. Quote it as a backtest, with its window and n, " +
-      "and never merged with the live figure beside it. " +
-      "session — each with its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
+      "and never merged with the live figure beside it. The `crypto` block is the crypto half of the same record — " +
+      "my self-scored crypto claims by kind (gamma pin, funding extreme, OI quadrant, cost anomaly), where n_cells " +
+      "(independent coin-days) is the real denominator and trustworthy:false means an early reading, never a base rate. " +
+      "Each claim carries its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
     parameters: { type: "object", properties: {} },
   },
@@ -795,8 +797,26 @@ function makeExecutors(ctx = {}) {
       };
     }
     const lr = snap.lean_record || {};
+    // THE CRYPTO HALF OF THE SAME RECORD. The collector self-scores its claims (gamma pin,
+    // funding extreme, OI quadrant, cost anomaly) exactly the way the engine scores the equity
+    // ones. Additive: if the crypto rollup is missing, the equity record still serves whole.
+    let cryptoRec = null;
+    try {
+      const ch = await _cryptoHist();
+      if (ch && ch.base_rates && Object.keys(ch.base_rates).length) {
+        cryptoRec = {
+          baseRates: ch.base_rates,
+          openClaims: ch.open_claims ?? null,
+          note: "self-scored crypto claims, graded at their own horizons against the series each " +
+                "claim was made on. n_cells (independent coin-days) is the denominator that " +
+                "matters; a row with trustworthy:false is an early reading — give the cell count " +
+                "and the caveat, never the percentage alone.",
+        };
+      }
+    } catch (_) { cryptoRec = null; }
     return {
       tickers: out,
+      crypto: cryptoRec,
       // the most public claim the product makes: the direction NoVo commits to on the open, graded
       // open-to-close. Only the Pre-Market Primer counts -- Mid-Day reads a session already half
       // resolved, the Closing Bell is a summary, and the Weekly takes a view on the week.
