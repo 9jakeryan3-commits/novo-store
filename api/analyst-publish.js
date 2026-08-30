@@ -252,13 +252,13 @@ function _levelsTable(levels) {
   const col = (t, items, c) => `<td style="vertical-align:top;width:50%;padding:0 5px;"><div style="border:1px solid #2e3036;border-top:2px solid ${c};border-radius:8px;overflow:hidden;"><div style="background:#26272c;padding:7px 12px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${c};">${t}</div><table style="width:100%;border-collapse:collapse;">${rows(items, c)}</table></div></td>`;
   return `<div style="margin:24px 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#eaf3ff;">Key Levels</div><table style="width:100%;border-collapse:separate;border-spacing:0;"><tr>${col('Resistance', rs, '#f87171')}${col('Support', sp, '#34d399')}</tr></table>`;
 }
-function _page(t, desc, canon, inner, extraHead) {
+function _page(t, desc, canon, inner, extraHead, crumbs) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${esc(canon)}"><meta property="og:title" content="${esc(t)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="article"><meta property="og:url" content="${esc(canon)}"><meta property="og:site_name" content="NoVo Options Trading"><meta property="og:image" content="${SITE}/og-default.png?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@0dte_NoVo"><meta name="twitter:title" content="${esc(t)}"><meta name="twitter:description" content="${esc(desc)}"><meta name="twitter:image" content="${SITE}/og-default.png?v=3"><link rel="icon" href="${SITE}/favicon.ico?v=2">${extraHead || ''}
-<style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}</style></head><body><div class="wrap">
-<div class="top"><a class="brand" href="${SITE}/analyst"><img src="${SITE}/novo-logo-light.png?v=5" alt="NoVo Options Trading"></a><a class="cta" href="${SITE}/analyst">Get it live &mdash; free 7-day trial</a></div>
+<style>*{box-sizing:border-box;}body{margin:0;background:#101013;color:#c2d2e6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;}a{color:#22d3ee;text-decoration:none;}.wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px;flex-wrap:wrap;}.brand img{height:26px;width:auto;display:block;}.cta{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:9px;white-space:nowrap;}h1{color:#eaf3ff;font-size:clamp(26px,4.5vw,34px);letter-spacing:-1px;line-height:1.15;margin:2px 0 10px;}.kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#22d3ee;}.muted{color:#6f8bab;font-size:13px;}.lead{color:#9fb6d1;font-size:15.5px;max-width:640px;}.card{background:#1c1d21;border:1px solid #2e3036;border-radius:12px;padding:26px;margin:22px 0;}.body{white-space:pre-wrap;font-size:16px;color:#c2d2e6;}.body b{color:#22d3ee;font-weight:700;}.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin:0 0 6px;}img.chart{width:100%;border-radius:8px;border:1px solid #2e3036;display:block;margin:0 0 20px;}ul.rows{list-style:none;padding:0;margin:26px 0 0;}ul.rows li{border:1px solid #2e3036;border-radius:11px;padding:18px 20px;margin-bottom:14px;background:#212227;}ul.rows a.rt{color:#eaf3ff;font-weight:800;font-size:18px;letter-spacing:-.3px;}.subcta{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.28);border-radius:12px;padding:26px;text-align:center;margin-top:36px;}.subcta a{background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;padding:12px 28px;border-radius:10px;display:inline-block;margin-top:14px;}.disc{font-size:11.5px;color:#6f8bab;margin-top:30px;line-height:1.6;}.sitehead{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid #2e3036;background:rgba(18,19,22,.94);}.sitehead .brand img{height:26px;width:auto;display:block;}.sitenav{display:flex;gap:18px;flex:1;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-ms-overflow-style:none;}.sitenav::-webkit-scrollbar{display:none;}.sitenav a{color:#9fb6d1;font-size:13.5px;font-weight:700;}.sitenav a:hover{color:#22d3ee;}.crumbs{font-size:12.5px;color:#6f8bab;font-weight:600;padding:14px 20px 2px;max-width:760px;margin:0 auto;}.crumbs a{color:#8aacc8;}.crumbs .sep{margin:0 7px;}.sitefoot{border-top:1px solid #2e3036;background:#0c0c0f;margin-top:40px;}.footin{max-width:960px;margin:0 auto;padding:34px 20px 46px;}.footcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:22px;}.footcols b{display:block;color:#eaf3ff;font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}.footcols a{display:block;color:#9fb6d1;font-size:13.5px;padding:4px 0;}.footcols a:hover{color:#22d3ee;}.srch{display:flex;gap:8px;margin:22px 0 4px;}.srch input{flex:1;background:#1c1d21;border:1px solid #2e3036;border-radius:9px;padding:11px 14px;color:#eaf3ff;font-size:14.5px;font-family:inherit;}.srch input::placeholder{color:#6f8bab;}.srch button{background:#22d3ee;color:#04121a;font-weight:800;border:0;border-radius:9px;padding:11px 18px;font-size:14px;cursor:pointer;font-family:inherit;}.more{display:block;text-align:center;border:1px solid #2e3036;background:#1c1d21;border-radius:10px;padding:14px;margin-top:18px;color:#eaf3ff;font-weight:800;font-size:14.5px;cursor:pointer;width:100%;font-family:inherit;}.more:hover{border-color:#22d3ee;color:#22d3ee;}</style></head><body><div class="wrap">
+<header class="sitehead"><a class="brand" href="${SITE}/"><img src="${SITE}/novo-logo-light.png?v=5" alt="NoVo Options Trading"></a><nav class="sitenav" aria-label="Main"><a href="${SITE}/market-data">Market Data</a><a href="${SITE}/analyst">Analyst</a><a href="${SITE}/trader">Trader</a><a href="${SITE}/crypto">Crypto</a><a href="${SITE}/journal/">Journal</a></nav><a class="cta" href="${SITE}/plans">Plans</a></header>${crumbs || ''}
 ${inner}
-<div class="disc">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss.</div>
-</div></body></html>`;
+</div>
+<footer class="sitefoot"><div class="footin"><div class="footcols"><div><b>Product</b><a href="${SITE}/analyst">Analyst</a><a href="${SITE}/trader">Trader</a><a href="${SITE}/crypto">Crypto Market Map</a><a href="${SITE}/plans">Plans</a></div><div><b>Free</b><a href="${SITE}/market-data">Market data</a><a href="${SITE}/journal/">The Journal</a><a href="${SITE}/options-101">Options 101</a><a href="${SITE}/0dte">0DTE guide</a></div><div><b>Company</b><a href="${SITE}/about">About</a><a href="${SITE}/faq">FAQ</a><a href="${SITE}/help">Help</a><a href="${SITE}/security">Security</a></div><div><b>Legal</b><a href="${SITE}/license">Terms</a><a href="${SITE}/privacy">Privacy</a><a href="${SITE}/risk-disclosure">Risk</a><a href="${SITE}/refund-policy">Refunds</a></div></div><div class="disc">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss. NoVo Options Trading LLC.</div></div></footer></body></html>`;
 }
 async function handleArchive(req, res) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
@@ -300,11 +300,74 @@ async function handleArchive(req, res) {
   let idx = await _loadJson('analyst-archive/index.json', token);
   if (!Array.isArray(idx)) idx = [];
   const pub = idx.filter(e => !e.publishAfter || now >= e.publishAfter).sort((a, b) => (b.publishAfter || 0) - (a.publishAfter || 0));
-  const rows = pub.length
-    ? pub.map(e => `<li><a class="rt" href="${SITE}/analyst/archive/${esc(e.slug)}">${esc(e.title)}</a><div class="muted" style="margin:4px 0 8px;">${esc(e.dateLabel || '')}</div><div style="font-size:14px;color:#9fb6d1;">${esc(e.excerpt || '')}&hellip;</div></li>`).join('')
-    : '<p class="muted" style="margin-top:24px;">Past reads will appear here after each session.</p>';
-  const inner = `<div class="kicker">The Archive</div><h1>NoVo Analyst &mdash; past market reads</h1><p class="lead">Every morning desk note, closing read, and week-ahead outlook &mdash; SPY dealer positioning, the gamma flip, the levels that matter, and what to watch. Released here after each session; <a href="${SITE}/analyst">subscribers get them live before the bell &rarr;</a></p><ul class="rows">${rows}</ul><div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">Get these live, not delayed.</div><div class="muted" style="margin-top:6px;">The read desks pay hundreds for, in your inbox before the bell &mdash; $129/mo, 7-day free trial.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div>`;
-  return res.status(200).send(_page('NoVo Analyst — Archive of SPY market reads', 'Past NoVo Analyst desk notes: SPY dealer positioning, gamma levels, structural bias, and what to watch — released after each session.', `${SITE}/analyst/archive`, inner));
+
+  // Search the WHOLE index, not the rows on screen. Title, date label and slug all count, because
+  // a session can be looked for as "2026-08-28", "Aug 28", "the close" or "week ahead".
+  const q = (req.query && req.query.q ? String(req.query.q) : '').trim().slice(0, 60);
+  const ql = q.toLowerCase();
+  const hits = ql
+    ? pub.filter(e => (`${e.title || ''} ${e.dateLabel || ''} ${e.slug || ''}`).toLowerCase().includes(ql))
+    : pub;
+
+  const PER = 24;
+  const pages = Math.max(1, Math.ceil(hits.length / PER));
+  let page = parseInt((req.query && req.query.page) || '1', 10);
+  if (!Number.isFinite(page) || page < 1) page = 1;
+  if (page > pages) page = pages;
+  const slice = hits.slice((page - 1) * PER, page * PER);
+
+  const row = e => `<li><a class="rt" href="${SITE}/analyst/archive/${esc(e.slug)}">${esc(e.title)}</a><div class="muted" style="margin:4px 0 8px;">${esc(e.dateLabel || '')}</div><div style="font-size:14px;color:#9fb6d1;">${esc(e.excerpt || '')}&hellip;</div></li>`;
+
+  // ?partial=1 returns rows only, for the load-more fetch. Same code path as the full render, so
+  // the appended rows can never drift from the ones rendered server-side.
+  if (req.query && 'partial' in req.query) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(slice.map(row).join(''));
+  }
+
+  const qs = extra => {
+    const p = [];
+    if (q) p.push('q=' + encodeURIComponent(q));
+    if (extra) p.push(extra);
+    return p.length ? '?' + p.join('&') : '';
+  };
+
+  const rows = slice.length ? slice.map(row).join('')
+    : (q ? '' : '<p class="muted" style="margin-top:24px;">Past reads will appear here after each session.</p>');
+
+  const empty = (q && !slice.length)
+    ? `<p class="muted" style="margin-top:24px;">Nothing matches &ldquo;${esc(q)}&rdquo;. <a href="${SITE}/analyst/archive">Show every read &rarr;</a></p>`
+    : '';
+
+  const more = page < pages
+    ? `<a class="more" id="more" href="${SITE}/analyst/archive${qs('page=' + (page + 1))}" data-next="${page + 1}" data-pages="${pages}" data-q="${esc(q)}">Load more &mdash; ${hits.length - page * PER} older</a>`
+    : '';
+
+  const search = `<form class="srch" method="get" action="${SITE}/analyst/archive" role="search"><input type="search" name="q" value="${esc(q)}" placeholder="Search by date or title &mdash; 2026-08-28, week ahead" aria-label="Search the archive"><button type="submit">Search</button></form>`;
+
+  const count = q
+    ? `<div class="muted">${hits.length} read${hits.length === 1 ? '' : 's'} matching &ldquo;${esc(q)}&rdquo; &middot; <a href="${SITE}/analyst/archive">clear</a></div>`
+    : `<div class="muted">${hits.length} read${hits.length === 1 ? '' : 's'}${pages > 1 ? ` &middot; page ${page} of ${pages}` : ''}</div>`;
+
+  const inner = `<div class="kicker">The Archive</div><h1>NoVo Analyst &mdash; past market reads</h1><p class="lead">Every morning desk note, closing read, and week-ahead outlook &mdash; SPY dealer positioning, the gamma flip, the levels that matter, and what to watch. Released here after each session; <a href="${SITE}/analyst">subscribers get them live before the bell &rarr;</a></p>${search}${count}<ul class="rows" id="rows">${rows}</ul>${empty}${more}<div class="subcta"><div style="color:#eaf3ff;font-weight:800;font-size:19px;">Get these live, not delayed.</div><div class="muted" style="margin-top:6px;">The read desks pay hundreds for, in your inbox before the bell &mdash; $129/mo, 7-day free trial.</div><a href="${SITE}/analyst">Start a 7-day free trial &rarr;</a></div>`;
+
+  // The button is a real link. This upgrades it in place and falls back to being a link if the
+  // fetch fails -- a load-more that breaks into a dead button is worse than one that navigates.
+  const js = `<script>(function(){var b=document.getElementById('more');if(!b)return;b.addEventListener('click',function(ev){ev.preventDefault();var n=+b.dataset.next,t=+b.dataset.pages,q=b.dataset.q?'&q='+encodeURIComponent(b.dataset.q):'';b.textContent='Loading\u2026';fetch('/analyst/archive?partial=1&page='+n+q,{headers:{'Accept':'text/html'}}).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(h){document.getElementById('rows').insertAdjacentHTML('beforeend',h);if(n>=t){b.remove();}else{b.dataset.next=n+1;b.href='/analyst/archive?page='+(n+1)+q;b.textContent='Load more';}}).catch(function(){window.location=b.href;});});})();</script>`;
+
+  const canon = `${SITE}/analyst/archive${page > 1 ? '?page=' + page : ''}`;
+  // A search result is a slice of a page that already exists; it should not compete with it.
+  const head = (q ? '<meta name="robots" content="noindex, follow">' : '')
+    + (page > 1 ? `<link rel="prev" href="${SITE}/analyst/archive${qs(page - 1 > 1 ? 'page=' + (page - 1) : '')}">` : '')
+    + (page < pages ? `<link rel="next" href="${SITE}/analyst/archive${qs('page=' + (page + 1))}">` : '')
+    + js;
+
+  const crumbs = `<nav class="crumbs" aria-label="Breadcrumb"><a href="${SITE}/">Home</a><span class="sep">&rsaquo;</span><a href="${SITE}/analyst">Analyst</a><span class="sep">&rsaquo;</span><span>The Archive</span></nav>`;
+
+  return res.status(200).send(_page(
+    page > 1 ? `NoVo Analyst — Archive of SPY market reads, page ${page}` : 'NoVo Analyst — Archive of SPY market reads',
+    'Past NoVo Analyst desk notes: SPY dealer positioning, gamma levels, structural bias, and what to watch — released after each session.',
+    canon, inner, head, crumbs));
 }
 
 export default async function handler(req, res) {
