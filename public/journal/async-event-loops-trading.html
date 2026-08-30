@@ -65,7 +65,7 @@
     <p>The market doesn't wait for your code to finish a slow task. An event-driven system responds to a new tick or a fill the moment it lands, which is exactly the <a href="/journal/latency-in-retail-trading.html">low-latency</a> behavior short-term execution demands. A blocking design would miss the window — busy waiting on the last request while the setup passes.</p>
     <p class="pull">A blocking script waits its turn. An event loop is already reacting while the naive version is still on hold.</p>
     <h2>The takeaway</h2>
-    <p>You don't need to write async code to benefit from understanding it — it explains <em>why</em> a properly built system can react to a <a href="/journal/why-0dte-fills-are-hard.html">fast SPY setup</a> that a spreadsheet-and-alerts workflow would miss. This event-driven core is the kind of engineering a serious execution tool is built on, and it's part of what lets <a href="/journal/how-novo-reads-the-market.html">NoVo</a> perceive and act in the same continuous beat.</p>
+    <p>You don't need to write async code to benefit from understanding it — it explains <em>why</em> a properly built system can react to a <a href="/journal/why-0dte-fills-are-hard.html">fast SPY setup</a> that a spreadsheet-and-alerts workflow would miss. That same event-driven core is what lets <a href="/journal/how-novo-reads-the-market.html">NoVo</a> recompute the dealer map continuously through the session instead of on a timer.</p>
   </div>
 
   <div class="cta">

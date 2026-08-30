@@ -503,7 +503,10 @@ nav { position: relative; }
   @keyframes traderGlow { 0%,100% { box-shadow: 0 0 14px rgba(16,185,129,0.22); } 50% { box-shadow: 0 0 30px rgba(16,185,129,0.55); } }
   .trader-glow { animation: traderGlow 2.6s ease-in-out infinite; }
   .trader-glow:hover { border-color: #10b981 !important; background: rgba(16,185,129,0.08) !important; }
-  @media (prefers-reduced-motion:reduce){ .analyst-glow, .trader-glow { animation: none } }
+  @keyframes cryptoGlow { 0%,100% { box-shadow: 0 0 14px rgba(167,139,250,0.22); } 50% { box-shadow: 0 0 30px rgba(167,139,250,0.55); } }
+  .crypto-glow { animation: cryptoGlow 2.6s ease-in-out infinite; }
+  .crypto-glow:hover { border-color: #a78bfa !important; background: rgba(167,139,250,0.08) !important; }
+  @media (prefers-reduced-motion:reduce){ .analyst-glow, .trader-glow, .crypto-glow { animation: none } }
   /* /ai -- page-specific. Everything else rides the shared sheet. */
   .ask-chip{display:inline-block;font-size:13px;color:var(--txt2);background:rgba(255,255,255,.03);
     border:1px solid var(--bdr);border-radius:999px;padding:7px 13px}
@@ -751,8 +754,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:26px;">
       <a href="/analyst" class="btn-secondary analyst-glow" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">Analyst &mdash; the map and the read, $129/mo &rarr;</a>
       <a href="/trader" class="btn-secondary trader-glow" style="border-color:#10b981;color:#10b981;text-decoration:none;">Trader &mdash; the live map, $209/mo &rarr;</a>
+      <a href="/crypto" class="btn-secondary crypto-glow" style="border-color:#a78bfa;color:#a78bfa;text-decoration:none;">Crypto Market Map &mdash; the map on crypto, $79/mo &rarr;</a>
     </div>
-    <p style="font-size:13.5px;color:var(--txt3);margin-top:18px;">Analyst starts with a 7-day free trial &middot; you decide every trade &middot; market data included &middot; cancel any time</p>
+    <p style="font-size:13.5px;color:var(--txt3);margin-top:18px;">7-day free trial on Analyst and Crypto &middot; you decide every trade &middot; market data included &middot; cancel any time</p>
   </div>
 </section>
 

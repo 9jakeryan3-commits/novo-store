@@ -65,7 +65,7 @@
     <p>Consider the traps: a network stutter mid-order (did it go through? retrying could double it — so writes aren't blindly retried); a <a href="/journal/partial-fills-explained.html">partial fill</a> that must be reconciled to the real position; a rate limit that must be backed off, not hammered. Each is a place where a naive loop corrupts its own state or duplicates an order. Handling them is unglamorous and non-negotiable.</p>
     <p class="pull">A trading system isn't judged on the day everything works. It's judged on the day the feed dies mid-position.</p>
     <h2>Why it matters</h2>
-    <p>Markets are messy and infrastructure fails at the worst moments. A system built to fail safe — pausing on stale data, reconciling true fills, never double-submitting, recovering cleanly on restart — is one you can actually trust. That defensive engineering is the boring backbone of <a href="/journal/how-novo-decides-executes-exits.html">NoVo's execution</a>: it protects the account precisely when the plumbing gets ugly.</p>
+    <p>Markets are messy and infrastructure fails at the worst moments. A system built to fail safe — pausing on stale data, reconciling true fills, never double-submitting, recovering cleanly on restart — is one you can actually trust. That defensive engineering is the boring backbone of <a href="/journal/how-novo-reads-the-market.html">NoVo's engine</a>: it is why the map goes quiet on stale data instead of drawing a level it can no longer stand behind.</p>
   </div>
 
   <div class="cta">
