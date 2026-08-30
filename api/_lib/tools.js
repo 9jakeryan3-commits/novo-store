@@ -329,6 +329,44 @@ const declarations = [
     },
   },
   {
+    name: "set_alert",
+    description:
+      "Set a one-shot push alert FOR THIS READER on a level crossing — 'tell me if SPY crosses " +
+      "its flip', 'ping me when VIX tops 20', 'alert me if BTC breaks 80000'. Kinds: " +
+      "equity_level (SPY/QQQ/IWM spot vs a price OR vs flip/call_wall/put_wall resolved live), " +
+      "vix_level, crypto_level (a coin vs a price). Fires ONCE as a push notification, then " +
+      "retires; expires in 7 days; 10 active max. The push states the crossing and nothing else " +
+      "— an alert is a notification, never advice, so never accept one framed as 'tell me when " +
+      "to buy'. Confirm what was set by reading back the tool's `watching`, and if it reports no " +
+      "registered device, tell them to toggle Live push alerts on the dashboard once.",
+    parameters: {
+      type: "object",
+      properties: {
+        kind: { type: "string", enum: ["equity_level", "vix_level", "crypto_level"] },
+        ticker: { type: "string", description: "SPY, QQQ or IWM (equity_level only)." },
+        coin: { type: "string", description: "Asset code, e.g. BTC (crypto_level only)." },
+        level: { type: "string", description: "A price number, or for equity_level one of: flip, call_wall, put_wall." },
+        direction: { type: "string", enum: ["above", "below"] },
+        note: { type: "string", description: "Optional label echoed in the push, their words." },
+      },
+      required: ["kind", "level", "direction"],
+    },
+  },
+  {
+    name: "list_alerts",
+    description: "This reader's active alerts — ids, what each watches, hours to expiry. Use for 'what alerts do I have'.",
+    parameters: { type: "object", properties: {} },
+  },
+  {
+    name: "cancel_alert",
+    description: "Cancel one of this reader's alerts by id, or all of them with id='all'.",
+    parameters: {
+      type: "object",
+      properties: { id: { type: "string", description: "The alert id from list_alerts/set_alert, or 'all'." } },
+      required: ["id"],
+    },
+  },
+  {
     name: "update_reader_memory",
     description:
       "Remember or forget something THIS reader told you about their market interests and " +
@@ -385,6 +423,24 @@ const declarations = [
         max_rows: { type: "number", description: "Row cap, 1-200. Default 200." },
       },
       required: ["db", "sql"],
+    },
+  },
+  {
+    name: "get_live_chain",
+    description:
+      "The LIVE option chain the dealer map was just computed from — every strike within 10% of " +
+      "spot on SPY, QQQ or IWM, with side, expiration, OI, volume, IV, delta, bid and ask, " +
+      "refreshed each ~60s publish. Use for 'what's IV at the 660 strike', 'where is OI stacked " +
+      "today', 'how wide is the 655 call market'. Pass strike to get just that strike's rows. " +
+      "This is the raw ladder behind get_gamma_profile's summary; absent means the publisher is " +
+      "idle or offline — say so.",
+    parameters: {
+      type: "object",
+      properties: {
+        ticker: { type: "string", enum: TICKERS },
+        strike: { type: "number", description: "Optional: return only rows at this strike." },
+      },
+      required: ["ticker"],
     },
   },
   {
@@ -994,6 +1050,25 @@ function makeExecutors(ctx = {}) {
     return (h && h.coins) ? h : null;
   }
 
+  async function set_alert(args = {}) {
+    const { setAlert } = require("./alerts.js");
+    if (!ctx.email) return { error: "no signed-in reader" };
+    const a = { ...args };
+    // level arrives as a string in the schema; a number-looking one is a price
+    if (a.level != null && /^[\d.]+$/.test(String(a.level).trim())) a.level = Number(a.level);
+    return setAlert(ctx.email, a);
+  }
+  async function list_alerts() {
+    const { listAlerts } = require("./alerts.js");
+    if (!ctx.email) return { error: "no signed-in reader" };
+    return listAlerts(ctx.email);
+  }
+  async function cancel_alert(args = {}) {
+    const { cancelAlert } = require("./alerts.js");
+    if (!ctx.email) return { error: "no signed-in reader" };
+    return cancelAlert(ctx.email, args);
+  }
+
   async function update_reader_memory(args = {}) {
     const { updateMemory, indexMember } = require("./member-memory.js");
     if (!ctx.email) return { error: "no signed-in reader" };
@@ -1041,6 +1116,26 @@ function makeExecutors(ctx = {}) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ db: k, sql: String(sql || ""), max_rows }),
     });
+  }
+
+  async function get_live_chain({ ticker, strike } = {}) {
+    const tk = okTicker(ticker);
+    if (!tk) return { error: "ticker must be SPY, QQQ or IWM" };
+    const out = await _archiveFetch(`/api/archive/chain?ticker=${tk}`, { method: "GET" });
+    if (out && Array.isArray(out.rows) && strike != null && isFinite(Number(strike))) {
+      const want = Number(strike);
+      out.rows = out.rows.filter((r) => Math.abs(Number(r[0]) - want) < 0.005);
+      if (!out.rows.length) out.note = `no rows at strike ${want} inside the ±10% window`;
+    }
+    if (out && Array.isArray(out.rows) && out.rows.length > 60 && strike == null) {
+      // unfiltered ladders are large; keep the strikes nearest spot
+      const spot = Number(out.spot) || 0;
+      out.rows = out.rows.sort((a, b) => Math.abs(a[0] - spot) - Math.abs(b[0] - spot)).slice(0, 60)
+                         .sort((a, b) => a[0] - b[0]);
+      out.trimmed_to = 60;
+    }
+    if (out && out.at) out.ageSeconds = Math.max(0, Math.round((Date.now() - out.at) / 1000));
+    return out;
   }
 
   async function get_chain_history({ symbol, address, network } = {}) {
@@ -1325,6 +1420,7 @@ function makeExecutors(ctx = {}) {
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
     describe_archive, query_archive, update_reader_memory,
+    set_alert, list_alerts, cancel_alert, get_live_chain,
   };
 }
 

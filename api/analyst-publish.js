@@ -544,6 +544,21 @@ export default async function handler(req, res) {
       const key = 'analyst-push/' + crypto.createHash('sha256').update(String(sub.endpoint)).digest('hex').slice(0, 40) + '.json';
       await put(key, JSON.stringify({ sub, at: Date.now(), tier: _tier }),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+      // ALSO index the subscription by MEMBER, so the reader's own alerts and digests can
+      // reach the reader — the blob store above is the broadcast fan-out, this is the
+      // person-addressed lane. Deduped by endpoint, capped at 5 devices.
+      try {
+        const r2 = kv();
+        if (r2) {
+          const ehash = crypto.createHash('sha256').update(_pEmail.trim().toLowerCase()).digest('hex').slice(0, 16);
+          let cur = null;
+          try { cur = await r2.get('push:u:' + ehash); } catch (_) { cur = null; }
+          if (typeof cur === 'string') { try { cur = JSON.parse(cur); } catch (_) { cur = null; } }
+          const list = (Array.isArray(cur) ? cur : []).filter((s) => s && s.endpoint !== sub.endpoint);
+          list.push(sub);
+          await r2.set('push:u:' + ehash, JSON.stringify(list.slice(-5)), { ex: 270 * 24 * 3600 });
+        }
+      } catch (_) { /* the personal index is best-effort; the broadcast path above stands */ }
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }
@@ -844,6 +859,13 @@ async function _promotePublicLevels(state) {
       await _recordAtmIv(state);
       await _promotePublicLevels(state);
       await _recordProfiles(state);
+      // Reader-defined alerts ride the publish that already happens — evaluated against the
+      // same numbers everyone sees, fired once, never advice. Best-effort: a broken alert
+      // pass must never cost the publish.
+      try {
+        const alerts = (await import('./_lib/alerts.js')).default;
+        await alerts.evaluateEquity(state);
+      } catch (_) {}
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }

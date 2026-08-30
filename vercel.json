@@ -658,6 +658,10 @@
     {
       "path": "/api/reconcile-subs",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/daily-digest",
+      "schedule": "0 12 * * *"
     }
   ],
   "headers": [

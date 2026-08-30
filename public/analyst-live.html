@@ -1712,7 +1712,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
             get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts',
             get_chain_history:'chain history', get_market_breadth:'market breadth',
             describe_archive:'archive schema', query_archive:'the raw archives',
-            update_reader_memory:'remembered that' };
+            update_reader_memory:'remembered that', set_alert:'alert set', list_alerts:'your alerts',
+            cancel_alert:'alert cancelled', get_live_chain:'live option chain' };
           var seen = {}, parts = [];
           d.lookups.forEach(function(l){
             var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');

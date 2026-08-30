@@ -104,6 +104,8 @@ module.exports = async (req, res) => {
     // 2h TTL: long enough to survive a collector restart or a quiet stretch, short enough
     // that a dead box shows as stale rather than silently serving yesterday's map.
     await r.set("crypto:map:live", payload, { ex: 7200 });
+    // Reader-defined crypto price alerts, evaluated on the pass that just landed.
+    try { await require("./_lib/alerts.js").evaluateCrypto(b); } catch (_) {}
     const shape = {};
     for (const k of Object.keys(b)) {
       const v = b[k];
