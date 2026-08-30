@@ -269,7 +269,7 @@ function analystWelcomeHtml(connectUrl) {
       <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">Your first read arrives with the next market session.</p>
       <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.07);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Your live dashboard</div>
-        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Watch the dealer map update through the session &mdash; the live <b style="color:#eaf3ff">SPY / QQQ / SPX</b> chart with dealer levels, net GEX, Zero-Gamma, walls, expected move &amp; skew, plus the &lsquo;The Line&rsquo; feed. Install it as an app and turn on push alerts.</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Watch the dealer map update through the session &mdash; the live <b style="color:#eaf3ff">SPY / QQQ / IWM</b> chart with dealer levels, net GEX, Zero-Gamma, walls, expected move &amp; skew, plus the &lsquo;The Line&rsquo; feed. Install it as an app and turn on push alerts.</div>
         <a href="https://novo-options.trade/analyst/live" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your live dashboard &rarr;</a>
         <div style="font-size:12px;color:#6f8bab;line-height:1.5;margin-top:12px;">Sign in with this email &mdash; we'll send a one-tap link.</div>
       </div>
