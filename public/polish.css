@@ -112,18 +112,14 @@ nav.is-scrolled {
 .crumbs .sep{color:#7d97b8;margin:0 7px;}
 .crumbs .cur{color:#7d97b8;}
 
-/* GONE ON THE MAIN PAGES. Jake's call, and the right one.
+/* The breadcrumb is a <nav>, and every page styles its HEADER with a bare `nav {}` type selector --
+   sticky, z-index:100, a background, a blur, a bottom border. All of it landed on the breadcrumb
+   too, so it painted a bar across the ticker and, with the mobile menu open, sliced through the
+   panel: header nav and crumbs both sat at z-index 100 in the root, so DOM ORDER decided and the
+   crumbs came second. The panel's own z-index:2000 could not save it -- that 2000 is local to the
+   header nav's stacking context, so the whole menu still painted at 100.
 
-   It was a <nav>, and every page styles its HEADER with a bare `nav {}` type selector -- sticky,
-   z-index:100, a background, a blur, a bottom border. All of it landed on the breadcrumb, so it
-   painted a bar across the ticker and sliced through the mobile menu panel. Undoing that
-   inheritance stopped it covering the menu but left it still colliding with the ticker row on a
-   phone, and on a nine-page marketing site a "Home > Analyst" trail was never worth the pixels: the
-   header nav already goes everywhere it points.
-
-   This is main pages ONLY. polish.css is not loaded by the journal, whose 1,196 articles keep their
-   breadcrumbs from blog.css -- there they sit on real hierarchy and earn their place.
-
-   The BreadcrumbList JSON-LD on these pages is left alone: it is a site-structure signal for search,
-   it never rendered, and it was never the thing that broke. */
-.crumbs{display:none;}
+   Undone here rather than in each page's inline CSS, which also restores what the comment above
+   always claimed: that .crumbs mirrors the journal's, and the journal's has no background, border
+   or position. */
+.crumbs{position:static;z-index:auto;background:none;backdrop-filter:none;border-bottom:0;top:auto;}
