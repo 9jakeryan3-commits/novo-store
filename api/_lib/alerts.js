@@ -11,7 +11,7 @@
 // through 40 times an hour is noise nobody asked for. Re-arm by asking again.
 
 const crypto = require("crypto");
-const { kv } = require("./_kv.js");
+const { kv } = require("../_kv.js");
 
 const MAX_ACTIVE = 10;
 const DEFAULT_TTL_MS = 7 * 24 * 3600 * 1000;
