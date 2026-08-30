@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping</title>
-<meta name="description" content="You could code your own SPY-options bot in Python — some should. But the build path hides real costs: data, broker plumbing, dealer-level math, testing…">
+<meta name="description" content="You could code your own SPY-options bot in Python — some should. But the build path hides real costs: data, options-chain plumbing, dealer-level math, testing…">
 <meta name="theme-color" content="#121316">
 <link rel="canonical" href="https://novo-options.trade/journal/novo-vs-custom-python-bot.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-options.trade/journal/novo-vs-custom-python-bot.html">
 <meta property="og:title" content="NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping">
-<meta property="og:description" content="You could code your own SPY bot in Python — but data, broker plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.">
+<meta property="og:description" content="You could code your own SPY bot in Python — but data, options-chain plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -24,12 +24,12 @@
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
 <meta name="twitter:title" content="NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping">
-<meta name="twitter:description" content="You could code your own SPY bot in Python — but data, broker plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.">
+<meta name="twitter:description" content="You could code your own SPY bot in Python — but data, options-chain plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=1f3edec1">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping", "description": "You could code your own SPY bot in Python — but data, broker plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/novo-vs-custom-python-bot.html", "articleSection": "Compare", "wordCount": 599, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping", "description": "You could code your own SPY bot in Python — but data, options-chain plumbing, dealer math, and maintenance are real costs. An honest build-vs-buy.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/novo-vs-custom-python-bot.html", "articleSection": "Compare", "wordCount": 599, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Compare & Buyer Guides", "item": "https://novo-options.trade/journal/compare"}, {"@type": "ListItem", "position": 4, "name": "NoVo vs a Custom Python Bot: Build-vs-Buy for SPY Scalping", "item": "https://novo-options.trade/journal/novo-vs-custom-python-bot.html"}]}
@@ -61,7 +61,7 @@
     <p>A working system is far more than a strategy script. You need: reliable <em>market data</em> (real-time options and greeks aren't free or trivial); <em>broker integration</em> (order routing, fills, error handling, <a href="/journal/broker-api-rate-limits.html">rate limits</a>); the <em>dealer-level math</em> (computing gamma exposure, walls, flip, gravity correctly &mdash; genuinely hard); robust <em>execution logic</em> (sizing, stops, exits, edge cases); <em>testing</em> and paper validation; and then <em>indefinite maintenance</em> as brokers, data, and markets change. It's a real software project, not a weekend hack &mdash; and bugs cost you real money.</p>
     <h2>What buying gives you</h2>
     <p>NoVo is the <em>bought</em> version of the hard half: the <a href="/journal/how-novo-reads-the-market.html">dealer-level computation</a>, the options-chain plumbing, the scoring, and the hosted infrastructure already built, tested, and maintained &mdash; for a <a href="/journal/why-subscription-not-profit-cut.html">subscription</a>. You skip months of engineering and the ongoing upkeep, and you get a system that already handles the hard parts correctly. The tradeoff: less total customization than your own code.</p>
-    <p class="pull">&ldquo;I'll just build it&rdquo; means building data feeds, broker plumbing, gamma math, execution, tests, <em>and</em> maintaining it forever. Buying is paying someone to have already done the hard 90%.</p>
+    <p class="pull">&ldquo;I'll just build it&rdquo; means building data feeds, options-chain plumbing, gamma math, scoring, tests, <em>and</em> maintaining it forever. Buying is paying someone to have already done the hard 90%.</p>
     <h2>How to decide</h2>
     <p>Build if you genuinely enjoy the engineering, want total control, and have the skill and time to maintain it &mdash; the DIY path is real and respectable. Buy if you'd rather spend your time <em>trading</em> than building and debugging infrastructure, and you want the hard parts handled correctly from day one. Be honest about the maintenance burden &mdash; many home-built bots die not from a bad strategy but from unmaintained plumbing. Related: <a href="/journal/hosted-vs-self-hosted-automation.html">hosted vs. self-hosted automation</a>.</p>
   </div>

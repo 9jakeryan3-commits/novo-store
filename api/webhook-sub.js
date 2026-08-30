@@ -293,6 +293,60 @@ function analystWelcomeHtml(connectUrl) {
 </div>`;
 }
 
+function cryptoWelcomeHtml(connectUrl) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#101013;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:30px 16px;">
+  <div style="background:#1c1d21;border:1px solid #2e3036;border-radius:14px;padding:34px 32px;">
+    <div style="text-align:center;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=5" alt="NoVo Options Trading" width="118" style="width:118px;height:auto;display:inline-block;border:0;">
+      <div style="font-size:11px;letter-spacing:3px;color:#a78bfa;text-transform:uppercase;font-weight:700;margin:10px 0 24px;">NoVo Crypto Market Map</div>
+    </div>
+
+    <h1 style="color:#eaf3ff;font-size:22px;margin:0 0 10px;">Welcome to the Crypto Market Map.</h1>
+    <p style="color:#c2d2e6;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. The map is live now &mdash; every coin NoVo covers, priced off the streamed book, with the on-chain side underneath it. Sign in with <strong style="color:#eaf3ff;">this email address</strong>.</p>
+
+    <div style="text-align:center;margin:0 0 26px;">
+      <a href="https://novo-options.trade/crypto/live" style="display:inline-block;background:#a78bfa;color:#12091f;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:800;font-size:15px;">Open the Crypto Market Map</a>
+    </div>
+
+    ${connectUrl ? `<div style="background:rgba(88,101,242,0.08);border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:10px;padding:16px 18px;margin:0 0 24px;text-align:center;">
+      <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Join the members Discord</div>
+      <div style="font-size:13px;color:#9fb6d1;line-height:1.5;margin-bottom:12px;">Your subscription includes the private NoVo Discord &mdash; the daily reads, alerts, and the members community. Link your account to unlock it.</div>
+      <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:14px;">Connect your Discord &rarr;</a>
+    </div>` : ''}
+
+    <div style="border-top:1px solid #2e3036;margin:0 0 20px;"></div>
+    <h2 style="color:#eaf3ff;font-size:16px;margin:0 0 14px;">Getting started</h2>
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#a78bfa;color:#12091f;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">1</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Open <strong style="color:#eaf3ff;">novo-options.trade/crypto/live</strong> and sign in with <strong style="color:#eaf3ff;">this email address</strong> &mdash; nothing to install, nothing to connect.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#a78bfa;color:#12091f;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">2</div></td>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Start with the <strong style="color:#eaf3ff;">coverage bands</strong> &mdash; they tell you how much of each coin&rsquo;s picture is measured rather than inferred, before you read anything else.</td></tr>
+      <tr><td style="vertical-align:top;padding:0 12px 0 0;"><div style="background:#a78bfa;color:#12091f;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">3</div></td>
+          <td style="vertical-align:top;color:#c2d2e6;font-size:14px;line-height:1.55;">Open it in any browser, or install it as an app on your desktop or phone.</td></tr>
+    </table>
+
+    <div style="background:rgba(245,158,11,0.08);border:1px solid #3a3c42;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#e8c48f;line-height:1.6;">
+      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
+    </div>
+
+    <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-options.trade" style="color:#22d3ee;">support@novo-options.trade</a>.</p>
+
+    <div style="border-top:1px solid #2e3036;margin-top:24px;padding-top:16px;">
+      <p style="font-size:12px;color:#6f8bab;margin:0;line-height:1.5;">Not financial advice. Trading involves substantial risk of loss. Your access is active while your subscription is current.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
 function welcomeEmailHtml(connectUrl) {
   return `<!DOCTYPE html>
 <html>
@@ -323,7 +377,7 @@ function welcomeEmailHtml(connectUrl) {
 
     <div style="background:rgba(6,182,212,0.07);border:1px solid #2e3036;border-left:3px solid #06b6d4;border-radius:10px;padding:16px 18px;margin:0 0 24px;">
       <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:6px;">Included: the NoVo Analyst live dashboard</div>
-      <div style="font-size:13px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#eaf3ff;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#eaf3ff;">live SPY / QQQ / SPX dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
+      <div style="font-size:13px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your Trader subscription also includes <strong style="color:#eaf3ff;">NoVo Analyst</strong> &mdash; the daily desk notes and the <strong style="color:#eaf3ff;">live SPY / QQQ / IWM dealer dashboard</strong> (net GEX, walls, Zero-Gamma, expected move &amp; skew, updating through the session). Sign in with this email.</div>
       <a href="https://novo-options.trade/analyst/live" style="display:inline-block;background:#06b6d4;color:#04121a;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:800;font-size:14px;">Open the live dashboard &rarr;</a>
     </div>
 
@@ -418,9 +472,26 @@ const handler = async (req, res) => {
     // ABOVE the Trader path: falling through would provision a trading licence AND run the
     // "Trader includes Analyst" upgrade, which RETIRES the customer's paid Analyst sub.
     if (obj?.metadata?.tier === 'crypto') {
+      // `existed` doubles as the retry guard: Stripe replays this event, and a duplicate contact
+      // is the only durable signal we have that the welcome already went out (there is no license
+      // row to check, the way the Analyst branch checks analystAdd().existed).
+      let existed = false;
       if (CRYPTO_AUDIENCE) {
         try { await _retry(() => resend.contacts.create({ audienceId: CRYPTO_AUDIENCE, email, unsubscribed: false }), 2); }
-        catch (e) { if (!/exist|already/i.test(e.message || '')) console.error(`[webhook-sub] crypto audience add failed: ${e.message}`); }
+        catch (e) {
+          if (/exist|already/i.test(e.message || '')) existed = true;
+          else console.error(`[webhook-sub] crypto audience add failed: ${e.message}`);
+        }
+      }
+      if (!existed) {
+        try {
+          await resend.emails.send({
+            from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',   // hardcoded verified domain, same as the other tiers
+            replyTo: 'support@novo-options.trade', to: [email],
+            subject: 'Welcome to the NoVo Crypto Market Map',
+            html: cryptoWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
+          });
+        } catch (err) { console.error(`[webhook-sub] crypto welcome failed (non-fatal): ${err.message}`); }
       }
       console.log(`[webhook-sub] Crypto Market Map subscriber ${email} — no license, no Analyst audience`);
       return res.status(200).json({ received: true, tier: 'crypto' });
@@ -629,8 +700,14 @@ const handler = async (req, res) => {
         if (CRYPTO_AUDIENCE && cust?.email) {
           try { await _retry(() => resend.contacts.remove({ audienceId: CRYPTO_AUDIENCE, email: cust.email }), 2); } catch (_) {}
         }
-        // Deliberately NOT touching the Analyst audience, the free list or the Discord role:
-        // this customer may hold a live Analyst or Trader sub that still earns all three.
+        // The paid-Discord role IS earned by Crypto, so it has to be released here too -- but only
+        // if nothing else earns it. hasOtherActivePaidSub counts any live sub regardless of tier,
+        // so a member who also holds Analyst or Trader keeps the role.
+        if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
+          await discordRevokeRole(cust?.metadata?.discord_id);
+        }
+        // Deliberately NOT touching the Analyst audience or the free list: a Crypto subscriber was
+        // never on the Analyst list by virtue of Crypto, so there is nothing of theirs to remove.
         console.log(`[webhook-sub] crypto cancel — sub:${subscriptionId}`);
       } catch (err) {
         console.error(`[webhook-sub] crypto cancel failed — sub:${subscriptionId} error:${err.message}`);

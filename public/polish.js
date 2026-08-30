@@ -79,3 +79,44 @@
     });
   }, 1200);
 })();
+
+/* ---- Discord link-up result -------------------------------------------------------------
+   /api/discord finishes by bouncing the member back to /analyst?discord=… or /crypto?discord=…
+   Nothing on either page ever read that parameter, so the flow ended on a page that looked
+   exactly like the one they left: no confirmation on success, and no explanation on failure.
+   A member who saw nothing would reasonably click Connect again. ---------------------------- */
+(function () {
+  var st;
+  try { st = new URLSearchParams(window.location.search).get('discord'); } catch (e) { return; }
+  if (st !== 'connected' && st !== 'failed' && st !== 'expired' && st !== 'error') return;
+
+  var ok = st === 'connected';
+  var msg = ok
+    ? 'Discord connected — your members role is live. Open Discord to see the private channels.'
+    : st === 'expired'
+      ? 'That link belongs to a subscription that is no longer active. Re-subscribe and the members channels come back.'
+      : 'We could not finish linking Discord. Try the Connect link in your welcome email again, or reply to it and we will sort it out.';
+
+  var el = document.createElement('div');
+  el.setAttribute('role', 'status');
+  el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:9999;' +
+    'max-width:min(520px,calc(100vw - 32px));padding:13px 18px;border-radius:11px;font-size:14px;' +
+    'line-height:1.5;font-weight:600;color:#eaf3ff;background:rgba(20,21,25,.96);backdrop-filter:blur(8px);' +
+    'border:1px solid ' + (ok ? 'rgba(88,101,242,.55)' : 'rgba(245,158,11,.5)') + ';' +
+    'box-shadow:0 0 30px -8px ' + (ok ? 'rgba(88,101,242,.6)' : 'rgba(245,158,11,.45)') + ';';
+  el.textContent = msg;
+  document.body.appendChild(el);
+
+  // Drop the parameter so a refresh or a shared URL does not replay the banner.
+  try {
+    var u = new URL(window.location.href);
+    u.searchParams.delete('discord');
+    window.history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
+  } catch (e) { /* older browser: leaving the param is harmless */ }
+
+  window.setTimeout(function () {
+    el.style.transition = 'opacity .4s ease';
+    el.style.opacity = '0';
+    window.setTimeout(function () { el.remove(); }, 450);
+  }, ok ? 6000 : 11000);
+})();
