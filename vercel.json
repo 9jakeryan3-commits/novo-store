@@ -649,6 +649,9 @@
     },
     "api/reconcile-subs.js": {
       "maxDuration": 60
+    },
+    "api/analyst-ask.js": {
+      "maxDuration": 90
     }
   },
   "crons": [

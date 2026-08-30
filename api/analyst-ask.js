@@ -29,6 +29,24 @@ const MAX_ROUNDS = 3;
 const MAX_CALLS_PER_ROUND = 4;
 const ROUND_BUDGET_MS = 4000;
 
+// THE DEEP-READ LANE. The fast lane above is sized for latency — a desk answer in a few seconds —
+// which caps how much of the corpus one answer can traverse. A deep read is the other trade:
+// real thinking budget, more tool rounds, longer output, for "give me the full read" questions.
+// Requested explicitly (body.deep) or by asking for one in words; never inferred from question
+// length, because a long question is not a request for a long answer.
+//
+// Thinking bills against maxOutputTokens on this model (the same trap the engine's llm_client
+// documents), so the deep output cap carries the thinking budget on top of the prose allowance:
+// ~2k to think, ~6k to write.
+const DEEP = {
+  MAX_ROUNDS: 5,
+  MAX_CALLS_PER_ROUND: 6,
+  ROUND_BUDGET_MS: 9000,
+  MAX_OUTPUT_TOKENS: 8192,
+  THINKING_BUDGET: 2048,
+};
+const DEEP_RE = /\b(deep\s+(read|dive)|full\s+read|comprehensive\s+(read|breakdown|review)|go\s+deep|the\s+works)\b/i;
+
 // Same 7-day HMAC token the live dashboard already carries. Every question costs a retrieval
 // plus a model call, so this is subscriber-only — not because the answer is secret, but
 // because an open endpoint is someone else's free Gemini bill.
@@ -435,6 +453,13 @@ module.exports = async (req, res) => {
   const question = String((req.body && req.body.question) || '').trim().slice(0, 600);
   if (!question) return res.status(400).json({ error: 'no question' });
 
+  // The deep lane costs several times a fast answer, so it carries its own cap on top of the
+  // shared ones. Over the cap it DOWNGRADES to the fast lane rather than erroring — a subscriber
+  // asking a ninth deep question still deserves an answer, just not a nine-round one. The
+  // response says which lane ran, so a downgrade is visible rather than silent.
+  let deep = !!(req.body && req.body.deep) || DEEP_RE.test(question);
+  if (deep && !(await rateOk(`ask:${email}:deep:h`, 8, 3600))) deep = false;
+
   // Prior turns, so a follow-up ("and QQQ?", "why?") means something. Hard-bounded on every axis --
   // count, length and shape -- because this is the one field a client can inflate at will, and it is
   // re-sent on every question. Six turns covers essentially any real follow-up chain.
@@ -455,7 +480,8 @@ module.exports = async (req, res) => {
 
     const qv = await embed(question);
     if (!qv) return res.status(502).json({ error: 'could not embed the question' });
-    const hits = search(idx, qv, 6);
+    // A deep read gets a wider retrieval too — more of the archive on the desk before it starts.
+    const hits = deep ? search(idx, qv, 9, 3) : search(idx, qv, 6);
 
     const r = kv();
     let live = null, ctx = null;
@@ -533,9 +559,25 @@ module.exports = async (req, res) => {
     } catch (_) { return null; }
   })();
 
+  // The depth block changes the CONTRACT of the answer, not the voice or the boundaries: a deep
+  // read is a desk report, not a longer chat reply. It rides in the prompt rather than SYSTEM so
+  // the fast lane's instructions stay byte-identical to what has been verified live.
+  const depthBlock = deep
+    ? ['THIS IS A DEEP READ. The reader asked for the full picture, so take the space the answer',
+       'actually needs — a structured desk report, not a chat reply. Cover what the question touches',
+       'and no more: the current structure with its levels, how today sits against your logged',
+       'history and base rates (always with n), the vol regime with its percentiles, positioning',
+       'where it matters, what would invalidate the read, and your own record on the claims you',
+       'lean on. Use your tools freely — several lookups per round, both maps where relevant.',
+       'Plain text still: short headed paragraphs separated by blank lines, "- " lists where they',
+       'help. Every hard boundary still applies — no advice, no point predictions, no instructions.',
+       '', ''].join('\n')
+    : '';
+
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
+      depthBlock +
       convo +
       `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
@@ -555,8 +597,13 @@ module.exports = async (req, res) => {
     // my estimate. Model calls are the spend; tool calls are why there is more than one of them.
     let modelCalls = 0, toolCalls = 0;
 
+    // Lane parameters, chosen once. The fast lane is byte-identical to what always ran.
+    const rounds = deep ? DEEP.MAX_ROUNDS : MAX_ROUNDS;
+    const callsCap = deep ? DEEP.MAX_CALLS_PER_ROUND : MAX_CALLS_PER_ROUND;
+    const roundBudget = deep ? DEEP.ROUND_BUDGET_MS : ROUND_BUDGET_MS;
+
     let upstream = null;                 // why the model call died, if it did
-    for (let round = 0; round < MAX_ROUNDS; round++) {
+    for (let round = 0; round < rounds; round++) {
       modelCalls++;
       let j;
       try {
@@ -567,15 +614,18 @@ module.exports = async (req, res) => {
         // The final round is forced to NONE so the loop always ends in prose. Left on AUTO, the
         // model can keep asking for one more lookup until the function is killed mid-chain, which
         // a subscriber sees as the analyst simply never answering.
-        toolConfig: { functionCallingConfig: { mode: round < MAX_ROUNDS - 1 ? 'AUTO' : 'NONE' } },
+        toolConfig: { functionCallingConfig: { mode: round < rounds - 1 ? 'AUTO' : 'NONE' } },
         generationConfig: {
           temperature: 0.25,
-          maxOutputTokens: 1600,
+          maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
           // This model thinks by default and the hidden reasoning bills against maxOutputTokens,
           // so on a tight budget the thinking eats the allowance and the visible answer comes back
           // as a truncated fragment. The engine's llm_client hit this and fixed it the same way:
-          // control thinking explicitly rather than inheriting the model default.
-          thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+          // control thinking explicitly rather than inheriting the model default. The deep lane
+          // is the one place thinking is ON — bounded, and paid for in the output cap above.
+          thinkingConfig: deep
+            ? { thinkingBudget: DEEP.THINKING_BUDGET, includeThoughts: false }
+            : { thinkingBudget: 0, includeThoughts: false },
         },
         });
       } catch (e) {
@@ -586,7 +636,7 @@ module.exports = async (req, res) => {
         break;
       }
       const parts = j?.candidates?.[0]?.content?.parts || [];
-      const calls = parts.filter((p) => p && p.functionCall).slice(0, MAX_CALLS_PER_ROUND);
+      const calls = parts.filter((p) => p && p.functionCall).slice(0, callsCap);
       toolCalls += calls.length;
 
       if (!calls.length) {
@@ -609,7 +659,7 @@ module.exports = async (req, res) => {
           out = { error: `no such tool: ${name}` };
         } else {
           try {
-            const left = Math.max(1200, ROUND_BUDGET_MS - (Date.now() - started));
+            const left = Math.max(1200, roundBudget - (Date.now() - started));
             out = await Promise.race([
               exec[name](args),
               new Promise((r) => setTimeout(() => r({ error: `${name} timed out` }), left)),
@@ -636,7 +686,7 @@ module.exports = async (req, res) => {
       }
       return res.status(502).json({ error: 'I came back with nothing there — ask me again.' });
     }
-    console.log(`[ASK] ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
+    console.log(`[ASK] ${deep ? 'deep' : 'fast'}: ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
     // would sit on screen as punctuation.
@@ -649,6 +699,7 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({
       ok: true,
+      mode: deep ? 'deep' : 'fast',
       answer: clean,
       sources: hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
       // The ledger is what the analyst actually looked up to write this, failures included. It
