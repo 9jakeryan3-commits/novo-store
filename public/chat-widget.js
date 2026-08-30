@@ -9,10 +9,18 @@
   var busy = false, opened = false;
 
   var css = ''
-    + '.nvc-btn{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:56px;height:56px;border-radius:50%;'
-    + 'border:1px solid #2e3036;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;cursor:pointer;'
-    + 'box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:24px}'
-    + '.nvc-btn:hover{filter:brightness(1.06)}'
+    + '.nvc-btn{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));'
+    + 'z-index:2147483000;height:44px;padding:0 15px;border-radius:999px;gap:9px;'
+    + 'border:1px solid #2e3036;background:rgba(20,21,25,.92);backdrop-filter:blur(8px);'
+    + 'color:#9fb6d1;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:.01em;'
+    + 'box-shadow:0 8px 24px rgba(0,0,0,.45);display:inline-flex;align-items:center;justify-content:center;'
+    + 'transition:border-color .18s,color .18s,box-shadow .18s}'
+    + '.nvc-btn svg{width:17px;height:17px;flex:0 0 auto;stroke:#22d3ee}'
+    + '.nvc-btn:hover,.nvc-btn:focus-visible{border-color:rgba(34,211,238,.5);color:#eaf3ff;'
+    + 'box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 22px -8px rgba(34,211,238,.55);outline:none}'
+    /* On a phone it collapses to a disc: the label is the first thing to cost more room than it
+       earns when the viewport is 390px wide and the button sits over the copy. */
+    + '@media(max-width:560px){.nvc-btn{padding:0;width:44px;gap:0}.nvc-btn .nvc-lbl{display:none}}'
     + '.nvc-panel{position:fixed;right:20px;bottom:88px;z-index:2147483000;width:370px;max-width:calc(100vw - 32px);'
     + 'height:540px;max-height:calc(100vh - 120px);background:#121316;border:1px solid #2e3036;border-radius:14px;'
     + 'display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.55);'
@@ -91,7 +99,12 @@
   function mount(){
     var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
-    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Message support'); btn.textContent='💬';
+    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Ask NoVo');
+    // An inline SVG, not an emoji: 💬 is a different picture on every platform and none of them
+    // match the site. Stroked in the same cyan the rest of the UI accents with.
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" '
+      + 'stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.9 9.9 0 0 1-2.8-.4L3 21l1.6-4.6A8.1 8.1 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/></svg>'
+      + '<span class="nvc-lbl">Ask NoVo</span>';
     btn.onclick = function(){ opened ? close() : open(); };
 
     panel = document.createElement('div'); panel.className='nvc-panel'; panel.setAttribute('role','dialog'); panel.setAttribute('aria-label','NoVo Options Trading support');
