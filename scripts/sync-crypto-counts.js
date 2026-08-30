@@ -68,6 +68,14 @@ function get(url) {
   const CHAIN_STEP = 50;
   const chain = Math.floor((Number(feed.chain) || 0) / CHAIN_STEP) * CHAIN_STEP;
 
+  // The COMBINED figure -- coins plus on-chain tokens -- which is the number the crypto dashboard
+  // has shown all along: crypto-live.html sums its two rails for the filter box. The site used to
+  // lead with the on-chain half alone, so a subscriber comparing the two saw "150+" here and "281
+  // tokens" there with no way to reconcile them. Same source, same arithmetic, floored the same
+  // way, so the baked claim stays true across the range -- and coin-count.js swaps in the exact
+  // live figure for anyone with JS.
+  const assets = Math.floor(((Number(feed.chain) || 0) + total) / CHAIN_STEP) * CHAIN_STEP;
+
   // How many tools the analyst can actually call, counted off the declarations themselves.
   let tools = 0;
   try {
@@ -94,6 +102,7 @@ function get(url) {
   const rules = [
     ['data-coincount span', /(<span data-coincount>)\d+(<\/span>)/g, '$1' + total + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+\+?(<\/span>)/g, '$1' + chain + '+$2'],
+    ['data-assetcount span', /(<span data-assetcount>)\d+\+?(<\/span>)/g, '$1' + assets + '+$2'],
     ...(tools ? [['data-toolcount span', /(<span data-toolcount>)\d+(<\/span>)/g, '$1' + tools + '$2']] : []),
     // Plain-text twin. index and faq carry this sentence inside JSON-LD as well as in the visible
     // page, and a <span> would corrupt the structured data -- so those say the number in words and
@@ -140,7 +149,7 @@ function get(url) {
   console.log(touched
     ? '.. crypto counts synced across ' + touched + ' file(s) -> ' + total + ' coins, '
       + bandA + ' with a dealer map, ' + bandB + ' with leverage positioning, '
-      + chain + '+ on-chain'
+      + chain + '+ on-chain, ' + assets + '+ assets'
     : '.. crypto counts already current across ' + files.length + ' file(s) (' + total + ' coins, '
       + bandA + ' A, ' + bandB + ' B, ' + chain + '+ chain, ' + tools + ' tools)');
 })();
