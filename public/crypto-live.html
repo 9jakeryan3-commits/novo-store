@@ -257,6 +257,12 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 /* Metric strip — the Analyst dashboard states secondary metrics as a labelled row of
    values, not as prose. Same grammar here. */
 .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;background:var(--bdr2)}
+  /* PHONES GET AN EXPLICIT TWO COLUMNS. auto-fit was handing a ~500px screen THREE, while the
+     odd-last-cell span below is written for two: BTC's five cells then rendered as three, then
+     ONE cell beside two dead grey tracks, then one spanning the width. The span rule was never
+     wrong -- the column count it assumed was, and auto-fit does not guarantee one. The grey is
+     the container background showing through wherever no cell covers it. */
+  @media (max-width:720px){ .mgrid{grid-template-columns:repeat(2,1fr)} }
   /* The cell count is conditional - BTC produces five - so on a two-column phone layout
      the last one left a dead grey square beside it. An odd last cell spans instead. */
   .mcell:last-child:nth-child(odd){grid-column:1/-1}
