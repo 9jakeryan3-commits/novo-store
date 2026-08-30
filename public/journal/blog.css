@@ -341,6 +341,12 @@ nav { position: relative; }
 .crumbs a:hover{color:var(--cyan);}
 .crumbs .sep{color:var(--txt3);margin:0 7px;}
 .crumbs .cur{color:var(--txt3);}
+
+/* The breadcrumb is a <nav>, so the bare `nav{}` header rule above (sticky, z-index:100,
+   background, blur, border) lands on it too -- which is what paints it over the open mobile
+   menu: header nav and crumbs both sit at z-index 100 and the crumbs come second in the DOM.
+   Same fix as polish.css, which the journal does not load. */
+.crumbs{position:static;z-index:auto;background:none;backdrop-filter:none;border-bottom:0;top:auto;}
 /* Related articles -- internal linking, and the fix for pages stuck at the nav/footer link floor. */
 .related{margin:44px 0 0;padding-top:26px;border-top:1px solid var(--bdr);}
 .related h3{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin:0 0 14px;}
