@@ -53,6 +53,20 @@ if [ -n "$(git status --porcelain)" ] && [ -z "$GEN_DIRT" ]; then
   echo ".. generated files refreshed and pushed"
 fi
 
+# The crypto counts are the awkward case: sync-crypto-counts.js writes live figures into CONTENT
+# html, where a generated edit and a hand edit are indistinguishable by path -- so these files can
+# never join the whitelist above. The on-chain figure genuinely moves between runs (202, then 191,
+# then 202 again inside one hour on 2026-08-30), and every move halted a deploy.
+# count-churn-only.js answers the question the whitelist cannot: is every changed line identical
+# apart from a figure in one of the anchored count slots? Only then is it auto-committed. A price
+# or a headline moving in the same file fails it, and the halt below still fires.
+if [ -n "$(git status --porcelain)" ] && node scripts/count-churn-only.js; then
+  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html 2>/dev/null || true
+  git commit -q -m "generated: crypto counts synced to the live sweep"
+  git push -q
+  echo ".. crypto counts refreshed and pushed"
+fi
+
 # Production is built from the local working tree, so it must equal the commit.
 if [ -n "$(git status --porcelain)" ]; then
   echo "!! uncommitted changes -- commit before deploying:"; git status --short; exit 1
