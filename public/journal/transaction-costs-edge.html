@@ -75,12 +75,12 @@
 <p><strong>Assume you cross the spread.</strong> Unless your system genuinely waits passively at the bid — and eats the trades it therefore misses — model yourself paying up.</p>
 <p><strong>Use real fills, not mid.</strong> A backtest filling at the midpoint assumes you got a price nobody offered you. Fill at the ask when buying and the bid when selling, and the picture changes fast.</p>
 <p><strong>Measure your actual slippage, then use that.</strong> Once live, the difference between your intended price and your fill is a number you can record on every trade. It is far more honest than any assumption. Feed the real figure back into the testing.</p>
-<p><strong>Include the trades you didn't get.</strong> A passive order that doesn't fill isn't free — it's a missed winner. Systems that look good because they only count the passive fills that happened are measuring survivors (<a href="/journal/survivorship-bias-backtesting.html">Survivorship Bias in Backtesting, Explained</a>).</p>
+<p><strong>Include the trades you didn't get.</strong> A passive order that doesn't fill isn't free — it's a missed winner. Systems that look good because they only count the passive fills that happened are measuring survivors (<a href="/journal/survivorship-bias-backtesting.html">survivorship bias</a>).</p>
 
 <h2>The test that matters</h2>
-<p>Take your <a href="/journal/expectancy.html"><span class="rk">Quantitative Trading</span>expectancy</a> and subtract the full round-trip cost. If the number is still comfortably positive, you have something. If it's marginal, you have a strategy that will be profitable in good conditions and unprofitable the moment spreads widen — which is to say, unprofitable when it matters.</p>
+<p>Take your <a href="/journal/expectancy.html">expectancy</a> and subtract the full round-trip cost. If the number is still comfortably positive, you have something. If it's marginal, you have a strategy that will be profitable in good conditions and unprofitable the moment spreads widen — which is to say, unprofitable when it matters.</p>
 <p>The honest version of this test kills a lot of ideas. That's the point. Better to kill them in a spreadsheet than one fill at a time.</p>
-<p>See also: <a href="/journal/backtest-vs-forward-test.html">backtest vs forward test</a> and <a href="/journal/execution-speed-as-edge.html">Execution Speed as an Edge</a>.</p>
+<p>See also: <a href="/journal/backtest-vs-forward-test.html">backtest vs forward test</a> and <a href="/journal/execution-speed-as-edge.html">execution speed as edge</a>.</p>
   </div>
 
   <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-is-max-pain.html">What Is Max Pain? The Strike Where Most Options Expire Worthless</a> &middot; <a href="/journal/what-a-0dte-trading-stack-costs.html">What a Complete 0DTE Trading Stack Actually Costs</a></p>

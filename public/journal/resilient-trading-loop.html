@@ -56,7 +56,7 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-02-06">Feb 6, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping &amp;amp; the Dealer Map - The Complete Guide</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p>Writing a trading system that works when data flows and the broker responds is the easy 80%. The hard, essential 20% is what happens when it <em>doesn't</em> — the feed drops, a quote goes stale, the broker API times out, the connection stutters. Resilience is what separates a demo from a system you'd let manage real orders.</p>
     <h2>Fail safe, not silent</h2>
@@ -65,7 +65,7 @@
     <p>Consider the traps: a network stutter mid-order (did it go through? retrying could double it — so writes aren't blindly retried); a <a href="/journal/partial-fills-explained.html">partial fill</a> that must be reconciled to the real position; a rate limit that must be backed off, not hammered. Each is a place where a naive loop corrupts its own state or duplicates an order. Handling them is unglamorous and non-negotiable.</p>
     <p class="pull">A trading system isn't judged on the day everything works. It's judged on the day the feed dies mid-position.</p>
     <h2>Why it matters</h2>
-    <p>Markets are messy and infrastructure fails at the worst moments. A system built to fail safe — pausing on stale data, reconciling true fills, never double-submitting, recovering cleanly on restart — is one you can actually trust. That defensive engineering is the boring backbone of <a href="/journal/how-novo-decides-executes-exits.html">How NoVo Builds a Read, and Scores It</a>: it protects the account precisely when the plumbing gets ugly.</p>
+    <p>Markets are messy and infrastructure fails at the worst moments. A system built to fail safe — pausing on stale data, reconciling true fills, never double-submitting, recovering cleanly on restart — is one you can actually trust. That defensive engineering is the boring backbone of <a href="/journal/how-novo-decides-executes-exits.html">NoVo's execution</a>: it protects the account precisely when the plumbing gets ugly.</p>
   </div>
 
   <div class="cta">

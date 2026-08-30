@@ -56,7 +56,7 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-09-05">Sep 5, 2025</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping &amp;amp; the Dealer Map - The Complete Guide</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p><a href="/journal/what-is-slippage.html">Slippage</a> — the gap between the price you wanted and the price you got — is a cost on every trade. On <a href="/journal/what-is-0dte-options-trading.html">1DTE and 0DTE</a> SPY options, it's amplified to the point of being decisive. A short-dated contract can move a large percentage on a small move in SPY, and the fill you get in the first second decides whether the trade is worth taking at all.</p>
     <h2>Why short-dated is worse</h2>
@@ -65,7 +65,7 @@
     <p>On a strategy that trades short-dated contracts, the execution logic is not an afterthought — it <em>is</em> the edge. Testing a passive fill when the tape is calm, paying up only when a move genuinely can't be missed, refusing an order when the quote is stale or the spread is blown out — these decisions, made in milliseconds and identically every time, are what separate a backtest from a live P&amp;L.</p>
     <p class="pull">A short-dated options strategy that ignores its own fills isn't a strategy. It's a backtest that dies on contact with the spread.</p>
     <h2>Where a system helps</h2>
-    <p>The cheapest fill is the one you never had to chase. Knowing in advance where the walls and the gamma flip sit tells you which prices are likely to be defended and which are open air, so you can work a limit into a level instead of paying up after the move has already gone. <a href="/journal/how-novo-decides-executes-exits.html"><span class="rk">Execution</span>NoVo</a> maps that structure live on SPY, QQQ and IWM; the order type, the limit you set, and the decision to walk away from a blown-out spread stay yours.</p>
+    <p>The cheapest fill is the one you never had to chase. Knowing in advance where the walls and the gamma flip sit tells you which prices are likely to be defended and which are open air, so you can work a limit into a level instead of paying up after the move has already gone. <a href="/journal/how-novo-decides-executes-exits.html">NoVo</a> maps that structure live on SPY, QQQ and IWM; the order type, the limit you set, and the decision to walk away from a blown-out spread stay yours.</p>
   </div>
 
   <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-is-slippage-in-options.html">What Is Slippage? Why Your Fill Differs From the Quote</a></p>

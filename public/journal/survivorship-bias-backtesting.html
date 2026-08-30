@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-03-06">Mar 6, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping &amp;amp; the Dealer Map - The Complete Guide</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test.html"><span class="rk">The System</span>backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it — and the results are dangerously flattering.</p>
+    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test.html">backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it — and the results are dangerously flattering.</p>
     <h2>How it inflates results</h2>
     <p>Imagine backtesting "buy the S&amp;P 500 and hold" using <em>today's</em> 500 members over the last 20 years. Every company that got kicked out for underperforming is missing — you're testing only the ones that thrived enough to still be in the index. The backtest looks great, but it was never available to trade in real time: you couldn't have known which companies would survive. The test rewards you for hindsight you didn't have.</p>
     <h2>Where it hides</h2>
     <p>It's everywhere backtests use a "current" universe: current index constituents, currently-listed stocks, currently-available funds. It also lurks in strategy marketing — "these signals would have returned X%" using a survivor-only dataset. The failed companies, the delisted tickers, the blown-up funds all vanish from the record, leaving an unrealistically rosy picture.</p>
     <p class="pull">A backtest on survivors is a study of who won, sold to you as a strategy for picking winners. It isn't.</p>
     <h2>How to avoid it</h2>
-    <p>Use <em>point-in-time</em>, survivorship-bias-free data that includes delisted and dead securities as they existed historically. And treat any backtest — especially a beautiful one — with skepticism until it's validated <a href="/journal/backtest-vs-forward-test.html"><span class="rk">The System</span>forward</a> on unseen data. Survivorship bias is a core reason forward results, not historical ones, are the truth. Honest system development refuses to trust a backtest that quietly buried its losers.</p>
+    <p>Use <em>point-in-time</em>, survivorship-bias-free data that includes delisted and dead securities as they existed historically. And treat any backtest — especially a beautiful one — with skepticism until it's validated <a href="/journal/backtest-vs-forward-test.html">forward</a> on unseen data. Survivorship bias is a core reason forward results, not historical ones, are the truth. Honest system development refuses to trust a backtest that quietly buried its losers.</p>
   </div>
 
   <div class="cta">

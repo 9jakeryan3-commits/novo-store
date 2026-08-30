@@ -64,7 +64,7 @@
     <p><strong>Delivery logistics.</strong> No coins move, so no wallet, no custody question, no transfer at expiry.</p>
     <h2>What replaces them</h2>
     <p>A single point of dependence: <em>the settlement price</em>. Since nothing is delivered, everything rests on the reference the venue computes at expiry &mdash; usually an average over a window across several spot exchanges, specifically to make it expensive to manipulate.</p>
-    <p>That averaging matters. Your contract does not settle at the price you see at the expiry instant; it settles at an average over a window around it. A sharp move inside that window is partly absorbed, which can leave the settlement meaningfully away from the last print &mdash; the same last-versus-reference distinction as <a href="/journal/mark-price-vs-last-price.html">Mark Price vs Last Price: Which One Liquidates You</a>.</p>
+    <p>That averaging matters. Your contract does not settle at the price you see at the expiry instant; it settles at an average over a window around it. A sharp move inside that window is partly absorbed, which can leave the settlement meaningfully away from the last print &mdash; the same last-versus-reference distinction as <a href="/journal/mark-price-vs-last-price.html">mark price versus last price</a>.</p>
     <h2>The practical consequence</h2>
     <p>A position held into expiry is settled at a number you cannot trade at and cannot fully predict. For a small position that is noise. For a large one held to the last minute, closing before the settlement window is the way to control the exit rather than accept whatever the average produces.</p>
   </div>
