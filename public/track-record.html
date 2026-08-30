@@ -857,9 +857,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var chh = '';
       Object.keys(cr.baseRates).sort().forEach(function(key){
         var c = cr.baseRates[key]; if (!c) return;
-        var kind = key.split('@')[0], hor = key.split('@')[1] || '';
+        // Keys are plain kinds now; the split keeps an older cached payload (kind@480m) readable.
+        var kind = key.split('@')[0], legacyHor = key.split('@')[1] || '';
         var label = CRK[kind] || kind.replace(/_/g, ' ');
-        var horTxt = hor ? hor.replace('m', '') + '-minute horizon' : '';
+        var hm = c.horizon_min;
+        var horTxt = (hm != null)
+          ? (typeof hm === 'number' ? hm + '-minute horizon'
+                                    : 'graded to expiry, ' + hm.min + '&ndash;' + hm.max + ' min')
+          : (legacyHor ? legacyHor.replace('m', '') + '-minute horizon' : '');
         if (c.trustworthy) {
           chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
               + '<div style="display:flex;align-items:baseline;gap:12px;">'
