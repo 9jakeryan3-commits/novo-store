@@ -57,7 +57,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   a { color: var(--cyan); }
   .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
   /* nav */
-  nav { position: sticky; top:0; z-index:100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom:1px solid var(--bdr); }
+  nav:not([class]) { position: sticky; top:0; z-index:100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom:1px solid var(--bdr); }
   .nav-inner { display:flex; align-items:center; justify-content:space-between; padding:12px 22px; max-width:1200px; margin:0 auto; }
   .nav-actions { display:flex; gap:14px; align-items:center; justify-content:flex-end; }
   .nav-actions a:not(.nav-buy):not(.nav-portal) { color:var(--txt2); font-weight:600; font-size:14px; text-decoration:none; padding:0; white-space:nowrap; }
@@ -115,14 +115,13 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 
 /* ---- mobile nav menu ---------------------------------------------------- */
-nav { position: relative; }
 .nav-menu-btn { display: none; align-items: center; gap: 7px; background: rgba(255,255,255,.04);
   border: 1px solid var(--bdr, #2e3036); color: var(--txt1, #eaf3ff); font-weight: 700;
   font-size: 13px; padding: 9px 13px; border-radius: 9px; cursor: pointer; line-height: 1;
   min-height: 40px; white-space: nowrap; }
 .nav-menu-btn:hover { border-color: var(--blue, #3b82f6); }
 .nav-menu-btn svg { width: 15px; height: 15px; }
-.nav-menu-panel { display: none; position: absolute; top: 100%; right: 12px; left: 12px;
+.nav-menu-panel { max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); overflow-y: auto; overscroll-behavior: contain; display: none; position: absolute; top: 100%; right: 12px; left: 12px;
   z-index: 2000; background: var(--navy2, #1c1d21); border: 1px solid var(--bdr, #2e3036);
   border-radius: 12px; padding: 8px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
 .nav-menu-panel.open { display: block; }
