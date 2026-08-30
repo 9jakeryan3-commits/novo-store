@@ -54,6 +54,28 @@ module.exports = async (req, res) => {
     }
   }
 
+  // The on-chain half's history — its own kind and key. Tokens are keyed network:address;
+  // stored whole (minus the kind tag) for the same store-what-arrived reason as the map.
+  if (b.kind === "chainhist") {
+    if (!b.tokens || typeof b.tokens !== "object") {
+      return res.status(400).json({ error: "chainhist needs {tokens:{...}}" });
+    }
+    const { kind, ...rest } = b;
+    const cp = JSON.stringify(Object.assign(rest, { received: Date.now() }));
+    if (cp.length > MAX_BYTES) {
+      return res.status(413).json({ error: `chainhist ${cp.length}b exceeds ${MAX_BYTES}b` });
+    }
+    const rc = kv();
+    if (!rc) return res.status(503).json({ error: "kv unavailable" });
+    try {
+      await rc.set("crypto:map:chainhist", cp, { ex: 86400 });
+      return res.status(200).json({ ok: true, kind: "chainhist", bytes: cp.length,
+                                    tokens: Object.keys(b.tokens).length });
+    } catch (e) {
+      return res.status(500).json({ error: String((e && e.message) || e).slice(0, 140) });
+    }
+  }
+
   if (!b.coins || typeof b.coins !== "object") {
     return res.status(400).json({ error: "expected {as_of, coins:{...}, breadth, health}" });
   }

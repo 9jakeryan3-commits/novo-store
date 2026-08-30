@@ -110,7 +110,10 @@ const declarations = [
       "what it is now. Every live figure placed against its own distribution: funding per venue " +
       "with its percentile, mean, standard deviation and sample size; open interest and cost to " +
       "trade the same way; net GEX with how often dealers have been short gamma and how much of " +
-      "the time spot has sat above the flip; daily series for trend. Also my own base rates - what " +
+      "the time spot has sat above the flip; DVOL (the crypto VIX) ranked in its own history with " +
+      "a daily series; realized vol by day off the 1-second tape, reading beside dvol/20; per-BOOK " +
+      "gamma daily series (never quote the pooled line for one book's build); daily series for " +
+      "trend. Also my own base rates - what " +
       "each kind of claim has actually resolved to, with n - and the coverage behind all of it. " +
       "Use this for ANY question with a historical shape: 'is this funding unusual', 'how often " +
       "does this happen', 'what has this setup resolved to', 'is this cheap by its own standards'. " +
@@ -314,6 +317,35 @@ const declarations = [
       properties: { symbol: { type: "string", description: "Ticker, e.g. SPY, NVDA, ^VIX. Defaults to SPY." } },
       required: ["symbol"],
     },
+  },
+  {
+    name: "get_chain_history",
+    description:
+      "The on-chain corpus's HISTORY - the one series that can never be backfilled. Per token " +
+      "(keyed network:address, never bare ticker): a daily series of price, pooled depth, 24h " +
+      "volume, hourly wallet counts and 24h change, up to 21 days, plus the sweep's own shape by " +
+      "day (tokens seen, first appearances - survivorship stated, not hidden). Use for 'how long " +
+      "has this token held depth', 'is this pool bleeding', 'what did it do yesterday', or any " +
+      "chain-token question with a time shape. days_seen below the window means the token entered " +
+      "late or left the sweep - say that rather than treating absence as a quiet day.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "Token ticker - returns EVERY address sharing it, because one ticker covers many tokens. Optional." },
+        address: { type: "string", description: "Contract address for an exact token. Optional." },
+        network: { type: "string", description: "solana or robinhood. Optional filter." },
+      },
+    },
+  },
+  {
+    name: "get_market_breadth",
+    description:
+      "The equity market's INTERNAL state right now: advancing-vs-declining breadth and the SPY " +
+      "put/call ratio behind the Market Pulse, plus the 11 SPDR sectors' moves on the day. Use for " +
+      "'how broad is this move', 'is this rally thin', 'which sectors are carrying it', 'is the " +
+      "tape one-sided'. Breadth is participation, never direction advice; a rally on 3 sectors and " +
+      "negative breadth is a different market from the same rally on 9.",
+    parameters: { type: "object", properties: {} },
   },
   {
     name: "get_vol_history",
@@ -888,6 +920,85 @@ function makeExecutors(ctx = {}) {
     return (h && h.coins) ? h : null;
   }
 
+  async function get_chain_history({ symbol, address, network } = {}) {
+    if (!r) return { error: "chain history unavailable" };
+    let h = null;
+    try { h = await r.get("crypto:map:chainhist"); } catch (_) { h = null; }
+    if (typeof h === "string") { try { h = JSON.parse(h); } catch (_) { h = null; } }
+    if (!h || !h.tokens) return { error: "no chain history published yet" };
+    const base = { series_cols: h.series_cols, sweep_days: h.days, coverage: h.coverage,
+                   note: h.note };
+    const entries = Object.entries(h.tokens);
+    let hits = entries;
+    if (network) hits = hits.filter(([k]) => k.startsWith(String(network).toLowerCase() + ":"));
+    if (address) {
+      const q = String(address).trim();
+      hits = hits.filter(([k]) => k.endsWith(":" + q));
+    } else if (symbol) {
+      const q = String(symbol).trim().toUpperCase();
+      hits = hits.filter(([, v]) => String(v.symbol || "").toUpperCase() === q);
+      if (!hits.length) {
+        return { ...base, not_found: q, tracked: entries.length,
+                 note2: "not in the rolled-up sweep - it holds the deepest ~200 tokens; " +
+                        "a smaller token can be below the cut rather than nonexistent" };
+      }
+    }
+    if (address || symbol) {
+      const out = {};
+      for (const [k, v] of hits.slice(0, 6)) out[k] = v;
+      return { ...base, matches: hits.length, tokens: out };
+    }
+    // no filter: the sweep's shape plus the deepest tokens' latest day
+    const top = hits
+      .map(([k, v]) => ({ key: k, symbol: v.symbol, days_seen: v.days_seen,
+                          latest: v.daily[v.daily.length - 1] }))
+      .sort((a, b) => ((b.latest && b.latest[2]) || 0) - ((a.latest && a.latest[2]) || 0))
+      .slice(0, 15);
+    return { ...base, tracked: entries.length, deepest: top };
+  }
+
+  // The 11 SPDR sectors, one batch quote — the same universe api/heatmap.js draws.
+  const SECTORS = [["XLK","Tech"],["XLF","Financials"],["XLV","Health care"],["XLY","Cons. discretionary"],
+                   ["XLP","Cons. staples"],["XLE","Energy"],["XLI","Industrials"],["XLB","Materials"],
+                   ["XLRE","Real estate"],["XLU","Utilities"],["XLC","Comm. services"]];
+
+  async function get_market_breadth() {
+    if (!r) return { error: "market internals unavailable" };
+    let last = null, inputs = null;
+    try { last = await r.get("mkt:pulse:last"); } catch (_) { last = null; }
+    try { inputs = await r.get("mkt:pulse:inputs"); } catch (_) { inputs = null; }
+    if (typeof last === "string") { try { last = JSON.parse(last); } catch (_) { last = null; } }
+    if (typeof inputs === "string") { try { inputs = JSON.parse(inputs); } catch (_) { inputs = null; } }
+
+    let sectors = null;
+    try {
+      const syms = SECTORS.map(([s]) => s).join(",");
+      const resp = await get(`https://query1.finance.yahoo.com/v8/finance/spark?symbols=${syms}&range=1d&interval=15m`,
+                             { "User-Agent": "Mozilla/5.0" });
+      if (resp && resp.ok) {
+        const j = await resp.json();
+        sectors = [];
+        for (const [sym, label] of SECTORS) {
+          const s = j?.spark?.result?.find((x) => x.symbol === sym)?.response?.[0]?.meta ||
+                    j?.[sym]?.[0]?.meta || null;
+          const px = s?.regularMarketPrice, prev = s?.chartPreviousClose || s?.previousClose;
+          if (px && prev) sectors.push({ sector: label, sym, changePct: Math.round((px / prev - 1) * 10000) / 100 });
+        }
+        sectors.sort((a, b) => b.changePct - a.changePct);
+        if (!sectors.length) sectors = null;
+      }
+    } catch (_) { sectors = null; }
+
+    if (!last && !inputs && !sectors) return { error: "no breadth data available right now" };
+    return {
+      pulse: last || null,
+      breadthInputs: inputs || null,
+      sectorsToday: sectors,
+      note: "breadth and put/call are PARTICIPATION, never a direction call; sectors are the " +
+            "day's move so far. Quote the as-of on anything dated.",
+    };
+  }
+
   async function get_vol_history({ series } = {}) {
     if (!r) return { error: "vol history unavailable" };
     let snap = null;
@@ -1088,8 +1199,8 @@ function makeExecutors(ctx = {}) {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
     get_base_rates, get_recent_reads, get_market_internals,
-    get_vol_history, get_futures_positioning,
-    get_crypto_map, get_crypto_breadth, get_crypto_history,
+    get_vol_history, get_futures_positioning, get_market_breadth,
+    get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
   };
 }
 

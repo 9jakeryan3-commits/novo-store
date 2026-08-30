@@ -1768,7 +1768,8 @@ window.addEventListener('hashchange', function(){
             search_news:'headlines', get_base_rates:'base rates', get_market_internals:'market internals',
             get_vol_history:'vol history', get_futures_positioning:'futures positioning',
             get_recent_reads:'my recent reads', get_crypto_map:'crypto map', get_crypto_breadth:'crypto breadth',
-            get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts' };
+            get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts',
+            get_chain_history:'chain history', get_market_breadth:'market breadth' };
           var seen = {}, parts = [];
           d.lookups.forEach(function(l){
             var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
