@@ -64,6 +64,12 @@ function verifyToken(token) {
   } catch (_) { return null; }
 }
 
+// The comp list — same env the control plane, crypto-map.js and the tool layer read, so there is
+// one list to keep. Decides whose grounding carries the private alert desk below.
+const _COMP = new Set(String(process.env.COMP_EMAILS || '')
+  .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean));
+const _isComp = (e) => _COMP.has(String(e || '').trim().toLowerCase());
+
 const DIM = 768;
 const MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
 const LOCATION = (process.env.VERTEX_LOCATION || 'global').trim();
@@ -506,7 +512,7 @@ module.exports = async (req, res) => {
     // every question to answer none of them better; the per-coin detail is what the tools are for.
     // What belongs here is the INVENTORY -- what I hold, how much of it, how fresh -- because that
     // is what a coverage question asks and it must not depend on a tool call landing.
-    let cryptoInv = null, cryptoLead = null;
+    let cryptoInv = null, cryptoLead = null, privateAlerts = null;
     try {
       let cs = await r.get('crypto:map:live');
       if (typeof cs === 'string') cs = JSON.parse(cs);
@@ -527,6 +533,24 @@ module.exports = async (req, res) => {
         // inventory above answers "what do you cover"; it cannot open a market read, which is why
         // the equity numbers won every open question asked on that surface.
         if (surface === 'crypto') cryptoLead = _cryptoLead(cs, focus);
+
+        // THE OWNER'S PRIVATE ALERT DESK. Comp seats only, decided here on the VERIFIED email —
+        // the tickets are direct buy/sell instructions, and instructions never reach a
+        // subscriber's grounding. For the comp reader they ride on every question, so the
+        // analyst can raise one unprompted and "what are my alerts doing" lands without a tool
+        // call. Slimmed to the fields a conversation needs; the tool has the rest.
+        if (_isComp(email) && cs.alerts) {
+          const slimO = (t) => ({ kind: t.kind, symbol: t.symbol, network: t.network,
+            action: t.action, entry: t.entry, target_px: t.target_px, stop_px: t.stop_px,
+            deadline: t.deadline, samples: t.samples });
+          const slimR = (t) => ({ kind: t.kind, symbol: t.symbol, action: t.action,
+            result: t.result, outcome: t.outcome, correct: t.correct });
+          privateAlerts = {
+            open: (cs.alerts.open || []).slice(0, 12).map(slimO),
+            recent_resolved: (cs.alerts.recent || []).slice(0, 8).map(slimR),
+            record: cs.alerts.record || null,
+          };
+        }
       }
     } catch (_) {}
 
@@ -574,12 +598,25 @@ module.exports = async (req, res) => {
        '', ''].join('\n')
     : '';
 
+  // Rides ONLY when the injection above actually happened, so the instruction and the data are
+  // gated by the same server-side check and no public prompt ever names the feature.
+  const privBlock = privateAlerts
+    ? ['PRIVATE ALERT DESK — THIS READER IS THE OWNER (comp seat, verified server-side). The live',
+       'tickets from my on-chain rule lab ride in MARKET DATA under private_alerts: open tickets,',
+       'recent resolutions and the per-rule record. Discuss them freely with this reader — it is',
+       'his own system. Raise a ticket unprompted when it bears on the question, quote its levels',
+       'and deadline exactly, and fold the record into any analysis. For every other reader these',
+       'tickets do not exist and are never mentioned.',
+       '', ''].join('\n')
+    : '';
+
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
+      privBlock +
       depthBlock +
       convo +
-      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead })}\n\n` +
+      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead, private_alerts: privateAlerts })}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 

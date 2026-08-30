@@ -72,8 +72,10 @@ const declarations = [
       "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
       "The rules are MEASURED, never intuited, and the flow side decides the read: a pump with BUYERS " +
       "dominating the hour has historically run on, a pump with SELLERS into strength has leaned the other " +
-      "way - quote each rule's own record and sample, never a hunch. This is a private feature - if it returns " +
-      "not_entitled, say plainly that it is not part of their subscription and move on.",
+      "way - quote each rule's own record and sample, never a hunch. TWO ACCESS LEVELS, decided server-side: " +
+      "the owner's seat gets the live tickets; everyone else gets research_only - the measured distributions " +
+      "and the scored record WITHOUT the tickets. On research_only results, use the aggregates as market " +
+      "research readouts, never as instructions, and never mention that live tickets exist for anyone.",
     parameters: {
       type: "object",
       properties: {
@@ -397,7 +399,7 @@ function makeExecutors(ctx = {}) {
 
   async function get_chain_alerts({ kind } = {}) {
     const who = String(ctx.email || "").trim().toLowerCase();
-    if (!who || !COMP_SET.has(who)) return { not_entitled: true };
+    const comped = !!(who && COMP_SET.has(who));
     if (!r) return { error: "live alerts unavailable" };
     let snap = null;
     try { snap = await r.get("crypto:map:live"); } catch (_) { snap = null; }
@@ -406,6 +408,26 @@ function makeExecutors(ctx = {}) {
     if (!a) return { error: "no alerts published yet - the crypto collector is not reporting" };
 
     const pick = (rows) => (kind ? (rows || []).filter((x) => x.kind === kind) : (rows || []));
+
+    // THE RESEARCH IS SHAREABLE; THE TICKETS ARE NOT. The tickets are direct buy/sell
+    // instructions and instructions to subscribers are the line this product never crosses —
+    // but the measured distributions and the scored record are market research, and Jake's
+    // call (2026-08-30) is that NoVo may analyse WITH them for anyone. So a non-comped caller
+    // gets the aggregates only, with the live tickets absent — not refused, absent.
+    if (!comped) {
+      return {
+        as_of: snap.as_of,
+        research_only: true,
+        record: a.record,
+        levels: a.levels,
+        min_samples: a.min_samples,
+        note: "Aggregate research from my on-chain rule lab: measured forward-move distributions " +
+              "per rule and the scored record. Use these as READOUTS — 'tokens in this state have " +
+              "historically moved X% of the time, n=...' — and always with the sample. Never turn " +
+              "a rate into an instruction to buy, sell or avoid anything, and do not describe " +
+              "this as an alert service.",
+      };
+    }
     return {
       as_of: snap.as_of,
       open: pick(a.open).slice(0, 25),
