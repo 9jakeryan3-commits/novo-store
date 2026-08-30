@@ -11,16 +11,24 @@
   var css = ''
     + '.nvc-btn{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));'
     + 'z-index:2147483000;height:44px;padding:0 15px;border-radius:999px;gap:9px;'
-    + 'border:1px solid #2e3036;background:rgba(20,21,25,.92);backdrop-filter:blur(8px);'
+    + 'border:1px solid rgba(34,211,238,.34);background:rgba(20,21,25,.92);backdrop-filter:blur(8px);'
     + 'color:#9fb6d1;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:.01em;'
-    + 'box-shadow:0 8px 24px rgba(0,0,0,.45);display:inline-flex;align-items:center;justify-content:center;'
+    + 'box-shadow:0 8px 24px rgba(0,0,0,.45),0 0 26px -6px rgba(34,211,238,.55);'
+    + 'display:inline-flex;align-items:center;justify-content:center;'
     + 'transition:border-color .18s,color .18s,box-shadow .18s}'
     + '.nvc-btn svg{width:17px;height:17px;flex:0 0 auto;stroke:#22d3ee}'
-    + '.nvc-btn:hover,.nvc-btn:focus-visible{border-color:rgba(34,211,238,.5);color:#eaf3ff;'
-    + 'box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 22px -8px rgba(34,211,238,.55);outline:none}'
+    + '.nvc-btn:hover,.nvc-btn:focus-visible{border-color:rgba(34,211,238,.75);color:#eaf3ff;'
+    + 'box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 34px -4px rgba(34,211,238,.8);outline:none}'
     /* On a phone it collapses to a disc: the label is the first thing to cost more room than it
        earns when the viewport is 390px wide and the button sits over the copy. */
     + '@media(max-width:560px){.nvc-btn{padding:0;width:44px;gap:0}.nvc-btn .nvc-lbl{display:none}}'
+    /* Open state: the icon rotates into a cross rather than the label being swapped out, so the
+       button never loses its content and never reflows. */
+    + '.nvc-btn .nvc-ico-x{display:none}'
+    + '.nvc-btn.nvc-open .nvc-ico-chat{display:none}'
+    + '.nvc-btn.nvc-open .nvc-ico-x{display:block}'
+    + '.nvc-btn.nvc-open .nvc-lbl{display:none}'
+    + '.nvc-btn.nvc-open{padding:0;width:44px;gap:0;border-color:rgba(34,211,238,.5)}'
     + '.nvc-panel{position:fixed;right:20px;bottom:88px;z-index:2147483000;width:370px;max-width:calc(100vw - 32px);'
     + 'height:540px;max-height:calc(100vh - 120px);background:#121316;border:1px solid #2e3036;border-radius:14px;'
     + 'display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.55);'
@@ -66,15 +74,15 @@
   var introShown = false;
 
   function open(){
-    opened = true; panel.classList.add('open'); btn.textContent = '×';
+    opened = true; panel.classList.add('open'); btn.classList.add('nvc-open');
     // Guard on the intro itself, not on messages.length. addMsg() only paints the
     // DOM -- it never pushes to `messages`, which send() owns -- so the old check
     // stayed true on every reopen and stacked another greeting each time.
     if (!introShown) { introShown = true; addMsg('assistant',
-      "Support here. Ask anything about how NoVo works: brokers, paper vs live, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + "."); }
+      "Support here. Ask anything about how NoVo works: the plans, what the dealer map shows, pricing, billing, or what a term means. For anything account-specific or money-related, I'll point you to " + SUPPORT + "."); }
     setTimeout(function(){ inputEl.focus(); }, 50);
   }
-  function close(){ opened = false; panel.classList.remove('open'); btn.textContent = '💬'; }
+  function close(){ opened = false; panel.classList.remove('open'); btn.classList.remove('nvc-open'); }
 
   async function send(){
     var text = inputEl.value.trim();
@@ -99,12 +107,13 @@
   function mount(){
     var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
-    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Ask NoVo');
+    btn = document.createElement('button'); btn.className='nvc-btn'; btn.setAttribute('aria-label','Message support');
     // An inline SVG, not an emoji: 💬 is a different picture on every platform and none of them
     // match the site. Stroked in the same cyan the rest of the UI accents with.
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" '
-      + 'stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.9 9.9 0 0 1-2.8-.4L3 21l1.6-4.6A8.1 8.1 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/></svg>'
-      + '<span class="nvc-lbl">Ask NoVo</span>';
+    var SVG = 'viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    btn.innerHTML = '<svg class="nvc-ico-chat" ' + SVG + '><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.9 9.9 0 0 1-2.8-.4L3 21l1.6-4.6A8.1 8.1 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/></svg>'
+      + '<svg class="nvc-ico-x" ' + SVG + '><path d="M18 6 6 18M6 6l12 12"/></svg>'
+      + '<span class="nvc-lbl">Support</span>';
     btn.onclick = function(){ opened ? close() : open(); };
 
     panel = document.createElement('div'); panel.className='nvc-panel'; panel.setAttribute('role','dialog'); panel.setAttribute('aria-label','NoVo Options Trading support');
