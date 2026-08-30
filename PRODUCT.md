@@ -3,7 +3,7 @@
 The single source of truth for **what is free and what is paid**. If a claim on the site
 disagrees with this file, one of them is a bug — check the code column and fix whichever is wrong.
 
-Last verified against the deployed site and engine: **2026-08-23**.
+Last verified against the deployed site and engine: **2026-08-30** (analyst/lookups sections).
 
 > **Keep this current.** Any change to what a tier includes — a feature shipped, retired, moved
 > across the paywall, or repriced — updates this file in the *same commit* as the page copy.
@@ -119,8 +119,13 @@ layer underneath. Nothing in this section appears on any free page.
   what the current setup has historically resolved to, with its sample size — the read carries a
   record, not only a reading.
 - **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
-  plus 11 read-only live lookups (dealer levels, gamma profile, session history, **base rates**, its
-  own track record, the archive, quotes, macro calendar, earnings dates, headlines).
+  plus **19 read-only live lookups** spanning both maps: dealer levels, gamma profile, session
+  history, **base rates**, its own track record, its recent reads, market internals, the
+  **volatility record back to 1990** (every gauge with its percentile), **CFTC futures
+  positioning**, quotes, macro calendar, earnings dates, headlines, and the crypto map, breadth,
+  corpus and chain tokens.
+  **Ask for a "deep read"** and it takes the long lane — more lookups, wider retrieval, a
+  structured desk report (capped at 8/hour; past that it answers in the fast lane).
   Market only — never accounts, trades or P&L; never advice.
 - Every hourly audit and desk note is kept and scored. NoVo writes each read with the session's
   earlier calls and its own record in hand.

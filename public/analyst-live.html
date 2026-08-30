@@ -1445,7 +1445,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <button type="button" data-q="How accurate have your published calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
   </div>
   <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
-    <input id="novo-ask-q" placeholder="Ask about the market&hellip;" autocomplete="off" maxlength="600">
+    <input id="novo-ask-q" placeholder="Ask about the market &mdash; or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>

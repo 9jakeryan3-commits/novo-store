@@ -596,7 +596,7 @@ tr:last-child td{border-bottom:none}
     <button type="button" data-q="How accurate have your published crypto calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
   </div>
   <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
-    <input id="novo-ask-q" placeholder="Ask about this map&hellip;" autocomplete="off" maxlength="600">
+    <input id="novo-ask-q" placeholder="Ask about this map &mdash; or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>
@@ -822,7 +822,8 @@ function histPanel(){
   // the crypto map had the numbers in the snapshot and showed them nowhere.
   const br=(SNAP&&SNAP.health&&SNAP.health.base_rates)||[];
   if(!br.length) return '';
-  const label={gamma_pin:'Gamma pin into the 08:00 UTC expiry',
+  const label={gamma_damp:'Gamma dampening into the 08:00 UTC expiry',
+               gamma_pin:'Gamma pin into the 08:00 UTC expiry (retired rule)',
                oi_quadrant:'Price / open-interest regime',
                funding_extreme:'Funding at an extreme',
                cost_anomaly:'Cost-to-trade anomaly'};
@@ -1095,7 +1096,7 @@ function drawReadStrip(){
    of predictions with the outcomes quietly dropped is a highlight reel; showing what happened next
    is the entire difference between a track record and marketing. */
 const KINDLABEL = {
-  gamma_pin: 'Gamma pin', funding_extreme: 'Funding extreme',
+  gamma_damp: 'Gamma damp', gamma_pin: 'Gamma pin', funding_extreme: 'Funding extreme',
   oi_quadrant: 'OI regime', cost_anomaly: 'Cost anomaly',
 };
 // The counts the collector ships alongside the 60-row page, with the old len(feed) derivation as
