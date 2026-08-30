@@ -64,7 +64,7 @@
     <p>Multi-leg positions are the ones that suffer. A spread priced from mid quotes on two liquid strikes may be genuinely available; the same spread using one liquid and one thin strike may cost several times its theoretical price to enter, and considerably more to exit in a hurry.</p>
     <p>The exit is the part that gets underestimated, exactly as it is on-chain: entering is voluntary and can wait for a good fill, while exiting is often not. It is the same argument as <a href="/journal/on-chain-liquidity-vs-order-book.html">sizing to the depth you exit into</a>, applied to an options book.</p>
     <h2>What it does to a dealer map</h2>
-    <p>Open interest at an illiquid strike still enters the gamma calculation at full weight, even if it has not traded in weeks &mdash; the stale-strike problem from <a href="/journal/reading-a-thin-options-book.html">reading a thin options book</a>.</p>
+    <p>Open interest at an illiquid strike still enters the gamma calculation at full weight, even if it has not traded in weeks &mdash; the stale-strike problem from <a href="/journal/reading-a-thin-options-book.html"><span class="rk">Crypto Dealer Flow</span>Reading a Thin Options Book Without Over-Reading It</a>.</p>
     <p>So an apparent wall on a far strike may be old positioning nobody has bothered to close rather than a live view. Checking whether a strike has recent volume, not just open interest, is the cheap way to tell the difference.</p>
     <h2>The practical habit</h2>
     <p>Read the size at the quote, not the quote. And for anything multi-leg, price it at the prices you would actually be filled at rather than at mids &mdash; the honest version of the round-trip discipline that applies to every market in this series.</p>

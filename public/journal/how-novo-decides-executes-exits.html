@@ -7,32 +7,32 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How NoVo Decides, Executes &amp; Exits | NoVo</title>
-<meta name="description" content="From a confirmed signal to a filled order to a disciplined exit — a hard stop and a trailing take-profit ladder that protect each position. How NoVo turns a read.">
+<title>How NoVo Builds a Read, and Scores It | NoVo</title>
+<meta name="description" content="The conditions that have to line up before NoVo calls a level meaningful, what gets discounted, how fast the map is redrawn, and how every read lands on a scored record.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
 <link rel="canonical" href="https://novo-options.trade/journal/how-novo-decides-executes-exits.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://novo-options.trade/journal/how-novo-decides-executes-exits.html">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:title" content="How NoVo Decides, Executes & Exits">
-<meta property="og:description" content="A multi-stage entry gate, one-click Adaptive-Urgent execution, and a strict per-position exit hierarchy.">
+<meta property="og:title" content="How NoVo Builds a Read, and Scores It">
+<meta property="og:description" content="A multi-stage gate before a level counts, a map redrawn at tape speed, and a record that grades every read afterwards.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="How NoVo Decides, Executes & Exits">
-<meta name="twitter:description" content="From a confirmed signal to a disciplined, capital-protected exit.">
+<meta name="twitter:title" content="How NoVo Builds a Read, and Scores It">
+<meta name="twitter:description" content="How a dealer-positioning read is built, and how it gets graded afterwards.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=1f3edec1">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "How NoVo Decides, Executes & Exits", "description": "From a confirmed signal to a filled order to a disciplined exit — a hard stop and a trailing take-profit ladder that protect each position. How NoVo turns a read into a managed trade.", "image": "https://novo-options.trade/novo-logo.png", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-28", "dateModified": "2026-06-28", "mainEntityOfPage": "https://novo-options.trade/journal/how-novo-decides-executes-exits.html", "articleSection": "Execution", "wordCount": 928, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "How NoVo Builds a Read, and Scores It", "description": "A multi-stage gate before a level counts, a map redrawn at tape speed, and a record that grades every read afterwards.", "image": "https://novo-options.trade/novo-logo.png", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-28", "dateModified": "2026-06-28", "mainEntityOfPage": "https://novo-options.trade/journal/how-novo-decides-executes-exits.html", "articleSection": "Execution", "wordCount": 928, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "How NoVo Decides, Executes & Exits", "item": "https://novo-options.trade/journal/how-novo-decides-executes-exits.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "How NoVo Builds a Read, and Scores It", "item": "https://novo-options.trade/journal/how-novo-decides-executes-exits.html"}]}
 </script>
 </head>
 <body>
@@ -48,47 +48,38 @@
 
 <main class="wrap">
 <article class="article">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/strategy-execution">Strategy &amp; Execution</a><span class="sep">&rsaquo;</span><span class="cur">How NoVo Decides, Executes &amp; Exits</span></nav>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/strategy-execution">Strategy &amp; Execution</a><span class="sep">&rsaquo;</span><span class="cur">How NoVo Builds a Read, and Scores It</span></nav>
   <header class="article-head">
-    <div class="kicker">Execution</div>
-    <h1>How NoVo Decides, Executes &amp; Exits</h1>
-    <p class="standfirst">A read is worthless without disciplined execution behind it. Here's how NoVo turns your one-click call into a filled order — and a filled order into a managed, capital-protected trade.</p>
+    <div class="kicker">Product</div>
+    <h1>How NoVo Builds a Read, and Scores It</h1>
+    <p class="standfirst">A read is worthless if you can't check it afterwards. Here's how NoVo turns raw dealer positioning into a read — and how every read ends up on a record you can audit.</p>
   </header>
   <div class="article-meta">NoVo Options Trading · Jun 28, 2026 &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping &amp;amp; the Dealer Map - The Complete Guide</a> guide &rarr;</div>
   <div class="article-body">
-    <p>Plenty of systems can spot a setup. The hard part — the part that actually decides whether you keep your money — is everything that happens <em>after</em>: confirming the entry is real, getting filled without bleeding edge, and managing the exit with zero emotion. NoVo treats all three as first-class problems.</p>
+    <p>Plenty of tools can draw a line on a chart. The hard part &mdash; the part that decides whether the line is worth anything &mdash; is everything around it: knowing when a level is actually loaded, knowing when a read has gone stale, and being honest afterwards about whether it held. NoVo treats all three as first-class problems.</p>
 
-    <h2>Deciding: a gate, not a trigger</h2>
-    <p>NoVo never enters on a single condition. An entry has to pass through a multi-stage gate, and every stage can veto the trade:</p>
+    <h2>Reading: a gate, not a trigger</h2>
+    <p>NoVo never calls a level meaningful on a single condition. A read has to pass through a multi-stage gate, and every stage can downgrade it:</p>
     <ul>
-      <li><strong>Is the move real?</strong> The tape has to confirm sustained directional pressure, not a one-tick spike that immediately reverses.</li>
-      <li><strong>Does the structure agree?</strong> The AI's directional bias has to align with the trade. A long needs a constructive structural read; a short needs the opposite. A stale read gets discounted automatically.</li>
-      <li><strong>How strong is it?</strong> Different strengths of setup open different entry paths — from a carefully filtered, lower-conviction entry to a high-urgency one when the tape is genuinely exploding. Stronger conviction earns more size; weaker conviction earns less.</li>
-      <li><strong>Is it chasing a wall?</strong> If price has already been rejected from a key level, NoVo won't chase a breakout right into it — it waits for price to actually clear the level instead of buying the top of a failed push.</li>
+      <li><strong>Is the move real?</strong> The tape has to show sustained directional pressure, not a one-tick spike that immediately reverses.</li>
+      <li><strong>Does the structure agree?</strong> The directional read has to line up with where dealer positioning actually sits. A stale read gets discounted automatically.</li>
+      <li><strong>How strong is it?</strong> Setups differ in weight &mdash; from a thin, single-level alignment to a price where several things stack on top of each other. The read says which one you are looking at.</li>
+      <li><strong>Is price chasing a wall?</strong> If price has already been rejected from a key level, a breakout read into that same level stays weak until price actually clears it.</li>
     </ul>
-    <p>The exact strength bands and floors that govern these paths are tunable by you and stay under the hood. The principle is what matters: <strong>conviction sizing</strong> — risk the most only when the evidence is strongest, and let weak setups pass.</p>
+    <p>The principle is what matters: <strong>conviction is stated, not implied.</strong> A thin alignment is labelled a thin alignment, and you decide what that is worth in your own account.</p>
 
-    <h2>Executing: getting filled without leaking edge</h2>
-    <p>Once a trade is approved, NoVo doesn't just blast a market order and eat the slippage. It fires an <strong>Adaptive-Urgent</strong> order &mdash; a marketable limit that crosses the spread in under a second, re-pricing up to a hard slippage cap so a fast 0DTE can't outrun it, then confirms the fill against your broker so a position is never missed or lost. Aggressive enough to get you in on the move, capped so it never pays through a blown-out spread.</p>
+    <h2>Speed: the map has to be current</h2>
+    <p>A level that was true four minutes ago is a different level. On <a href="/analyst">Analyst</a> the dealer map is recomputed every 60 seconds across SPY, QQQ and IWM. On <a href="/trader">Trader</a> the same map is drawn on a live candle chart and redrawn roughly every five seconds, with price moving up to ten times a second, plus a structural audit at the top of every hour.</p>
 
-    <p class="pull">A good entry filled badly is a bad entry. NoVo treats execution quality as part of the edge, not an afterthought.</p>
+    <p class="pull">A good read acted on late is a bad read. NoVo redraws the map at tape speed so the level in front of you is the current one.</p>
 
-    <h2>Exiting: a strict hierarchy, all yours to set</h2>
-    <p>This is where most traders fall apart, so NoVo makes it mechanical. Every open position is re-evaluated continuously against a strict priority ladder, where higher rules always override lower ones:</p>
-    <ul>
-      <li><strong>Your manual controls</strong> — take partial profit or liquidate everything, instantly, whenever you want.</li>
-      <li><strong>A hard stop</strong> — a fixed maximum loss per trade. When it's hit, the trade is closed. No negotiation, no "give it room."</li>
-      <li><strong>Trailing stops</strong> — once a trade is working, NoVo trails the gain to lock in profit if it reverses.</li>
-      <li><strong>Staged take-profits</strong> — bank a portion at a first target and let the rest run, or cap the whole position — your choice.</li>
-    </ul>
-    <p>Every one of those levels is a number <em>you</em> set, live, from the dashboard. Nothing is hidden or hardcoded. Earlier versions of NoVo had a discretionary exit that could cut a trade when the AI bias flipped mid-position — that was deliberately <strong>removed</strong>, because a momentary bias flip wasn't reliable enough to justify overriding the stop you set. Your risk rules run the show.</p>
+    <h2>Scoring: the part most tools skip</h2>
+    <p>Every read NoVo puts on the screen is written down and graded against what price actually did next. That is what produces the scored record on the setup in front of you &mdash; not a backtest of a strategy, but NoVo&rsquo;s own history of calling this structure, misses included. It is the only honest answer to &ldquo;why should I believe this level?&rdquo;</p>
+    <p>What NoVo does not do is act on any of it. It has no connection to your brokerage, places no orders, and sets no stops or targets. Direction, strike, size, entry and exit are all yours, decided by you and placed by you at your own broker &mdash; the <a href="/tools/position-size-calculator">position-size calculator</a> is there if you want a second opinion on the size.</p>
 
-    <h2>The capital protections that never sleep</h2>
-    <p>Those protections run per position: the hard stop caps the loss on every trade, and the trailing and take-profit rungs bank gains before they can give back. There are also enforced cooldowns between trades so it never machine-guns into a chop. And if the system ever restarts while a position is open, it re-adopts that position with safe assumptions and keeps managing it without missing a beat.</p>
-
-    <p>Entry, execution, exit, and the guardrails around them — all mechanical, all consistent, all under your configured limits. That's the difference between a plan and a system that actually follows one.</p>
+    <p>A gated read, a map that stays current, and a record that grades itself. What you do with it is the part only you can do.</p>
   </div>
 
   <div class="cta">
@@ -123,7 +114,7 @@
 <nav class="more">
   <div class="label">Keep reading</div>
   <a href="/journal/how-novo-thinks-and-learns.html">How NoVo Thinks <span>The three AI layers, the honest record, and the line the AI never crosses.</span></a>
-  <a href="/journal/how-novo-reads-the-market.html">How NoVo Reads the Market <span>The data streams behind every decision.</span></a>
+  <a href="/journal/how-novo-reads-the-market.html">How NoVo Reads the Market</a>
 </nav>
 </main>
 
