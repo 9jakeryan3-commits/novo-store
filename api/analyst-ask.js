@@ -64,11 +64,10 @@ function verifyToken(token) {
   } catch (_) { return null; }
 }
 
-// The comp list — same env the control plane, crypto-map.js and the tool layer read, so there is
-// one list to keep. Decides whose grounding carries the private alert desk below.
-const _COMP = new Set(String(process.env.COMP_EMAILS || '')
-  .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean));
-const _isComp = (e) => _COMP.has(String(e || '').trim().toLowerCase());
+// The comp gate — the SAME shared check crypto-map.js and trader-live.js's list encodes,
+// factored into _lib/comp.js so every surface reads one implementation of one list. Decides
+// whose grounding carries the private alert desk below.
+const { isComp: _isComp } = require('./_lib/comp.js');
 
 const DIM = 768;
 const MODEL = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();

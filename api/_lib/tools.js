@@ -354,12 +354,9 @@ function makeExecutors(ctx = {}) {
 
   // Comped seats only, for now. The thresholds behind these calls rest on a few dozen resolved
   // observations from a single window -- enough to act on personally, nowhere near enough to sell.
-  // Gated on the SAME env list the control plane and the map endpoint use, so there is one list to
-  // keep rather than three that drift.
-  const COMP_SET = new Set(
-    String(process.env.COMP_EMAILS || "")
-      .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
-  );
+  // Gated through _lib/comp.js -- the ONE implementation of the COMP_EMAILS check every surface
+  // shares, so this gate can never drift from the dashboards'.
+  const { isComp } = require("./comp.js");
 
   async function get_chain_token({ symbol, network } = {}) {
     if (!r) return { error: "chain map unavailable" };
@@ -399,8 +396,7 @@ function makeExecutors(ctx = {}) {
   }
 
   async function get_chain_alerts({ kind } = {}) {
-    const who = String(ctx.email || "").trim().toLowerCase();
-    const comped = !!(who && COMP_SET.has(who));
+    const comped = isComp(ctx.email);
     if (!r) return { error: "live alerts unavailable" };
     let snap = null;
     try { snap = await r.get("crypto:map:live"); } catch (_) { snap = null; }
