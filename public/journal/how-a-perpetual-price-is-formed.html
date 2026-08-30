@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How a Perpetual&rsquo;s Price Is Actually Formed | NoVo Options Trading</title>
-<meta name="description" content="Bitcoin has a dealer map. Deribit carries almost all crypto options open interest, so BTC gamma exposure can be computed the same way it is for SPY - and it moves.">
+<meta name="description" content="A perpetual has two forces acting on it: an order book that sets the price and a funding mechanism that argues with it. Knowing which is winning is most of the read.">
 <meta name="theme-color" content="#121316">
 <link rel="canonical" href="https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:url" content="https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html">
 <meta property="og:title" content="How a Perpetual&rsquo;s Price Is Actually Formed">
-<meta property="og:description" content="Bitcoin has a dealer map. Deribit carries almost all crypto options open interest, so BTC gamma exposure can be computed the same way it is for SPY - and it moves.">
+<meta property="og:description" content="A perpetual has two forces acting on it: an order book that sets the price and a funding mechanism that argues with it. Knowing which is winning is most of the read.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=963c11c7">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "How a Perpetual&rsquo;s Price Is Actually Formed", "description": "The perp trades on its own order book, which can go anywhere. Funding is the tether, and it pulls slowly rather than clamping.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=3", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html", "articleSection": "Perps & Funding", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "How a Perpetual’s Price Is Actually Formed", "description": "The perp trades on its own order book, which can go anywhere. Funding is the tether, and it pulls slowly rather than clamping.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=3", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html", "articleSection": "Perps & Funding", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "How a Perpetual&rsquo;s Price Is Actually Formed", "item": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "How a Perpetual’s Price Is Actually Formed", "item": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html"}]}
 </script>
 </head>
 <body>
