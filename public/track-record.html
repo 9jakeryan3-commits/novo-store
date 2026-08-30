@@ -854,17 +854,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         oi_quadrant: 'The price-and-open-interest quadrant carries forward',
         cost_anomaly: 'An unusually wide Robinhood round-trip comes back in'
       };
+      // ONE ROW PER CLAIM KIND, whatever shape the payload arrived in. An older rollup keyed
+      // rows as kind@<horizon> — and gamma_pin's horizon is minutes-to-expiry, different on
+      // every ticket, so that shape carries HUNDREDS of rows for one question and rendered as
+      // a page-long wall. The collector now ships one row per kind; if a cached legacy payload
+      // is still being served, collapse it here: claims and hits sum, the cell count is shown
+      // as a floor (cells can repeat across horizon rows, so summing would overstate).
+      var rawKeys = Object.keys(cr.baseRates);
+      var plainKeys = rawKeys.filter(function(k){ return k.indexOf('@') < 0; });
+      var rows;
+      if (plainKeys.length) {
+        rows = plainKeys.map(function(k){ return { kind: k, c: cr.baseRates[k] }; });
+      } else {
+        var byKind = {};
+        rawKeys.forEach(function(k){
+          var c0 = cr.baseRates[k]; if (!c0) return;
+          var kd = k.split('@')[0];
+          var t = byKind[kd] || (byKind[kd] = { n_claims: 0, hit: 0, n_cells: 0, n_days: 0 });
+          t.n_claims += c0.n_claims || 0; t.hit += c0.hit || 0;
+          t.n_cells = Math.max(t.n_cells, c0.n_cells || 0);
+          t.n_days = Math.max(t.n_days, c0.n_days || 0);
+        });
+        rows = Object.keys(byKind).map(function(kd){
+          var t = byKind[kd];
+          return { kind: kd, c: { n_claims: t.n_claims, hit: t.hit, n_cells: t.n_cells,
+            n_days: t.n_days, rate: null, trustworthy: false,
+            caveat: 'Not yet a base rate: at least ' + t.n_cells + ' independent coin-day cells over '
+                  + t.n_days + ' day(s). Quote it as an early reading with the cell count, never as a hit rate.' } };
+        });
+      }
       var chh = '';
-      Object.keys(cr.baseRates).sort().forEach(function(key){
-        var c = cr.baseRates[key]; if (!c) return;
-        // Keys are plain kinds now; the split keeps an older cached payload (kind@480m) readable.
-        var kind = key.split('@')[0], legacyHor = key.split('@')[1] || '';
+      rows.sort(function(a, b){ return a.kind < b.kind ? -1 : 1; }).forEach(function(row){
+        var c = row.c, kind = row.kind; if (!c) return;
         var label = CRK[kind] || kind.replace(/_/g, ' ');
         var hm = c.horizon_min;
         var horTxt = (hm != null)
           ? (typeof hm === 'number' ? hm + '-minute horizon'
                                     : 'graded to expiry, ' + hm.min + '&ndash;' + hm.max + ' min')
-          : (legacyHor ? legacyHor.replace('m', '') + '-minute horizon' : '');
+          : '';
         if (c.trustworthy) {
           chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
               + '<div style="display:flex;align-items:baseline;gap:12px;">'
