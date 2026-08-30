@@ -123,3 +123,17 @@ nav.is-scrolled {
    always claimed: that .crumbs mirrors the journal's, and the journal's has no background, border
    or position. */
 .crumbs{position:static;z-index:auto;background:none;backdrop-filter:none;border-bottom:0;top:auto;}
+
+/* ...and then it still read as a BAND, because it sat on the body background in the gap between the
+   ticker and the hero's gradient -- a flat strip across the top of every page. Nothing was painting
+   it; the seam was the absence of the hero's background behind it.
+
+   So the hero is pulled up to run underneath it. The crumb text then floats on the hero's own
+   gradient and the strip disappears. Scoped with the adjacent-sibling combinator so it only fires
+   where a hero actually follows the breadcrumb (35 of the 44 pages) -- the other nine keep the
+   ordinary flow rather than having a negative margin pull the crumbs over whatever is there.
+
+   z-index:1 is enough to sit above the hero and nowhere near the header nav's 100, so this cannot
+   bring back the crumb-over-the-menu bug. */
+.crumbs{position:relative;z-index:1;padding-bottom:0;}
+.crumbs + .hero, .crumbs + .container.hero{margin-top:-38px;padding-top:82px;}
