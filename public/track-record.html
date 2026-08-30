@@ -850,8 +850,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (cr && cr.baseRates && Object.keys(cr.baseRates).length) {
       var CRK = {
         gamma_pin: 'Spot finishes nearer the dominant call wall',
+        gamma_damp: 'Near the wall, the tape runs the way the gamma sign says',
         funding_extreme: 'Extreme funding squeezes the side paying it',
+        funding_extreme_shorts_paying: 'Shorts paying extreme funding get squeezed up',
+        funding_extreme_longs_paying: 'Longs paying extreme funding get pushed down',
         oi_quadrant: 'The price-and-open-interest quadrant carries forward',
+        oi_quadrant_up: 'A long-building quadrant carries price up',
+        oi_quadrant_down: 'A long-unwind quadrant carries price down',
         cost_anomaly: 'An unusually wide Robinhood round-trip comes back in'
       };
       // ONE ROW PER CLAIM KIND, whatever shape the payload arrived in. An older rollup keyed
@@ -892,6 +897,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           ? (typeof hm === 'number' ? hm + '-minute horizon'
                                     : 'graded to expiry, ' + hm.min + '&ndash;' + hm.max + ' min')
           : '';
+        // The context a rate cannot be read without: the drift it has to beat, and any
+        // kind-specific health warning the rollup attached.
+        var extra = '';
+        if (c.market_baseline) {
+          extra += '<div class="muted" style="font-size:11px;margin-top:2px;">market drift over the span: '
+                 + c.market_baseline.up_pct + '% of all 8h windows rose (n=' + nn(c.market_baseline.n_windows)
+                 + ') &mdash; a directional rate has to beat that, not 50%.</div>';
+        }
+        if (c.note) extra += '<div class="muted" style="font-size:11px;margin-top:2px;">' + c.note + '</div>';
         if (c.trustworthy) {
           chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
               + '<div style="display:flex;align-items:baseline;gap:12px;">'
@@ -901,6 +915,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               + '<div class="muted" style="font-size:11px;margin-top:3px;">' + nn(c.n_cells) + ' coin-days over '
               + nn(c.n_days) + ' day' + (c.n_days === 1 ? '' : 's') + ' &middot; ' + nn(c.n_claims) + ' claims'
               + (horTxt ? ' &middot; ' + horTxt : '') + '</div>'
+              + extra
               + '</div>';
         } else {
           chh += '<div style="padding:8px 0;border-top:1px solid var(--bdr);">'
@@ -913,9 +928,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               + '</div>'
               + '<div class="muted" style="font-size:11px;margin-top:3px;line-height:1.5;">' + (c.caveat || 'accruing')
               + (horTxt ? ' &middot; ' + horTxt : '') + '</div>'
+              + extra
               + '</div>';
         }
       });
+      // Claims taken OUT of the record say so — silently vanishing would break the page's
+      // own promise that a claim which stops holding gets said out loud.
+      if (cr.retired) {
+        Object.keys(cr.retired).forEach(function(rk){
+          chh += '<div class="muted" style="font-size:11px;padding-top:8px;line-height:1.55;">'
+               + '<b style="color:var(--txt2);">Retired &mdash; ' + (CRK[rk] || rk.replace(/_/g, ' ')) + ':</b> '
+               + cr.retired[rk] + '</div>';
+        });
+      }
       if (cr.openClaims != null) {
         chh += '<div class="muted" style="font-size:11.5px;padding-top:8px;">' + nn(cr.openClaims)
              + ' claims are open right now, awaiting their horizon.</div>';

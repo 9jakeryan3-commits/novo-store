@@ -227,8 +227,9 @@ const declarations = [
       "session. Several claims ALSO carry an `archive` block -- the same question re-asked over ~4,500 reconstructed " +
       "sessions back to 2008, graded on the session after each close. Quote it as a backtest, with its window and n, " +
       "and never merged with the live figure beside it. The `crypto` block is the crypto half of the same record — " +
-      "my self-scored crypto claims by kind (gamma pin, funding extreme, OI quadrant, cost anomaly), where n_cells " +
-      "(independent coin-days) is the real denominator and trustworthy:false means an early reading, never a base rate. " +
+      "my self-scored crypto claims by kind (gamma damp, funding extreme per paying side, OI quadrant per direction, " +
+      "cost anomaly), where n_cells (independent coin-days) is the real denominator, trustworthy:false means an early " +
+      "reading never a base rate, and directional rates carry the market drift they must beat. " +
       "Each claim carries its sample size. Use for 'how often', 'does that actually hold', 'how accurate are you'. This is " +
       "the scored record — get_session_history gives the raw session summary, not the hit rate.",
     parameters: { type: "object", properties: {} },
@@ -830,11 +831,14 @@ function makeExecutors(ctx = {}) {
       if (ch && ch.base_rates && Object.keys(ch.base_rates).length) {
         cryptoRec = {
           baseRates: ch.base_rates,
+          retired: ch.base_rates_retired || null,
           openClaims: ch.open_claims ?? null,
           note: "self-scored crypto claims, graded at their own horizons against the series each " +
                 "claim was made on. n_cells (independent coin-days) is the denominator that " +
                 "matters; a row with trustworthy:false is an early reading — give the cell count " +
-                "and the caveat, never the percentage alone.",
+                "and the caveat, never the percentage alone. Directional kinds report per " +
+                "predicted side, each with market_baseline (the drift a rate has to beat). A " +
+                "kind under `retired` was measured and taken out — say so if asked about it.",
         };
       }
     } catch (_) { cryptoRec = null; }

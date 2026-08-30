@@ -60,11 +60,13 @@ module.exports = async (req, res) => {
   if (ch && ch.base_rates && Object.keys(ch.base_rates).length) {
     snap.crypto = {
       baseRates: ch.base_rates,
+      retired: ch.base_rates_retired || null,
       openClaims: ch.open_claims ?? null,
       asOf: ch.received || null,
       note: "Self-scored crypto claims, graded at their own horizons against the series each " +
             "claim was made on. n_cells (independent coin-days) is the denominator that matters; " +
-            "a row with trustworthy:false is an early reading, not a base rate.",
+            "a row with trustworthy:false is an early reading, not a base rate. Directional kinds " +
+            "report per predicted side with the market's own drift beside them.",
     };
   }
   return res.status(200).json(snap);
