@@ -137,3 +137,7 @@ nav.is-scrolled {
    bring back the crumb-over-the-menu bug. */
 .crumbs{position:relative;z-index:1;padding-bottom:0;}
 .crumbs + .hero, .crumbs + .container.hero{margin-top:-38px;padding-top:82px;}
+/* crypto wraps its hero in .cx, so the sibling is the WRAPPER, not the hero. Pull the wrapper
+   up and pad the hero inside it -- same result, one level down. */
+.crumbs + .cx{margin-top:-38px;}
+.crumbs + .cx .hero{padding-top:82px;}
