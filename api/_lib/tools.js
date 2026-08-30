@@ -70,15 +70,17 @@ const declarations = [
       "currently have open, how the resolved ones actually went, and the measured rule levels - each rule's " +
       "target/stop and its triggered-vs-baseline rates - that every verdict rests on. Use " +
       "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
-      "These rules point the OPPOSITE way to intuition: a chain token bleeds by default, so a token up hard on " +
-      "the hour is a fade and depth arriving reads as exit liquidity. This is a private feature - if it returns " +
+      "The rules are MEASURED, never intuited, and the flow side decides the read: a pump with BUYERS " +
+      "dominating the hour has historically run on, a pump with SELLERS into strength has leaned the other " +
+      "way - quote each rule's own record and sample, never a hunch. This is a private feature - if it returns " +
       "not_entitled, say plainly that it is not part of their subscription and move on.",
     parameters: {
       type: "object",
       properties: {
         kind: {
           type: "string",
-          description: "Optional filter: chain_pump_fade, chain_depth_influx, or chain_holds_bid.",
+          description: "Optional filter: chain_pump_buyers, chain_pump_sellers, chain_depth_influx, or " +
+            "chain_holds_bid (chain_pump_fade is the retired pre-split kind, still in the record).",
         },
       },
     },
