@@ -564,11 +564,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- HERO PRODUCT SHOT — real v4.3 stacked mashup (2026-07-19), replaces the SVG mock -->
     <style>
-      .hero-mashup{ position:relative; max-width:900px; margin:52px auto 0; padding-top:30px; padding-left:20px; }
+      .hero-mashup{ position:relative; max-width:900px; margin:44px auto 0; }
       .hm-back{ width:100%; display:block; border-radius:12px; overflow:hidden; border:1px solid var(--bdr);
         box-shadow:var(--shadow-lg), 0 0 90px -30px rgba(16,185,129,.18); transform:rotate(-1.6deg); }
       .hm-back img{ display:block; width:100%; height:auto; }
-      .hm-fan{ position:absolute; top:clamp(26px,4vw,58px); left:clamp(-22px,-1.2vw,6px); display:flex; align-items:flex-start; z-index:5; }
+      .hm-fan{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:flex; align-items:center; z-index:5; }
       .hm-card{ width:clamp(88px,11vw,132px); border-radius:13px; overflow:hidden; border:1px solid var(--bdr); background:#0a0f18;
         box-shadow:0 26px 54px -16px rgba(0,0,0,.72); transition:transform .35s cubic-bezier(.2,.7,.2,1); }
       .hm-card img{ display:block; width:100%; height:auto; }
@@ -578,8 +578,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          clamp() widths above already shrink the phone cards on narrow viewports; this just tightens the
          fan's own scale a touch further so four overlapping cards read as a mashup, not a wall, on a phone. */
       @media (max-width:640px){
-        .hero-mashup{ padding-left:30px; margin-top:38px; }
-        .hm-fan{ top:clamp(16px,5vw,28px); left:clamp(4px,1vw,10px); }
+        .hero-mashup{ margin-top:32px; }
+        .hm-fan{ top:50%; left:50%; }
         .hm-card{ width:clamp(64px,20vw,84px); }
         .hm-card:nth-child(n+2){ margin-left:-34px !important; }
       }
@@ -617,7 +617,7 @@ nav { position: relative; }
         <div class="hm-card" style="transform:rotate(9deg) translateY(16px);z-index:3;margin-left:-46px;"><img src="/screenshots/trader-live-analysis.webp?v=1" width="502" height="1044" alt="Trader on a phone &mdash; the analysis tab &mdash; the structural audit with its identified levels, observed patterns and written thesis, and what NoVo knows about this setup" loading="lazy" decoding="async"></div>
       </div>
     </div>
-    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:16px auto 0;">The dashboard and the phone app &mdash; the whole dealer map, drawn on the tape as it moves.</p>
+    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:18px auto 34px;">The dashboard and the phone app &mdash; the whole dealer map, drawn on the tape as it moves.</p>
 
 
     <p style="margin-top:44px;">Trader does the watching &mdash; every dealer level recomputed and redrawn on the tape as it moves, the structural audit rerun at the top of every hour, and all of it laid over the candles instead of listed in a table you have to translate onto your own chart.</p>
