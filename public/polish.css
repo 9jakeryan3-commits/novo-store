@@ -111,3 +111,13 @@ nav.is-scrolled {
 .crumbs a:hover{color:#22d3ee;}
 .crumbs .sep{color:#7d97b8;margin:0 7px;}
 .crumbs .cur{color:#7d97b8;}
+
+/* The breadcrumb is a <nav>, and every page styles its HEADER with a bare `nav {}` type selector --
+   position:sticky, z-index:100, a background, a blur and a bottom border. All of it landed on the
+   breadcrumb too, which is why it painted a bar over the ticker and, with the mobile menu open,
+   sliced straight through the panel: the header nav and the crumbs both sat at z-index 100 in the
+   root, so DOM ORDER decided, and the crumbs come second.
+   The menu panel's own z-index:2000 could not save it -- that 2000 is local to the header nav's
+   stacking context, so the whole menu still paints at 100.
+   Undo the inheritance here rather than in ten pages' inline CSS. */
+.crumbs{position:static;z-index:auto;background:none;backdrop-filter:none;border-bottom:0;top:auto;}
