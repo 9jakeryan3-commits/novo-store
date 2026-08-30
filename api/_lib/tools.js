@@ -308,6 +308,36 @@ const declarations = [
       required: ["symbol"],
     },
   },
+  {
+    name: "get_vol_history",
+    description:
+      "The volatility RECORD behind the current print: VIX daily closes since 1990, VIX9D, VIX3M, " +
+      "VIX6M, VXN, RVX, VVIX and CBOE SKEW — each with its current level, its percentile against its " +
+      "FULL history AND against the last two years, min/median/max and the sample size, plus the term " +
+      "structure with its shape. THE tool for 'is vol high', 'is this cheap', 'where does VIX rank', " +
+      "'what percentile is this'. Quote BOTH percentiles when they disagree — 'the 33rd percentile " +
+      "since 1990 but the 13th of the last two years' — because a level can be historically cheap and " +
+      "locally rich at once. Daily closes: quote last_date, and never present a prior close as the " +
+      "current print.",
+    parameters: {
+      type: "object",
+      properties: {
+        series: { type: "string", description: "Optional: VIX, VIX9D, VIX3M, VIX6M, VXN, RVX, VVIX or SKEW. Omit for all." },
+      },
+    },
+  },
+  {
+    name: "get_futures_positioning",
+    description:
+      "Weekly FUTURES positioning from the CFTC's Commitments of Traders: net position of speculators " +
+      "(non-commercial, the funds) and hedgers (commercial) in E-mini S&P 500, Nasdaq 100, Russell 2000 " +
+      "and VIX futures, with the week-over-week change, open interest and a short trend. The dealer map " +
+      "reads OPTIONS positioning intraday; this is the futures crowd on a weekly clock — who is long the " +
+      "index itself. Use for 'how are funds positioned', 'is the market crowded long', 'what is spec " +
+      "positioning in VIX'. Released Friday for the prior TUESDAY, so it is days old BY DESIGN — always " +
+      "give the report date. A crowded net is fuel for a move the other way, never a direction call.",
+    parameters: { type: "object", properties: {} },
+  },
 ];
 
 // ── executors ──────────────────────────────────────────────────────────────────
@@ -814,6 +844,88 @@ function makeExecutors(ctx = {}) {
     return (h && h.coins) ? h : null;
   }
 
+  async function get_vol_history({ series } = {}) {
+    if (!r) return { error: "vol history unavailable" };
+    let snap = null;
+    try { snap = await r.get("novo:vol"); } catch (_) { snap = null; }
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    if (!snap || !snap.series) return { error: "no volatility history published yet" };
+    // The monthly close arrays are chart food — hundreds of points per series that add nothing
+    // to a percentile answer. The summary stats are the read.
+    const strip = ({ monthly, ...rest } = {}) => rest;
+    const note =
+      "Daily closes. pct_all ranks the CURRENT level against the series' full history " +
+      "(VIX since 1990); pct_2y against the last two years — quote both when they disagree. " +
+      "last_date is the newest close, which on an active session is usually yesterday's.";
+    const want = series ? String(series).trim().toUpperCase() : null;
+    if (want) {
+      const e = snap.series[want];
+      if (!e) return { error: `no history for ${want}`, have: Object.keys(snap.series) };
+      return { as_of: snap.as_of, series: { [want]: strip(e) },
+               termStructure: snap.term_structure || null, note };
+    }
+    const out = {};
+    for (const [k, v] of Object.entries(snap.series)) out[k] = strip(v);
+    return { as_of: snap.as_of, series: out, termStructure: snap.term_structure || null, note };
+  }
+
+  // Same series list api/positioning.js serves the public page from — each name checked for a
+  // 2026 report date, because the CFTC leaves renamed series in the dataset still answering.
+  const COT_MARKETS = [
+    ["S&P 500", "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE", "SPY"],
+    ["Nasdaq 100", "NASDAQ MINI - CHICAGO MERCANTILE EXCHANGE", "QQQ"],
+    ["Russell 2000", "RUSSELL E-MINI - CHICAGO MERCANTILE EXCHANGE", "IWM"],
+    ["VIX", "VIX FUTURES - CBOE FUTURES EXCHANGE", null],
+  ];
+
+  async function get_futures_positioning() {
+    const CFTC = "https://publicreporting.cftc.gov/resource/6dca-aqww.json";
+    const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+    const one = async ([label, market, etf]) => {
+      try {
+        const url = `${CFTC}?$where=${encodeURIComponent(`market_and_exchange_names='${market}'`)}` +
+                    `&$order=report_date_as_yyyy_mm_dd%20DESC&$limit=6`;
+        const resp = await get(url, { "User-Agent": "novo-options.trade" });
+        if (!resp || !resp.ok) return null;
+        const rows = await resp.json();
+        if (!Array.isArray(rows) || !rows.length) return null;
+        const pts = rows.map((x) => {
+          const sl = num(x.noncomm_positions_long_all), ss = num(x.noncomm_positions_short_all);
+          const cl = num(x.comm_positions_long_all), cs = num(x.comm_positions_short_all);
+          return {
+            date: x.report_date_as_yyyy_mm_dd ? String(x.report_date_as_yyyy_mm_dd).slice(0, 10) : null,
+            openInterest: num(x.open_interest_all),
+            specNet: sl != null && ss != null ? sl - ss : null,
+            commNet: cl != null && cs != null ? cl - cs : null,
+          };
+        }).filter((x) => x.date).reverse();
+        if (!pts.length) return null;
+        const last = pts[pts.length - 1];
+        const prev = pts.length > 1 ? pts[pts.length - 2] : null;
+        // A renamed series goes quiet rather than erroring — drop anything stale instead of
+        // publishing it as current. 45 days covers a holiday gap in a weekly release.
+        const ageDays = (Date.now() - Date.parse(last.date + "T00:00:00Z")) / 86400000;
+        if (!Number.isFinite(ageDays) || ageDays > 45) return null;
+        return {
+          market: label, etf, reportDate: last.date,
+          specNet: last.specNet, commNet: last.commNet, openInterest: last.openInterest,
+          specChangeWk: last.specNet != null && prev && prev.specNet != null
+            ? last.specNet - prev.specNet : null,
+          specNetTrend: pts.map((p) => [p.date, p.specNet]),
+        };
+      } catch (_) { return null; }
+    };
+    const markets = (await Promise.all(COT_MARKETS.map(one))).filter(Boolean);
+    if (!markets.length) return { error: "CFTC is unreachable right now" };
+    return {
+      source: "CFTC Commitments of Traders",
+      markets,
+      note: "Weekly, released Friday for the prior TUESDAY — days old by design; always give " +
+            "reportDate. spec = non-commercial (funds), comm = hedgers, in contracts. A crowded " +
+            "net is fuel for a move the other way, never a direction call.",
+    };
+  }
+
   async function get_crypto_history({ coin } = {}) {
     const h = await _cryptoHist();
     if (!h) return { error: "the crypto history rollup has not been published yet" };
@@ -932,6 +1044,7 @@ function makeExecutors(ctx = {}) {
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
     get_base_rates, get_recent_reads, get_market_internals,
+    get_vol_history, get_futures_positioning,
     get_crypto_map, get_crypto_breadth, get_crypto_history,
   };
 }

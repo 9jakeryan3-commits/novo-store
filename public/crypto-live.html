@@ -13,7 +13,7 @@ function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
 gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
 </script>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="/crypto-live.webmanifest">
 <title>Crypto Market Map · NoVo</title>
 <meta name="robots" content="noindex,nofollow">
@@ -543,11 +543,11 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="dgrp">Collector</div>
     <div id="dstats"></div>
-    <div class="dgrp">The fine print</div>
-    <div style="padding:2px 2px 10px;font-size:11px;line-height:1.55;color:var(--txt4)">
-      Market analysis and education only &mdash; not financial advice. The map is read-only and
-      cannot place an order. Digital assets are volatile; you can lose your capital.
-    </div>
+    <div class="dgrp">The fine print</div>
+    <div style="padding:2px 2px 10px;font-size:11px;line-height:1.55;color:var(--txt4)">
+      Market analysis and education only &mdash; not financial advice. The map is read-only and
+      cannot place an order. Digital assets are volatile; you can lose your capital.
+    </div>
     <div class="dgrp">Account</div>
     <a class="dlink" href="https://app.novo-aitrading.app/portal">Member portal<span class="ar">&rarr;</span></a>
     <a class="dlink" href="https://app.novo-aitrading.app/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
@@ -1764,7 +1764,10 @@ window.addEventListener('hashchange', function(){
           var names = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
             get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
             get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date', get_track_record:'track record',
-            search_news:'headlines' };
+            search_news:'headlines', get_base_rates:'base rates', get_market_internals:'market internals',
+            get_vol_history:'vol history', get_futures_positioning:'futures positioning',
+            get_recent_reads:'my recent reads', get_crypto_map:'crypto map', get_crypto_breadth:'crypto breadth',
+            get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts' };
           var seen = {}, parts = [];
           d.lookups.forEach(function(l){
             var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');

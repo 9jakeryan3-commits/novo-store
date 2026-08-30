@@ -1706,7 +1706,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
           var names = { get_dealer_levels:'live dealer map', get_gamma_profile:'gamma by strike',
             get_session_history:'logged sessions', search_journal:'archive', get_quote:'quote',
             get_economic_calendar:'economic calendar', get_earnings_dates:'earnings date', get_track_record:'track record',
-            search_news:'headlines' };
+            search_news:'headlines', get_base_rates:'base rates', get_market_internals:'market internals',
+            get_vol_history:'vol history', get_futures_positioning:'futures positioning',
+            get_recent_reads:'my recent reads', get_crypto_map:'crypto map', get_crypto_breadth:'crypto breadth',
+            get_crypto_history:'crypto history', get_chain_token:'chain token', get_chain_alerts:'chain alerts' };
           var seen = {}, parts = [];
           d.lookups.forEach(function(l){
             var n = (names[l.tool] || l.tool) + (l.args && (l.args.ticker || l.args.symbol) ? ' ' + (l.args.ticker || l.args.symbol) : '');
