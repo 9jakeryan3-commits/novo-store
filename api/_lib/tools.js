@@ -319,6 +319,45 @@ const declarations = [
     },
   },
   {
+    name: "describe_archive",
+    description:
+      "The MAP of the raw archives before querying them: every table I can reach in the chosen " +
+      "archive ('dealer' = the equity corpus: per-minute dealer snapshots, session bars to 2000, " +
+      "daily maps reconstructed to 2008, banked option chains, macro series to 1990, my published " +
+      "reads; 'crypto' = the crypto corpus: gamma by strike, funding, OI, the 1-second tape, chain " +
+      "pools, my scored claims) with its columns, row count and date span. ALWAYS call this before " +
+      "the first query_archive of a conversation - guessing at schema wastes a round.",
+    parameters: {
+      type: "object",
+      properties: { db: { type: "string", enum: ["dealer", "crypto"], description: "Which archive." } },
+      required: ["db"],
+    },
+  },
+  {
+    name: "query_archive",
+    description:
+      "Run ONE read-only SQL SELECT against the raw archives on my own box - the observations " +
+      "BEHIND every rollup. Use when no other tool answers the question's exact shape: 'every " +
+      "session since 2008 where the flip sat within 0.3% at the open', 'the strike ladder that was " +
+      "banked at Thursday's open', 'BTC's 1-second tape through the CPI print'. Rules: SELECT only, " +
+      "one statement, always add a LIMIT and a date filter (a 1.2s budget kills broad scans), " +
+      "columns come from describe_archive. Results cap at 200 rows - aggregate in SQL rather than " +
+      "fetching rows to count. HONESTY RULES APPLY DOUBLE HERE: you are computing a statistic " +
+      "nobody pre-vetted, so state the n and the window, use session/coin-day counts as the " +
+      "denominator (snapshot rows are ~60s apart and autocorrelated), and never pool " +
+      "source='backfill' with live rows. If it returns an error, the archive box may be offline - " +
+      "say the archive is unreachable and answer from the live layer.",
+    parameters: {
+      type: "object",
+      properties: {
+        db: { type: "string", enum: ["dealer", "crypto"], description: "Which archive." },
+        sql: { type: "string", description: "One SELECT statement. Include LIMIT." },
+        max_rows: { type: "number", description: "Row cap, 1-200. Default 200." },
+      },
+      required: ["db", "sql"],
+    },
+  },
+  {
     name: "get_chain_history",
     description:
       "The on-chain corpus's HISTORY - the one series that can never be backfilled. Per token " +
@@ -920,6 +959,45 @@ function makeExecutors(ctx = {}) {
     return (h && h.coins) ? h : null;
   }
 
+  // ── the archive channel — the box answers, the store relays ─────────────────
+  // Availability is honestly asymmetric: the LIVE layer is cloud-side and survives the box;
+  // the raw archives ARE the box. A failure here returns an error the model is instructed
+  // to state plainly rather than fill.
+  const ARCHIVE_URL = String(process.env.ARCHIVE_URL || "").replace(/\/$/, "");
+  const ARCHIVE_SECRET = process.env.ARCHIVE_QUERY_SECRET || "";
+
+  async function _archiveFetch(path, init) {
+    if (!ARCHIVE_URL || !ARCHIVE_SECRET) return { error: "the archive channel is not configured" };
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 2500);
+      const r = await fetch(ARCHIVE_URL + path, {
+        ...init,
+        headers: { ...(init && init.headers), "x-archive-secret": ARCHIVE_SECRET },
+        signal: ctl.signal,
+      });
+      clearTimeout(t);
+      if (!r.ok) return { error: `archive answered ${r.status}` };
+      return await r.json();
+    } catch (_) {
+      return { error: "the archive box is unreachable right now - the live layer is unaffected" };
+    }
+  }
+
+  async function describe_archive({ db } = {}) {
+    const k = db === "crypto" ? "crypto" : "dealer";
+    return _archiveFetch(`/api/archive/catalog?db=${k}`, { method: "GET" });
+  }
+
+  async function query_archive({ db, sql, max_rows } = {}) {
+    const k = db === "crypto" ? "crypto" : "dealer";
+    return _archiveFetch("/api/archive/query", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ db: k, sql: String(sql || ""), max_rows }),
+    });
+  }
+
   async function get_chain_history({ symbol, address, network } = {}) {
     if (!r) return { error: "chain history unavailable" };
     let h = null;
@@ -1201,6 +1279,7 @@ function makeExecutors(ctx = {}) {
     get_base_rates, get_recent_reads, get_market_internals,
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
+    describe_archive, query_archive,
   };
 }
 
