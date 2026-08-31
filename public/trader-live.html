@@ -1143,7 +1143,18 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      2026-08-31 07:23). And every desktop flex:1 1 0 content area inside an auto-height mobile
      card computes to a ZERO basis — the read showed one clipped line. Mobile sizes content to
      itself, capped, scrolling internally. */
-    /* The VIX row was moved LAST in the DOM for the desktop strip ("far right, beside the score").
+      /* MOBILE CHART HEIGHT (2026-08-31, Jake: "barely usable to even check where we are"). The pane
+     carries an inline 340px sized for the desktop grid; on a phone that is a porthole. Give it
+     ~56% of the real viewport (dvh, so the address bar doesn't lie), floored and capped. The
+     overlays shrink with it: the OHLCV legend was clipping its change% off the right edge at
+     412px. */
+  #novo-chart { height: 56dvh !important; min-height: 400px; max-height: 640px; }
+  #chart-legend2 { font-size: 9.5px; letter-spacing: 0; }
+  #novo-chip { top: 24px; }
+  #novo-chip .c-reg { font-size: 8.5px; }
+  #novo-chip .c-flip { font-size: 8.5px; }
+  #chart-wm { font-size: 30px; letter-spacing: 3px; }
+  /* The VIX row was moved LAST in the DOM for the desktop strip ("far right, beside the score").
      On mobile the same DOM is the stacked Market Intel panel, where that left VIX dangling beside
      the Analyst Score meter — so the panel goes flex-column and order pulls VIX back to the top.
      Desktop is untouched: its strip reads the DOM order. */
