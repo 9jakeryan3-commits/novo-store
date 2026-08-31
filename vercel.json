@@ -665,6 +665,10 @@
       "destination": "/journal/ai-systems.html"
     },
     {
+      "source": "/journal/coins-and-chains",
+      "destination": "/journal/coins-and-chains.html"
+    },
+    {
       "source": "/journal/about-novo",
       "destination": "/journal/about-novo.html"
     },
