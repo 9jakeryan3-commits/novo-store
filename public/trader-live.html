@@ -104,6 +104,18 @@
     }
   };
 
+  /* HTTP lane's ticket refresh. When a poller gets a 401 the ticket is dead — before this, every
+     poll just returned silently forever and the chart froze while the page looked alive. Debounced
+     so a burst of 401s from parallel pollers mints ONE new ticket; does not touch the WS (a dead
+     socket heals through its own onclose path). */
+  var _reauthBusy = false;
+  window.novoReauth = function(){
+    if (_reauthBusy || Date.now() - _handshakeAt < 20000) return;
+    _reauthBusy = true;
+    window.novoHandshake().then(function(){ _reauthBusy = false; },
+                               function(){ _reauthBusy = false; });
+  };
+
   window.addEventListener('DOMContentLoaded', async function(){
     if (await window.novoHandshake()) {
       /* The page's own first attempt at these ran before the ticket existed and returned early,
@@ -2253,6 +2265,7 @@ function connectTelemetry(){
 
   ws.onopen=()=>{
     if(_updating){ location.reload(); return; }
+    window._wsFails=0;
     logTerminal('\u{1F7E2} Connected to Apex Core Telemetry Engine.','sys');
     if(typeof _setNovoStatus==='function') _setNovoStatus();   // repaint the status pill via its single writer
     document.getElementById('t-status').textContent='ONLINE';
@@ -2556,7 +2569,12 @@ function connectTelemetry(){
     const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
     dot.style.background='var(--red)'; dot.style.boxShadow='0 0 8px var(--red)';
     txt.textContent='OFFLINE'; txt.style.color='var(--red)';
-    setTimeout(connectTelemetry,3000);
+    // Three straight failures = the ticket is dead, not the network. novoReconnect re-handshakes
+    // and reconnects; retrying the old NOVO_WS URL forever just bounced off the server every 3s
+    // (novoReconnect existed exactly for this and was never wired in).
+    window._wsFails=(window._wsFails||0)+1;
+    if(window._wsFails>=3){ setTimeout(function(){ try{window.novoReconnect();}catch(_e){} },3000); }
+    else setTimeout(connectTelemetry,3000);
   };
   ws.onerror=ev=>ev.target.close();
 }
@@ -2765,7 +2783,7 @@ function _renderLine(){
 async function _loadAnalysisBoard(){
   try{
     var u=NOVO_URL('/api/analysis-board'); if(!u) return;
-    var r=await fetch(u); if(!r.ok) return;
+    var r=await _tfetch(u); if(!r.ok){ _reauth401(r); return; }
     _abData=await r.json();
     _renderBoard(); _renderLine();
   }catch(_e){}
@@ -2789,20 +2807,34 @@ try{
 }catch(_e){}
 function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol})); }catch(_e){} }
 
+// Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
+// and the chart/board loops are self-scheduling (next tick only after the last completes) — so one
+// hung fetch used to freeze the whole lane, switch veil stuck on, candles dead while the WS kept
+// the hero price moving (Jake's 2026-08-31 split-screen freeze). Abort → catch → the loop's
+// finally schedules the next tick and the chart heals on its own.
+function _tfetch(u,ms){
+  var ac=('AbortController' in window)?new AbortController():null;
+  var tm=ac?setTimeout(function(){ try{ac.abort();}catch(_e){} },ms||12000):null;
+  var p=fetch(u,ac?{signal:ac.signal,cache:'no-store'}:{cache:'no-store'});
+  return p.finally(function(){ if(tm)clearTimeout(tm); });
+}
+function _reauth401(r){ try{ if(r&&r.status===401&&window.novoReauth) window.novoReauth(); }catch(_e){} }
 function _isDeepTf(){ return typeof _ctbTf==='string'; }
 // Deep frames come from /api/chart-history (Tradier history through the same auth): 1H = 40 days
 // of hourly, D = 5 years daily, W = 10 years weekly. Client-cached per (ticker, frame); the
 // server holds its own cache too, so the 4s chart loop costs one upstream fetch per TTL.
 let _histC={key:null,ts:0,candles:null,inflight:false};
 async function _loadHist(){
-  var key=_selTkr()+':'+_ctbTf, ttl=(_ctbTf==='1h')?60000:300000;
+  // 60s client TTL on ALL deep frames (was 5min for D/W): during RTH the forming daily bar is
+  // live too, and a 5-minute-stale close next to a real-time hero price reads as a broken chart.
+  var key=_selTkr()+':'+_ctbTf, ttl=60000;
   if(_histC.key===key && (Date.now()-_histC.ts)<ttl) return _histC.candles;
   if(_histC.inflight) return (_histC.key===key)?_histC.candles:null;
   _histC.inflight=true;
   try{
     var u=NOVO_URL('/api/chart-history'); if(!u) return null;
-    var r=await fetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf);
-    if(!r.ok) return (_histC.key===key)?_histC.candles:null;
+    var r=await _tfetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf, 15000);
+    if(!r.ok){ _reauth401(r); return (_histC.key===key)?_histC.candles:null; }
     var d=await r.json();
     if(d.ticker!==_selTkr()||d.tf!==_ctbTf) return null;   // stale response from before a switch
     _histC={key:key,ts:Date.now(),candles:d.candles||[],inflight:false};
@@ -2963,14 +2995,19 @@ function _chartClick(param){
     _addDrawing({k:'f',v1:_pendPt.v,v2:price});
   } else if(_ctbTool==='m'){
     var dv=price-_pendPt.v, dp=_pendPt.v?dv/_pendPt.v*100:0;
-    var bars=(t!==null&&_pendPt.t!==null)?Math.round(Math.abs(t-_pendPt.t)/(_ctbTf*60)):null;
-    var mins=(t!==null&&_pendPt.t!==null)?Math.round(Math.abs(t-_pendPt.t)/60):null;
+    // Bar width in SECONDS — on deep frames _ctbTf is a string and _ctbTf*60 is NaN, which the
+    // measure tool happily printed as "NaN bars". Second unit follows the frame: minutes reads
+    // as noise across a daily span, so H/D/W measure in days instead.
+    var _sec={'1h':3600,'1d':86400,'1w':604800}[_ctbTf]||(_ctbTf*60);
+    var _dt=(t!==null&&_pendPt.t!==null)?Math.abs(t-_pendPt.t):null;
+    var bars=(_dt!==null)?Math.round(_dt/_sec):null;
+    var mins=(_dt!==null)?(_isDeepTf()?Math.round(_dt/86400)+' d':Math.round(_dt/60)+' min'):null;
     _clearMeasure();
     var el=document.getElementById('novo-chart');
     if(el){
       _measEl=document.createElement('div'); _measEl.id='chart-measure';
       _measEl.innerHTML=(dv>=0?'+':'')+dv.toFixed(2)+' &middot; '+(dp>=0?'+':'')+dp.toFixed(2)+'%'+
-        (bars!==null?('<br>'+bars+' bars &middot; '+mins+' min'):'');
+        (bars!==null?('<br>'+bars+' bars &middot; '+mins):'');
       _measEl.style.left=Math.min(param.point.x+12, el.clientWidth-130)+'px';
       _measEl.style.top=Math.max(param.point.y-14,4)+'px';
       el.style.position='relative'; el.appendChild(_measEl);
@@ -3073,7 +3110,12 @@ const _sessShade={
 };
 function _showVeil(){
   var v=document.getElementById('chart-veil');
-  if(v){ v.textContent='loading '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; v.classList.add('on'); }
+  if(v){
+    v.textContent='loading '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; v.classList.add('on');
+    // Still veiled after 10s = a load failed and the 4s loop is retrying. Say so — a spinner that
+    // says nothing for that long reads as a freeze even while it's recovering.
+    setTimeout(function(){ if(v.classList.contains('on')) v.textContent='slow connection — retrying '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; },10000);
+  }
 }
 _paintCtb();
 function _initNovoChart(){
@@ -3154,7 +3196,7 @@ async function loadNovoChart(){
     if(!_initNovoChart()) return;
     const _reqTkr=_selTkr();
     const _u=NOVO_URL('/api/spy-chart'); if(!_u) return;   // pre-handshake: skip; the bootstrap retries
-    const r=await fetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok) return;
+    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _reauth401(r); return; }
     const d=await r.json();
     // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
     // that answers for a ticker other than the current selection. A payload with NO d.ticker is a
@@ -3164,7 +3206,10 @@ async function loadNovoChart(){
     else if(!_selIsExec()) return;
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
-    let _view=_tfView(d);
+    // Deep frames NEVER go through _tfView: its bucket step is _ctbTf*60, and '1h'*60 is NaN —
+    // the old order computed a one-bucket NaN view first and threw it away, a live grenade one
+    // reorder from painting.
+    let _view=_isDeepTf()?null:_tfView(d);
     if(_isDeepTf()){
       const _hc=await _loadHist();
       if(!_hc||!_hc.length) return;   // keep the current chart until history answers
@@ -3226,9 +3271,7 @@ async function loadNovoChart(){
       // poll replaces this within one bar-cache cycle, so the tip can't drift onto a stale bar for long.
       _novoLastCandle = (_ctbTf===1) ? Object.assign({}, _view.candles[_view.candles.length-1]) : null;
       _novoTipLive = (d.tip_live === true && _ctbTf===1);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
-      // Opening window. Candles are 1-min (Tradier interval=1min), so bars == minutes.
-      //   DESKTOP: last 2 HOURS = 120 bars (2026-07-16, Jake).
-      //   MOBILE:  75 bars — the chart is ~1/4 the width there, and a wide window is an unreadable smear.
+      // Opening window — per-frame maps _tfOpen/_tfOpenM below (widened 2026-08-31).
       // Initial view ONLY: _novoRanged latches after the first successful set, so panning and zooming
       // afterwards are never fought.
       // Set it ONLY once the chart actually has a width. On MOBILE the chart's column (col-intel) starts
@@ -3391,6 +3434,13 @@ async function loadNovoChart(){
 }
 loadNovoChart();
 (function _nc(){ Promise.resolve(loadNovoChart()).catch(function(){}).finally(function(){ setTimeout(_nc, 4000); }); })();   // self-scheduling: next tick only AFTER the last completes (no pile-up). 4s not 2s (2026-07-30): the 0.5s WS keeps the price + forming bar live, so this heavy 5-day fetch/parse only needs to refresh bar structure — halving it cuts jank with no visible lag
+// Coming back from the background repaints NOW, not on whatever's left of the throttled 4s/60s
+// timers — the phone-return moment is exactly when a trader glances at the chart.
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden) return;
+  try{ loadNovoChart(); }catch(_e){}
+  try{ _loadAnalysisBoard(); }catch(_e){}
+});
 
 // Midday chop lockout — the visual half of the engine's owner-box entry block (11:45-2:00 ET). Greys the Buy
 // buttons + shows the chip so you SEE the wall instead of testing it. Owner box only (a hosted body is skipped).
