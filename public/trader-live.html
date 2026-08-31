@@ -1338,6 +1338,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #saas-header #card-mktintel { flex: 1 1 auto; min-width: 0; order: 2;
     display: flex; align-items: center; flex-wrap: wrap;
     gap: 2px 0; background: none; border: none; padding: 5px 12px; overflow: hidden; }
+  /* The strip owns the WHOLE bar now (the action buttons left with the execution build), so the
+     readouts stretch as equal tiles across it and the labels use their full words -- the
+     abbreviation machinery below is retired rather than deleted, in case the bar ever has to
+     share again (Jake, 2026-08-30: "full words and stretch the length of its bar"). */
+  #saas-header #card-mktintel .dr,
+  #saas-header #card-mktintel .bar-row { flex: 1 1 0 !important; justify-content: center !important; }
   /* Active by default, switched off at 1850px+. A full-width zero-height flex item forces the wrap to
      happen HERE rather than wherever the values ran out of room -- so the two rows are 6 + 2 every
      time, instead of moving as "Quiet" becomes "Building - 43/100". */
@@ -1380,11 +1386,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      landed on the last readout, clipping "17/100" to "17/". Shortening the LABELS buys ~195px back,
      which is more than the widest value swing costs. The full words stay in the markup and stay on
      mobile, where the panel has room -- so the two can never drift out of sync. */
+  /* RETIRED 2026-08-30 (kept as reference): the data-short collapse that squeezed "Gamma
+     Squeeze" to "SQUEEZE" while the strip shared the bar. Full words fit the full bar.
   #saas-header #card-mktintel .dk[data-short],
   #saas-header #card-mktintel .bar-lbl[data-short] { font-size: 0; }
   #saas-header #card-mktintel .dk[data-short]::after,
   #saas-header #card-mktintel .bar-lbl[data-short]::after {
-    content: attr(data-short); font-size: 9px; letter-spacing: 1px; }
+    content: attr(data-short); font-size: 9px; letter-spacing: 1px; } */
+  #saas-header #card-mktintel .dk,
+  #saas-header #card-mktintel .bar-lbl { font-size: 9.5px; letter-spacing: 1.2px; }
   #workspace {
     /* THREE equal tracks. The top keeps its 2:1 feel by spanning 2 of 3 (the chart side
        gets ~66%, the right rail ~33%), and the bottom becomes a true 3-across row:
