@@ -515,6 +515,18 @@ tr:last-child td{border-bottom:none}
     html.novo-ask-lock, html.novo-ask-lock body{overflow:hidden;overscroll-behavior:none}
   }
 
+  /* Desktop expand: the same full-screen chat, one keystroke of intent away. The floating
+     panel stays the default; .max takes the whole viewport and remembers the choice. */
+  #novo-ask .mx{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
+    color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
+  #novo-ask .mx:hover{color:#eaf3ff;border-color:var(--askacc)}
+  #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
+    border-radius:0;border:0}
+  #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
+  html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
+  @media (max-width:720px){ #novo-ask .mx{display:none} }
+
+
 /* Below ~375px the bar is wider than the phone. Nothing is dropped - the type tightens. */
 @media(max-width:374px){
   header{gap:8px;padding:8px 10px}
@@ -610,6 +622,7 @@ tr:last-child td{border-bottom:none}
       <b>NoVo</b>
       <span>AI market analyst</span>
     </div>
+    <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
     <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize">&#x2304;</button>
   </header>
@@ -1552,6 +1565,7 @@ window.addEventListener('hashchange', function(){
     document.getElementById('novo-ask').classList.toggle('on', !!on);
     // Full-screen on mobile means the page behind must not scroll underneath.
     try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
+    try { document.documentElement.classList.toggle('novo-ask-lock-x', !!on && document.getElementById('novo-ask').classList.contains('max')); } catch(_){}
     var _b = document.getElementById('novo-ask-bubble');
     _b.style.display = on ? 'none' : 'flex';
     // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
@@ -1581,6 +1595,29 @@ window.addEventListener('hashchange', function(){
     var panel = document.getElementById('novo-ask');
     if (!panel) return;
     var open = panel.classList.contains('on');
+
+  // Desktop expand/restore — same full screen the phone gets, by choice, and remembered.
+  window.novoAskMax = function(){
+    var p = document.getElementById('novo-ask');
+    var on = !p.classList.contains('max');
+    p.classList.toggle('max', on);
+    try { document.documentElement.classList.toggle('novo-ask-lock-x', on && p.classList.contains('on')); } catch(_){}
+    try { localStorage.setItem('novo_ask_max', on ? '1' : ''); } catch(_){}
+    var b = document.getElementById('novo-ask-mx');
+    if (b){ b.innerHTML = on ? '&#x2921;' : '&#x2922;'; b.title = on ? 'Restore the panel' : 'Expand to full screen'; }
+    // the geometry just changed; put the pinned message back at the top of the view
+    if (PINNED) setTimeout(function(){ pinTop(PINNED, 1); }, 30);
+  };
+  (function(){
+    try {
+      if (localStorage.getItem('novo_ask_max') === '1'){
+        var p = document.getElementById('novo-ask');
+        p.classList.add('max');
+        var b = document.getElementById('novo-ask-mx');
+        if (b){ b.innerHTML = '&#x2921;'; b.title = 'Restore the panel'; }
+      }
+    } catch(_){}
+  })();
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); window.novoAskOpen(!open); return; }
     if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
     // "/" is a shortcut only when it is not a character someone is trying to type.
