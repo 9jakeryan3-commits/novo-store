@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://novo-options.trade/</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -422,7 +422,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/crypto</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -432,7 +432,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/faq</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -447,7 +447,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1422,7 +1422,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/crypto</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2126,6 +2126,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/flush-or-reversal-classifying-the-break.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/fomc-2pm-whipsaw.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -2348,6 +2353,11 @@
   <url>
     <loc>https://novo-options.trade/journal/global-dollar-usdg-market-structure.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/global-liquidity-and-crypto.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -3116,6 +3126,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/liquidation-data-undercounts.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/liquidation-heatmaps-what-they-show.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -3123,6 +3138,11 @@
   <url>
     <loc>https://novo-options.trade/journal/liquidation-price-and-leverage-math.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/liquidations-by-side-reading-the-flow.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -3158,6 +3178,11 @@
   <url>
     <loc>https://novo-options.trade/journal/long-short-ratio-explained.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/long-short-ratio-which-one.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -3526,6 +3551,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/new-high-old-crowd-positioning-divergence.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/new-highs-vs-new-lows.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -3666,6 +3696,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/one-coin-six-funding-rates.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/one-house-zero-to-trading.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -3708,6 +3743,11 @@
   <url>
     <loc>https://novo-options.trade/journal/open-interest-migration-across-expiries.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/open-interest-vs-market-cap.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -4781,6 +4821,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/stablecoin-supply-as-sideline-capital.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/starknet-strk-market-structure.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -4898,6 +4943,11 @@
   <url>
     <loc>https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/taker-imbalance-who-crosses-the-spread.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
