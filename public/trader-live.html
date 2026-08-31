@@ -1878,6 +1878,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           border: 1px solid var(--bdr); border-radius: 4px; background: rgba(255,255,255,.03);
           color: var(--txt3); cursor: pointer; }
         #c2-head .c2-pill:hover { color: var(--txt1); border-color: rgba(255,255,255,.2); }
+        #c2-head .c2-chip { font-size: 9.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+        #c2-legend { position: absolute; top: 28px; left: 10px; z-index: 11; pointer-events: none;
+          font-family: var(--font); font-size: 10px; color: var(--txt3); white-space: nowrap; }
+        #c2-legend b { color: var(--txt1); font-weight: 700; }
+        #c2-legend .up { color: var(--grn); } #c2-legend .dn { color: var(--red); }
+        #c2-legend .dim { color: var(--txt3); }
         /* CANVAS SETTINGS (2026-08-31, Jake circled TradingView's scale menu): the price-scale
            modes lightweight-charts actually has — auto-fit, regular/log/percent/indexed, invert. */
         #scale-menu { position: absolute; top: 8px; right: 66px; z-index: 30; display: none;
@@ -3019,6 +3025,12 @@ function _applyTogVis(){
     if(_novoVolSeries) _novoVolSeries.applyOptions({visible:_ctbTog.vol});
     for(var k in _novoLvlSeries){ try{_novoLvlSeries[k].applyOptions({visible:_ctbTog.lvl});}catch(_e){} }
     for(var k2 in _novoLines){ try{_novoLines[k2].applyOptions({lineVisible:_ctbTog.lvl,axisLabelVisible:_ctbTog.lvl});}catch(_e){} }
+    // Split-pane parity: every toggle drives both panes.
+    if(_c2Vwap) _c2Vwap.applyOptions({visible:_ctbTog.vwap});
+    if(_c2Ema9) _c2Ema9.applyOptions({visible:_ctbTog.ema});
+    if(_c2Ema21) _c2Ema21.applyOptions({visible:_ctbTog.ema});
+    if(_c2Vol) _c2Vol.applyOptions({visible:_ctbTog.vol});
+    for(var k3 in _c2LvlSeries){ try{_c2LvlSeries[k3].applyOptions({visible:_ctbTog.lvl,lastValueVisible:_ctbTog.lvl});}catch(_e){} }
   }catch(_e){}
 }
 function _paintCtb(){
@@ -3055,7 +3067,8 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
     // HA off→on is glide-safe (the glide gates on !_ctbTog.ha), but on→off re-enabled the glide
     // INSTANTLY, painting a raw bar over the still-displayed HA last bar until the repaint landed.
     // Drop the tip state; the next poll re-establishes it against the freshly-drawn series.
-    if(k==='ha'){ _novoTipLive=false; _novoLastCandle=null; try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language
+    if(k==='ha'){ _novoTipLive=false; _novoLastCandle=null; }
+    if(k==='ha'||k==='vp'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language (and profile)
   });
 });
 
@@ -3211,7 +3224,10 @@ function _renderChip(){
 // exactly what they are: extended hours.
 const _SHADE_PRE='rgba(255,167,38,0.05)', _SHADE_EXT='rgba(59,130,246,0.055)';
 function _sessOf(t){ var m=Math.floor(t/60)%1440; if(m>=570&&m<960) return 0; if(m>=240&&m<570) return 1; return 2; }
-const _sessShade={
+// FACTORY (2026-08-31, split-parity build): both panes shade identically — the instance only
+// differs in WHICH candle array it reads.
+function _makeShade(getC){
+return {
   _chart:null,_series:null,
   attached:function(p){ this._chart=p.chart; this._series=p.series; },
   detached:function(){ this._chart=null; this._series=null; },
@@ -3223,7 +3239,7 @@ const _sessShade={
       renderer:function(){ return { draw:function(target){
         try{
           if(typeof _ctbTf!=='number') return;                   // deep frames: no session tint
-          var cs=_novoViewC; if(!cs||cs.length<2||!self._chart) return;
+          var cs=getC(); if(!cs||cs.length<2||!self._chart) return;
           var tsc=self._chart.timeScale();
           var vr=tsc.getVisibleRange(); if(!vr) return;
           target.useBitmapCoordinateSpace(function(scope){
@@ -3252,7 +3268,8 @@ const _sessShade={
       } }; }
     }];
   }
-};
+}; }
+const _sessShade=_makeShade(function(){ return _novoViewC; });
 // ── Heikin Ashi (2026-08-31, Jake) ────────────────────────────────────────────────────────────
 // Derived at paint time from the raw bars. _novoViewC stays RAW always — the read chip, dealer
 // levels and the volume profile measure the real tape; only the DRAWN bars (and the legend that
@@ -3276,18 +3293,17 @@ function _haView(cands){
 // nodes land next to the dealer walls, which is the point of having both on one pane. Each bar's
 // volume spreads evenly across the buckets its high–low range covers; the POC bucket is amber.
 // Intraday frames only, same rule as the session tint.
-let _svpData=null;
-function _svpCalc(){
-  _svpData=null;
-  if(!_ctbTog.vp||typeof _ctbTf!=='number') return;
-  var cs=_novoViewC; if(!cs||cs.length<3) return;
+let _svpData=null,_svpData2=null;
+function _svpCalcFor(cs){
+  if(!_ctbTog.vp||typeof _ctbTf!=='number') return null;
+  if(!cs||cs.length<3) return null;
   var day=Math.floor(cs[cs.length-1].time/86400);
   var lo=Infinity,hi=-Infinity,sess=[];
   for(var i=0;i<cs.length;i++){ var c=cs[i];
     if(Math.floor(c.time/86400)!==day) continue;
     sess.push(c); if(c.low<lo)lo=c.low; if(c.high>hi)hi=c.high;
   }
-  if(sess.length<3||!(hi>lo)) return;
+  if(sess.length<3||!(hi>lo)) return null;
   var n=Math.min(60,Math.max(24,Math.round((hi-lo)/0.10))), step=(hi-lo)/n, vols=new Array(n).fill(0);
   sess.forEach(function(c){
     var b1=Math.min(n-1,Math.max(0,Math.floor((c.low-lo)/step)));
@@ -3296,9 +3312,11 @@ function _svpCalc(){
     for(var b=b1;b<=b2;b++) vols[b]+=per;
   });
   var mx=0,poc=0; for(var b2i=0;b2i<n;b2i++){ if(vols[b2i]>mx){mx=vols[b2i];poc=b2i;} }
-  if(mx>0) _svpData={lo:lo,step:step,vols:vols,max:mx,poc:poc};
+  return (mx>0)?{lo:lo,step:step,vols:vols,max:mx,poc:poc}:null;
 }
-const _svpPrim={
+function _svpCalc(){ _svpData=_svpCalcFor(_novoViewC); }
+function _makeSvp(getD){
+return {
   _chart:null,_series:null,
   attached:function(p){ this._chart=p.chart; this._series=p.series; },
   detached:function(){ this._chart=null; this._series=null; },
@@ -3309,7 +3327,7 @@ const _svpPrim={
       zOrder:function(){ return 'bottom'; },
       renderer:function(){ return { draw:function(target){
         try{
-          var d=_svpData; if(!d||!_ctbTog.vp||!self._series) return;
+          var d=getD(); if(!d||!_ctbTog.vp||!self._series) return;
           target.useBitmapCoordinateSpace(function(scope){
             var ctx=scope.context, W=scope.bitmapSize.width, pr=scope.verticalPixelRatio;
             var maxW=W*0.22;
@@ -3327,15 +3345,25 @@ const _svpPrim={
       } }; }
     }];
   }
-};
-// ── SPLIT VIEW (2026-08-31, Jake) ─────────────────────────────────────────────────────────────
-// A second ticker in a pane beside the main chart. Deliberately a MINI pane: candles at the same
-// timeframe + the four dealer lines (flip/walls/gravity) + price. Drawings, SVP, markers and the
-// tip glide stay on the main pane — the split answers "what is the other index doing against ITS
-// structure", not "give me two full cockpits". Desktop-wide only; follows the main TF; its loop
-// is re-armable and supervised like every other lane.
+}; }
+const _svpPrim=_makeSvp(function(){ return _svpData; });
+// Level colours + axis titles — script scope, shared by BOTH panes (they were locals inside
+// loadNovoChart until the split-parity build needed them in _c2Load too).
+const _LVL_COLOR={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7'};
+const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
+  'EM_HI':'EM ▲','EM_LO':'EM ▼','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
+  'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
+// ── SPLIT VIEW (2026-08-31, Jake; built FULL same day — "shouldn't the split chart match levels,
+// timeframe adjustment and all... gotta build it full") ───────────────────────────────────────
+// A second ticker as a REAL pane: candles at the main TF, the FULL labelled level set, VWAP +
+// EMAs, session shading, volume, its own volume profile and gamma chip, a hover OHLCV legend,
+// and a time-range sync so both panes pan and zoom as one terminal. Only drawings, markers and
+// the WS tip glide stay main-pane-only (drawings are per-ticker; the glide carries the exec
+// ticker's tick). Desktop-wide only; its loop is re-armable and supervised like every lane.
 let _splitTkr=''; try{ _splitTkr=localStorage.getItem('novo_split')||''; }catch(_e){}
-let _c2chart=null,_c2series=null,_c2lines=[],_c2Key='',_c2Ranged=false,_c2HistC={};
+let _c2chart=null,_c2series=null,_c2Key='',_c2Ranged=false,_c2HistC={};
+let _c2Vwap=null,_c2Ema9=null,_c2Ema21=null,_c2Vol=null;
+let _c2Raw=null,_c2Map=null,_c2OvSig='',_c2LvlSeries={},_c2LvlPx={},_c2LvlSig='';
 const _C2_TKRS=['SPY','QQQ','IWM'];
 function _splitOn(){ return !!_splitTkr && !!(window.matchMedia&&window.matchMedia('(min-width: 1100px)').matches); }
 function _c2Others(){ return _C2_TKRS.filter(function(t){ return t!==_selTkr(); }); }
@@ -3358,6 +3386,16 @@ function _c2Head(px){
     });
   }
   var pe=h.querySelector('.c2-px'); if(pe) pe.textContent=(px?'$'+(+px).toFixed(2):'');
+  // The pane's own gamma read — same hard signals as the main chip, off ITS ticker's board hash.
+  var ch=h.querySelector('.c2-chip');
+  if(!ch){ ch=document.createElement('span'); ch.className='c2-chip'; h.appendChild(ch); }
+  var B2=(_abData&&_abData.board)?_abData.board[_splitTkr]:null;
+  var p2=(_c2Raw&&_c2Raw.length)?_c2Raw[_c2Raw.length-1].close:null;
+  if(B2&&B2.flip&&p2){
+    var sg2=(B2.net_gex!==null&&B2.net_gex<0), d2=(p2-B2.flip)/B2.flip*100;
+    var t2=(sg2?'short gamma':'long gamma')+' · '+Math.abs(d2).toFixed(2)+'% '+(d2>=0?'above':'below')+' flip';
+    if(ch.__h!==t2){ ch.__h=t2; ch.textContent=t2; ch.style.color=sg2?'#f43f5e':'#34d399'; }
+  } else ch.textContent='';
 }
 function _c2Init(){
   if(_c2series) return true;
@@ -3373,76 +3411,149 @@ function _c2Init(){
   });
   _c2series=_c2chart.addCandlestickSeries({upColor:'#34d399',downColor:'#f43f5e',
     borderUpColor:'#34d399',borderDownColor:'#f43f5e',wickUpColor:'#34d399',wickDownColor:'#f43f5e'});
+  // FULL PARITY (2026-08-31): the same overlay stack as the main pane.
+  _c2Vwap=_c2chart.addLineSeries({color:'#f59e0b',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,visible:_ctbTog.vwap});
+  _c2Ema9=_c2chart.addLineSeries({color:'#f0f0ee',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,visible:_ctbTog.ema});
+  _c2Ema21=_c2chart.addLineSeries({color:'#3556b8',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,visible:_ctbTog.ema});
+  _c2Vol=_c2chart.addHistogramSeries({priceScaleId:'vol',priceFormat:{type:'volume'},priceLineVisible:false,lastValueVisible:false,visible:_ctbTog.vol});
+  try{ _c2chart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
+  try{ if(_c2series.attachPrimitive) _c2series.attachPrimitive(_makeShade(function(){ return _c2Raw; })); }catch(_e){}
+  try{ if(_c2series.attachPrimitive) _c2series.attachPrimitive(_makeSvp(function(){ return _svpData2; })); }catch(_e){}
+  // Hover OHLCV legend, same format as the main pane's.
+  try{
+    var el2b=document.getElementById('novo-chart2');
+    if(el2b && !document.getElementById('c2-legend')){
+      var lg=document.createElement('div'); lg.id='c2-legend'; el2b.appendChild(lg);
+    }
+    _c2chart.subscribeCrosshairMove(function(param){
+      var bar=null;
+      if(param&&typeof param.time==='number'&&_c2Map) bar=_c2Map.get(param.time)||null;
+      if(bar===window._c2HovBar) return;
+      window._c2HovBar=bar;
+      var el=document.getElementById('c2-legend'); if(!el) return;
+      var arr=window._c2DrawC||_c2Raw; if(!arr||!arr.length){ el.textContent=''; return; }   // hover describes the bars actually DRAWN (HA or raw)
+      var b=bar||arr[arr.length-1], i=bar?arr.indexOf(bar):arr.length-1;
+      var prev=(i>0)?arr[i-1].close:b.open, chg=prev?(b.close-prev)/prev*100:0, up=b.close>=prev;
+      var h='<span class="dim">'+_fmtBarTime(b.time)+'</span>  O <b>'+b.open.toFixed(2)+'</b>  H <b>'+b.high.toFixed(2)+'</b>  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>';
+      if(el.__h!==h){ el.__h=h; el.innerHTML=h; }
+    });
+  }catch(_e){}
+  // TIME-RANGE SYNC — both panes pan and zoom as one terminal. Time (not logical-index) ranges,
+  // because the two tickers hold different bar counts; a busy flag breaks the feedback loop.
+  try{
+    if(!window._syncWired && _novoChart){   // main chart must exist or the flag latches with nothing wired
+      window._syncWired=true;
+      var _busy=false;
+      var _push=function(dst){ return function(r){
+        if(_busy||!r||!dst()) return;
+        _busy=true; try{ dst().timeScale().setVisibleRange(r); }catch(_e){} _busy=false;
+      }; };
+      _novoChart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _splitOn()?_c2chart:null; }));
+      _c2chart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _novoChart; }));
+    }
+  }catch(_e){}
   try{ _applyScale(); }catch(_e){}   // pane 2 speaks the same scale as pane 1, always
   return true;
 }
 async function _c2Load(){
   if(!_splitOn()) return;
   if(_splitTkr===_selTkr()){ _splitTkr=_c2Others()[0]; try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){} }
-  var tk=_splitTkr, candles=null, lvls=null, px=null;
+  var tk=_splitTkr, view=null, lvls=null, px=null;
   var u=NOVO_URL('/api/spy-chart'); if(!u) return;
   if(_isDeepTf()){
-    var key=tk+':'+_ctbTf, hc=_c2HistC[key];
-    if(hc && (Date.now()-hc.ts)<60000){ candles=hc.c; }
+    var key=tk+':'+_ctbTf, hc=_c2HistC[key], cand=null;
+    if(hc && (Date.now()-hc.ts)<60000){ cand=hc.c; }
     else{
       var r2=await _tfetch(NOVO_URL('/api/chart-history')+'&ticker='+encodeURIComponent(tk)+'&tf='+_ctbTf,15000);
       if(!r2.ok){ _reauth401(r2); return; }
       var d2=await r2.json();
       if(d2.ticker!==tk||d2.tf!==_ctbTf) return;
       if(tk!==_splitTkr) return;   // pill clicked mid-flight — this response matches the REQUEST, not the pane any more
-      candles=d2.candles||[]; _c2HistC[key]={ts:Date.now(),c:candles};
+      cand=d2.candles||[]; _c2HistC[key]={ts:Date.now(),c:cand};
     }
+    if(!cand||!cand.length) return;
+    // Same recipe as the main pane's deep frames: continuous EMAs, no VWAP (a session curve is
+    // meaningless across years of bars). Dealer levels from the board's per-ticker hash.
+    view={candles:cand, vwap:[], ema9:_emaOn(cand,9,false), ema21:_emaOn(cand,21,false)};
     var B=(_abData&&_abData.board)?_abData.board[tk]:null;
-    if(B) lvls={FLIP:B.flip,CW:B.call_wall,PW:B.put_wall,GRAV:B.gravity};
+    if(B) lvls={FLIP:B.flip,CW:B.call_wall,PW:B.put_wall,GRAV:B.gravity,EM_HI:B.em_high,EM_LO:B.em_low};
     px=B?B.spot:null;
   } else {
     var r=await _tfetch(u+'&ticker='+encodeURIComponent(tk)); if(!r.ok){ _reauth401(r); return; }
     var d=await r.json();
     if(d.ticker && d.ticker!==tk) return;
     if(tk!==_splitTkr) return;                       // switched mid-flight
-    candles=_tfView(d).candles;
-    var L=d.levels||{}; lvls={FLIP:L.FLIP,CW:L.CW,PW:L.PW,GRAV:L.GRAV};
+    view=_tfView(d);                                 // candles + VWAP + EMAs, aggregated to the main TF
+    lvls=d.levels||{};                               // the FULL per-ticker level set, same as the main pane
     px=d.price;
   }
+  var candles=view?view.candles:null;
   if(!candles||!candles.length) return;
   if(!_c2Init()) return;
-  if(_ctbTog.ha) candles=_haView(candles);           // the two panes must speak the same bar language
-  // AUDIT (2026-08-31): the main pane's steady-state discipline, which this pane never had — it
-  // was full-setData + 4 price lines torn down and re-created + header innerHTML EVERY 4s, a
-  // guaranteed repaint even overnight. Same anchor + same count → update the forming bar only.
+  _c2Raw=candles;                                        // raw feeds the shade + VP primitives
+  _svpData2=_ctbTog.vp?_svpCalcFor(candles):null;
+  var drawC=_ctbTog.ha?_haView(candles):candles;         // the two panes must speak the same bar language
+  window._c2DrawC=drawC;
+  _c2Map=new Map(drawC.map(function(c){ return [c.time,c]; }));
+  // The main pane's steady-state discipline: same anchor + same count → update the forming bar.
   var key2=tk+':'+_ctbTf+(_ctbTog.ha?':ha':'');
   var _fresh=(key2!==_c2Key);
-  if(_fresh){ _c2Key=key2; _c2Ranged=false; }
+  if(_fresh){ _c2Key=key2; _c2Ranged=false; _c2OvSig=''; _c2LvlSig='__switch__'; }
   var f0=candles[0].time;
   if(_fresh || f0!==window._c2FirstT || candles.length>window._c2Count){
-    _c2series.setData(candles);
+    _c2series.setData(drawC);
+    if(_c2Vol) _c2Vol.setData(candles.map(_volBar));
     window._c2FirstT=f0; window._c2Count=candles.length;
   } else {
-    _c2series.update(candles[candles.length-1]);
+    _c2series.update(drawC[drawC.length-1]);
+    if(_c2Vol) _c2Vol.update(_volBar(candles[candles.length-1]));
   }
-  // Price lines PERSIST: a moved level is applyOptions({price}) on its existing line; lines are
-  // created/removed only when a level appears or vanishes.
-  var lc2={FLIP:'#22d3ee',CW:'#34d399',PW:'#f43f5e',GRAV:'#3b82f6'};
-  var tl2={FLIP:'FLIP',CW:'CALL WALL',PW:'PUT WALL',GRAV:'GRAVITY'};
-  window._c2LineMap=window._c2LineMap||{};
-  var _seen={};
-  for(var k in (lvls||{})){
-    var v=+lvls[k]; if(!(v>0)) continue; _seen[k]=1;
-    var ln=window._c2LineMap[k];
-    if(!ln){ ln=window._c2LineMap[k]=_c2series.createPriceLine({price:v,color:lc2[k],lineWidth:1,axisLabelVisible:true,title:tl2[k]}); }
-    else if(ln.__px!==v){ try{ ln.applyOptions({price:v}); }catch(_e){} }
-    ln.__px=v;
+  // Overlays, sig-gated like the main pane (EMAs included, so deep frames never freeze).
+  var vl=(view.vwap&&view.vwap.length)?view.vwap[view.vwap.length-1]:null;
+  var el9=(view.ema9&&view.ema9.length)?view.ema9[view.ema9.length-1]:null;
+  var os=tk+'|'+(view.vwap?view.vwap.length:0)+':'+(vl?vl.time+':'+vl.value:'-')
+    +'|'+(view.ema9?view.ema9.length:0)+':'+(el9?el9.time+':'+el9.value:'-');
+  if(os!==_c2OvSig){ _c2OvSig=os;
+    if(_c2Vwap) _c2Vwap.setData(view.vwap||[]);
+    if(_c2Ema9) _c2Ema9.setData(view.ema9||[]);
+    if(_c2Ema21) _c2Ema21.setData(view.ema21||[]);
   }
-  for(var k2 in window._c2LineMap){
-    if(!_seen[k2]){ try{ _c2series.removePriceLine(window._c2LineMap[k2]); }catch(_e){} delete window._c2LineMap[k2]; }
+  // THE FULL LEVEL SET, drawn exactly like the main pane — solid first→last segments with axis
+  // titles, per-label diffed. D/W keeps only the dealer structure, same rule as the main pane.
+  var lastT=candles[candles.length-1].time;
+  if(_ctbTf==='1d'||_ctbTf==='1w'){
+    var _keep2={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1}, _f3={};
+    for(var _lk in (lvls||{})){ if(_keep2[_lk]) _f3[_lk]=lvls[_lk]; }
+    lvls=_f3;
+  }
+  var drawn=[];
+  for(var lbl in (lvls||{})){ var lv=+lvls[lbl]; if(lbl!=='VWAP' && lv>0) drawn.push([lbl,lv]); }
+  var lsig=drawn.map(function(r){ return r[0]; }).join(',')+'@'+f0;
+  if(lsig!==_c2LvlSig){
+    for(var sk in _c2LvlSeries){ try{ _c2chart.removeSeries(_c2LvlSeries[sk]); }catch(_e){} }
+    _c2LvlSeries={}; _c2LvlPx={};
+    drawn.forEach(function(row){
+      var lb=row[0], v=row[1], c=_LVL_COLOR[lb]||'#94a3b8';
+      var s=_c2chart.addLineSeries({color:c,lineWidth:1,lineStyle:((lb==='EM_LO'||lb==='EM_HI')?2:0),
+        priceLineVisible:false,lastValueVisible:_ctbTog.lvl,crosshairMarkerVisible:false,
+        visible:_ctbTog.lvl,title:(_LVL_TITLE[lb]||lb),autoscaleInfoProvider:function(){return null;}});
+      s.setData([{time:f0,value:v},{time:lastT,value:v}]);
+      _c2LvlSeries[lb]=s; _c2LvlPx[lb]=v;
+    });
+    _c2LvlSig=lsig;
+  } else {
+    drawn.forEach(function(row){
+      var lb=row[0], v=row[1], s=_c2LvlSeries[lb]; if(!s) return;
+      try{
+        if(_c2LvlPx[lb]!==v){ s.setData([{time:f0,value:v},{time:lastT,value:v}]); _c2LvlPx[lb]=v; }
+        else s.update({time:lastT,value:v});
+      }catch(_e){}
+    });
   }
   if(!_c2Ranged){
-    try{
-      var n=candles.length, ob=(_tfOpen&&_tfOpen[_ctbTf])||300, pad=Math.ceil(ob*0.08);
-      _c2chart.timeScale().applyOptions({rightOffset:pad});
-      _c2chart.timeScale().setVisibleLogicalRange({from:Math.max(0,n-ob),to:n+pad});
-      _c2Ranged=true;
-    }catch(_e){}
+    // Mirror the MAIN pane's window — the time-range sync keeps them together afterwards.
+    try{ var vr=_novoChart&&_novoChart.timeScale().getVisibleRange(); if(vr) _c2chart.timeScale().setVisibleRange(vr); }catch(_e){}
+    _c2Ranged=true;
   }
   _c2Head(px);
 }
