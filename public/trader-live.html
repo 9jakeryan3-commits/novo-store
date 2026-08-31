@@ -1540,6 +1540,21 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   }
   body.v-feeds #card-brain { display: flex; }
   body.v-feeds #row-unique { display: grid; grid-area: unique !important; }
+  /* SHORT DESKTOP (2026-08-31, Jake's smaller-screen shot): the brain row is `auto`, so What NoVo
+     Knows always took its FULL content height — on a ~900px viewport that starved everything above
+     it: the audit clipped mid-sentence at ~230px and the Three Books lost its bottom four rows.
+     Under 1010px of height every row gets a bounded share instead, with floors so nothing becomes
+     a letterbox, and the brain card scrolls internally like the feed cards already do. On a window
+     shorter than the floors sum (~750px) #workspace's own overflow-y takes over — scroll, not clip. */
+  @media (max-height: 1010px) {
+    body.v-feeds #workspace {
+      grid-template-rows: auto minmax(250px, 1.15fr) minmax(210px, 1fr) minmax(180px, 0.95fr);
+    }
+    body.v-feeds #card-brain { flex-direction: column; overflow: hidden; min-height: 0; }
+    body.v-feeds #card-brain .brain-grid { flex: 1 1 0; min-height: 0; overflow-y: auto; align-content: start; }
+  }
+  /* The Books table sat flush against the window edge — give the numbers shoulder room. */
+  body.v-feeds #card-board .b3-wrap { padding-right: 16px; }
   body.v-feeds #card-read  { display: flex; grid-area: read !important; border-left: 1px solid var(--bdr); }
   body.v-feeds #card-read .read2-body { max-height: none; }
   /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
