@@ -469,6 +469,370 @@
       "destination": "/track-record.html"
     },
     {
+      "source": "/crypto/aave",
+      "destination": "/crypto/aave.html"
+    },
+    {
+      "source": "/crypto/ada",
+      "destination": "/crypto/ada.html"
+    },
+    {
+      "source": "/crypto/aero",
+      "destination": "/crypto/aero.html"
+    },
+    {
+      "source": "/crypto/algo",
+      "destination": "/crypto/algo.html"
+    },
+    {
+      "source": "/crypto/arb",
+      "destination": "/crypto/arb.html"
+    },
+    {
+      "source": "/crypto/aster",
+      "destination": "/crypto/aster.html"
+    },
+    {
+      "source": "/crypto/atom",
+      "destination": "/crypto/atom.html"
+    },
+    {
+      "source": "/crypto/avax",
+      "destination": "/crypto/avax.html"
+    },
+    {
+      "source": "/crypto/avnt",
+      "destination": "/crypto/avnt.html"
+    },
+    {
+      "source": "/crypto/axs",
+      "destination": "/crypto/axs.html"
+    },
+    {
+      "source": "/crypto/bat",
+      "destination": "/crypto/bat.html"
+    },
+    {
+      "source": "/crypto/bch",
+      "destination": "/crypto/bch.html"
+    },
+    {
+      "source": "/crypto/bill",
+      "destination": "/crypto/bill.html"
+    },
+    {
+      "source": "/crypto/bio",
+      "destination": "/crypto/bio.html"
+    },
+    {
+      "source": "/crypto/bnb",
+      "destination": "/crypto/bnb.html"
+    },
+    {
+      "source": "/crypto/bonk",
+      "destination": "/crypto/bonk.html"
+    },
+    {
+      "source": "/crypto/btc",
+      "destination": "/crypto/btc.html"
+    },
+    {
+      "source": "/crypto/cashcat",
+      "destination": "/crypto/cashcat.html"
+    },
+    {
+      "source": "/crypto/cc",
+      "destination": "/crypto/cc.html"
+    },
+    {
+      "source": "/crypto/chip",
+      "destination": "/crypto/chip.html"
+    },
+    {
+      "source": "/crypto/comp",
+      "destination": "/crypto/comp.html"
+    },
+    {
+      "source": "/crypto/crv",
+      "destination": "/crypto/crv.html"
+    },
+    {
+      "source": "/crypto/doge",
+      "destination": "/crypto/doge.html"
+    },
+    {
+      "source": "/crypto/dot",
+      "destination": "/crypto/dot.html"
+    },
+    {
+      "source": "/crypto/eigen",
+      "destination": "/crypto/eigen.html"
+    },
+    {
+      "source": "/crypto/ena",
+      "destination": "/crypto/ena.html"
+    },
+    {
+      "source": "/crypto/etc",
+      "destination": "/crypto/etc.html"
+    },
+    {
+      "source": "/crypto/eth",
+      "destination": "/crypto/eth.html"
+    },
+    {
+      "source": "/crypto/fet",
+      "destination": "/crypto/fet.html"
+    },
+    {
+      "source": "/crypto/floki",
+      "destination": "/crypto/floki.html"
+    },
+    {
+      "source": "/crypto/flr",
+      "destination": "/crypto/flr.html"
+    },
+    {
+      "source": "/crypto/gram",
+      "destination": "/crypto/gram.html"
+    },
+    {
+      "source": "/crypto/grt",
+      "destination": "/crypto/grt.html"
+    },
+    {
+      "source": "/crypto/hbar",
+      "destination": "/crypto/hbar.html"
+    },
+    {
+      "source": "/crypto/hype",
+      "destination": "/crypto/hype.html"
+    },
+    {
+      "source": "/crypto/imx",
+      "destination": "/crypto/imx.html"
+    },
+    {
+      "source": "/crypto/inj",
+      "destination": "/crypto/inj.html"
+    },
+    {
+      "source": "/crypto/jto",
+      "destination": "/crypto/jto.html"
+    },
+    {
+      "source": "/crypto/ldo",
+      "destination": "/crypto/ldo.html"
+    },
+    {
+      "source": "/crypto/link",
+      "destination": "/crypto/link.html"
+    },
+    {
+      "source": "/crypto/lit",
+      "destination": "/crypto/lit.html"
+    },
+    {
+      "source": "/crypto/ltc",
+      "destination": "/crypto/ltc.html"
+    },
+    {
+      "source": "/crypto/mega",
+      "destination": "/crypto/mega.html"
+    },
+    {
+      "source": "/crypto/mew",
+      "destination": "/crypto/mew.html"
+    },
+    {
+      "source": "/crypto/mnt",
+      "destination": "/crypto/mnt.html"
+    },
+    {
+      "source": "/crypto/moodeng",
+      "destination": "/crypto/moodeng.html"
+    },
+    {
+      "source": "/crypto/morpho",
+      "destination": "/crypto/morpho.html"
+    },
+    {
+      "source": "/crypto/near",
+      "destination": "/crypto/near.html"
+    },
+    {
+      "source": "/crypto/ondo",
+      "destination": "/crypto/ondo.html"
+    },
+    {
+      "source": "/crypto/op",
+      "destination": "/crypto/op.html"
+    },
+    {
+      "source": "/crypto/orca",
+      "destination": "/crypto/orca.html"
+    },
+    {
+      "source": "/crypto/paxg",
+      "destination": "/crypto/paxg.html"
+    },
+    {
+      "source": "/crypto/pengu",
+      "destination": "/crypto/pengu.html"
+    },
+    {
+      "source": "/crypto/pepe",
+      "destination": "/crypto/pepe.html"
+    },
+    {
+      "source": "/crypto/pnut",
+      "destination": "/crypto/pnut.html"
+    },
+    {
+      "source": "/crypto/popcat",
+      "destination": "/crypto/popcat.html"
+    },
+    {
+      "source": "/crypto/pyth",
+      "destination": "/crypto/pyth.html"
+    },
+    {
+      "source": "/crypto/qnt",
+      "destination": "/crypto/qnt.html"
+    },
+    {
+      "source": "/crypto/ray",
+      "destination": "/crypto/ray.html"
+    },
+    {
+      "source": "/crypto/re",
+      "destination": "/crypto/re.html"
+    },
+    {
+      "source": "/crypto/render",
+      "destination": "/crypto/render.html"
+    },
+    {
+      "source": "/crypto/sei",
+      "destination": "/crypto/sei.html"
+    },
+    {
+      "source": "/crypto/sent",
+      "destination": "/crypto/sent.html"
+    },
+    {
+      "source": "/crypto/shib",
+      "destination": "/crypto/shib.html"
+    },
+    {
+      "source": "/crypto/skr",
+      "destination": "/crypto/skr.html"
+    },
+    {
+      "source": "/crypto/sky",
+      "destination": "/crypto/sky.html"
+    },
+    {
+      "source": "/crypto/snx",
+      "destination": "/crypto/snx.html"
+    },
+    {
+      "source": "/crypto/sol",
+      "destination": "/crypto/sol.html"
+    },
+    {
+      "source": "/crypto/strk",
+      "destination": "/crypto/strk.html"
+    },
+    {
+      "source": "/crypto/sui",
+      "destination": "/crypto/sui.html"
+    },
+    {
+      "source": "/crypto/syrup",
+      "destination": "/crypto/syrup.html"
+    },
+    {
+      "source": "/crypto/trump",
+      "destination": "/crypto/trump.html"
+    },
+    {
+      "source": "/crypto/trx",
+      "destination": "/crypto/trx.html"
+    },
+    {
+      "source": "/crypto/uni",
+      "destination": "/crypto/uni.html"
+    },
+    {
+      "source": "/crypto/usdc",
+      "destination": "/crypto/usdc.html"
+    },
+    {
+      "source": "/crypto/usdg",
+      "destination": "/crypto/usdg.html"
+    },
+    {
+      "source": "/crypto/virtual",
+      "destination": "/crypto/virtual.html"
+    },
+    {
+      "source": "/crypto/vvv",
+      "destination": "/crypto/vvv.html"
+    },
+    {
+      "source": "/crypto/w",
+      "destination": "/crypto/w.html"
+    },
+    {
+      "source": "/crypto/wif",
+      "destination": "/crypto/wif.html"
+    },
+    {
+      "source": "/crypto/wld",
+      "destination": "/crypto/wld.html"
+    },
+    {
+      "source": "/crypto/wlfi",
+      "destination": "/crypto/wlfi.html"
+    },
+    {
+      "source": "/crypto/xcn",
+      "destination": "/crypto/xcn.html"
+    },
+    {
+      "source": "/crypto/xlm",
+      "destination": "/crypto/xlm.html"
+    },
+    {
+      "source": "/crypto/xpl",
+      "destination": "/crypto/xpl.html"
+    },
+    {
+      "source": "/crypto/xrp",
+      "destination": "/crypto/xrp.html"
+    },
+    {
+      "source": "/crypto/xtz",
+      "destination": "/crypto/xtz.html"
+    },
+    {
+      "source": "/crypto/zec",
+      "destination": "/crypto/zec.html"
+    },
+    {
+      "source": "/crypto/zora",
+      "destination": "/crypto/zora.html"
+    },
+    {
+      "source": "/crypto/zro",
+      "destination": "/crypto/zro.html"
+    },
+    {
+      "source": "/crypto/zrx",
+      "destination": "/crypto/zrx.html"
+    },
+    {
       "source": "/changelog",
       "destination": "/changelog.html"
     },
