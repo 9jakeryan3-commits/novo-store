@@ -2261,6 +2261,10 @@ let _updating=false;
 function connectTelemetry(){
   const proto=location.protocol==='https:'?'wss:':'ws:';
   if(!NOVO_WS){ return; }   // no ticket yet -- the bootstrap calls connectTelemetry() once it has one
+  // Silence and close any previous socket FIRST. Reconnect paths (onclose retry, resume handler,
+  // novoReconnect) can otherwise stack two live sockets — doubled messages, and the old one's
+  // onclose firing a fresh connect loop against whichever ticket it died holding.
+  try{ if(ws){ ws.onclose=null; ws.onerror=null; ws.onmessage=null; ws.onopen=null; ws.close(); } }catch(_e){}
   ws=new WebSocket(NOVO_WS);
 
   ws.onopen=()=>{
@@ -2305,6 +2309,7 @@ function connectTelemetry(){
     }
   }
   ws.onmessage=function(ev){
+    window._wsLastMsg=Date.now();   // liveness stamp — the resume handler reads it to spot zombie sockets
     let data;try{data=JSON.parse(ev.data);}catch(e){return;};
     if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: ~10Hz tick — price/tip/change + open-position P&L, skip the heavy handler
     if(data.trial){document.body.classList.add('trial-mode');}
@@ -3440,6 +3445,19 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) return;
   try{ loadNovoChart(); }catch(_e){}
   try{ _loadAnalysisBoard(); }catch(_e){}
+  // WS resume (Jake, 2026-08-31: "go back to it, it won't reconnect — the light is red"). Android
+  // kills the socket in the background and throttles the retry timers, and the old ticket may be
+  // dead by the time the app is foregrounded — so reconnection can't be left to the 3s onclose
+  // loop. On resume: a CLOSED/missing socket gets a full re-handshake + reconnect; a socket that
+  // CLAIMS to be open but hasn't delivered a frame in 15s is a zombie (the classic Android resume
+  // state) and gets closed, which routes it into the same reconnect path. CONNECTING is left alone.
+  // Both bad states go straight to novoReconnect (fresh handshake, fresh ticket, reconnect) —
+  // connectTelemetry silences and closes whatever socket exists first, so this can't stack two.
+  try{
+    var _st=(ws&&typeof ws.readyState==='number')?ws.readyState:3;
+    var _zombie=(_st===1 && window._wsLastMsg && (Date.now()-window._wsLastMsg)>15000);
+    if(_st>=2 || _zombie){ window.novoReconnect(); }
+  }catch(_e){}
 });
 
 // Midday chop lockout — the visual half of the engine's owner-box entry block (11:45-2:00 ET). Greys the Buy
