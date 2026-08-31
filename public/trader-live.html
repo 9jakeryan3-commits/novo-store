@@ -95,13 +95,22 @@
     }
   };
 
-  /* Reconnect re-runs the handshake: the old ticket is very likely dead by now. */
+  /* Reconnect re-runs the handshake: the old ticket is very likely dead by now.
+     ARM CONTRACT (2026-08-31 audit): retry through ONE owned timer, like every other loop on the
+     page. The bare setTimeout self-retry meant every caller (onclose ladder, supervisor every 10s)
+     spawned an independent 5s chain that lived until a handshake SUCCEEDED — ten minutes offline
+     grew ~60 concurrent chains hammering a dead endpoint, then a thundering herd of handshakes and
+     sockets the moment the network returned. clearTimeout-on-arm collapses any number of callers
+     into exactly one pending retry. */
+  var _rcBusy = false;
   window.novoReconnect = async function(){
-    if (await window.novoHandshake()) {
-      try { connectTelemetry(); } catch(_){}
-    } else {
-      setTimeout(window.novoReconnect, 5000);
-    }
+    if (_rcBusy) return;
+    _rcBusy = true; clearTimeout(window._rcTimer);
+    var ok = false;
+    try { ok = await window.novoHandshake(); } catch(_){ ok = false; }
+    _rcBusy = false;
+    if (ok) { try { connectTelemetry(); } catch(_){} }
+    else { clearTimeout(window._rcTimer); window._rcTimer = setTimeout(window.novoReconnect, 5000); }
   };
 
   /* HTTP lane's ticket refresh. When a poller gets a 401 the ticket is dead — before this, every
@@ -2222,8 +2231,11 @@ window.runAnalysis = async function(){
   btns.forEach(function(b){ b.dataset.state = 'busy'; setText(b, 'Asking NoVo…'); });
   var done = function(state, text){
     btns.forEach(function(b){ b.dataset.state = state; setText(b, text); });
-    setTimeout(function(){
-      btns.forEach(function(b){ b.removeAttribute('data-state'); setText(b, b.dataset.label); });
+    // Owned timer: a re-click inside the old 2.6s window let the previous run's reset strip the
+    // NEW run's busy state mid-flight.
+    clearTimeout(window._runLblTimer);
+    window._runLblTimer = setTimeout(function(){
+      btns.forEach(function(b){ if(b.dataset.state !== 'busy'){ b.removeAttribute('data-state'); setText(b, b.dataset.label); } });
     }, 2600);
   };
   try{
@@ -2366,29 +2378,41 @@ function connectTelemetry(){
     // only on heavy frames, and the viewer can switch back at any moment.
     if(prevClose!==undefined && prevClose!==null){ var _p0=parseFloat(prevClose)||0; if(_p0>0) window._spyPrev=_p0; }
     if(!_selIsExec()) return;
-    var e=document.getElementById('t-spy'); if(e) e.textContent='$'+spy.toFixed(2);
-    try{
-      if(_novoTipLive && !_ctbTog.ha && _novoSeries && _novoLastCandle && _novoLastCandle.time){
-        var _ref=_novoLastCandle.open||_novoLastCandle.close||0;   // reject a tip >0.6% off the bar open (frozen/bad-tick guard)
-        if(_ref>0 && Math.abs(spy/_ref-1)<=0.006){
-          _novoLastCandle.close=spy;
-          if(spy>_novoLastCandle.high) _novoLastCandle.high=spy;
-          if(spy<_novoLastCandle.low)  _novoLastCandle.low =spy;
-          _novoSeries.update(_novoLastCandle);
+    // rAF-COALESCED (2026-08-31 speed audit): the lane now ticks up to 40Hz, and every
+    // series.update() invalidates the whole canvas — 40 full repaints/sec regardless of what the
+    // display can show. Stash the freshest price and flush ONCE per animation frame: DOM writes and
+    // the chart repaint land together, at most one per frame, and a burst of ticks between frames
+    // costs one paint of the newest price instead of N paints of every intermediate one.
+    window._pxPending=spy;
+    if(window._pxRaf) return;
+    window._pxRaf=requestAnimationFrame(function(){
+      window._pxRaf=null;
+      var p=window._pxPending; if(!(p>0)) return;
+      if(!_selIsExec()) return;   // ticker switched between stash and flush — this price belongs to the ENGINE's chart, not the one now showing
+      var e=document.getElementById('t-spy'); if(e) e.textContent='$'+p.toFixed(2);
+      try{
+        if(_novoTipLive && !_ctbTog.ha && _novoSeries && _novoLastCandle && _novoLastCandle.time){
+          var _ref=_novoLastCandle.open||_novoLastCandle.close||0;   // reject a tip >0.6% off the bar open (frozen/bad-tick guard)
+          if(_ref>0 && Math.abs(p/_ref-1)<=0.006){
+            _novoLastCandle.close=p;
+            if(p>_novoLastCandle.high) _novoLastCandle.high=p;
+            if(p<_novoLastCandle.low)  _novoLastCandle.low =p;
+            _novoSeries.update(_novoLastCandle);
+          }
         }
+      }catch(_e){}
+      var ce=document.getElementById('t-spy-chg');
+      if(ce){
+        var prev=parseFloat(window._spyPrev||0);
+        if(prev>0){ var usd=p-prev, up=usd>=0; ce.textContent=(up?'▲':'▼')+' '+(up?'+':'')+(usd/prev*100).toFixed(2)+'% · $'+Math.abs(usd).toFixed(2); ce.style.color=up?'var(--grn)':'var(--red)'; }
+        else { ce.textContent='—'; ce.style.color='var(--txt3)'; }
       }
-    }catch(_e){}
-    var ce=document.getElementById('t-spy-chg');
-    if(ce){
-      var prev=parseFloat(window._spyPrev||0);
-      if(prev>0){ var usd=spy-prev, up=usd>=0; ce.textContent=(up?'▲':'▼')+' '+(up?'+':'')+(usd/prev*100).toFixed(2)+'% · $'+Math.abs(usd).toFixed(2); ce.style.color=up?'var(--grn)':'var(--red)'; }
-      else { ce.textContent='—'; ce.style.color='var(--txt3)'; }
-    }
+    });
   }
   ws.onmessage=function(ev){
     window._wsLastMsg=Date.now();   // liveness stamp — the resume handler reads it to spot zombie sockets
     let data;try{data=JSON.parse(ev.data);}catch(e){return;};
-    if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: ~10Hz tick — price/tip/change + open-position P&L, skip the heavy handler
+    if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: up to 40Hz dedup-on-change — price/tip/change, rAF-coalesced to one repaint per frame, skip the heavy handler
     if(data.trial){document.body.classList.add('trial-mode');}
 
 
@@ -2430,6 +2454,19 @@ function connectTelemetry(){
           // and _paintTkrUI re-resolves a follow-the-engine viewer (no pinned choice) to the new tkr.
           document.querySelectorAll('.term-live-ticker').forEach(function(el){el.textContent=_tk;});
           _paintTkrUI();
+          // AUDIT F1 (2026-08-31, critical): for a follow-the-engine viewer (no pinned choice),
+          // this changes what _selTkr() resolves to — the SAME identity change the click path
+          // guards against ("two tickers' sessions share the SAME epoch anchor, so a switch can be
+          // mistaken for a degraded response"). Without this reset the next poll either freezes on
+          // the OLD ticker's candles under the NEW caption, or glues the new ticker's last bar onto
+          // the old chart. Same reset as _setTkr, engine-driven.
+          if(_novoSelTkr===null){
+            _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
+            _novoOvSig=''; _novoLvlSig='__engine_switch__'; _novoTipLive=false; _novoLastCandle=null;
+            try{ _reloadDrawings(); }catch(_e){}
+            try{ _showVeil(); }catch(_e){}
+            try{ loadNovoChart(); }catch(_e){}
+          }
         }
       }
       // Header price + chart-tip glide + change go through the shared applier (also driven by the fast
@@ -3015,7 +3052,10 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
     // HA and VP change what is DRAWN, not a series' visibility — force a full setData repaint
     // (glitch-guard reset; _novoRanged stays latched so the viewer's pan/zoom is never fought).
     if(k==='ha'||k==='vp'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
-    if(k==='ha'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language
+    // HA off→on is glide-safe (the glide gates on !_ctbTog.ha), but on→off re-enabled the glide
+    // INSTANTLY, painting a raw bar over the still-displayed HA last bar until the repaint landed.
+    // Drop the tip state; the next poll re-establishes it against the freshly-drawn series.
+    if(k==='ha'){ _novoTipLive=false; _novoLastCandle=null; try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language
   });
 });
 
@@ -3107,7 +3147,8 @@ function _chartClick(param){
       _measEl.style.left=Math.min(param.point.x+12, el.clientWidth-130)+'px';
       _measEl.style.top=Math.max(param.point.y-14,4)+'px';
       el.style.position='relative'; el.appendChild(_measEl);
-      setTimeout(_clearMeasure, 8000);
+      // Timer is OWNED: an uncancelled 8s timeout from measurement #1 used to erase a fresh #2.
+      clearTimeout(window._measTimer); window._measTimer=setTimeout(_clearMeasure, 8000);
     }
   }
   _pendPt=null; _ctbTool=null; _paintCtb();
@@ -3115,6 +3156,12 @@ function _chartClick(param){
 // ── Pro overlays ──────────────────────────────────────────────────────────────────────────────
 let _novoViewC=null,_novoViewMap=null;
 const _TF_NAME={1:'1m',5:'5m',15:'15m','1h':'1H','1d':'D','1w':'W'};
+// Opening-window maps (widened 2026-08-31; HOISTED here same day — they were block-scoped inside
+// loadNovoChart and _c2Load's reference to _tfOpen threw a swallowed ReferenceError every tick, so
+// the split pane never got its fitted opening view). Desktop: the full regular session of 1m, a
+// day and a half of 5m, two weeks of hourly, nine months of daily. Mobile: its own tighter map.
+const _tfOpen={1:390,5:288,15:192,'1h':240,'1d':190,'1w':156};
+const _tfOpenM={1:120,5:96,15:80,'1h':96,'1d':90,'1w':104};
 function _paintWm(){
   var wm=document.getElementById('chart-wm');
   if(wm) wm.textContent=_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf);
@@ -3135,11 +3182,12 @@ function _renderLegend2(bar){
   var i=bar?cs.indexOf(bar):cs.length-1;   // prev close for the hovered bar's change
   var prev=(i>0)?cs[i-1].close:b.open;
   var chg=prev?(b.close-prev)/prev*100:0, up=b.close>=prev;
-  el.innerHTML='<span class="dim">'+_fmtBarTime(b.time)+'</span>'+
+  var _h='<span class="dim">'+_fmtBarTime(b.time)+'</span>'+
     '  O <b>'+b.open.toFixed(2)+'</b>  H <b>'+b.high.toFixed(2)+'</b>'+
     '  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>'+
     '  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'+
     '  <span class="dim">V '+_fmtVol(b.v)+'</span>';
+  if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h; }   // identical content → zero DOM work
 }
 function _renderChip(){
   var el=document.getElementById('novo-chip'); if(!el) return;
@@ -3150,8 +3198,9 @@ function _renderChip(){
   // engine's own numbers off the per-ticker dealer hash — no soft calls on the chart.
   var sg=(B.net_gex!==null&&B.net_gex<0);
   var d=(px-B.flip)/B.flip*100;
-  el.innerHTML='<span class="c-reg '+(sg?'sg':'lg')+'">'+(sg?'short gamma':'long gamma')+'</span>'+
+  var _ch='<span class="c-reg '+(sg?'sg':'lg')+'">'+(sg?'short gamma':'long gamma')+'</span>'+
     '<span class="c-flip">'+Math.abs(d).toFixed(2)+'% '+(d>=0?'above':'below')+' flip '+B.flip.toFixed(2)+'</span>';
+  if(el.__h!==_ch){ el.__h=_ch; el.innerHTML=_ch; }   // identical content → zero DOM work
 }
 // ── Extended-hours shading (TradingView-style) ────────────────────────────────────────────────
 // A lightweight-charts 4.1 series PRIMITIVE with zOrder 'bottom', so the tint paints behind the
@@ -3294,15 +3343,21 @@ function _c2Head(px){
   var el2=document.getElementById('novo-chart2'); if(!el2) return;
   var h=document.getElementById('c2-head');
   if(!h){ h=document.createElement('div'); h.id='c2-head'; el2.appendChild(h); }
-  var pills=_c2Others().filter(function(t){ return t!==_splitTkr; })
-    .map(function(t){ return '<span class="c2-pill" data-c2tk="'+t+'">'+t+'</span>'; }).join('');
-  h.innerHTML='<span class="c2-tk">'+_splitTkr+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'</span>'
-    +(px?'<span class="c2-px">$'+(+px).toFixed(2)+'</span>':'')+pills;
-  h.querySelectorAll('.c2-pill').forEach(function(p){
-    p.addEventListener('click',function(){ _splitTkr=p.getAttribute('data-c2tk');
-      try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){}
-      _c2Key=''; _c2Ranged=false; _c2Run(); });
-  });
+  // Rebuild the header only when its IDENTITY changes (pane ticker / TF / main ticker for the
+  // pill set); the steady 4s tick just writes the price into its span.
+  var sig=_splitTkr+'|'+_ctbTf+'|'+_selTkr();
+  if(h.__sig!==sig){
+    h.__sig=sig;
+    var pills=_c2Others().filter(function(t){ return t!==_splitTkr; })
+      .map(function(t){ return '<span class="c2-pill" data-c2tk="'+t+'">'+t+'</span>'; }).join('');
+    h.innerHTML='<span class="c2-tk">'+_splitTkr+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'</span><span class="c2-px"></span>'+pills;
+    h.querySelectorAll('.c2-pill').forEach(function(p){
+      p.addEventListener('click',function(){ _splitTkr=p.getAttribute('data-c2tk');
+        try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){}
+        _c2Key=''; _c2Ranged=false; _c2Run(); });
+    });
+  }
+  var pe=h.querySelector('.c2-px'); if(pe) pe.textContent=(px?'$'+(+px).toFixed(2):'');
 }
 function _c2Init(){
   if(_c2series) return true;
@@ -3334,6 +3389,7 @@ async function _c2Load(){
       if(!r2.ok){ _reauth401(r2); return; }
       var d2=await r2.json();
       if(d2.ticker!==tk||d2.tf!==_ctbTf) return;
+      if(tk!==_splitTkr) return;   // pill clicked mid-flight — this response matches the REQUEST, not the pane any more
       candles=d2.candles||[]; _c2HistC[key]={ts:Date.now(),c:candles};
     }
     var B=(_abData&&_abData.board)?_abData.board[tk]:null;
@@ -3351,18 +3407,35 @@ async function _c2Load(){
   if(!candles||!candles.length) return;
   if(!_c2Init()) return;
   if(_ctbTog.ha) candles=_haView(candles);           // the two panes must speak the same bar language
-  _c2series.setData(candles);
-  _c2lines.forEach(function(l){ try{ _c2series.removePriceLine(l); }catch(_e){} });
-  _c2lines=[];
+  // AUDIT (2026-08-31): the main pane's steady-state discipline, which this pane never had — it
+  // was full-setData + 4 price lines torn down and re-created + header innerHTML EVERY 4s, a
+  // guaranteed repaint even overnight. Same anchor + same count → update the forming bar only.
+  var key2=tk+':'+_ctbTf+(_ctbTog.ha?':ha':'');
+  var _fresh=(key2!==_c2Key);
+  if(_fresh){ _c2Key=key2; _c2Ranged=false; }
+  var f0=candles[0].time;
+  if(_fresh || f0!==window._c2FirstT || candles.length>window._c2Count){
+    _c2series.setData(candles);
+    window._c2FirstT=f0; window._c2Count=candles.length;
+  } else {
+    _c2series.update(candles[candles.length-1]);
+  }
+  // Price lines PERSIST: a moved level is applyOptions({price}) on its existing line; lines are
+  // created/removed only when a level appears or vanishes.
   var lc2={FLIP:'#22d3ee',CW:'#34d399',PW:'#f43f5e',GRAV:'#3b82f6'};
   var tl2={FLIP:'FLIP',CW:'CALL WALL',PW:'PUT WALL',GRAV:'GRAVITY'};
+  window._c2LineMap=window._c2LineMap||{};
+  var _seen={};
   for(var k in (lvls||{})){
-    var v=+lvls[k];
-    if(v>0) _c2lines.push(_c2series.createPriceLine({price:v,color:lc2[k],lineWidth:1,
-      axisLabelVisible:true,title:tl2[k]}));
+    var v=+lvls[k]; if(!(v>0)) continue; _seen[k]=1;
+    var ln=window._c2LineMap[k];
+    if(!ln){ ln=window._c2LineMap[k]=_c2series.createPriceLine({price:v,color:lc2[k],lineWidth:1,axisLabelVisible:true,title:tl2[k]}); }
+    else if(ln.__px!==v){ try{ ln.applyOptions({price:v}); }catch(_e){} }
+    ln.__px=v;
   }
-  var key2=tk+':'+_ctbTf;
-  if(key2!==_c2Key){ _c2Key=key2; _c2Ranged=false; }
+  for(var k2 in window._c2LineMap){
+    if(!_seen[k2]){ try{ _c2series.removePriceLine(window._c2LineMap[k2]); }catch(_e){} delete window._c2LineMap[k2]; }
+  }
   if(!_c2Ranged){
     try{
       var n=candles.length, ob=(_tfOpen&&_tfOpen[_ctbTf])||300, pad=Math.ceil(ob*0.08);
@@ -3458,13 +3531,20 @@ function _scaleMenuRender(){
 // Boot AFTER the let-declarations above (a call before them lands in the TDZ and dies silently) —
 // builds the wrapper and, if a split was saved, restores it.
 try{ _applySplit(); }catch(_e){}
+function _veilOff(){
+  var v=document.getElementById('chart-veil'); if(v) v.classList.remove('on');
+  clearTimeout(window._veilTimer);
+}
 function _showVeil(){
   var v=document.getElementById('chart-veil');
   if(v){
     v.textContent='loading '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; v.classList.add('on');
-    // Still veiled after 10s = a load failed and the 4s loop is retrying. Say so — a spinner that
-    // says nothing for that long reads as a freeze even while it's recovering.
-    setTimeout(function(){ if(v.classList.contains('on')) v.textContent='slow connection — retrying '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; },10000);
+    // Still veiled after 10s = a load failed and the loop is retrying. Say so — a spinner that
+    // says nothing for that long reads as a freeze even while it's recovering. The timer is OWNED
+    // (cleared on every show and on _veilOff): an orphaned timeout from an earlier switch used to
+    // stamp "slow connection" onto a two-second-old fresh veil.
+    clearTimeout(window._veilTimer);
+    window._veilTimer=setTimeout(function(){ if(v.classList.contains('on')) v.textContent='slow connection — retrying '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; },10000);
   }
 }
 _paintCtb();
@@ -3540,6 +3620,8 @@ function _initNovoChart(){
     _novoChart.subscribeCrosshairMove(function(param){
       var bar=null, _lm=(_ctbTog.ha&&_novoHaMap)?_novoHaMap:_novoViewMap;   // hover must describe the bars actually drawn
       if(param&&typeof param.time==='number'&&_lm) bar=_lm.get(param.time)||null;
+      if(bar===window._lastHovBar) return;   // pointer events fire at frame rate; only a bar CHANGE re-renders
+      window._lastHovBar=bar;
       _renderLegend2(bar);
     });
   }catch(_e){}
@@ -3567,7 +3649,10 @@ async function loadNovoChart(){
     let _view=_isDeepTf()?null:_tfView(d);
     if(_isDeepTf()){
       const _hc=await _loadHist();
-      if(!_hc||!_hc.length) return;   // keep the current chart until history answers
+      // Keep the current chart until history answers — but a SUCCESSFUL empty answer means this
+      // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
+      // the veil cadence forever (the weekend switch-to-QQQ trap).
+      if(!_hc||!_hc.length){ if(_hc) _veilOff(); return; }
       // EMAs on H/D/W run continuous (no session reseed) — reseeding a daily EMA is meaningless.
       _view={candles:_hc, vwap:[], ema9:_emaOn(_hc,9,false), ema21:_emaOn(_hc,21,false)};
     }
@@ -3593,6 +3678,7 @@ async function loadNovoChart(){
         } else { _ce.textContent='—'; _ce.style.color='var(--txt3)'; }
       }
     }
+    if(!(_view.candles && _view.candles.length)) _veilOff();   // server answered, no bars: stop the spinner
     if(_view.candles && _view.candles.length){
       const _firstT = _view.candles[0].time;
       // GLITCH FIX (2026-07-17): a transient partial/degraded /api/spy-chart response returns FEWER bars
@@ -3607,12 +3693,21 @@ async function loadNovoChart(){
       // HA mode swaps only what is DRAWN. The transform is O(n) over ~3k bars — recomputed per
       // paint so the steady-state update's last bar always carries the right derived open.
       const _drawC = _ctbTog.ha ? _haView(_view.candles) : _view.candles;
-      if(!_novoHasData || _firstT !== _novoFirstT || _view.candles.length > _novoBarCount+1){
-        _novoSeries.setData(_drawC); _novoHasData=true;   // first load / new session / gap → full set
+      // AUDIT F2 (2026-08-31): ANY bar-count growth takes the full setData, not just gaps >1.
+      // The old `+1 append via update()` path never rewrote the JUST-COMPLETED bar with its final
+      // server values — so the WS glide's last ticks (which run a few seconds into the NEXT minute
+      // before the poll lands) stayed printed in the completed bar's close/high/low forever, and in
+      // HA mode the new bar's open midpointed a body the chart wasn't showing. One setData per bar
+      // rollover (~28ms at 4x CPU throttle, 1-in-15 ticks) buys bars that always match the server.
+      if(!_novoHasData || _firstT !== _novoFirstT || _view.candles.length > _novoBarCount){
+        _novoSeries.setData(_drawC); _novoHasData=true;   // first load / new session / new bar / gap → full set
         if(_novoVolSeries) _novoVolSeries.setData(_view.candles.map(_volBar));
-        if(_firstT !== _novoFirstT) _novoRanged=false;       // new session anchor → re-fit the opening window
+        // AUDIT F4: deep frames serve ROLLING windows (40d of 1H, 5y of D) — the left edge dropping
+        // a bar is not a new session, and re-fitting there yanked the viewer's pan back to the
+        // opening window ~hourly on 1H. Only intraday first-bar changes are session rolls.
+        if(_firstT !== _novoFirstT && !_isDeepTf()) _novoRanged=false;
       } else {
-        _novoSeries.update(_drawC[_drawC.length-1]);   // steady state → smooth-update the forming candle
+        _novoSeries.update(_drawC[_drawC.length-1]);   // same-count steady state → smooth-update the forming candle
         if(_novoVolSeries) _novoVolSeries.update(_volBar(_view.candles[_view.candles.length-1]));
       }
       _novoFirstT = _firstT;
@@ -3622,7 +3717,7 @@ async function loadNovoChart(){
       _novoHaC = _ctbTog.ha ? _drawC : null;
       _novoHaMap = _ctbTog.ha ? new Map(_drawC.map(function(c){ return [c.time, c]; })) : null;
       try{ _svpCalc(); }catch(_e){}
-      var _veil=document.getElementById('chart-veil'); if(_veil) _veil.classList.remove('on');
+      _veilOff();
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
       try{ _renderChip(); }catch(_e){}
       // LIVE-TIP HANDOFF (2026-07-17): keep a copy of the forming (last) candle so the WS telemetry frame
@@ -3646,16 +3741,9 @@ async function loadNovoChart(){
         const _el=document.getElementById('novo-chart');
         if(_el && _el.clientWidth>0){
           const _n=_view.candles.length;
-          // Opening windows widened 2026-08-31 (Jake): both maps were still tuned for the small-chart
-          // era. Desktop is a full terminal pane now — it opens on the whole regular session of 1m,
-          // a day and a half of 5m, three days of 15m, two weeks of hourly, nine months of daily,
-          // three years of weekly. Roughly 3px/bar at the widest window; don't push past that.
+          // Maps live at script scope (see _tfOpen/_tfOpenM by _TF_NAME). ~3px/bar minimum at the
+          // widest desktop window; don't push the maps past that.
           const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
-          const _tfOpen={1:390,5:288,15:192,'1h':240,'1d':190,'1w':156};
-          // Mobile gets its own map, no longer desktop/4: two hours of 1m, a full session of 5m,
-          // two weeks of hourly, four-plus months of daily, two years of weekly. At 56dvh the bars
-          // have the vertical resolution to stay readable this thin; the 340px porthole didn't.
-          const _tfOpenM={1:120,5:96,15:80,'1h':96,'1d':90,'1w':104};
           const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : (_tfOpenM[_ctbTf]||100);
           // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
           // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
@@ -3674,15 +3762,24 @@ async function loadNovoChart(){
     // recomputes them on a 10s candle-cache TTL, so ~4 of 5 polls carried byte-identical arrays; setData
     // rebuilds+repaints the whole series each time, which was the bulk of the chart jank. A cheap change
     // signature gates it — no redraw when nothing moved.
+    // AUDIT (2026-08-31): the sig must cover the EMAs too — on deep frames _view.vwap is empty, so
+    // the old vwap-only sig was a CONSTANT and EMA9/21 froze at their first paint while the forming
+    // hourly/daily bar kept moving: a stale indicator drawn as live. Markers get their own sig
+    // (count + last marker identity) so a VWAP wiggle no longer rebuilds the whole marker set, and
+    // a changed marker at constant count no longer slips through.
     const _vlast=(_view.vwap&&_view.vwap.length)?_view.vwap[_view.vwap.length-1]:null;
-    const _ovSig=(_view.vwap?_view.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')+'|'+(d.markers?d.markers.length:0);
+    const _elast=(_view.ema9&&_view.ema9.length)?_view.ema9[_view.ema9.length-1]:null;
+    const _ovSig=(_view.vwap?_view.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')
+      +'|'+(_view.ema9?_view.ema9.length:0)+':'+(_elast?_elast.time+':'+_elast.value:'-');
     if(_ovSig!==_novoOvSig){
       _novoOvSig=_ovSig;
       if(_novoVwap){ _novoVwap.setData(_view.vwap||[]); }   // VWAP curve
       if(_novoEma9){ _novoEma9.setData(_view.ema9||[]); }   // EMA9 white
       if(_novoEma21){ _novoEma21.setData(_view.ema21||[]); } // EMA21 navy
-      _novoSeries.setMarkers(d.markers||[]);
     }
+    const _mlast=(d.markers&&d.markers.length)?d.markers[d.markers.length-1]:null;
+    const _mkSig=(d.markers?d.markers.length:0)+':'+(_mlast?(_mlast.time+':'+(_mlast.price||_mlast.position||'')+':'+(_mlast.shape||'')):'-');
+    if(_mkSig!==window._novoMkSig){ window._novoMkSig=_mkSig; _novoSeries.setMarkers(d.markers||[]); }
     // FLIP/CW/PW/GRAV are the engine's own dealer levels (the ones _level_trigger fires on) — cyan for the
     // gamma flip, dark blue for the gravity magnet (a blue pair with the flip), green/red for the walls.
     // Opening Range is light pink; After-Hours purple; Prior-Day near-white.
@@ -3717,7 +3814,9 @@ async function loadNovoChart(){
         // DRAW EVERY LEVEL. There used to be a `Math.abs(v-px)<=2.0` gate here, so anything more than $2
         // from spot was legend-only and never appeared on the chart — that's why YDL kept "vanishing"
         // (750.20 vs 754.68 = $4.48 away). It reads as a missing level, not as a filter.
-        _drawn.push([lbl, v, (_lvlFrom[lbl]||null)]);
+        // (`from` is NOT in this tuple any more — it is intentionally unused by the drawing code, and
+        // its server-side flicker was forcing the full-teardown path on nearly every RTH tick.)
+        _drawn.push([lbl, v]);
         // ...but only let NEAR levels stretch the price scale. _novoLevelVals feeds the candle series'
         // autoscaleInfoProvider, so pushing every level would drag the range out to CW 760 / FLIP 749.43
         // and squash the candles into a band. Far levels still draw — they just get clipped if they're
@@ -3748,13 +3847,18 @@ async function loadNovoChart(){
       + '<div><div style="'+_hdr+'">Highs</div>'+_highs+'</div>'
       + '<div><div style="'+_hdr+'">Lows</div>'+_lows+'</div>'
       + '</div>');
-    const _sig = JSON.stringify(_drawn);
+    // AUDIT (2026-08-31): full teardown ONLY when the level SET changes (a label appears or
+    // vanishes) or the session anchor moves. A price MOVING re-datas that one series in place —
+    // the old all-or-nothing JSON sig tore down and re-added all ~15 series whenever any single
+    // level moved a cent, which during RTH (gravity/flip recompute every ~5s) was most ticks:
+    // ~100-200 series rebuilds a minute, each one a full chart invalidation + axis-label churn.
+    const _sig = _drawn.map(function(r){ return r[0]; }).join(',')+'@'+_firstT;
     if(_sig !== _novoLvlSig){
       for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){} }
       for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){} }
-      _novoLines={}; _novoLvlSeries={};
+      _novoLines={}; _novoLvlSeries={}; window._lvlPx={};
       _drawn.forEach(function(row){
-        const lbl=row[0], v=row[1], from=row[2], c=lc[lbl]||'#94a3b8';
+        const lbl=row[0], v=row[1], c=lc[lbl]||'#94a3b8';
         // ALWAYS draw a SOLID, FULL-WIDTH line (first bar -> newest bar). Two bugs killed here:
         // (1) dotted: a transient null origin used to fall back to a dotted price line and, because the extend
         //     branch below only touches solid series, it stayed STUCK dotted until the next rebuild.
@@ -3770,30 +3874,49 @@ async function loadNovoChart(){
           // This replaces an earlier attempt at an in-pane price-line title, which drew nothing: the line
           // here is a LINE SERIES, and the price-line label belongs to a different object entirely.
           // Only levels inside the visible price range render a label, so the axis stays readable.
-          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles,crosshairMarkerVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
+          // visible: set at CREATION so the rebuild path never births a series with the wrong
+          // visibility — which is what used to justify calling _applyTogVis on every tick.
+          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl,crosshairMarkerVisible:false,visible:_ctbTog.lvl,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
-          _novoLvlSeries[lbl]=s;
+          _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v;
         } else {
           // No candles at all (chart still loading) — a solid, not dotted, full-width line as the last resort.
-          _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),axisLabelVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
+          _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),lineVisible:_ctbTog.lvl,axisLabelVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
         }
       });
       _novoLvlSig=_sig;
     } else if(_lastT){
       _drawn.forEach(function(row){
-        const s=_novoLvlSeries[row[0]];
-        if(s){ try{ s.update({time:_lastT, value:row[1]}); }catch(_e){} }   // extend onto the newest bar
+        const lbl=row[0], v=row[1], s=_novoLvlSeries[lbl];
+        if(!s) return;
+        try{
+          if(window._lvlPx && window._lvlPx[lbl]!==v){
+            // This one level MOVED — re-data just its two points; every other series is untouched.
+            s.setData([{time:_firstT,value:v},{time:_lastT,value:v}]);
+            window._lvlPx[lbl]=v;
+          } else {
+            s.update({time:_lastT, value:v});   // unchanged → just extend onto the newest bar
+          }
+        }catch(_e){}
       });
     }
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
       + '<span style="color:#facc15">&#9679; win exit</span><span style="color:#94a3b8">&#9679; loss exit</span></div>');
-    const lg=document.getElementById('novo-chart-legend'); if(lg) lg.innerHTML=leg.join('');
+    // Write the panel only when its content actually changed — innerHTML churn every tick was
+    // destroying text selection and forcing style recalcs for identical markup. (The string build
+    // above is microseconds; the DOM replacement was the cost.)
+    const lg=document.getElementById('novo-chart-legend');
+    if(lg){ const _lh=leg.join(''); if(lg.__h!==_lh){ lg.__h=_lh; lg.innerHTML=_lh; } }
   }catch(e){console.error('novo chart:',e);}
-  try{ _applyTogVis(); }catch(_e){}
+  // _applyTogVis() is NOT called here any more (2026-08-31 audit): visibility is set at series
+  // creation now, and re-applying ~20 applyOptions per tick forced a wasted repaint each cycle.
+  // The toolbar click handler still calls it — the one place visibility actually changes.
 }
-loadNovoChart();
+// (The bare boot-time loadNovoChart() that used to sit here was a duplicate: _ncRun() below fires
+// immediately, and on mobile the tab switcher schedules a third — two redundant ~500KB fetches
+// at page open. _ncRun is the single entry now.)
 // Re-armable chart loop — same contract as _abArm above. 4s not 2s (2026-07-30): the 0.5s WS
 // keeps the price + forming bar live; this heavy 5-day fetch/parse only refreshes bar structure.
 function _ncArm(ms){ clearTimeout(window._ncTimer); window._ncTimer=setTimeout(_ncRun, ms); }
@@ -3818,9 +3941,12 @@ function _laneCheck(kick){
   try{
     // 1) The chart library. Vendored same-origin, but if the script STILL failed (interrupted
     //    load at open), _initNovoChart returns false forever — re-inject, script tags don't retry.
-    if(!window.LightweightCharts && !window._lwRetryAt || (!window.LightweightCharts && now-window._lwRetryAt>15000)){
+    if(!window.LightweightCharts && (!window._lwRetryAt || now-window._lwRetryAt>15000)){
       window._lwRetryAt=now;
-      var sc=document.createElement('script'); sc.src='/js/lightweight-charts-4.1.3.js'; document.head.appendChild(sc);
+      // REPLACE the previous retry tag rather than stacking a new one per attempt — a pathological
+      // outage would otherwise append script tags to the head forever.
+      var old=document.getElementById('lw-retry'); if(old) old.remove();
+      var sc=document.createElement('script'); sc.id='lw-retry'; sc.src='/js/lightweight-charts-4.1.3.js'; document.head.appendChild(sc);
     }
   }catch(_e){}
   try{
