@@ -459,7 +459,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
 /* ── Chart toolbar ─────────────────────────────────────────────────────────────────────────── */
-#chart-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px 2px 7px; }
+#chart-toolbar { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; justify-content: center;
+  flex-wrap: wrap; padding: 0 12px; min-width: 0; }
+.spy-hero { flex-wrap: wrap; row-gap: 6px; }
+@media (max-width: 768px) {
+  /* Phone: the hero is two lines — ticker + price first, then the toolbar full-width. */
+  #chart-toolbar { order: 4; flex-basis: 100%; justify-content: flex-start; padding: 2px 0 0; }
+  .b3 td, .b3 th { font-size: 10px; padding: 3px 4px; }
+  .b3 .b3-d { font-size: 8.5px; }
+}
 .ctb-group { display: flex; gap: 2px; }
 .ctb-sep { width: 1px; height: 16px; background: var(--bdr); margin: 0 4px; }
 .ctb-btn { font-family: var(--font); font-size: 10.5px; font-weight: 800; letter-spacing: .8px;
@@ -1704,23 +1712,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           </div>
           <div class="spy-hero-sub">S&amp;P 500</div>
         </div>
-        <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
-      </div>
-      <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
-
-      <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
-      <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-      <div style="margin:8px 14px 8px;">
-        <!-- Chart toolbar (2026-08-30, Jake: "timeframes, chart tools and other stuff").
-             Left: timeframe pills (client-side aggregation of the 1-min feed — the server stays 1-min).
-             Middle: drawing tools — horizontal level, trendline, fib retracement, measure; drawings
-             persist per ticker in localStorage. Right: overlay toggles. -->
+        <!-- Chart toolbar lives IN the hero band (Jake: "tools landed in the wrong spot") — the
+             empty middle between the ticker switcher and the price. One line on desktop; on a
+             phone it wraps to its own full-width line under the ticker row. -->
         <div id="chart-toolbar">
           <div class="ctb-group" id="ctb-tf" aria-label="Timeframe">
             <button type="button" class="ctb-btn" data-tf="1">1m</button>
             <button type="button" class="ctb-btn" data-tf="5">5m</button>
             <button type="button" class="ctb-btn" data-tf="15">15m</button>
-            <button type="button" class="ctb-btn" data-tf="60">1h</button>
+            <button type="button" class="ctb-btn" data-tf="1h">1H</button>
+            <button type="button" class="ctb-btn" data-tf="1d">D</button>
+            <button type="button" class="ctb-btn" data-tf="1w">W</button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tools" aria-label="Drawing tools">
@@ -1739,6 +1741,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           </div>
           <span id="ctb-hint" class="ctb-hint"></span>
         </div>
+        <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
+      </div>
+      <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
+
+      <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
+      <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+      <div style="margin:8px 14px 8px;">
+        
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
         <!-- The chart level legend moved to the "Chart Levels" panel (was card-novostatus) 2026-07-17 so it's readable. -->
       </div>
@@ -2629,11 +2639,42 @@ _loadAnalysisBoard();
 let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
-  if([1,5,15,60].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
+  if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
   ['vwap','ema','lvl','vol'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
 function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol})); }catch(_e){} }
 
+function _isDeepTf(){ return typeof _ctbTf==='string'; }
+// Deep frames come from /api/chart-history (Tradier history through the same auth): 1H = 40 days
+// of hourly, D = 5 years daily, W = 10 years weekly. Client-cached per (ticker, frame); the
+// server holds its own cache too, so the 4s chart loop costs one upstream fetch per TTL.
+let _histC={key:null,ts:0,candles:null,inflight:false};
+async function _loadHist(){
+  var key=_selTkr()+':'+_ctbTf, ttl=(_ctbTf==='1h')?60000:300000;
+  if(_histC.key===key && (Date.now()-_histC.ts)<ttl) return _histC.candles;
+  if(_histC.inflight) return (_histC.key===key)?_histC.candles:null;
+  _histC.inflight=true;
+  try{
+    var u=NOVO_URL('/api/chart-history'); if(!u) return null;
+    var r=await fetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf);
+    if(!r.ok) return (_histC.key===key)?_histC.candles:null;
+    var d=await r.json();
+    if(d.ticker!==_selTkr()||d.tf!==_ctbTf) return null;   // stale response from before a switch
+    _histC={key:key,ts:Date.now(),candles:d.candles||[],inflight:false};
+    return _histC.candles;
+  }catch(_e){ return (_histC.key===key)?_histC.candles:null; }
+  finally{ _histC.inflight=false; }
+}
+function _emaOn(cands,span,reseedDaily){
+  var k=2/(span+1),out=[],pd=null,v=0;
+  cands.forEach(function(b){
+    var dy=Math.floor(b.time/86400);
+    if(v===0||(reseedDaily&&dy!==pd)){ pd=dy; v=b.close; }
+    else { v=b.close*k+v*(1-k); if(!reseedDaily) pd=dy; }
+    out.push({time:b.time,value:+v.toFixed(2)});
+  });
+  return out;
+}
 function _tfView(d){
   var raw=d.candles||[];
   if(_ctbTf<=1) return {candles:raw, vwap:d.vwap||[], ema9:d.ema9||[], ema21:d.ema21||[]};
@@ -2676,7 +2717,7 @@ function _applyTogVis(){
   }catch(_e){}
 }
 function _paintCtb(){
-  document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){ b.classList.toggle('on',+b.getAttribute('data-tf')===_ctbTf); });
+  document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){ b.classList.toggle('on',String(b.getAttribute('data-tf'))===String(_ctbTf)); });
   document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){ b.classList.toggle('on',!!_ctbTog[b.getAttribute('data-tog')]); });
   document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){ b.classList.toggle('armed',b.getAttribute('data-tool')===_ctbTool); });
   var el=document.getElementById('novo-chart'); if(el) el.classList.toggle('drawing',!!_ctbTool);
@@ -2687,12 +2728,14 @@ function _paintCtb(){
 }
 document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
   b.addEventListener('click',function(){
-    var tf=+b.getAttribute('data-tf'); if(tf===_ctbTf) return;
+    var tf=b.getAttribute('data-tf'); if(/^\d+$/.test(tf)) tf=+tf;
+    if(tf===_ctbTf) return;
     _ctbTf=tf; _ctbSave();
     // Same reset as a ticker switch: bucket times share epoch anchors across TFs, so the
     // glitch-guard could mistake the switch for a degraded response and skip it.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoLastCandle=null;
+    try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
     _paintCtb(); loadNovoChart();
   });
 });
@@ -2842,6 +2885,7 @@ function _initNovoChart(){
     priceLineVisible:false,lastValueVisible:false});
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
+  try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
   try{ _reloadDrawings(); _applyTogVis(); }catch(_e){}
   return true;
 }
@@ -2860,7 +2904,21 @@ async function loadNovoChart(){
     else if(!_selIsExec()) return;
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
-    const _view=_tfView(d);
+    let _view=_tfView(d);
+    if(_isDeepTf()){
+      const _hc=await _loadHist();
+      if(!_hc||!_hc.length) return;   // keep the current chart until history answers
+      // EMAs on H/D/W run continuous (no session reseed) — reseeding a daily EMA is meaningless.
+      _view={candles:_hc, vwap:[], ema9:_emaOn(_hc,9,false), ema21:_emaOn(_hc,21,false)};
+    }
+    // On D/W the session furniture (OR/PM/AH/PD, VWAP) belongs to a single day and reads as
+    // noise across years of bars — only the live dealer structure survives the zoom-out.
+    let _lvls=_lvls||{}, _lvlFromSrc=_lvlFromSrc||{};
+    if(_ctbTf==='1d'||_ctbTf==='1w'){
+      const _keep={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1};
+      const _f2={}; for(const _lk in _lvls){ if(_keep[_lk]) _f2[_lk]=_lvls[_lk]; }
+      _lvls=_f2; _lvlFromSrc={};
+    }
     // Selected ticker ≠ engine ticker → the WS lane is silent for this chart; the hero price and
     // day-change render from this poll instead. prev_close is server-derived from the ticker's own
     // prior RTH session.
@@ -2923,7 +2981,7 @@ async function loadNovoChart(){
           // up from 180 — the chart now owns the full right side, so it has the width to show them);
           // mobile stays tighter at 75 (its narrow width can't show even 3h legibly).
           const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
-          const _tfOpen={1:300,5:150,15:120,60:60};
+          const _tfOpen={1:300,5:150,15:120,'1h':160,'1d':130,'1w':104};
           const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : Math.ceil((_tfOpen[_ctbTf]||300)/4);
           // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
           // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
@@ -2965,7 +3023,7 @@ async function loadNovoChart(){
     // ── LEVELS, TradingView-style ────────────────────────────────────────────────────────────────────
     // A THIN SOLID segment starting at the bar that SET the level, running to the newest bar — not a dotted
     // line spanning the whole chart, which implied the level existed before it was set. Origin times come
-    // from d.level_from (server-derived in /api/spy-chart). No origin -> fall back to the old full-width
+    // from _lvlFromSrc (server-derived in /api/spy-chart). No origin -> fall back to the old full-width
     // price line so an unknown level still shows rather than silently vanishing.
     //
     // This poll runs every 2s, so the series are built ONCE and then only EXTENDED: tearing down and
@@ -2975,11 +3033,11 @@ async function loadNovoChart(){
     const leg=[], px=(+d.price)||null;
     const _lastT = (_view.candles && _view.candles.length) ? _view.candles[_view.candles.length-1].time : null;
     const _firstT = (_view.candles && _view.candles.length) ? _view.candles[0].time : null;
-    const _lvlFrom = d.level_from || {};
+    const _lvlFrom = _lvlFromSrc || {};
     const _drawn = [];
     _novoLevelVals=[];
-    for(const lbl in (d.levels||{})){
-      const c=lc[lbl]||'#94a3b8', v=+d.levels[lbl];
+    for(const lbl in (_lvls||{})){
+      const c=lc[lbl]||'#94a3b8', v=+_lvls[lbl];
       // VWAP is drawn as a moving line series (above) — skip its flat price line, but keep it in the legend.
       if(lbl!=='VWAP'){
         // DRAW EVERY LEVEL. There used to be a `Math.abs(v-px)<=2.0` gate here, so anything more than $2
@@ -3003,9 +3061,9 @@ async function loadNovoChart(){
     // High sits directly across from its Low. Reuses the .dr/.dk/.dv row style (identical to Market Intel).
     // Only levels the engine actually sent are shown.
     const _lrow=function(lbl,name){
-      if(!(d.levels && (lbl in d.levels))) return '';
+      if(!(_lvls && (lbl in _lvls))) return '';
       const c=lc[lbl]||'#94a3b8';
-      return `<div class="dr" style="padding:3px 12px"><span class="dk" style="color:${c}">${name}</span><span class="dv" style="font-size:12px">${(+d.levels[lbl]).toFixed(2)}</span></div>`;
+      return `<div class="dr" style="padding:3px 12px"><span class="dk" style="color:${c}">${name}</span><span class="dv" style="font-size:12px">${(+_lvls[lbl]).toFixed(2)}</span></div>`;
     };
     const _hdr='font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;padding:4px 12px 2px';
     const _anchors=_lrow('VWAP','VWAP')+_lrow('FLIP','Gamma Flip')+_lrow('GRAV','Gravity')+_lrow('CW','Call Wall')+_lrow('PW','Put Wall')+_lrow('EM_HI','Exp Move &#9650;')+_lrow('EM_LO','Exp Move &#9660;');
