@@ -124,7 +124,14 @@ module.exports = async (req, res) => {
     // COUNT ONLY, no rows. The on-chain half is part of the subscription like everything else
     // here; what is free is knowing how much of it there is. The build reads this to keep the
     // marketing count honest instead of it being typed once and going stale.
-    chain: Array.isArray(snap.chain) ? snap.chain.length : 0,
+    // The PUBLISHED count is a trailing minimum over passes that swept every network, not the
+    // live length: tokens sit right on the liquidity line and flicker across it, so the live
+    // figure moved 131-234 in one day and the build's floor-to-50 turned that into 62 band
+    // flips with nothing real behind them. A minimum can only under-claim, so "N+ tokens" is
+    // true at every moment of the window. Falls back to the live length for older snapshots.
+    chain: typeof snap.chain_count === 'number' ? snap.chain_count
+         : (Array.isArray(snap.chain) ? snap.chain.length : 0),
+    chain_live: Array.isArray(snap.chain) ? snap.chain.length : 0,
     chain_networks: Array.isArray(snap.chain)
       ? [...new Set(snap.chain.map((t) => t.network))].length : 0,
     note: "Current funding, open interest and 24h liquidations are free per coin. " +
