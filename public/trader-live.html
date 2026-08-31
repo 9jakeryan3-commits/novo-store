@@ -3242,12 +3242,17 @@ async function loadNovoChart(){
         const _el=document.getElementById('novo-chart');
         if(_el && _el.clientWidth>0){
           const _n=_view.candles.length;
-          // 1-min candles → bars == minutes. Desktop opens on the last 5 HOURS (300 bars, Jake 2026-08-20,
-          // up from 180 — the chart now owns the full right side, so it has the width to show them);
-          // mobile stays tighter at 75 (its narrow width can't show even 3h legibly).
+          // Opening windows widened 2026-08-31 (Jake): both maps were still tuned for the small-chart
+          // era. Desktop is a full terminal pane now — it opens on the whole regular session of 1m,
+          // a day and a half of 5m, three days of 15m, two weeks of hourly, nine months of daily,
+          // three years of weekly. Roughly 3px/bar at the widest window; don't push past that.
           const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
-          const _tfOpen={1:300,5:150,15:120,'1h':160,'1d':130,'1w':104};
-          const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : Math.ceil((_tfOpen[_ctbTf]||300)/4);
+          const _tfOpen={1:390,5:288,15:192,'1h':240,'1d':190,'1w':156};
+          // Mobile gets its own map, no longer desktop/4: two hours of 1m, a full session of 5m,
+          // two weeks of hourly, four-plus months of daily, two years of weekly. At 56dvh the bars
+          // have the vertical resolution to stay readable this thin; the 340px porthole didn't.
+          const _tfOpenM={1:120,5:96,15:80,'1h':96,'1d':90,'1w':104};
+          const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : (_tfOpenM[_ctbTf]||100);
           // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
           // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
           // candles ran under the level tags, which are ~100px wide. Scale it with the bar count instead
