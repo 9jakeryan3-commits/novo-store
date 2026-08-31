@@ -198,7 +198,7 @@ tframed = Image.new('RGBA', (_tf.width, 418), (0, 0, 0, 0))
 tframed.paste(_tf, (0, (418 - _tf.height) // 2))
 
 card('og-trader.png', 'Trader', 'The cockpit. Every dealer level,' + chr(10) + 'living on the candles.',
-     'CHARTING TERMINAL  ·  1m–WEEKLY  ·  THE THREE BOOKS  ·  24/5',
+     'CHARTING TERMINAL  ·  VOLUME PROFILE  ·  THE THREE BOOKS  ·  24/5',
      '$209/mo', '· includes Analyst', (0x34, 0xd3, 0x99), tframed)
 
 # ---- Plans: four lanes, no execution claims (replaces the hand-made three-lane card whose Trader
