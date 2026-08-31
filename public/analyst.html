@@ -263,9 +263,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      presentational hint, so without it each card renders at the capture's full
      1048px and overflows the 600px fan. */
   .ss-fan-card img { width: 100%; height: auto; display: block; }
-  .ss-fan-1 { transform: translateX(-18%) rotate(7deg); z-index: 3; }
-  .ss-fan-2 { transform: translateX(-50%) rotate(0deg); z-index: 2; }
-  .ss-fan-3 { transform: translateX(-82%) rotate(-7deg); z-index: 1; }
+  .ss-fan-card { width: 55%; }
+  .ss-fan-1 { transform: translateX(-12%) rotate(8deg); z-index: 4; }
+  .ss-fan-2 { transform: translateX(-37%) rotate(3deg); z-index: 3; }
+  .ss-fan-3 { transform: translateX(-63%) rotate(-3deg); z-index: 2; }
+  .ss-fan-4 { transform: translateX(-88%) rotate(-8deg); z-index: 1; }
   .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: translateX(-50%) translateY(-16px) rotate(0deg) scale(1.05); z-index: 5; box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
   /* Mobile: keep the SAME fanned/overlapping stack (not a flat vertical list); tap a card to bring it forward */
   /* Mobile: STACK, do not fan. At 76% card width a translateX(-74%) card starts ~30px
@@ -277,7 +279,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
               display: flex; flex-direction: column; gap: 16px; }
     .ss-fan-card { position: static; top: auto; left: auto; width: 100%;
                    transform: none !important; box-shadow: 0 14px 44px rgba(0,0,0,.5); }
-    .ss-fan-1, .ss-fan-2, .ss-fan-3 { transform: none; z-index: auto; }
+    .ss-fan-1, .ss-fan-2, .ss-fan-3, .ss-fan-4 { transform: none; z-index: auto; }
     .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: none !important; box-shadow: 0 22px 60px rgba(0,0,0,.7); }
   }
   @media(max-width:600px) { .ss-mobile-row > div { flex-basis: 82%; max-width: 82%; } }
@@ -704,6 +706,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
           <img src="/screenshots/analyst-dash-3.webp?v=5" width="1571" height="1048" alt="Analyst dashboard &mdash; the live sweeps &amp; blocks print tape with sweep bias and aggressor-tagged prints, the &lsquo;today looks like&hellip;&rsquo; historical analogues with how each resolved, and &lsquo;The Line&rsquo; level-break playbooks firing in real time" decoding="async" loading="lazy">
         </figure>
+        <figure class="ss-fan-card ss-fan-4" tabindex="0">
+          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; today&rsquo;s read</span></div>
+          <img src="/screenshots/analyst-dash-4-read.webp?v=1" width="1571" height="1044" alt="Today&rsquo;s Read on the Analyst dashboard &mdash; a full pre-market primer: the bottom line, the setup, dealer positioning and levels to watch, then the dealer map for SPY, QQQ and IWM with net GEX, flip, gravity, walls, historical resolution rates with sample sizes, expected moves, skew and IV rank" decoding="async" loading="lazy">
+        </figure>
       </div>
       <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the full dealer read with vanna &amp; charm, gamma by strike through the session, the flow and print tape, the analogues and the written read. Installs like an app on desktop &amp; mobile.</p>
     </div>
@@ -722,8 +728,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p style="font-size:14.5px;color:var(--txt1);line-height:1.7;font-weight:600;margin-bottom:10px;">SPY opens pinned inside a positive-gamma regime &mdash; dealers long, moves dampened.</p>
       <p style="font-size:14px;color:var(--txt2);line-height:1.75;">Net GEX sits at <b style="color:var(--txt1);">+$2.0B</b> with the flip down at <b style="color:var(--txt1);">752.48</b>, so expect a grind between the <b style="color:var(--green);">759 call wall</b> and the <b style="color:#f43f5e;">740 put wall</b> rather than a clean trend. The weekly expected move is <b style="color:var(--txt1);">&plusmn;1%</b>. While positive gamma holds, the band edges tend to get pulled back toward the middle; a decisive break below the flip is what turns chop into trend &mdash; that's the level that changes the map.</p>
     </div>
-    
-    <figure style="margin:20px 0 0;background:#0d0e10;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;box-shadow:0 12px 44px rgba(0,0,0,.45);"><div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; today&rsquo;s read, on the dashboard</span></div><img src="/screenshots/analyst-dash-4-read.webp?v=1" width="1571" height="1044" alt="Today&rsquo;s Read on the Analyst dashboard &mdash; a full pre-market primer: the bottom line, the setup, dealer positioning and levels to watch, then the dealer map for SPY, QQQ and IWM with net GEX, flip, gravity, walls, historical resolution rates with sample sizes, expected moves, skew and IV rank &mdash; the desk note as members see it" decoding="async" loading="lazy" style="display:block;width:100%;height:auto;"></figure>
     <div class="ai-grid" style="margin-top:20px;">
       <div class="ai-card"><div class="ai-card-label" style="color:#22d3ee;">In your inbox</div><h3>The Open &middot; The Close &middot; The Week Ahead</h3><p>A morning desk note, a closing read, and a Sunday week-ahead &mdash; each grounded in the live dealer map and this week's real catalysts, in plain English. And at 12:30 on trading days NoVo speaks first: a lunch-hour read on what the morning resolved to, dropped straight into the members chat.</p></div>
       <div class="ai-card green-top"><div class="ai-card-label green">Real-time</div><h3>&lsquo;The Line&rsquo; level-break playbooks</h3><p>When SPY, QQQ or IWM breaks or reclaims a MAJOR level, an instant hold-or-break playbook lands on your dashboard &mdash; for whichever ticker you&rsquo;re watching. The same deterministic read every time.</p></div>
