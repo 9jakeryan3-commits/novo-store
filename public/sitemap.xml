@@ -946,8 +946,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/buyers-checklist-0dte-execution-tools.html</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://novo-options.trade/journal/buyers-checklist-0dte-trading-tools.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1866,11 +1866,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/execution-algos-and-slicing-an-order.html</loc>
-    <lastmod>2026-08-30</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/execution-speed-as-edge.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
@@ -2446,8 +2441,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/how-novo-decides-executes-exits.html</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://novo-options.trade/journal/how-novo-builds-a-read.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -4333,6 +4328,11 @@
   <url>
     <loc>https://novo-options.trade/journal/skew-shift-scalp.html</loc>
     <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/slicing-an-order.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -6331,13 +6331,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/why-spy-and-the-dte-dial.html</loc>
+    <loc>https://novo-options.trade/journal/why-spy-pins-round-numbers.html</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/why-spy-pins-round-numbers.html</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://novo-options.trade/journal/why-spy-qqq-iwm.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -6421,8 +6421,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/your-money-your-keys.html</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://novo-options.trade/journal/your-money-your-broker.html</loc>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
