@@ -1420,7 +1420,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask header{padding:13px 16px;gap:11px}
   #novo-ask header b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
     background:var(--askacc);margin-right:8px;box-shadow:0 0 10px var(--askacc);vertical-align:1px}
-  #novo-ask .x{font-size:22px;padding:2px 6px;border-radius:9px}
+  #novo-ask .x{padding:5px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
   #novo-ask .x:hover{color:#eaf3ff;background:rgba(255,255,255,.06)}
   #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}
   #novo-ask input{border-radius:12px;padding:11px 13px;font-size:14px}
@@ -1472,7 +1472,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
-    <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize">&#x2304;</button>
+    <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
   </header>
   <div class="log" id="novo-ask-log">
     <div class="intro">
