@@ -421,6 +421,36 @@
       "source": "/journal/what-runs-laptop-closed.html",
       "destination": "/trader",
       "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-spotgamma",
+      "destination": "/journal/spotgamma-alternative.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-spotgamma.html",
+      "destination": "/journal/spotgamma-alternative.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-menthorq",
+      "destination": "/journal/menthorq-alternative.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-menthorq.html",
+      "destination": "/journal/menthorq-alternative.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-unusual-whales",
+      "destination": "/journal/unusual-whales-alternative.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-vs-unusual-whales.html",
+      "destination": "/journal/unusual-whales-alternative.html",
+      "permanent": true
     }
   ],
   "rewrites": [
