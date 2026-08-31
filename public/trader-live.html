@@ -1828,6 +1828,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low">Fib</button>
             <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;</button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;</button>
+            <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;</button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
@@ -1835,6 +1836,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tog="ema" title="EMA 9 / 21">EMA</button>
             <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels">LVLS</button>
             <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram">VOL</button>
+            <button type="button" class="ctb-btn" data-tog="ha" title="Heikin Ashi candles">HA</button>
+            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber">VP</button>
           </div>
           <span id="ctb-hint" class="ctb-hint"></span>
         </div>
@@ -1842,6 +1845,30 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       </div>
       <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
 
+      <style>
+        /* SPLIT VIEW (2026-08-31, Jake picked it from the chart-features list). #novo-chart gets
+           re-parented into #chart-split at init; the wrapper takes over the card's flex role so the
+           single-pane geometry is IDENTICAL to before (mobile 56dvh rule still targets #novo-chart
+           directly and still wins). Desktop-wide only — two panes under 1100px is two postage stamps. */
+        #chart-split { display: flex; gap: 8px; min-height: 0; }
+        /* !important + child selectors: `#card-spy #novo-chart { flex:1 1 auto }` (two ids) otherwise
+           outranks this, basis:auto resolves to the inline width:100%, and pane 2 collapses to 0px. */
+        #chart-split > #novo-chart, #chart-split > #novo-chart2 { min-width: 0; flex: 1 1 0 !important; width: auto !important; }
+        #card-spy #chart-split { flex: 1 1 auto; min-height: 0; }
+        #card-spy #chart-split > #novo-chart, #card-spy #chart-split > #novo-chart2 { height: auto !important; align-self: stretch; }
+        #novo-chart2 { display: none; position: relative; border-radius: 7px; overflow: hidden;
+          border: 1px solid var(--bdr2); background: rgba(0,0,0,0.25); box-shadow: 0 1px 6px rgba(0,0,0,0.25); }
+        #ctb-split { display: none; }
+        @media (min-width: 1100px) { #ctb-split { display: inline-block; } }
+        #c2-head { position: absolute; top: 8px; left: 10px; z-index: 12; display: flex; gap: 6px;
+          align-items: baseline; pointer-events: auto; font-family: var(--font); }
+        #c2-head .c2-tk { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: var(--txt2); }
+        #c2-head .c2-px { font-size: 12px; font-weight: 700; color: var(--txt1); font-variant-numeric: tabular-nums; }
+        #c2-head .c2-pill { font-size: 9px; font-weight: 700; letter-spacing: .8px; padding: 2px 7px;
+          border: 1px solid var(--bdr); border-radius: 4px; background: rgba(255,255,255,.03);
+          color: var(--txt3); cursor: pointer; }
+        #c2-head .c2-pill:hover { color: var(--txt1); border-color: rgba(255,255,255,.2); }
+      </style>
       <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
       <!-- Vendored (2026-08-31): this was the last third-party dependency on the chart's critical
            path. A flaky unpkg fetch at app open left window.LightweightCharts undefined FOREVER —
@@ -2311,7 +2338,7 @@ function connectTelemetry(){
     if(!_selIsExec()) return;
     var e=document.getElementById('t-spy'); if(e) e.textContent='$'+spy.toFixed(2);
     try{
-      if(_novoTipLive && _novoSeries && _novoLastCandle && _novoLastCandle.time){
+      if(_novoTipLive && !_ctbTog.ha && _novoSeries && _novoLastCandle && _novoLastCandle.time){
         var _ref=_novoLastCandle.open||_novoLastCandle.close||0;   // reject a tip >0.6% off the bar open (frozen/bad-tick guard)
         if(_ref>0 && Math.abs(spy/_ref-1)<=0.006){
           _novoLastCandle.close=spy;
@@ -2829,13 +2856,13 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false};
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  ['vwap','ema','lvl','vol','ha','vp'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes) — so one
@@ -2945,11 +2972,16 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
     try{ _showVeil(); _paintWm(); }catch(_e){}
     _paintCtb(); loadNovoChart();
+    try{ _c2Key=''; _c2Ranged=false; _c2Run(); }catch(_e){}   // the split pane follows the main TF
   });
 });
 document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
   b.addEventListener('click',function(){
     var k=b.getAttribute('data-tog'); _ctbTog[k]=!_ctbTog[k]; _ctbSave(); _paintCtb(); _applyTogVis();
+    // HA and VP change what is DRAWN, not a series' visibility — force a full setData repaint
+    // (glitch-guard reset; _novoRanged stays latched so the viewer's pan/zoom is never fought).
+    if(k==='ha'||k==='vp'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
+    if(k==='ha'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language
   });
 });
 
@@ -3064,9 +3096,9 @@ function _fmtVol(v){
 }
 function _renderLegend2(bar){
   var el=document.getElementById('chart-legend2'); if(!el) return;
-  var cs=_novoViewC; if(!cs||!cs.length){ el.textContent=''; return; }
+  var cs=(_ctbTog.ha&&_novoHaC)?_novoHaC:_novoViewC; if(!cs||!cs.length){ el.textContent=''; return; }
   var b=bar||cs[cs.length-1];
-  var i=_novoViewMap&&bar?cs.indexOf(bar):cs.length-1;   // prev close for the hovered bar's change
+  var i=bar?cs.indexOf(bar):cs.length-1;   // prev close for the hovered bar's change
   var prev=(i>0)?cs[i-1].close:b.open;
   var chg=prev?(b.close-prev)/prev*100:0, up=b.close>=prev;
   el.innerHTML='<span class="dim">'+_fmtBarTime(b.time)+'</span>'+
@@ -3138,6 +3170,203 @@ const _sessShade={
     }];
   }
 };
+// ── Heikin Ashi (2026-08-31, Jake) ────────────────────────────────────────────────────────────
+// Derived at paint time from the raw bars. _novoViewC stays RAW always — the read chip, dealer
+// levels and the volume profile measure the real tape; only the DRAWN bars (and the legend that
+// describes them) switch. The WS tip glide is disabled in HA mode: gliding a raw close onto a
+// derived bar paints a candle that belongs to neither series.
+let _novoHaC=null,_novoHaMap=null;
+function _haView(cands){
+  var out=[],pO=0,pC=0;
+  for(var i=0;i<cands.length;i++){
+    var c=cands[i];
+    var hc=(c.open+c.high+c.low+c.close)/4;
+    var ho=i?(pO+pC)/2:(c.open+c.close)/2;
+    out.push({time:c.time,open:+ho.toFixed(2),high:+Math.max(c.high,ho,hc).toFixed(2),
+              low:+Math.min(c.low,ho,hc).toFixed(2),close:+hc.toFixed(2),v:c.v||0});
+    pO=ho; pC=hc;
+  }
+  return out;
+}
+// ── Session Volume Profile (2026-08-31, Jake) ─────────────────────────────────────────────────
+// Today's volume bucketed by price, drawn as right-anchored bars behind the candles — volume
+// nodes land next to the dealer walls, which is the point of having both on one pane. Each bar's
+// volume spreads evenly across the buckets its high–low range covers; the POC bucket is amber.
+// Intraday frames only, same rule as the session tint.
+let _svpData=null;
+function _svpCalc(){
+  _svpData=null;
+  if(!_ctbTog.vp||typeof _ctbTf!=='number') return;
+  var cs=_novoViewC; if(!cs||cs.length<3) return;
+  var day=Math.floor(cs[cs.length-1].time/86400);
+  var lo=Infinity,hi=-Infinity,sess=[];
+  for(var i=0;i<cs.length;i++){ var c=cs[i];
+    if(Math.floor(c.time/86400)!==day) continue;
+    sess.push(c); if(c.low<lo)lo=c.low; if(c.high>hi)hi=c.high;
+  }
+  if(sess.length<3||!(hi>lo)) return;
+  var n=Math.min(60,Math.max(24,Math.round((hi-lo)/0.10))), step=(hi-lo)/n, vols=new Array(n).fill(0);
+  sess.forEach(function(c){
+    var b1=Math.min(n-1,Math.max(0,Math.floor((c.low-lo)/step)));
+    var b2=Math.min(n-1,Math.max(0,Math.floor((c.high-lo)/step)));
+    var per=(c.v||0)/(b2-b1+1);
+    for(var b=b1;b<=b2;b++) vols[b]+=per;
+  });
+  var mx=0,poc=0; for(var b2i=0;b2i<n;b2i++){ if(vols[b2i]>mx){mx=vols[b2i];poc=b2i;} }
+  if(mx>0) _svpData={lo:lo,step:step,vols:vols,max:mx,poc:poc};
+}
+const _svpPrim={
+  _chart:null,_series:null,
+  attached:function(p){ this._chart=p.chart; this._series=p.series; },
+  detached:function(){ this._chart=null; this._series=null; },
+  updateAllViews:function(){},
+  paneViews:function(){
+    var self=this;
+    return [{
+      zOrder:function(){ return 'bottom'; },
+      renderer:function(){ return { draw:function(target){
+        try{
+          var d=_svpData; if(!d||!_ctbTog.vp||!self._series) return;
+          target.useBitmapCoordinateSpace(function(scope){
+            var ctx=scope.context, W=scope.bitmapSize.width, pr=scope.verticalPixelRatio;
+            var maxW=W*0.22;
+            for(var b=0;b<d.vols.length;b++){
+              if(!d.vols[b]) continue;
+              var y1=self._series.priceToCoordinate(d.lo+(b+1)*d.step);
+              var y2=self._series.priceToCoordinate(d.lo+b*d.step);
+              if(y1===null||y2===null) continue;
+              var w=d.vols[b]/d.max*maxW;
+              ctx.fillStyle=(b===d.poc)?'rgba(245,158,11,0.30)':'rgba(148,163,184,0.10)';
+              ctx.fillRect(W-w, y1*pr+0.5, w, Math.max(1,(y2-y1)*pr-1));
+            }
+          });
+        }catch(_e){}
+      } }; }
+    }];
+  }
+};
+// ── SPLIT VIEW (2026-08-31, Jake) ─────────────────────────────────────────────────────────────
+// A second ticker in a pane beside the main chart. Deliberately a MINI pane: candles at the same
+// timeframe + the four dealer lines (flip/walls/gravity) + price. Drawings, SVP, markers and the
+// tip glide stay on the main pane — the split answers "what is the other index doing against ITS
+// structure", not "give me two full cockpits". Desktop-wide only; follows the main TF; its loop
+// is re-armable and supervised like every other lane.
+let _splitTkr=''; try{ _splitTkr=localStorage.getItem('novo_split')||''; }catch(_e){}
+let _c2chart=null,_c2series=null,_c2lines=[],_c2Key='',_c2Ranged=false,_c2HistC={};
+const _C2_TKRS=['SPY','QQQ','IWM'];
+function _splitOn(){ return !!_splitTkr && !!(window.matchMedia&&window.matchMedia('(min-width: 1100px)').matches); }
+function _c2Others(){ return _C2_TKRS.filter(function(t){ return t!==_selTkr(); }); }
+function _c2Head(px){
+  var el2=document.getElementById('novo-chart2'); if(!el2) return;
+  var h=document.getElementById('c2-head');
+  if(!h){ h=document.createElement('div'); h.id='c2-head'; el2.appendChild(h); }
+  var pills=_c2Others().filter(function(t){ return t!==_splitTkr; })
+    .map(function(t){ return '<span class="c2-pill" data-c2tk="'+t+'">'+t+'</span>'; }).join('');
+  h.innerHTML='<span class="c2-tk">'+_splitTkr+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'</span>'
+    +(px?'<span class="c2-px">$'+(+px).toFixed(2)+'</span>':'')+pills;
+  h.querySelectorAll('.c2-pill').forEach(function(p){
+    p.addEventListener('click',function(){ _splitTkr=p.getAttribute('data-c2tk');
+      try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){}
+      _c2Key=''; _c2Ranged=false; _c2Run(); });
+  });
+}
+function _c2Init(){
+  if(_c2series) return true;
+  if(!window.LightweightCharts) return false;
+  var el2=document.getElementById('novo-chart2'); if(!el2) return false;
+  _c2chart=LightweightCharts.createChart(el2,{
+    autoSize:true,
+    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit'},
+    grid:{vertLines:{color:'rgba(255,255,255,0.035)'},horzLines:{color:'rgba(255,255,255,0.035)'}},
+    rightPriceScale:{borderColor:'rgba(255,255,255,0.08)'},
+    timeScale:{borderColor:'rgba(255,255,255,0.08)',timeVisible:true,secondsVisible:false,rightOffset:6},
+    crosshair:{mode:LightweightCharts.CrosshairMode.Normal}
+  });
+  _c2series=_c2chart.addCandlestickSeries({upColor:'#34d399',downColor:'#f43f5e',
+    borderUpColor:'#34d399',borderDownColor:'#f43f5e',wickUpColor:'#34d399',wickDownColor:'#f43f5e'});
+  return true;
+}
+async function _c2Load(){
+  if(!_splitOn()) return;
+  if(_splitTkr===_selTkr()){ _splitTkr=_c2Others()[0]; try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){} }
+  var tk=_splitTkr, candles=null, lvls=null, px=null;
+  var u=NOVO_URL('/api/spy-chart'); if(!u) return;
+  if(_isDeepTf()){
+    var key=tk+':'+_ctbTf, hc=_c2HistC[key];
+    if(hc && (Date.now()-hc.ts)<60000){ candles=hc.c; }
+    else{
+      var r2=await _tfetch(NOVO_URL('/api/chart-history')+'&ticker='+encodeURIComponent(tk)+'&tf='+_ctbTf,15000);
+      if(!r2.ok){ _reauth401(r2); return; }
+      var d2=await r2.json();
+      if(d2.ticker!==tk||d2.tf!==_ctbTf) return;
+      candles=d2.candles||[]; _c2HistC[key]={ts:Date.now(),c:candles};
+    }
+    var B=(_abData&&_abData.board)?_abData.board[tk]:null;
+    if(B) lvls={FLIP:B.flip,CW:B.call_wall,PW:B.put_wall,GRAV:B.gravity};
+    px=B?B.spot:null;
+  } else {
+    var r=await _tfetch(u+'&ticker='+encodeURIComponent(tk)); if(!r.ok){ _reauth401(r); return; }
+    var d=await r.json();
+    if(d.ticker && d.ticker!==tk) return;
+    if(tk!==_splitTkr) return;                       // switched mid-flight
+    candles=_tfView(d).candles;
+    var L=d.levels||{}; lvls={FLIP:L.FLIP,CW:L.CW,PW:L.PW,GRAV:L.GRAV};
+    px=d.price;
+  }
+  if(!candles||!candles.length) return;
+  if(!_c2Init()) return;
+  if(_ctbTog.ha) candles=_haView(candles);           // the two panes must speak the same bar language
+  _c2series.setData(candles);
+  _c2lines.forEach(function(l){ try{ _c2series.removePriceLine(l); }catch(_e){} });
+  _c2lines=[];
+  var lc2={FLIP:'#22d3ee',CW:'#34d399',PW:'#f43f5e',GRAV:'#3b82f6'};
+  var tl2={FLIP:'FLIP',CW:'CALL WALL',PW:'PUT WALL',GRAV:'GRAVITY'};
+  for(var k in (lvls||{})){
+    var v=+lvls[k];
+    if(v>0) _c2lines.push(_c2series.createPriceLine({price:v,color:lc2[k],lineWidth:1,
+      axisLabelVisible:true,title:tl2[k]}));
+  }
+  var key2=tk+':'+_ctbTf;
+  if(key2!==_c2Key){ _c2Key=key2; _c2Ranged=false; }
+  if(!_c2Ranged){
+    try{
+      var n=candles.length, ob=(_tfOpen&&_tfOpen[_ctbTf])||300, pad=Math.ceil(ob*0.08);
+      _c2chart.timeScale().applyOptions({rightOffset:pad});
+      _c2chart.timeScale().setVisibleLogicalRange({from:Math.max(0,n-ob),to:n+pad});
+      _c2Ranged=true;
+    }catch(_e){}
+  }
+  _c2Head(px);
+}
+function _c2Arm(ms){ clearTimeout(window._c2Timer); window._c2Timer=setTimeout(_c2Run, ms); }
+function _c2Run(){
+  if(!_splitOn()) return;                            // loop parks itself when the split closes
+  window._c2TickAt=Date.now();
+  Promise.resolve(_c2Load()).catch(function(){}).finally(function(){ if(_splitOn()) _c2Arm(4000); });
+}
+function _applySplit(){
+  var el=document.getElementById('novo-chart'), el2=document.getElementById('novo-chart2');
+  // One-time re-parent into the flex wrapper (see the #chart-split CSS beside the markup).
+  if(el && !document.getElementById('chart-split')){
+    var w=document.createElement('div'); w.id='chart-split';
+    el.parentNode.insertBefore(w, el); w.appendChild(el);
+    el2=document.createElement('div'); el2.id='novo-chart2'; w.appendChild(el2);
+  }
+  if(el2) el2.style.display=_splitOn()?'block':'none';
+  var b=document.getElementById('ctb-split'); if(b) b.classList.toggle('on',!!_splitTkr);
+  if(_splitOn()) _c2Run();
+}
+(function(){
+  var b=document.getElementById('ctb-split');
+  if(b) b.addEventListener('click',function(){
+    _splitTkr=_splitTkr?'':_c2Others()[0];
+    try{ localStorage.setItem('novo_split',_splitTkr); }catch(_e){}
+    _c2Key=''; _c2Ranged=false; _applySplit();
+  });
+})();
+// Boot AFTER the let-declarations above (a call before them lands in the TDZ and dies silently) —
+// builds the wrapper and, if a split was saved, restores it.
+try{ _applySplit(); }catch(_e){}
 function _showVeil(){
   var v=document.getElementById('chart-veil');
   if(v){
@@ -3199,6 +3428,7 @@ function _initNovoChart(){
     priceLineVisible:false,lastValueVisible:false});
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_sessShade); }catch(_e){}
+  try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_svpPrim); }catch(_e){}
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
   // Pro overlays: watermark, OHLCV legend, NoVo read chip, switch veil. Mounted here so the
@@ -3213,8 +3443,8 @@ function _initNovoChart(){
       vertLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'},
       horzLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'}}});
     _novoChart.subscribeCrosshairMove(function(param){
-      var bar=null;
-      if(param&&typeof param.time==='number'&&_novoViewMap) bar=_novoViewMap.get(param.time)||null;
+      var bar=null, _lm=(_ctbTog.ha&&_novoHaMap)?_novoHaMap:_novoViewMap;   // hover must describe the bars actually drawn
+      if(param&&typeof param.time==='number'&&_lm) bar=_lm.get(param.time)||null;
       _renderLegend2(bar);
     });
   }catch(_e){}
@@ -3279,18 +3509,24 @@ async function loadNovoChart(){
       if(_novoHasData && _firstT === _novoFirstT && _view.candles.length < _novoBarCount){
         return;
       }
+      // HA mode swaps only what is DRAWN. The transform is O(n) over ~3k bars — recomputed per
+      // paint so the steady-state update's last bar always carries the right derived open.
+      const _drawC = _ctbTog.ha ? _haView(_view.candles) : _view.candles;
       if(!_novoHasData || _firstT !== _novoFirstT || _view.candles.length > _novoBarCount+1){
-        _novoSeries.setData(_view.candles); _novoHasData=true;   // first load / new session / gap → full set
+        _novoSeries.setData(_drawC); _novoHasData=true;   // first load / new session / gap → full set
         if(_novoVolSeries) _novoVolSeries.setData(_view.candles.map(_volBar));
         if(_firstT !== _novoFirstT) _novoRanged=false;       // new session anchor → re-fit the opening window
       } else {
-        _novoSeries.update(_view.candles[_view.candles.length-1]);   // steady state → smooth-update the forming candle
+        _novoSeries.update(_drawC[_drawC.length-1]);   // steady state → smooth-update the forming candle
         if(_novoVolSeries) _novoVolSeries.update(_volBar(_view.candles[_view.candles.length-1]));
       }
       _novoFirstT = _firstT;
       _novoBarCount = _view.candles.length;
       _novoViewC = _view.candles;
       _novoViewMap = new Map(_view.candles.map(function(c){ return [c.time, c]; }));
+      _novoHaC = _ctbTog.ha ? _drawC : null;
+      _novoHaMap = _ctbTog.ha ? new Map(_drawC.map(function(c){ return [c.time, c]; })) : null;
+      try{ _svpCalc(); }catch(_e){}
       var _veil=document.getElementById('chart-veil'); if(_veil) _veil.classList.remove('on');
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
       try{ _renderChip(); }catch(_e){}
@@ -3497,6 +3733,7 @@ function _laneCheck(kick){
     //    is dead (thrown outside its try, killed by a frozen renderer, anything) — re-arm it.
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
+    if(_splitOn() && (kick || now-(window._c2TickAt||0)>30000)) _c2Run();
   }catch(_e){}
   try{
     // 3) The WS. CLOSED/missing -> full re-handshake + reconnect (the old ticket is suspect by
