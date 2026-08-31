@@ -470,6 +470,51 @@ tr:last-child td{border-bottom:none}
   #novo-ask input:focus{border-color:#a78bfa}
   #novo-ask button.go{background:#a78bfa;border:0;border-radius:var(--r-2);color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
+
+  /* ── chat, upgraded: full-screen on mobile, a thread that reads like a product ── */
+  #novo-ask{--askacc:#a78bfa}
+  #novo-ask .log{padding:16px 16px 10px;gap:14px}
+  #novo-ask .log::-webkit-scrollbar{width:8px}
+  #novo-ask .log::-webkit-scrollbar-thumb{background:rgba(128,148,168,.28);border-radius:99px}
+  #novo-ask .log::-webkit-scrollbar-track{background:transparent}
+  /* NoVo's turns get a quiet card of their own — who said what reads at a glance, and long
+     answers stop looking like raw page text. */
+  #novo-ask .m:not(.you):not(.think){background:rgba(255,255,255,.032);
+    border:1px solid rgba(255,255,255,.07);border-radius:14px 14px 14px 5px;
+    padding:11px 14px;max-width:min(94%,760px);box-shadow:0 1px 2px rgba(0,0,0,.22)}
+  #novo-ask .m{font-size:13.75px;line-height:1.7}
+  #novo-ask .src{border-top:0;padding:0 2px;margin-top:-7px;font-size:10.5px;opacity:.85;
+    max-width:min(94%,760px)}
+  #novo-ask header{padding:13px 16px;gap:11px}
+  #novo-ask header b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--askacc);margin-right:8px;box-shadow:0 0 10px var(--askacc);vertical-align:1px}
+  #novo-ask .x{font-size:22px;padding:2px 6px;border-radius:9px}
+  #novo-ask .x:hover{color:#eaf3ff;background:rgba(255,255,255,.06)}
+  #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}
+  #novo-ask input{border-radius:12px;padding:11px 13px;font-size:14px}
+  #novo-ask button.go{border-radius:12px;padding:0 18px;height:41px;font-size:14px}
+  /* The empty-thread welcome: an intro with a headline, and suggestion chips that look like an
+     invitation rather than a settings list. They leave with the first message; the one-line quick
+     row above the composer carries suggestions from then on. */
+  #novo-ask .intro{padding:6px 2px 0}
+  #novo-ask .intro::before{content:'Ask the desk.';display:block;font-size:15px;font-weight:800;
+    color:#eaf3ff;letter-spacing:-.01em;margin-bottom:7px}
+  #novo-ask .chips{gap:8px;margin-top:14px}
+  #novo-ask .chips button{border-radius:999px;padding:8px 13px;font-size:12px;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035);color:var(--txt2,#9fb6d1);
+    transition:border-color .15s,color .15s}
+  #novo-ask .chips button:hover{border-color:var(--askacc);color:#eaf3ff}
+  /* Mobile: the chat IS the screen. No sheet floating over a half-visible page — inset zero,
+     square corners, the composer padded clear of the home bar, and one chevron to minimize. */
+  @media (max-width:720px){
+    #novo-ask{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
+      border-radius:0;border:0}
+    #novo-ask header{padding-top:calc(13px + env(safe-area-inset-top,0px))}
+    #novo-ask .m.you{max-width:86%}
+    #novo-ask .m:not(.you):not(.think){max-width:96%}
+    html.novo-ask-lock, html.novo-ask-lock body{overflow:hidden;overscroll-behavior:none}
+  }
+
 /* Below ~375px the bar is wider than the phone. Nothing is dropped - the type tightens. */
 @media(max-width:374px){
   header{gap:8px;padding:8px 10px}
@@ -566,7 +611,7 @@ tr:last-child td{border-bottom:none}
       <span>AI market analyst</span>
     </div>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
-    <button class="x" onclick="novoAskOpen(0)" aria-label="Close">&times;</button>
+    <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize">&#x2304;</button>
   </header>
   <div class="log" id="novo-ask-log">
     <div class="intro">
@@ -1505,6 +1550,8 @@ window.addEventListener('hashchange', function(){
   var busy = false;
   window.novoAskOpen = function(on){
     document.getElementById('novo-ask').classList.toggle('on', !!on);
+    // Full-screen on mobile means the page behind must not scroll underneath.
+    try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
     var _b = document.getElementById('novo-ask-bubble');
     _b.style.display = on ? 'none' : 'flex';
     // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
