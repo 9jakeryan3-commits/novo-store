@@ -1829,6 +1829,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;</button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;</button>
             <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;</button>
+            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;</button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
@@ -1868,6 +1869,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           border: 1px solid var(--bdr); border-radius: 4px; background: rgba(255,255,255,.03);
           color: var(--txt3); cursor: pointer; }
         #c2-head .c2-pill:hover { color: var(--txt1); border-color: rgba(255,255,255,.2); }
+        /* CANVAS SETTINGS (2026-08-31, Jake circled TradingView's scale menu): the price-scale
+           modes lightweight-charts actually has — auto-fit, regular/log/percent/indexed, invert. */
+        #scale-menu { position: absolute; top: 8px; right: 66px; z-index: 30; display: none;
+          background: #17171a; border: 1px solid var(--bdr); border-radius: 10px; padding: 5px;
+          box-shadow: 0 18px 50px rgba(0,0,0,.6); min-width: 190px; font-family: var(--sans); }
+        #scale-menu.open { display: block; }
+        #scale-menu .sm-i { display: flex; align-items: center; gap: 9px; padding: 8px 11px;
+          border-radius: 7px; font-size: 11.5px; font-weight: 600; color: var(--txt2); cursor: pointer; }
+        #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
+        #scale-menu .sm-c { width: 12px; flex: 0 0 12px; color: var(--cyn); font-weight: 800; }
+        #scale-menu .sm-sep { height: 1px; background: var(--bdr2); margin: 4px 6px; }
       </style>
       <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
       <!-- Vendored (2026-08-31): this was the last third-party dependency on the chart's critical
@@ -2862,7 +2874,11 @@ try{
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
   ['vwap','ema','lvl','vol','ha','vp'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp})); }catch(_e){} }
+// Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
+// — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
+let _scaleCfg={m:0,inv:false};
+try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; }catch(_e){}
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,sm:_scaleCfg.m,inv:_scaleCfg.inv})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes) — so one
@@ -3284,6 +3300,7 @@ function _c2Init(){
   });
   _c2series=_c2chart.addCandlestickSeries({upColor:'#34d399',downColor:'#f43f5e',
     borderUpColor:'#34d399',borderDownColor:'#f43f5e',wickUpColor:'#34d399',wickDownColor:'#f43f5e'});
+  try{ _applyScale(); }catch(_e){}   // pane 2 speaks the same scale as pane 1, always
   return true;
 }
 async function _c2Load(){
@@ -3364,6 +3381,62 @@ function _applySplit(){
     _c2Key=''; _c2Ranged=false; _applySplit();
   });
 })();
+// ── CANVAS SETTINGS MENU (2026-08-31, Jake) ───────────────────────────────────────────────────
+// The scale controls the library actually has, on a ⚙ in the toolbar: auto-fit, reset view,
+// regular/log/percent/indexed-to-100, invert. Applies to BOTH panes — a split where one side is
+// log and the other linear is a comparison lying to you.
+function _applyScale(){
+  var o={mode:_scaleCfg.m, invertScale:_scaleCfg.inv};
+  try{ if(_novoChart) _novoChart.priceScale('right').applyOptions(o); }catch(_e){}
+  try{ if(_c2chart) _c2chart.priceScale('right').applyOptions(o); }catch(_e){}
+}
+function _scaleMenuRender(){
+  var m=document.getElementById('scale-menu'); if(!m) return;
+  var auto=true; try{ auto=_novoChart.priceScale('right').options().autoScale!==false; }catch(_e){}
+  var rows=[
+    {k:'auto', lbl:'Auto — fit price to data', c:auto},
+    {k:'reset',lbl:'Reset view', c:false},
+    {sep:1},
+    {k:'m0', lbl:'Regular',        c:_scaleCfg.m===0},
+    {k:'m1', lbl:'Logarithmic',    c:_scaleCfg.m===1},
+    {k:'m2', lbl:'Percent',        c:_scaleCfg.m===2},
+    {k:'m3', lbl:'Indexed to 100', c:_scaleCfg.m===3},
+    {sep:1},
+    {k:'inv', lbl:'Invert scale',  c:_scaleCfg.inv},
+  ];
+  m.innerHTML=rows.map(function(r){
+    if(r.sep) return '<div class="sm-sep"></div>';
+    return '<div class="sm-i" data-sk="'+r.k+'"><span class="sm-c">'+(r.c?'&#10003;':'')+'</span>'+r.lbl+'</div>';
+  }).join('');
+  m.querySelectorAll('.sm-i').forEach(function(it){
+    it.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var k=it.getAttribute('data-sk');
+      if(k==='auto'){ try{ _novoChart.priceScale('right').applyOptions({autoScale:true}); }catch(_e){}
+        try{ if(_c2chart) _c2chart.priceScale('right').applyOptions({autoScale:true}); }catch(_e){} }
+      else if(k==='reset'){ try{ _novoChart.priceScale('right').applyOptions({autoScale:true}); }catch(_e){}
+        _novoRanged=false; _c2Ranged=false; loadNovoChart(); try{ _c2Run(); }catch(_e){} }
+      else if(k==='inv'){ _scaleCfg.inv=!_scaleCfg.inv; _ctbSave(); _applyScale(); }
+      else { _scaleCfg.m=+k.slice(1); _ctbSave(); _applyScale(); }
+      _scaleMenuRender();   // repaint checks; the menu stays open for a second tweak
+    });
+  });
+}
+(function(){
+  var b=document.getElementById('ctb-scale'); if(!b) return;
+  b.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    var el=document.getElementById('novo-chart'); if(!el) return;
+    var m=document.getElementById('scale-menu');
+    if(!m){ m=document.createElement('div'); m.id='scale-menu'; el.style.position='relative'; el.appendChild(m); }
+    var open=!m.classList.contains('open');
+    m.classList.toggle('open',open);
+    if(open) _scaleMenuRender();
+  });
+  document.addEventListener('click',function(){
+    var m=document.getElementById('scale-menu'); if(m) m.classList.remove('open');
+  });
+})();
 // Boot AFTER the let-declarations above (a call before them lands in the TDZ and dies silently) —
 // builds the wrapper and, if a split was saved, restores it.
 try{ _applySplit(); }catch(_e){}
@@ -3408,8 +3481,11 @@ function _initNovoChart(){
         // The VISIBLE span is this range divided by (1 - top - bottom margin), so to land
         // on a $5/$6 window we must ask for a proportionally SMALLER range. Getting this
         // wrong is what made the "$5 lock" open at $8.
+        // The readable-span floor is a DOLLAR span — it only means anything on the regular scale.
+        // In log/percent/indexed modes the library transforms the range itself; forcing a $ floor
+        // there fights the transform, so those modes autoscale untouched (levels still expand).
         const span=mx-mn, _min=_novoMinSpan()*(1-2*_NOVO_SCALE_PAD);
-        if(isFinite(span) && span<_min){
+        if(_scaleCfg.m===0 && isFinite(span) && span<_min){
           const mid=(mx+mn)/2, half=_min/2;
           mn=mid-half; mx=mid+half;
         }
@@ -3429,6 +3505,7 @@ function _initNovoChart(){
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_sessShade); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_svpPrim); }catch(_e){}
+  try{ _applyScale(); }catch(_e){}   // restore the persisted scale mode/invert
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
   // Pro overlays: watermark, OHLCV legend, NoVo read chip, switch veil. Mounted here so the

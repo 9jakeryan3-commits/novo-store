@@ -469,6 +469,10 @@
       "destination": "/track-record.html"
     },
     {
+      "source": "/week-ahead",
+      "destination": "/week-ahead.html"
+    },
+    {
       "source": "/tradingview",
       "destination": "/tradingview.html"
     },
