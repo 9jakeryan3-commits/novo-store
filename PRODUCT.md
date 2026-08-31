@@ -156,6 +156,15 @@ layer underneath. Nothing in this section appears on any free page.
 - **Ticker switcher (2026-08-30)** — SPY / QQQ / IWM pills in the chart hero; per-viewer, instant,
   no restart. Candles, VWAP, EMAs, session levels and dealer levels all follow the selection; the
   Market Intel strip still describes the engine’s ticker (named in the nav pill)
+- **Charting terminal (2026-08-30 late)** — six timeframes (1m/5m/15m client-agg; 1H/D/W off the
+  engine’s dxFeed history lanes: ~9.5 months hourly incl. 24/5 overnight sessions, 10y daily, 15y
+  weekly); drawing tools (h-line/trendline/fib/measure, persisted per ticker); volume histogram;
+  TradingView-style extended-hours shading; OHLCV crosshair legend; per-ticker read chip (net-GEX
+  sign + % from flip); ticker·frame watermark. Chart runs 24/5 including Sunday nights
+- **ANALYSIS tab** — Analysis Feed | NoVo’s written read side by side; ‘The Line’ level-break
+  playbook feed (per ticker); **The Three Books** — all three tickers’ dealer structure in one
+  table incl. put/call skew and the MM fast/slow hedging split; What NoVo Knows beneath. Market
+  Intel strip: full words across the whole bar, VIX far right
 - **Every level labelled in the pane** — gamma flip, call and put walls, gravity, expected-move
   bands, VWAP, opening range, and the pre-market / after-hours / prior-day highs and lows
 - **Structural audit rerun at the top of every hour** — macro bias, levels, patterns, thesis
