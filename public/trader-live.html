@@ -2931,9 +2931,9 @@ try{
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
-let _scaleCfg={m:0,inv:false};
-try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,sm:_scaleCfg.m,inv:_scaleCfg.inv})); }catch(_e){} }
+let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
+try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes) — so one
@@ -3478,8 +3478,11 @@ function _applySplit(){
 // log and the other linear is a comparison lying to you.
 function _applyScale(){
   var o={mode:_scaleCfg.m, invertScale:_scaleCfg.inv};
-  try{ if(_novoChart) _novoChart.priceScale('right').applyOptions(o); }catch(_e){}
-  try{ if(_c2chart) _c2chart.priceScale('right').applyOptions(o); }catch(_e){}
+  // Zoom anchor (2026-08-31, Jake): rightBarStaysOnScroll=true pins the newest bar — the wheel
+  // zooms "into the price" at the right edge; false is the library default, zoom around the cursor.
+  var t={rightBarStaysOnScroll:_scaleCfg.za};
+  try{ if(_novoChart){ _novoChart.priceScale('right').applyOptions(o); _novoChart.timeScale().applyOptions(t); } }catch(_e){}
+  try{ if(_c2chart){ _c2chart.priceScale('right').applyOptions(o); _c2chart.timeScale().applyOptions(t); } }catch(_e){}
 }
 function _scaleMenuRender(){
   var m=document.getElementById('scale-menu'); if(!m) return;
@@ -3494,6 +3497,9 @@ function _scaleMenuRender(){
     {k:'m3', lbl:'Indexed to 100', c:_scaleCfg.m===3},
     {sep:1},
     {k:'inv', lbl:'Invert scale',  c:_scaleCfg.inv},
+    {sep:1},
+    {k:'zc', lbl:'Zoom to cursor', c:!_scaleCfg.za},
+    {k:'zp', lbl:'Zoom to price',  c:_scaleCfg.za},
   ];
   m.innerHTML=rows.map(function(r){
     if(r.sep) return '<div class="sm-sep"></div>';
@@ -3508,6 +3514,7 @@ function _scaleMenuRender(){
       else if(k==='reset'){ try{ _novoChart.priceScale('right').applyOptions({autoScale:true}); }catch(_e){}
         _novoRanged=false; _c2Ranged=false; loadNovoChart(); try{ _c2Run(); }catch(_e){} }
       else if(k==='inv'){ _scaleCfg.inv=!_scaleCfg.inv; _ctbSave(); _applyScale(); }
+      else if(k==='zc'||k==='zp'){ _scaleCfg.za=(k==='zp'); _ctbSave(); _applyScale(); }
       else { _scaleCfg.m=+k.slice(1); _ctbSave(); _applyScale(); }
       _scaleMenuRender();   // repaint checks; the menu stays open for a second tweak
     });
