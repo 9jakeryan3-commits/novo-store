@@ -65,8 +65,16 @@ function get(url) {
   // Floored rather than rounded, and given a plus, so the claim is true across the whole range
   // instead of exact for one pass -- and under-claiming is the safe direction to be wrong in when
   // the number is telling someone how much they get.
+  // Read `chain_smoothed`, NOT `chain`. Flooring to a fifty was not enough on its own: the live
+  // count genuinely ranges 131-234 across a day, which straddles the 200 edge, so the baked claim
+  // still flipped 150+/200+ -- 62 band changes in 24 hours, replayed across all 373 collector
+  // passes, with nothing real behind them. `chain_smoothed` is the LOWEST count over collector
+  // passes that swept every network in a trailing window, so it cannot over-claim and a failed
+  // per-network fetch cannot drag it down as if the map had shrunk. Same day, same data: 9 flips.
+  // `chain` stays the exact live figure for coin-count.js, which must reconcile with the dashboard.
   const CHAIN_STEP = 50;
-  const chain = Math.floor((Number(feed.chain) || 0) / CHAIN_STEP) * CHAIN_STEP;
+  const chainRaw = Number(feed.chain_smoothed ?? feed.chain) || 0;
+  const chain = Math.floor(chainRaw / CHAIN_STEP) * CHAIN_STEP;
 
   // The COMBINED figure -- coins plus on-chain tokens -- which is the number the crypto dashboard
   // has shown all along: crypto-live.html sums its two rails for the filter box. The site used to
@@ -74,7 +82,7 @@ function get(url) {
   // tokens" there with no way to reconcile them. Same source, same arithmetic, floored the same
   // way, so the baked claim stays true across the range -- and coin-count.js swaps in the exact
   // live figure for anyone with JS.
-  const assets = Math.floor(((Number(feed.chain) || 0) + total) / CHAIN_STEP) * CHAIN_STEP;
+  const assets = Math.floor((chainRaw + total) / CHAIN_STEP) * CHAIN_STEP;
 
   // How many tools the analyst can actually call, counted off the declarations themselves.
   let tools = 0;
