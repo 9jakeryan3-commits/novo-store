@@ -7,7 +7,7 @@
   </url>
   <url>
     <loc>https://novo-options.trade/0dte</loc>
-    <lastmod>2026-08-30</lastmod>
+    <lastmod>2026-08-31</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -396,6 +396,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/changelog</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/compare/best-0dte-tools</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.7</priority>
@@ -427,6 +432,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/crypto</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/developers</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.8</priority>
   </url>
