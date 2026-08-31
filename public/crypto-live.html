@@ -1591,11 +1591,6 @@ window.addEventListener('hashchange', function(){
   function novoAskTyping(el){
     return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
-  document.addEventListener('keydown', function(e){
-    var panel = document.getElementById('novo-ask');
-    if (!panel) return;
-    var open = panel.classList.contains('on');
-
   // Desktop expand/restore — same full screen the phone gets, by choice, and remembered.
   window.novoAskMax = function(){
     var p = document.getElementById('novo-ask');
@@ -1618,6 +1613,11 @@ window.addEventListener('hashchange', function(){
       }
     } catch(_){}
   })();
+  document.addEventListener('keydown', function(e){
+    var panel = document.getElementById('novo-ask');
+    if (!panel) return;
+    var open = panel.classList.contains('on');
+
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); window.novoAskOpen(!open); return; }
     if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
     // "/" is a shortcut only when it is not a character someone is trying to type.
