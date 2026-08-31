@@ -110,7 +110,8 @@
          so the handshake is what actually starts them. */
       try { connectTelemetry(); } catch(_){
 }
-      try { loadNovoChart(); } catch(_){}
+            try { loadNovoChart(); } catch(_){}
+      try { _loadAnalysisBoard(); } catch(_){}   // the tab's cards paint the moment auth lands, not on the next poll tick
       try { window.brainTick(); } catch(_){}
     }
   });
@@ -2757,7 +2758,11 @@ async function _loadAnalysisBoard(){
   }catch(_e){}
 }
 _loadAnalysisBoard();
-(function _ab(){ Promise.resolve(_loadAnalysisBoard()).catch(function(){}).finally(function(){ setTimeout(_ab, 60000); }); })();
+// Fast lane until first paint: the parse-time call fires before the handshake has minted
+// NOVO_URL and returns empty, and a 60s retry left the ANALYSIS cards on em-dashes for up to a
+// minute (Jake, 2026-08-31: "takes sometimes 10 seconds or more"). Retry every 2s until the
+// first payload lands, then relax to the 60s cadence the data actually moves at.
+(function _ab(){ Promise.resolve(_loadAnalysisBoard()).catch(function(){}).finally(function(){ setTimeout(_ab, _abData?60000:2000); }); })();
 
 // ── Chart toolbar: timeframes, drawing tools, overlay toggles (2026-08-30) ────────────────────
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
