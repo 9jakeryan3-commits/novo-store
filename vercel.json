@@ -1,6 +1,56 @@
 {
   "redirects": [
     {
+      "source": "/journal/how-novo-decides-executes-exits.html",
+      "destination": "/journal/how-novo-builds-a-read.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/how-novo-decides-executes-exits",
+      "destination": "/journal/how-novo-builds-a-read.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/why-spy-and-the-dte-dial.html",
+      "destination": "/journal/why-spy-qqq-iwm.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/why-spy-and-the-dte-dial",
+      "destination": "/journal/why-spy-qqq-iwm.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/buyers-checklist-0dte-execution-tools.html",
+      "destination": "/journal/buyers-checklist-0dte-trading-tools.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/buyers-checklist-0dte-execution-tools",
+      "destination": "/journal/buyers-checklist-0dte-trading-tools.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/execution-algos-and-slicing-an-order.html",
+      "destination": "/journal/slicing-an-order.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/execution-algos-and-slicing-an-order",
+      "destination": "/journal/slicing-an-order.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/your-money-your-keys.html",
+      "destination": "/journal/your-money-your-broker.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/your-money-your-keys",
+      "destination": "/journal/your-money-your-broker.html",
+      "permanent": true
+    },
+    {
       "source": "/(.*)",
       "has": [
         {
