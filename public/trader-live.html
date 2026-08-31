@@ -108,7 +108,8 @@
     if (await window.novoHandshake()) {
       /* The page's own first attempt at these ran before the ticket existed and returned early,
          so the handshake is what actually starts them. */
-      try { connectTelemetry(); } catch(_){}
+      try { connectTelemetry(); } catch(_){
+}
       try { loadNovoChart(); } catch(_){}
       try { window.brainTick(); } catch(_){}
     }
@@ -457,6 +458,22 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   transition: color .15s ease, border-color .15s ease, background .15s ease; }
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
+/* ── Chart toolbar ─────────────────────────────────────────────────────────────────────────── */
+#chart-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px 2px 7px; }
+.ctb-group { display: flex; gap: 2px; }
+.ctb-sep { width: 1px; height: 16px; background: var(--bdr); margin: 0 4px; }
+.ctb-btn { font-family: var(--font); font-size: 10.5px; font-weight: 800; letter-spacing: .8px;
+  color: var(--txt3); background: none; border: 1px solid transparent; border-radius: 5px;
+  padding: 3px 8px; cursor: pointer; line-height: 1.4;
+  transition: color .12s ease, background .12s ease, border-color .12s ease; }
+.ctb-btn:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
+.ctb-btn.on { color: #22d3ee; background: rgba(34,211,238,.08); border-color: rgba(34,211,238,.3); }
+.ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.35); }
+.ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
+#novo-chart.drawing { cursor: crosshair; }
+#chart-measure { position: absolute; z-index: 20; pointer-events: none; background: rgba(20,21,25,.94);
+  border: 1px solid rgba(245,158,11,.4); border-radius: 6px; padding: 6px 10px;
+  font-family: var(--font); font-size: 11px; color: var(--txt1); line-height: 1.5; white-space: nowrap; }
 /* ── ANALYSIS tab: The Line feed + the three-book dealer board ─────────────────────────────── */
 .lf-area { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 4px 14px 10px; }
 .lf-row  { padding: 8px 0 7px; border-bottom: 1px solid var(--bdr2); }
@@ -1228,6 +1245,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 #saas-header { display: none; }
 /* Desktop Analysis view only -- every rule for these sits inside the 769px query. */
 #card-brain { display: none; }
+/* The Line + Three Books live ONLY on the ANALYSIS view (Jake: "none of the analysis stuff goes
+   on the chart tab"). Desktop dissolves the columns (display:contents), so without a default of
+   none this wrapper auto-flowed into the CHART view's grid as a stray right-side box. v-feeds
+   turns it on with its own grid area; the mobile ANALYSIS tab overrides with its stacked flex. */
+#row-unique { display: none; grid-template-columns: 1.15fr 1fr; min-height: 0; }
+#row-unique > .card { min-height: 0; }
 /* Panel typography lives at TOP LEVEL, not in the 769px query. #card-brain is display:none
    by default and only the Analysis views switch it on, so these are inert everywhere else --
    and mobile has an Analysis tab too. Scoping them to desktop shipped the markup to mobile
@@ -1424,10 +1447,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      and the Analysis Feed takes the full width, with NoVo's own history underneath it. */
   body.v-feeds #workspace {
     grid-template-columns: 1fr;
-    grid-template-areas: "activity" "feed" "brain";
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "activity" "feed" "unique" "brain";
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.9fr) auto;
   }
   body.v-feeds #card-brain { display: flex; }
+  body.v-feeds #row-unique { display: grid; grid-area: unique !important; }
   /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
      outranks any selector -- which is why the existing area rules below carry !important. Same here. */
   body.v-feeds #card-activity { grid-area: activity !important; }
@@ -1687,6 +1711,34 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
       <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
       <div style="margin:8px 14px 8px;">
+        <!-- Chart toolbar (2026-08-30, Jake: "timeframes, chart tools and other stuff").
+             Left: timeframe pills (client-side aggregation of the 1-min feed — the server stays 1-min).
+             Middle: drawing tools — horizontal level, trendline, fib retracement, measure; drawings
+             persist per ticker in localStorage. Right: overlay toggles. -->
+        <div id="chart-toolbar">
+          <div class="ctb-group" id="ctb-tf" aria-label="Timeframe">
+            <button type="button" class="ctb-btn" data-tf="1">1m</button>
+            <button type="button" class="ctb-btn" data-tf="5">5m</button>
+            <button type="button" class="ctb-btn" data-tf="15">15m</button>
+            <button type="button" class="ctb-btn" data-tf="60">1h</button>
+          </div>
+          <div class="ctb-sep"></div>
+          <div class="ctb-group" id="ctb-tools" aria-label="Drawing tools">
+            <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;</button>
+            <button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;</button>
+            <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low">Fib</button>
+            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;</button>
+            <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;</button>
+          </div>
+          <div class="ctb-sep"></div>
+          <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
+            <button type="button" class="ctb-btn" data-tog="vwap" title="VWAP curve">VWAP</button>
+            <button type="button" class="ctb-btn" data-tog="ema" title="EMA 9 / 21">EMA</button>
+            <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels">LVLS</button>
+            <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram">VOL</button>
+          </div>
+          <span id="ctb-hint" class="ctb-hint"></span>
+        </div>
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
         <!-- The chart level legend moved to the "Chart Levels" panel (was card-novostatus) 2026-07-17 so it's readable. -->
       </div>
@@ -1758,7 +1810,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
          along and the tab only carried a base-rate row about it. RIGHT: the three index books side
          by side — flip, walls, gravity, net GEX and the expected-move band for SPY, QQQ and IWM at
          once, off the per-ticker dealer hashes. Both render from /api/analysis-board (~60s poll). -->
-    <div id="row-unique" style="grid-row:2;display:grid;grid-template-columns:1.15fr 1fr;min-height:0;">
+    <div id="row-unique">
       <div id="card-line" class="card" style="flex-direction:column;overflow:hidden;border-right:1px solid var(--bdr);">
         <div class="ch">
           <span class="ch-title">The Line &mdash; <span id="line-tk">SPY</span> level breaks</span>
@@ -2449,7 +2501,7 @@ function _novoMinSpan(){
   try{ return window.matchMedia('(min-width: 769px)').matches ? _NOVO_MIN_SPAN_DESK : _NOVO_MIN_SPAN_MOB; }
   catch(_e){ return _NOVO_MIN_SPAN_DESK; }
 }
-let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
+let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoVolSeries=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
 // ── Ticker switcher state (2026-08-30) ─────────────────────────────────────────────────────────────
 // null = follow the engine's ticker (the pre-switcher behaviour, and what a first-time viewer gets).
 // A click pins the choice and persists it. The WS fast-price lane carries the ENGINE ticker's tick,
@@ -2481,6 +2533,7 @@ function _setTkr(tk){
     // on their own, but clearing them makes the rebuild immediate rather than eventual.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoLastCandle=null;
+    try{ _reloadDrawings(); }catch(_e){}   // drawings are per-ticker
     var pe=document.getElementById('t-spy'); if(pe) pe.textContent='—';
     var ce=document.getElementById('t-spy-chg'); if(ce){ ce.textContent='—'; ce.style.color='var(--txt3)'; }
     loadNovoChart();
@@ -2568,6 +2621,176 @@ async function _loadAnalysisBoard(){
 }
 _loadAnalysisBoard();
 (function _ab(){ Promise.resolve(_loadAnalysisBoard()).catch(function(){}).finally(function(){ setTimeout(_ab, 60000); }); })();
+
+// ── Chart toolbar: timeframes, drawing tools, overlay toggles (2026-08-30) ────────────────────
+// The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
+// Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
+// objects on load and on every ticker switch — the objects themselves never serialize.
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false};
+try{
+  var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
+  if([1,5,15,60].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
+  ['vwap','ema','lvl','vol'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+}catch(_e){}
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol})); }catch(_e){} }
+
+function _tfView(d){
+  var raw=d.candles||[];
+  if(_ctbTf<=1) return {candles:raw, vwap:d.vwap||[], ema9:d.ema9||[], ema21:d.ema21||[]};
+  var step=_ctbTf*60, out=[], idx={};
+  for(var i=0;i<raw.length;i++){
+    var c=raw[i], bt=Math.floor(c.time/step)*step, b=idx[bt];
+    if(!b){ b=idx[bt]={time:bt,open:c.open,high:c.high,low:c.low,close:c.close,v:(c.v||0)}; out.push(b); }
+    else { if(c.high>b.high)b.high=c.high; if(c.low<b.low)b.low=c.low; b.close=c.close; b.v+=(c.v||0); }
+  }
+  // VWAP: the last 1-min value inside each bucket (the curve is cumulative, so "last" is correct).
+  var vw=[], cur=null;
+  (d.vwap||[]).forEach(function(p2){
+    var bt=Math.floor(p2.time/step)*step;
+    if(cur&&cur.time===bt) cur.value=p2.value; else { cur={time:bt,value:p2.value}; vw.push(cur); }
+  });
+  // EMAs re-derived on the aggregate with the SERVER's math: k=2/(span+1), reseeded at each
+  // session day's first bar. Sampling the 1-min EMA instead would draw a curve that belongs to
+  // different bars than the ones on screen.
+  var e9=[],e21=[],k9=2/10,k21=2/22,pd=null,s9=0,s21=0;
+  out.forEach(function(b2){
+    var dy=Math.floor(b2.time/86400);   // candle times are ET-shifted, so this flips at ET midnight
+    if(dy!==pd){ pd=dy; s9=b2.close; s21=b2.close; }
+    else { s9=b2.close*k9+s9*(1-k9); s21=b2.close*k21+s21*(1-k21); }
+    e9.push({time:b2.time,value:+s9.toFixed(2)}); e21.push({time:b2.time,value:+s21.toFixed(2)});
+  });
+  return {candles:out,vwap:vw,ema9:e9,ema21:e21};
+}
+function _volBar(c){
+  return {time:c.time,value:(c.v||0),
+    color:(c.close>=c.open)?'rgba(52,211,153,0.32)':'rgba(244,63,94,0.32)'};
+}
+function _applyTogVis(){
+  try{
+    if(_novoVwap) _novoVwap.applyOptions({visible:_ctbTog.vwap});
+    if(_novoEma9) _novoEma9.applyOptions({visible:_ctbTog.ema});
+    if(_novoEma21) _novoEma21.applyOptions({visible:_ctbTog.ema});
+    if(_novoVolSeries) _novoVolSeries.applyOptions({visible:_ctbTog.vol});
+    for(var k in _novoLvlSeries){ try{_novoLvlSeries[k].applyOptions({visible:_ctbTog.lvl});}catch(_e){} }
+    for(var k2 in _novoLines){ try{_novoLines[k2].applyOptions({lineVisible:_ctbTog.lvl,axisLabelVisible:_ctbTog.lvl});}catch(_e){} }
+  }catch(_e){}
+}
+function _paintCtb(){
+  document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){ b.classList.toggle('on',+b.getAttribute('data-tf')===_ctbTf); });
+  document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){ b.classList.toggle('on',!!_ctbTog[b.getAttribute('data-tog')]); });
+  document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){ b.classList.toggle('armed',b.getAttribute('data-tool')===_ctbTool); });
+  var el=document.getElementById('novo-chart'); if(el) el.classList.toggle('drawing',!!_ctbTool);
+  var h=document.getElementById('ctb-hint');
+  if(h) h.textContent=_ctbTool==='h'?'click a price':_ctbTool==='t'?(_pendPt?'click the second point':'click two points')
+    :_ctbTool==='f'?(_pendPt?'now click the swing low':'click the swing high, then the low')
+    :_ctbTool==='m'?(_pendPt?'click the second point':'click two points'):'';
+}
+document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var tf=+b.getAttribute('data-tf'); if(tf===_ctbTf) return;
+    _ctbTf=tf; _ctbSave();
+    // Same reset as a ticker switch: bucket times share epoch anchors across TFs, so the
+    // glitch-guard could mistake the switch for a degraded response and skip it.
+    _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
+    _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoLastCandle=null;
+    _paintCtb(); loadNovoChart();
+  });
+});
+document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var k=b.getAttribute('data-tog'); _ctbTog[k]=!_ctbTog[k]; _ctbSave(); _paintCtb(); _applyTogVis();
+  });
+});
+
+// ── Drawings ─────────────────────────────────────────────────────────────────────────────────
+let _ctbTool=null,_pendPt=null,_drawObjs=[],_measEl=null;
+function _drawSpecs(){ try{ return JSON.parse(localStorage.getItem('novo_draw_'+_selTkr())||'[]'); }catch(_e){ return []; } }
+function _drawSave(sp){ try{ localStorage.setItem('novo_draw_'+_selTkr(),JSON.stringify(sp.slice(0,40))); }catch(_e){} }
+function _fibLines(v1,v2){
+  return [0,0.236,0.382,0.5,0.618,0.786,1].map(function(r){
+    return {price:+(v1+(v2-v1)*r).toFixed(2),title:(r*100).toFixed(1),r:r};
+  });
+}
+function _mountDrawing(spec){
+  if(!_novoSeries||!_novoChart) return null;
+  try{
+    if(spec.k==='h'){
+      var pl=_novoSeries.createPriceLine({price:spec.p,color:'#e8c48f',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'you'});
+      return {spec:spec,lines:[pl]};
+    }
+    if(spec.k==='f'){
+      var ls=_fibLines(spec.v1,spec.v2).map(function(f){
+        return _novoSeries.createPriceLine({price:f.price,color:'rgba(167,139,250,0.55)',lineWidth:1,lineStyle:3,axisLabelVisible:false,title:'fib '+f.title});
+      });
+      return {spec:spec,lines:ls};
+    }
+    if(spec.k==='t'){
+      var s=_novoChart.addLineSeries({color:'#f59e0b',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,autoscaleInfoProvider:function(){return null;}});
+      var a={time:spec.t1,value:spec.v1},b2={time:spec.t2,value:spec.v2};
+      if(b2.time===a.time) b2.time=a.time+60;
+      s.setData(a.time<b2.time?[a,b2]:[b2,a]);
+      return {spec:spec,series:s};
+    }
+  }catch(_e){}
+  return null;
+}
+function _unmountDrawings(){
+  _drawObjs.forEach(function(o){
+    try{ (o.lines||[]).forEach(function(pl){_novoSeries.removePriceLine(pl);}); }catch(_e){}
+    try{ if(o.series) _novoChart.removeSeries(o.series); }catch(_e){}
+  });
+  _drawObjs=[];
+}
+function _reloadDrawings(){
+  _unmountDrawings();
+  if(!_novoSeries) return;
+  _drawSpecs().forEach(function(sp){ var o=_mountDrawing(sp); if(o) _drawObjs.push(o); });
+}
+function _addDrawing(spec){
+  var o=_mountDrawing(spec);
+  if(o){ _drawObjs.push(o); _drawSave(_drawObjs.map(function(x){return x.spec;})); }
+}
+function _clearMeasure(){ if(_measEl){ try{_measEl.remove();}catch(_e){} _measEl=null; } }
+document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.getAttribute('data-tool');
+    _ctbTool=(_ctbTool===t)?null:t; _pendPt=null; _clearMeasure(); _paintCtb();
+  });
+});
+var _clr=document.getElementById('ctb-clear');
+if(_clr) _clr.addEventListener('click',function(){ _unmountDrawings(); _drawSave([]); _clearMeasure(); });
+function _chartClick(param){
+  if(!_ctbTool||!_novoSeries||!param||!param.point) return;
+  var price=_novoSeries.coordinateToPrice(param.point.y);
+  if(price===null||!isFinite(price)) return;
+  price=+(+price).toFixed(2);
+  var t=(typeof param.time==='number')?param.time:null;
+  if(_ctbTool==='h'){ _addDrawing({k:'h',p:price}); _ctbTool=null; _paintCtb(); return; }
+  if(_ctbTool==='t'||_ctbTool==='m'){ if(t===null){ return; } }   // needs a bar under the cursor
+  if(!_pendPt){ _pendPt={t:t,v:price,x:param.point.x,y:param.point.y}; _paintCtb(); return; }
+  if(_ctbTool==='t'){
+    _addDrawing({k:'t',t1:_pendPt.t,v1:_pendPt.v,t2:t,v2:price});
+  } else if(_ctbTool==='f'){
+    _addDrawing({k:'f',v1:_pendPt.v,v2:price});
+  } else if(_ctbTool==='m'){
+    var dv=price-_pendPt.v, dp=_pendPt.v?dv/_pendPt.v*100:0;
+    var bars=(t!==null&&_pendPt.t!==null)?Math.round(Math.abs(t-_pendPt.t)/(_ctbTf*60)):null;
+    var mins=(t!==null&&_pendPt.t!==null)?Math.round(Math.abs(t-_pendPt.t)/60):null;
+    _clearMeasure();
+    var el=document.getElementById('novo-chart');
+    if(el){
+      _measEl=document.createElement('div'); _measEl.id='chart-measure';
+      _measEl.innerHTML=(dv>=0?'+':'')+dv.toFixed(2)+' &middot; '+(dp>=0?'+':'')+dp.toFixed(2)+'%'+
+        (bars!==null?('<br>'+bars+' bars &middot; '+mins+' min'):'');
+      _measEl.style.left=Math.min(param.point.x+12, el.clientWidth-130)+'px';
+      _measEl.style.top=Math.max(param.point.y-14,4)+'px';
+      el.style.position='relative'; el.appendChild(_measEl);
+      setTimeout(_clearMeasure, 8000);
+    }
+  }
+  _pendPt=null; _ctbTool=null; _paintCtb();
+}
+_paintCtb();
 function _initNovoChart(){
   if(_novoSeries) return true;
   if(!window.LightweightCharts) return false;              // CDN lib not ready yet — retry next tick
@@ -2614,6 +2837,12 @@ function _initNovoChart(){
   // EMA9 (white) + EMA21 (navy) — the engine's real session EMAs, reseeded daily at 04:00 (correct at the open).
   _novoEma9 =_novoChart.addLineSeries({color:'#f0f0ee',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
   _novoEma21=_novoChart.addLineSeries({color:'#3556b8',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  // Volume histogram on its own hidden scale, pinned to the bottom ~15% of the pane.
+  _novoVolSeries=_novoChart.addHistogramSeries({priceScaleId:'vol',priceFormat:{type:'volume'},
+    priceLineVisible:false,lastValueVisible:false});
+  try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
+  try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
+  try{ _reloadDrawings(); _applyTogVis(); }catch(_e){}
   return true;
 }
 async function loadNovoChart(){
@@ -2629,6 +2858,9 @@ async function loadNovoChart(){
     // it only when that is what the viewer selected, or SPY candles would paint under a QQQ caption.
     if(d.ticker){ if(d.ticker!==_selTkr()) return; }
     else if(!_selIsExec()) return;
+    // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
+    // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
+    const _view=_tfView(d);
     // Selected ticker ≠ engine ticker → the WS lane is silent for this chart; the hero price and
     // day-change render from this poll instead. prev_close is server-derived from the ticker's own
     // prior RTH session.
@@ -2643,32 +2875,34 @@ async function loadNovoChart(){
         } else { _ce.textContent='—'; _ce.style.color='var(--txt3)'; }
       }
     }
-    if(d.candles && d.candles.length){
-      const _firstT = d.candles[0].time;
+    if(_view.candles && _view.candles.length){
+      const _firstT = _view.candles[0].time;
       // GLITCH FIX (2026-07-17): a transient partial/degraded /api/spy-chart response returns FEWER bars
       // for the SAME session. The session only GROWS during RTH, so "same anchor, fewer candles" is bad
       // data, not a real shrink — the old code setData'd the short set straight onto the chart, which IS
       // the "lost some candles then came back" glitch (the next good poll restored them). Keep the good
       // chart and skip this poll. Only a genuine new session — the first bar's time changes — legitimately
       // resets to fewer bars, and that path re-fits the opening window.
-      if(_novoHasData && _firstT === _novoFirstT && d.candles.length < _novoBarCount){
+      if(_novoHasData && _firstT === _novoFirstT && _view.candles.length < _novoBarCount){
         return;
       }
-      if(!_novoHasData || _firstT !== _novoFirstT || d.candles.length > _novoBarCount+1){
-        _novoSeries.setData(d.candles); _novoHasData=true;   // first load / new session / gap → full set
+      if(!_novoHasData || _firstT !== _novoFirstT || _view.candles.length > _novoBarCount+1){
+        _novoSeries.setData(_view.candles); _novoHasData=true;   // first load / new session / gap → full set
+        if(_novoVolSeries) _novoVolSeries.setData(_view.candles.map(_volBar));
         if(_firstT !== _novoFirstT) _novoRanged=false;       // new session anchor → re-fit the opening window
       } else {
-        _novoSeries.update(d.candles[d.candles.length-1]);   // steady state → smooth-update the forming candle
+        _novoSeries.update(_view.candles[_view.candles.length-1]);   // steady state → smooth-update the forming candle
+        if(_novoVolSeries) _novoVolSeries.update(_volBar(_view.candles[_view.candles.length-1]));
       }
       _novoFirstT = _firstT;
-      _novoBarCount = d.candles.length;
+      _novoBarCount = _view.candles.length;
       // LIVE-TIP HANDOFF (2026-07-17): keep a copy of the forming (last) candle so the WS telemetry frame
       // can glide its close between the 2s polls (see the ws.onmessage tip-update). The 2s poll still OWNS
       // bar structure — adding a new minute, correcting O/H/L — this only lets the CURRENT bar's close track
       // the 2s live quote at WS frame rate (~2Hz) instead of stepping once per poll. On a minute rollover the
       // poll replaces this within one bar-cache cycle, so the tip can't drift onto a stale bar for long.
-      _novoLastCandle = Object.assign({}, d.candles[d.candles.length-1]);
-      _novoTipLive = (d.tip_live === true);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
+      _novoLastCandle = (_ctbTf===1) ? Object.assign({}, _view.candles[_view.candles.length-1]) : null;
+      _novoTipLive = (d.tip_live === true && _ctbTf===1);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
       // Opening window. Candles are 1-min (Tradier interval=1min), so bars == minutes.
       //   DESKTOP: last 2 HOURS = 120 bars (2026-07-16, Jake).
       //   MOBILE:  75 bars — the chart is ~1/4 the width there, and a wide window is an unreadable smear.
@@ -2684,12 +2918,13 @@ async function loadNovoChart(){
       if(!_novoRanged){
         const _el=document.getElementById('novo-chart');
         if(_el && _el.clientWidth>0){
-          const _n=d.candles.length;
+          const _n=_view.candles.length;
           // 1-min candles → bars == minutes. Desktop opens on the last 5 HOURS (300 bars, Jake 2026-08-20,
           // up from 180 — the chart now owns the full right side, so it has the width to show them);
           // mobile stays tighter at 75 (its narrow width can't show even 3h legibly).
           const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
-          const _openBars = _desk ? 300 : 75;
+          const _tfOpen={1:300,5:150,15:120,60:60};
+          const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : Math.ceil((_tfOpen[_ctbTf]||300)/4);
           // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
           // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
           // candles ran under the level tags, which are ~100px wide. Scale it with the bar count instead
@@ -2707,13 +2942,13 @@ async function loadNovoChart(){
     // recomputes them on a 10s candle-cache TTL, so ~4 of 5 polls carried byte-identical arrays; setData
     // rebuilds+repaints the whole series each time, which was the bulk of the chart jank. A cheap change
     // signature gates it — no redraw when nothing moved.
-    const _vlast=(d.vwap&&d.vwap.length)?d.vwap[d.vwap.length-1]:null;
-    const _ovSig=(d.vwap?d.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')+'|'+(d.markers?d.markers.length:0);
+    const _vlast=(_view.vwap&&_view.vwap.length)?_view.vwap[_view.vwap.length-1]:null;
+    const _ovSig=(_view.vwap?_view.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')+'|'+(d.markers?d.markers.length:0);
     if(_ovSig!==_novoOvSig){
       _novoOvSig=_ovSig;
-      if(_novoVwap){ _novoVwap.setData(d.vwap||[]); }   // VWAP curve
-      if(_novoEma9){ _novoEma9.setData(d.ema9||[]); }   // EMA9 white
-      if(_novoEma21){ _novoEma21.setData(d.ema21||[]); } // EMA21 navy
+      if(_novoVwap){ _novoVwap.setData(_view.vwap||[]); }   // VWAP curve
+      if(_novoEma9){ _novoEma9.setData(_view.ema9||[]); }   // EMA9 white
+      if(_novoEma21){ _novoEma21.setData(_view.ema21||[]); } // EMA21 navy
       _novoSeries.setMarkers(d.markers||[]);
     }
     // FLIP/CW/PW/GRAV are the engine's own dealer levels (the ones _level_trigger fires on) — cyan for the
@@ -2738,8 +2973,8 @@ async function loadNovoChart(){
     // actually changes (a level's price moves, or one crosses the $2 in-play boundary); otherwise just
     // update() the right edge onto the newest bar.
     const leg=[], px=(+d.price)||null;
-    const _lastT = (d.candles && d.candles.length) ? d.candles[d.candles.length-1].time : null;
-    const _firstT = (d.candles && d.candles.length) ? d.candles[0].time : null;
+    const _lastT = (_view.candles && _view.candles.length) ? _view.candles[_view.candles.length-1].time : null;
+    const _firstT = (_view.candles && _view.candles.length) ? _view.candles[0].time : null;
     const _lvlFrom = d.level_from || {};
     const _drawn = [];
     _novoLevelVals=[];
@@ -2824,6 +3059,7 @@ async function loadNovoChart(){
       + '<span style="color:#facc15">&#9679; win exit</span><span style="color:#94a3b8">&#9679; loss exit</span></div>');
     const lg=document.getElementById('novo-chart-legend'); if(lg) lg.innerHTML=leg.join('');
   }catch(e){console.error('novo chart:',e);}
+  try{ _applyTogVis(); }catch(_e){}
 }
 loadNovoChart();
 (function _nc(){ Promise.resolve(loadNovoChart()).catch(function(){}).finally(function(){ setTimeout(_nc, 4000); }); })();   // self-scheduling: next tick only AFTER the last completes (no pile-up). 4s not 2s (2026-07-30): the 0.5s WS keeps the price + forming bar live, so this heavy 5-day fetch/parse only needs to refresh bar structure — halving it cuts jank with no visible lag
