@@ -186,12 +186,16 @@ card('og-crypto.png', 'Crypto Market Map',
 
 # ---- Trader: the cockpit (2026-08-31 — the old card sold one-click entry and auto exits, the
 # retired execution product; Jake caught it in a Discord embed. The real terminal is the shot.) ----
-tshot = Image.open(os.path.join(PUB, 'screenshots', 'trader-live-chart.webp')).convert('RGBA')
+# The DESKTOP shot (2026-08-31): "the cockpit" should show the cockpit, and the wide terminal
+# fits the card whole — chart, labelled levels, flow rail — where a phone shot cropped to its
+# empty top third. Padded to the analyst card's 418px band so it sits vertically centered.
+tshot = Image.open(os.path.join(PUB, 'screenshots', 'trader-live-desk.webp')).convert('RGBA')
 tw2 = 470
 tshot = tshot.resize((tw2, round(tshot.height * tw2 / tshot.width)), Image.LANCZOS)
-tshot = tshot.crop((0, 0, tw2, min(tshot.height, 414)))
-tframed = Image.new('RGBA', (tshot.width + 4, tshot.height + 4), (0x2e, 0x30, 0x36, 255))
-tframed.paste(tshot, (2, 2))
+_tf = Image.new('RGBA', (tshot.width + 4, tshot.height + 4), (0x2e, 0x30, 0x36, 255))
+_tf.paste(tshot, (2, 2))
+tframed = Image.new('RGBA', (_tf.width, 418), (0, 0, 0, 0))
+tframed.paste(_tf, (0, (418 - _tf.height) // 2))
 
 card('og-trader.png', 'Trader', 'The cockpit. Every dealer level,' + chr(10) + 'living on the candles.',
      'CHARTING TERMINAL  ·  1m–WEEKLY  ·  THE THREE BOOKS  ·  24/5',
