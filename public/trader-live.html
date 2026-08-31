@@ -2913,7 +2913,7 @@ async function loadNovoChart(){
     }
     // On D/W the session furniture (OR/PM/AH/PD, VWAP) belongs to a single day and reads as
     // noise across years of bars — only the live dealer structure survives the zoom-out.
-    let _lvls=_lvls||{}, _lvlFromSrc=_lvlFromSrc||{};
+    let _lvls=d.levels||{}, _lvlFromSrc=d.level_from||{};
     if(_ctbTf==='1d'||_ctbTf==='1w'){
       const _keep={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1};
       const _f2={}; for(const _lk in _lvls){ if(_keep[_lk]) _f2[_lk]=_lvls[_lk]; }
