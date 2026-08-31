@@ -36,7 +36,7 @@ function freeWelcomeHtml(invite, email) {
     </div>
     <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">
       <h1 style="color:#eaf3ff;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're on the list.</h1>
-      <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll get <b style="color:#eaf3ff">The Week Ahead</b> every Sunday &mdash; NoVo's structural read on the week's key levels, catalysts, and market regime &mdash; plus the occasional note. Free, always.</p>
+      <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">You'll get <b style="color:#eaf3ff">The Week Ahead</b> every Sunday &mdash; NoVo's structural read on the week's key levels, catalysts, and market regime &mdash; and the <b style="color:#eaf3ff">Mid-Day Tape Review</b> every trading day. Free, always.</p>
       ${invite ? `<div style="margin:18px 0 6px;border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Join the NoVo Discord &mdash; free</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Talk markets in the community channels and see what NoVo's tracking. Free to join &mdash; no card.</div>
