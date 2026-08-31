@@ -448,6 +448,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .spy-hero { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; border-top: 1px solid var(--bdr2); border-bottom: 1px solid var(--bdr); background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.22)); }
 .spy-hero-l { display: flex; flex-direction: column; gap: 2px; }
 .spy-hero-tkr { font-family: var(--font); font-size: 15px; font-weight: 900; letter-spacing: 2px; color: var(--txt1); }
+/* The ticker switcher. Same type as the old static ticker text so the hero reads the same at rest;
+   the selected pill is bright with a cyan underline, the other two are muted but obviously clickable. */
+.tkr-pills { display: flex; gap: 4px; }
+.tkr-pill { font-family: var(--font); font-size: 14px; font-weight: 900; letter-spacing: 1.5px;
+  color: var(--txt3); background: none; border: 0; border-bottom: 2px solid transparent;
+  padding: 2px 7px 3px; cursor: pointer; line-height: 1.2; border-radius: 4px 4px 0 0;
+  transition: color .15s ease, border-color .15s ease, background .15s ease; }
+.tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
+.tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
 .spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
 .spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
@@ -1357,6 +1366,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #card-spy .spy-hero-px { font-size: 19px; line-height: 1.1; }
   #card-spy .spy-hero-chg { font-size: 10.5px; }
   #card-spy .spy-hero-tkr { font-size: 13px; }
+  #card-spy .tkr-pill { font-size: 12px; padding: 2px 6px 3px; letter-spacing: 1px; }
   #card-spy > div[style*="margin:8px"] { margin: 4px 12px 4px !important; }
   #card-spy #novo-chart-legend { padding: 4px 2px 0 !important; }
 
@@ -1632,7 +1642,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <!-- SPY headline + chart -->
     <div class="card" id="card-spy">
       <div class="spy-hero">
-        <div class="spy-hero-l"><div class="spy-hero-tkr">SPY</div><div class="spy-hero-sub">S&amp;P 500</div></div>
+        <!-- Ticker switcher (2026-08-30, Jake): click to flip the chart between the three mastered
+             tickers, per-viewer, no restart. The selected pill is the chart you are looking at; the
+             engine's own ticker still shows in the nav strip pill. Selection sticks in localStorage. -->
+        <div class="spy-hero-l">
+          <div class="tkr-pills" id="tkr-pills" role="tablist" aria-label="Chart ticker">
+            <button type="button" class="tkr-pill" data-tkr="SPY" role="tab">SPY</button>
+            <button type="button" class="tkr-pill" data-tkr="QQQ" role="tab">QQQ</button>
+            <button type="button" class="tkr-pill" data-tkr="IWM" role="tab">IWM</button>
+          </div>
+          <div class="spy-hero-sub">S&amp;P 500</div>
+        </div>
         <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
       </div>
       <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
@@ -2054,7 +2074,12 @@ function connectTelemetry(){
   // the header price + chart-tip glide + change render identically from either. Cheap enough to run at ~10Hz.
   function _applyLivePx(spy, prevClose){
     spy=parseFloat(spy||0); if(!(spy>0)) return;
-    if(prevClose!==undefined && prevClose!==null){ var _p=parseFloat(prevClose)||0; if(_p>0) window._spyPrev=_p; }
+    // This lane carries the ENGINE ticker's tick. When the viewer has the chart on another ticker,
+    // writing it to the hero would caption a QQQ chart with SPY's price — the hero and the forming
+    // bar belong to the 4s chart poll then (see loadNovoChart). Still record prev_close: it arrives
+    // only on heavy frames, and the viewer can switch back at any moment.
+    if(prevClose!==undefined && prevClose!==null){ var _p0=parseFloat(prevClose)||0; if(_p0>0) window._spyPrev=_p0; }
+    if(!_selIsExec()) return;
     var e=document.getElementById('t-spy'); if(e) e.textContent='$'+spy.toFixed(2);
     try{
       if(_novoTipLive && _novoSeries && _novoLastCandle && _novoLastCandle.time){
@@ -2107,16 +2132,17 @@ function connectTelemetry(){
       // than at 20:45. Say which: "Off-hrs" when the session explains it, "—" only when the value is
       // absent DURING RTH, which is the case actually worth noticing. The squeeze tile beside them has
       // read "Off-hrs" all along; this just stops the rest of the strip disagreeing with it.
-      // Header ticker + long name follow the engine's selected market (SPY/QQQ/IWM), so the hero and nav pill
-      // stop saying "SPY / S&P 500" when the chart is actually on QQQ or IWM.
+      // The nav pill follows the engine's selected market (SPY/QQQ/IWM); the hero belongs to the
+      // viewer's ticker switcher and repaints via _paintTkrUI when the engine ticker moves.
       if(lt.exec_ticker){
         const _tk=String(lt.exec_ticker).toUpperCase();
-        const _nm={SPY:'S&P 500',QQQ:'Nasdaq 100',IWM:'Russell 2000'}[_tk]||_tk;
         if(window._novoExecTkr!==_tk){
           window._novoExecTkr=_tk;
-          document.querySelectorAll('.spy-hero-tkr').forEach(function(el){el.textContent=_tk;});
-          document.querySelectorAll('.spy-hero-sub').forEach(function(el){el.textContent=_nm;});
+          // The nav strip pill names the ENGINE's ticker — that stays. The hero no longer takes the
+          // engine's name: it captions whichever chart the viewer selected (the switcher owns it),
+          // and _paintTkrUI re-resolves a follow-the-engine viewer (no pinned choice) to the new tkr.
           document.querySelectorAll('.term-live-ticker').forEach(function(el){el.textContent=_tk;});
+          _paintTkrUI();
         }
       }
       // Header price + chart-tip glide + change go through the shared applier (also driven by the fast
@@ -2375,6 +2401,45 @@ function _novoMinSpan(){
   catch(_e){ return _NOVO_MIN_SPAN_DESK; }
 }
 let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
+// ── Ticker switcher state (2026-08-30) ─────────────────────────────────────────────────────────────
+// null = follow the engine's ticker (the pre-switcher behaviour, and what a first-time viewer gets).
+// A click pins the choice and persists it. The WS fast-price lane carries the ENGINE ticker's tick,
+// so everything it drives — the hero price, the change %, the forming-bar glide — is gated on the
+// selection actually BEING the engine ticker; on any other selection those render from the 4s chart
+// poll's own payload instead (its price is the ticker's forming dxFeed bar).
+let _novoSelTkr=null;
+try{ var _st=localStorage.getItem('novo_trader_tkr'); if(_st==='SPY'||_st==='QQQ'||_st==='IWM') _novoSelTkr=_st; }catch(_e){}
+const _TKR_NAME={SPY:'S&P 500',QQQ:'Nasdaq 100',IWM:'Russell 2000'};
+function _selTkr(){ return _novoSelTkr || window._novoExecTkr || 'SPY'; }
+function _selIsExec(){ return _selTkr() === (window._novoExecTkr || 'SPY'); }
+function _paintTkrUI(){
+  var sel=_selTkr();
+  document.querySelectorAll('#tkr-pills .tkr-pill').forEach(function(b){
+    var on=(b.getAttribute('data-tkr')===sel);
+    b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false');
+  });
+  document.querySelectorAll('.spy-hero-sub').forEach(function(el){ el.textContent=_TKR_NAME[sel]||sel; });
+}
+function _setTkr(tk){
+  if(tk!==_selTkr()){
+    _novoSelTkr=tk;
+    try{ localStorage.setItem('novo_trader_tkr',tk); }catch(_e){}
+    // Full chart reset. The glitch-guard in loadNovoChart compares first-bar times, and two tickers'
+    // sessions share the SAME epoch anchor (both open at 04:00), so without a reset a switch could be
+    // mistaken for a degraded response and skipped. Level/overlay sigs are content-derived and change
+    // on their own, but clearing them makes the rebuild immediate rather than eventual.
+    _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
+    _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoLastCandle=null;
+    var pe=document.getElementById('t-spy'); if(pe) pe.textContent='—';
+    var ce=document.getElementById('t-spy-chg'); if(ce){ ce.textContent='—'; ce.style.color='var(--txt3)'; }
+    loadNovoChart();
+  }
+  _paintTkrUI();
+}
+document.querySelectorAll('#tkr-pills .tkr-pill').forEach(function(b){
+  b.addEventListener('click',function(){ _setTkr(b.getAttribute('data-tkr')); });
+});
+_paintTkrUI();
 function _initNovoChart(){
   if(_novoSeries) return true;
   if(!window.LightweightCharts) return false;              // CDN lib not ready yet — retry next tick
@@ -2426,9 +2491,28 @@ function _initNovoChart(){
 async function loadNovoChart(){
   try{
     if(!_initNovoChart()) return;
+    const _reqTkr=_selTkr();
     const _u=NOVO_URL('/api/spy-chart'); if(!_u) return;   // pre-handshake: skip; the bootstrap retries
-    const r=await fetch(_u); if(!r.ok) return;
+    const r=await fetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok) return;
     const d=await r.json();
+    // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
+    // that answers for a ticker other than the current selection. (d.ticker is absent only from a
+    // pre-rollout server, which can only ever serve the engine ticker — same check, via _reqTkr.)
+    if((d.ticker||_reqTkr)!==_selTkr()) return;
+    // Selected ticker ≠ engine ticker → the WS lane is silent for this chart; the hero price and
+    // day-change render from this poll instead. prev_close is server-derived from the ticker's own
+    // prior RTH session.
+    if(!_selIsExec() && d.price){
+      var _pe=document.getElementById('t-spy'); if(_pe) _pe.textContent='$'+(+d.price).toFixed(2);
+      var _ce=document.getElementById('t-spy-chg');
+      if(_ce){
+        var _pc=parseFloat(d.prev_close||0);
+        if(_pc>0){ var _usd=(+d.price)-_pc, _up=_usd>=0;
+          _ce.textContent=(_up?'▲':'▼')+' '+(_up?'+':'')+(_usd/_pc*100).toFixed(2)+'% · $'+Math.abs(_usd).toFixed(2);
+          _ce.style.color=_up?'var(--grn)':'var(--red)';
+        } else { _ce.textContent='—'; _ce.style.color='var(--txt3)'; }
+      }
+    }
     if(d.candles && d.candles.length){
       const _firstT = d.candles[0].time;
       // GLITCH FIX (2026-07-17): a transient partial/degraded /api/spy-chart response returns FEWER bars
