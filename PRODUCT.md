@@ -119,7 +119,7 @@ layer underneath. Nothing in this section appears on any free page.
   what the current setup has historically resolved to, with its sample size — the read carries a
   record, not only a reading.
 - **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
-  plus **19 read-only live lookups** spanning both maps: dealer levels, gamma profile, session
+  plus **28 read-only live lookups** spanning both maps: dealer levels, gamma profile, session
   history, **base rates**, its own track record, its recent reads, market internals, the
   **volatility record back to 1990** (every gauge with its percentile), **CFTC futures
   positioning**, quotes, macro calendar, earnings dates, headlines, and the crypto map, breadth,
