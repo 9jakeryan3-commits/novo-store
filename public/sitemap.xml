@@ -391,6 +391,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/analyst/archive/2026-08-31-the-open</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/analyst/methodology</loc>
     <lastmod>2026-08-30</lastmod>
     <priority>0.7</priority>
@@ -2251,6 +2256,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/journal/does-novo-cover-spreads.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/journal/does-novo-give-signals.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
@@ -2262,11 +2272,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/does-novo-replace-trading-plan.html</loc>
-    <lastmod>2026-08-31</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/does-novo-trade-spreads.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4071,11 +4076,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/novo-stop-on-option-or-spy.html</loc>
-    <lastmod>2026-08-31</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/novo-vs-broker-app.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
@@ -4092,11 +4092,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/novo-vs-discord-groups.html</loc>
-    <lastmod>2026-08-31</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/novo-vs-menthorq.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
@@ -4121,22 +4116,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/journal/novo-vs-spotgamma.html</loc>
-    <lastmod>2026-08-31</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://novo-options.trade/journal/novo-vs-thinkorswim.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://novo-options.trade/journal/novo-vs-tradingview-alerts.html</loc>
-    <lastmod>2026-08-31</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/journal/novo-vs-unusual-whales.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
@@ -5322,6 +5307,11 @@
   </url>
   <url>
     <loc>https://novo-options.trade/journal/stop-loss-orders-explained.html</loc>
+    <lastmod>2026-08-31</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/journal/stop-on-option-or-spy.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
