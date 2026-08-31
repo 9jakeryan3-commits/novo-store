@@ -1142,6 +1142,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      2026-08-31 07:23). And every desktop flex:1 1 0 content area inside an auto-height mobile
      card computes to a ZERO basis — the read showed one clipped line. Mobile sizes content to
      itself, capped, scrolling internally. */
+    /* The VIX row was moved LAST in the DOM for the desktop strip ("far right, beside the score").
+     On mobile the same DOM is the stacked Market Intel panel, where that left VIX dangling beside
+     the Analyst Score meter — so the panel goes flex-column and order pulls VIX back to the top.
+     Desktop is untouched: its strip reads the DOM order. */
+  #card-mktintel { display: flex; flex-direction: column; }
+  #card-mktintel .dr-vix { order: -1; }
   #col-feed #row-unique { display: flex !important; flex-direction: column; flex: 0 0 auto !important; min-height: 0; }
   #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap {
     flex: 0 0 auto !important; height: auto; max-height: 260px; overflow-y: auto; }
@@ -1832,8 +1838,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         <span id="t-apex" class="bar-val">0/100</span>
         <div class="bar-track"><div id="t-apex-bar" class="bar-fill" style="width:0%"></div></div>
       <!-- VIX rides far right, beside the score, above the price (Jake 2026-08-30). -->
-      <div class="dr"><span class="dk">VIX</span><span id="t-vix" class="dv">—</span></div>
-      </div>
+</div>
+      <!-- VIX: last in DOM for the desktop strip (far right); order:-1 puts it first on the mobile panel. -->
+      <div class="dr dr-vix"><span class="dk">VIX</span><span id="t-vix" class="dv">—</span></div>
     </div>
 
     <!-- Chart Levels — the SPY chart's level legend lives here now (2026-07-17), as a readable 2-col
