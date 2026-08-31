@@ -1158,7 +1158,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      On mobile the same DOM is the stacked Market Intel panel, where that left VIX dangling beside
      the Analyst Score meter — so the panel goes flex-column and order pulls VIX back to the top.
      Desktop is untouched: its strip reads the DOM order. */
-  #card-mktintel { display: flex; flex-direction: column; }
+    #card-mktintel { display: flex; flex-direction: column; }
+  /* The section title must outrank the promoted VIX row, or VIX floats ABOVE "Market Intel". */
+  #card-mktintel .dsec { order: -2; }
   #card-mktintel .dr-vix { order: -1; }
   #col-feed #row-unique { display: flex !important; flex-direction: column; flex: 0 0 auto !important; min-height: 0; }
   #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap {
