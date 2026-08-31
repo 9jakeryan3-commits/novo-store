@@ -479,6 +479,29 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.35); }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
 #novo-chart.drawing { cursor: crosshair; }
+/* Pro overlays: OHLCV legend (top-left), NoVo read chip under it, ticker/frame watermark,
+   and the switch veil. All pointer-events:none — the chart owns the mouse. */
+#chart-legend2 { position: absolute; top: 8px; left: 10px; z-index: 12; pointer-events: none;
+  font-family: var(--font); font-size: 11px; line-height: 1.5; color: var(--txt2);
+  text-shadow: 0 1px 3px rgba(0,0,0,.8); white-space: nowrap; }
+#chart-legend2 b { color: var(--txt1); font-weight: 700; }
+#chart-legend2 .up { color: var(--grn); } #chart-legend2 .dn { color: var(--red); }
+#chart-legend2 .dim { color: var(--txt3); }
+#novo-chip { position: absolute; top: 27px; left: 10px; z-index: 12; pointer-events: none;
+  font-family: var(--font); font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px;
+  text-transform: uppercase; display: flex; gap: 6px; align-items: center; }
+#novo-chip .c-reg { padding: 2px 7px; border-radius: 4px; }
+#novo-chip .c-reg.lg { color: var(--grn); background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.25); }
+#novo-chip .c-reg.sg { color: var(--red); background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.25); }
+#novo-chip .c-flip { color: var(--txt3); }
+#chart-wm { position: absolute; inset: 0; z-index: 1; pointer-events: none; display: flex;
+  align-items: center; justify-content: center; font-family: var(--font); font-weight: 900;
+  font-size: clamp(28px, 6vw, 64px); letter-spacing: 6px; color: rgba(255,255,255,0.035);
+  user-select: none; }
+#chart-veil { position: absolute; inset: 0; z-index: 14; pointer-events: none; display: none;
+  align-items: center; justify-content: center; background: rgba(10,11,14,0.45);
+  font-family: var(--font); font-size: 12px; letter-spacing: 2px; color: var(--txt3); }
+#chart-veil.on { display: flex; }
 #chart-measure { position: absolute; z-index: 20; pointer-events: none; background: rgba(20,21,25,.94);
   border: 1px solid rgba(245,158,11,.4); border-radius: 6px; padding: 6px 10px;
   font-family: var(--font); font-size: 11px; color: var(--txt1); line-height: 1.5; white-space: nowrap; }
@@ -2532,6 +2555,7 @@ function _paintTkrUI(){
   document.querySelectorAll('.spy-hero-sub').forEach(function(el){ el.textContent=_TKR_NAME[sel]||sel; });
   var lt=document.getElementById('line-tk'); if(lt) lt.textContent=sel;
   try{ _renderLine(); }catch(_e){}
+  try{ _paintWm(); _renderChip(); }catch(_e){}
 }
 function _setTkr(tk){
   if(tk!==_selTkr()){
@@ -2544,6 +2568,7 @@ function _setTkr(tk){
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoLastCandle=null;
     try{ _reloadDrawings(); }catch(_e){}   // drawings are per-ticker
+    try{ _showVeil(); }catch(_e){}
     var pe=document.getElementById('t-spy'); if(pe) pe.textContent='—';
     var ce=document.getElementById('t-spy-chg'); if(ce){ ce.textContent='—'; ce.style.color='var(--txt3)'; }
     loadNovoChart();
@@ -2590,6 +2615,7 @@ function _renderBoard(){
     if(!b.em_low||!b.em_high) return '<td class="b3-d">&mdash;</td>';
     return '<td class="b3-d"><span class="b3-v">'+b.em_low.toFixed(2)+'</span> &ndash; <span class="b3-v">'+b.em_high.toFixed(2)+'</span></td>';});}).join('')+'</tr>';
   tb.innerHTML=rows;
+  try{ _renderChip(); }catch(_e){}
   var st=document.getElementById('board-stamp');
   if(st){
     var ts=Math.max.apply(null,TKS.map(function(t){return (B[t]&&B[t].ts)||0;}));
@@ -2736,6 +2762,7 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoLastCandle=null;
     try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
+    try{ _showVeil(); _paintWm(); }catch(_e){}
     _paintCtb(); loadNovoChart();
   });
 });
@@ -2833,6 +2860,51 @@ function _chartClick(param){
   }
   _pendPt=null; _ctbTool=null; _paintCtb();
 }
+// ── Pro overlays ──────────────────────────────────────────────────────────────────────────────
+let _novoViewC=null,_novoViewMap=null;
+const _TF_NAME={1:'1m',5:'5m',15:'15m','1h':'1H','1d':'D','1w':'W'};
+function _paintWm(){
+  var wm=document.getElementById('chart-wm');
+  if(wm) wm.textContent=_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf);
+}
+function _fmtBarTime(t){
+  var d=new Date(t*1000);
+  if(_ctbTf==='1d'||_ctbTf==='1w') return d.toISOString().slice(0,10);
+  return d.toISOString().slice(5,16).replace('T',' ');   // times are ET-shifted epochs — UTC render IS ET
+}
+function _fmtVol(v){
+  if(!v) return '—';
+  return v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':String(v);
+}
+function _renderLegend2(bar){
+  var el=document.getElementById('chart-legend2'); if(!el) return;
+  var cs=_novoViewC; if(!cs||!cs.length){ el.textContent=''; return; }
+  var b=bar||cs[cs.length-1];
+  var i=_novoViewMap&&bar?cs.indexOf(bar):cs.length-1;   // prev close for the hovered bar's change
+  var prev=(i>0)?cs[i-1].close:b.open;
+  var chg=prev?(b.close-prev)/prev*100:0, up=b.close>=prev;
+  el.innerHTML='<span class="dim">'+_fmtBarTime(b.time)+'</span>'+
+    '  O <b>'+b.open.toFixed(2)+'</b>  H <b>'+b.high.toFixed(2)+'</b>'+
+    '  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>'+
+    '  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'+
+    '  <span class="dim">V '+_fmtVol(b.v)+'</span>';
+}
+function _renderChip(){
+  var el=document.getElementById('novo-chip'); if(!el) return;
+  var B=(_abData&&_abData.board)?_abData.board[_selTkr()]:null;
+  var px=(_novoViewC&&_novoViewC.length)?_novoViewC[_novoViewC.length-1].close:null;
+  if(!B||!B.flip||!px){ el.innerHTML=''; return; }
+  // HARD signals only: regime = the sign of net GEX; position = price vs the flip. Both are the
+  // engine's own numbers off the per-ticker dealer hash — no soft calls on the chart.
+  var sg=(B.net_gex!==null&&B.net_gex<0);
+  var d=(px-B.flip)/B.flip*100;
+  el.innerHTML='<span class="c-reg '+(sg?'sg':'lg')+'">'+(sg?'short gamma':'long gamma')+'</span>'+
+    '<span class="c-flip">'+Math.abs(d).toFixed(2)+'% '+(d>=0?'above':'below')+' flip '+B.flip.toFixed(2)+'</span>';
+}
+function _showVeil(){
+  var v=document.getElementById('chart-veil');
+  if(v){ v.textContent='loading '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; v.classList.add('on'); }
+}
 _paintCtb();
 function _initNovoChart(){
   if(_novoSeries) return true;
@@ -2886,6 +2958,23 @@ function _initNovoChart(){
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
+  // Pro overlays: watermark, OHLCV legend, NoVo read chip, switch veil. Mounted here so the
+  // markup stays untouched and they exist exactly as long as the chart does.
+  try{
+    el.style.position='relative';
+    ['chart-wm','chart-legend2','novo-chip','chart-veil'].forEach(function(id){
+      if(!document.getElementById(id)){ var d=document.createElement('div'); d.id=id; el.appendChild(d); }
+    });
+    _paintWm();
+    _novoChart.applyOptions({crosshair:{mode:LightweightCharts.CrosshairMode.Normal,
+      vertLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'},
+      horzLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'}}});
+    _novoChart.subscribeCrosshairMove(function(param){
+      var bar=null;
+      if(param&&typeof param.time==='number'&&_novoViewMap) bar=_novoViewMap.get(param.time)||null;
+      _renderLegend2(bar);
+    });
+  }catch(_e){}
   try{ _reloadDrawings(); _applyTogVis(); }catch(_e){}
   return true;
 }
@@ -2954,6 +3043,11 @@ async function loadNovoChart(){
       }
       _novoFirstT = _firstT;
       _novoBarCount = _view.candles.length;
+      _novoViewC = _view.candles;
+      _novoViewMap = new Map(_view.candles.map(function(c){ return [c.time, c]; }));
+      var _veil=document.getElementById('chart-veil'); if(_veil) _veil.classList.remove('on');
+      _renderLegend2(null);   // no hover → the legend tracks the newest bar
+      try{ _renderChip(); }catch(_e){}
       // LIVE-TIP HANDOFF (2026-07-17): keep a copy of the forming (last) candle so the WS telemetry frame
       // can glide its close between the 2s polls (see the ws.onmessage tip-update). The 2s poll still OWNS
       // bar structure — adding a new minute, correcting O/H/L — this only lets the CURRENT bar's close track
