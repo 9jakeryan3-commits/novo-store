@@ -779,6 +779,23 @@ async function _promotePublicLevels(state) {
   // Numeric grounding — coverage + per-session counts. Tiny, so it goes straight to KV.
   // The PUBLIC volatility record -- CBOE-published indices only, so it is safe on a free page.
   // ~54KB, so it goes straight to KV like the context rather than to blob storage.
+  // The live data-point counter (2026-08-31): the engine counts its own stores every ~5 min and
+  // POSTs the total plus the MEASURED growth rate; /api/datapoints serves it publicly and the /ai
+  // page ticks it forward between polls. Real numbers only — no rate arrives until the engine has
+  // two counts to diff.
+  if (req.body && typeof req.body === 'object' && req.body.kind === 'datapoints') {
+    try {
+      const r = kv();
+      if (r) await r.set('public:datapoints', JSON.stringify({
+        total: Number(req.body.total) || 0,
+        per_sec: (req.body.per_sec === null || req.body.per_sec === undefined) ? null : Number(req.body.per_sec),
+        crypto_per_hr: (req.body.crypto_per_hr === null || req.body.crypto_per_hr === undefined) ? null : Number(req.body.crypto_per_hr),
+        ts: Number(req.body.ts) || Math.floor(Date.now() / 1000),
+      }));
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
   if (req.body && typeof req.body === 'object' && req.body.kind === 'vol-history') {
     try {
       const r = kv();
