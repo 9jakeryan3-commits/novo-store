@@ -469,6 +469,14 @@
       "destination": "/track-record.html"
     },
     {
+      "source": "/changelog",
+      "destination": "/changelog.html"
+    },
+    {
+      "source": "/developers",
+      "destination": "/developers.html"
+    },
+    {
       "source": "/week-ahead",
       "destination": "/week-ahead.html"
     },

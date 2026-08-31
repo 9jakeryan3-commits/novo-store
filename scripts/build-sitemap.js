@@ -210,3 +210,44 @@ const gone = [...before].filter((u) => !entries.has(u.replace(ORIGIN, '')));
 console.log('  sitemap: ' + urls.length + ' urls (was ' + before.size + ' unique)');
 console.log('           skipped ' + skippedNoindex + ' noindex, ' + skippedRedirect + ' redirecting');
 if (gone.length) console.log('           dropped ' + gone.length + ': ' + gone.slice(0, 5).join(', '));
+
+// ── RSS feed for the journal ──────────────────────────────────────────────────
+// /journal/feed.xml: the 40 most recently touched articles, titles and deks from
+// search-index.json, dates from the same git lastmod map the sitemap uses. Rebuilt
+// on every deploy alongside the sitemap, so it can never drift from the corpus.
+// Aggregators and AI crawlers get a machine door into 1,200+ articles that until
+// now only existed as HTML.
+try {
+  const idx = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/journal/search-index.json'), 'utf8'));
+  const byslug = new Map(idx.map((e) => [e.s.replace(/\.html$/, ''), e]));
+  const items = [];
+  for (const [file, date] of lastmod.entries()) {
+    const m = file.match(/^public\/journal\/([a-z0-9-]+)\.html$/);
+    if (!m || m[1] === 'index') continue;
+    const e = byslug.get(m[1]);
+    if (!e) continue;
+    items.push({ slug: m[1], date, title: e.t, dek: e.d || '' });
+  }
+  items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug < b.slug ? -1 : 1));
+  const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const rss =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n' +
+    '<title>The NoVo Journal</title>\n' +
+    '<link>' + ORIGIN + '/journal/</link>\n' +
+    '<description>Market structure, dealer flow, options and crypto — plain-English pieces from the NoVo desk.</description>\n' +
+    '<language>en</language>\n' +
+    '<atom:link href="' + ORIGIN + '/journal/feed.xml" rel="self" type="application/rss+xml"/>\n' +
+    items.slice(0, 40).map((it) =>
+      '<item><title>' + esc(it.title) + '</title>' +
+      '<link>' + ORIGIN + '/journal/' + it.slug + '.html</link>' +
+      '<guid isPermaLink="true">' + ORIGIN + '/journal/' + it.slug + '.html</guid>' +
+      '<pubDate>' + new Date(it.date + 'T12:00:00Z').toUTCString() + '</pubDate>' +
+      '<description>' + esc(it.dek) + '</description></item>'
+    ).join('\n') +
+    '\n</channel>\n</rss>\n';
+  fs.writeFileSync(path.join(ROOT, 'public/journal/feed.xml'), rss, 'utf8');
+  console.log('  rss: ' + Math.min(items.length, 40) + ' items -> public/journal/feed.xml');
+} catch (e) {
+  console.warn('  ! rss feed NOT written (' + e.message.split('\n')[0] + ')');
+}
