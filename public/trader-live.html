@@ -531,7 +531,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .b3 .pos { color: var(--grn); } .b3 .neg { color: var(--red); }
 .read2-body { flex: 1 1 0; min-height: 0; max-height: 170px; overflow-y: auto; padding: 10px 16px 14px;
   font-size: 12px; line-height: 1.7; color: var(--txt2); white-space: pre-wrap; }
-#row-unique { grid-template-rows: auto auto; }
+#card-read { display: none; }
 .spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
 .spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
@@ -1139,6 +1139,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* The Line + Three Books stack on a phone; the row wrapper stops being a 2-col grid. */
   #col-feed #row-unique { display: flex !important; flex-direction: column; }
   #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap { max-height: 260px; }
+  #col-feed #card-read { display: flex !important; flex-direction: column; }
   #col-feed #card-read .read2-body { max-height: 240px; }
   #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
   #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
@@ -1481,12 +1482,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      change after startup. The Activity Feed is diagnostics: it collapses to a one-line status strip
      and the Analysis Feed takes the full width, with NoVo's own history underneath it. */
   body.v-feeds #workspace {
-    grid-template-columns: 1fr;
-    grid-template-areas: "activity" "feed" "unique" "brain";
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-areas: "activity activity" "feed read" "unique unique" "brain brain";
     grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.9fr) auto;
   }
   body.v-feeds #card-brain { display: flex; }
   body.v-feeds #row-unique { display: grid; grid-area: unique !important; }
+  body.v-feeds #card-read  { display: flex; grid-area: read !important; border-left: 1px solid var(--bdr); }
+  body.v-feeds #card-read .read2-body { max-height: none; }
   /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
      outranks any selector -- which is why the existing area rules below carry !important. Same here. */
   body.v-feeds #card-activity { grid-area: activity !important; }
@@ -1840,6 +1843,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       </div>
       <div class="log-area"><div id="intel-output">Awaiting command...</div></div>
     </div>
+      <!-- Today's written read — the desk note Trader members already own via Analyst; full width
+           beside the Analysis Feed on desktop (Jake), stacked right under it on a phone. -->
+      <div id="card-read" class="card" style="flex-direction:column;overflow:hidden;">
+        <div class="ch">
+          <span class="ch-title" id="read2-title">Today&rsquo;s read</span>
+          <span id="read2-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
+        </div>
+        <div id="read2-body" class="read2-body">&mdash;</div>
+      </div>
 
     <!-- The two members-only reads (2026-08-30, Jake: "this tab should show things you can't get
          anywhere else"). LEFT: 'The Line' — the engine's confirmed level-break playbooks for the
@@ -1861,15 +1873,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           <span id="board-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
         </div>
         <div class="b3-wrap"><table class="b3" id="b3-table"><tbody></tbody></table></div>
-      </div>
-      <!-- Today's written read — the desk note Trader members already own via Analyst; full width
-           under the Line/Books pair, scrolling internally so the row never balloons. -->
-      <div id="card-read" class="card" style="flex-direction:column;overflow:hidden;grid-column:1/-1;border-top:1px solid var(--bdr);">
-        <div class="ch">
-          <span class="ch-title" id="read2-title">Today&rsquo;s read</span>
-          <span id="read2-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
-        </div>
-        <div id="read2-body" class="read2-body">&mdash;</div>
       </div>
     </div>
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
