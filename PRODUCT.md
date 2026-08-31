@@ -152,6 +152,12 @@ layer underneath. Nothing in this section appears on any free page.
 
 ## NoVo Trader — $209/mo · includes all of Analyst
 
+**The angle (2026-08-31): Trader is the instrument, Analyst is the research desk.** The overlap
+between the two dashboards is the product design, not a defect: everything act-now lives on the
+Trader terminal; the step-back surfaces — NoVo the chat, the gamma-by-strike heatmap, the in-house
+flow tape, the historical analogues, push notifications — live on the Analyst desk. Sell the pair
+as "the cockpit and the desk."
+
 - **The live dealer map, streamed** — the levels drawn on a candle chart that moves with the tape
 - **Ticker switcher (2026-08-30)** — SPY / QQQ / IWM pills in the chart hero; per-viewer, instant,
   no restart. Candles, VWAP, EMAs, session levels and dealer levels all follow the selection; the
