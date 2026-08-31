@@ -451,6 +451,26 @@
       "source": "/journal/novo-vs-unusual-whales.html",
       "destination": "/journal/unusual-whales-alternative.html",
       "permanent": true
+    },
+    {
+      "source": "/journal/does-novo-trade-spreads",
+      "destination": "/journal/does-novo-cover-spreads.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/does-novo-trade-spreads.html",
+      "destination": "/journal/does-novo-cover-spreads.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-stop-on-option-or-spy",
+      "destination": "/journal/stop-on-option-or-spy.html",
+      "permanent": true
+    },
+    {
+      "source": "/journal/novo-stop-on-option-or-spy.html",
+      "destination": "/journal/stop-on-option-or-spy.html",
+      "permanent": true
     }
   ],
   "rewrites": [

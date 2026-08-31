@@ -7,33 +7,29 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Should Your Stop Sit on the Option or on SPY? | NoVo</title>
-<meta name="description" content="You think in SPY levels, but a stop order triggers on the option's price. How to convert one into the other with delta.">
+<title>Does NoVo Cover Spreads, or Just Single Options? | NoVo</title>
+<meta name="description" content="Dealer levels describe the underlying, not your ticket, so they read the same either way. What a single near-the-money option gives you that a spread does not.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/novo-stop-on-option-or-spy.html">
+<link rel="canonical" href="https://novo-options.trade/journal/does-novo-cover-spreads.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/novo-stop-on-option-or-spy.html">
-<meta property="og:title" content="Should Your Stop Sit on the Option or on SPY?">
-<meta property="og:description" content="Put the stop on the option so it can fill, and size it to the SPY level you actually think in — converted via delta.">
+<meta property="og:url" content="https://novo-options.trade/journal/does-novo-cover-spreads.html">
+<meta property="og:title" content="Does NoVo Cover Spreads, or Just Single Options?">
+<meta property="og:description" content="Dealer levels describe the underlying, not your ticket — so the map reads the same whichever structure you choose.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="Should Your Stop Sit on the Option or on SPY?">
-<meta name="twitter:description" content="Put the stop on the option so it can fill, and size it to the SPY level you actually think in — converted via delta.">
+<meta name="twitter:title" content="Does NoVo Cover Spreads, or Just Single Options?">
+<meta name="twitter:description" content="Dealer levels describe the underlying, not your ticket — so the map reads the same whichever structure you choose.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=1f3edec1">
-<script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Should Your Stop Sit on the Option or on SPY?", "description": "Put the stop on the option so it can fill, and size it to the SPY level you actually think in — converted via delta.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/novo-stop-on-option-or-spy.html", "articleSection": "NoVo", "wordCount": 574, "inLanguage": "en", "isAccessibleForFree": true}
-</script>
-<script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "NoVo, Guides & FAQ", "item": "https://novo-options.trade/journal/about-novo"}, {"@type": "ListItem", "position": 4, "name": "Should Your Stop Sit on the Option or on SPY?", "item": "https://novo-options.trade/journal/novo-stop-on-option-or-spy.html"}]}
-</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Does NoVo Cover Spreads, or Just Single Options?", "description": "Dealer levels describe the underlying, not your ticket — so the map reads the same whichever structure you choose.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/does-novo-cover-spreads.html", "articleSection": "NoVo", "wordCount": 470, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "NoVo, Guides & FAQ", "item": "https://novo-options.trade/journal/about-novo"}, {"@type": "ListItem", "position": 4, "name": "Does NoVo Cover Spreads, or Just Single Options?", "item": "https://novo-options.trade/journal/does-novo-cover-spreads.html"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -48,22 +44,22 @@
 
 <main class="wrap">
 <article class="article">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/about-novo">NoVo, Guides &amp; FAQ</a><span class="sep">&rsaquo;</span><span class="cur">Should Your Stop Sit on the Option or on SPY?</span></nav>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/about-novo">NoVo, Guides &amp; FAQ</a><span class="sep">&rsaquo;</span><span class="cur">Does NoVo Cover Spreads, or Just Single Options?</span></nav>
   <header class="article-head">
     <div class="kicker">NoVo</div>
-    <h1>Should Your Stop Sit on the Option or on SPY?</h1>
-    <p class="standfirst">It's a sharper question than it looks, because the two answers usually force a trade-off. Here's how to get both sides of it.</p>
+    <h1>Does NoVo Cover Spreads, or Just Single Options?</h1>
+    <p class="standfirst">A fair question with a short answer: the dealer map is built strike by strike, so it reads the same whichever structure you choose.</p>
   </header>
-  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
+  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/options-101">options basics</a></div>
   <div class="article-body">
-    <p>You think in SPY levels &mdash; &ldquo;I'm wrong if SPY breaks 739.&rdquo; But a stop order <a href="/journal/stop-on-option-price-not-underlying.html">actually triggers on the option's price</a>, not SPY's. That mismatch usually forces a choice: a real, broker-resting stop on the option (but in premium terms that drift from your level), or a mental &ldquo;watch SPY&rdquo; stop (that depends on you being at the screen). You don't have to accept either one whole.</p>
-    <h2>Convert the level into a premium</h2>
-    <p>Mark the <strong>SPY level</strong> where the idea is invalid, then translate it into an <strong>option-premium stop</strong> using the contract's <a href="/journal/what-is-delta-options.html">delta</a>. If a $2 adverse move in SPY invalidates the trade and the option's delta is ~0.40, that's roughly a $0.80 move in the option &mdash; so the stop goes about $0.80 under your fill, plus a small cushion for <a href="/journal/bid-ask-spread-explained.html">spread</a> noise. You reasoned in levels; the order rests where it can actually fill. Delta isn't fixed, so the conversion is an approximation that gets rougher the further price travels &mdash; worth re-checking if the trade widens out.</p>
-    <h2>Why a resting order beats a mental stop</h2>
-    <p>A stop resting <em>at your broker</em> is still protecting you if your connection drops, your platform freezes, or you simply look away. A mental stop only works while you are there and honest with yourself. And because it's sized to your level rather than some round premium number, it doesn't get knocked out by ordinary spread wiggle before SPY has actually done anything wrong.</p>
-    <p class="pull">Put the stop on the option, so it can fill. Size it to your SPY level, so it means what you meant.</p>
-    <h2>Where the level comes from</h2>
-    <p>The conversion is the easy half. The harder half is picking a SPY level that is genuinely invalidation and not just noise &mdash; and that's a structure question. Dealer positioning gives you the candidates: the far side of the gamma flip, the put wall beneath you, the edge of the expected-move band. NoVo maps those levels live on SPY, QQQ and IWM. Where the stop goes, and whether the order is placed at all, is yours.</p>
+    <p>Short answer: <strong>the map is structure-agnostic</strong>. NoVo maps dealer positioning strike by strike &mdash; the gamma flip, the call and put walls, the expected-move band &mdash; on SPY, QQQ and IWM. Those levels describe the underlying, not your ticket, so they read the same whether you buy a single near-the-money option or work a <a href="/journal/single-options-vs-spreads-scalping.html">spread</a> around them. Which structure you use is your decision, at your own broker.</p>
+    <h2>Where single options fit</h2>
+    <p>A single near-the-money option gives maximum responsiveness to a level-to-level move, the <a href="/journal/getting-filled-at-the-mid.html">cleanest and fastest fills</a> on liquid strikes, and a dead-simple position with <strong>risk capped at the premium</strong> &mdash; you can never lose more than you put in. Spreads add legs, cap the upside, introduce a short leg with <a href="/journal/early-assignment-risk.html">assignment risk</a>, and are slower to fill as a combo. On a fast level-to-level scalp, that speed and simplicity is usually the point.</p>
+    <h2>Where spreads fit</h2>
+    <p>A defined-risk spread trades the home run for something cheaper and more probable &mdash; and it leans on the same map from the other side. A short strike parked beyond the call wall or the put wall is a bet on where price <em>won't</em> go, which is exactly the question dealer positioning speaks to. The map gives you the wall and the <a href="/journal/delta-based-strike-selection.html">strike detail</a> behind it; the structure you wrap around it is yours.</p>
+    <p class="pull">Dealer levels describe the underlying, not your ticket. The map reads the same whether you're long one contract or short a spread &mdash; the structure is your call.</p>
+    <h2>What NoVo actually does</h2>
+    <p>NoVo maps where dealers are positioned, keeps it current through the session, and tells you what that structure has tended to mean &mdash; with the sample size behind the claim. It doesn't place orders, connect to a broker, or pick a structure for you. You bring the trade; NoVo brings the terrain it happens on.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +88,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-wash-sale-rule.html"><span class="rk">Trader Tax</span>The Wash-Sale Rule</a></li><li><a href="/journal/what-percentage-of-traders-are-profitable.html"><span class="rk">FAQ</span>What Percentage of Day Traders Are Actually Profitable?</a></li><li><a href="/journal/why-scalping-isnt-mobile.html"><span class="rk">Getting Started</span>Why Serious Scalping Isn't a Mobile Activity</a></li><li><a href="/journal/does-my-broker-offer-0dte-spy.html"><span class="rk">FAQ</span>Does My Broker Offer 0DTE SPY Options? How to Check</a></li><li><a href="/journal/how-many-contracts-beginner.html"><span class="rk">How-To</span>How Many SPY Contracts Should a Beginner Trade? (One)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/about-novo" style="color:var(--cyan);font-weight:700;">All NoVo, Guides &amp; FAQ articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/how-to-backtest-a-0dte-strategy.html"><span class="rk">How-To</span>How to Backtest a 0DTE Strategy (and Its Real Limits)</a></li><li><a href="/journal/how-to-use-a-morning-and-close-desk-note.html"><span class="rk">Market Analysis</span>Using the Desk Notes</a></li><li><a href="/journal/option-lost-money-spy-went-up.html"><span class="rk">FAQ</span>Why Did My SPY Option Lose Money When SPY Went My Way?</a></li><li><a href="/journal/trader-tax-status.html"><span class="rk">Trader Tax</span>Trader Tax Status (TTS), Explained</a></li><li><a href="/journal/what-to-do-after-first-losing-streak.html"><span class="rk">How-To</span>What to Do After Your First Losing Streak</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/about-novo" style="color:var(--cyan);font-weight:700;">All NoVo, Guides &amp; FAQ articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->
