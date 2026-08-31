@@ -18,7 +18,7 @@ Last verified against the deployed site and engine: **2026-08-30** (analyst/look
 | **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
 | **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + the live streaming map |
-| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo. **Its own product** — not included with Analyst or Trader, and neither is included with it |
+| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo, **plus the private members Discord** (same guild and role as Analyst/Trader, wired 2026-08-30). **Its own product** — not included with Analyst or Trader, and neither is included with it |
 
 - **7-day money-back on the first payment, all three plans.** Trader has no trial, so this is its
   evaluation window. Stated in `license.html`, `refund-policy.html`, `help.html`, `api/chat.js`,
@@ -153,6 +153,9 @@ layer underneath. Nothing in this section appears on any free page.
 ## NoVo Trader — $209/mo · includes all of Analyst
 
 - **The live dealer map, streamed** — the levels drawn on a candle chart that moves with the tape
+- **Ticker switcher (2026-08-30)** — SPY / QQQ / IWM pills in the chart hero; per-viewer, instant,
+  no restart. Candles, VWAP, EMAs, session levels and dealer levels all follow the selection; the
+  Market Intel strip still describes the engine’s ticker (named in the nav pill)
 - **Every level labelled in the pane** — gamma flip, call and put walls, gravity, expected-move
   bands, VWAP, opening range, and the pre-market / after-hours / prior-day highs and lows
 - **Structural audit rerun at the top of every hour** — macro bias, levels, patterns, thesis
