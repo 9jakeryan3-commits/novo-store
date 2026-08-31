@@ -1823,22 +1823,22 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tools" aria-label="Drawing tools">
-            <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;</button>
-            <button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;</button>
-            <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low">Fib</button>
-            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;</button>
-            <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;</button>
-            <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;</button>
-            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;</button>
+            <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;<span class="ctb-l">&nbsp;LEVEL</span></button>
+            <button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;<span class="ctb-l">&nbsp;TREND</span></button>
+            <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low"><span class="ctb-s">Fib</span><span class="ctb-l">FIB</span></button>
+            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button>
+            <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;<span class="ctb-l">&nbsp;CLEAR</span></button>
+            <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
+            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
             <button type="button" class="ctb-btn" data-tog="vwap" title="VWAP curve">VWAP</button>
             <button type="button" class="ctb-btn" data-tog="ema" title="EMA 9 / 21">EMA</button>
-            <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels">LVLS</button>
-            <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram">VOL</button>
-            <button type="button" class="ctb-btn" data-tog="ha" title="Heikin Ashi candles">HA</button>
-            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber">VP</button>
+            <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels"><span class="ctb-s">LVLS</span><span class="ctb-l">LEVELS</span></button>
+            <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram"><span class="ctb-s">VOL</span><span class="ctb-l">VOLUME</span></button>
+            <button type="button" class="ctb-btn" data-tog="ha" title="Heikin Ashi candles"><span class="ctb-s">HA</span><span class="ctb-l">HEIKIN ASHI</span></button>
+            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber"><span class="ctb-s">VP</span><span class="ctb-l">VOLUME PROFILE</span></button>
           </div>
           <span id="ctb-hint" class="ctb-hint"></span>
         </div>
@@ -1880,6 +1880,24 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
         #scale-menu .sm-c { width: 12px; flex: 0 0 12px; color: var(--cyn); font-weight: 800; }
         #scale-menu .sm-sep { height: 1px; background: var(--bdr2); margin: 4px 6px; }
+        /* SPELLED-OUT TOOLBAR (2026-08-31, Jake: "let those names spell out on desktop, let it
+           fill that tool bar"). Full names only where the row genuinely has the width — with every
+           long label on, the toolbar runs ~1300px before the hero price, so the gate sits at
+           1480px. Below it the compact glyphs stay; the row must NEVER wrap. */
+        .ctb-btn { white-space: nowrap; }
+        .ctb-l { display: none; }
+        @media (min-width: 1480px) {
+          .ctb-l { display: inline; }
+          .ctb-s { display: none; }
+        }
+        /* Ticker selector beside the price (2026-08-31, Jake): on desktop the pills move to the
+           right, next to the hero price, and the toolbar takes the left. Pure flex order — the DOM
+           stays put, so the mobile hero (its own wrap layout) is untouched. */
+        @media (min-width: 769px) {
+          .spy-hero-l { order: 2; align-items: flex-end; margin: 0 16px 0 12px; }
+          #chart-toolbar { order: 1; justify-content: flex-start; }
+          .spy-hero-r { order: 3; }
+        }
       </style>
       <!-- Live SPY chart — NoVo's OWN (candles + its levels & entry/exit markers) -->
       <!-- Vendored (2026-08-31): this was the last third-party dependency on the chart's critical
