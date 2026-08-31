@@ -691,6 +691,10 @@
     {
       "source": "/trader/sw.js",
       "destination": "/trader-sw.js"
+    },
+    {
+      "source": "/journal/:slug",
+      "destination": "/journal/:slug.html"
     }
   ],
   "functions": {
