@@ -529,6 +529,9 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .b3 .b3-v { color: var(--txt1); font-weight: 700; }
 .b3 .b3-d { font-size: 9.5px; color: var(--txt3); font-weight: 400; }
 .b3 .pos { color: var(--grn); } .b3 .neg { color: var(--red); }
+.read2-body { flex: 1 1 0; min-height: 0; max-height: 170px; overflow-y: auto; padding: 10px 16px 14px;
+  font-size: 12px; line-height: 1.7; color: var(--txt2); white-space: pre-wrap; }
+#row-unique { grid-template-rows: auto auto; }
 .spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
 .spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
@@ -1136,6 +1139,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* The Line + Three Books stack on a phone; the row wrapper stops being a 2-col grid. */
   #col-feed #row-unique { display: flex !important; flex-direction: column; }
   #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap { max-height: 260px; }
+  #col-feed #card-read .read2-body { max-height: 240px; }
   #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
   #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
   /* Mobile has an Analysis tab too -- it is this column. The panel is a base display:none, so it
@@ -1857,6 +1861,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           <span id="board-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
         </div>
         <div class="b3-wrap"><table class="b3" id="b3-table"><tbody></tbody></table></div>
+      </div>
+      <!-- Today's written read — the desk note Trader members already own via Analyst; full width
+           under the Line/Books pair, scrolling internally so the row never balloons. -->
+      <div id="card-read" class="card" style="flex-direction:column;overflow:hidden;grid-column:1/-1;border-top:1px solid var(--bdr);">
+        <div class="ch">
+          <span class="ch-title" id="read2-title">Today&rsquo;s read</span>
+          <span id="read2-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
+        </div>
+        <div id="read2-body" class="read2-body">&mdash;</div>
       </div>
     </div>
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
@@ -2614,7 +2627,27 @@ function _renderBoard(){
   rows+='<tr><td class="b3-lbl">Exp. move</td>'+TKS.map(function(t){return cell(t,function(b){
     if(!b.em_low||!b.em_high) return '<td class="b3-d">&mdash;</td>';
     return '<td class="b3-d"><span class="b3-v">'+b.em_low.toFixed(2)+'</span> &ndash; <span class="b3-v">'+b.em_high.toFixed(2)+'</span></td>';});}).join('')+'</tr>';
+  // Skew + the MM hedging split — the engine's own IV work, per ticker. Positive skew (puts
+  // over calls) reads red: the crowd is paying up for downside.
+  rows+='<tr><td class="b3-lbl">Skew put&minus;call</td>'+TKS.map(function(t){return cell(t,function(b){
+    var sk=b.skew||{}; if(sk.skew_pts===undefined) return '<td class="b3-d">&mdash;</td>';
+    var sp=+sk.skew_pts;
+    return '<td><span class="b3-v '+(sp>=0?'neg':'pos')+'">'+(sp>=0?'+':'')+sp.toFixed(1)+'</span> <span class="b3-d">'+(+sk.put_iv).toFixed(1)+'/'+(+sk.call_iv).toFixed(1)+'</span></td>';});}).join('')+'</tr>';
+  rows+='<tr><td class="b3-lbl">MM fast/slow</td>'+TKS.map(function(t){return cell(t,function(b){
+    var sk=b.skew||{}; if(sk.mm_fast===undefined) return '<td class="b3-d">&mdash;</td>';
+    var d2=+(sk.mm_spread||0);
+    return '<td><span class="b3-v">'+(+sk.mm_fast).toFixed(1)+'/'+(+sk.mm_slow).toFixed(1)+'</span> <span class="b3-d">'+(d2>=0?'+':'')+d2.toFixed(1)+'</span></td>';});}).join('')+'</tr>';
   tb.innerHTML=rows;
+  // Today's written read — fills once per board poll; plain text, escaped by textContent.
+  try{
+    var rd=_abData.read;
+    var tE=document.getElementById('read2-title'), bE=document.getElementById('read2-body'), sE=document.getElementById('read2-stamp');
+    if(rd&&rd.text){
+      if(tE) tE.textContent=rd.title||'Today’s read';
+      if(bE) bE.textContent=rd.text;
+      if(sE) sE.textContent=rd.ts?String(rd.ts).slice(0,16):'';
+    } else if(bE&&bE.textContent==='—'){ bE.textContent='No published read yet this session.'; }
+  }catch(_e){}
   try{ _renderChip(); }catch(_e){}
   var st=document.getElementById('board-stamp');
   if(st){
@@ -2901,6 +2934,57 @@ function _renderChip(){
   el.innerHTML='<span class="c-reg '+(sg?'sg':'lg')+'">'+(sg?'short gamma':'long gamma')+'</span>'+
     '<span class="c-flip">'+Math.abs(d).toFixed(2)+'% '+(d>=0?'above':'below')+' flip '+B.flip.toFixed(2)+'</span>';
 }
+// ── Extended-hours shading (TradingView-style) ────────────────────────────────────────────────
+// A lightweight-charts 4.1 series PRIMITIVE with zOrder 'bottom', so the tint paints behind the
+// candles on the chart's own canvas — no DOM overlay guessing at coordinates. Bar times are
+// ET-shifted epochs, so minutes-of-day fall straight out of the timestamp: pre-market
+// (04:00–09:30) amber, RTH unshaded, post + overnight (16:00–04:00) blue. Intraday frames only —
+// a session tint on a daily chart is noise. Weekend/overnight bars classify as blue, which is
+// exactly what they are: extended hours.
+const _SHADE_PRE='rgba(255,167,38,0.05)', _SHADE_EXT='rgba(59,130,246,0.055)';
+function _sessOf(t){ var m=Math.floor(t/60)%1440; if(m>=570&&m<960) return 0; if(m>=240&&m<570) return 1; return 2; }
+const _sessShade={
+  _chart:null,_series:null,
+  attached:function(p){ this._chart=p.chart; this._series=p.series; },
+  detached:function(){ this._chart=null; this._series=null; },
+  updateAllViews:function(){},
+  paneViews:function(){
+    var self=this;
+    return [{
+      zOrder:function(){ return 'bottom'; },
+      renderer:function(){ return { draw:function(target){
+        try{
+          if(typeof _ctbTf!=='number') return;                   // deep frames: no session tint
+          var cs=_novoViewC; if(!cs||cs.length<2||!self._chart) return;
+          var tsc=self._chart.timeScale();
+          var vr=tsc.getVisibleRange(); if(!vr) return;
+          target.useBitmapCoordinateSpace(function(scope){
+            var ctx=scope.context, H=scope.bitmapSize.height, pr=scope.horizontalPixelRatio;
+            var runs=[], cur=null;
+            for(var i=0;i<cs.length;i++){
+              var t=cs[i].time;
+              if(t<vr.from-_ctbTf*120||t>vr.to+_ctbTf*120) continue;
+              var sess=_sessOf(t);
+              if(cur&&cur.s===sess){ cur.t2=t; }
+              else { if(cur) runs.push(cur); cur={s:sess,t1:t,t2:t}; }
+            }
+            if(cur) runs.push(cur);
+            var half=(_ctbTf*60)/2;
+            runs.forEach(function(r){
+              if(r.s===0) return;                                 // RTH stays clean
+              var x1=tsc.timeToCoordinate(r.t1), x2=tsc.timeToCoordinate(r.t2);
+              if(x1===null||x2===null) return;
+              var bw=(tsc.timeToCoordinate(r.t1+_ctbTf*60)||x1+6)-x1;
+              var a=(x1-bw/2)*pr, b2=(x2+bw/2)*pr;
+              ctx.fillStyle=(r.s===1)?_SHADE_PRE:_SHADE_EXT;
+              ctx.fillRect(a,0,b2-a,H);
+            });
+          });
+        }catch(_e){}
+      } }; }
+    }];
+  }
+};
 function _showVeil(){
   var v=document.getElementById('chart-veil');
   if(v){ v.textContent='loading '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; v.classList.add('on'); }
@@ -2956,6 +3040,7 @@ function _initNovoChart(){
   _novoVolSeries=_novoChart.addHistogramSeries({priceScaleId:'vol',priceFormat:{type:'volume'},
     priceLineVisible:false,lastValueVisible:false});
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
+  try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_sessShade); }catch(_e){}
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
   // Pro overlays: watermark, OHLCV legend, NoVo read chip, switch veil. Mounted here so the
