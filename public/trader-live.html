@@ -457,6 +457,30 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   transition: color .15s ease, border-color .15s ease, background .15s ease; }
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
+/* ── ANALYSIS tab: The Line feed + the three-book dealer board ─────────────────────────────── */
+.lf-area { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 4px 14px 10px; }
+.lf-row  { padding: 8px 0 7px; border-bottom: 1px solid var(--bdr2); }
+.lf-row:last-child { border-bottom: 0; }
+.lf-head { display: flex; align-items: baseline; gap: 8px; }
+.lf-t    { font-family: var(--font); font-size: 10px; color: var(--txt3); letter-spacing: .5px; }
+.lf-x    { font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--txt1); }
+.lf-bias { font-family: var(--font); font-size: 9.5px; font-weight: 800; letter-spacing: 1px; padding: 1px 6px; border-radius: 3px; }
+.lf-bias.up { color: var(--grn); background: rgba(52,211,153,.1); }
+.lf-bias.dn { color: var(--red); background: rgba(244,63,94,.1); }
+.lf-m    { margin-top: 3px; font-size: 10.5px; line-height: 1.55; color: var(--txt3); }
+.lf-m b  { color: var(--txt2); font-weight: 700; }
+.lf-empty{ padding: 16px 2px; font-size: 11.5px; color: var(--txt3); line-height: 1.6; }
+.b3-wrap { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 2px 10px 10px; }
+.b3      { width: 100%; border-collapse: collapse; }
+.b3 td, .b3 th { padding: 4px 6px; font-family: var(--font); font-size: 11.5px; text-align: right;
+  border-bottom: 1px solid var(--bdr2); white-space: nowrap; }
+.b3 tr:last-child td { border-bottom: 0; }
+.b3 .b3-lbl { text-align: left; font-family: var(--sans); font-size: 9.5px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--txt3); }
+.b3 th { font-size: 10.5px; font-weight: 900; letter-spacing: 1.5px; color: var(--txt1); border-bottom: 1px solid var(--bdr); }
+.b3 .b3-v { color: var(--txt1); font-weight: 700; }
+.b3 .b3-d { font-size: 9.5px; color: var(--txt3); font-weight: 400; }
+.b3 .pos { color: var(--grn); } .b3 .neg { color: var(--red); }
 .spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
 .spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
@@ -1061,6 +1085,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      doesn't know about the mobile tab bar, so force it to match
      #workspace's already-correct calculation. */
   #col-feed { flex-direction: column !important; height: 100% !important; overflow-y: auto !important; padding-bottom: 0 !important; }
+  /* The Line + Three Books stack on a phone; the row wrapper stops being a 2-col grid. */
+  #col-feed #row-unique { display: flex !important; flex-direction: column; }
+  #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap { max-height: 260px; }
   #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
   #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
   /* Mobile has an Analysis tab too -- it is this column. The panel is a base display:none, so it
@@ -1725,6 +1752,28 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <div class="log-area"><div id="intel-output">Awaiting command...</div></div>
     </div>
 
+    <!-- The two members-only reads (2026-08-30, Jake: "this tab should show things you can't get
+         anywhere else"). LEFT: 'The Line' — the engine's confirmed level-break playbooks for the
+         ticker the hero switcher has selected; plans.html has sold this in the Trader column all
+         along and the tab only carried a base-rate row about it. RIGHT: the three index books side
+         by side — flip, walls, gravity, net GEX and the expected-move band for SPY, QQQ and IWM at
+         once, off the per-ticker dealer hashes. Both render from /api/analysis-board (~60s poll). -->
+    <div id="row-unique" style="grid-row:2;display:grid;grid-template-columns:1.15fr 1fr;min-height:0;">
+      <div id="card-line" class="card" style="flex-direction:column;overflow:hidden;border-right:1px solid var(--bdr);">
+        <div class="ch">
+          <span class="ch-title">The Line &mdash; <span id="line-tk">SPY</span> level breaks</span>
+          <span id="line-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
+        </div>
+        <div id="line-feed" class="lf-area"><div class="lf-empty">Loading&hellip;</div></div>
+      </div>
+      <div id="card-board" class="card" style="flex-direction:column;overflow:hidden;">
+        <div class="ch">
+          <span class="ch-title">The Three Books &mdash; live dealer structure</span>
+          <span id="board-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
+        </div>
+        <div class="b3-wrap"><table class="b3" id="b3-table"><tbody></tbody></table></div>
+      </div>
+    </div>
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
     <div id="card-brain" class="card" style="flex-direction:column;overflow:hidden;">
       <div class="ch">
@@ -2419,6 +2468,8 @@ function _paintTkrUI(){
     b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false');
   });
   document.querySelectorAll('.spy-hero-sub').forEach(function(el){ el.textContent=_TKR_NAME[sel]||sel; });
+  var lt=document.getElementById('line-tk'); if(lt) lt.textContent=sel;
+  try{ _renderLine(); }catch(_e){}
 }
 function _setTkr(tk){
   if(tk!==_selTkr()){
@@ -2440,6 +2491,83 @@ document.querySelectorAll('#tkr-pills .tkr-pill').forEach(function(b){
   b.addEventListener('click',function(){ _setTkr(b.getAttribute('data-tkr')); });
 });
 _paintTkrUI();
+
+// ── ANALYSIS tab: The Line + the three-book dealer board ──────────────────────────────────────
+// One poll feeds both cards. The board shows all three tickers at once; the Line feed follows the
+// hero's ticker switcher (each ticker has its own 25h playbook feed on the server).
+let _abData=null;
+function _fmtGex(raw,spot){
+  // Same per-1% display convention as the Net GEX tile: raw × spot × 0.01, in $M/$B.
+  if(raw===null||raw===undefined||!(spot>0)) return null;
+  var v=raw*spot*0.01, a=Math.abs(v);
+  var s=a>=1e9?(v/1e9).toFixed(2)+'B':(v/1e6).toFixed(1)+'M';
+  return (v>=0?'+':'')+s;
+}
+function _renderBoard(){
+  var tb=document.querySelector('#b3-table tbody'); if(!tb||!_abData) return;
+  var B=_abData.board||{}, TKS=['SPY','QQQ','IWM'];
+  function cell(tk,fn){ var b=B[tk]; return b?fn(b):'<td class="b3-d">&mdash;</td>'; }
+  function lvl(b,k){
+    var v=b[k]; if(!v) return '<td class="b3-d">&mdash;</td>';
+    var d=(b.spot>0)?((v-b.spot)/b.spot*100):null;
+    return '<td><span class="b3-v">'+v.toFixed(2)+'</span> <span class="b3-d">'+
+      (d===null?'':(d>=0?'+':'')+d.toFixed(1)+'%')+'</span></td>';
+  }
+  var rows='<tr><th class="b3-lbl">'+''+'</th>'+TKS.map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr>';
+  rows+='<tr><td class="b3-lbl">Spot</td>'+TKS.map(function(t){return cell(t,function(b){
+    return '<td class="b3-v">'+(b.spot?b.spot.toFixed(2):'&mdash;')+'</td>';});}).join('')+'</tr>';
+  rows+='<tr><td class="b3-lbl">Net GEX /1%</td>'+TKS.map(function(t){return cell(t,function(b){
+    var g=_fmtGex(b.net_gex,b.spot); if(g===null) return '<td class="b3-d">&mdash;</td>';
+    return '<td class="b3-v '+(b.net_gex>=0?'pos':'neg')+'">'+g+'</td>';});}).join('')+'</tr>';
+  [['flip','Gamma flip'],['call_wall','Call wall'],['put_wall','Put wall'],['gravity','Gravity']]
+    .forEach(function(rk){
+      rows+='<tr><td class="b3-lbl">'+rk[1]+'</td>'+TKS.map(function(t){return cell(t,function(b){return lvl(b,rk[0]);});}).join('')+'</tr>';
+    });
+  rows+='<tr><td class="b3-lbl">Exp. move</td>'+TKS.map(function(t){return cell(t,function(b){
+    if(!b.em_low||!b.em_high) return '<td class="b3-d">&mdash;</td>';
+    return '<td class="b3-d"><span class="b3-v">'+b.em_low.toFixed(2)+'</span> &ndash; <span class="b3-v">'+b.em_high.toFixed(2)+'</span></td>';});}).join('')+'</tr>';
+  tb.innerHTML=rows;
+  var st=document.getElementById('board-stamp');
+  if(st){
+    var ts=Math.max.apply(null,TKS.map(function(t){return (B[t]&&B[t].ts)||0;}));
+    st.textContent=ts?('as of '+new Date(ts*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})):'—';
+  }
+}
+function _renderLine(){
+  var el=document.getElementById('line-feed'); if(!el||!_abData) return;
+  var items=(_abData.line||{})[_selTkr()]||[];
+  if(!items.length){
+    el.innerHTML='<div class="lf-empty">No confirmed level breaks for '+_selTkr()+' in the last 25 hours. '+
+      'The Line fires only when price holds beyond a mapped level on consecutive checks — silence means the levels held.</div>';
+    return;
+  }
+  el.innerHTML=items.map(function(it){
+    var bias=String(it.bias||'').toUpperCase();
+    var cls=/LONG|UP|BULL/.test(bias)?'up':(/SHORT|DOWN|BEAR/.test(bias)?'dn':'');
+    var meta=[];
+    if(it.hold) meta.push('<b>Holds:</b> '+it.hold);
+    if(it.brk) meta.push('<b>Breaks:</b> '+it.brk);
+    if(it.watch) meta.push('<b>Watch:</b> '+it.watch);
+    return '<div class="lf-row"><div class="lf-head"><span class="lf-t">'+(it.ts||'')+'</span>'+
+      '<span class="lf-x">'+(it.text||'')+'</span>'+
+      (bias?'<span class="lf-bias '+cls+'">'+bias+'</span>':'')+
+      (it.now?'<span class="lf-t">now '+it.now+'</span>':'')+'</div>'+
+      (meta.length?'<div class="lf-m">'+meta.join(' &middot; ')+'</div>':'')+
+      '</div>';
+  }).join('');
+  var st=document.getElementById('line-stamp');
+  if(st) st.textContent=items.length+' event'+(items.length===1?'':'s');
+}
+async function _loadAnalysisBoard(){
+  try{
+    var u=NOVO_URL('/api/analysis-board'); if(!u) return;
+    var r=await fetch(u); if(!r.ok) return;
+    _abData=await r.json();
+    _renderBoard(); _renderLine();
+  }catch(_e){}
+}
+_loadAnalysisBoard();
+(function _ab(){ Promise.resolve(_loadAnalysisBoard()).catch(function(){}).finally(function(){ setTimeout(_ab, 60000); }); })();
 function _initNovoChart(){
   if(_novoSeries) return true;
   if(!window.LightweightCharts) return false;              // CDN lib not ready yet — retry next tick
