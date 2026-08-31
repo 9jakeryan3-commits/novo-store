@@ -2496,9 +2496,11 @@ async function loadNovoChart(){
     const r=await fetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok) return;
     const d=await r.json();
     // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
-    // that answers for a ticker other than the current selection. (d.ticker is absent only from a
-    // pre-rollout server, which can only ever serve the engine ticker — same check, via _reqTkr.)
-    if((d.ticker||_reqTkr)!==_selTkr()) return;
+    // that answers for a ticker other than the current selection. A payload with NO d.ticker is a
+    // pre-rollout server that ignored the query param and served the ENGINE ticker's data — accept
+    // it only when that is what the viewer selected, or SPY candles would paint under a QQQ caption.
+    if(d.ticker){ if(d.ticker!==_selTkr()) return; }
+    else if(!_selIsExec()) return;
     // Selected ticker ≠ engine ticker → the WS lane is silent for this chart; the hero price and
     // day-change render from this poll instead. prev_close is server-derived from the ticker's own
     // prior RTH session.
