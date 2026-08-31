@@ -1137,10 +1137,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      #workspace's already-correct calculation. */
   #col-feed { flex-direction: column !important; height: 100% !important; overflow-y: auto !important; padding-bottom: 0 !important; }
   /* The Line + Three Books stack on a phone; the row wrapper stops being a 2-col grid. */
-  #col-feed #row-unique { display: flex !important; flex-direction: column; }
-  #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap { max-height: 260px; }
+    /* row-unique is NOT a .card, so it missed the flex:0 0 auto below and flex-shrink crushed it
+     to 0px while its children painted over What NoVo Knows — the garbled-headers mangle (Jake,
+     2026-08-31 07:23). And every desktop flex:1 1 0 content area inside an auto-height mobile
+     card computes to a ZERO basis — the read showed one clipped line. Mobile sizes content to
+     itself, capped, scrolling internally. */
+  #col-feed #row-unique { display: flex !important; flex-direction: column; flex: 0 0 auto !important; min-height: 0; }
+  #col-feed #card-line .lf-area, #col-feed #card-board .b3-wrap {
+    flex: 0 0 auto !important; height: auto; max-height: 260px; overflow-y: auto; }
   #col-feed #card-read { display: flex !important; flex-direction: column; }
-  #col-feed #card-read .read2-body { max-height: 240px; }
+  #col-feed #card-read .read2-body { flex: 0 0 auto !important; height: auto; max-height: 240px; overflow-y: auto; }
   #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
   #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
   /* Mobile has an Analysis tab too -- it is this column. The panel is a base display:none, so it
