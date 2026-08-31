@@ -1395,6 +1395,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     content: attr(data-short); font-size: 9px; letter-spacing: 1px; } */
   #saas-header #card-mktintel .dk,
   #saas-header #card-mktintel .bar-lbl { font-size: 9.5px; letter-spacing: 1.2px; }
+  /* Viewer on another ticker: the engine-scoped tiles say WHOSE numbers they are. */
+  #saas-header #card-mktintel.alt-tkr .dk[data-eng]::after,
+  #saas-header #card-mktintel.alt-tkr .bar-lbl[data-eng]::after {
+    content: "  b7 " attr(data-eng); color: var(--txt3); opacity: .75; }
   #workspace {
     /* THREE equal tracks. The top keeps its 2:1 feel by spanning 2 of 3 (the chart side
        gets ~66%, the right rail ~33%), and the bottom becomes a true 3-across row:
@@ -2336,7 +2340,10 @@ function connectTelemetry(){
       const gexRaw=parseFloat(lt.net_gex||0);
       const gex = spy>0 ? gexRaw*spy*0.01 : null;   // no spot -> can't scale to the per-1% display; show '—', never the raw per-$1 value
       const ge=document.getElementById('t-gex');
-      if(ge){ if(gex===null){ ge.textContent='—'; ge.style.color=''; } else { const a=Math.abs(gex);ge.textContent=(gex>=0?'+':'')+(a>=1e9?(gex/1e9).toFixed(1)+'B':a>=1e6?(gex/1e6).toFixed(2)+'M':(gex/1e3).toFixed(0)+'k');ge.style.color=gex<0?'var(--red)':'var(--grn)'; } }
+      // The GEX tile follows the viewer's TICKER SWITCHER: this ws lane carries the ENGINE ticker's
+      // book, so it only writes the tile while that IS the selection — otherwise the 60s board poll
+      // owns it with the selected ticker's own net GEX (same per-1% convention).
+      if(ge&&_selIsExec()){ if(gex===null){ ge.textContent='—'; ge.style.color=''; } else { const a=Math.abs(gex);ge.textContent=(gex>=0?'+':'')+(a>=1e9?(gex/1e9).toFixed(1)+'B':a>=1e6?(gex/1e6).toFixed(2)+'M':(gex/1e3).toFixed(0)+'k');ge.style.color=gex<0?'var(--red)':'var(--grn)'; } }
       const _fmtM=(v)=>{const x=parseFloat(v||0);return (x>=0?'+':'')+(Math.abs(x)>=1e6?(x/1e6).toFixed(1)+'M':(x/1e3).toFixed(0)+'k');};
       // Book Delta/Theta/Vega removed from the Trader dashboard 2026-07-10 — no trading edge (4 studies:
       // never vary in sign, coin-flip on magnitude) and noise to the Trader. Still fed to the Analyst desk
@@ -2580,9 +2587,29 @@ function _paintTkrUI(){
     b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false');
   });
   document.querySelectorAll('.spy-hero-sub').forEach(function(el){ el.textContent=_TKR_NAME[sel]||sel; });
-  var lt=document.getElementById('line-tk'); if(lt) lt.textContent=sel;
+    var lt=document.getElementById('line-tk'); if(lt) lt.textContent=sel;
   try{ _renderLine(); }catch(_e){}
   try{ _paintWm(); _renderChip(); }catch(_e){}
+  // Strip honesty when the chart is on another ticker: Net GEX follows the selection (board
+  // poll); the engine-scoped tiles (macro/retail/rvol/tape/squeeze/score) keep the engine's
+  // numbers and their labels grow an engine-ticker tag so nothing lies by adjacency.
+  try{
+    var card=document.getElementById('card-mktintel');
+    if(card){
+      var eng=window._novoExecTkr||'SPY';
+      ['t-regime','t-retail','t-rvol','t-imb','t-sqz','t-apex'].forEach(function(id){
+        var v=document.getElementById(id); if(!v) return;
+        var l=v.parentElement?v.parentElement.querySelector('.dk,.bar-lbl'):null;
+        if(l) l.setAttribute('data-eng',eng);
+      });
+            var _wasAlt=card.classList.contains('alt-tkr'), _nowAlt=!_selIsExec();
+      card.classList.toggle('alt-tkr', _nowAlt);
+      // Switching BACK to the engine ticker: blank the GEX tile rather than let the other
+      // book's number sit untagged for the ~2s until the next heavy ws frame rewrites it.
+      if(_wasAlt&&!_nowAlt){ var _g3=document.getElementById('t-gex'); if(_g3){ _g3.textContent='—'; _g3.style.color=''; } }
+    }
+    if(typeof _renderBoard==='function'&&_abData) _renderBoard();
+  }catch(_e){}
 }
 function _setTkr(tk){
   if(tk!==_selTkr()){
@@ -2652,6 +2679,20 @@ function _renderBoard(){
     var d2=+(sk.mm_spread||0);
     return '<td><span class="b3-v">'+(+sk.mm_fast).toFixed(1)+'/'+(+sk.mm_slow).toFixed(1)+'</span> <span class="b3-d">'+(d2>=0?'+':'')+d2.toFixed(1)+'</span></td>';});}).join('')+'</tr>';
   tb.innerHTML=rows;
+    // The GEX tile for a non-engine selection: the selected ticker's own book off the board hash,
+  // same per-1% convention as the ws lane. Everything else on the strip is engine-scoped
+  // computation and stays so — the labels grow an engine-ticker tag instead (see _paintTkrUI).
+  try{
+    if(!_selIsExec()){
+      var _gb=(_abData.board||{})[_selTkr()]||null;
+      var _ge2=document.getElementById('t-gex');
+      if(_ge2){
+        var _g2=(_gb&&_gb.net_gex!==null&&_gb.net_gex!==undefined&&_gb.spot>0)?_gb.net_gex*_gb.spot*0.01:null;
+        if(_g2===null){ _ge2.textContent='—'; _ge2.style.color=''; }
+        else { var _a2=Math.abs(_g2); _ge2.textContent=(_g2>=0?'+':'')+(_a2>=1e9?(_g2/1e9).toFixed(1)+'B':_a2>=1e6?(_g2/1e6).toFixed(2)+'M':(_g2/1e3).toFixed(0)+'k'); _ge2.style.color=_g2<0?'var(--red)':'var(--grn)'; }
+      }
+    }
+  }catch(_e){}
   // Today's written read — fills once per board poll; plain text, escaped by textContent.
   try{
     var rd=_abData.read;
