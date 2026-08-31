@@ -183,3 +183,65 @@ card('og-crypto.png', 'Crypto Market Map',
      'DEALER GAMMA  \u00b7  FUNDING BY VENUE  \u00b7  LIQUIDATIONS',
      '$79/mo', '\u00b7 7-day free trial', (0xa7, 0x8b, 0xfa),
      ladder((470, 414), (0xa7, 0x8b, 0xfa, 255), (0x7c, 0x3a, 0xed, 255)))
+
+# ---- Trader: the cockpit (2026-08-31 — the old card sold one-click entry and auto exits, the
+# retired execution product; Jake caught it in a Discord embed. The real terminal is the shot.) ----
+tshot = Image.open(os.path.join(PUB, 'screenshots', 'trader-live-chart.webp')).convert('RGBA')
+tw2 = 470
+tshot = tshot.resize((tw2, round(tshot.height * tw2 / tshot.width)), Image.LANCZOS)
+tshot = tshot.crop((0, 0, tw2, min(tshot.height, 414)))
+tframed = Image.new('RGBA', (tshot.width + 4, tshot.height + 4), (0x2e, 0x30, 0x36, 255))
+tframed.paste(tshot, (2, 2))
+
+card('og-trader.png', 'Trader', 'The cockpit. Every dealer level,' + chr(10) + 'living on the candles.',
+     'CHARTING TERMINAL  ·  1m–WEEKLY  ·  THE THREE BOOKS  ·  24/5',
+     '$209/mo', '· includes Analyst', (0x34, 0xd3, 0x99), tframed)
+
+# ---- Plans: four lanes, no execution claims (replaces the hand-made three-lane card whose Trader
+# lane read "One click in, exits automated") --------------------------------------------------------
+def plans_card():
+    im = background()
+    d = ImageDraw.Draw(im)
+    logo = Image.open(os.path.join(PUB, 'novo-logo.png')).convert('RGBA')
+    lw = 150
+    logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
+    im.paste(logo, ((1200 - lw) // 2, 34), logo)
+
+    tf = font('seguibl.ttf', 54)
+    t = 'Choose your lane.'
+    d.text(((1200 - d.textlength(t, font=tf)) // 2, 128), t, font=tf, fill=TXT1)
+    sf = font('segoeui.ttf', 26)
+    s2 = 'Read it free  →  the desk  →  the cockpit.'
+    d.text(((1200 - d.textlength(s2, font=sf)) // 2, 200), s2, font=sf, fill=TXT3)
+
+    lanes = [
+        ('FREE', '$0', 'Market notes + the Journal', 'No card, ever', (0xf5, 0x9e, 0x0b)),
+        ('CRYPTO MAP', '$79/mo', 'The dealer map, on crypto', '7-day free trial', (0xa7, 0x8b, 0xfa)),
+        ('ANALYST', '$129/mo', 'The desk — map, reads + NoVo', '7-day free trial', (0x22, 0xd3, 0xee)),
+        ('TRADER', '$209/mo', 'The cockpit — the terminal', 'Includes Analyst', (0x34, 0xd3, 0x99)),
+    ]
+    W, H, GAP = 264, 270, 20
+    x0 = (1200 - (W * 4 + GAP * 3)) // 2
+    y0 = 268
+    nf = font('segoeuib.ttf', 19)
+    pf = font('seguibl.ttf', 40)
+    df = font('segoeui.ttf', 19)
+    mf = font('segoeui.ttf', 16)
+    for i, (name, price, desc, note, ac) in enumerate(lanes):
+        x = x0 + i * (W + GAP)
+        d.rectangle([x, y0, x + W, y0 + 5], fill=ac)
+        d.rounded_rectangle([x, y0 + 5, x + W, y0 + H], radius=10,
+                            fill=(0x11, 0x16, 0x20, 255), outline=(0x2a, 0x33, 0x42, 255), width=1)
+        d.text((x + 20, y0 + 28), name, font=nf, fill=ac)
+        d.text((x + 20, y0 + 62), price, font=pf, fill=TXT1)
+        yy = y0 + 128
+        for ln in wrap(d, desc, df, W - 40):
+            d.text((x + 20, yy), ln, font=df, fill=TXT2)
+            yy += 26
+        d.text((x + 20, y0 + H - 40), note, font=mf, fill=TXT3)
+    d.text(((1200 - d.textlength('novo-options.trade', font=font('segoeuib.ttf', 22))) // 2, 578),
+           'novo-options.trade', font=font('segoeuib.ttf', 22), fill=TXT3)
+    im.save(os.path.join(PUB, 'og-plans.png'), optimize=True)
+    print('  wrote %-20s %s KB' % ('og-plans.png', os.path.getsize(os.path.join(PUB, 'og-plans.png')) // 1024))
+
+plans_card()
