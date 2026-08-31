@@ -1382,7 +1382,7 @@ function drawCoin(){
       <div class="kv"><span class="k">Sell spread</span><span class="v nu">${tc.sell_spread_pct.toFixed(3)}%</span></div>
       <div class="kv"><span class="k">Cheapness rank</span><span class="v nu">${tc.cheapness_rank} / ${Object.keys(SNAP.coins).length}</span></div>
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
-        Robinhood's own disclosed markup, at your fee tier.</div></div></div>`;
+        Robinhood's own disclosed markup, quoted at real trade size &mdash; not a headline rate.</div></div></div>`;
   }
   // 24h liquidation flow for THIS coin — forced selling, the crypto answer to a squeeze.
   const liq=(SNAP.health&&SNAP.health.liquidations_24h||[]).filter(x=>x.asset_code===CUR);
