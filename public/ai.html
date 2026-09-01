@@ -605,8 +605,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     box-shadow: 0 24px 80px rgba(0,0,0,.6); transform-origin: center bottom;
     transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; cursor: pointer; will-change: transform; }
   .aichat-card img { width: 100%; height: auto; display: block; }
-  .aichat-card figcaption { padding: 9px 13px; border-bottom: 1px solid var(--bdr,#2e3036);
-    font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; }
+  /* The caption has to scale WITH the fan, not sit at a fixed size inside it. At a fixed
+     11px a caption wraps to four or five lines in a 113px-wide card, which made the cards
+     283px tall inside a 228px container - they overflowed and collided with the section
+     below. In vw it stays the same share of the card at every width. */
+  .aichat-card figcaption { padding: clamp(4px,0.65vw,9px) clamp(5px,0.95vw,13px);
+    border-bottom: 1px solid var(--bdr,#2e3036); line-height: 1.25;
+    font-size: clamp(6px,0.8vw,11px); font-weight: 700;
+    letter-spacing: clamp(.3px,0.1vw,1.4px); text-transform: uppercase; }
   .aichat-1 { transform: translateX(28%) rotate(8deg); z-index: 4; }
   .aichat-2 { transform: translateX(-24%) rotate(3deg); z-index: 3; }
   .aichat-3 { transform: translateX(-76%) rotate(-3deg); z-index: 2; }
@@ -614,9 +620,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .aichat-card:hover, .aichat-card:focus-visible, .aichat-card.front {
     transform: translateX(-50%) translateY(-14px) rotate(0deg) scale(1.06); z-index: 6;
     box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
+  /* THE FAN IS THE LAYOUT AT EVERY WIDTH. It used to collapse to a 2x2 grid under 760px,
+     which cropped each card mid-sentence and left the container aspect-ratio reserving a
+     large empty band underneath it. The fan is built from percentages inside an
+     aspect-ratio box, so it just scales: the same arrangement on a phone as on a desktop.
+     Tap-to-front is what makes a card readable at that size, and it already works. */
   @media (max-width: 760px) {
-    .aichat-fan { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
-    .aichat-card { position: static; width: 100%; transform: none !important; box-shadow: 0 14px 44px rgba(0,0,0,.5); }
+    .aichat-fan { margin-top: 24px; }
   }
 </style>
 <section>
