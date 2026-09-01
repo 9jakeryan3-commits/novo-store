@@ -120,6 +120,12 @@ module.exports = async (req, res) => {
     mapped: list.length,
     // How many carry a real options book, so the "six cryptos" claim stops being hand-typed.
     books: list.filter(function (c) { return c.band === 'A'; }).length,
+    // Coins with a book OR leverage positioning: band A + band B. A THIRD number near 90 and
+    // not interchangeable with the other two -- it includes TRX (Deribit book, no retail
+    // listing) and excludes USDG (band C stablecoin, neither), which is the opposite membership
+    // to `coins`. They both read 90 today by coincidence; any copy saying "a book or leverage
+    // positioning" must read this one or it will start counting a coin that has neither.
+    bands: list.filter(function (c) { return c.band === 'A' || c.band === 'B'; }).length,
     list,
     // COUNT ONLY, no rows. The on-chain half is part of the subscription like everything else
     // here; what is free is knowing how much of it there is. The build reads this to keep the

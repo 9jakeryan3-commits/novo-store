@@ -15,7 +15,10 @@
   // of the seven real options books but no retail listing - so a stat labelled "coins mapped"
   // showing the tradable count was understating the map by one.
   var mapped = document.querySelectorAll('[data-mappedcount]');
-  if (!els.length && !chain.length && !asset.length && !mapped.length) return;
+  // band A + band B: coins with a book OR leverage positioning. A third number near 90,
+  // with the opposite membership to `coins` - it has TRX and not USDG.
+  var bands  = document.querySelectorAll('[data-bandcount]');
+  if (!els.length && !chain.length && !asset.length && !mapped.length && !bands.length) return;
   fetch('/api/crypto-free')
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
@@ -32,6 +35,9 @@
       }
       if (typeof j.mapped === 'number' && j.mapped > 0) {
         mapped.forEach(function (el) { el.textContent = String(j.mapped); });
+      }
+      if (typeof j.bands === 'number' && j.bands > 0) {
+        bands.forEach(function (el) { el.textContent = String(j.bands); });
       }
       els.forEach(function (el) {
         // data-coincount="words" wants "ninety" rather than "90" - the /plans copy reads

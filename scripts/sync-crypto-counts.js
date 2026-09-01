@@ -116,6 +116,15 @@ function get(url) {
     // every coin on the map. They differ by TRX -- a real options book, no retail listing -- so
     // anything saying "coins mapped" has to read this one or it undercounts by one.
     ['data-mappedcount span', /(<span data-mappedcount>)\d+(<\/span>)/g, '$1' + mapped + '$2'],
+    // THE THIRD NEAR-90 NUMBER: coins with a book OR leverage positioning = band A + band B.
+    // It is neither of the other two. `total` (tradable at retail) is also 90 today but is a
+    // DIFFERENT SET -- it includes USDG and excludes TRX, exactly the opposite membership of
+    // this one, which includes TRX (live Deribit book, no retail listing) and excludes USDG
+    // (band C stablecoin, no book and no perp). They agree at 90 by coincidence, and that
+    // coincidence ends the day USDG gets a perp or TRX gets listed. A sentence claiming "a book
+    // or leverage positioning" has to read this, or it will silently start counting a coin that
+    // has neither.
+    ['data-bandcount span', /(<span data-bandcount>)\d+(<\/span>)/g, '$1' + (bandA + bandB) + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+\+?(<\/span>)/g, '$1' + chain + '+$2'],
     ['data-assetcount span', /(<span data-assetcount>)\d+\+?(<\/span>)/g, '$1' + assets + '+$2'],
     ...(tools ? [['data-toolcount span', /(<span data-toolcount>)\d+(<\/span>)/g, '$1' + tools + '$2']] : []),
@@ -155,7 +164,7 @@ function get(url) {
       const t = fs.readFileSync(p, 'utf8');
       // data-mappedcount belongs in this list too: a page carrying ONLY that marker was never
       // opened, so the map-size count could go stale in exactly the file that cares most about it.
-      return /data-coincount/.test(t) || /data-mappedcount/.test(t) || /data-chaincount/.test(t)
+      return /data-coincount/.test(t) || /data-mappedcount/.test(t) || /data-bandcount/.test(t) || /data-chaincount/.test(t)
           || /data-toolcount/.test(t)
           || /tokens on Solana/.test(t)
           || /\b(all|across)?\s?\d+ coins\b/i.test(t);
