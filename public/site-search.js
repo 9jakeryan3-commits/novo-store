@@ -62,12 +62,39 @@
   wrap.className = 'ss-wrap';
   wrap.innerHTML =
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
-    'placeholder="Search NoVo — guides, coins, tools, the read archive…" '  +
     'aria-label="Search the site">' +
     '<div class="ss-panel" id="site-search-results" role="listbox"></div>';
   inner.insertAdjacentElement('afterend', wrap);
 
   var input = wrap.querySelector('#site-search-input');
+
+  // The placeholder has to FIT, or it truncates mid-word - the long one cut off at
+  // "the read archiv" on a phone. MEASURED, not guessed from breakpoints: breakpoints were
+  // picking the shortest string on a 412px phone while 354px of room sat unused, and any
+  // fixed number is wrong the moment the font or the copy changes. Try longest first, take
+  // the first that actually fits the box it is sitting in.
+  var PLACEHOLDERS = [
+    'Search NoVo — guides, coins, tools, the read archive…',
+    'Search NoVo — guides, coins, tools…',
+    'Search NoVo — guides, coins…',
+    'Search NoVo…'
+  ];
+  function setPlaceholder() {
+    var cs = getComputedStyle(input);
+    var room = input.getBoundingClientRect().width
+             - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+             - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+    if (!room || room <= 0) return;
+    var ctx = setPlaceholder._c || (setPlaceholder._c = document.createElement('canvas').getContext('2d'));
+    ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    for (var i = 0; i < PLACEHOLDERS.length; i++) {
+      // 6px of slack so a rounding difference cannot clip the last glyph
+      if (ctx.measureText(PLACEHOLDERS[i]).width <= room - 6) { input.placeholder = PLACEHOLDERS[i]; return; }
+    }
+    input.placeholder = PLACEHOLDERS[PLACEHOLDERS.length - 1];
+  }
+  setPlaceholder();
+  window.addEventListener('resize', setPlaceholder);
   var panel = wrap.querySelector('#site-search-results');
   var data = null, loading = false, lastQ = '';
 
