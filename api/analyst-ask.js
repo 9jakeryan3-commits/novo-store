@@ -19,7 +19,7 @@ const { kv, rateOk } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
-const { getMemory } = require('./_lib/member-memory.js');
+const { getMemory, eh } = require('./_lib/member-memory.js');
 const { nowBlock } = require('./_clock.js');
 
 // Three rounds is enough for the deepest real chain — look up the map, notice a gap, fill it,
@@ -530,6 +530,70 @@ BEFORE YOU SEND — run this list every time. It outranks every instinct above i
   view of the reader. Work the arithmetic out before the first word, and if it needs more than one
   step it comes from a tool. A visible self-correction reads as guessing, which is what it is.`;
 
+// ── what changed since this reader was last here ───────────────────────────────────
+// Continuity nobody else can offer: the map is stateful and the reader is not watching it. NoVo
+// already knows where every level sat the last time they asked, so the interesting sentence is
+// not "SPY is above its flip" but "SPY was below its flip when you were last here, and it
+// crossed" — the delta is the news, the level is just the number.
+//
+// Deliberately STRUCTURAL, not price-drift: a ticker moving 0.4% is not an event and saying so
+// every session teaches the reader to ignore the line. A regime change, a flip cross, a wall
+// moving — those are events. If nothing structural moved, this block is EMPTY and NoVo says
+// nothing, which is the same rule as everywhere else: no data, render nothing.
+const SEEN_TTL_S = 30 * 24 * 3600;
+const SEEN_STALE_MIN = 45;      // under this it is the same sitting, not a return visit
+
+function _snapshotLevels(live) {
+  const out = {};
+  const arr = (live && (live.tickers || (Array.isArray(live) ? live : null))) || [];
+  for (const t of arr) {
+    if (!t || !t.ticker) continue;
+    out[t.ticker] = {
+      spot: t.spot ?? null, flip: t.flip ?? null,
+      callWall: t.callWall ?? null, putWall: t.putWall ?? null,
+      // The regime is the thing that actually changes what the map MEANS.
+      above: (typeof t.spot === 'number' && typeof t.flip === 'number') ? t.spot >= t.flip : null,
+      gex: typeof t.netGex === 'number' ? Math.sign(t.netGex) : null,
+    };
+  }
+  return out;
+}
+
+function _changeLines(prev, now) {
+  const lines = [];
+  for (const [tk, a] of Object.entries(prev || {})) {
+    const b = now[tk];
+    if (!b) continue;
+    if (a.above !== null && b.above !== null && a.above !== b.above) {
+      lines.push(`${tk} crossed its gamma flip — it was ${a.above ? 'above' : 'below'} at ${a.flip}, ` +
+                 `now ${b.above ? 'above' : 'below'} at ${b.flip}`);
+    } else if (a.gex !== null && b.gex !== null && a.gex !== b.gex && b.gex !== 0) {
+      lines.push(`${tk} flipped to ${b.gex > 0 ? 'positive' : 'negative'} net GEX`);
+    }
+    if (a.callWall && b.callWall && a.callWall !== b.callWall) {
+      lines.push(`${tk}'s call wall moved ${a.callWall} → ${b.callWall}`);
+    }
+    if (a.putWall && b.putWall && a.putWall !== b.putWall) {
+      lines.push(`${tk}'s put wall moved ${a.putWall} → ${b.putWall}`);
+    }
+  }
+  return lines.slice(0, 4);
+}
+
+function sinceBlock(lines, ageMin) {
+  if (!lines || !lines.length) return '';
+  const when = ageMin >= 2880 ? `${Math.round(ageMin / 1440)} days`
+             : ageMin >= 120 ? `${Math.round(ageMin / 60)} hours`
+             : `${Math.round(ageMin)} minutes`;
+  return ['WHAT CHANGED SINCE THIS READER WAS LAST HERE (' + when + ' ago). These are structural',
+          'moves on the map they were looking at, computed from what it held then versus now:',
+          ...lines.map((l) => '- ' + l),
+          'If any of it bears on what they just asked, LEAD with it in one line — that is the news',
+          'and they have not seen it. If it does not, ignore this block entirely; do not recite it,',
+          'and never open with it just because it is here.',
+          '', ''].join('\n');
+}
+
 // ── lessons from my own resolved calls ─────────────────────────────────────────────
 // Self-improvement loops only work when the feedback is a RESOLVED OUTCOME. An agent that grades
 // itself, or that accumulates its own past output as memory, measurably degrades — it entrenches
@@ -778,6 +842,28 @@ module.exports = async (req, res) => {
       trackRec = typeof tr === 'string' ? JSON.parse(tr) : tr;
     } catch (_) {}
 
+    // What moved on the map between their last question and this one. Read-then-write, and both
+    // halves are best-effort: a KV hiccup costs a nice line, never the answer.
+    let sinceLines = [], sinceAge = 0;
+    try {
+      const key = 'seen:u:' + eh(email);
+      let prev = await r.get(key);
+      if (typeof prev === 'string') prev = JSON.parse(prev);
+      const nowSnap = _snapshotLevels(live);
+      if (prev && prev.levels && prev.ts) {
+        const ageMin = (Date.now() - prev.ts) / 60000;
+        // Inside the stale window this is the same sitting -- "what changed since you were last
+        // here" is a nonsense sentence three questions into one conversation.
+        if (ageMin >= SEEN_STALE_MIN) {
+          sinceLines = _changeLines(prev.levels, nowSnap);
+          sinceAge = ageMin;
+        }
+      }
+      if (Object.keys(nowSnap).length) {
+        await r.set(key, JSON.stringify({ ts: Date.now(), levels: nowSnap }), { ex: SEEN_TTL_S });
+      }
+    } catch (_) { sinceLines = []; }
+
     // THE CRYPTO SIDE OF THE SAME MIND. This used to be reachable only if the model chose to call a
     // tool, while the equity map was handed over on every question -- so "how many data points do
     // you have" answered with equities alone in one dashboard and with both maps in the other. The
@@ -981,6 +1067,7 @@ module.exports = async (req, res) => {
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
+      sinceBlock(sinceLines, sinceAge) +
       lessonsBlock(trackRec) +
       levelBlock +
       privBlock +
