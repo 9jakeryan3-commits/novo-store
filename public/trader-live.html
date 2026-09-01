@@ -2419,6 +2419,7 @@ function connectTelemetry(){
     window._wsLastMsg=Date.now();   // liveness stamp — the resume handler reads it to spot zombie sockets
     let data;try{data=JSON.parse(ev.data);}catch(e){return;};
     if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: up to 40Hz dedup-on-change — price/tip/change, rAF-coalesced to one repaint per frame, skip the heavy handler
+    if(data.type==='hb'){ return; }   // keepalive while identical heavy frames are suppressed (B2) — the liveness stamp above is all it carries; falling through would blank the CORE tile
     if(data.trial){document.body.classList.add('trial-mode');}
 
 
@@ -2988,7 +2989,11 @@ function _emaOn(cands,span,reseedDaily){
 }
 function _tfView(d){
   var raw=d.candles||[];
-  if(_ctbTf<=1) return {candles:raw, vwap:d.vwap||[], ema9:d.ema9||[], ema21:d.ema21||[]};
+  // 1m EMAs are derived HERE, not shipped (B2, 2026-09-01): the server's arrays were ~350KB of
+  // every 4s poll re-stating math this file already runs for every other frame. Same formula, same
+  // daily reseed, numerically diffed against the server arrays before they stopped being read.
+  // (ema9/ema21 from an older server are simply ignored — one source of truth.)
+  if(_ctbTf<=1) return {candles:raw, vwap:d.vwap||[], ema9:_emaOn(raw,9,true), ema21:_emaOn(raw,21,true)};
   var step=_ctbTf*60, out=[], idx={};
   for(var i=0;i<raw.length;i++){
     var c=raw[i], bt=Math.floor(c.time/step)*step, b=idx[bt];
@@ -3510,13 +3515,21 @@ async function _c2Load(){
   }
   // Overlays, sig-gated like the main pane (EMAs included, so deep frames never freeze).
   var vl=(view.vwap&&view.vwap.length)?view.vwap[view.vwap.length-1]:null;
-  var el9=(view.ema9&&view.ema9.length)?view.ema9[view.ema9.length-1]:null;
+  // Penultimate-point sig + last-point update(), same as the main pane (B2): the derived EMAs' last
+  // value tracks this ticker's forming bar, and keying the sig on it forced a full setData per poll.
+  var el9=(view.ema9&&view.ema9.length>1)?view.ema9[view.ema9.length-2]
+    :((view.ema9&&view.ema9.length)?view.ema9[0]:null);
   var os=tk+'|'+(view.vwap?view.vwap.length:0)+':'+(vl?vl.time+':'+vl.value:'-')
     +'|'+(view.ema9?view.ema9.length:0)+':'+(el9?el9.time+':'+el9.value:'-');
   if(os!==_c2OvSig){ _c2OvSig=os;
     if(_c2Vwap) _c2Vwap.setData(view.vwap||[]);
     if(_c2Ema9) _c2Ema9.setData(view.ema9||[]);
     if(_c2Ema21) _c2Ema21.setData(view.ema21||[]);
+  } else {
+    try{
+      if(_c2Ema9&&view.ema9&&view.ema9.length) _c2Ema9.update(view.ema9[view.ema9.length-1]);
+      if(_c2Ema21&&view.ema21&&view.ema21.length) _c2Ema21.update(view.ema21[view.ema21.length-1]);
+    }catch(_e){}
   }
   // THE FULL LEVEL SET, drawn exactly like the main pane — solid first→last segments with axis
   // titles, per-label diffed. D/W keeps only the dealer structure, same rule as the main pane.
@@ -3892,7 +3905,12 @@ async function loadNovoChart(){
     // (count + last marker identity) so a VWAP wiggle no longer rebuilds the whole marker set, and
     // a changed marker at constant count no longer slips through.
     const _vlast=(_view.vwap&&_view.vwap.length)?_view.vwap[_view.vwap.length-1]:null;
-    const _elast=(_view.ema9&&_view.ema9.length)?_view.ema9[_view.ema9.length-1]:null;
+    // Sig keys off the PENULTIMATE EMA point (B2, 2026-09-01): the EMAs are client-derived now, so
+    // their LAST point rightly tracks the forming bar's tip — keying the sig on it meant a full
+    // 3-series setData every 4s poll. Structure (length + penultimate) gates the rebuild; the live
+    // last point glides via cheap update() below, the same pattern the forming candle uses.
+    const _elast=(_view.ema9&&_view.ema9.length>1)?_view.ema9[_view.ema9.length-2]
+      :((_view.ema9&&_view.ema9.length)?_view.ema9[0]:null);
     const _ovSig=(_view.vwap?_view.vwap.length:0)+':'+(_vlast?_vlast.time+':'+_vlast.value:'-')
       +'|'+(_view.ema9?_view.ema9.length:0)+':'+(_elast?_elast.time+':'+_elast.value:'-');
     if(_ovSig!==_novoOvSig){
@@ -3900,6 +3918,11 @@ async function loadNovoChart(){
       if(_novoVwap){ _novoVwap.setData(_view.vwap||[]); }   // VWAP curve
       if(_novoEma9){ _novoEma9.setData(_view.ema9||[]); }   // EMA9 white
       if(_novoEma21){ _novoEma21.setData(_view.ema21||[]); } // EMA21 navy
+    } else {
+      try{   // tip-only move: same length, same penultimate → last point time matches, update() replaces in place
+        if(_novoEma9&&_view.ema9&&_view.ema9.length) _novoEma9.update(_view.ema9[_view.ema9.length-1]);
+        if(_novoEma21&&_view.ema21&&_view.ema21.length) _novoEma21.update(_view.ema21[_view.ema21.length-1]);
+      }catch(_e){}
     }
     const _mlast=(d.markers&&d.markers.length)?d.markers[d.markers.length-1]:null;
     const _mkSig=(d.markers?d.markers.length:0)+':'+(_mlast?(_mlast.time+':'+(_mlast.price||_mlast.position||'')+':'+(_mlast.shape||'')):'-');
