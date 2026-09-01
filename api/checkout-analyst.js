@@ -35,8 +35,12 @@ module.exports = async (req, res) => {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
-  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST || 'price_1U59pFApyfMAkbeEhEDpToGK';        // $129/mo (was $129 — raised 2026-08-16)
-  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY || 'price_1U59pFApyfMAkbeEDzNHEJbD'; // $1,290/yr (was $1,290)
+  // Fallbacks refreshed 2026-09-01 to the LLC-account ids (acct_1U8720B1Bq29OALa) the env
+  // vars point at — the old ApyfMAkbeE fallbacks live on the ORIGINAL Stripe account, so if
+  // the env var ever dropped, checkout would send an alien price id to the LLC secret key
+  // and every Analyst checkout would 500. A fallback that cannot work is not a fallback.
+  const MONTHLY_79 = process.env.STRIPE_PRICE_ANALYST || 'price_1U8R0NB1Bq29OALa7evMqazz';        // $129/mo
+  const YEARLY_790 = process.env.STRIPE_PRICE_ANALYST_YEARLY || 'price_1U8R2PB1Bq29OALaUv2W6VAm'; // $1,290/yr
   const priceId = (plan === 'yearly') ? YEARLY_790 : MONTHLY_79;
 
   try {

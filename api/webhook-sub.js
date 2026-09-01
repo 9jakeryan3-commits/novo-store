@@ -89,6 +89,10 @@ const ANALYST_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_ANALYST, process.env.STRIPE_PRICE_ANALYST_YEARLY,
   'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',   // $129 / $1,290 — kept: existing subs
   'price_1U59pFApyfMAkbeEhEDpToGK', 'price_1U59pFApyfMAkbeEDzNHEJbD',   // $129 / $1,290
+  // The LLC-account (acct_1U8720B1Bq29OALa) Analyst prices — what the env vars point at since
+  // 2026-08-25. Baked here too because a set whose only current members arrive via env is a
+  // set that silently orphans every live Analyst sub the day a variable is dropped.
+  'price_1U8R0NB1Bq29OALa7evMqazz', 'price_1U8R2PB1Bq29OALaUv2W6VAm',   // $129 / $1,290 — LLC account
 ].filter(Boolean));
 
 // Resolve tier from the subscription's PRICE, not just the mutable/strippable metadata.tier. metadata is a
@@ -105,6 +109,12 @@ function subIsAnalyst(sub) {
 const CRYPTO_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_CRYPTO, process.env.STRIPE_PRICE_CRYPTO_YEARLY,
   'price_1U9EU0B1Bq29OALajbT8DWJS', 'price_1U9EUsB1Bq29OALaYh2QODHA',   // $79 / $790 — prod_V9XZrb8qBEdzoI
+  // Bundle COMPANION prices (2026-09-01) — the discounted crypto halves of the two bundles,
+  // on the same product. A bundle sub carries one of these beside its Analyst/Trader item.
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC_YEARLY,
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL_YEARLY,
+  'price_1UB0ZhB1Bq29OALa8iLZSSL5', 'price_1UB0ZhB1Bq29OALamNjyA6Y9',   // $40 / $400 — beside Analyst
+  'price_1UB0ZhB1Bq29OALaOw2hUHWS', 'price_1UB0ZhB1Bq29OALaWQPTPOs7',   // $30 / $300 — beside Trader
 ].filter(Boolean));
 function subIsCrypto(sub) {
   if (sub?.metadata?.tier === 'crypto') return true;
@@ -115,8 +125,29 @@ function subIsCrypto(sub) {
 // THE branch that matters. This file was written for two tiers, so its logic was
 // "not Analyst == Trader" and every non-Analyst sub was sent down the license path.
 // A Crypto sub has no license either, so ask the question that is actually being asked:
-// does this tier own a trading instance? Only Trader does.
-function subHasLicense(sub) { return !subIsAnalyst(sub) && !subIsCrypto(sub); }
+// does this tier own a trading instance? Only a sub carrying a TRADER item does.
+// PER ITEM since the bundles (2026-09-01): the Complete bundle is [Trader item, crypto
+// companion item] in ONE subscription — the old per-sub "not analyst && not crypto" read
+// its crypto companion and said "no license", so a Complete member's engine was never
+// activated on payment and never suspended on failure. An item that is neither an Analyst
+// nor a Crypto price IS the Trader item, whatever else rides beside it.
+function subHasLicense(sub) {
+  // Metadata first, as a fast path AND a safety net for prices absent from the literal sets
+  // (a grandfathered Analyst price we forgot would otherwise read as "the Trader item").
+  const t = sub?.metadata?.tier;
+  if (t === 'analyst' || t === 'crypto' || t === 'bundle_ac') return false;
+  if (t === 'bundle_all') return true;
+  try {
+    const items = sub?.items?.data || [];
+    if (items.length) {
+      return items.some(it => it?.price?.id
+        && !ANALYST_PRICE_IDS.has(it.price.id) && !CRYPTO_PRICE_IDS.has(it.price.id));
+    }
+  } catch (_) { /* fall through to the per-sub read */ }
+  // No items visible (thin event object): the old per-sub answer, which is right for every
+  // single-product sub and errs toward "no license" — never touches the license server blind.
+  return !subIsAnalyst(sub) && !subIsCrypto(sub);
+}
 
 async function isAnalystSub(subscriptionId) {
   try { const s = await stripe.subscriptions.retrieve(subscriptionId); return subIsAnalyst(s); }
@@ -242,8 +273,10 @@ async function hasActiveTraderSub(email, excludeSubId) {
     const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
     // 'not analyst' used to mean Trader. With a third product that is false: a Crypto sub
     // would read as an active Trader and cancel a legitimate Analyst checkout as a
-    // "reverse duplicate". Exclude both non-Trader tiers explicitly.
-    return subs.data.some(s => s.id !== excludeSubId && !subIsAnalyst(s) && !subIsCrypto(s) && LIVE.includes(s.status));
+    // "reverse duplicate". And since the bundles, PER SUB is false too: the Complete bundle
+    // carries a crypto companion beside its Trader item, so "not crypto" would miss it and
+    // its holder could double-buy Trader. subHasLicense asks the per-ITEM question.
+    return subs.data.some(s => s.id !== excludeSubId && subHasLicense(s) && LIVE.includes(s.status));
   };
   try {
     const seen = new Set();
@@ -256,6 +289,92 @@ async function hasActiveTraderSub(email, excludeSubId) {
   } catch (e) { console.error(`[webhook-sub] trader-sub check failed: ${e.message}`); }
   return false;
 }
+
+// ── Bundle helpers (2026-09-01) ──────────────────────────────────────────────
+// One generic sweep over every customer sharing the email (same search()+list() shape as
+// the guards above), applying `test` per live sub. Kept factored because four different
+// bundle questions need the identical walk.
+async function _sweepSubs(email, excludeSubId, test) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return false;
+  const LIVE = ['active', 'trialing', 'past_due', 'unpaid'];
+  const hit = async (custId) => {
+    const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    return subs.data.some(s => s.id !== excludeSubId && LIVE.includes(s.status) && test(s));
+  };
+  try {
+    const seen = new Set();
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); if (await hit(c.id)) return true; }
+    } catch (_) { /* search index warming up — fall through to list() */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id) && await hit(c.id)) return true; }
+  } catch (e) { console.error(`[webhook-sub] sub sweep failed: ${e.message}`); }
+  return false;
+}
+// A live bundle of either kind. metadata-keyed on purpose: our own checkout-bundle.js is
+// the only writer of these tier values, and the price-id fallback below catches a stripped one.
+const _isBundleSub = (s) => String(s?.metadata?.tier || '').startsWith('bundle_')
+  || (subIsCrypto(s) && (subIsAnalyst(s) || subHasLicense(s)));
+const hasLiveBundle = (email, excludeSubId) => _sweepSubs(email, excludeSubId, _isBundleSub);
+// Any other live sub already granting the Crypto Market Map (standalone or via a bundle).
+const emailHasCryptoEnt = (email, excludeSubId) => _sweepSubs(email, excludeSubId, subIsCrypto);
+
+// Retire live subs whose metadata.tier is in `tiers` — the generalized form of
+// retireAnalystOnTraderUpgrade, with the same trialing-cancel-now / active-run-out split
+// and the same non-fatal posture. Used when a bundle purchase supersedes standalone subs.
+async function retireTierSubs(email, newSubId, tiers) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return [];
+  const done = [];
+  const want = new Set(tiers);
+  const sweep = async (custId) => {
+    const subs = await stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+    for (const s of subs.data) {
+      if (s.id === newSubId) continue;
+      if (!want.has(s.metadata?.tier)) continue;
+      if (!['active', 'trialing', 'past_due', 'unpaid'].includes(s.status)) continue;
+      if (s.cancel_at_period_end) { done.push(`${s.id}:already-ending`); continue; }
+      try {
+        if (s.status === 'trialing') {
+          await stripe.subscriptions.cancel(s.id);
+          done.push(`${s.id}:cancelled-now`);
+        } else {
+          await stripe.subscriptions.update(s.id, { cancel_at_period_end: true });
+          done.push(`${s.id}:ends-at-period-end`);
+        }
+      } catch (e) { console.error(`[webhook-sub] could not retire ${s.metadata?.tier} sub ${s.id}: ${e.message}`); }
+    }
+  };
+  try {
+    const seen = new Set();
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); await sweep(c.id); }
+    } catch (_) { /* search index warming up — fall through to list() */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id)) await sweep(c.id); }
+  } catch (e) { console.error(`[webhook-sub] tier-retire sweep failed: ${e.message}`); }
+  return done;
+}
+
+// Entitlement caches (crypto-map.js 'ent:crypto:', trader-live.js 'ent:trader:') hold a
+// verdict for up to 600s (allow) / 120s (deny). Purge both the moment a subscription is
+// born or dies, so a new subscriber is never stuck behind a stale deny and a canceller
+// does not coast on a stale allow. Same sha256(email)[:24] recipe both endpoints use.
+async function entCachePurge(email) {
+  try {
+    const norm = String(email || '').trim().toLowerCase();
+    if (!norm) return;
+    const r = require('./_kv').kv();
+    if (!r) return;
+    const h = require('crypto').createHash('sha256').update(norm).digest('hex').slice(0, 24);
+    try { await r.del('ent:crypto:' + h); } catch (_) {}
+    try { await r.del('ent:trader:' + h); } catch (_) {}
+  } catch (_) { /* cache purge is best-effort by definition */ }
+}
+
 function analystWelcomeHtml(connectUrl) {
   return `<div style="margin:0;padding:0;background:#101013;">
   <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
@@ -345,6 +464,58 @@ function cryptoWelcomeHtml(connectUrl) {
 </div>
 </body>
 </html>`;
+}
+
+// Bundle welcomes (2026-09-01). One email covering both halves — a bundle buyer getting two
+// separate product welcomes reads as two separate bills.
+function _bundleShell(kicker, inner) {
+  return `<div style="margin:0;padding:0;background:#101013;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="background:#17181b;border:1px solid #2e3036;border-bottom:0;border-radius:12px 12px 0 0;padding:22px 24px;text-align:center;">
+      <img src="https://novo-options.trade/novo-logo-light.png?v=5" alt="NoVo Options Trading" height="30" style="height:30px;width:auto;display:inline-block;border:0;">
+      <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${kicker}</div>
+    </div>
+    <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">${inner}
+      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss. Manage or cancel anytime at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.</p>
+    </div>
+  </div>
+</div>`;
+}
+const _bundleCryptoCard = `<div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #a78bfa;border-radius:8px;padding:16px 18px;background:rgba(167,139,250,0.07);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Your Crypto Market Map</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Dealer gamma on every coin with a real options book, funding per venue, the block tape, the carry curve, liquidation flow &mdash; live now. Sign in with this email.</div>
+        <a href="https://novo-options.trade/crypto/live" style="display:inline-block;background:#a78bfa;color:#12091f;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open the Crypto Market Map &rarr;</a>
+      </div>`;
+const _bundleDiscordCard = (connectUrl) => connectUrl ? `<div style="margin:18px 0 6px;border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:8px;padding:16px 18px;background:rgba(88,101,242,0.08);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">The members Discord</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Reads, real-time alerts and the members community &mdash; link your Discord to unlock the private channels.</div>
+        <a href="${connectUrl}" style="display:inline-block;background:#5865F2;color:#ffffff;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Connect your Discord &rarr;</a>
+      </div>` : '';
+
+function bundleAcWelcomeHtml(connectUrl) {
+  return _bundleShell('NoVo Analyst + Crypto', `
+      <h1 style="color:#eaf3ff;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; both maps are live.</h1>
+      <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;">One subscription, both products. <b style="color:#eaf3ff">NoVo Analyst</b>: the SPY / QQQ / IWM dealer map with NoVo's reads by email &mdash; <b style="color:#eaf3ff">The Open</b> and <b style="color:#eaf3ff">The Close</b> each session, the <b style="color:#eaf3ff">Week Ahead</b> on Sundays. <b style="color:#eaf3ff">The Crypto Market Map</b>: the same discipline pointed at crypto. Your first read arrives with the next market session.</p>
+      <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #22d3ee;border-radius:8px;padding:16px 18px;background:rgba(34,211,238,0.07);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Your equity dashboard</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">The live <b style="color:#eaf3ff">SPY / QQQ / IWM</b> dealer map &mdash; net GEX, Zero-Gamma, the walls, expected move &amp; skew. Sign in with this email; we'll send a one-tap link.</div>
+        <a href="https://novo-options.trade/analyst/live" style="display:inline-block;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your live dashboard &rarr;</a>
+      </div>
+      ${_bundleCryptoCard}
+      ${_bundleDiscordCard(connectUrl)}`);
+}
+
+function bundleAllWelcomeHtml(connectUrl) {
+  return _bundleShell('NoVo Complete', `
+      <h1 style="color:#eaf3ff;font-size:22px;font-weight:800;margin:0 0 14px;letter-spacing:-.3px;">You're in &mdash; the whole desk.</h1>
+      <p style="color:#c2d2e6;line-height:1.65;font-size:15px;margin:0 0 14px;"><b style="color:#eaf3ff">NoVo Trader</b> (which includes everything in Analyst), plus the <b style="color:#eaf3ff">Crypto Market Map</b>, on one subscription. Trader streams every dealer level live on a real charting terminal, with the hourly structural audit and NoVo's written read beside the tape.</p>
+      <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.07);">
+        <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Start at your portal</div>
+        <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your portal is where Trader lives &mdash; open it, sign in with this email, and the setup steps walk you through the rest.</div>
+        <a href="https://app.novo-aitrading.app/portal" style="display:inline-block;background:linear-gradient(180deg,#34d399,#10b981);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your portal &rarr;</a>
+      </div>
+      ${_bundleCryptoCard}
+      ${_bundleDiscordCard(connectUrl)}`);
 }
 
 function welcomeEmailHtml(connectUrl) {
@@ -467,11 +638,140 @@ const handler = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
+    // NoVo BUNDLES (2026-09-01): bundle_ac = Analyst + Crypto ($169/$1,690), bundle_all =
+    // Complete, i.e. Trader + Crypto ($239/$2,300). Two line items each — the existing
+    // Analyst/Trader base price plus a discounted crypto companion — so entitlement flows
+    // from price ids the gates already know. Must sit ABOVE the crypto/analyst branches
+    // and the Trader fallthrough: an unrouted bundle would take the Trader path, send the
+    // wrong welcome, and (for bundle_ac) provision a licence it did not buy.
+    if (obj?.metadata?.tier === 'bundle_ac' || obj?.metadata?.tier === 'bundle_all') {
+      const _tier = obj.metadata.tier;
+      const _isAll = _tier === 'bundle_all';
+
+      // DUPLICATE / CONFLICT GUARD. A live Trader (or Complete) sub means this purchase
+      // double-bills something: Trader already includes Analyst, Complete includes it all.
+      // For bundle_ac a live AC bundle is the same story. Cancel + auto-refund the NEW
+      // purchase and say why — never leave a member paying twice for one entitlement. The
+      // one deliberate asymmetry: buying Complete while holding plain Trader is ALSO
+      // refused (rather than auto-retiring the Trader sub), because tearing down a live
+      // Trader engine on a webhook race is a worse failure than asking support to switch —
+      // the refusal email carries the path.
+      try {
+        const conflict = (await hasActiveTraderSub(email, obj.subscription))
+          || (!_isAll && await hasLiveBundle(email, obj.subscription));
+        if (conflict) {
+          let charged = true, refunded = false;
+          try {
+            const sub = await stripe.subscriptions.retrieve(obj.subscription);
+            charged = sub.status !== 'trialing';
+            await stripe.subscriptions.cancel(obj.subscription);
+            if (charged) refunded = await _refundLatest(sub);
+          } catch (e) { console.error(`[webhook-sub] dupe-bundle cancel/refund failed: ${e.message}`); }
+          console.log(`[webhook-sub] conflicting ${_tier} purchase by ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
+          try {
+            await resend.emails.send({
+              from: 'NoVo <orders@novo-aitrading.app>',
+              replyTo: 'support@novo-options.trade', to: [email],
+              subject: 'No double-billing — duplicate bundle subscription cancelled',
+              html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
+                <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge &mdash; this would have billed you twice</h2>
+                <p style="margin:0 0 12px;">You already hold a subscription that overlaps the <strong style="color:#eaf3ff;">${_isAll ? 'NoVo Complete bundle' : 'NoVo Analyst + Crypto bundle'}</strong> you just started, so we cancelled the new one${charged ? (refunded ? ' and refunded the charge to your card' : '') : ' before it charged you'}. Your existing access is unchanged.</p>
+                <p style="margin:0 0 12px;">${_isAll ? 'Want to switch your current subscription to the Complete bundle? Just reply to this email and we’ll move you over without losing a day.' : 'If you were after the crypto half, the Crypto Market Map is available on its own — or reply and we’ll switch you to the Complete bundle.'}</p>
+                <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-options.trade" style="color:#34d399;">support@novo-options.trade</a></p></div>`,
+            });
+          } catch (e) { console.error(`[webhook-sub] dupe-bundle notice failed: ${e.message}`); }
+          return res.status(200).json({ received: true, duplicate_tier: true });
+        }
+      } catch (e) { console.error(`[webhook-sub] bundle conflict guard failed (non-fatal): ${e.message}`); }
+
+      // TRIAL-ONCE (bundle_ac only — bundle_all carries no trial): same KV gate as Analyst,
+      // same key on purpose. An email that already burned its 7-day Analyst trial does not
+      // get a second one by adding $40 of crypto to the cart.
+      if (!_isAll) {
+        try {
+          const _kv = require('./_kv').kv();
+          if (_kv) {
+            const _prevSub = await _kv.get('analyst_trialed:' + email);
+            if (!_prevSub) {
+              await _kv.set('analyst_trialed:' + email, obj.subscription);
+            } else if (_prevSub !== obj.subscription) {
+              const _s = await stripe.subscriptions.retrieve(obj.subscription);
+              if (_s.status === 'trialing') {
+                await stripe.subscriptions.update(obj.subscription, { trial_end: 'now' });
+                console.log(`[webhook-sub] repeat trial via bundle_ac by ${email} — trial ended, sub ${obj.subscription}`);
+              }
+            }
+          }
+        } catch (e) { console.error(`[webhook-sub] bundle trial-once check failed (non-fatal): ${e.message}`); }
+      }
+
+      // UPGRADE PATH: the bundle supersedes any standalone subs it contains. Complete also
+      // supersedes the AC bundle. Same trialing-cancel-now / active-run-out rules as the
+      // Trader upgrade path, same non-fatal posture.
+      try {
+        const retired = await retireTierSubs(email, obj.subscription,
+          _isAll ? ['analyst', 'crypto', 'bundle_ac'] : ['analyst', 'crypto']);
+        if (retired.length) console.log(`[webhook-sub] ${_tier} upgrade — retired: ${retired.join(', ')}`);
+      } catch (e) { console.error(`[webhook-sub] bundle retire failed (non-fatal): ${e.message}`); }
+
+      // Both audiences: the equity reads AND the crypto list. freeRemove for the same
+      // reason as every paid tier. Welcome dedupe keys on the Analyst add like the Analyst
+      // branch — a Stripe retry finds the contact already there and skips the re-send.
+      const _r = await analystAdd(email);
+      if (CRYPTO_AUDIENCE) {
+        try { await _retry(() => resend.contacts.create({ audienceId: CRYPTO_AUDIENCE, email, unsubscribed: false }), 2); }
+        catch (e) { if (!/exist|already/i.test(e.message || '')) console.error(`[webhook-sub] bundle crypto audience add failed: ${e.message}`); }
+      }
+      await freeRemove(email);
+      if (!_r.existed) {
+        try {
+          await resend.emails.send({
+            from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',
+            replyTo: 'support@novo-options.trade', to: [email],
+            subject: _isAll ? 'Welcome to NoVo Complete — the whole desk' : 'Welcome to NoVo — Analyst + Crypto',
+            html: (_isAll ? bundleAllWelcomeHtml : bundleAcWelcomeHtml)(`${SITE}/api/discord?cs=${obj.id}`),
+          });
+        } catch (err) { console.error(`[webhook-sub] bundle welcome failed (non-fatal): ${err.message}`); }
+      }
+      // New entitlements exist NOW — a stale cached deny must not outlive this event.
+      await entCachePurge(email);
+      console.log(`[webhook-sub] ${_tier} subscriber ${email}${_isAll ? ' — licence rides the Trader item' : ' — no licence'}`);
+      return res.status(200).json({ received: true, tier: _tier });
+    }
+
     // NoVo Crypto Market Map: its own product. No license, no provisioning, and NOT the
     // Analyst audience — a Crypto subscriber did not buy the SPY/QQQ/IWM read. Must sit
     // ABOVE the Trader path: falling through would provision a trading licence AND run the
     // "Trader includes Analyst" upgrade, which RETIRES the customer's paid Analyst sub.
     if (obj?.metadata?.tier === 'crypto') {
+      // REVERSE-DUPLICATE GUARD (2026-09-01): a live sub already granting the Crypto Map —
+      // a standalone Crypto sub or either bundle — means this purchase double-bills it.
+      // Same cancel + auto-refund + notice shape as the Analyst guard below.
+      try {
+        if (await emailHasCryptoEnt(email, obj.subscription)) {
+          let charged = true, refunded = false;
+          try {
+            const sub = await stripe.subscriptions.retrieve(obj.subscription);
+            charged = sub.status !== 'trialing';
+            await stripe.subscriptions.cancel(obj.subscription);
+            if (charged) refunded = await _refundLatest(sub);
+          } catch (e) { console.error(`[webhook-sub] dupe-crypto cancel/refund failed: ${e.message}`); }
+          console.log(`[webhook-sub] duplicate Crypto purchase by ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
+          try {
+            await resend.emails.send({
+              from: 'NoVo <orders@novo-aitrading.app>',
+              replyTo: 'support@novo-options.trade', to: [email],
+              subject: 'You already have the Crypto Market Map — duplicate cancelled',
+              html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
+                <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge &mdash; you already have this</h2>
+                <p style="margin:0 0 12px;">A subscription you already hold includes the <strong style="color:#eaf3ff;">Crypto Market Map</strong>, so we cancelled the duplicate you just started${charged ? (refunded ? ' and refunded the charge to your card' : '') : ' before it charged you'}. Your existing access is unchanged.</p>
+                <p style="margin:0 0 12px;">${charged && !refunded ? 'If your card was charged for it, just reply to this email and we will refund it.' : 'You were not charged.'}</p>
+                <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-options.trade" style="color:#34d399;">support@novo-options.trade</a></p></div>`,
+            });
+          } catch (e) { console.error(`[webhook-sub] dupe-crypto notice failed: ${e.message}`); }
+          return res.status(200).json({ received: true, duplicate_tier: true });
+        }
+      } catch (e) { console.error(`[webhook-sub] crypto reverse-dupe guard failed (non-fatal): ${e.message}`); }
       // `existed` doubles as the retry guard: Stripe replays this event, and a duplicate contact
       // is the only durable signal we have that the welcome already went out (there is no license
       // row to check, the way the Analyst branch checks analystAdd().existed).
@@ -493,6 +793,7 @@ const handler = async (req, res) => {
           });
         } catch (err) { console.error(`[webhook-sub] crypto welcome failed (non-fatal): ${err.message}`); }
       }
+      await entCachePurge(email);   // a pre-purchase cached deny must not outlive the purchase
       console.log(`[webhook-sub] Crypto Market Map subscriber ${email} — no license, no Analyst audience`);
       return res.status(200).json({ received: true, tier: 'crypto' });
     }
@@ -504,7 +805,11 @@ const handler = async (req, res) => {
       // $209 + $129 for one entitlement. Analyst opens on a 7-day trial, so cancelling here almost always
       // means they are never charged at all. Non-fatal: a failure must not block the normal Analyst flow.
       try {
-        const already = await hasActiveTraderSub(email, obj.subscription);
+        // A live Trader/Complete sub OR either bundle already includes Analyst (2026-09-01:
+        // hasActiveTraderSub now answers per-item, which covers Complete; hasLiveBundle
+        // covers the AC bundle, whose items are all "known" prices).
+        const already = (await hasActiveTraderSub(email, obj.subscription))
+          || (await hasLiveBundle(email, obj.subscription));
         if (already) {
           let charged = true, refunded = false;
           try {
@@ -521,7 +826,7 @@ const handler = async (req, res) => {
               subject: 'You already have NoVo Analyst — duplicate subscription cancelled',
               html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
                 <h2 style="color:#eaf3ff;font-size:19px;margin:0 0 12px;">No charge — you already have this</h2>
-                <p style="margin:0 0 12px;">Your <strong style="color:#eaf3ff;">NoVo Trader</strong> subscription already includes everything in <strong style="color:#eaf3ff;">NoVo Analyst</strong> — the live dealer dashboard, the daily Open and Close desk notes, and the Sunday Week Ahead.</p>
+                <p style="margin:0 0 12px;">A subscription you already hold &mdash; <strong style="color:#eaf3ff;">NoVo Trader</strong> or one of the bundles &mdash; already includes everything in <strong style="color:#eaf3ff;">NoVo Analyst</strong>: the live dealer dashboard, the daily Open and Close desk notes, and the Sunday Week Ahead.</p>
                 <p style="margin:0 0 12px;">So we cancelled the duplicate Analyst subscription you just started${charged ? '' : ' before it charged you'}. Nothing changes about your Trader access.</p>
                 <p style="margin:0 0 12px;">${charged ? (refunded ? 'Any charge for it has been refunded to your card.' : 'If your card was charged for it, just reply to this email and we will refund it.') : 'You were not charged.'}</p>
                 <p style="margin:0;font-size:13px;color:#8aacc8;">Questions? <a href="mailto:support@novo-options.trade" style="color:#34d399;">support@novo-options.trade</a></p></div>`,
@@ -564,6 +869,7 @@ const handler = async (req, res) => {
           });
         } catch (err) { console.error(`[webhook-sub] analyst welcome failed (non-fatal): ${err.message}`); }
       }
+      await entCachePurge(email);
       return res.status(200).json({ received: true });
     }
 
@@ -633,6 +939,7 @@ const handler = async (req, res) => {
       // so a Resend blip never blocks onboarding. Log and fall through to the 200 ack below.
       console.error(`[webhook-sub] Welcome email failed (non-fatal, acking) — error:${err.message}`);
     }
+    await entCachePurge(email);   // a pre-purchase cached deny (ent:trader:) must not outlive the purchase
   }
 
   // ── Monthly renewal payment succeeded → re-activate if suspended ─────────
@@ -678,57 +985,43 @@ const handler = async (req, res) => {
   }
 
   // ── Subscription cancelled → revoke access ────────────────────────────────
+  // COMPOSED per product flag (2026-09-01), not an else-if chain: a bundle sub is Analyst
+  // AND Crypto (bundle_ac), or licensed AND Crypto (bundle_all), and the old chain ran only
+  // its first match — an AC-bundle cancel would have cleaned the Analyst side and left the
+  // member on the crypto audience forever. Each cleanup runs iff its flag is set, each
+  // behind its own "does anything else still grant this" guard. Single-product subs take
+  // exactly the same actions they always did.
   else if (event.type === 'customer.subscription.deleted') {
     const subscriptionId = obj?.id;
-    if (subIsAnalyst(obj)) {   // Analyst cancel → drop from the audience (no license). Tier from PRICE, not just metadata.
+    if (subscriptionId) {
+      const isA = subIsAnalyst(obj), isC = subIsCrypto(obj), isL = subHasLicense(obj);
       try {
+        // License teardown first — the control plane must never keep an engine running on a
+        // dead subscription, whatever else this sub also carried.
+        if (isL) await cancelSub(subscriptionId);
+
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        // Only strip entitlements if NO other active paid sub (e.g. an active Trader) still includes them.
-        if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
-          await analystRemove(cust?.email);
-          await discordRevokeRole(cust?.metadata?.discord_id);
-          await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
-        }
-      } catch (err) {
-        console.error(`[webhook-sub] analyst cancel failed — sub:${subscriptionId} error:${err.message}`);
-        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
-        return res.status(500).json({ error: 'analyst cancel failed, will retry' });
-      }
-    } else if (subIsCrypto(obj)) {   // Crypto cancel → drop its audience only. No license exists to cancel.
-      try {
-        const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        if (CRYPTO_AUDIENCE && cust?.email) {
+        // Crypto audience: removed only when NO remaining live sub still grants the map
+        // (a member cancelling a standalone Crypto sub while holding a bundle stays).
+        if (isC && CRYPTO_AUDIENCE && cust?.email
+            && !(await emailHasCryptoEnt(cust.email, subscriptionId))) {
           try { await _retry(() => resend.contacts.remove({ audienceId: CRYPTO_AUDIENCE, email: cust.email }), 2); } catch (_) {}
         }
-        // The paid-Discord role IS earned by Crypto, so it has to be released here too -- but only
-        // if nothing else earns it. hasOtherActivePaidSub counts any live sub regardless of tier,
-        // so a member who also holds Analyst or Trader keeps the role.
+        // Analyst audience + free list + Discord role: same coarse guard as always — any
+        // other live paid sub keeps everything.
         if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
           await discordRevokeRole(cust?.metadata?.discord_id);
+          if (isA || isL) {
+            await analystRemove(cust?.email);
+            await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
+          }
         }
-        // Deliberately NOT touching the Analyst audience or the free list: a Crypto subscriber was
-        // never on the Analyst list by virtue of Crypto, so there is nothing of theirs to remove.
-        console.log(`[webhook-sub] crypto cancel — sub:${subscriptionId}`);
+        await entCachePurge(cust?.email);   // a cancelled member must not coast on a cached allow
+        console.log(`[webhook-sub] cancel cascade — sub:${subscriptionId} analyst=${isA} crypto=${isC} license=${isL}`);
       } catch (err) {
-        console.error(`[webhook-sub] crypto cancel failed — sub:${subscriptionId} error:${err.message}`);
-        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
-        return res.status(500).json({ error: 'crypto cancel failed, will retry' });
-      }
-    } else if (subscriptionId) {
-      try {
-        await cancelSub(subscriptionId);
-        // Trader cancel → drop paid-Discord role + Analyst audience UNLESS another active paid sub keeps them.
-        const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
-        if (!(await hasOtherActivePaidSub(cust?.email, subscriptionId))) {
-          await discordRevokeRole(cust?.metadata?.discord_id);
-          await analystRemove(cust?.email);
-          await freeAdd(cust?.email);   // revert to a free member (keeps the Weekly + articles)
-        }
-      } catch (err) {
-        // Was two separate try blocks, the second swallowing ALL errors — so a Discord/audience failure left a
-        // cancelled member with their paid role indefinitely (no reconciler for Discord). Now: release the
-        // claim + 500 so Stripe retries the whole idempotent cleanup.
-        console.error(`[webhook-sub] Trader cancel side-effects failed — sub:${subscriptionId} error:${err.message}`);
+        // Release the claim + 500 so Stripe retries the whole idempotent cleanup — a swallowed
+        // failure here left a cancelled member with a paid role indefinitely (no Discord reconciler).
+        console.error(`[webhook-sub] cancel cascade failed — sub:${subscriptionId} error:${err.message}`);
         if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
         return res.status(500).json({ error: 'cancel side-effects failed, will retry' });
       }

@@ -32,6 +32,12 @@ const CRYPTO_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_CRYPTO_YEARLY,
   'price_1U9EU0B1Bq29OALajbT8DWJS',   // $79/mo   — prod_V9XZrb8qBEdzoI
   'price_1U9EUsB1Bq29OALaYh2QODHA',   // $790/yr  — prod_V9XZrb8qBEdzoI
+  // Bundle COMPANION prices (2026-09-01) — the discounted crypto half of each bundle, on the
+  // same product. A bundle subscriber's crypto entitlement arrives on one of these ids.
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC_YEARLY,
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL_YEARLY,
+  'price_1UB0ZhB1Bq29OALa8iLZSSL5', 'price_1UB0ZhB1Bq29OALamNjyA6Y9',   // $40/$400 — beside Analyst
+  'price_1UB0ZhB1Bq29OALaOw2hUHWS', 'price_1UB0ZhB1Bq29OALaWQPTPOs7',   // $30/$300 — beside Trader
 ].filter(Boolean));
 
 const LIVE = ["active", "trialing", "past_due"];

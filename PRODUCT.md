@@ -18,11 +18,16 @@ Last verified against the deployed site and engine: **2026-08-30** (analyst/look
 | **Free** | $0 | — | Public pages open to anyone; a **free account** adds the member portal |
 | **NoVo Analyst** | $129/mo · $1,290/yr | 7 days, card required | The live dealer map + the read |
 | **NoVo Trader** | $209/mo · $2,000/yr | **none** | Everything in Analyst + the live streaming map |
-| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo, **plus the private members Discord** (same guild and role as Analyst/Trader, wired 2026-08-30). **Its own product** — not included with Analyst or Trader, and neither is included with it |
+| **NoVo Crypto Market Map** | $79/mo · $790/yr | 7 days, card required | The crypto dealer map + the on-chain map + NoVo, **plus the private members Discord** (same guild and role as Analyst/Trader, wired 2026-08-30). **Its own product** — not included with Analyst or Trader, and neither is included with it — **unless bundled (below)** |
+| **Analyst + Crypto bundle** | $169/mo · $1,690/yr | 7 days, card required | Everything in Analyst + everything in the Crypto Market Map, $39/mo under the two apart. One Stripe subscription with two line items (Analyst base + a $40/$400 crypto companion price) — added 2026-09-01 |
+| **NoVo Complete bundle** | $239/mo · $2,300/yr | **none** (Trader has none, and a bundle must not reintroduce it) | Everything in Trader (Analyst included) + everything in the Crypto Market Map, $49/mo under the parts. Two line items (Trader base + a $30/$300 crypto companion) — added 2026-09-01 |
 
-- **7-day money-back on the first payment, all three plans.** Trader has no trial, so this is its
-  evaluation window. Stated in `license.html`, `refund-policy.html`, `help.html`, `api/chat.js`,
-  and under the Trader button on `plans.html`.
+- **7-day money-back on the first payment, all plans.** Trader and the Complete bundle have no
+  trial, so this is their evaluation window. Stated in `license.html`, `refund-policy.html`,
+  `help.html`, `api/chat.js`, and under the Trader/Complete buttons on `plans.html`.
+- **A bundle supersedes its parts.** Buying one auto-retires the standalone subs it contains
+  (trialing → cancelled now, active → runs out its paid period); buying a part you already
+  hold via a bundle is auto-cancelled and refunded. Wired in `api/webhook-sub.js`.
 - **Price for life** — the rate you subscribe at holds while the subscription stays active.
 - **Free follows the market, not the product.** We give away what the market already gives
   away and sell what the market sells. On the crypto side that was checked, not assumed:

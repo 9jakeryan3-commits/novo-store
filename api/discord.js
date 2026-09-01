@@ -35,8 +35,10 @@ module.exports = async (req, res) => {
         } catch (e) { return back('error'); }
       }
       const customerId = sess.customer;
-      const isAnalyst = sess.metadata?.tier === 'analyst';
+      const isAnalyst = sess.metadata?.tier === 'analyst'
+        || sess.metadata?.tier === 'bundle_ac';            // AC bundle's front door is the Analyst welcome
       const isCrypto = sess.metadata?.tier === 'crypto';   // own product — return them to its page
+      // bundle_all deliberately takes the default (Trader) redirect below — its home is /analyst.
 
       const tokRes = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

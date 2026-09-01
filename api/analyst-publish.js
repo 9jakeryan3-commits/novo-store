@@ -159,6 +159,11 @@ async function _activePaidSub(email) {   // active/trialing/past_due Stripe sub 
 const CRYPTO_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_CRYPTO, process.env.STRIPE_PRICE_CRYPTO_YEARLY,
   'price_1U9EU0B1Bq29OALajbT8DWJS', 'price_1U9EUsB1Bq29OALaYh2QODHA',   // $79 / $790
+  // Bundle companions (2026-09-01) — the crypto half of each bundle rides one of these.
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_AC_YEARLY,
+  process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL_YEARLY,
+  'price_1UB0ZhB1Bq29OALa8iLZSSL5', 'price_1UB0ZhB1Bq29OALamNjyA6Y9',   // $40/$400 — beside Analyst
+  'price_1UB0ZhB1Bq29OALaOw2hUHWS', 'price_1UB0ZhB1Bq29OALaWQPTPOs7',   // $30/$300 — beside Trader
 ].filter(Boolean));
 function _subIsCrypto(sub) {
   if (sub?.metadata?.tier === 'crypto') return true;
@@ -170,6 +175,7 @@ const ANALYST_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_ANALYST, process.env.STRIPE_PRICE_ANALYST_YEARLY,
   'price_1TugYAApyfMAkbeEarl2ULSv', 'price_1TugYAApyfMAkbeE9c3Rdypj',   // $129 / $1,290 — kept: existing subs
   'price_1U59pFApyfMAkbeEhEDpToGK', 'price_1U59pFApyfMAkbeEDzNHEJbD',   // $129 / $1,290
+  'price_1U8R0NB1Bq29OALa7evMqazz', 'price_1U8R2PB1Bq29OALaUv2W6VAm',   // $129 / $1,290 — LLC account, what env points at
 ].filter(Boolean));
 function _subIsAnalyst(sub) {
   if (sub?.metadata?.tier === 'analyst') return true;
@@ -196,11 +202,21 @@ async function _memberTier(email) {
       const subs = await _stripe.subscriptions.list({ customer: id, status: 'all', limit: 20 });
       for (const s of subs.data) {
         if (!LIVE.includes(s.status)) continue;
+        // PER ITEM since the bundles (2026-09-01): the Complete bundle is [Trader item,
+        // crypto companion] in one sub — the old per-sub order read its companion first and
+        // classified the member null, so their Trader device got the duplicate push this
+        // function exists to suppress. An item that is neither Analyst nor Crypto IS the
+        // Trader item, whatever rides beside it.
+        const items = (s?.items?.data || []).filter(it => it?.price?.id);
+        if (items.length && items.some(it => !ANALYST_PRICE_IDS.has(it.price.id) && !CRYPTO_PRICE_IDS.has(it.price.id))
+            && s?.metadata?.tier !== 'analyst' && s?.metadata?.tier !== 'crypto' && s?.metadata?.tier !== 'bundle_ac') {
+          return 'trader';
+        }
         if (_subIsAnalyst(s)) { sawAnalyst = true; continue; }
         if (_subIsCrypto(s)) continue;    // Crypto is its own product — NOT Trader, and it
                                           // owns no engine, so squeeze pushes must NOT be
                                           // suppressed for a Crypto-only member.
-        return 'trader';                  // any other live paid sub = Trader
+        if (!items.length) return 'trader';   // thin object, not analyst/crypto = Trader (old behavior)
       }
     }
     return sawAnalyst ? 'analyst' : null;

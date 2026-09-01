@@ -37,6 +37,10 @@ WHAT NOVO IS
     the 7-day money-back is its evaluation window. It places NO trades and connects to NO broker.
   - NoVo Crypto Market Map ($79/mo or $790/yr): ITS OWN PRODUCT, not included with Analyst or Trader, and
     neither is included with it. 7-day free trial, card required. It also carries the private members Discord.
+  - BUNDLES (both at /plans): Analyst + Crypto $169/mo or $1,690/yr (7-day free trial) — both products,
+    $39/mo under the two apart. NoVo Complete $239/mo or $2,300/yr — everything: Trader (Analyst included)
+    plus the Crypto Market Map, $49/mo under the parts; no trial, the 7-day money-back is its window.
+    One subscription, one bill, same members Discord. A bundle supersedes its parts automatically.
 - NoVo, the AI market analyst (included with Analyst, so Trader has it too; the Crypto Market Map includes it
   for the crypto side): a chat bubble on the live dashboard — 'Ask NoVo', bottom right. ONE analyst across both
   maps, equity and crypto. What it can do:

@@ -25,8 +25,17 @@
       // The Crypto Market Map had NO branch at all, so not one $79 click has ever reached GA4 or Ads.
       // A product whose checkouts are invisible cannot be bid on, cannot be optimised, and looks like
       // it converts at zero -- which is indistinguishable from a product nobody wants.
-      var _cv = (/yearly/i.test(oc) || window._cryptoPlan === 'yearly') ? 790 : 79;
+      // Plan global differs BY PAGE: crypto.html stores window._cryptoPlan, plans.html stores the
+      // lexical _cxPlan (visible here as window._cxPlan since it's declared with var at top level) —
+      // reading only one of them reported every annual sale from the other page at the monthly value.
+      var _cv = (/yearly/i.test(oc) || window._cryptoPlan === 'yearly' || window._cxPlan === 'yearly') ? 790 : 79;
       gtag('event', 'begin_checkout', { currency: 'USD', value: _cv, items: [{ item_id: 'crypto', item_name: 'NoVo Crypto Market Map' }] });
+    } else if (/bundleAcCheckout/.test(oc)) {
+      var _bav = (window._bundleAcPlan === 'yearly') ? 1690 : 169;
+      gtag('event', 'begin_checkout', { currency: 'USD', value: _bav, items: [{ item_id: 'bundle_ac', item_name: 'NoVo Analyst + Crypto bundle' }] });
+    } else if (/bundleAllCheckout/.test(oc)) {
+      var _bcv = (window._bundleAllPlan === 'yearly') ? 2300 : 239;
+      gtag('event', 'begin_checkout', { currency: 'USD', value: _bcv, items: [{ item_id: 'bundle_all', item_name: 'NoVo Complete bundle' }] });
     }
   }, true);
 
