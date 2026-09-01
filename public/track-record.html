@@ -187,6 +187,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .fut .fg { font-size:12.5px; font-weight:700; }
   .up{ color:var(--green); } .dn{ color:var(--red); }
 
+  /* TICKER GROUPS INSIDE A CLAIM. Every claim repeats the same shape once per ticker -- a bold
+     heading with its verdict, then its detail lines -- but the groups were emitted as bare
+     siblings with nothing between them, so SPY's numbers ran straight into QQQ's. Claim seven was
+     the odd one out, wrapping its groups in a 13px div, which is why some blocks looked separated
+     and others did not. One rule for both shapes: the FIRST group in a claim gets nothing, every
+     later one gets a rule above it. Sibling-based, so a claim that renders only one ticker (or
+     drops one for thin data) never shows a stray leading divider. */
+  .tg-head:not(:first-child),
+  .tg + .tg { border-top:1px solid var(--bdr); margin-top:14px; padding-top:14px; }
+  .tg { margin-bottom:13px; }
+
   /* dealer teaser (LOCKED) */
   .teaser { display:grid; grid-template-columns:1fr 1fr; gap:0; overflow:hidden; padding:0; }
   @media(max-width:820px){ .teaser{ grid-template-columns:1fr; } }
@@ -631,7 +642,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       // printed "does not hold in this window" in red, which is NoVo publishing 0% about itself off
       // one observation. A claim that cannot be graded cannot render a verdict either.
       if (c && (!c.strength || c.strength === 'inconclusive')) { verdict = 'not yet distinguishable from chance'; ok = null; }
-      return '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
+      return '<div class="tg-head" style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
            + ' <span style="font-weight:600;color:' + (ok === null ? 'var(--txt3)' : (ok ? 'var(--green)' : 'var(--red)'))
            + ';">' + verdict + '</span>' + sg(c) + '</div>';
     }
@@ -724,7 +735,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                      + ' &mdash; price was back behind it an hour later <b>'
                      + p[1].back_behind_rate + '%</b> of the time' + sg(p[1]));
         });
-        wb += '<div style="margin-bottom:13px;">'
+        wb += '<div class="tg">'
             + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">'
             + tk + ' <span style="font-weight:600;color:var(--txt3);">when the wall does break</span></div>'
             + brl + '</div>';
@@ -732,7 +743,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       var wbr = t.wall_base_rate;
       if (wbr && wbr.enough) {
-        wb += '<div style="margin-bottom:13px;">'
+        wb += '<div class="tg">'
             + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:4px;">' + tk
             + ' <span style="font-weight:600;color:var(--txt2);">price goes through them</span></div>';
         [['call','call wall'],['put','put wall']].forEach(function(w){
