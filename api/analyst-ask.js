@@ -1010,6 +1010,13 @@ module.exports = async (req, res) => {
       .replace(/\*\*(.+?)\*\*/g, '$1')
       .replace(/(^|\n)\s*[*•]\s+/g, '$1- ')
       .replace(/(^|\n)#{1,6}\s*/g, '$1')
+      // Code fences and horizontal rules, both observed live on the DEEP lane: a desk report is
+      // long and structured enough that the model reaches for markdown furniture the fast lane
+      // never triggers, and the panel renders text — so ``` and --- sat on screen as punctuation.
+      // The fence's CONTENTS are kept (it is usually an ASCII level map, which reads fine as
+      // text); only the markers go.
+      .replace(/(^|\n)\s*```[a-z]*\s*(\n|$)/gi, '$1')
+      .replace(/(^|\n)\s*(?:-{3,}|_{3,}|={3,})\s*(?=\n|$)/g, '$1')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
