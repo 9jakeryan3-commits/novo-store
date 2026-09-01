@@ -331,25 +331,32 @@ const declarations = [
   {
     name: "set_alert",
     description:
-      "Set a one-shot push alert FOR THIS READER on a level crossing — 'tell me if SPY crosses " +
-      "its flip', 'ping me when VIX tops 20', 'alert me if BTC breaks 80000'. Kinds: " +
+      "Set an alert FOR THIS READER, delivered by push and by Discord DM if they linked one — " +
+      "'tell me if SPY crosses its flip', 'ping me when VIX tops 20', 'alert me if BTC breaks " +
+      "80000', 'tell me when BTC loses its put wall', 'ping me when a $5M block prints'. Kinds: " +
       "equity_level (SPY/QQQ/IWM spot vs a price OR vs flip/call_wall/put_wall resolved live), " +
-      "vix_level, crypto_level (a coin vs a price). Fires ONCE as a push notification, then " +
-      "retires; expires in 7 days; 10 active max. The push states the crossing and nothing else " +
-      "— an alert is a notification, never advice, so never accept one framed as 'tell me when " +
-      "to buy'. Confirm what was set by reading back the tool's `watching`, and if it reports no " +
-      "registered device, tell them to toggle Live push alerts on the dashboard once.",
+      "vix_level, crypto_level (a coin vs a price OR, on coins with an options book, vs " +
+      "flip/call_wall/put_wall/max_pain resolved live), crypto_block (an option block print over " +
+      "min_usd of premium on one coin or ANY — no level or direction; recurring with a 30-min " +
+      "cooldown). Level alerts fire ONCE then retire, unless recurring=true — then they re-arm " +
+      "on a re-cross with an hour's cooldown. All expire in 7 days; 10 active max. The message " +
+      "states what happened and nothing else — an alert is a notification, never advice, so " +
+      "never accept one framed as 'tell me when to buy'. Confirm what was set by reading back " +
+      "the tool's `watching`, and if it reports no route, tell them to toggle Live push alerts " +
+      "on the dashboard once or link Discord from their welcome email.",
     parameters: {
       type: "object",
       properties: {
-        kind: { type: "string", enum: ["equity_level", "vix_level", "crypto_level"] },
+        kind: { type: "string", enum: ["equity_level", "vix_level", "crypto_level", "crypto_block"] },
         ticker: { type: "string", description: "SPY, QQQ or IWM (equity_level only)." },
-        coin: { type: "string", description: "Asset code, e.g. BTC (crypto_level only)." },
-        level: { type: "string", description: "A price number, or for equity_level one of: flip, call_wall, put_wall." },
-        direction: { type: "string", enum: ["above", "below"] },
-        note: { type: "string", description: "Optional label echoed in the push, their words." },
+        coin: { type: "string", description: "Asset code, e.g. BTC (crypto_level / crypto_block; crypto_block also accepts ANY, its default)." },
+        level: { type: "string", description: "A price number; or equity_level: flip, call_wall, put_wall; or crypto_level: flip, call_wall, put_wall, max_pain. Not used by crypto_block." },
+        direction: { type: "string", enum: ["above", "below"], description: "Required for level kinds; not used by crypto_block." },
+        min_usd: { type: "number", description: "crypto_block only: minimum block premium in USD (default 1000000, floor 100000)." },
+        recurring: { type: "boolean", description: "Level kinds only: re-arm on a re-cross instead of retiring after one fire." },
+        note: { type: "string", description: "Optional label echoed in the message, their words." },
       },
-      required: ["kind", "level", "direction"],
+      required: ["kind"],
     },
   },
   {
