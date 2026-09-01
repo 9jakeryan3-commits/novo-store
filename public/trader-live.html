@@ -3040,7 +3040,22 @@ async function _loadAnalysisBoard(){
     var r=await _tfetch(u); if(!r.ok){ _reauth401(r); return; }
     _abData=await r.json();
     _renderBoard(); _renderLine();
+    if(_ctbTog.heat){ try{ _loadHeat(); }catch(_e){} }   // B16: field refresh rides this supervised lane
   }catch(_e){}
+}
+// B16: the heatmap's strike×time field — fetched only while the toggle is on, per (ticker) cached,
+// 60s server cache + ETag behind it. One in-flight guard; a repaint lands when data arrives.
+let _heatData={};
+async function _loadHeat(){
+  try{
+    var tk=_selTkr(), u=NOVO_URL('/api/gex-matrix'); if(!u) return;
+    if(window._heatBusy) return; window._heatBusy=1;
+    try{
+      var r=await _tfetch(u+'&ticker='+encodeURIComponent(tk)); if(!r.ok){ _reauth401(r); return; }
+      var d=await r.json();
+      if(d&&d.ticker===tk&&d.cols&&d.cols.length){ _heatData[tk]=d; try{ _novoChart.timeScale().applyOptions({}); }catch(_e){} }
+    } finally { window._heatBusy=0; }
+  }catch(_e){ window._heatBusy=0; }
 }
 _loadAnalysisBoard();
 // Fast lane until first paint: the parse-time call fires before the handshake has minted
@@ -3058,17 +3073,18 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false,trails:false,drift:false};
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false,trails:false,drift:false,heat:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo','trails','drift'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo','trails','drift','heat'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  if(_ctbTog.heat&&_ctbTog.tint) _ctbTog.tint=false;   // B16: field and wash are mutually exclusive
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
 let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
 try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,trails:_ctbTog.trails,drift:_ctbTog.drift,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,trails:_ctbTog.trails,drift:_ctbTog.drift,heat:_ctbTog.heat,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes), so one
@@ -3889,6 +3905,72 @@ return {
     }];
   }
 }; }
+// ── B16: STRIKE × TIME GAMMA HEATMAP ────────────────────────────────────────
+// The flagship: the dealer-gamma field painted UNDER the live tape. Columns are the engine's chain
+// snapshots (each honestly spans until the next measurement); rows are strikes; green = net call
+// gamma (sticky shelf), red = net put gamma (slippery), alpha by magnitude, ceiling 0.13 — the
+// raw tape stays unmistakably raw. Geometry is clamped to the loaded bars, drawn in bitmap space
+// with pixel-ratio rounding, and costs ~44×23 rect fills per frame only while enabled.
+function _makeHeat(){
+return {
+  _chart:null,_series:null,
+  attached:function(p){ this._chart=p.chart; this._series=p.series; },
+  detached:function(){ this._chart=null; this._series=null; },
+  updateAllViews:function(){},
+  paneViews:function(){
+    var self=this;
+    return [{
+      zOrder:function(){ return 'bottom'; },
+      renderer:function(){ return { draw:function(target){
+        try{
+          if(!_ctbTog.heat||!self._series||!self._chart) return;
+          var d=_heatData[_selTkr()]; if(!d||!d.cols||!d.cols.length) return;
+          var cs=_novoViewC; if(!cs||!cs.length) return;
+          var t0=cs[0].time, tN=cs[cs.length-1].time;
+          var tsc=self._chart.timeScale();
+          target.useBitmapCoordinateSpace(function(scope){
+            var ctx=scope.context, pr=scope.verticalPixelRatio, hpr=scope.horizontalPixelRatio;
+            var W=scope.bitmapSize.width, H=scope.bitmapSize.height;
+            var gap=1e9;
+            for(var i=1;i<d.strikes.length;i++){ var g=d.strikes[i]-d.strikes[i-1]; if(g>0&&g<gap) gap=g; }
+            if(gap>=1e9) gap=1;
+            // Color LUT built ONCE per payload: ~1,000 rgba strings per frame was the p95 spike.
+            if(!d._lut){
+              d._lut=d.cells.map(function(row){ return row.map(function(v){
+                if(!v) return null;
+                var a=Math.min(0.13,Math.abs(v)*0.13).toFixed(3);
+                return (v>=0)?('rgba(52,211,153,'+a+')'):('rgba(244,63,94,'+a+')');
+              }); });
+            }
+            var xs=[];
+            for(var c2=0;c2<d.cols.length;c2++){
+              var tt=Math.min(Math.max(d.cols[c2],t0),tN);
+              var x=tsc.timeToCoordinate(tt);
+              xs.push(x===null?null:Math.round(x*hpr));
+            }
+            // Strikes OUTER: one coordinate pair per strike per frame (44x2), not per cell (44x23).
+            for(var s2=0;s2<d.strikes.length;s2++){
+              var yC=self._series.priceToCoordinate(d.strikes[s2]); if(yC===null) continue;
+              var yCp=yC*pr; if(yCp<-20||yCp>H+20) continue;   // off-pane strikes cost nothing
+              var yT=self._series.priceToCoordinate(d.strikes[s2]+gap/2);
+              var hh=(yT===null)?4*pr:Math.max(2*pr,Math.abs(yC-yT)*2*pr*0.92);
+              var yTop=Math.round(yCp-hh/2), hR=Math.round(hh);
+              var row=d.cells[s2], lut=d._lut[s2];
+              for(var c3=0;c3<d.cols.length;c3++){
+                if(!row[c3]) continue;
+                var x1=xs[c3]; if(x1===null) continue;
+                var x2=(c3+1<d.cols.length&&xs[c3+1]!==null)?xs[c3+1]:W;
+                if(x2<=x1) continue;
+                ctx.fillStyle=lut[c3];
+                ctx.fillRect(x1, yTop, x2-x1, hR);
+              }
+            }
+          });
+        }catch(_e){}
+      } }; }
+    }];
+  }
+}; }
 // ── B15: LEVEL MIGRATION TRAILS ────────────────────────────────────────────────
 // How the walls MOVED today, drawn as faint stepped lines behind the current flat levels —
 // "call wall rolled UP at 11:40" becomes readable signal instead of a teleporting line. Off by
@@ -4373,6 +4455,7 @@ function _scaleMenuRender(){
     {k:'dvh', lbl:'Gravity halo (after 2pm)', c:_ctbTog.halo},
     {k:'dvl', lbl:'Level trails — today\'s wall path', c:_ctbTog.trails},
     {k:'dvd', lbl:'Drift arrow (modeled)', c:_ctbTog.drift},
+    {k:'dvx', lbl:'Gamma heatmap — strike × time', c:_ctbTog.heat},
   ];
   m.innerHTML=rows.map(function(r){
     if(r.sep) return '<div class="sm-sep"></div>';
@@ -4388,10 +4471,16 @@ function _scaleMenuRender(){
         _novoRanged=false; _c2Ranged=false; loadNovoChart(); try{ _c2Run(); }catch(_e){} }
       else if(k==='inv'){ _scaleCfg.inv=!_scaleCfg.inv; _ctbSave(); _applyScale(); }
       else if(k==='zc'||k==='zp'){ _scaleCfg.za=(k==='zp'); _ctbSave(); _applyScale(); }
-      else if(k==='dvt'||k==='dvc'||k==='dvh'||k==='dvl'||k==='dvd'){
-        var _dk2={dvt:'tint',dvc:'cone',dvh:'halo',dvl:'trails',dvd:'drift'}[k];
-        _ctbTog[_dk2]=!_ctbTog[_dk2]; _ctbSave();
-        _novoOvSig=''; _novoHasData=false; loadNovoChart();   // cone/tint/halo re-derive with the overlays
+      else if(k==='dvt'||k==='dvc'||k==='dvh'||k==='dvl'||k==='dvd'||k==='dvx'){
+        var _dk2={dvt:'tint',dvc:'cone',dvh:'halo',dvl:'trails',dvd:'drift',dvx:'heat'}[k];
+        _ctbTog[_dk2]=!_ctbTog[_dk2];
+        // B16: the heatmap and the regime tint are mutually exclusive — two background fields at
+        // once is mud, decided at build time. Turning one on turns the other off.
+        if(_dk2==='heat'&&_ctbTog.heat) _ctbTog.tint=false;
+        if(_dk2==='tint'&&_ctbTog.tint) _ctbTog.heat=false;
+        _ctbSave();
+        if(_dk2==='heat'&&_ctbTog.heat){ try{ _loadHeat(); }catch(_e){} }
+        _novoOvSig=''; _novoHasData=false; loadNovoChart();   // ambient visuals re-derive with the overlays
       }
       else { _scaleCfg.m=+k.slice(1); _ctbSave(); _applyScale(); }
       _scaleMenuRender();   // repaint checks; the menu stays open for a second tweak
@@ -4580,6 +4669,7 @@ function _initNovoChart(){
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_svpPrim); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeGexProf(function(){ return (_abData&&_abData.strikes)?_abData.strikes[_selTkr()]:null; })); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeDealerViz()); }catch(_e){}
+  try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeHeat()); }catch(_e){}
   try{ _applyScale(); }catch(_e){}   // restore the persisted scale mode/invert
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
