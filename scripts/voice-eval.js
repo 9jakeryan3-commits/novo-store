@@ -12,11 +12,15 @@
 //
 // BASELINE, so a future run has something to compare against. Before the voice contract shipped
 // (2026-09-01) the live answer to "what's SPY doing right now?" was 279 words, 25.4 words per
-// sentence, ZERO contractions and one "I". After: ~75 words, ~15 per sentence, contractions and
-// first person present. The suite sat at 3/25 checks missed, and the three were soft — an em-dash
-// making one long opening sentence, and a pure lookup answer that had no natural place for "I".
-// TREAT A JUMP FROM THREE TO TEN AS A REGRESSION. Do not tune the prompt to score zero: the goal
-// is an analyst who sounds like a person, not one who games five metrics.
+// sentence, ZERO contractions and one "I". After the contract, and after repeating it at the END
+// of the prompt (SYSTEM alone was thousands of tokens upstream by the time production finished
+// appending data), the suite sits at **5/25 missed against production on the standard register**:
+// every answer is inside its length budget and uses first person, and the remainder are soft —
+// sentences running 25-29 words against a 24 threshold, and short factual answers with no natural
+// contraction. TREAT A JUMP TO TEN AS A REGRESSION. Do not tune the prompt to score zero: the
+// goal is an analyst who sounds like a person, not one who games five metrics.
+//
+// A number from an unpinned identity is not comparable to this one — see EVAL_EMAIL below.
 //
 // Usage:
 //   node scripts/voice-eval.js                 # against production
@@ -62,16 +66,25 @@ function score(text, c) {
   };
 }
 
+// ⚠️ NEVER POINT THIS AT A REAL READER'S SEAT. It defaulted to the owner's comp address and
+// silently measured whatever REGISTER that account was set to: with Plain English on, every
+// answer carries an inline gloss, which lengthens sentences and reads as a voice regression that
+// is really the reader's own preference working correctly. It also means the eval would WRITE a
+// level onto a real member's memory if the pinning below were ever passed through. A dedicated
+// identity, and the register pinned explicitly, so runs are comparable to each other and to the
+// baseline. `standard` is the default register and therefore the thing worth regression-testing.
+const EVAL_EMAIL = process.env.VOICE_EVAL_EMAIL || 'voice-eval@novo-options.trade';
+const EVAL_LEVEL = process.env.VOICE_EVAL_LEVEL || 'standard';
+
 async function askProd(q) {
   const crypto = require('crypto');
   const sec = process.env.ANALYST_PUBLISH_SECRET || process.env.ANALYST_LIVE_SECRET;
   if (!sec) throw new Error('set ANALYST_PUBLISH_SECRET to run against production');
-  const p = Buffer.from(JSON.stringify({ e: process.env.VOICE_EVAL_EMAIL || 'novotrades26@gmail.com',
-                                         x: Date.now() + 900000 })).toString('base64url');
+  const p = Buffer.from(JSON.stringify({ e: EVAL_EMAIL, x: Date.now() + 900000 })).toString('base64url');
   const t = p + '.' + crypto.createHmac('sha256', sec).update(p).digest('base64url');
   const r = await fetch((process.env.SITE_URL || 'https://novo-options.trade') + '/api/analyst-ask', {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ t, question: q }),
+    body: JSON.stringify({ t, question: q, level: EVAL_LEVEL }),
   });
   const j = await r.json();
   return j.answer || j.error || '';
