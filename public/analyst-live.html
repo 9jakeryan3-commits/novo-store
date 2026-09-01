@@ -52,9 +52,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* Match the Trader dashboard's palette — neutral near-black (was navy). Card SHAPE/spacing unchanged
      (rounded + spaced, as-is). Only the hue moves: page/tile/card shades + text go neutral gray. */
   :root {
-    --navy:  #0e0e10;   /* nested tile / inset bg (darkest usable shade) */
-    --navy2: #17171a;   /* card bg */
+    --navy:  #0e0e10;   /* nested tile / inset bg */
+    --navy2: #17171a;   /* raised chrome: inputs, rings, the ask bar -- NOT cards any more */
+    /* CARD SURFACES (2026-08-31, Jake: "darken the analyst dashboard cards like the crypto, they
+       should be almost black"). Taken verbatim from crypto-live.html so the two dashboards are one
+       product rather than two themes: cards sit on --panel, the deepest wells on --sunk, and card
+       borders drop to --bdr2 because a 2c border around a 111113 panel reads as a box drawn around
+       the data instead of an edge. --navy2 keeps its old value and its old job on raised chrome. */
+    --panel: #111113;   /* card bg -- almost black */
+    --sunk:  #0b0b0d;   /* deepest well: rails, sticky heads */
     --bdr:   #2c2c30;   /* borders */
+    --bdr2:  #242428;   /* card borders -- quieter than --bdr */
     --txt1:  #f0f0ee;   /* headline text */
     --txt2:  #a8a8a8;   /* body text */
     --txt3:  #6e6e6e;   /* muted labels */
@@ -189,7 +197,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .lv-tile { padding: 14px 16px; }
     .lv-tile .v { font-size: 22px; }
   }
-  .lv-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 16px 18px; }
+  .lv-card { background: var(--panel); border: 1px solid var(--bdr2); border-radius: 14px; padding: 16px 18px; }
   .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
   .lv-card img.chart { width: 100%; border-radius: 8px; border: 1px solid var(--bdr); display: block; }
   /* dealer tiles */
@@ -318,7 +326,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .lv-bottom .b-strip { grid-column: 1; grid-row: auto; order: 2; }
     .lv-bottom .b-line  { grid-column: 1; grid-row: auto; order: 3; }
   }
-  .lv-mini { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
+  .lv-mini { background: var(--panel); border: 1px solid var(--bdr2); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
   .lv-mini.on { border-color: rgba(34,211,238,.5); }
   .lv-mini:hover { border-color: rgba(34,211,238,.45); background: rgba(34,211,238,.05); }
   .strip-hd { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: 2px;
@@ -362,7 +370,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      the loudest row on the page a set of numbers NoVo does not even compute. It is context, so it is
      now one thin segmented strip: a single container, hairline dividers, values inline. */
   .lv-ribbon { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px;
-               background: var(--navy2); border: 1px solid var(--bdr); border-radius: 10px; }
+               background: var(--panel); border: 1px solid var(--bdr2); border-radius: 10px; }
   .lv-ribbon::-webkit-scrollbar { height: 0; }
   .rib { position: relative; flex: 1 0 auto; padding: 9px 15px; display: flex; align-items: baseline;
          gap: 8px; white-space: nowrap; }
