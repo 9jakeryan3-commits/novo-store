@@ -830,6 +830,13 @@ module.exports = async (req, res) => {
        'lean on. Use your tools freely — several lookups per round, both maps where relevant.',
        'Plain text still: short headed paragraphs separated by blank lines, "- " lists where they',
        'help. Every hard boundary still applies — no advice, no point predictions, no instructions.',
+       'BEFORE YOU SETTLE ON A READ, ARGUE THE OTHER SIDE. Write the strongest case against it —',
+       'the level that would break it, the reading of the same positioning that points the other',
+       'way, the base rate that does not support it — and then answer that case or change the read.',
+       'One short paragraph, in the report, headed plainly. A read that has not survived its own',
+       'counter-argument is a guess with sources. (This is the one durable finding from the',
+       'multi-agent trading literature: the structured disagreement helps, the extra agents do not,',
+       'so it is a pass you make rather than a second opinion someone else supplies.)',
        '', ''].join('\n')
     : '';
 
