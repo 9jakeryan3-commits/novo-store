@@ -9,7 +9,13 @@
   var els   = document.querySelectorAll('[data-coincount]');
   var chain = document.querySelectorAll('[data-chaincount]');
   var asset = document.querySelectorAll('[data-assetcount]');
-  if (!els.length && !chain.length && !asset.length) return;
+  // MAPPED IS NOT THE SAME NUMBER AS COINS. `coins` counts what is tradable at retail, because
+  // the cost-to-trade copy is read back from a broker's disclosed markup and only exists for
+  // coins that broker lists. `mapped` is the size of the map. They differ by TRX, which has one
+  // of the seven real options books but no retail listing - so a stat labelled "coins mapped"
+  // showing the tradable count was understating the map by one.
+  var mapped = document.querySelectorAll('[data-mappedcount]');
+  if (!els.length && !chain.length && !asset.length && !mapped.length) return;
   fetch('/api/crypto-free')
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
@@ -22,7 +28,10 @@
       // rail's "filter 293 tokens" is coins + chain, and the site was quoting the floored half.
       if (typeof j.chain === 'number' && j.chain > 0) {
         chain.forEach(function (el) { el.textContent = String(j.chain); });
-        asset.forEach(function (el) { el.textContent = String(n + j.chain); });
+        asset.forEach(function (el) { el.textContent = String((j.mapped || n) + j.chain); });
+      }
+      if (typeof j.mapped === 'number' && j.mapped > 0) {
+        mapped.forEach(function (el) { el.textContent = String(j.mapped); });
       }
       els.forEach(function (el) {
         // data-coincount="words" wants "ninety" rather than "90" - the /plans copy reads

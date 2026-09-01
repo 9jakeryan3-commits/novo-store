@@ -53,6 +53,7 @@ function get(url) {
 
   const list = Array.isArray(feed.list) ? feed.list : [];
   const total = Number(feed.coins) || list.length;
+  const mapped = Number(feed.mapped) || list.length;
   const bandA = list.filter((x) => x.band === 'A').length;
   const bandB = list.filter((x) => x.band === 'B').length;
   // The on-chain half, written as "200+" and floored to a FIFTY.
@@ -82,7 +83,8 @@ function get(url) {
   // tokens" there with no way to reconcile them. Same source, same arithmetic, floored the same
   // way, so the baked claim stays true across the range -- and coin-count.js swaps in the exact
   // live figure for anyone with JS.
-  const assets = Math.floor((chainRaw + total) / CHAIN_STEP) * CHAIN_STEP;
+  // "assets mapped" is the size of the map, so the coin half is `mapped`, not `total`.
+  const assets = Math.floor((chainRaw + mapped) / CHAIN_STEP) * CHAIN_STEP;
 
   // How many tools the analyst can actually call, counted off the declarations themselves.
   let tools = 0;
@@ -109,6 +111,11 @@ function get(url) {
   const keepCase = (n, tail) => (m) => m.slice(0, 3) + ' ' + n + ' ' + tail;
   const rules = [
     ['data-coincount span', /(<span data-coincount>)\d+(<\/span>)/g, '$1' + total + '$2'],
+    // The SIZE OF THE MAP, which is not `total`. `total` is feed.coins = tradable at retail,
+    // because the cost-to-trade copy only exists for coins the broker lists; feed.mapped counts
+    // every coin on the map. They differ by TRX -- a real options book, no retail listing -- so
+    // anything saying "coins mapped" has to read this one or it undercounts by one.
+    ['data-mappedcount span', /(<span data-mappedcount>)\d+(<\/span>)/g, '$1' + mapped + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+\+?(<\/span>)/g, '$1' + chain + '+$2'],
     ['data-assetcount span', /(<span data-assetcount>)\d+\+?(<\/span>)/g, '$1' + assets + '+$2'],
     ...(tools ? [['data-toolcount span', /(<span data-toolcount>)\d+(<\/span>)/g, '$1' + tools + '$2']] : []),
