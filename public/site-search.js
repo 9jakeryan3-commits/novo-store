@@ -190,3 +190,27 @@
     if (!wrap.contains(e.target)) panel.classList.remove('show');
   });
 })();
+
+/* Prose-cap centering. The shared sheets cap running text (~78ch) inside the 1560 shell;
+   a capped box whose TEXT is centered must center its BOX too. The alignment arrives by
+   inline style, by class, or by inheritance - only computed style sees all three, so this
+   cannot live in the stylesheets. Left-aligned text is untouched. */
+(function () {
+  function nvsCenterCapped() {
+    var els = document.querySelectorAll(
+      '.container p, .wrap p, .container li, .wrap li, .container .section-sub, .wrap .section-sub');
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i];
+      if (e.closest('.nvs-ss-wrap')) continue;
+      var cs = getComputedStyle(e);
+      if (cs.textAlign !== 'center') continue;
+      var mw = parseFloat(cs.maxWidth);
+      if (!mw || !e.parentElement) continue;
+      if (mw < e.parentElement.getBoundingClientRect().width - 12) {
+        e.style.marginLeft = 'auto'; e.style.marginRight = 'auto';
+      }
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', nvsCenterCapped);
+  else nvsCenterCapped();
+})();

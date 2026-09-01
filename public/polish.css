@@ -211,10 +211,33 @@ nav.is-scrolled {
    which is the shape Jake pointed at. It is a flex child of .nav-inner there, so
    it takes the middle and stops growing at a sane reading width. */
 @media (min-width: 1025px) {
-  .nvs-ss-wrap { flex: 1 1 320px; max-width: 620px; margin: 0 28px; padding: 0; }
-  nav .nvs-ss-wrap { border-top: 0; padding-top: 0; }
-  .nvs-ss-wrap input { padding: 8px 13px; font-size: 13.5px; }
+  /* Jake: "center the search bar on desktop view." As a flex child it could never be
+     truly centred - the brand block (191px) and the account buttons (125px) are not the
+     same width, so any amount of flex or auto margin leaves the box sitting ~33px off,
+     and the old flex:1 rule left it 129px right of centre. Taking it out of the flow and
+     pinning it to the middle centres it against the viewport exactly, at every width.
+     MEASURED placement: row 1 runs 12px to 56px on every page family, so top:12 plus a
+     44px box makes the search exactly as tall as the brand and the buttons beside it.
+     Header geometry does not change on scroll (checked with .is-scrolled applied). */
+  /* The widget injects its own <style> at runtime, which lands after these sheets in the
+     head and wins every tie. Scoping to `nav .nvs-ss-wrap` outranks it on specificity
+     instead of relying on order - the flat `.nvs-ss-wrap` form here was silently ignored. */
+  .nav-inner { position: relative; }
+  nav .nvs-ss-wrap {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: clamp(260px, calc(100vw - 780px), 620px);
+    max-width: none; margin: 0; padding: 0; border-top: 0;
+  }
+  nav .nvs-ss-wrap input { height: 44px; padding: 0 14px; font-size: 14px; }
   .nvs-ss-panel { left: 0; right: 0; top: calc(100% + 6px); }
+}
+
+/* Phones and tablets: Jake asked for it back UNDER the brand row rather than above it.
+   The page styles give .nav-logo order:1 and the widget defaults to 0, which is why it
+   had climbed above the logo; ordering it last drops it to its own full-width second row,
+   where the widget's own hairline reads as a header divider. */
+@media (max-width: 1024px) {
+  .nvs-ss-wrap { order: 9; flex-basis: 100%; width: 100%; }
 }
 
 /* Prose inside cards and sections keeps a readable measure too. These were the
@@ -249,7 +272,7 @@ nav.is-scrolled {
    and heroes, not for one column of prose in a box. */
 @media (min-width: 1200px) {
   .faq-list { max-width: none; }
-  .container > .card, .container.sec > .card { max-width: 1180px; }
+  .container > .card, .container.sec > .card { max-width: 1180px; margin-inline: auto; }
 }
 
 /* The analyst screenshot fan's rotated cards bleed ~24px below their aspect-ratio box by
@@ -264,7 +287,7 @@ nav.is-scrolled {
    of text they were the most lopsided thing on the site. Same for trader's .ai-card.
    Capped to match the single-column card rule. */
 @media (min-width: 1200px) {
-  .feature[style*="grid-column"], .ai-card { max-width: 1180px; }
+  .feature[style*="grid-column"], .ai-card { max-width: 1180px; margin-inline: auto; }
 
   /* And the 7-card grid above them wrapped 5+2 at full width, leaving a mostly-empty
      second row. 320px minimum tracks give 4+3 on a wide screen - balanced rows - and
@@ -308,4 +331,20 @@ nav.is-scrolled {
   .features-grid:has(> :nth-child(3):last-child) {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* Pricing rows widened to the 1180 card scale; the cards have to grow with their tracks
+   or they float centered inside them with dead space between. Desktop only - the mobile
+   stack keeps the original 480 so a single card never spans the phone edge to edge. */
+@media (min-width: 1200px) {
+  .price-card { max-width: 560px; }
+}
+
+/* The screenshot fan is four absolutely-placed cards rotated about their bottom edge, so
+   the outermost card's corner reaches past the container. There is room for that at
+   desktop width; between 700 and 1100 it reached ~5px past the viewport and gave the whole
+   page a horizontal scroll. Scaling the fan itself pulls the corner back inside without
+   clipping a card or unpicking the fan geometry. */
+@media (min-width: 700px) and (max-width: 1100px) {
+  .ss-fan { transform: scale(0.93); transform-origin: center top; }
 }
