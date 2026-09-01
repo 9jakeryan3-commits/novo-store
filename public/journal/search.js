@@ -8,11 +8,11 @@
 
   var data = [], ready = false;
 
-  fetch('/journal/search-index.json?v=10')
+  fetch('/journal/search-index.json?v=11')
     .then(function (r) { return r.json(); })
     .then(function (j) {
       data = j; ready = true;
-      if (meta) meta.textContent = 'Search 1,000+ guides — options, dealer flow, market structure, risk & discipline.';
+      if (meta) meta.textContent = 'Search the whole site — guides, coins, tools and the read archive.';
       var q = (new URLSearchParams(location.search)).get('q');
       if (q) { input.value = q; run(q); input.focus(); }
     })
@@ -55,7 +55,7 @@
     }
     out.innerHTML = res.slice(0, 16).map(function (r) {
       var a = r.a;
-      return '<a class="kb-item" href="/journal/' + a.s + '.html">' +
+      return '<a class="kb-item" href="' + (a.u || ('/journal/' + a.s + '.html')) + '">' +
         '<div class="kb-t">' + hl(a.t, toks) + (a.k ? ' <span class="kb-k">' + esc(a.k) + '</span>' : '') + '</div>' +
         '<div class="kb-d">' + hl(a.d, toks) + '</div></a>';
     }).join('');
