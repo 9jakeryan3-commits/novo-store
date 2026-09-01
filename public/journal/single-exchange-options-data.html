@@ -7,15 +7,15 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4EMKLHBB6F');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Why GEX Readings Differ Between Providers | NoVo</title>
-<meta name="description" content="Dealer-sign rules, which expirations are counted, snapshot timing, and the open-interest source each move the flip. How to judge which reading to trust.">
+<title>How Much of the Options Tape Does Your Data Source See? | NoVo</title>
+<meta name="description" content="SPX prints 100% on one exchange. SPY prints about a quarter there. A tool built on a single exchange's feed inherits that split - and rarely says so.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/why-gex-differs-between-providers.html">
+<link rel="canonical" href="https://novo-options.trade/journal/single-exchange-options-data.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/why-gex-differs-between-providers.html">
-<meta property="og:title" content="Why GEX Readings Differ Between Providers">
+<meta property="og:url" content="https://novo-options.trade/journal/single-exchange-options-data.html">
+<meta property="og:title" content="How Much of the Options Tape Does Your Data Source See?">
 <meta property="og:description" content="Same market, different GEX numbers? It's the assumptions — dealer-sign, expirations included, gamma model. What varies.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <meta property="og:image:width" content="1200">
@@ -23,13 +23,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@0dte_NoVo">
 <meta name="twitter:creator" content="@0dte_NoVo">
-<meta name="twitter:title" content="Why GEX Readings Differ Between Providers">
+<meta name="twitter:title" content="How Much of the Options Tape Does Your Data Source See?">
 <meta name="twitter:description" content="Same market, different GEX numbers? It's the assumptions — dealer-sign, expirations included, gamma model. What varies.">
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=8aad145c">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Why GEX Readings Differ Between Providers", "description": "Same market, different GEX numbers? It's the assumptions — dealer-sign, expirations included, gamma model. What varies.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/why-gex-differs-between-providers.html", "articleSection": "Dealer Flow", "wordCount": 556, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Why GEX Readings Differ Between Providers", "item": "https://novo-options.trade/journal/why-gex-differs-between-providers.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How Much of the Options Tape Does Your Data Source See?", "description": "Same market, different GEX numbers? It's the assumptions — dealer-sign, expirations included, gamma model. What varies.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-09-01", "dateModified": "2026-09-01", "mainEntityOfPage": "https://novo-options.trade/journal/single-exchange-options-data.html", "articleSection": "Dealer Flow", "wordCount": 520, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "How Much of the Options Tape Does Your Data Source See?", "item": "https://novo-options.trade/journal/single-exchange-options-data.html"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -44,22 +44,24 @@
 
 <main class="wrap">
 <article class="article">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/dealer-flow">Dealer Flow &amp; Positioning</a><span class="sep">&rsaquo;</span><span class="cur">Why GEX Readings Differ Between Providers</span></nav>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/journal/">The Journal</a><span class="sep">&rsaquo;</span><a href="/journal/dealer-flow">Dealer Flow &amp; Positioning</a><span class="sep">&rsaquo;</span><span class="cur">How Much of the Options Tape Does Your Data Source See?</span></nav>
   <header class="article-head">
     <div class="kicker">Dealer Flow</div>
-    <h1>Why GEX Readings Differ Between Providers</h1>
-    <p class="standfirst">Pull up two GEX dashboards and you'll often see two different gamma flips. Neither is broken &mdash; they're making different choices, and knowing the choices tells you which number to trust.</p>
+    <h1>How Much of the Options Tape Does Your Data Source See?</h1>
+    <p class="standfirst">Eighteen exchanges print US options; one consolidated tape unites them. Whether your tool reads that tape or one exchange&rsquo;s slice decides what a quarter of its numbers mean.</p>
   </header>
-  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
+  <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-09-01">Sep 1, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
-    <p>Because <a href="/journal/how-gex-is-calculated.html">GEX is an estimate built on assumptions</a>, different providers legitimately arrive at different numbers for the same market. The disagreements come from a handful of modeling choices.</p>
-    <h2>What actually varies</h2>
-    <p><strong>The dealer-positioning sign.</strong> The whole calculation hinges on <a href="/journal/dealer-long-gamma-assumption.html">assuming which side dealers are on</a>; providers use different rules for signing flow, and small sign differences move the flip. <strong>Which expirations.</strong> Some include only near-dated options, others the whole surface, and since <a href="/journal/walls-0dte-vs-monthly.html">0DTE and monthly gamma</a> behave differently, that reshapes the profile. <strong>Data and timing.</strong> Snapshot time, data source, and whether they use live or end-of-day open interest all shift the result. <strong>Modeling.</strong> How gamma itself is computed (volatility inputs, spot vs strike weighting) differs.</p>
-    <p class="pull">The disagreement isn't error &mdash; it's different honest choices about an unobservable quantity. Pick one method and stay consistent.</p>
-    <h2>Why it doesn't break the framework</h2>
-    <p>The <em>direction</em> of the read usually agrees even when the exact level doesn't: providers tend to concur on whether the market is broadly long or short gamma, and roughly where the big <a href="/journal/gamma-walls-explained.html">walls</a> sit. The precise flip price wobbles; the regime call is more robust. Trade the regime with confidence and the exact level with a margin of error.</p>
-    <h2>The practical rule</h2>
-    <p>Don't average two providers or chase whichever number suits your bias &mdash; <strong>pick one consistent source and learn how it behaves</strong>. A slightly &ldquo;wrong&rdquo; level you understand and use consistently beats a &ldquo;truer&rdquo; one you switch to only when convenient. NoVo computes its map one consistent way for exactly this reason: internal consistency matters more than matching someone else's dashboard.</p>
+    <p>Every listed option in the United States prints on one of eighteen exchanges, and the trades and quotes from all of them are consolidated into a single national tape under OPRA. That tape is the market. Anything less is a sample of it.</p>
+    <p>Data vendors face a real cost problem here. The consolidated feed is expensive; a single exchange group&rsquo;s own data product is not, and Cboe&rsquo;s is the best of those &mdash; well documented, deep history, priced so an analytics shop can actually build on it. Nothing is wrong with that feed. The question is the denominator underneath the numbers built from it.</p>
+    <h2>The split, measured</h2>
+    <p>Cboe publishes its own market-share statistics. As of late August 2026, its four options exchanges combined printed roughly <strong>26% of SPY options volume, 24% of QQQ, and 19% of IWM</strong>. Those shares drift month to month; the shape does not. Meanwhile <a href="/journal/what-is-cboe.html">SPX and VIX options are Cboe-proprietary products</a> &mdash; 100% of that volume prints on one exchange by construction.</p>
+    <p class="pull">On SPX, a single-exchange feed <em>is</em> the market. On SPY it is a quarter of it &mdash; and the label on the dashboard rarely changes when the denominator does.</p>
+    <h2>Where the gap hides</h2>
+    <p>Open interest clears centrally at the OCC, so an OI-built ladder &mdash; <a href="/journal/biggest-oi-strike-not-the-wall.html">the walls</a>, the big strikes &mdash; looks identical from either source. The flow-derived reads are where the sample shows: put/call ratios, volume at a strike, buy-versus-sell inference from open/close data. Built on one venue&rsquo;s prints, each of those is measured on about a quarter of the ETF tape. And it is not a random quarter &mdash; exchanges compete on fee structures and order types, so each venue&rsquo;s mix of participants skews in its own direction.</p>
+    <h2>The question to ask</h2>
+    <p>Ask any vendor two things: is the source OPRA-consolidated or single-exchange, and for each number, is the denominator the whole market or one venue? A shop doing SPX-first work on Cboe data is being exact &mdash; there the single feed covers everything. The same method quietly extended to SPY, QQQ and IWM keeps the name and loses three-quarters of the denominator.</p>
+    <p>The chain NoVo reads &mdash; volume and open interest per contract &mdash; is the consolidated view, and <a href="/journal/dealer-flow.html">the sweeps and blocks on the Analyst dashboard</a> are computed in-house off the consolidated print tape. Where any number on the map is measured on less than the whole, the sample size is printed beside it. Same rule as everywhere else: <a href="/analyst/methodology">the method is public</a>, so the denominator is too.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -88,7 +90,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/single-exchange-options-data.html"><span class="rk">Dealer Flow</span>How Much of the Options Tape Does Your Data Source See?</a></li><li><a href="/journal/dealer-0dte-gamma-at-the-money.html"><span class="rk">Dealer Flow</span>Why Dealers' 0DTE Gamma Concentrates At-the-Money (and Pins Price)</a></li><li><a href="/journal/gamma-roll-off-into-expiration.html"><span class="rk">Dealer Flow</span>Gamma Roll-Off Into Expiration, Explained</a></li><li><a href="/journal/market-breadth-divergence.html"><span class="rk">Structure</span>Breadth Divergence: When SPY Rises but Fewer Stocks Do</a></li><li><a href="/journal/prior-day-high-low-levels.html"><span class="rk">Levels</span>Prior-Day High and Low: The Levels That Carry Overnight</a></li><li><a href="/journal/the-closing-auction-explained.html"><span class="rk">Market Structure</span>The Closing Auction Explained: How the Official Close Is Set</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/why-gex-differs-between-providers.html"><span class="rk">Dealer Flow</span>Why GEX Readings Differ Between Providers</a></li><li><a href="/journal/what-is-cboe.html"><span class="rk">Market Structure</span>What Is the Cboe? The Options Exchange Behind SPX and VIX</a></li><li><a href="/journal/how-gex-is-calculated.html"><span class="rk">Dealer Flow</span>How Gamma Exposure (GEX) Is Actually Calculated</a></li><li><a href="/journal/biggest-oi-strike-not-the-wall.html"><span class="rk">Dealer Flow</span>Why the Biggest Open-Interest Strike Isn&rsquo;t Always the Wall</a></li><li><a href="/journal/net-gex-vs-gex-by-strike.html"><span class="rk">Dealer Flow</span>Reading Net GEX vs GEX by Strike</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->
