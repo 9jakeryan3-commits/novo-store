@@ -438,7 +438,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- ANALYST + CRYPTO BUNDLE -->
     <div class="card feat-cyan" id="bundle-ac-card">
-      <div class="tag cyan">Bundle &middot; save $39/mo</div>
+      <div class="tag cyan" id="ba-tag">Bundle &middot; save $39/mo</div>
       <div class="kicker">The equity dealer map <b>and</b> the crypto map &middot; NoVo across both</div>
       <h2>Analyst + Crypto</h2>
       <div class="toggle" id="ba-toggle">
@@ -464,7 +464,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- COMPLETE BUNDLE -->
     <div class="card feat-green" id="bundle-all-card">
-      <div class="tag green">The whole desk &middot; save $49/mo</div>
+      <div class="tag green" id="bc-tag">The whole desk &middot; save $49/mo</div>
       <div class="kicker">Trader (Analyst included) <b>plus</b> the Crypto Market Map</div>
       <h2>NoVo Complete</h2>
       <div class="toggle" id="bc-toggle">
@@ -646,10 +646,12 @@ function setBundleAcPlan(p) {
   if (window._bundleAcPlan === 'yearly') {
     num.textContent = '1,690'; per.textContent = '/yr'; note.innerHTML = 'per year &middot; $1,290 + $790 apart &middot; cancel any time';
     if (under) under.textContent = 'Then $1,690/yr · cancel any time';
+    var tag = document.getElementById('ba-tag'); if (tag) tag.innerHTML = 'Bundle &middot; save $390/yr';
     yr.className = 'on-cyan'; mo.className = '';
   } else {
     num.textContent = '169'; per.textContent = '/mo'; note.innerHTML = 'per month &middot; $129 + $79 apart &middot; cancel any time';
     if (under) under.textContent = 'Then $169/mo or $1,690/yr · cancel any time';
+    var tag2 = document.getElementById('ba-tag'); if (tag2) tag2.innerHTML = 'Bundle &middot; save $39/mo';
     mo.className = 'on-cyan'; yr.className = '';
   }
 }
@@ -660,9 +662,11 @@ function setBundleAllPlan(p) {
   var num = document.getElementById('bc-num'), per = document.getElementById('bc-per'), note = document.getElementById('bc-note'), btn = document.getElementById('bc-btn');
   if (window._bundleAllPlan === 'yearly') {
     num.textContent = '2,300'; per.textContent = '/yr'; note.innerHTML = 'per year &middot; $2,000 + $790 apart &middot; cancel any time';
+    var ctag = document.getElementById('bc-tag'); if (ctag) ctag.innerHTML = 'The whole desk &middot; save $490/yr';
     btn.textContent = 'Subscribe — $2,300/yr'; yr.className = 'on-green'; mo.className = '';
   } else {
     num.textContent = '239'; per.textContent = '/mo'; note.innerHTML = 'per month &middot; $209 + $79 apart &middot; cancel any time';
+    var ctag2 = document.getElementById('bc-tag'); if (ctag2) ctag2.innerHTML = 'The whole desk &middot; save $49/mo';
     btn.textContent = 'Subscribe — $239/mo'; mo.className = 'on-green'; yr.className = '';
   }
 }
@@ -682,6 +686,11 @@ async function _bundleGo(bundle, plan, btnId) {
     alert('Could not start checkout — please try again.');
   }
 }
+window.addEventListener('pageshow', function (e) {
+  if (!e.persisted) return;   // bfcache restore: un-stick the bundle CTAs left on 'Redirecting…'
+  var b1 = document.getElementById('ba-btn'); if (b1 && b1.disabled) { b1.disabled = false; b1.textContent = 'Start 7-day free trial'; }
+  var b2 = document.getElementById('bc-btn'); if (b2 && b2.disabled) { b2.disabled = false; setBundleAllPlan(window._bundleAllPlan || 'monthly'); }
+});
 function bundleAcCheckout() {
   if (SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
   return _bundleGo('ac', window._bundleAcPlan || 'monthly', 'ba-btn');
@@ -777,6 +786,7 @@ function setCryptoPlan(p){
     num.textContent='79'; per.textContent='/mo'; note.textContent='per month \u00b7 cancel any time'; }
 }
 function cryptoCheckout(){
+  if (typeof SALES_PAUSED !== 'undefined' && SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
   var b=document.querySelector('.btn-purple'); if(!b) return;
   var t=b.textContent; b.disabled=true; b.textContent='One moment...';
   fetch('/api/checkout-crypto',{method:'POST',headers:{'Content-Type':'application/json'},

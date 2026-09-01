@@ -71,7 +71,7 @@ WHAT NOVO IS
   portal (app.novo-aitrading.app/portal).
 - Pricing is price-for-life: the rate you subscribe at stays as long as your subscription is active.
 - Billing: monthly or yearly via Stripe. Manage or cancel anytime from the billing portal; access runs to the end
-  of the paid period. 7-day money-back on your first payment, all three plans (email support). Analyst and Crypto
+  of the paid period. 7-day money-back on your first payment, every plan, bundles included (email support). Analyst and Crypto
   have a 7-day free trial with a card; Trader has no trial.
 
 THE CRYPTO MARKET MAP ($79/mo) — a real product, answer about it confidently

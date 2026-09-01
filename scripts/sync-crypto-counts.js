@@ -125,6 +125,10 @@ function get(url) {
     // or leverage positioning" has to read this, or it will silently start counting a coin that
     // has neither.
     ['data-bandcount span', /(<span data-bandcount>)\d+(<\/span>)/g, '$1' + (bandA + bandB) + '$2'],
+    // Coins with a real OPTIONS BOOK (band A alone). The marker predates this slot — crypto.html,
+    // faq.html and plans.html all carried <span data-bookcount>7</span> with NOTHING stamping it
+    // (verify 2026-09-01): the exact stale-marker class this script exists to kill.
+    ['data-bookcount span', /(<span data-bookcount>)\d+(<\/span>)/g, '$1' + bandA + '$2'],
     ['data-chaincount span', /(<span data-chaincount>)\d+\+?(<\/span>)/g, '$1' + chain + '+$2'],
     ['data-assetcount span', /(<span data-assetcount>)\d+\+?(<\/span>)/g, '$1' + assets + '+$2'],
     ...(tools ? [['data-toolcount span', /(<span data-toolcount>)\d+(<\/span>)/g, '$1' + tools + '$2']] : []),
@@ -165,7 +169,7 @@ function get(url) {
       // data-mappedcount belongs in this list too: a page carrying ONLY that marker was never
       // opened, so the map-size count could go stale in exactly the file that cares most about it.
       return /data-coincount/.test(t) || /data-mappedcount/.test(t) || /data-bandcount/.test(t) || /data-chaincount/.test(t)
-          || /data-toolcount/.test(t)
+          || /data-toolcount/.test(t) || /data-bookcount/.test(t)
           || /tokens on Solana/.test(t)
           || /\b(all|across)?\s?\d+ coins\b/i.test(t);
     });
