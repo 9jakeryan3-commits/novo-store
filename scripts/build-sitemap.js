@@ -219,7 +219,18 @@ if (gone.length) console.log('           dropped ' + gone.length + ': ' + gone.s
 // now only existed as HTML.
 try {
   const idx = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/journal/search-index.json'), 'utf8'));
-  const byslug = new Map(idx.map((e) => [e.s.replace(/\.html$/, ''), e]));
+  // The index has worn two shapes: journal-only entries keyed s:"slug.html", and the
+  // site-wide rebuild keyed u:"/journal/slug". Read either, so the feed survives the next
+  // index change the way it did not survive this one (it crashed on .s and no feed shipped).
+  const byslug = new Map(idx.flatMap((e) => {
+    if (!e) return [];
+    if (typeof e.s === 'string') return [[e.s.replace(/\.html$/, ''), e]];
+    if (typeof e.u === 'string') {
+      const m = e.u.match(/^\/journal\/([a-z0-9-]+)(?:\.html)?$/);
+      if (m && m[1] !== 'index') return [[m[1], e]];
+    }
+    return [];
+  }));
   const items = [];
   for (const [file, date] of lastmod.entries()) {
     const m = file.match(/^public\/journal\/([a-z0-9-]+)\.html$/);
