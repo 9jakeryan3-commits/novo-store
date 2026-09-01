@@ -123,10 +123,16 @@ function get(url) {
     // page, and a <span> would corrupt the structured data -- so those say the number in words and
     // this keeps them level with the marker version.
     ['across N tokens on Solana', /across \d+\+? tokens on Solana/g, 'across ' + chain + '+ tokens on Solana'],
-    ['across N coins', /across \d+ coins/gi, 'across ' + total + ' coins'],
-    ['all N coins', /\ball \d+ coins/gi, keepCase(total, 'coins')],
+    // MAP-SIZE plain text, and it must run BEFORE the generic coin rules below -- which is also why
+    // those three now refuse to match "... coins in the map". A sentence that says "in the map" is
+    // counting the map (feed.mapped, 91), not the retail cost universe (feed.coins, 90); without
+    // this the JSON-LD twin of the /crypto FAQ answer was stamped back to 90 on every single build,
+    // undercounting the map by TRX forever while the visible marker beside it read 91.
+    ['N coins in the map', /\b\d+ coins in the map/g, mapped + ' coins in the map'],
+    ['across N coins', /across \d+ coins(?! in the map)/gi, 'across ' + total + ' coins'],
+    ['all N coins', /\ball \d+ coins(?! in the map)/gi, keepCase(total, 'coins')],
     ['all N ranked', /\ball \d+ ranked/gi, keepCase(total, 'ranked')],
-    ['bare N coins', /(?<![-\w>])\b\d+ coins\b/g, total + ' coins'],
+    ['bare N coins', /(?<![-\w>])\b\d+ coins\b(?! in the map)/g, total + ' coins'],
     ['the other N', /the other \d+/g, 'the other ' + (total - 1)],
     ['stat: dealer map',
       /(<div class="stat-val"[^>]*>)\d+(<\/div><div [^>]*>With a dealer map<)/, '$1' + bandA + '$2'],
@@ -136,12 +142,21 @@ function get(url) {
   ];
 
   // Only files that actually carry a count. A page with no marker is never opened for writing.
+  // The journal HUB carries a count too and readdirSync is not recursive, so it was invisible to
+  // this script and had been sitting on a hand-typed number the sync could never reach. Named
+  // explicitly rather than walking 1,000+ articles: the hub is the one file down there with a
+  // marker, and a recursive walk would re-read the whole journal on every deploy.
+  const EXTRA = [path.join(PUB, 'journal', 'index.html')].filter((p) => fs.existsSync(p));
   const files = fs.readdirSync(PUB)
     .filter((f) => f.endsWith('.html'))
     .map((f) => path.join(PUB, f))
+    .concat(EXTRA)
     .filter((p) => {
       const t = fs.readFileSync(p, 'utf8');
-      return /data-coincount/.test(t) || /data-chaincount/.test(t) || /data-toolcount/.test(t)
+      // data-mappedcount belongs in this list too: a page carrying ONLY that marker was never
+      // opened, so the map-size count could go stale in exactly the file that cares most about it.
+      return /data-coincount/.test(t) || /data-mappedcount/.test(t) || /data-chaincount/.test(t)
+          || /data-toolcount/.test(t)
           || /tokens on Solana/.test(t)
           || /\b(all|across)?\s?\d+ coins\b/i.test(t);
     });

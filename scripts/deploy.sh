@@ -61,7 +61,10 @@ fi
 # apart from a figure in one of the anchored count slots? Only then is it auto-committed. A price
 # or a headline moving in the same file fails it, and the halt below still fires.
 if [ -n "$(git status --porcelain)" ] && node scripts/count-churn-only.js; then
-  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html 2>/dev/null || true
+  # journal/index.html carries a count too (the hub, not the 1,000+ articles). It joined the sync
+  # script's file list on 2026-08-31; without it here a synced hub would sit dirty and halt the
+  # NEXT deploy instead of riding along with the other generated count edits.
+  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html           public/journal/index.html 2>/dev/null || true
   git commit -q -m "generated: crypto counts synced to the live sweep"
   git push -q
   echo ".. crypto counts refreshed and pushed"
