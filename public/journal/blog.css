@@ -489,3 +489,40 @@ nav { position: relative; }
      is inline on the grid. */
   .features-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; }
 }
+
+
+/* ── EVEN ROWS AT EVERY VIEW (Jake: "make them like the rest... all even on all views") ──
+   The four full-row strips are ordinary grid cards now. Evenness by arithmetic, not luck:
+   - Desktop, 4 columns: index's main grid holds 16 cards = 4 full rows. Analyst holds 12 +
+     two content-heavy cards tagged .feature-w2 at half-width = 3 rows + 1 full row, then
+     the #ask-novo callout keeps its deliberate full-width span as the section closer.
+   - 700-1100px: auto-fit lands on ragged 3-column rows (16 = 3+3+3+3+3+1), so the grid is
+     pinned to 2 columns there: 16 = 8 even rows, analyst 14 = 7. Below 700 it is 1 column
+     and evenness is free. */
+@media (min-width: 1200px) {
+  .feature-w2 { grid-column: span 2; }
+}
+@media (min-width: 700px) and (max-width: 1100px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* A grid holding exactly six cards wraps 4+2 on a four-column desktop. Three columns give
+   it two even rows instead, wherever such a grid appears. */
+@media (min-width: 1200px) {
+  .features-grid:has(> :nth-child(6):last-child) {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Three-card grids in the pinned-2-column band would wrap 2+1. Give them three narrow
+   columns where there is room, one column where there is not - even either way. */
+@media (min-width: 900px) and (max-width: 1100px) {
+  .features-grid:has(> :nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+@media (min-width: 700px) and (max-width: 899px) {
+  .features-grid:has(> :nth-child(3):last-child) {
+    grid-template-columns: 1fr !important;
+  }
+}
