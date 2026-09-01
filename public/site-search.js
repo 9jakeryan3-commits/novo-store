@@ -17,16 +17,20 @@
    ~390KB, and charging every visitor to every page for a box most will not open is a real cost
    for an occasional feature. */
 (function () {
-  var anchor = document.querySelector('.nav-more');
-  if (!anchor || !anchor.parentNode || document.getElementById('site-search-input')) return;
+  // LEFT OF THE HOME LINK, not tacked on the end: first child of .nav-actions. Falls back to
+  // sitting before the More button if a template has no .nav-actions, and bails entirely on
+  // pages with no standard header (the three live dashboards) rather than mounting into nothing.
+  var actions = document.querySelector('.nav-actions');
+  var anchor = actions || document.querySelector('.nav-more');
+  if (!anchor || document.getElementById('site-search-input')) return;
 
   var css = document.createElement('style');
   css.textContent = [
     '.ss-wrap{position:relative;display:flex;align-items:center;margin:0 6px;}',
-    '.ss-wrap input{width:150px;background:var(--navy2,#1c1d21);border:1px solid var(--bdr,#2e3036);',
+    '.ss-wrap input{width:190px;background:var(--navy2,#1c1d21);border:1px solid var(--bdr,#2e3036);',
     'border-radius:999px;padding:7px 12px;color:var(--txt1,#eaf3ff);font-size:13px;font-family:inherit;',
     'outline:none;transition:width .18s ease,border-color .18s ease;}',
-    '.ss-wrap input:focus{width:230px;border-color:#22d3ee;}',
+    '.ss-wrap input:focus{width:290px;border-color:#22d3ee;}',
     '.ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
     '.ss-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;width:min(420px,86vw);',
     'background:var(--navy2,#16171a);border:1px solid var(--bdr,#2e3036);border-radius:12px;',
@@ -40,7 +44,14 @@
     '.ss-k{color:var(--txt3,#7d97b8);font-size:11px;font-weight:700;letter-spacing:.09em;',
     'text-transform:uppercase;}',
     '.ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
-    '@media(max-width:900px){.ss-wrap{display:none;}}'
+    // At <=1024 the header becomes two rows, .nav-actions turns to display:contents and the
+    // individual links are hidden behind the Menu button - so this box becomes a direct flex
+    // child of .nav-inner. It takes the whole second row: order 5 puts it after the
+    // line-break pseudo at order 4, and a 100% basis makes it full width. It used to be
+    // display:none here, which hid it on precisely the screens where the link row is gone.
+    '@media(max-width:1024px){.ss-wrap{order:5;flex-basis:100%;margin:2px 0 0;}',
+    '.ss-wrap input,.ss-wrap input:focus{width:100%;}',
+    '.ss-panel{left:0;right:auto;width:100%;}}'
   ].join('');
   document.head.appendChild(css);
 
@@ -50,7 +61,8 @@
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
     'placeholder="Search…" aria-label="Search the site">' +
     '<div class="ss-panel" id="site-search-results" role="listbox"></div>';
-  anchor.parentNode.insertBefore(wrap, anchor);
+  if (actions) actions.insertBefore(wrap, actions.firstChild);
+  else anchor.parentNode.insertBefore(wrap, anchor);
 
   var input = wrap.querySelector('#site-search-input');
   var panel = wrap.querySelector('#site-search-results');
