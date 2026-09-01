@@ -3058,17 +3058,17 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false};
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false,trails:false,drift:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo','trails','drift'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
 let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
 try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,trails:_ctbTog.trails,drift:_ctbTog.drift,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes), so one
@@ -3837,6 +3837,30 @@ return {
                 ctx.fillStyle='rgba(244,63,94,0.05)'; ctx.fillRect(0,Math.min(H,yFp+band),W,Math.max(0,H-yFp-band));
               }
             }
+            if(_ctbTog.drift && px.GRAV>0 && _novoViewC && _novoViewC.length){
+              // B15: MODELED drift arrow — spot toward gravity, longer as the close nears. A pin
+              // proxy from streamed values, labeled as modeled; per-strike charm aggregation is the
+              // stated upgrade path. Drawn only when the ramp and distance both say something.
+              var lastD=_novoViewC[_novoViewC.length-1];
+              var mD=Math.floor(lastD.time/60)%1440;
+              var rampD=(mD>=780&&mD<960)?((mD-780)/180):0;     // 13:00→16:00
+              var spotD=lastD.close;
+              if(rampD>0.1 && spotD>0 && Math.abs(px.GRAV-spotD)/spotD>0.0004){
+                var y1D=self._series.priceToCoordinate(spotD), y2D=self._series.priceToCoordinate(px.GRAV);
+                if(y1D!==null&&y2D!==null&&Math.abs(y2D-y1D)>6){
+                  var xD=W-36, ap=0.25+0.45*rampD;
+                  var yy1=y1D*pr, yy2=y1D*pr+(y2D-y1D)*pr*rampD;   // length grows with the ramp
+                  ctx.strokeStyle='rgba(96,165,250,'+ap.toFixed(2)+')'; ctx.lineWidth=2;
+                  ctx.beginPath(); ctx.moveTo(xD,yy1); ctx.lineTo(xD,yy2); ctx.stroke();
+                  var dir=(yy2>yy1)?1:-1;
+                  ctx.fillStyle='rgba(96,165,250,'+ap.toFixed(2)+')';
+                  ctx.beginPath(); ctx.moveTo(xD,yy2+6*dir); ctx.lineTo(xD-4,yy2); ctx.lineTo(xD+4,yy2); ctx.closePath(); ctx.fill();
+                  ctx.font=(10*pr>=10?10*pr:10)+'px monospace'; ctx.fillStyle='rgba(148,163,184,0.65)';
+                  ctx.textAlign='right';
+                  ctx.fillText('drift (modeled)', xD-8, (yy1+yy2)/2);
+                }
+              }
+            }
             if(_ctbTog.halo && px.GRAV>0 && _novoViewC && _novoViewC.length){
               var last=_novoViewC[_novoViewC.length-1];
               var m=Math.floor(last.time/60)%1440;
@@ -3865,6 +3889,51 @@ return {
     }];
   }
 }; }
+// ── B15: LEVEL MIGRATION TRAILS ────────────────────────────────────────────────
+// How the walls MOVED today, drawn as faint stepped lines behind the current flat levels —
+// "call wall rolled UP at 11:40" becomes readable signal instead of a teleporting line. Off by
+// default (⚙ menu); four series, sig-gated setData on the 60s board poll; autoscale untouched;
+// re-strike badges (↥/↧) where a wall jumps ≥ 0.25% between samples. Intraday frames only.
+let _trailSeries={}, _trailSig='';
+const _TRAIL_SPEC={FLIP:{i:1,c:'rgba(34,211,238,0.30)'},CW:{i:2,c:'rgba(52,211,153,0.30)'},
+                   PW:{i:3,c:'rgba(244,63,94,0.30)'},GRAV:{i:4,c:'rgba(59,130,246,0.30)'}};
+function _trailsApply(){
+  try{
+    var on=_ctbTog.trails && !_isDeepTf();
+    var path=(on&&_abData&&_abData.paths)?(_abData.paths[_selTkr()]||[]):[];
+    if(!on||path.length<2){
+      for(var k in _trailSeries){ try{_novoChart.removeSeries(_trailSeries[k]);}catch(_e){} }
+      _trailSeries={}; _trailSig=''; return;
+    }
+    var cs=_novoViewC; if(!cs||!cs.length||!_novoChart) return;
+    var dayStart=cs[cs.length-1].time-(cs[cs.length-1].time%86400);   // shifted epochs → ET midnight
+    var step=_ctbTf*60;
+    var sig=_selTkr()+':'+_ctbTf+':'+path.length+':'+(path[path.length-1]||[]).join(',');
+    if(sig===_trailSig) return;
+    _trailSig=sig;
+    for(var lbl in _TRAIL_SPEC){
+      var spec=_TRAIL_SPEC[lbl], pts=[], seen={}, marks=[], prev=null;
+      path.forEach(function(row){
+        var v=row[spec.i]; if(!(v>0)) return;
+        var t=Math.floor((dayStart+row[0]*60)/step)*step;
+        if(seen[t]!==undefined){ pts[seen[t]]={time:t,value:v}; }   // last sample in a bucket wins
+        else { seen[t]=pts.length; pts.push({time:t,value:v}); }
+        if(prev!==null && prev>0 && Math.abs(v-prev)/prev>=0.0025 && (lbl==='CW'||lbl==='PW') && marks.length<6){
+          marks.push({time:t,position:v>prev?'aboveBar':'belowBar',
+            color:spec.c.replace('0.30','0.9'),shape:v>prev?'arrowUp':'arrowDown',text:lbl+(v>prev?' ↥':' ↧')});
+        }
+        prev=v;
+      });
+      if(pts.length<2) continue;
+      var s=_trailSeries[lbl];
+      if(!s){ s=_trailSeries[lbl]=_novoChart.addLineSeries({color:spec.c,lineWidth:1,lineStyle:0,
+        lineType:1, priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,
+        autoscaleInfoProvider:function(){return null;}}); }
+      s.setData(pts);
+      try{ s.setMarkers(marks); }catch(_e){}
+    }
+  }catch(_e){}
+}
 // Structural ghost walls: when the ALL-EXPIRY heaviest call-side / put-side strike disagrees with
 // the engine's published wall by ≥ $0.50, draw it as a faint dashed price line — the engine's
 // wall stays THE wall (solid, authoritative); the ghost says where the longer-dated book stacks.
@@ -4302,6 +4371,8 @@ function _scaleMenuRender(){
     {k:'dvt', lbl:'Regime tint — flip wash', c:_ctbTog.tint},
     {k:'dvc', lbl:'EM decay cone', c:_ctbTog.cone},
     {k:'dvh', lbl:'Gravity halo (after 2pm)', c:_ctbTog.halo},
+    {k:'dvl', lbl:'Level trails — today\'s wall path', c:_ctbTog.trails},
+    {k:'dvd', lbl:'Drift arrow (modeled)', c:_ctbTog.drift},
   ];
   m.innerHTML=rows.map(function(r){
     if(r.sep) return '<div class="sm-sep"></div>';
@@ -4317,8 +4388,8 @@ function _scaleMenuRender(){
         _novoRanged=false; _c2Ranged=false; loadNovoChart(); try{ _c2Run(); }catch(_e){} }
       else if(k==='inv'){ _scaleCfg.inv=!_scaleCfg.inv; _ctbSave(); _applyScale(); }
       else if(k==='zc'||k==='zp'){ _scaleCfg.za=(k==='zp'); _ctbSave(); _applyScale(); }
-      else if(k==='dvt'||k==='dvc'||k==='dvh'){
-        var _dk2={dvt:'tint',dvc:'cone',dvh:'halo'}[k];
+      else if(k==='dvt'||k==='dvc'||k==='dvh'||k==='dvl'||k==='dvd'){
+        var _dk2={dvt:'tint',dvc:'cone',dvh:'halo',dvl:'trails',dvd:'drift'}[k];
         _ctbTog[_dk2]=!_ctbTog[_dk2]; _ctbSave();
         _novoOvSig=''; _novoHasData=false; loadNovoChart();   // cone/tint/halo re-derive with the overlays
       }
@@ -4905,6 +4976,7 @@ async function loadNovoChart(){
     try{ _lvlCollide(); }catch(_e){}   // B11: hide lower-priority axis tags that overprint at confluence
     try{ _lvlStrengthApply(); }catch(_e){}   // B12: width/alpha from gamma share × session decay, change-gated
     try{ _ghostWalls(); }catch(_e){}         // B13: faint dashed structural walls when the long book disagrees
+    try{ _trailsApply(); }catch(_e){}        // B15: today's wall paths, sig-gated
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
