@@ -1159,7 +1159,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   })();
 
   // Safety net: render() returns early when no payload arrived, so a dead fetch would leave the
-  // skeleton shimmering forever — which is strictly worse than the dash it replaced, because it
+  // skeleton shimmering forever, which is strictly worse than the dash it replaced, because it
   // promises data that is never coming. After 12s, fall back to showing the real placeholders.
   setTimeout(function(){
     var _d = document.getElementById('dash');
@@ -1506,7 +1506,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   <div class="log" id="novo-ask-log">
     <div class="intro">
       Ask about the map, the session, or what is moving it. I read today&rsquo;s dealer positioning,
-      every session I have logged and a thousand-article archive &mdash; so I can tell you what a setup
+      every session I have logged and a thousand-article archive, so I can tell you what a setup
       like this one has actually resolved to before, and over how many sessions. I go and get the
       catalyst, an earnings date or the macro calendar when the answer needs one.
       <div class="chips">
@@ -1535,7 +1535,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <button type="button" data-q="How accurate have your published calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
   </div>
   <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
-    <input id="novo-ask-q" placeholder="Ask about the market &mdash; or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
+    <input id="novo-ask-q" placeholder="Ask about the market, or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>
@@ -1969,7 +1969,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
     var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
-    bt.title = 'Attach a chart image — or just paste one';
+    bt.title = 'Attach a chart image, or just paste one';
     bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
     bt.onclick = function(){ fi.click(); };
     qi.form.insertBefore(bt, qi);

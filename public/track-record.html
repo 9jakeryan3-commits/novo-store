@@ -870,7 +870,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         cost_anomaly: 'An unusually wide Robinhood round-trip comes back in'
       };
       // ONE ROW PER CLAIM KIND, whatever shape the payload arrived in. An older rollup keyed
-      // rows as kind@<horizon> — and gamma_pin's horizon is minutes-to-expiry, different on
+      // rows as kind@<horizon>, and gamma_pin's horizon is minutes-to-expiry, different on
       // every ticket, so that shape carries HUNDREDS of rows for one question and rendered as
       // a page-long wall. The collector now ships one row per kind; if a cached legacy payload
       // is still being served, collapse it here: claims and hits sum, the cell count is shown

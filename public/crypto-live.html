@@ -678,7 +678,7 @@ tr:last-child td{border-bottom:none}
     <button type="button" data-q="How accurate have your published crypto calls been?" onclick="novoAsk(this.dataset.q)">Your record</button>
   </div>
   <form onsubmit="event.preventDefault();novoAsk(document.getElementById('novo-ask-q').value)">
-    <input id="novo-ask-q" placeholder="Ask about this map &mdash; or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
+    <input id="novo-ask-q" placeholder="Ask about this map, or ask for a deep read&hellip;" autocomplete="off" maxlength="600">
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>
@@ -2019,7 +2019,7 @@ window.addEventListener('hashchange', function(){
     var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
     var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
-    bt.title = 'Attach a chart image — or just paste one';
+    bt.title = 'Attach a chart image, or just paste one';
     bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
     bt.onclick = function(){ fi.click(); };
     qi.form.insertBefore(bt, qi);

@@ -757,7 +757,7 @@ input.inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; ma
    transparent bg + a .55 border + `inset 0 0 14px -9px` inner glow; on hover a .10 wash, a .85
    border, a lighter label and a slightly wider glow. Hue is the ONLY thing that changes between
    them. c-grn / c-red / c-amb were built this way; c-blu predates it (flat .12 tint, .4 border, no
-   inner glow) and read cheap next to them — and I copied c-blu's shape when adding c-gry, so Start
+   inner glow) and read cheap next to them, and I copied c-blu's shape when adding c-gry, so Start
    AND Stop both looked washed out beside Buy Calls / Buy Puts / Take Profit / Close All.
    If you add a colour, copy this block and change only the hue. */
 
@@ -1177,7 +1177,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #chart-wm { font-size: 30px; letter-spacing: 3px; }
   /* The VIX row was moved LAST in the DOM for the desktop strip ("far right, beside the score").
      On mobile the same DOM is the stacked Market Intel panel, where that left VIX dangling beside
-     the Analyst Score meter — so the panel goes flex-column and order pulls VIX back to the top.
+     the Analyst Score meter, so the panel goes flex-column and order pulls VIX back to the top.
      Desktop is untouched: its strip reads the DOM order. */
     #card-mktintel { display: flex; flex-direction: column; }
   /* The section title must outrank the promoted VIX row, or VIX floats ABOVE "Market Intel". */
@@ -1413,7 +1413,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* !important earns its place exactly once here: the Analyst Score row carries an INLINE
      style="padding-bottom:12px" for the panel layout, and an inline style outranks any selector.
      Left alone it makes that row 12px taller, and centre alignment then lifts its text ~6px above
-     every other readout — which is the "not in line with the rest" that survived two passes. */
+     every other readout, which is the "not in line with the rest" that survived two passes. */
   #saas-header #card-mktintel .dr:hover { background: none; }
   #saas-header #card-mktintel .dsec + .dr { border-left: none; padding-left: 0; }
   /* The base rows are PANEL rows: .dr is space-between (label left, value pinned right across a full-width
@@ -2942,7 +2942,7 @@ try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='b
 function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
-// and the chart/board loops are self-scheduling (next tick only after the last completes) — so one
+// and the chart/board loops are self-scheduling (next tick only after the last completes), so one
 // hung fetch used to freeze the whole lane, switch veil stuck on, candles dead while the WS kept
 // the hero price moving (Jake's 2026-08-31 split-screen freeze). Abort → catch → the loop's
 // finally schedules the next tick and the chart heals on its own.
@@ -3767,7 +3767,7 @@ async function loadNovoChart(){
     let _view=_isDeepTf()?null:_tfView(d);
     if(_isDeepTf()){
       const _hc=await _loadHist();
-      // Keep the current chart until history answers — but a SUCCESSFUL empty answer means this
+      // Keep the current chart until history answers, but a SUCCESSFUL empty answer means this
       // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
       // the veil cadence forever (the weekend switch-to-QQQ trap).
       if(!_hc||!_hc.length){ if(_hc) _veilOff(); return; }
@@ -3813,7 +3813,7 @@ async function loadNovoChart(){
       const _drawC = _ctbTog.ha ? _haView(_view.candles) : _view.candles;
       // AUDIT F2 (2026-08-31): ANY bar-count growth takes the full setData, not just gaps >1.
       // The old `+1 append via update()` path never rewrote the JUST-COMPLETED bar with its final
-      // server values — so the WS glide's last ticks (which run a few seconds into the NEXT minute
+      // server values, so the WS glide's last ticks (which run a few seconds into the NEXT minute
       // before the poll lands) stayed printed in the completed bar's close/high/low forever, and in
       // HA mode the new bar's open midpointed a body the chart wasn't showing. One setData per bar
       // rollover (~28ms at 4x CPU throttle, 1-in-15 ticks) buys bars that always match the server.
@@ -3849,7 +3849,7 @@ async function loadNovoChart(){
       // Initial view ONLY: _novoRanged latches after the first successful set, so panning and zooming
       // afterwards are never fought.
       // Set it ONLY once the chart actually has a width. On MOBILE the chart's column (col-intel) starts
-      // as a HIDDEN tab (0px), and a range set on a zero-size chart silently fails — which is why the zoom
+      // as a HIDDEN tab (0px), and a range set on a zero-size chart silently fails, which is why the zoom
       // never took on phones. Defer + retry every poll until the container is really sized.
       //
       // (The comment here used to say "Open on the last 6 HOURS … 6h = 360 bars" directly above a line
@@ -3863,7 +3863,7 @@ async function loadNovoChart(){
           // widest desktop window; don't push the maps past that.
           const _desk = !!(window.matchMedia && window.matchMedia('(min-width: 769px)').matches);
           const _openBars = _desk ? (_tfOpen[_ctbTf]||300) : (_tfOpenM[_ctbTf]||100);
-          // rightOffset is counted in BARS, not pixels — so the clearance it buys SHRINKS as the window
+          // rightOffset is counted in BARS, not pixels, so the clearance it buys SHRINKS as the window
           // widens. At 180 bars an offset of 8 held ~55px; at 300 the same 8 holds ~33px and the newest
           // candles ran under the level tags, which are ~100px wide. Scale it with the bar count instead
           // of hard-coding: ~100px of room whatever the window. Mobile draws no tags, so it needs almost none.
@@ -3910,7 +3910,7 @@ async function loadNovoChart(){
       'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
     const _wantTitles = (window.innerWidth >= 769);
     // ── LEVELS, TradingView-style ────────────────────────────────────────────────────────────────────
-    // A THIN SOLID segment starting at the bar that SET the level, running to the newest bar — not a dotted
+    // A THIN SOLID segment starting at the bar that SET the level, running to the newest bar, not a dotted
     // line spanning the whole chart, which implied the level existed before it was set. Origin times come
     // from _lvlFromSrc (server-derived in /api/spy-chart). No origin -> fall back to the old full-width
     // price line so an unknown level still shows rather than silently vanishing.
@@ -3993,7 +3993,7 @@ async function loadNovoChart(){
           // here is a LINE SERIES, and the price-line label belongs to a different object entirely.
           // Only levels inside the visible price range render a label, so the axis stays readable.
           // visible: set at CREATION so the rebuild path never births a series with the wrong
-          // visibility — which is what used to justify calling _applyTogVis on every tick.
+          // visibility, which is what used to justify calling _applyTogVis on every tick.
           const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl,crosshairMarkerVisible:false,visible:_ctbTog.lvl,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
           _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v;
@@ -4049,7 +4049,7 @@ _ncRun();
 // ── SUPERVISOR (2026-08-31, Jake: "the chart freezing between apps and timeframes has to be
 // fixed, it can't happen") ───────────────────────────────────────────────────────────────────
 // One routine, three triggers. Every freeze this dashboard has ever produced was some lane
-// silently dead while the page looked alive — so instead of trusting any single event to fire,
+// silently dead while the page looked alive, so instead of trusting any single event to fire,
 // a watchdog interval re-checks EVERY lane while the page is visible, and the resume events just
 // run the same check immediately. setInterval survives background throttling (it fires late, but
 // it fires), so even a resume where Android drops every lifecycle event still heals in <=8s.
@@ -4123,7 +4123,7 @@ var _pcPts=null,_pcGeo=null,_pcHoverX=null;
 // `if (_activePeriod !== '1D')`, and a self-scheduling 2s poller. The poller guards against ITSELF
 // (next tick only after the last completes) but nothing guarded them against EACH OTHER, and there
 // was no request token. So: the poller's fetch(?days=1) is in flight, you click 1W, that fires
-// fetch(?days=7) — and whichever response lands LAST won the canvas. Land the 1D one second and you
+// fetch(?days=7), and whichever response lands LAST won the canvas. Land the 1D one second and you
 // get 1D data drawn under an active 1W pill. A fresh chance to lose that race arrived every 2s.
 //
 // Worse, the function re-read the GLOBAL _activePeriod after its awaits, so a mid-flight switch
@@ -4136,7 +4136,7 @@ var _pcPts=null,_pcGeo=null,_pcHoverX=null;
 var _pcSeq=0;
 var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-market), whatever period the chart shows
 // _pcPer = the period the pc-* DOM elements currently hold data for. NOT the same thing as
-// _activePeriod, which is the period the user has CLICKED — and the gap between those two is a
+// _activePeriod, which is the period the user has CLICKED, and the gap between those two is a
 // second race, separate from the fetch race below:
 //   click 1W -> _activePeriod flips instantly -> _kpi()'s own 2s timer fires before the fetch lands
 //   -> it takes the 1W branch and reads pc-total, which still holds TODAY's -$140 -> the Period P&L
@@ -4153,7 +4153,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 
   // ARMED/LIVE/HALTED row: topbar at desktop, back INSIDE the Activity Feed on mobile.
   // It's pre-placed in the topbar so logTerminal's `if(!row){...terminal.insertBefore}` never
-  // fires — which on mobile would mean the feed silently LOSES its live row (and the row would
+  // fires, which on mobile would mean the feed silently LOSES its live row (and the row would
   // render at full size, glow and all, inside the 48px bar). Moving the node keeps one element,
   // so all three writers still resolve it either way and mobile looks exactly as it always did.
   function _mountLiveRow(){
