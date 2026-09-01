@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Survivorship Bias in Backtesting, Explained | NoVo</title>
-<meta name="description" content="If your backtest only includes stocks that still exist today, it's ignoring every company that failed — and its results are a lie. Here is how survivorship bias.">
+<meta name="description" content="If your backtest only includes stocks that still exist today, it's ignoring every company that failed, and its results are a lie. Here is how survivorship bias.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
 <link rel="canonical" href="https://novo-options.trade/journal/survivorship-bias-backtesting.html">
@@ -29,7 +29,7 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=1f3edec1">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Survivorship Bias", "description": "If your backtest only includes stocks that still exist today, it's ignoring every company that failed — and its results are a lie. Here is how survivorship bias inflates backtests and how to avoid it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-06", "dateModified": "2026-03-06", "mainEntityOfPage": "https://novo-options.trade/journal/survivorship-bias-backtesting.html", "articleSection": "The System", "wordCount": 562, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Survivorship Bias", "description": "If your backtest only includes stocks that still exist today, it's ignoring every company that failed, and its results are a lie. Here is how survivorship bias inflates backtests and how to avoid it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-06", "dateModified": "2026-03-06", "mainEntityOfPage": "https://novo-options.trade/journal/survivorship-bias-backtesting.html", "articleSection": "The System", "wordCount": 562, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Survivorship Bias", "item": "https://novo-options.trade/journal/survivorship-bias-backtesting.html"}]}
@@ -52,13 +52,13 @@
   <header class="article-head">
     <div class="kicker">The System</div>
     <h1>Survivorship Bias</h1>
-    <p class="standfirst">Backtest a strategy on today's stocks and you've quietly excluded every company that went bankrupt or got delisted. The survivors flatter you — and lie.</p>
+    <p class="standfirst">Backtest a strategy on today's stocks and you've quietly excluded every company that went bankrupt or got delisted. The survivors flatter you, and lie.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-03-06">Mar 6, 2026</time></div>
 
     <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test.html">backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it — and the results are dangerously flattering.</p>
+    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test.html">backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it, and the results are dangerously flattering.</p>
     <h2>How it inflates results</h2>
     <p>Imagine backtesting "buy the S&amp;P 500 and hold" using <em>today's</em> 500 members over the last 20 years. Every company that got kicked out for underperforming is missing — you're testing only the ones that thrived enough to still be in the index. The backtest looks great, but it was never available to trade in real time: you couldn't have known which companies would survive. The test rewards you for hindsight you didn't have.</p>
     <h2>Where it hides</h2>

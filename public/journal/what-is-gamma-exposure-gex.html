@@ -52,16 +52,16 @@
   <header class="article-head">
     <div class="kicker">Plain English</div>
     <h1>What Is Gamma Exposure (GEX)?</h1>
-    <p class="standfirst">GEX is one of the most useful ideas in modern options trading — and one of the most badly explained. Here's what it actually is, and why it quietly shapes how SPY moves all day.</p>
+    <p class="standfirst">GEX is one of the most useful ideas in modern options trading, and one of the most badly explained. Here's what it actually is, and why it quietly shapes how SPY moves all day.</p>
   </header>
   <div class="article-meta">NoVo Options Trading · Jun 28, 2026 &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
 
     <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
   <div class="article-body">
-    <p>To understand gamma exposure, start one step back, with the people on the other side of your options trade: the market makers (dealers). When you buy an option, a dealer is usually selling it to you — and they don't want a directional bet, they want to stay neutral and earn the spread. To stay neutral as the market moves, they constantly buy and sell the underlying (here, SPY). That hedging is mechanical, it's enormous, and it leaves footprints. GEX is how you read those footprints.</p>
+    <p>To understand gamma exposure, start one step back, with the people on the other side of your options trade: the market makers (dealers). When you buy an option, a dealer is usually selling it to you, and they don't want a directional bet, they want to stay neutral and earn the spread. To stay neutral as the market moves, they constantly buy and sell the underlying (here, SPY). That hedging is mechanical, it's enormous, and it leaves footprints. GEX is how you read those footprints.</p>
 
     <h2>First, what gamma is</h2>
-    <p>Two quick terms. <strong>Delta</strong> is how much an option's price moves when the underlying moves a dollar. <strong>Gamma</strong> is how fast that delta itself changes as the underlying moves. High gamma means a dealer's exposure shifts quickly as price moves — so they have to re-hedge more aggressively. You don't need the math; you need the consequence: gamma decides <em>how much</em> dealers must buy or sell to stay neutral as SPY ticks around.</p>
+    <p>Two quick terms. <strong>Delta</strong> is how much an option's price moves when the underlying moves a dollar. <strong>Gamma</strong> is how fast that delta itself changes as the underlying moves. High gamma means a dealer's exposure shifts quickly as price moves, so they have to re-hedge more aggressively. You don't need the math; you need the consequence: gamma decides <em>how much</em> dealers must buy or sell to stay neutral as SPY ticks around.</p>
 
     <h2>Gamma exposure: the whole market's position, netted</h2>
     <p><strong>Gamma exposure (GEX)</strong> is the aggregate gamma position of all those dealers across the options chain, netted into one picture of which way — and how hard — they'll have to hedge. The key insight is that the <em>sign</em> of that net position flips the market's behavior:</p>
@@ -76,7 +76,7 @@
     <p>Between those two worlds is a level often called the <strong>gamma flip</strong> — the price where net dealer gamma crosses from positive to negative. It matters because the market's <em>character</em> changes as price moves across it: the same breakout that would get absorbed above the flip can accelerate below it. Knowing roughly where that line sits tells you what kind of session you're likely in — a fade-the-extremes day or a chase-the-trend day — before the tape makes it obvious.</p>
 
     <h2>Why this matters most for SPY (and 0DTE)</h2>
-    <p>SPY and the S&P 500 complex carry some of the largest options open interest in the world, and a huge share of it now sits in very short-dated contracts. That concentration makes dealer hedging a genuinely market-moving force intraday — which is exactly why GEX has become such a watched concept for <a href="/journal/what-is-0dte-options-trading.html">0DTE and same-day SPY trading</a>. It's not a crystal ball; it's a map of the terrain — where price is likely to stall, accelerate, or reverse.</p>
+    <p>SPY and the S&P 500 complex carry some of the largest options open interest in the world, and a huge share of it now sits in very short-dated contracts. That concentration makes dealer hedging a genuinely market-moving force intraday, which is exactly why GEX has become such a watched concept for <a href="/journal/what-is-0dte-options-trading.html">0DTE and same-day SPY trading</a>. It's not a crystal ball; it's a map of the terrain — where price is likely to stall, accelerate, or reverse.</p>
 
     <h2>How NoVo uses it</h2>
     <p>Reading dealer positioning is one of the streams <a href="/journal/how-novo-reads-the-market.html">NoVo fuses into its market read</a>. It continuously estimates net gamma exposure and tracks where the behavior is likely to flip, then uses that as structural context — knowing the terrain, not just the direction — alongside the live tape, the macro backdrop, and an AI structural read. The specific calculations and thresholds are the part that took the longest to calibrate and stay under the hood; the principle is the point: <strong>direction is the easy part — context is the edge.</strong></p>

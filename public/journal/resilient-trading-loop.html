@@ -52,7 +52,7 @@
   <header class="article-head">
     <div class="kicker">Trading Infrastructure</div>
     <h1>A Resilient Trading Loop</h1>
-    <p class="standfirst">Any system works when everything works. The ones you can trust with real money are the ones designed for the moment something breaks — because it will.</p>
+    <p class="standfirst">Any system works when everything works. The ones you can trust with real money are the ones designed for the moment something breaks, because it will.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-02-06">Feb 6, 2026</time></div>
 
@@ -62,7 +62,7 @@
     <h2>Fail safe, not silent</h2>
     <p>The cardinal rule: when in doubt, do nothing dangerous. A stale <a href="/journal/polling-vs-streaming-data.html">quote</a> must not trigger a trade priced off old data. A timed-out order status must be re-checked, not assumed. A dropped feed should pause new entries, not fire blind. The worst failure isn't stopping — it's acting confidently on bad information.</p>
     <h2>The specific hazards</h2>
-    <p>Consider the traps: a network stutter mid-order (did it go through? retrying could double it — so writes aren't blindly retried); a <a href="/journal/partial-fills-explained.html">partial fill</a> that must be reconciled to the real position; a rate limit that must be backed off, not hammered. Each is a place where a naive loop corrupts its own state or duplicates an order. Handling them is unglamorous and non-negotiable.</p>
+    <p>Consider the traps: a network stutter mid-order (did it go through? retrying could double it, so writes aren't blindly retried); a <a href="/journal/partial-fills-explained.html">partial fill</a> that must be reconciled to the real position; a rate limit that must be backed off, not hammered. Each is a place where a naive loop corrupts its own state or duplicates an order. Handling them is unglamorous and non-negotiable.</p>
     <p class="pull">A trading system isn't judged on the day everything works. It's judged on the day the feed dies mid-position.</p>
     <h2>Why it matters</h2>
     <p>Markets are messy and infrastructure fails at the worst moments. A system built to fail safe — pausing on stale data, reconciling true fills, never double-submitting, recovering cleanly on restart — is one you can actually trust. That defensive engineering is the boring backbone of <a href="/journal/how-novo-reads-the-market.html">NoVo's engine</a>: it is why the map goes quiet on stale data instead of drawing a level it can no longer stand behind.</p>

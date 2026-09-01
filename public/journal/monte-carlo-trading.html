@@ -53,12 +53,12 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-16">Jul 16, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
   <div class="article-body">
-<p>Your backtest produced one equity curve. It looks fine. What it doesn't tell you is that the same strategy, with the same trades in a different order, could have handed you a drawdown twice as deep — and that order was pure luck.</p>
+<p>Your backtest produced one equity curve. It looks fine. What it doesn't tell you is that the same strategy, with the same trades in a different order, could have handed you a drawdown twice as deep, and that order was pure luck.</p>
 <p><strong>Monte Carlo simulation</strong> is how you see the other outcomes.</p>
 
 <h2>The idea</h2>
 <p>Take your trade results. Shuffle them into a random order. Build the equity curve. Do it again. Do it ten thousand times. You now have a distribution of what this strategy could plausibly have done, rather than the single history you happened to live through.</p>
-<p>What comes out is genuinely uncomfortable. A system with a 12% worst drawdown in backtest routinely shows 25% or worse across the simulations. Not because the strategy changed — because your actual history got a lucky ordering, and you'd been treating that luck as a property of the system.</p>
+<p>What comes out is genuinely uncomfortable. A system with a 12% worst drawdown in backtest routinely shows 25% or worse across the simulations. Not because the strategy changed, because your actual history got a lucky ordering, and you'd been treating that luck as a property of the system.</p>
 
 <p class="pull">The drawdown in your backtest isn't your worst case. It's one sample from a distribution you never looked at.</p>
 

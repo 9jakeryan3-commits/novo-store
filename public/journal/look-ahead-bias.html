@@ -54,7 +54,7 @@
 
     <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Look-ahead bias</strong> is when a <a href="/journal/backtest-vs-forward-test.html">backtest</a> uses information that would not actually have been available at the moment the decision was made. The strategy effectively "peeks into the future," producing results that look brilliant and are impossible to reproduce live — because in reality you don't have tomorrow's data today.</p>
+    <p><strong>Look-ahead bias</strong> is when a <a href="/journal/backtest-vs-forward-test.html">backtest</a> uses information that would not actually have been available at the moment the decision was made. The strategy effectively "peeks into the future," producing results that look brilliant and are impossible to reproduce live, because in reality you don't have tomorrow's data today.</p>
     <h2>How it sneaks in</h2>
     <p>It's usually subtle and accidental. Using a day's closing price to make a decision that should have been made at the open. Using restated or revised data (like a revised GDP figure) that wasn't known on the original date. Calculating an indicator over a full period that includes bars from <em>after</em> the signal. Filtering your universe by data that only existed later. Each quietly leaks future knowledge into a past decision.</p>
     <h2>Why it's so dangerous</h2>
