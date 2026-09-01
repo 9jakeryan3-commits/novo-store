@@ -839,6 +839,15 @@ function volRow(d,g){
       <div class="mv nu" style="font-size:14px">${px(lo)} – ${px(hi)}</div>
       <div class="ms">&plusmn;${em.toFixed(2)}% &middot; DVOL/20</div></div>`);
   }
+  // IV vs RV — measured beside implied. rv is yesterday-to-now realized (sd of 1-minute log
+  // returns scaled to a daily %); iv is DVOL/20. Both were computed for weeks and never drawn.
+  const HV=(SNAP.hist&&SNAP.hist[CUR])||null;
+  if(HV&&HV.rv&&HV.dvol&&HV.dvol.implied_daily){
+    const rv=HV.rv.pct, iv=HV.dvol.implied_daily, spread=iv-rv;
+    c.push(`<div class="mcell"><div class="mk">Implied vs realized &middot; 1d</div>
+      <div class="mv ${spread>=0?'up':'dn'}">${spread>=0?'+':''}${spread.toFixed(2)}pt</div>
+      <div class="ms">IV ${iv.toFixed(2)}% vs RV ${rv.toFixed(2)}% &middot; ${HV.rv.n_min} min measured</div></div>`);
+  }
   if(d.skew){
     const sk=d.skew.skew_pts, puts=sk>0;
     c.push(`<div class="mcell"><div class="mk">Skew &middot; near ATM</div>
