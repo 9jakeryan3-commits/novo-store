@@ -159,11 +159,16 @@ module.exports = async (req, res) => {
         const v = hc[k];
         if (!v || typeof v !== "object") continue;
         const e = {};
-        if (v.oi && v.oi.pct != null) e.oi = { pct: v.oi.pct, n: v.oi.n };
+        // .lt is the LONG lens where one exists — the venue's own archive (years of daily
+        // closes / hourly prints), a separate population from the live samples with its own
+        // n and span. Forwarded whole; it is already a compact summary.
+        if (v.oi && v.oi.pct != null) e.oi = { pct: v.oi.pct, n: v.oi.n,
+                                               ...(v.oi.lt ? { lt: v.oi.lt } : {}) };
         const f = {};
         for (const ven of Object.keys(v.funding || {})) {
           const d = v.funding[ven];
-          if (d && d.pct != null) f[ven] = { pct: d.pct, n: d.n };
+          if (d && d.pct != null) f[ven] = { pct: d.pct, n: d.n,
+                                             ...(d.lt ? { lt: d.lt } : {}) };
         }
         if (Object.keys(f).length) e.funding = f;
         // IV vs RV — both already computed by history.py, never rendered until 2026-09-01.
@@ -176,6 +181,7 @@ module.exports = async (req, res) => {
         }
         if (v.dvol && v.dvol.now != null) {
           e.dvol = { now: v.dvol.now, pct: v.dvol.pct, n: v.dvol.n,
+                     ...(v.dvol.lt ? { lt: v.dvol.lt } : {}),
                      implied_daily: Math.round(v.dvol.now / 20 * 1000) / 1000 };
         }
         if (Object.keys(e).length) hist[k] = e;

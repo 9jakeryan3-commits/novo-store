@@ -829,11 +829,17 @@ function gauge(g){
   </div>`;
 }
 
+// The long lens's span, compact: 1987 days -> "5.4y", 179 -> "179d".
+function ltSpan(lt){ return lt.days>=360?(lt.days/365).toFixed(1)+'y':lt.days+'d'; }
 function volRow(d,g){
   const c=[];
+  const HVd=(SNAP.hist&&SNAP.hist[CUR])||null;
   if(d.dvol){
+    // The long lens outranks the tagline when it exists: "p9 of 5.4y of daily closes" is
+    // the sentence the live sample never had the depth to say.
+    const lt=HVd&&HVd.dvol&&HVd.dvol.lt;
     c.push(`<div class="mcell"><div class="mk">DVOL</div><div class="mv am">${d.dvol.value.toFixed(1)}</div>
-      <div class="ms">crypto VIX &middot; Deribit</div></div>`);
+      <div class="ms">${lt?`p${lt.pct.toFixed(0)} of ${ltSpan(lt)} of daily closes`:'crypto VIX &middot; Deribit'}</div></div>`);
     const em=d.dvol.implied_daily_pct, lo=g.spot*(1-em/100), hi=g.spot*(1+em/100);
     c.push(`<div class="mcell"><div class="mk">Expected move &middot; 1d</div>
       <div class="mv nu" style="font-size:14px">${px(lo)} – ${px(hi)}</div>
@@ -1467,7 +1473,11 @@ function drawCoin(){
     const pctCell=(o)=>{
       if(!o||o.pct==null) return '<td class="nu">—</td>';
       const hot=o.pct>=90||o.pct<=10;
-      return `<td class="nu"${hot?' style="color:var(--amber)"':''} title="${o.n} samples">${o.pct.toFixed(0)}th</td>`;
+      // .lt = the venue's OWN archive (hourly prints for years) - a second, deeper lens
+      // with its own n, never pooled with the live samples the first number ranks against.
+      const lt=o.lt?` <span style="color:var(--txt4)">&middot; p${o.lt.pct.toFixed(0)}/${ltSpan(o.lt)}</span>`:'';
+      const tip=`${o.n} live samples`+(o.lt?`; long lens: ${o.lt.n} ${o.lt.cadence} prints over ${ltSpan(o.lt)} from the venue's own archive`:'');
+      return `<td class="nu"${hot?' style="color:var(--amber)"':''} title="${tip}">${o.pct.toFixed(0)}th${lt}</td>`;
     };
     h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
       <span class="sub">per venue · never blended · trusted rows only</span></div><div class="pb">
@@ -1487,8 +1497,10 @@ function drawCoin(){
       <span class="v nu">${money(pos.total_oi_usd)}</span></div>
       ${oiP&&oiP.pct!=null?`<div class="kv"><span class="k">Book size vs its own history</span>
       <span class="v ${oiP.pct>=90||oiP.pct<=10?'am':'nu'}">${oiP.pct.toFixed(0)}th percentile</span></div>
+      ${oiP.lt?`<div class="kv"><span class="k">OKX book vs ${ltSpan(oiP.lt)} of its own daily archive</span>
+      <span class="v ${oiP.lt.pct>=90||oiP.lt.pct<=10?'am':'nu'}">${oiP.lt.pct.toFixed(0)}th percentile</span></div>`:''}
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
-        Measured against this coin's own ${oiP.n} logged readings. How crowded, not which way.</div>`:''}
+        Measured against this coin's own ${oiP.n} logged readings${oiP.lt?`; the OKX line against ${oiP.lt.n} daily rows from the venue's own archive - like against like, never blended`:''}. How crowded, not which way.</div>`:''}
       </div></div>`;
   }
   h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
