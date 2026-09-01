@@ -191,7 +191,7 @@ nav.is-scrolled {
   .nav-actions { display: contents; }
 
   .nav-logo { order: 1; margin-right: auto; }
-  .ss-wrap  { order: 2; }              /* search, row 1 centre - sized below */
+  .nvs-ss-wrap  { order: 2; }              /* search, row 1 centre - sized below */
   .nav-buy  { order: 3; }              /* Plans */
   .nav-portal { order: 4; }
 
@@ -211,10 +211,10 @@ nav.is-scrolled {
    which is the shape Jake pointed at. It is a flex child of .nav-inner there, so
    it takes the middle and stops growing at a sane reading width. */
 @media (min-width: 1025px) {
-  .ss-wrap { flex: 1 1 320px; max-width: 620px; margin: 0 28px; padding: 0; }
-  nav .ss-wrap { border-top: 0; padding-top: 0; }
-  .ss-wrap input { padding: 8px 13px; font-size: 13.5px; }
-  .ss-panel { left: 0; right: 0; top: calc(100% + 6px); }
+  .nvs-ss-wrap { flex: 1 1 320px; max-width: 620px; margin: 0 28px; padding: 0; }
+  nav .nvs-ss-wrap { border-top: 0; padding-top: 0; }
+  .nvs-ss-wrap input { padding: 8px 13px; font-size: 13.5px; }
+  .nvs-ss-panel { left: 0; right: 0; top: calc(100% + 6px); }
 }
 
 /* Prose inside cards and sections keeps a readable measure too. These were the
@@ -225,7 +225,7 @@ nav.is-scrolled {
   .how-card p, .card p, .pain-resolve p, .prose p, .article-body p,
   .lead2 .deck, .cx p { max-width: 78ch; }
   /* Centred blocks keep their prose centred as well as capped. */
-  .hero p, .hero .section-sub, .section-sub, .hero-tagline,
+  .hero p, .hero .section-sub, .hero-tagline,
   [style*="text-align:center"] > p { margin-inline: auto; }
 }
 
@@ -239,3 +239,19 @@ nav.is-scrolled {
   .container [style*="text-align: center"] p,
   .hero p, .hero li { margin-inline: auto; }
 }
+
+
+/* ── WIDE-SHELL FOLLOW-UPS (2026-09-01, after Jake's five screenshots) ─────────────
+   The accordion lists were built for the 1120 shell (700-760px, left-pinned) and read
+   as broken beside a 1560 header. They now fill the shell, Unusual-Whales style.
+   Single-column cards are the opposite case: at 1516px wide with ~700px of text they
+   looked lopsided, so they cap at 1180 - the wide shell is for grids, tables, the nav
+   and heroes, not for one column of prose in a box. */
+@media (min-width: 1200px) {
+  .faq-list { max-width: none; }
+  .container > .card, .container.sec > .card { max-width: 1180px; }
+}
+
+/* The analyst screenshot fan's rotated cards bleed ~24px below their aspect-ratio box by
+   design; give the caption under it standing room so the graze (14px measured) cannot touch. */
+.ss-fan { margin-bottom: 30px; }

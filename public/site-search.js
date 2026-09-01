@@ -30,49 +30,49 @@
   css.textContent = [
     // A second header row: full width, centred on the same 1200px measure as the bar above,
     // separated by a hairline so it reads as part of the header rather than page content.
-    '.ss-wrap{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:0 22px 11px;}',
-    'nav .ss-wrap{border-top:1px solid var(--bdr,#2e3036);padding-top:11px;}',
-    '.ss-wrap input{display:block;width:100%;box-sizing:border-box;background:var(--navy2,#1c1d21);',
+    '.nvs-ss-wrap{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:0 22px 11px;}',
+    'nav .nvs-ss-wrap{border-top:1px solid var(--bdr,#2e3036);padding-top:11px;}',
+    '.nvs-ss-wrap input{display:block;width:100%;box-sizing:border-box;background:var(--navy2,#1c1d21);',
     'border:1px solid var(--bdr,#2e3036);border-radius:10px;padding:10px 14px;',
     'color:var(--txt1,#eaf3ff);font-size:14px;font-family:inherit;outline:none;',
     'transition:border-color .18s ease;}',
-    '.ss-wrap input:focus{border-color:#22d3ee;}',
-    '.ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
+    '.nvs-ss-wrap input:focus{border-color:#22d3ee;}',
+    '.nvs-ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
     // The panel hangs from the input and matches its width, so results line up with the box.
-    '.ss-panel{display:none;position:absolute;top:calc(100% + 4px);left:22px;right:22px;',
+    '.nvs-ss-panel{display:none;position:absolute;top:calc(100% + 4px);left:22px;right:22px;',
     'background:var(--navy2,#16171a);border:1px solid var(--bdr,#2e3036);border-radius:12px;',
     'box-shadow:0 24px 60px rgba(0,0,0,.55);padding:6px;z-index:400;max-height:min(70vh,460px);',
     'overflow-y:auto;text-align:left;}',
-    '.ss-panel.show{display:block;}',
-    '.ss-item{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:8px;',
+    '.nvs-ss-panel.show{display:block;}',
+    '.nvs-ss-item{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:8px;',
     'text-decoration:none;}',
-    '.ss-item:hover,.ss-item:focus-visible{background:rgba(255,255,255,.05);}',
-    '.ss-t{color:var(--txt1,#eaf3ff);font-size:13.5px;font-weight:600;line-height:1.35;}',
-    '.ss-k{color:var(--txt3,#7d97b8);font-size:11px;font-weight:700;letter-spacing:.09em;',
+    '.nvs-ss-item:hover,.nvs-ss-item:focus-visible{background:rgba(255,255,255,.05);}',
+    '.nvs-ss-t{color:var(--txt1,#eaf3ff);font-size:13.5px;font-weight:600;line-height:1.35;}',
+    '.nvs-ss-k{color:var(--txt3,#7d97b8);font-size:11px;font-weight:700;letter-spacing:.09em;',
     'text-transform:uppercase;}',
-    '.ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
+    '.nvs-ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
     // Narrower gutters on phones, where 22px each side is a real bite out of the field.
     // DESKTOP: the box rides in ROW 1 beside the brand, the Unusual Whales shape - logo,
     // search, then the account buttons, with the nav links spread across row 2. It is a flex
     // child of .nav-inner there (polish.css/blog.css order it), so it takes the middle and
     // stops growing at a readable width instead of spanning the whole bar.
-    '@media(min-width:1025px){.ss-wrap{width:auto;flex:1 1 300px;max-width:600px;',
+    '@media(min-width:1025px){.nvs-ss-wrap{width:auto;flex:1 1 300px;max-width:600px;',
     'margin:0 24px;padding:0;}',
-    'nav .ss-wrap{border-top:0;padding-top:0;}',
-    '.ss-wrap input{padding:8px 13px;font-size:13.5px;}',
-    '.ss-panel{left:0;right:0;top:calc(100% + 6px);}}',
-    '@media(max-width:560px){.ss-wrap{padding:0 14px 10px;}',
-    'nav .ss-wrap{padding-top:10px;}',
-    '.ss-panel{left:14px;right:14px;}}'
+    'nav .nvs-ss-wrap{border-top:0;padding-top:0;}',
+    '.nvs-ss-wrap input{padding:8px 13px;font-size:13.5px;}',
+    '.nvs-ss-panel{left:0;right:0;top:calc(100% + 6px);}}',
+    '@media(max-width:560px){.nvs-ss-wrap{padding:0 14px 10px;}',
+    'nav .nvs-ss-wrap{padding-top:10px;}',
+    '.nvs-ss-panel{left:14px;right:14px;}}'
   ].join('');
   document.head.appendChild(css);
 
   var wrap = document.createElement('div');
-  wrap.className = 'ss-wrap';
+  wrap.className = 'nvs-ss-wrap';
   wrap.innerHTML =
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
     'aria-label="Search the site">' +
-    '<div class="ss-panel" id="site-search-results" role="listbox"></div>';
+    '<div class="nvs-ss-panel" id="site-search-results" role="listbox"></div>';
   // INSIDE .nav-inner, not after it. As a sibling it could never join row 1 - a flex
   // parent can only order its own children - so the desktop layout Jake asked for (logo,
   // search, account on row 1; nav links spread across row 2) needs it in the flex context.
@@ -120,7 +120,7 @@
       .then(function (j) { data = j || []; loading = false; if (lastQ) run(lastQ); })
       .catch(function () {
         loading = false;
-        panel.innerHTML = '<div class="ss-none">Search is unavailable right now.</div>';
+        panel.innerHTML = '<div class="nvs-ss-none">Search is unavailable right now.</div>';
         panel.classList.add('show');
       });
   }
@@ -165,14 +165,14 @@
     res.sort(function (x, y) { return y.s - x.s || x.a.t.length - y.a.t.length; });
 
     if (!res.length) {
-      panel.innerHTML = '<div class="ss-none">No matches for &ldquo;' + esc(q) + '&rdquo;.</div>';
+      panel.innerHTML = '<div class="nvs-ss-none">No matches for &ldquo;' + esc(q) + '&rdquo;.</div>';
       panel.classList.add('show');
       return;
     }
     panel.innerHTML = res.slice(0, 10).map(function (r) {
-      return '<a class="ss-item" href="' + esc(r.a.u) + '">' +
-             '<span class="ss-t">' + esc(r.a.t) + '</span>' +
-             (r.a.k ? '<span class="ss-k">' + esc(r.a.k) + '</span>' : '') + '</a>';
+      return '<a class="nvs-ss-item" href="' + esc(r.a.u) + '">' +
+             '<span class="nvs-ss-t">' + esc(r.a.t) + '</span>' +
+             (r.a.k ? '<span class="nvs-ss-k">' + esc(r.a.k) + '</span>' : '') + '</a>';
     }).join('');
     panel.classList.add('show');
   }
@@ -182,7 +182,7 @@
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { input.value = ''; run(''); input.blur(); }
     if (e.key === 'Enter') {
-      var first = panel.querySelector('.ss-item');
+      var first = panel.querySelector('.nvs-ss-item');
       if (first) { location.href = first.getAttribute('href'); }
     }
   });
