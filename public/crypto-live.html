@@ -1107,7 +1107,15 @@ function drawRail(filter=''){
   }
   // Ranked by TURNOVER, not depth. A reserve is a number a pool states about itself; volume is one
   // the market produced, and one pool claims $446m of depth against $1.76m of daily trade.
-  for(const net of ['robinhood','solana']){
+  // Networks come from the DATA, not a hardcoded list (2026-08-31): this loop was
+  // ['robinhood','solana'], so adding Base server-side would have collected every pool into the
+  // corpus and rendered NONE of it -- the display silently dropping a whole chain. NETORDER only
+  // fixes the order of the ones we know; anything new appears after them instead of vanishing.
+  const NETORDER=['robinhood','solana','base'];
+  const _nets=[...new Set((crows||[]).map(t=>t.network))]
+    .sort((a,b)=>{const ia=NETORDER.indexOf(a),ib=NETORDER.indexOf(b);
+                  return (ia<0?99:ia)-(ib<0?99:ib) || String(a).localeCompare(String(b));});
+  for(const net of _nets){
     const grp=crows.filter(t=>t.network===net).sort((x,y)=>(y.vol_h24||0)-(x.vol_h24||0));
     if(!grp.length) continue;
     h+=`<div class="bandhead">${NETLABEL[net]||net} · liquidity · ${grp.length}</div>`;
@@ -1229,7 +1237,7 @@ function drawFeed(){
    would read as missing data rather than as inapplicable. What they have is depth, turnover and the
    wallets behind it, which for an asset whose dominant risk is exit is the honest read. */
 let TOK = null, FEED = false;
-const NETLABEL = {robinhood:'Robinhood Chain', solana:'Solana'};
+const NETLABEL = {robinhood:'Robinhood Chain', solana:'Solana', base:'Base'};
 function _pctv(n){ return n==null?'—':(n>=0?'+':'')+n.toFixed(1)+'%'; }
 function drawChainToken(){
   const t=TOK; if(!t) return;
