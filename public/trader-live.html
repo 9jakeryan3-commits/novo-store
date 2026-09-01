@@ -3087,12 +3087,29 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
 
 // ── Drawings ─────────────────────────────────────────────────────────────────────────────────
 let _ctbTool=null,_pendPt=null,_drawObjs=[],_measEl=null;
+let _drawUnmounted=[];   // specs that failed to mount (B5) — a rollback or transient failure must not purge saved drawings
 function _drawSpecs(){ try{ return JSON.parse(localStorage.getItem('novo_draw_'+_selTkr())||'[]'); }catch(_e){ return []; } }
 function _drawSave(sp){ try{ localStorage.setItem('novo_draw_'+_selTkr(),JSON.stringify(sp.slice(0,40))); }catch(_e){} }
 function _fibLines(v1,v2){
+  // Conventional retracement (B5, 2026-09-01): 0%% at the SECOND anchor (the end of the move),
+  // prices measured back toward the first — the ladder every other platform draws. The old form
+  // measured from the FIRST anchor, so 38.2/61.8 were swapped vs TradingView and the "78.6" line
+  // sat at the 21.4%% retracement — 2.2%%-of-range from where a trader keys stops.
   return [0,0.236,0.382,0.5,0.618,0.786,1].map(function(r){
-    return {price:+(v1+(v2-v1)*r).toFixed(2),title:(r*100).toFixed(1),r:r};
+    return {price:+(v2+(v1-v2)*r).toFixed(2),title:(r*100).toFixed(1),r:r};
   });
+}
+// Snap a stored epoch onto the ACTIVE frame's time grid (B5): specs keep raw epochs (lossless),
+// the MOUNT aligns them. A 1m-anchored trend endpoint drawn on a 15m or deep chart otherwise
+// injects a phantom time-scale slot — a whitespace column plus a near-vertical stub.
+function _snapT(t){
+  if(t===null||t===undefined) return t;
+  if(!_isDeepTf()) return Math.floor(t/(_ctbTf*60))*(_ctbTf*60);
+  var arr=_novoViewC; if(!arr||!arr.length) return t;
+  var lo=0,hi=arr.length-1;
+  while(lo<hi){ var mid=(lo+hi)>>1; if(arr[mid].time<t) lo=mid+1; else hi=mid; }
+  if(lo>0 && Math.abs(arr[lo-1].time-t)<=Math.abs(arr[lo].time-t)) lo--;
+  return arr[lo].time;
 }
 function _mountDrawing(spec){
   if(!_novoSeries||!_novoChart) return null;
@@ -3109,8 +3126,8 @@ function _mountDrawing(spec){
     }
     if(spec.k==='t'){
       var s=_novoChart.addLineSeries({color:'#f59e0b',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,autoscaleInfoProvider:function(){return null;}});
-      var a={time:spec.t1,value:spec.v1},b2={time:spec.t2,value:spec.v2};
-      if(b2.time===a.time) b2.time=a.time+60;
+      var a={time:_snapT(spec.t1),value:spec.v1},b2={time:_snapT(spec.t2),value:spec.v2};
+      if(b2.time===a.time) b2.time=a.time+(_isDeepTf()?({'1h':3600,'1d':86400,'1w':604800}[_ctbTf]||3600):(_ctbTf*60));
       s.setData(a.time<b2.time?[a,b2]:[b2,a]);
       return {spec:spec,series:s};
     }
@@ -3127,11 +3144,12 @@ function _unmountDrawings(){
 function _reloadDrawings(){
   _unmountDrawings();
   if(!_novoSeries) return;
-  _drawSpecs().forEach(function(sp){ var o=_mountDrawing(sp); if(o) _drawObjs.push(o); });
+  _drawUnmounted=[];
+  _drawSpecs().forEach(function(sp){ var o=_mountDrawing(sp); if(o) _drawObjs.push(o); else _drawUnmounted.push(sp); });
 }
 function _addDrawing(spec){
   var o=_mountDrawing(spec);
-  if(o){ _drawObjs.push(o); _drawSave(_drawObjs.map(function(x){return x.spec;})); }
+  if(o){ _drawObjs.push(o); _drawSave(_drawObjs.map(function(x){return x.spec;}).concat(_drawUnmounted)); }
 }
 function _clearMeasure(){ if(_measEl){ try{_measEl.remove();}catch(_e){} _measEl=null; } }
 document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){
@@ -3141,7 +3159,7 @@ document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){
   });
 });
 var _clr=document.getElementById('ctb-clear');
-if(_clr) _clr.addEventListener('click',function(){ _unmountDrawings(); _drawSave([]); _clearMeasure(); });
+if(_clr) _clr.addEventListener('click',function(){ _unmountDrawings(); _drawUnmounted=[]; _drawSave([]); _clearMeasure(); });
 function _chartClick(param){
   if(!_ctbTool||!_novoSeries||!param||!param.point) return;
   var price=_novoSeries.coordinateToPrice(param.point.y);
@@ -3162,7 +3180,16 @@ function _chartClick(param){
     // as noise across a daily span, so H/D/W measure in days instead.
     var _sec={'1h':3600,'1d':86400,'1w':604800}[_ctbTf]||(_ctbTf*60);
     var _dt=(t!==null&&_pendPt.t!==null)?Math.abs(t-_pendPt.t):null;
+    // REAL bars (B5): count positions in the drawn array, not wall-clock ÷ bar-width — Fri→Mon on
+    // 1m used to report ~7x the truth (weekend minutes aren't bars). Arithmetic stays as fallback.
     var bars=(_dt!==null)?Math.round(_dt/_sec):null;
+    try{
+      var _arr=_ctbTog.ha?_novoHaC:_novoViewC;
+      if(_dt!==null&&_arr&&_arr.length){
+        var _bi=function(tt){ var lo=0,hi=_arr.length-1; while(lo<hi){ var mid=(lo+hi)>>1; if(_arr[mid].time<tt) lo=mid+1; else hi=mid; } return lo; };
+        bars=Math.abs(_bi(t)-_bi(_pendPt.t));
+      }
+    }catch(_e){}
     var mins=(_dt!==null)?(_isDeepTf()?Math.round(_dt/86400)+' d':Math.round(_dt/60)+' min'):null;
     _clearMeasure();
     var el=document.getElementById('novo-chart');
@@ -3885,6 +3912,9 @@ async function loadNovoChart(){
       try{ _svpCalc(); }catch(_e){}
       window._paintAt=Date.now();   // last time real candles reached the screen — the supervisor's proof the chart is alive
       window._paintKey=_reqTkr+':'+_ctbTf;   // WHOSE candles those were (B4) — the veil backstop must not credit a stale selection's paint
+      // Remount drawings once per (ticker, tf), AFTER the new frame's candles exist (B5) — the
+      // deep-frame snap binary-searches the freshly painted array. Key-gated: never per poll.
+      if(window._drawTfKey!==window._paintKey){ window._drawTfKey=window._paintKey; try{ _reloadDrawings(); }catch(_e){} }
       _veilOff();
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
       try{ _renderChip(); }catch(_e){}
