@@ -988,19 +988,67 @@ function exposures(g){
   return h+`</div></div>`;
 }
 
+// THE SETTLEMENT CLOCK. Crypto's whole options book re-prices to an 08:00 UTC settlement
+// every single day — pinning, charm and the roll-off repeat 365 times a year where equities
+// get 12 monthlies. The clock counts down to the FRONT EXPIRY'S OWN timestamp (never an
+// assumed 08:00 — quarterlies land on the same clock but the data, not the caption, is the
+// authority), and says what measurably rolls off at it: the front's share of the book's
+// open interest, its share of net gamma, its max pain. All of it from g.term — measured
+// per expiry every pass. The ticking is one textContent write per second, no redraw.
+function clockPanel(g){
+  const t=(g&&g.term)||[]; if(!t.length) return '';
+  const f=t[0]; if(!f||!f.e) return '';
+  const totOi=t.reduce((a,x)=>a+(x.oi||0),0);
+  const oiShare=totOi>0&&f.oi!=null?f.oi/totOi*100:null;
+  const totAbsG=t.reduce((a,x)=>a+Math.abs(x.net_gex||0),0);
+  const gShare=totAbsG>0&&f.net_gex!=null?Math.abs(f.net_gex)/totAbsG*100:null;
+  const when=new Date(f.e), hh=String(when.getUTCHours()).padStart(2,'0'), mm=String(when.getUTCMinutes()).padStart(2,'0');
+  return `<div class="panel"><div class="ph"><h2>Settlement clock</h2>
+    <span class="sub">next expiry settles ${hh}:${mm} UTC</span></div><div class="pb">
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+      <span id="settle-clock" data-exp="${f.e}" style="font-family:var(--mono);font-size:26px;font-weight:800;color:var(--amber);letter-spacing:.5px">--:--:--</span>
+      <span style="font-size:11.5px;color:var(--txt3)">until the front expiry settles &middot; the book re-prices to this clock daily</span></div>
+    <div class="mgrid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="mcell"><div class="mk">Rolls off &middot; open interest</div>
+        <div class="mv nu">${oiShare!=null?oiShare.toFixed(1)+'%':'—'}</div>
+        <div class="ms">${f.oi!=null?Math.round(f.oi).toLocaleString()+' of '+Math.round(totOi).toLocaleString()+' '+(g.oi_unit||'')+' OI':''}</div></div>
+      <div class="mcell"><div class="mk">Front share of net gamma</div>
+        <div class="mv nu">${gShare!=null?gShare.toFixed(1)+'%':'—'}</div>
+        <div class="ms">of the book's absolute net GEX, by expiry</div></div>
+      <div class="mcell"><div class="mk">Front max pain</div>
+        <div class="mv nu">${f.max_pain!=null?px(f.max_pain):'—'}</div>
+        <div class="ms">P/C ${f.pc!=null?f.pc.toFixed(2):'—'} &middot; ATM IV ${f.atm_iv!=null?f.atm_iv.toFixed(1)+'%':'—'}</div></div>
+    </div>
+    <div class="fnote">What expires stops hedging: the front's gamma leaves the book at settlement, and the dampening or amplifying it did leaves with it. Measured shares, not a forecast.</div>
+    </div></div>`;
+}
+// One interval for the whole page; finds the current clock element by id each tick, so
+// coin switches and redraws never stack timers.
+setInterval(function(){
+  var el=document.getElementById('settle-clock'); if(!el) return;
+  var ms=Number(el.getAttribute('data-exp'))-Date.now();
+  if(ms<=0){ el.textContent='settling…'; return; }
+  var s=Math.floor(ms/1000);
+  el.textContent=String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+},1000);
 function termPanel(g){
   const t=(g&&g.term)||[]; if(t.length<2) return '';
-  const rows=t.slice(0,10).map(function(x){
+  const totOi=t.reduce((a,x)=>a+(x.oi||0),0);
+  const rows=t.slice(0,10).map(function(x,i){
     const d = x.days<1 ? (x.days*24).toFixed(0)+'h' : x.days.toFixed(0)+'d';
-    return `<tr><td>${d}</td><td class="num">${x.atm_iv!=null?x.atm_iv.toFixed(1)+'%':'—'}</td>`
+    const sh = totOi>0&&x.oi!=null ? (x.oi/totOi*100).toFixed(1)+'%' : '—';
+    return `<tr${i===0?' style="color:var(--amber)"':''}><td>${d}${i===0?' <span style="font-size:9.5px;letter-spacing:1px">NEXT</span>':''}</td>`
+      +`<td class="num">${x.atm_iv!=null?x.atm_iv.toFixed(1)+'%':'—'}</td>`
       +`<td class="num">${x.oi!=null?Math.round(x.oi).toLocaleString():'—'}</td>`
+      +`<td class="num">${sh}</td>`
+      +`<td class="num">${x.net_gex!=null?money(x.net_gex):'—'}</td>`
       +`<td class="num">${x.pc!=null?x.pc.toFixed(2):'—'}</td>`
       +`<td class="num">${x.max_pain!=null?px(x.max_pain):'—'}</td></tr>`;
   }).join('');
-  return `<div class="panel"><div class="ph"><h2>Term structure</h2>`
-    +`<span class="sub">${t.length} expiries</span></div><div class="pb">`
+  return `<div class="panel"><div class="ph"><h2>Term structure &middot; the expiry ladder</h2>`
+    +`<span class="sub">${t.length} expiries &middot; settles 08:00 UTC</span></div><div class="pb">`
     +`<table class="tt"><thead><tr><th>Expiry</th><th class="num">ATM IV</th>`
-    +`<th class="num">OI</th><th class="num">P/C</th><th class="num">Max pain</th></tr></thead>`
+    +`<th class="num">OI</th><th class="num">% of book</th><th class="num">Net GEX</th><th class="num">P/C</th><th class="num">Max pain</th></tr></thead>`
     +`<tbody>${rows}</tbody></table>`
     +`<div class="fnote">Front-month IV above the back months is backwardation — the market is paying up for the near date.</div>`
     +`</div></div>`;
@@ -1461,7 +1509,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h += venuePanel(g) + exposures(g) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
+    h += venuePanel(g) + exposures(g) + clockPanel(g) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     // CROWDING LADDER (2026-09-01). The percentile columns are MEASURED: history.py ranks each
