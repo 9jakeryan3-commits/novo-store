@@ -754,6 +754,17 @@ module.exports = async (req, res) => {
     // loaded on every question so continuity is real rather than performed.
     let readerMem = null;
     try { readerMem = await getMemory(email); } catch (_) { readerMem = null; }
+    // A control in the panel sets the same field the model sets by conversation, so the toggle and
+    // "keep it simple" are one setting rather than two that can disagree. Applied to THIS answer
+    // as well as saved, or the reader flips the switch and the reply that follows still ignores it.
+    const wantLevel = String((req.body && req.body.level) || '').trim().toLowerCase();
+    if (['plain', 'standard', 'desk', 'reset'].includes(wantLevel)) {
+      try {
+        const { updateMemory } = require('./_lib/member-memory.js');
+        await updateMemory(email, { level: wantLevel });
+        readerMem = await getMemory(email);
+      } catch (_) { /* the setting is a preference, never a reason to fail the question */ }
+    }
     try {
       // Members get the LIVE dealer state. `public:levels` is the deliberately 15-30 min
       // delayed slot api/levels.js serves anonymous visitors — grounding a paid answer in it
@@ -884,6 +895,36 @@ module.exports = async (req, res) => {
 
   // Continuity, made explicit. Rides only when there is something remembered, and carries its
   // own rules so the fast lane's SYSTEM stays untouched.
+  // HOW MUCH VOCABULARY THIS READER WANTS. The capability was always there — asked "I'm brand new
+  // to options, what is gamma", NoVo answers with "delta is your speed, gamma is your
+  // acceleration", which is genuinely good teaching. The problem was that it only happened when
+  // the reader announced themselves, so the same person asking "what's SPY doing" the next day got
+  // "positive net GEX regime" and "contango structure" and was lost by the second sentence. This
+  // makes it a setting that persists instead of a confession they have to keep making.
+  //
+  // It is a VOCABULARY switch, never a content one. Same read, same numbers, same uncertainty,
+  // same refusal to give advice — a beginner is not owed a smaller truth, just a sayable one.
+  const level = (readerMem && readerMem.level) || null;
+  const levelBlock = level === 'plain'
+    ? ['PLAIN ENGLISH FOR THIS READER — they asked, and it sticks until they say otherwise.',
+       'Define every market term the first time it appears in the answer, in the same sentence, in',
+       'six words or fewer — "the gamma flip (where dealers switch from calming the tape to',
+       'pushing it)". Prefer the everyday word: "the level where dealers change behaviour" beats',
+       '"the flip zone". Reach for a concrete analogy when one is honest. Skip percentile-versus-',
+       'history framing unless they ask for it; say "unusually low" and give the number.',
+       'DO NOT SHRINK THE READ. Same call, same numbers, same uncertainty, same base rates with',
+       'their sample size, same refusal to tell them what to do. They get the whole truth in',
+       'words they can use. Never say "simply", never say "as you probably know", and never',
+       'mention that they are on a simpler setting — that would be talking down, which is the',
+       'one thing this must not do.',
+       '', ''].join('\n')
+    : level === 'desk'
+    ? ['DESK REGISTER FOR THIS READER — they asked you to stop explaining. Assume fluency in the',
+       'greeks, dealer positioning and vol structure. Do not define terms, do not add the',
+       'parenthetical gloss. Straight to the read.',
+       '', ''].join('\n')
+    : '';
+
   const memBlock = (readerMem && ((readerMem.interests || []).length || (readerMem.notes || []).length))
     ? ['WHAT YOU KNOW ABOUT THIS READER (they told you; market interests and style only):',
        (readerMem.interests || []).length ? 'Follows: ' + readerMem.interests.join(', ') : '',
@@ -941,6 +982,7 @@ module.exports = async (req, res) => {
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
       lessonsBlock(trackRec) +
+      levelBlock +
       privBlock +
       depthBlock +
       webBlock +

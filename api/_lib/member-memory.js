@@ -18,6 +18,16 @@ const MAX_NOTES = 8;
 const MAX_NOTE_LEN = 160;
 const TTL_S = 270 * 24 * 3600;
 
+// HOW MUCH VOCABULARY THIS READER WANTS. Its own field rather than a free-text note, because the
+// prompt has to branch on it deterministically and a note that happens to say "keep it simple" is
+// a sentence, not a setting.
+//   plain    - every term defined in place, analogies over jargon, no percentile-vs-history unless
+//              asked. Same numbers and the same read; a smaller vocabulary.
+//   standard - the default. Assumes the reader knows options basics.
+//   desk     - assumes fluency; skips the definitions entirely.
+// Never a different ANSWER, only a different vocabulary. A beginner gets the same call a pro does.
+const LEVELS = ["plain", "standard", "desk"];
+
 // Position/account-shaped content is refused at the write, whatever the model asked for.
 const ACCOUNT_SHAPED = /\b(my (position|account|portfolio|p&?l|pnl|balance)|(bought|sold|holding|long|short)\s+\d|\d+\s*(shares|contracts)|stop\s*(loss)?\s*(at|@)|entry\s*(at|@)|\$\d{2,})\b/i;
 
@@ -33,11 +43,14 @@ async function getMemory(email) {
   let m = null;
   try { m = await r.get(_key(email)); } catch (_) { m = null; }
   if (typeof m === "string") { try { m = JSON.parse(m); } catch (_) { m = null; } }
-  if (!m || (!Array.isArray(m.interests) && !Array.isArray(m.notes))) return null;
-  return { interests: m.interests || [], notes: m.notes || [], updated: m.updated || null };
+  // A reader who has ONLY set a level has real memory — returning null there would drop the
+  // setting on every read and silently undo it.
+  if (!m || (!Array.isArray(m.interests) && !Array.isArray(m.notes) && !m.level)) return null;
+  return { interests: m.interests || [], notes: m.notes || [],
+           level: LEVELS.includes(m.level) ? m.level : null, updated: m.updated || null };
 }
 
-async function updateMemory(email, { add_interests, remove_interests, note, clear } = {}) {
+async function updateMemory(email, { add_interests, remove_interests, note, level, clear } = {}) {
   const r = kv();
   if (!r || !email) return { error: "memory unavailable" };
   if (clear) {
@@ -69,13 +82,19 @@ async function updateMemory(email, { add_interests, remove_interests, note, clea
     else if (nt && !cur.notes.includes(nt)) cur.notes = [...cur.notes, nt].slice(-MAX_NOTES);
   }
 
+  if (level !== undefined) {
+    const lv = String(level || "").trim().toLowerCase();
+    if (LEVELS.includes(lv)) cur.level = lv;
+    else if (lv === "" || lv === "reset") delete cur.level;
+  }
+
   cur.updated = Date.now();
   try {
     await r.set(_key(email), JSON.stringify(cur), { ex: TTL_S });
   } catch (e) {
     return { error: "could not save" };
   }
-  const out = { ok: true, interests: cur.interests, notes: cur.notes };
+  const out = { ok: true, interests: cur.interests, notes: cur.notes, level: cur.level || null };
   if (refused.length) {
     out.refused = refused;
     out.note = "position/account-shaped items are never stored - I read markets, not accounts";
@@ -93,4 +112,4 @@ async function indexMember(email) {
   try { await r.set("mem:e:" + eh(email), String(email).trim().toLowerCase(), { ex: TTL_S }); } catch (_) {}
 }
 
-module.exports = { getMemory, updateMemory, indexMember, eh };
+module.exports = { getMemory, updateMemory, indexMember, eh, LEVELS };

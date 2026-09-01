@@ -382,6 +382,17 @@ const declarations = [
         add_interests: { type: "array", items: { type: "string" }, description: "Tickers, coins or market topics they follow. Short phrases." },
         remove_interests: { type: "array", items: { type: "string" } },
         note: { type: "string", description: "One short preference, in their words. Market/style only." },
+        level: {
+          type: "string",
+          enum: ["plain", "standard", "desk", "reset"],
+          description:
+            "How much VOCABULARY this reader wants, and it sticks across conversations. Set " +
+            "'plain' the moment they say they are new, ask you to keep it simple, say they do " +
+            "not follow the jargon, or ask what a basic term means for the second time - do not " +
+            "wait to be asked for a setting, they do not know there is one. 'desk' when they ask " +
+            "you to stop explaining or say they trade professionally. 'reset' returns to default. " +
+            "This changes only the WORDS: the read, the numbers and the honesty never move.",
+        },
         clear: { type: "boolean", description: "Erase everything on their request." },
       },
     },

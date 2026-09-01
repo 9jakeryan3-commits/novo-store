@@ -520,6 +520,19 @@ tr:last-child td{border-bottom:none}
   #novo-ask .mx{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
     color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
   #novo-ask .mx:hover{color:#eaf3ff;border-color:var(--askacc)}
+  /* Plain English: a setting a new trader can find without asking for it. Lit when on, because
+     a toggle whose state you cannot see is a toggle people press twice. */
+  #novo-ask .lvl{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
+    color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
+    margin-right:6px;white-space:nowrap}
+  #novo-ask .lvl:hover{color:#eaf3ff;border-color:var(--askacc)}
+  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;background:var(--askacc);border-color:var(--askacc)}
+  /* Go deeper: the answer is short by default now, so the way back to the desk report has to be
+     one tap rather than knowing the phrase "deep read". */
+  #novo-ask .deeper{background:none;border:1px solid var(--bdr,#22303f);border-radius:8px;
+    color:var(--txt2,#9fb6d1);font-size:11.5px;cursor:pointer;padding:4px 9px;margin:2px 0 0}
+  #novo-ask .deeper:hover{color:#eaf3ff;border-color:var(--askacc)}
+  @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px} }
   #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
   #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
@@ -623,6 +636,7 @@ tr:last-child td{border-bottom:none}
       <span>AI market analyst</span>
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
+    <button class="lvl" id="novo-ask-lvl" type="button" onclick="novoAskLevel()" aria-pressed="false" title="Plain English: define the jargon as I go">Plain English</button>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
     <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
   </header>
@@ -1815,7 +1829,7 @@ window.addEventListener('hashchange', function(){
     w.textContent = fmtWhen(_at);
     try { w.title = new Date(_at).toLocaleString(); } catch(_e){}
     ansEl.appendChild(w);
-    var _turn = { r: 'novo', x: d.answer, t: _at };
+    var _turn = { r: 'novo', x: d.answer, t: _at, q: d.__q || null };
     if (d.lookups && d.lookups.length){
       var cl = checkedLine(d.lookups);
       if (cl){ _turn.c = 'Checked: ' + cl; srcLine(_turn.c); }
@@ -1825,8 +1839,48 @@ window.addEventListener('hashchange', function(){
         return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' · ');
       srcLine(_turn.s);
     }
+    // Only on a fast answer: a deep read IS the deeper version.
+    if (d.mode !== 'deep' && _turn.q){
+      var db = deeperBtn(_turn.q);
+      if (db) ansEl.parentNode.insertBefore(db, ansEl.nextSibling);
+    }
     TURNS.push(_turn); saveTurns(); pinTop(_qel);
   }
+  // ── plain English ──────────────────────────────────────────────────────────────
+  // The capability was always there: told someone is new, NoVo writes "delta is your speed,
+  // gamma is your acceleration". It just needed to STICK, instead of being a confession the
+  // reader has to repeat every session. The server owns the setting (it lives in reader memory
+  // and the model can set it from "keep it simple" too); this mirrors it locally so the button
+  // is lit on arrival rather than after the first answer comes back.
+  var LEVEL = (function(){ try { return localStorage.getItem('novo_ask_level') || ''; } catch(_){ return ''; } })();
+  function paintLevel(){
+    var b = document.getElementById('novo-ask-lvl'); if (!b) return;
+    var on = LEVEL === 'plain';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.textContent = on ? 'Plain English: on' : 'Plain English';
+    b.title = on ? 'Plain English is on - I define the jargon as I go. Tap to turn it off.'
+                 : 'Plain English: I define every term as I use it';
+  }
+  window.novoAskLevel = function(){
+    LEVEL = (LEVEL === 'plain') ? 'standard' : 'plain';
+    try { localStorage.setItem('novo_ask_level', LEVEL); } catch(_){}
+    paintLevel();
+  };
+  paintLevel();
+
+  // ── go deeper ──────────────────────────────────────────────────────────────────
+  // Answers are short by default now. This is the way back to the full desk report without
+  // having to know the phrase, and it re-asks the ORIGINAL question rather than "go deeper",
+  // which on its own carries no subject.
+  function deeperBtn(q){
+    if (!q) return null;
+    var b = document.createElement('button');
+    b.className = 'deeper'; b.type = 'button'; b.textContent = 'Go deeper';
+    b.title = 'Full desk report on this question';
+    b.onclick = function(){ b.remove(); window.novoAsk(q, { deep: true }); };
+    return b;
+  }
+
   // paste or attach a chart image; it rides the next question
   var PENDIMG = null;
   function clearAttach(){ PENDIMG = null; var ch = document.getElementById('novo-ask-imgchip'); if (ch) ch.remove(); }
@@ -1959,8 +2013,9 @@ window.addEventListener('hashchange', function(){
     try { var u = new URLSearchParams(location.search).get('t'); if (u) return u; } catch(_){}
     try { return localStorage.getItem('novo_live_t') || ''; } catch(_){ return ''; }
   }
-  window.novoAsk = async function(q){
+  window.novoAsk = async function(q, opts){
     q = (q||'').trim(); if (!q || busy) return;
+    opts = opts || {};
     var intro = document.querySelector('#novo-ask .intro'); if (intro) intro.remove();
     window.novoAskQuick();
     document.getElementById('novo-ask-q').value = '';
@@ -1994,7 +2049,8 @@ window.addEventListener('hashchange', function(){
           ? { kind:'chain_token', symbol:TOK.symbol, address:TOK.address, network:TOK.network }
           : { kind:'coin', code:CUR };
       } catch(_e){}
-      var _body = { question: q, t: tok() || null, history: hist, surface: 'crypto', focus: focus, stream: true };
+      var _body = { question: q, t: tok() || null, history: hist, surface: 'crypto', focus: focus, stream: true,
+                    level: LEVEL || undefined, deep: opts.deep || undefined };
       if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
       var r = await fetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
@@ -2033,7 +2089,7 @@ window.addEventListener('hashchange', function(){
           var em = (errObj && errObj.error) || 'NoVo is unavailable right now.', _et = Date.now();
           add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
         } else {
-          finishAnswer(doneObj, _qel, ansEl);
+          doneObj.__q = q; finishAnswer(doneObj, _qel, ansEl);
         }
       }
     } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
