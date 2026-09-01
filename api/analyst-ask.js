@@ -1078,7 +1078,17 @@ module.exports = async (req, res) => {
       convo +
       `MARKET DATA (every number you may state is here):\n${marketJson}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
-      `QUESTION: ${question}`;
+      `QUESTION: ${question}\n\n` +
+      // THE VOICE CONTRACT, REPEATED WHERE IT ACTUALLY LANDS. It lives at the end of SYSTEM, which
+      // is the right place in a bare prompt — but production appends the regime blocks, the reader
+      // memory, both maps and the reference set after it, so by the time the model reaches the
+      // question the contract is thousands of tokens upstream and losing to the data. Measured:
+      // 3/25 voice checks missed against the lean local prompt, 7/25 against production, and the
+      // misses were the analyst going impersonal — exactly the failure a distant instruction
+      // predicts. Same words, restated last, where nothing follows them.
+      'ANSWER AS YOURSELF: match the length to the question (a one-line question gets one to three ' +
+      'sentences), first sentence answers it in under twenty words, say "I" at least once, use ' +
+      'contractions, no summary paragraph, and do not list every number you hold.';
 
     // ── the tool loop ──────────────────────────────────────────────────────────────
     // The grounding above already answers most questions on its own. The loop exists for the ones
