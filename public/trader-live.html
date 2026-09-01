@@ -2901,7 +2901,35 @@ function _fmtGex(raw,spot){
   var s=a>=1e9?(v/1e9).toFixed(2)+'B':(v/1e6).toFixed(1)+'M';
   return (v>=0?'+':'')+s;
 }
+// B12: today's net-GEX path as a sparkline beside the GEX readout. The strip describes the ENGINE
+// ticker (the nav pill names it), so the path follows _novoExecTkr, not the viewer's selection.
+// Trials never receive gexpath (server scrub), so the canvas simply stays hidden there.
+function _gexSpark(){
+  try{
+    var host=document.getElementById('t-gex'); if(!host||!host.parentNode) return;
+    var gp=(_abData&&_abData.gexpath)?_abData.gexpath[(window._novoExecTkr||'SPY')]:null;
+    var c=document.getElementById('t-gex-spark');
+    if(!c){ c=document.createElement('canvas'); c.id='t-gex-spark'; c.width=128; c.height=32;
+      c.style.cssText='width:64px;height:16px;margin:0 6px 0 auto;align-self:center;';
+      host.parentNode.insertBefore(c,host); }
+    if(!gp||gp.length<3){ c.style.display='none'; return; }
+    c.style.display='';
+    var ctx=c.getContext('2d'); ctx.clearRect(0,0,128,32);
+    var vs=gp.map(function(r){return r[1];});
+    var mn=Math.min.apply(null,vs), mx=Math.max.apply(null,vs);
+    if(mx-mn<1e-9){ mx=mn+1; }
+    if(mn<0&&mx>0){ var zy=30-((0-mn)/(mx-mn))*28;
+      ctx.strokeStyle='rgba(139,147,167,0.45)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,zy); ctx.lineTo(128,zy); ctx.stroke(); }
+    ctx.strokeStyle=(vs[vs.length-1]<0)?'#f43f5e':'#34d399'; ctx.lineWidth=2;
+    ctx.beginPath();
+    gp.forEach(function(r,i){ var x=i/(gp.length-1)*126+1, y=30-((r[1]-mn)/(mx-mn))*28;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.stroke();
+  }catch(_e){}
+}
 function _renderBoard(){
+  _gexSpark();
   var tb=document.querySelector('#b3-table tbody'); if(!tb||!_abData) return;
   var B=_abData.board||{}, TKS=['SPY','QQQ','IWM'];
   function cell(tk,fn){ var b=B[tk]; return b?fn(b):'<td class="b3-d">&mdash;</td>'; }
@@ -3724,6 +3752,48 @@ const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','
 // session levels; VWAP sits between.
 const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
   'PMH':4,'PML':4,'ORH':4,'ORL':4,'AHH':3,'AHL':3,'YDH':3,'YDL':3};
+// B12: short badge names for merged-confluence titles and event markers.
+const _LVL_SHORT={'FLIP':'FLIP','CW':'CW','PW':'PW','GRAV':'GRAV','VWAP':'VWAP','EM_HI':'EM▲','EM_LO':'EM▼',
+  'PMH':'PMH','PML':'PML','ORH':'ORH','ORL':'ORL','AHH':'AHH','AHL':'AHL','YDH':'PDH','YDL':'PDL'};
+function _hexA(hex,a){ var h=hex.replace('#',''); if(h.length!==6) return hex;
+  return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')'; }
+// Session decay for the strength encoding: dealer walls bleed gamma into the close. 1.0 pre-open,
+// linear 1→0.25 across RTH, 0.85 off-hours (the publisher's fresh overnight chain, slightly dimmed).
+// Read off the newest bar's ET-shifted minute — no clock-zone math.
+function _lvlDecay(){
+  try{
+    var cs=_novoViewC; if(!cs||!cs.length) return 1;
+    var m=Math.floor(cs[cs.length-1].time/60)%1440;
+    if(m>=570&&m<960) return 1-0.75*((m-570)/390);
+    if(m>=240&&m<570) return 1;
+    return 0.85;
+  }catch(_e){ return 1; }
+}
+// B12: STRENGTH ENCODING — dealer-structure levels carry the weight of the gamma behind them.
+// Width 1-4 from the level's nearest-strike share of the heaviest strike (the analysis-board's
+// |gamma·OI| profile); alpha from the session decay. Applied through applyOptions on QUANTIZED
+// change only, so it can never churn the per-label diff pass.
+function _lvlStrengthApply(){
+  try{
+    var st=(_abData&&_abData.strikes)?_abData.strikes[_selTkr()]:null;
+    var px=window._lvlPx||{}; var dk=_lvlDecay();
+    window._lvlWKey=window._lvlWKey||{};
+    ['CW','PW','GRAV','FLIP'].forEach(function(lbl){
+      var s=_novoLvlSeries[lbl]; if(!s||!(px[lbl]>0)) return;
+      var w=1;
+      if(st&&st.sa&&st.sa.length){
+        var bd=1e9, share=0;
+        st.sa.forEach(function(r){ var d2=Math.abs(r[0]-px[lbl]); if(d2<bd){ bd=d2; share=r[1]; } });
+        if(bd<=1.5) w=1+Math.round(share*3);
+      }
+      var al=+(0.45+0.55*dk).toFixed(2);
+      var key=w+':'+al;
+      if(window._lvlWKey[lbl]===key) return;
+      window._lvlWKey[lbl]=key;
+      s.applyOptions({lineWidth:w,color:_hexA(_LVL_COLOR[lbl]||'#8b93a7',al)});
+    });
+  }catch(_e){}
+}
 function _lvlCollide(){
   try{
     if(window._lvlUsePL) return;   // % modes draw the ladder as price lines; this governs line-series tags
@@ -4482,9 +4552,27 @@ async function loadNovoChart(){
         if(_novoEma21&&_view.ema21&&_view.ema21.length) _novoEma21.update(_view.ema21[_view.ema21.length-1]);
       }catch(_e){}
     }
-    const _mlast=(d.markers&&d.markers.length)?d.markers[d.markers.length-1]:null;
-    const _mkSig=(d.markers?d.markers.length:0)+':'+(_mlast?(_mlast.time+':'+(_mlast.price||_mlast.position||'')+':'+(_mlast.shape||'')):'-');
-    if(_mkSig!==window._novoMkSig){ window._novoMkSig=_mkSig; _novoSeries.setMarkers(d.markers||[]); }
+    // B12: The Line's lost/reclaimed events pinned to their bars — the feed list finally lands ON
+    // the chart. Times are server-shifted to the bar basis; snapped to this frame's bucket and
+    // dropped unless that exact bar exists (setMarkers silently loses mismatched times — checked).
+    var _evm=[];
+    try{
+      if(!_isDeepTf() && _abData && _abData.events){
+        var _evs=_abData.events[_reqTkr]||[], _step=_ctbTf*60;
+        _evs.forEach(function(ev2){
+          var bt=Math.floor(ev2.t/_step)*_step;
+          if(!_novoViewMap||!_novoViewMap.has(bt)) return;
+          var up2=(ev2.verb==='reclaimed');
+          _evm.push({time:bt,position:up2?'belowBar':'aboveBar',color:up2?'#34d399':'#f43f5e',
+            shape:up2?'arrowUp':'arrowDown',
+            text:(up2?'↩ ':'✕ ')+(ev2.lbl||'').replace('Pre-Market','PM').replace('Opening-Range','OR').replace('Prior-Day','PD')});
+        });
+      }
+    }catch(_e){}
+    const _allMk=(d.markers||[]).concat(_evm);
+    const _mlast=(_allMk&&_allMk.length)?_allMk[_allMk.length-1]:null;
+    const _mkSig=(_allMk?_allMk.length:0)+':'+(_mlast?(_mlast.time+':'+(_mlast.price||_mlast.position||'')+':'+(_mlast.shape||'')+':'+(_mlast.text||'')):'-');
+    if(_mkSig!==window._novoMkSig){ window._novoMkSig=_mkSig; _novoSeries.setMarkers(_allMk); }
     // FLIP/CW/PW/GRAV are the engine's own dealer levels (the ones _level_trigger fires on) — cyan for the
     // gamma flip, dark blue for the gravity magnet (a blue pair with the flip), green/red for the walls.
     // Opening Range is light pink; After-Hours purple; Prior-Day near-white.
@@ -4557,7 +4645,25 @@ async function loadNovoChart(){
     // the old all-or-nothing JSON sig tore down and re-added all ~15 series whenever any single
     // level moved a cent, which during RTH (gravity/flip recompute every ~5s) was most ticks:
     // ~100-200 series rebuilds a minute, each one a full chart invalidation + axis-label churn.
-    const _sig = _drawn.map(function(r){ return r[0]; }).join(',')+'@'+_firstT;
+    // B12: CONFLUENCE MERGE — levels within $0.05 draw as ONE line wearing a stacked title
+    // ("CALL WALL · EM▲"). The kept line is the higher-priority one; the merged partner's name
+    // rides its title. The sig naturally covers merges (the label set changes), so a merge or a
+    // split triggers exactly one rebuild.
+    window._lvlMerged={};
+    (function(){
+      var pr=function(l){ return _LVL_PRIO[l]||1; };
+      var sorted=_drawn.slice().sort(function(a,b){ return pr(b[0])-pr(a[0]); });
+      var kept=[];
+      sorted.forEach(function(row){
+        var host=null;
+        for(var i=0;i<kept.length;i++){ if(Math.abs(kept[i][1]-row[1])<=0.05){ host=kept[i]; break; } }
+        if(host){ (window._lvlMerged[host[0]]=window._lvlMerged[host[0]]||[]).push(row[0]); }
+        else kept.push(row);
+      });
+      if(kept.length!==_drawn.length){ _drawn.length=0; kept.forEach(function(r){ _drawn.push(r); }); }
+    })();
+    const _sig = _drawn.map(function(r){ return r[0]; }).join(',')+'@'+_firstT
+      +'@'+Object.keys(window._lvlMerged).map(function(k){ return k+':'+window._lvlMerged[k].join('+'); }).join('|');
     if(_sig !== _novoLvlSig){
       for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){} }
       for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){} }
@@ -4581,7 +4687,7 @@ async function loadNovoChart(){
           // Only levels inside the visible price range render a label, so the axis stays readable.
           // visible: set at CREATION so the rebuild path never births a series with the wrong
           // visibility, which is what used to justify calling _applyTogVis on every tick.
-          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
+          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?((_lvlTitle[lbl]||lbl)+(window._lvlMerged&&window._lvlMerged[lbl]?' · '+window._lvlMerged[lbl].map(function(m){return _LVL_SHORT[m]||m;}).join(' · '):'')):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
           _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v;
         } else {
@@ -4607,6 +4713,7 @@ async function loadNovoChart(){
     }
     try{ _lvlSyncPLs(); }catch(_e){}   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
     try{ _lvlCollide(); }catch(_e){}   // B11: hide lower-priority axis tags that overprint at confluence
+    try{ _lvlStrengthApply(); }catch(_e){}   // B12: width/alpha from gamma share × session decay, change-gated
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
