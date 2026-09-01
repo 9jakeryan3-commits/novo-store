@@ -255,3 +255,20 @@ nav.is-scrolled {
 /* The analyst screenshot fan's rotated cards bleed ~24px below their aspect-ratio box by
    design; give the caption under it standing room so the graze (14px measured) cannot touch. */
 .ss-fan { margin-bottom: 30px; }
+
+
+/* ── THE FULL-ROW FEATURE STRIPS (Jake's screenshot, twice) ──────────────────────────
+   The homepage's "Analyst Score / Gamma by strike / Historical analogues / What this
+   setup has done" cards are .feature elements spanning the whole grid via an inline
+   grid-column:1/-1 - so the .card cap never touched them, and at 1512px wide with 78ch
+   of text they were the most lopsided thing on the site. Same for trader's .ai-card.
+   Capped to match the single-column card rule. */
+@media (min-width: 1200px) {
+  .feature[style*="grid-column"], .ai-card { max-width: 1180px; }
+
+  /* And the 7-card grid above them wrapped 5+2 at full width, leaving a mostly-empty
+     second row. 320px minimum tracks give 4+3 on a wide screen - balanced rows - and
+     grids with 3 or fewer cards are unaffected. !important because the column template
+     is inline on the grid. */
+  .features-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; }
+}
