@@ -1919,7 +1919,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            path. A flaky unpkg fetch at app open left window.LightweightCharts undefined FOREVER —
            script tags don't retry — and the chart sat dead until an app restart. Same origin now;
            the watchdog below also re-injects it if it somehow still failed to arrive. -->
-      <script src="/js/lightweight-charts-4.1.3.js"></script>
+      <script src="/js/lightweight-charts-4.2.3.js"></script>
       <div style="margin:8px 14px 8px;">
         
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
@@ -3455,7 +3455,7 @@ function _c2Init(){
   var el2=document.getElementById('novo-chart2'); if(!el2) return false;
   _c2chart=LightweightCharts.createChart(el2,{
     autoSize:true,
-    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit'},
+    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit',attributionLogo:false},
     grid:{vertLines:{color:'rgba(255,255,255,0.035)'},horzLines:{color:'rgba(255,255,255,0.035)'}},
     rightPriceScale:{borderColor:'rgba(255,255,255,0.08)'},
     timeScale:{borderColor:'rgba(255,255,255,0.08)',timeVisible:true,secondsVisible:false,rightOffset:6},
@@ -3792,7 +3792,7 @@ function _initNovoChart(){
   const el=document.getElementById('novo-chart'); if(!el) return false;
   _novoChart=LightweightCharts.createChart(el,{
     autoSize:true,
-    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit'},
+    layout:{background:{type:'solid',color:'transparent'},textColor:'#8aa0b8',fontSize:10,fontFamily:'inherit',attributionLogo:false},
     grid:{vertLines:{color:'rgba(255,255,255,0.035)'},horzLines:{color:'rgba(255,255,255,0.035)'}},
     // scaleMargins MUST be pinned. The library defaults (top .2 / bottom .1) consume 30%
     // of the plot on top of whatever range autoscaleInfoProvider returns, so a forced $5
@@ -4205,7 +4205,7 @@ function _laneCheck(kick){
       // REPLACE the previous retry tag rather than stacking a new one per attempt — a pathological
       // outage would otherwise append script tags to the head forever.
       var old=document.getElementById('lw-retry'); if(old) old.remove();
-      var sc=document.createElement('script'); sc.id='lw-retry'; sc.src='/js/lightweight-charts-4.1.3.js'; document.head.appendChild(sc);
+      var sc=document.createElement('script'); sc.id='lw-retry'; sc.src='/js/lightweight-charts-4.2.3.js'; document.head.appendChild(sc);
     }
   }catch(_e){}
   try{
