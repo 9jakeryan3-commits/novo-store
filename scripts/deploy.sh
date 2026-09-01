@@ -30,6 +30,7 @@ node scripts/stamp-assets.js
 #   - every coin count on /crypto was hand-typed and drifted: the page claimed 89 coins and 82
 #     with leverage positioning while the collector was publishing 90 and 83
 node scripts/sync-crypto-counts.js
+node scripts/sync-track-record.js
 # Lift the site's real header/footer/CSS into api/_lib/site-chrome.js so the server-rendered
 # pages (/analyst/archive) match the static ones. AFTER stamp-assets and the counts, so the
 # extracted markup carries the current ?v= hashes and the current numbers.
@@ -64,7 +65,7 @@ if [ -n "$(git status --porcelain)" ] && node scripts/count-churn-only.js; then
   # journal/index.html carries a count too (the hub, not the 1,000+ articles). It joined the sync
   # script's file list on 2026-08-31; without it here a synced hub would sit dirty and halt the
   # NEXT deploy instead of riding along with the other generated count edits.
-  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html           public/journal/index.html 2>/dev/null || true
+  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html           public/journal/index.html           public/analyst.html public/trader.html public/ai.html           public/compare-novo-vs-spotgamma.html public/compare-novo-vs-menthorq.html           public/compare-novo-vs-option-alpha.html public/compare-novo-vs-unusual-whales.html 2>/dev/null || true
   git commit -q -m "generated: crypto counts synced to the live sweep"
   git push -q
   echo ".. crypto counts refreshed and pushed"
