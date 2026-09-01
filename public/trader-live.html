@@ -1851,7 +1851,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels"><span class="ctb-s">LVLS</span><span class="ctb-l">LEVELS</span></button>
             <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram"><span class="ctb-s">VOL</span><span class="ctb-l">VOLUME</span></button>
             <button type="button" class="ctb-btn" data-tog="ha" title="Heikin Ashi candles"><span class="ctb-s">HA</span><span class="ctb-l">HEIKIN ASHI</span></button>
-            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber"><span class="ctb-s">VP</span><span class="ctb-l">VOLUME PROFILE</span></button>
+            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber"><span class="ctb-s">VP</span><span class="ctb-l">VOLUME PROFILE</span></button><button type="button" class="ctb-btn" data-tog="gex" title="Dealer gamma by strike — the wall is the biggest bar"><span class="ctb-s">GEX</span><span class="ctb-l">GEX PROFILE</span></button>
           </div>
           <span id="ctb-hint" class="ctb-hint"></span>
         </div>
@@ -3044,17 +3044,17 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false};
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol','ha','vp'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  ['vwap','ema','lvl','vol','ha','vp','gex'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
 let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
 try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes), so one
@@ -3188,12 +3188,12 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
     var k=b.getAttribute('data-tog'); _ctbTog[k]=!_ctbTog[k]; _ctbSave(); _paintCtb(); _applyTogVis();
     // HA and VP change what is DRAWN, not a series' visibility — force a full setData repaint
     // (glitch-guard reset; _novoRanged stays latched so the viewer's pan/zoom is never fought).
-    if(k==='ha'||k==='vp'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
+    if(k==='ha'||k==='vp'||k==='gex'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
     // HA off→on is glide-safe (the glide gates on !_ctbTog.ha), but on→off re-enabled the glide
     // INSTANTLY, painting a raw bar over the still-displayed HA last bar until the repaint landed.
     // Drop the tip state; the next poll re-establishes it against the freshly-drawn series.
     if(k==='ha'){ _novoTipLive=false; _novoLastCandle=null; }
-    if(k==='ha'||k==='vp'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language (and profile)
+    if(k==='ha'||k==='vp'||k==='gex'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language (and profile)
   });
 });
 
@@ -3740,6 +3740,77 @@ return {
   }
 }; }
 const _svpPrim=_makeSvp(function(){ return _svpData; });
+// ── B13: GEX-BY-STRIKE HISTOGRAM ─────────────────────────────────────────────
+// The canonical dealer chart, painted under the live tape: right-docked horizontal bars per strike,
+// green above (net call gamma) / red below (net put gamma), width = |gamma·OI| share of the
+// heaviest strike. Two layers: ALL-EXPIRY structure faint, NEAREST-EXPIRY (0DTE) brighter on top —
+// where they stack the wall is undeniable, and thin-gamma air pockets read as momentum lanes.
+// zOrder bottom (never over candles), autoscale untouched, geometry computed per draw
+// (~48 strikes × priceToCoordinate — trivial). Factory: each pane reads ITS OWN ticker's profile.
+function _makeGexProf(getD){
+return {
+  _chart:null,_series:null,
+  attached:function(p){ this._chart=p.chart; this._series=p.series; },
+  detached:function(){ this._chart=null; this._series=null; },
+  updateAllViews:function(){},
+  paneViews:function(){
+    var self=this;
+    return [{
+      zOrder:function(){ return 'bottom'; },
+      renderer:function(){ return { draw:function(target){
+        try{
+          var st=getD(); if(!st||!_ctbTog.gex||!self._series) return;
+          target.useBitmapCoordinateSpace(function(scope){
+            var ctx=scope.context, W=scope.bitmapSize.width, pr=scope.verticalPixelRatio, hpr=scope.horizontalPixelRatio;
+            var maxW=W*0.18;
+            var draw=function(profile, aG, aR, thick){
+              if(!profile) return;
+              for(var i=0;i<profile.length;i++){
+                var y=self._series.priceToCoordinate(profile[i][0]);
+                if(y===null) continue;
+                var w=Math.max(1,profile[i][1]*maxW);
+                var pos=(profile[i][2]===undefined)?true:(profile[i][2]>=0);
+                ctx.fillStyle=pos?('rgba(52,211,153,'+aG+')'):('rgba(244,63,94,'+aR+')');
+                var hh=Math.max(1*pr, thick*pr);
+                ctx.fillRect(W-w, y*pr-hh/2, w, hh);
+              }
+            };
+            draw(st.sa, 0.10, 0.10, 3);    // structural: faint, slightly thick
+            draw(st.s0, 0.26, 0.26, 1.6);  // 0DTE: brighter, tighter — stacks over structure at shared strikes
+          });
+        }catch(_e){}
+      } }; }
+    }];
+  }
+}; }
+// Structural ghost walls: when the ALL-EXPIRY heaviest call-side / put-side strike disagrees with
+// the engine's published wall by ≥ $0.50, draw it as a faint dashed price line — the engine's
+// wall stays THE wall (solid, authoritative); the ghost says where the longer-dated book stacks.
+let _ghostPLs={};
+function _ghostWalls(){
+  try{
+    var st=(_abData&&_abData.strikes)?_abData.strikes[_selTkr()]:null;
+    var px=window._lvlPx||{}, want={};
+    if(st&&st.sa&&st.sa.length&&_ctbTog.lvl){
+      var spot=(_novoViewC&&_novoViewC.length)?_novoViewC[_novoViewC.length-1].close:null;
+      if(spot>0){
+        var bestUp=null,bestDn=null;
+        st.sa.forEach(function(r){
+          if(r[0]>spot){ if(!bestUp||r[1]>bestUp[1]) bestUp=r; }
+          else { if(!bestDn||r[1]>bestDn[1]) bestDn=r; }
+        });
+        if(bestUp&&(!(px.CW>0)||Math.abs(bestUp[0]-px.CW)>=0.5)) want.GCW=bestUp[0];
+        if(bestDn&&(!(px.PW>0)||Math.abs(bestDn[0]-px.PW)>=0.5)) want.GPW=bestDn[0];
+      }
+    }
+    for(var k in _ghostPLs){ if(want[k]===undefined){ try{_novoSeries.removePriceLine(_ghostPLs[k]);}catch(_e){} delete _ghostPLs[k]; } }
+    for(var k2 in want){
+      var col=(k2==='GCW')?'rgba(52,211,153,0.35)':'rgba(244,63,94,0.35)';
+      if(_ghostPLs[k2]){ try{_ghostPLs[k2].applyOptions({price:want[k2]});}catch(_e){} }
+      else { try{ _ghostPLs[k2]=_novoSeries.createPriceLine({price:want[k2],color:col,lineWidth:1,lineStyle:2,axisLabelVisible:false,title:''}); }catch(_e){} }
+    }
+  }catch(_e){}
+}
 // Level colours + axis titles — script scope, shared by BOTH panes (they were locals inside
 // loadNovoChart until the split-parity build needed them in _c2Load too).
 const _LVL_COLOR={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7'};
@@ -3884,6 +3955,7 @@ function _c2Init(){
   try{ _c2chart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ if(_c2series.attachPrimitive) _c2series.attachPrimitive(_makeShade(function(){ return _c2Raw; })); }catch(_e){}
   try{ if(_c2series.attachPrimitive) _c2series.attachPrimitive(_makeSvp(function(){ return _svpData2; })); }catch(_e){}
+  try{ if(_c2series.attachPrimitive) _c2series.attachPrimitive(_makeGexProf(function(){ return (_abData&&_abData.strikes&&_splitTkr)?_abData.strikes[_splitTkr]:null; })); }catch(_e){}
   // Hover OHLCV legend, same format as the main pane's.
   try{
     var el2b=document.getElementById('novo-chart2');
@@ -4338,6 +4410,7 @@ function _initNovoChart(){
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_sessShade); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_svpPrim); }catch(_e){}
+  try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeGexProf(function(){ return (_abData&&_abData.strikes)?_abData.strikes[_selTkr()]:null; })); }catch(_e){}
   try{ _applyScale(); }catch(_e){}   // restore the persisted scale mode/invert
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
@@ -4714,6 +4787,7 @@ async function loadNovoChart(){
     try{ _lvlSyncPLs(); }catch(_e){}   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
     try{ _lvlCollide(); }catch(_e){}   // B11: hide lower-priority axis tags that overprint at confluence
     try{ _lvlStrengthApply(); }catch(_e){}   // B12: width/alpha from gamma share × session decay, change-gated
+    try{ _ghostWalls(); }catch(_e){}         // B13: faint dashed structural walls when the long book disagrees
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
