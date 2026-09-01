@@ -449,6 +449,32 @@ GROUNDING
 - "How often does X hold" and "how accurate are you" are answered by the scored track record, not from memory. If it scores a claim badly, say so — the record is public and you do not get to edit it.
 - Use REFERENCE for mechanics and cite the source titles you actually drew on.
 
+HOW I REASON — the order, not a style note
+- OUTSIDE VIEW FIRST, then today. Before leaning on a setup, establish how often it has resolved
+  the way you are about to imply — from the track record, the base rates or the archive — and say
+  that number with its sample size. THEN adjust for what is different about right now, and say
+  what you adjusted for. A read that skips the base rate is a story; a base rate with no adjustment
+  is a table. The archive is mine and it goes back further than anyone asking has been trading —
+  leading with it is the whole edge, so lead with it.
+- DECOMPOSE what you cannot answer whole. A question like "is this setup dangerous" breaks into
+  pieces each of which has a lookup: where is spot against the flip, what is vol doing against its
+  own history, how did this shape resolve before. Answer the pieces, then assemble. Never assemble
+  from a feel for the whole.
+- BE GRANULAR. "62% of 148 sessions" is a claim that can be scored. "Usually", "often" and
+  "tends to" cannot, and hiding behind them is how an analyst is never wrong and never useful.
+  When the number exists, give the number.
+- CONFIDENCE IS EARNED FROM THE RECORD, NOT FELT. State a probability only when it comes from
+  something scored — a base rate, a track-record line, a percentile. Never attach a percentage to
+  a judgement you formed in the answer. If nothing scored covers it, say what you would need to
+  know to score it and stop.
+- RE-DERIVE, NEVER DRIFT. When a level crosses, an alert fires or a new number lands, work the
+  read out again from what is in front of you now — do not adjust the last answer. If the new read
+  disagrees with something you said earlier in this conversation, say so plainly and say what
+  changed. The record is the memory, not the last paragraph.
+- ARITHMETIC AND DATES ARE HAZARDS. Never chain multi-step math in prose — if the number needs
+  computing, it comes from a tool or it does not get stated. Every figure carries the date it is
+  as of; when a series ends before today, say when it ends rather than implying it is current.
+
 COMPARISONS
 - You read three index tickers AND the crypto book, so comparing across them is yours to do and nobody else offers it on this data. When asked how SPY and QQQ are set up, or which one is closer to its flip, call the tool once per ticker and answer from both — never from one and an assumption about the other.
 - Compare on the thing that differs. Two tickers at the same net GEX are not in the same position if one sits above its flip and the other below it, and the distance to the flip in PERCENT is the comparable number, not the dollar gap.
@@ -473,6 +499,89 @@ A: Not my call — I read the map, you take the trade. What the map says: SPY ab
 
 Q: You said 649 would hold and it didn't.
 A: It didn't, and the archive says so — I do not get to edit that. What changed: net GEX flipped negative just before midday and the level stopped having anyone paid to defend it. A level holds while dealers are hedged into holding it, and not one minute longer.`;
+
+// ── the verification pass (deep lane only) ─────────────────────────────────────────
+// A financial answer that is confidently wrong about a number is worse than no answer, and the
+// measured failure mode of retrieval-grounded finance QA is exactly that: plausible prose with a
+// figure nobody checked. Chain-of-Verification is the published fix — draft, then check each claim
+// against the evidence in a SEPARATE call that is not invested in the draft, then revise only what
+// failed. Measured elsewhere at roughly 4x fewer hallucinated facts; here it runs on the deep lane,
+// where the answer is a desk report and one extra call is affordable.
+//
+// THE SAFETY ASYMMETRY, and the reason this cannot make an answer worse: the evidence bundle is
+// TRUNCATED, so "I cannot find that number" means nothing. The verifier may only flag a figure it
+// can CONTRADICT with a specific different value present in the evidence. Absence is never a
+// finding. A verifier that flagged absences would delete true numbers whenever the bundle was
+// clipped, which is the one way this feature could cost more than it earns.
+const VERIFY_MAX_EVIDENCE = 18000;
+
+function _evidenceBundle(contents, marketJson) {
+  const outs = [];
+  for (const turn of contents) {
+    for (const p of (turn.parts || [])) {
+      if (p && p.functionResponse) {
+        outs.push(p.functionResponse.name + ': ' +
+                  JSON.stringify(p.functionResponse.response).slice(0, 3000));
+      }
+    }
+  }
+  const tools = outs.join('\n').slice(0, VERIFY_MAX_EVIDENCE);
+  const market = String(marketJson || '').slice(0, VERIFY_MAX_EVIDENCE);
+  return `MARKET DATA (truncated):\n${market}\n\nLOOKUP RESULTS (truncated):\n${tools}`;
+}
+
+async function verifyAnswer(answer, contents, marketJson, callModelFn, model) {
+  const evidence = _evidenceBundle(contents, marketJson);
+  const vres = await callModelFn(`${model}:generateContent`, {
+    contents: [{ role: 'user', parts: [{ text:
+      'You are checking a market analyst\'s draft against the evidence it was written from.\n\n' +
+      'For every QUANTITATIVE claim in the draft — a price, level, percentage, percentile, count, ' +
+      'sample size, date — decide whether the evidence CONTRADICTS it.\n\n' +
+      'RULES, and they are strict:\n' +
+      '- The evidence is TRUNCATED. If you cannot find a figure, that is NOT a contradiction. ' +
+      'Report nothing for it.\n' +
+      '- Flag a claim ONLY when the evidence contains a specific different value for that exact ' +
+      'quantity. Quote the evidence value.\n' +
+      '- A figure correctly derived from evidence values (a difference, a percent of a stated ' +
+      'total) is SUPPORTED, not a contradiction.\n' +
+      '- Do not comment on style, tone, completeness or wording. Numbers only.\n\n' +
+      'Return JSON only: {"corrections":[{"claim":"<the exact text as written>",' +
+      '"evidence_value":"<the value the evidence gives>","note":"<8 words max>"}]}\n' +
+      'An empty array is the correct and expected answer for a clean draft.\n\n' +
+      `EVIDENCE:\n${evidence}\n\nDRAFT:\n${answer}` }] }],
+    generationConfig: { temperature: 0, maxOutputTokens: 900, responseMimeType: 'application/json',
+                        thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
+  });
+  const parts = vres?.candidates?.[0]?.content?.parts || [];
+  const txt = parts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+  let corrections = [];
+  try {
+    const parsed = JSON.parse(txt);
+    corrections = Array.isArray(parsed?.corrections) ? parsed.corrections : [];
+  } catch (_) { corrections = []; }
+  // Only corrections that actually name both halves of a contradiction survive.
+  return corrections.filter((c) => c && c.claim && c.evidence_value).slice(0, 6);
+}
+
+async function reviseAnswer(answer, corrections, callModelFn, model) {
+  const list = corrections.map((c, i) =>
+    `${i + 1}. Written: "${c.claim}" — the evidence says: ${c.evidence_value}`).join('\n');
+  const rres = await callModelFn(`${model}:generateContent`, {
+    contents: [{ role: 'user', parts: [{ text:
+      'Correct these figures in the text below. Change NOTHING else — not the voice, not the ' +
+      'structure, not a sentence that was not named. Fix each listed number to the evidence value, ' +
+      'and if a sentence no longer holds once its number is corrected, adjust that sentence ' +
+      'minimally so it stays true. Keep the DRAFT\'S number formatting — a price written to two ' +
+      'decimals stays at two decimals (659.4 from the evidence is written 659.40), and a percent ' +
+      'keeps the precision it had. First person, plain text, no markdown, no preamble, no ' +
+      'commentary about the corrections. Return the full corrected text only.\n\n' +
+      `CORRECTIONS:\n${list}\n\nTEXT:\n${answer}` }] }],
+    generationConfig: { temperature: 0.1, maxOutputTokens: 8192,
+                        thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
+  });
+  const parts = rres?.candidates?.[0]?.content?.parts || [];
+  return parts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -716,6 +825,11 @@ module.exports = async (req, res) => {
        '', ''].join('\n')
     : '';
 
+  // Held in a variable rather than inlined: the verification pass checks the answer's figures
+  // against this exact bundle, and re-serializing it there could drift from what was prompted.
+  const marketJson = JSON.stringify({ live, history: ctx, crypto: cryptoInv,
+                                      crypto_live: cryptoLead, private_alerts: privateAlerts });
+
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
@@ -725,7 +839,7 @@ module.exports = async (req, res) => {
       memBlock +
       imgBlock +
       convo +
-      `MARKET DATA (every number you may state is here):\n${JSON.stringify({ live, history: ctx, crypto: cryptoInv, crypto_live: cryptoLead, private_alerts: privateAlerts })}\n\n` +
+      `MARKET DATA (every number you may state is here):\n${marketJson}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
       `QUESTION: ${question}`;
 
@@ -856,6 +970,38 @@ module.exports = async (req, res) => {
       if (sse) { sse({ type: 'error', error: emsg }); return res.end(); }
       return res.status(502).json({ error: emsg });
     }
+    // THE VERIFICATION PASS. Deep only: the flagship answer gets its numbers checked against the
+    // evidence before it is final. Fails OPEN in every direction — a verifier that errors, times
+    // out, returns nothing, or comes back empty leaves the draft exactly as written. The corrected
+    // text rides in the `done` event, which is the canonical answer the client swaps in anyway, and
+    // a `verify` event says how many figures moved so a correction is visible rather than silent.
+    let verified = null;
+    if (deep && answer) {
+      try {
+        const corrections = await Promise.race([
+          verifyAnswer(answer, contents, marketJson, callModel, MODEL),
+          new Promise((r) => setTimeout(() => r([]), 6000)),
+        ]);
+        if (corrections.length) {
+          modelCalls++;
+          const revised = await Promise.race([
+            reviseAnswer(answer, corrections, callModel, MODEL),
+            new Promise((r) => setTimeout(() => r(''), 8000)),
+          ]);
+          // A revision that comes back empty or suspiciously shorter is a failed rewrite, not a
+          // better answer: keep the draft. Losing half a desk report to a truncated retry would be
+          // a worse outcome than the figure it was fixing.
+          if (revised && revised.length > answer.length * 0.6) {
+            answer = revised;
+            verified = { corrected: corrections.length,
+                         notes: corrections.map((c) => c.note || '').filter(Boolean) };
+            console.log(`[ASK] verify: corrected ${corrections.length} figure(s)`);
+          }
+        }
+        modelCalls++;
+      } catch (e) { console.error('[ASK] verify failed (draft kept)', e && e.message); }
+    }
+    if (sse && verified) sse({ type: 'verify', corrected: verified.corrected });
     console.log(`[ASK] ${deep ? 'deep' : 'fast'}: ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
@@ -873,6 +1019,7 @@ module.exports = async (req, res) => {
         sources: [...hits.map((h) => ({ title: h.t, url: h.u || null, kind: h.s })),
                   ...webSources.slice(0, 5)],
         lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
+        verified,
         indexBuilt: idx.built || null,
       });
       return res.end();
@@ -887,6 +1034,7 @@ module.exports = async (req, res) => {
       // The ledger is what the analyst actually looked up to write this, failures included. It
       // is the difference between an answer you can check and an answer you have to trust.
       lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
+      verified,
       indexBuilt: idx.built || null,
     });
   } catch (e) {
