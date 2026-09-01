@@ -500,6 +500,74 @@ A: Not my call — I read the map, you take the trade. What the map says: SPY ab
 Q: You said 649 would hold and it didn't.
 A: It didn't, and the archive says so — I do not get to edit that. What changed: net GEX flipped negative just before midday and the level stopped having anyone paid to defend it. A level holds while dealers are hedged into holding it, and not one minute longer.`;
 
+// ── lessons from my own resolved calls ─────────────────────────────────────────────
+// Self-improvement loops only work when the feedback is a RESOLVED OUTCOME. An agent that grades
+// itself, or that accumulates its own past output as memory, measurably degrades — it entrenches
+// confident mistakes and pollutes its own context. What works is distilling resolved results into
+// a small curated set and putting that in front of the next answer.
+//
+// NoVo already scores every claim it publishes, so the raw material exists and needs no new
+// machinery: this reads the same scored record the public track-record page renders and turns it
+// into a handful of lines about which of MY OWN claims hold and which do not. It is deliberately
+// SMALL and it never accumulates — it is recomputed from the current record on every question, so
+// a claim that stops holding stops being cited the same day.
+//
+// It rides in the prompt rather than being fetched by a tool because the point is that NoVo knows
+// its weak spots WITHOUT being asked. A model that has to decide to look up its own record is a
+// model that will not look when it matters.
+const LESSON_MIN_N = 20;
+
+// FIVE DIFFERENT CLAIMS BEAT ONE CLAIM FIVE TIMES. The same claim scores on SPY, QQQ and IWM and
+// again as a backtest, so a naive top-5 was "expected move" four ways — true, and nearly no
+// information. One entry per claim NAME, the best-sampled instance of each.
+function _byClaim(list) {
+  const best = new Map();
+  for (const s of list) {
+    const name = s.replace(/^\S+\s/, '').split(':')[0];
+    const n = parseInt((s.match(/n=(\d+)/) || [])[1] || '0', 10);
+    const cur = best.get(name);
+    if (!cur || n > cur.n) best.set(name, { s, n });
+  }
+  return [...best.values()].sort((a, b) => b.n - a.n).slice(0, 5).map((x) => x.s);
+}
+
+function lessonsBlock(tr) {
+  if (!tr || !tr.tickers) return '';
+  const strong = [], weak = [];
+  for (const [tk, claims] of Object.entries(tr.tickers)) {
+    if (!claims || typeof claims !== 'object') continue;
+    for (const [name, c] of Object.entries(claims)) {
+      if (!c || typeof c !== 'object') continue;
+      const n = c.sessions || c.n || 0;
+      const label = `${tk} ${name.replace(/_/g, ' ')}`;
+      // A claim with a rate and a baseline it must beat is the scoreable kind.
+      if (typeof c.rate === 'number' && typeof c.baseline === 'number' && n >= LESSON_MIN_N) {
+        const d = c.rate - c.baseline;
+        (d >= 5 ? strong : d <= -5 ? weak : null)?.push(
+          `${label}: ${c.rate.toFixed(0)}% vs ${c.baseline}% baseline (n=${n})`);
+      } else if (c.holds === false && (c.strength === 'strong' || c.strength === 'moderate')) {
+        // Graded and it did NOT hold, with enough signal to mean it.
+        weak.push(`${label}: does not hold in the current window`);
+      } else if (c.holds === true && c.strength === 'strong' && n >= LESSON_MIN_N) {
+        strong.push(`${label}: holds, strong`);
+      }
+    }
+  }
+  if (!strong.length && !weak.length) return '';
+  const L = ['MY OWN RECORD ON MY OWN CLAIMS (scored, not remembered — this is what the public',
+             'track record says about me right now):'];
+  if (strong.length) L.push('Holding up: ' + _byClaim(strong).join(' · '));
+  if (weak.length) L.push('NOT holding up: ' + _byClaim(weak).join(' · '));
+  L.push(weak.length
+    ? 'Lean on the first list. When a question turns on something in the second, say so in one ' +
+      'line before answering — a claim my own record does not support is one I flag, not one I ' +
+      'quietly reuse.'
+    : 'Lean on these where they apply, and if my record does not cover what is being asked, say ' +
+      'that rather than borrowing confidence from a claim about something else.');
+  L.push('Never cite a rate from here without the n beside it.', '', '');
+  return L.join('\n');
+}
+
 // ── the verification pass (deep lane only) ─────────────────────────────────────────
 // A financial answer that is confidently wrong about a number is worse than no answer, and the
 // measured failure mode of retrieval-grounded finance QA is exactly that: plausible prose with a
@@ -651,7 +719,7 @@ module.exports = async (req, res) => {
     const hits = deep ? search(idx, qv, 9, 3) : search(idx, qv, 6);
 
     const r = kv();
-    let live = null, ctx = null;
+    let live = null, ctx = null, trackRec = null;
     // What NoVo remembers about THIS reader — market interests and preferences they stated,
     // loaded on every question so continuity is real rather than performed.
     let readerMem = null;
@@ -660,11 +728,13 @@ module.exports = async (req, res) => {
       // Members get the LIVE dealer state. `public:levels` is the deliberately 15-30 min
       // delayed slot api/levels.js serves anonymous visitors — grounding a paid answer in it
       // reported stale numbers as current. Fall back to it only if the live mirror is missing.
-      const [lv, l, c] = await Promise.all([
-        r.get('analyst:live_levels'), r.get('public:levels'), r.get('analyst:context')]);
+      const [lv, l, c, tr] = await Promise.all([
+        r.get('analyst:live_levels'), r.get('public:levels'), r.get('analyst:context'),
+        r.get('novo:track_record')]);
       const liveMirror = typeof lv === 'string' ? JSON.parse(lv) : lv;
       live = liveMirror || (typeof l === 'string' ? JSON.parse(l) : l);
       ctx = typeof c === 'string' ? JSON.parse(c) : c;
+      trackRec = typeof tr === 'string' ? JSON.parse(tr) : tr;
     } catch (_) {}
 
     // THE CRYPTO SIDE OF THE SAME MIND. This used to be reachable only if the model chose to call a
@@ -833,6 +903,7 @@ module.exports = async (req, res) => {
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
+      lessonsBlock(trackRec) +
       privBlock +
       depthBlock +
       webBlock +
