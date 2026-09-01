@@ -1909,6 +1909,20 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
         #scale-menu .sm-c { width: 12px; flex: 0 0 12px; color: var(--cyn); font-weight: 800; }
         #scale-menu .sm-sep { height: 1px; background: var(--bdr2); margin: 4px 6px; }
+        /* B9: keyboard cheat sheet */
+        #kbd-help { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 40;
+          display: none; background: #17171a; border: 1px solid var(--bdr); border-radius: 12px;
+          padding: 14px 16px; box-shadow: 0 24px 70px rgba(0,0,0,.7); font-family: var(--sans);
+          min-width: 250px; max-width: 320px; }
+        #kbd-help.open { display: block; }
+        #kbd-help h4 { margin: 0 0 9px; font-size: 12px; letter-spacing: .5px; text-transform: uppercase;
+          color: var(--txt3); font-weight: 700; }
+        #kbd-help .kb-row { display: flex; justify-content: space-between; align-items: center;
+          gap: 16px; padding: 4px 0; font-size: 12px; color: var(--txt2); }
+        #kbd-help kbd { font-family: var(--font); font-size: 10.5px; font-weight: 700; color: var(--txt1);
+          background: rgba(255,255,255,.07); border: 1px solid var(--bdr2); border-radius: 4px;
+          padding: 1px 6px; white-space: nowrap; }
+        #kbd-help .kb-close { margin-top: 10px; text-align: right; font-size: 10.5px; color: var(--txt3); }
         /* SPELLED-OUT TOOLBAR (2026-08-31, Jake: "let those names spell out on desktop, let it
            fill that tool bar"). Full names only where the row genuinely has the width — with every
            long label on, the toolbar runs ~1300px before the hero price, so the gate sits at
@@ -3836,6 +3850,69 @@ function _scaleMenuRender(){
     var m=document.getElementById('scale-menu'); if(m) m.classList.remove('open');
   });
 })();
+// ── KEYBOARD MAP (B9) ────────────────────────────────────────────────────────
+// The page had zero keyboard handling — the loudest "this is a webpage, not a terminal" tell for
+// anyone with TradingView muscle memory. Guarded against typing in any field so it never fights the
+// Cap/analyst inputs elsewhere on the page. Number keys reuse the TF buttons' own click handler, so
+// they inherit B8's window preservation for free. Delete / Ctrl+Z are wired to hooks B10 fills.
+var _KB_TF={'1':'1','2':'5','3':'15','4':'1h','5':'1d','6':'1w'};
+function _kbPanZoom(kind){
+  try{
+    var ts=_novoChart&&_novoChart.timeScale(); if(!ts) return;
+    var r=ts.getVisibleLogicalRange(); if(!r) return;
+    var span=r.to-r.from; if(!(span>0)) return;
+    if(kind==='left'){ var d=Math.max(1,Math.round(span*0.15)); ts.setVisibleLogicalRange({from:r.from-d,to:r.to-d}); }
+    else if(kind==='right'){ var d2=Math.max(1,Math.round(span*0.15)); ts.setVisibleLogicalRange({from:r.from+d2,to:r.to+d2}); }
+    else if(kind==='in'){ var s=span*0.8; if(s<6) s=6; ts.setVisibleLogicalRange({from:r.to-s,to:r.to}); }   // zoom around the right edge (live price)
+    else if(kind==='out'){ ts.setVisibleLogicalRange({from:r.to-span*1.25,to:r.to}); }
+  }catch(_e){}
+}
+function _kbHelpToggle(force){
+  var el=document.getElementById('novo-chart'); if(!el) return;
+  var h=document.getElementById('kbd-help');
+  if(!h){ h=document.createElement('div'); h.id='kbd-help'; el.style.position='relative';
+    h.innerHTML='<h4>Keyboard</h4>'+
+      '<div class="kb-row"><span>Timeframe</span><span><kbd>1</kbd>…<kbd>6</kbd></span></div>'+
+      '<div class="kb-row"><span>Pan</span><span><kbd>←</kbd> <kbd>→</kbd></span></div>'+
+      '<div class="kb-row"><span>Zoom</span><span><kbd>+</kbd> <kbd>−</kbd></span></div>'+
+      '<div class="kb-row"><span>Back to live</span><span><kbd>L</kbd></span></div>'+
+      '<div class="kb-row"><span>Drop level at cursor</span><span><kbd>Alt</kbd>+<kbd>H</kbd></span></div>'+
+      '<div class="kb-row"><span>Cancel tool / close</span><span><kbd>Esc</kbd></span></div>'+
+      '<div class="kb-row"><span>Delete selected</span><span><kbd>Del</kbd></span></div>'+
+      '<div class="kb-row"><span>Undo</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd></span></div>'+
+      '<div class="kb-close">press <kbd>?</kbd> or <kbd>Esc</kbd> to close</div>';
+    el.appendChild(h); }
+  var open=(force===true)?true:(force===false?false:!h.classList.contains('open'));
+  h.classList.toggle('open',open);
+}
+document.addEventListener('keydown',function(e){
+  if(e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+  if(e.metaKey&&e.key.toLowerCase()==='z'){ return; }   // let the OS handle cmd-z outside our hook
+  var k=e.key;
+  if(k==='Escape'){
+    _ctbTool=null; _pendPt=null; try{_clearMeasure();}catch(_e){}
+    var sm=document.getElementById('scale-menu'); if(sm) sm.classList.remove('open');
+    _kbHelpToggle(false);
+    try{ if(window._drawDeselect) window._drawDeselect(); }catch(_e){}
+    try{_paintCtb();}catch(_e){}
+    return;
+  }
+  if(k==='?'||(k==='/'&&e.shiftKey)){ _kbHelpToggle(); e.preventDefault(); return; }
+  if(_KB_TF[k]!==undefined && !e.ctrlKey && !e.metaKey && !e.altKey){
+    var btn=document.querySelector('#ctb-tf .ctb-btn[data-tf="'+_KB_TF[k]+'"]');
+    if(btn){ btn.click(); e.preventDefault(); } return;
+  }
+  if(k==='ArrowLeft'){ _kbPanZoom('left'); e.preventDefault(); return; }
+  if(k==='ArrowRight'){ _kbPanZoom('right'); e.preventDefault(); return; }
+  if(k==='+'||k==='='){ _kbPanZoom('in'); e.preventDefault(); return; }
+  if(k==='-'||k==='_'){ _kbPanZoom('out'); e.preventDefault(); return; }
+  if((k==='l'||k==='L') && !e.ctrlKey && !e.metaKey && !e.altKey){ try{_goLive();}catch(_e){} return; }
+  if(e.altKey && (k==='h'||k==='H')){
+    var px=window._lastCrossPx; if(px>0){ try{ _addDrawing({k:'h',p:px}); }catch(_e){} } e.preventDefault(); return;
+  }
+  if(k==='Delete'||k==='Backspace'){ try{ if(window._drawDeleteSelected) window._drawDeleteSelected(); }catch(_e){} return; }
+  if((e.ctrlKey||e.metaKey) && (k==='z'||k==='Z')){ try{ if(window._drawUndo){ window._drawUndo(); e.preventDefault(); } }catch(_e){} return; }
+});
 // Boot AFTER the let-declarations above (a call before them lands in the TDZ and dies silently) —
 // builds the wrapper and, if a split was saved, restores it.
 try{ _applySplit(); }catch(_e){}
@@ -3934,6 +4011,7 @@ function _initNovoChart(){
     _novoChart.subscribeCrosshairMove(function(param){
       var bar=null, _lm=(_ctbTog.ha&&_novoHaMap)?_novoHaMap:_novoViewMap;   // hover must describe the bars actually drawn
       if(param&&typeof param.time==='number'&&_lm) bar=_lm.get(param.time)||null;
+      try{ if(param&&param.point){ var _cp=_novoSeries.coordinateToPrice(param.point.y); if(_cp!==null&&isFinite(_cp)) window._lastCrossPx=+(+_cp).toFixed(2); } }catch(_e){}
       if(bar===window._lastHovBar) return;   // pointer events fire at frame rate; only a bar CHANGE re-renders
       window._lastHovBar=bar;
       _renderLegend2(bar);
