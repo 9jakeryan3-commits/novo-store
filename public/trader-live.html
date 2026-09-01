@@ -2688,7 +2688,15 @@ function connectTelemetry(){
 
   };
 
-  ws.onclose=function(){
+  ws.onclose=function(ev){
+    // 4401 is the server saying "this ticket is dead — re-handshake" (tickets last minutes; a
+    // long-open tab WILL hit it). Retrying the same URL burned two 3s rounds against a credential
+    // that can never work (B4). Straight to novoReconnect, fail counter reset.
+    if(ev && ev.code===4401){
+      window._wsFails=0;
+      setTimeout(function(){ try{ window.novoReconnect(); }catch(_e){} },250);
+      return;
+    }
     logTerminal('⚠️ Connection to Apex Core lost. Reconnecting in 3s...','sys');
     document.getElementById('t-status').textContent='OFFLINE';
     document.getElementById('t-status').className='dv cred';
@@ -3366,6 +3374,7 @@ const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','
 // the WS tip glide stay main-pane-only (drawings are per-ticker; the glide carries the exec
 // ticker's tick). Desktop-wide only; its loop is re-armable and supervised like every lane.
 let _splitTkr=''; try{ _splitTkr=localStorage.getItem('novo_split')||''; }catch(_e){}
+if(_splitTkr && ['SPY','QQQ','IWM'].indexOf(_splitTkr)<0) _splitTkr='';   // B4: an unrecognized restore opened a permanently empty, forever-polling pane
 let _c2chart=null,_c2series=null,_c2Key='',_c2Ranged=false,_c2HistC={};
 let _c2Vwap=null,_c2Ema9=null,_c2Ema21=null,_c2Vol=null;
 let _c2Raw=null,_c2Map=null,_c2OvSig='',_c2LvlSeries={},_c2LvlPx={},_c2LvlSig='';
@@ -3443,22 +3452,27 @@ function _c2Init(){
       if(el.__h!==h){ el.__h=h; el.innerHTML=h; }
     });
   }catch(_e){}
-  // TIME-RANGE SYNC — both panes pan and zoom as one terminal. Time (not logical-index) ranges,
-  // because the two tickers hold different bar counts; a busy flag breaks the feedback loop.
-  try{
-    if(!window._syncWired && _novoChart){   // main chart must exist or the flag latches with nothing wired
-      window._syncWired=true;
-      var _busy=false;
-      var _push=function(dst){ return function(r){
-        if(_busy||!r||!dst()) return;
-        _busy=true; try{ dst().timeScale().setVisibleRange(r); }catch(_e){} _busy=false;
-      }; };
-      _novoChart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _splitOn()?_c2chart:null; }));
-      _c2chart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _novoChart; }));
-    }
-  }catch(_e){}
+  _wireSync();
   try{ _applyScale(); }catch(_e){}   // pane 2 speaks the same scale as pane 1, always
   return true;
+}
+// TIME-RANGE SYNC — both panes pan and zoom as one terminal. Time (not logical-index) ranges,
+// because the two tickers hold different bar counts; a busy flag breaks the feedback loop.
+// A FUNCTION, not a one-shot inside init (B4): _c2Init early-returns once _c2series exists, so if
+// the main chart wasn't up at that instant the latch stayed unwired forever. Retried from _c2Load
+// and the supervisor until both charts exist, then wires exactly once.
+function _wireSync(){
+  try{
+    if(window._syncWired || !_novoChart || !_c2chart) return;
+    window._syncWired=true;
+    var _busy=false;
+    var _push=function(dst){ return function(r){
+      if(_busy||!r||!dst()) return;
+      _busy=true; try{ dst().timeScale().setVisibleRange(r); }catch(_e){} _busy=false;
+    }; };
+    _novoChart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _splitOn()?_c2chart:null; }));
+    _c2chart.timeScale().subscribeVisibleTimeRangeChange(_push(function(){ return _novoChart; }));
+  }catch(_e){}
 }
 async function _c2Load(){
   if(!_splitOn()) return;
@@ -3495,16 +3509,21 @@ async function _c2Load(){
   var candles=view?view.candles:null;
   if(!candles||!candles.length) return;
   if(!_c2Init()) return;
+  _wireSync();   // retried until BOTH charts exist (B4) — the one-shot latch inside init could miss
+  // The main pane's steady-state discipline: same anchor + same count → update the forming bar.
+  var key2=tk+':'+_ctbTf+(_ctbTog.ha?':ha':'');
+  var _fresh=(key2!==_c2Key);
+  var f0=candles[0].time;
+  // Degraded-response guard (B4), mirror of the main pane's: a shorter same-session payload is a
+  // truncated upstream answer, not a new session — painting it throws inside the library. Guarded
+  // BEFORE any state assignment so a skipped tick leaves the pane's state exactly as it was.
+  if(!_fresh && f0===window._c2FirstT && candles.length<window._c2Count) return;
   _c2Raw=candles;                                        // raw feeds the shade + VP primitives
   _svpData2=_ctbTog.vp?_svpCalcFor(candles):null;
   var drawC=_ctbTog.ha?_haView(candles):candles;         // the two panes must speak the same bar language
   window._c2DrawC=drawC;
   _c2Map=new Map(drawC.map(function(c){ return [c.time,c]; }));
-  // The main pane's steady-state discipline: same anchor + same count → update the forming bar.
-  var key2=tk+':'+_ctbTf+(_ctbTog.ha?':ha':'');
-  var _fresh=(key2!==_c2Key);
   if(_fresh){ _c2Key=key2; _c2Ranged=false; _c2OvSig=''; _c2LvlSig='__switch__'; }
-  var f0=candles[0].time;
   if(_fresh || f0!==window._c2FirstT || candles.length>window._c2Count){
     _c2series.setData(drawC);
     if(_c2Vol) _c2Vol.setData(candles.map(_volBar));
@@ -3588,6 +3607,17 @@ function _applySplit(){
   var b=document.getElementById('ctb-split'); if(b) b.classList.toggle('on',!!_splitTkr);
   if(_splitOn()) _c2Run();
 }
+// The 1100px boundary is LIVE state (B4): _splitOn() reads matchMedia at call time, but nothing
+// re-ran _applySplit on a crossing — shrink stranded a frozen dead pane (inline display:block
+// beats the base CSS, its close button hidden with the toolbar), grow polled forever into a
+// display:none pane. _applySplit is idempotent in both directions.
+(function(){
+  try{
+    var mq=window.matchMedia('(min-width: 1100px)');
+    var onx=function(){ try{ _c2Key=''; _c2Ranged=false; _applySplit(); }catch(_e){} };
+    if(mq.addEventListener) mq.addEventListener('change',onx); else if(mq.addListener) mq.addListener(onx);
+  }catch(_e){}
+})();
 (function(){
   var b=document.getElementById('ctb-split');
   if(b) b.addEventListener('click',function(){
@@ -3854,6 +3884,7 @@ async function loadNovoChart(){
       _novoHaMap = _ctbTog.ha ? new Map(_drawC.map(function(c){ return [c.time, c]; })) : null;
       try{ _svpCalc(); }catch(_e){}
       window._paintAt=Date.now();   // last time real candles reached the screen — the supervisor's proof the chart is alive
+      window._paintKey=_reqTkr+':'+_ctbTf;   // WHOSE candles those were (B4) — the veil backstop must not credit a stale selection's paint
       _veilOff();
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
       try{ _renderChip(); }catch(_e){}
@@ -4103,13 +4134,16 @@ function _laneCheck(kick){
     // the last 20s the chart is demonstrably current, so take it down rather than leave a
     // "retrying" spinner sitting over data the viewer can read (Jake, 2026-09-01). This is the
     // backstop for any future path that shows the veil and returns before the paint's own clear.
-    if(now-(window._paintAt||0)<20000){
+    // ...and the paint must belong to the CURRENT selection (B4): a failed SPY→QQQ switch left
+    // _paintAt fresh from SPY's paint 3s earlier, so this backstop dropped the veil over SPY
+    // candles under a QQQ caption for as long as the outage lasted.
+    if(now-(window._paintAt||0)<20000 && window._paintKey===(_selTkr()+':'+_ctbTf)){
       var _v2=document.getElementById('chart-veil');
       if(_v2&&_v2.classList.contains('on')) _veilOff();
     }
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
-    if(_splitOn() && (kick || now-(window._c2TickAt||0)>30000)) _c2Run();
+    if(_splitOn()){ _wireSync(); if(kick || now-(window._c2TickAt||0)>30000) _c2Run(); }
   }catch(_e){}
   try{
     // 3) The WS. CLOSED/missing -> full re-handshake + reconnect (the old ticket is suspect by
