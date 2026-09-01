@@ -195,7 +195,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      later one gets a rule above it. Sibling-based, so a claim that renders only one ticker (or
      drops one for thin data) never shows a stray leading divider. */
   .tg-head:not(:first-child),
-  .tg + .tg { border-top:1px solid var(--bdr); margin-top:14px; padding-top:14px; }
+  .tg:not(:first-child) { border-top:1px solid var(--bdr); margin-top:14px; padding-top:14px; }
   .tg { margin-bottom:13px; }
 
   /* dealer teaser (LOCKED) */
@@ -542,7 +542,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var bt = t.expected_move_backtest || {};
       if (e.sessions) {
         var beat = e.rate != null && e.rate >= e.baseline;
-        em += '<div style="margin-bottom:14px;">'
+        em += '<div class="tg" style="margin-bottom:14px;">'
            + '<div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:5px;">'
            + '<span>' + tk + '</span><span style="color:' + (beat ? 'var(--green)' : 'var(--txt2)') + '">'
            + e.inside + ' of ' + e.sessions + ' &middot; ' + pct(e.rate) + '</span></div>'
@@ -563,7 +563,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var f = t.flip_regime || {};
       if (f.enough) {
         var mx = Math.max(f.positive_median_pct, f.negative_median_pct);
-        fl += '<div style="margin-bottom:16px;">'
+        fl += '<div class="tg" style="margin-bottom:16px;">'
            + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:6px;">' + tk
            + ' <span style="font-weight:600;color:' + (f.holds ? 'var(--green)' : 'var(--red)') + ';">'
            + (f.holds ? 'holds · ' + f.ratio + 'x further in negative gamma' : 'does not hold in this window')
