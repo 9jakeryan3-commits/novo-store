@@ -1835,7 +1835,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;<span class="ctb-l">&nbsp;LEVEL</span></button>
             <button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;<span class="ctb-l">&nbsp;TREND</span></button>
             <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low"><span class="ctb-s">Fib</span><span class="ctb-l">FIB</span></button>
-            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button>
+            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#128279;<span class="ctb-l">&nbsp;MAGNET</span></button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;<span class="ctb-l">&nbsp;CLEAR</span></button>
             <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
             <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button>
@@ -1923,6 +1923,27 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           background: rgba(255,255,255,.07); border: 1px solid var(--bdr2); border-radius: 4px;
           padding: 1px 6px; white-space: nowrap; }
         #kbd-help .kb-close { margin-top: 10px; text-align: right; font-size: 10.5px; color: var(--txt3); }
+        /* B10: drawing editor */
+        #ctb-magnet.on { background: rgba(34,211,238,.16); color: var(--txt1); border-color: rgba(34,211,238,.5); }
+        #draw-chip { position: absolute; z-index: 41; display: none; align-items: center; gap: 6px;
+          font-family: var(--font); font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+          background: rgba(20,26,38,.95); border: 1px solid rgba(244,63,94,.5); color: var(--txt1);
+          box-shadow: 0 4px 14px rgba(0,0,0,.45); transform: translate(-50%,-140%); white-space: nowrap; }
+        #draw-chip.show { display: inline-flex; }
+        #draw-chip button { font: inherit; cursor: pointer; background: rgba(244,63,94,.16); color: #ffb3c0;
+          border: 1px solid rgba(244,63,94,.4); border-radius: 4px; padding: 1px 6px; }
+        #draw-chip button:hover { background: rgba(244,63,94,.3); color: #fff; }
+        #chart-ctx { position: absolute; z-index: 42; display: none; min-width: 178px; padding: 5px;
+          background: #17171a; border: 1px solid var(--bdr); border-radius: 10px;
+          box-shadow: 0 18px 50px rgba(0,0,0,.6); font-family: var(--sans); }
+        #chart-ctx.open { display: block; }
+        #chart-ctx .cx-i { display: flex; align-items: center; gap: 9px; padding: 7px 11px; border-radius: 7px;
+          font-size: 11.5px; font-weight: 600; color: var(--txt2); cursor: pointer; }
+        #chart-ctx .cx-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
+        #chart-ctx .cx-sep { height: 1px; background: var(--bdr2); margin: 4px 6px; }
+        #novo-chart.alert-flash { animation: alertflash .5s ease-out 3; }
+        @keyframes alertflash { 0%,100% { box-shadow: 0 1px 6px rgba(0,0,0,.25); } 50% { box-shadow: 0 0 0 2px rgba(244,63,94,.6) inset, 0 1px 6px rgba(0,0,0,.25); } }
+        @media (prefers-reduced-motion: reduce){ #novo-chart.alert-flash { animation: none; } }
         /* SPELLED-OUT TOOLBAR (2026-08-31, Jake: "let those names spell out on desktop, let it
            fill that tool bar"). Full names only where the row genuinely has the width — with every
            long label on, the toolbar runs ~1300px before the hero price, so the gate sits at
@@ -2440,6 +2461,24 @@ function connectTelemetry(){
             _novoSeries.update(_novoLastCandle);
           }
         }
+      }catch(_e){}
+      // Alert lines (B10): fire once when the live tick crosses, either direction. Cheap — only the
+      // handful of 'a' specs, only on the exec ticker's own lane (which is where p comes from).
+      try{
+        if(window._pxLast>0 && _drawObjs.length){
+          _drawObjs.forEach(function(o){
+            if(o.spec.k!=='a') return; var ap=o.spec.price;
+            if((window._pxLast-ap)*(p-ap)<0){   // sign flip = crossed
+              var el2=document.getElementById('novo-chart');
+              if(el2){ el2.classList.remove('alert-flash'); void el2.offsetWidth; el2.classList.add('alert-flash'); }
+              try{ if(!window._alertAC) window._alertAC=new (window.AudioContext||window.webkitAudioContext)();
+                var ac=window._alertAC, osc=ac.createOscillator(), g=ac.createGain();
+                osc.frequency.value=880; g.gain.value=0.08; osc.connect(g); g.connect(ac.destination);
+                osc.start(); osc.stop(ac.currentTime+0.15); }catch(_e){}
+            }
+          });
+        }
+        window._pxLast=p;
       }catch(_e){}
       var ce=document.getElementById('t-spy-chg');
       if(ce){
@@ -3090,7 +3129,8 @@ function _paintCtb(){
   var h=document.getElementById('ctb-hint');
   if(h) h.textContent=_ctbTool==='h'?'click a price':_ctbTool==='t'?(_pendPt?'click the second point':'click two points')
     :_ctbTool==='f'?(_pendPt?'now click the swing low':'click the swing high, then the low')
-    :_ctbTool==='m'?(_pendPt?'click the second point':'click two points'):'';
+    :_ctbTool==='m'?(_pendPt?'click the second point':'click two points')
+    :_ctbTool==='a'?'click a price to set an alert':'';
 }
 document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
   b.addEventListener('click',function(){
@@ -3155,8 +3195,12 @@ function _mountDrawing(spec){
   if(!_novoSeries||!_novoChart) return null;
   try{
     if(spec.k==='h'){
-      var pl=_novoSeries.createPriceLine({price:spec.p,color:'#e8c48f',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'you'});
+      var pl=_novoSeries.createPriceLine({price:spec.p,color:'#e8c48f',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'level'});
       return {spec:spec,lines:[pl]};
+    }
+    if(spec.k==='a'){   // price alert (B10): dashed rose line, flashes on cross; readout-only, no broker
+      var al=_novoSeries.createPriceLine({price:spec.price,color:'#f43f5e',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'⏱ alert'});
+      return {spec:spec,lines:[al]};
     }
     if(spec.k==='f'){
       var ls=_fibLines(spec.v1,spec.v2).map(function(f){
@@ -3187,26 +3231,193 @@ function _reloadDrawings(){
   _drawUnmounted=[];
   _drawSpecs().forEach(function(sp){ var o=_mountDrawing(sp); if(o) _drawObjs.push(o); else _drawUnmounted.push(sp); });
 }
+var _drawUndoBuf=null;   // one-shot snapshot of the spec array before the last mutation (B10)
+function _drawSnapshot(){ try{ _drawUndoBuf=JSON.parse(JSON.stringify(_drawObjs.map(function(x){return x.spec;}).concat(_drawUnmounted))); }catch(_e){ _drawUndoBuf=null; } }
+function _did(){ window._drawSeq=(window._drawSeq||0)+1; return 'd'+Date.now().toString(36)+(window._drawSeq); }
 function _addDrawing(spec){
+  if(!spec.id) spec.id=_did();
+  _drawSnapshot();
   var o=_mountDrawing(spec);
   if(o){ _drawObjs.push(o); _drawSave(_drawObjs.map(function(x){return x.spec;}).concat(_drawUnmounted)); }
 }
-function _clearMeasure(){ if(_measEl){ try{_measEl.remove();}catch(_e){} _measEl=null; } }
+// ── DRAWING EDITOR (B10) ───────────────────────────────────────────────────
+// Turns the chart from a picture into a workspace: click-to-select with a delete chip, per-drawing
+// delete (ending the CLEAR-ALL-only trap), undo, magnet snap to O/H/L/C, a right-click menu, and
+// draggable price lines / alert lines. Strictly a readout — an alert flashes the page and beeps; it
+// never reaches a broker. Hit-testing is pixel-space against the same coordinate API the library uses.
+let _magnet=true; try{ _magnet=(localStorage.getItem('novo_magnet')!=='0'); }catch(_e){}
+let _drawSel=null;   // {obj} currently selected
+function _priceCoord(p){ try{ var y=_novoSeries.priceToCoordinate(p); return (y===null)?null:y; }catch(_e){ return null; } }
+function _timeCoord(t){ try{ var x=_novoChart.timeScale().timeToCoordinate(t); return (x===null)?null:x; }catch(_e){ return null; } }
+function _specPrices(sp){
+  if(sp.k==='h') return [sp.p];
+  if(sp.k==='a') return [sp.price];
+  if(sp.k==='t') return [sp.v1,sp.v2];
+  if(sp.k==='f') return _fibLines(sp.v1,sp.v2).map(function(f){return f.price;});
+  return [];
+}
+// pixel distance from (x,y) to a drawing; Infinity if not resolvable
+function _drawDist(obj,x,y){
+  var sp=obj.spec, best=Infinity;
+  if(sp.k==='h'||sp.k==='a'||sp.k==='f'){
+    _specPrices(sp).forEach(function(p){ var yy=_priceCoord(p); if(yy!==null) best=Math.min(best,Math.abs(y-yy)); });
+    return best;   // horizontal lines: vertical distance only
+  }
+  if(sp.k==='t'){
+    var x1=_timeCoord(_snapT(sp.t1)), y1=_priceCoord(sp.v1), x2=_timeCoord(_snapT(sp.t2)), y2=_priceCoord(sp.v2);
+    if(x1===null||y1===null||x2===null||y2===null) return Infinity;
+    var dx=x2-x1, dy=y2-y1, L2=dx*dx+dy*dy;
+    var tt=L2?Math.max(0,Math.min(1,((x-x1)*dx+(y-y1)*dy)/L2)):0;
+    var px=x1+tt*dx, py=y1+tt*dy;
+    return Math.hypot(x-px,y-py);
+  }
+  return Infinity;
+}
+function _drawHit(x,y){
+  var best=null,bd=7;   // ~7px tolerance, a touch wider than the eye expects so it feels forgiving
+  _drawObjs.forEach(function(o){ var d=_drawDist(o,x,y); if(d<bd){ bd=d; best=o; } });
+  return best;
+}
+function _lineWeight(obj,on){
+  try{ (obj.lines||[]).forEach(function(pl){ pl.applyOptions({lineWidth:on?3:1}); });
+       if(obj.series) obj.series.applyOptions({lineWidth:on?3:1}); }catch(_e){}
+}
+function _drawDeselect(){ if(_drawSel){ _lineWeight(_drawSel,false); _drawSel=null; } var c=document.getElementById('draw-chip'); if(c) c.classList.remove('show'); }
+window._drawDeselect=_drawDeselect;
+function _drawSelect(obj,x,y){
+  _drawDeselect(); _drawSel=obj; _lineWeight(obj,true);
+  var chip=document.getElementById('draw-chip');
+  if(chip){ chip.style.left=x+'px'; chip.style.top=y+'px'; chip.classList.add('show'); }
+}
+function _drawDeleteSelected(){
+  if(!_drawSel) return;
+  _drawSnapshot();
+  var id=_drawSel.spec.id;
+  try{ (_drawSel.lines||[]).forEach(function(pl){_novoSeries.removePriceLine(pl);}); }catch(_e){}
+  try{ if(_drawSel.series) _novoChart.removeSeries(_drawSel.series); }catch(_e){}
+  _drawObjs=_drawObjs.filter(function(o){ return o!==_drawSel; });
+  _drawSel=null;
+  var c=document.getElementById('draw-chip'); if(c) c.classList.remove('show');
+  _drawSave(_drawObjs.map(function(x){return x.spec;}).filter(function(s){return s.id!==id;}).concat(_drawUnmounted));
+}
+window._drawDeleteSelected=_drawDeleteSelected;
+function _drawUndo(){
+  if(!_drawUndoBuf) return;
+  var specs=_drawUndoBuf; _drawUndoBuf=null;
+  try{ localStorage.setItem('novo_draw_'+_selTkr(),JSON.stringify(specs.slice(0,40))); }catch(_e){}
+  _drawDeselect(); _reloadDrawings();
+}
+window._drawUndo=_drawUndo;
+// Magnet: snap a click price to the nearest O/H/L/C of the bar under the cursor, within ~9px.
+function _magSnap(t,price,y){
+  if(!_magnet||t===null) return price;
+  try{
+    var map=(_ctbTog.ha&&_novoHaMap)?_novoHaMap:_novoViewMap;
+    var bar=map&&map.get(_snapT(t)); if(!bar) return price;
+    var cands=[bar.open,bar.high,bar.low,bar.close], best=price, bd=9;
+    cands.forEach(function(v){ var yy=_priceCoord(v); if(yy!==null&&Math.abs(y-yy)<bd){ bd=Math.abs(y-yy); best=+(+v).toFixed(2); } });
+    return best;
+  }catch(_e){ return price; }
+}
+(function(){
+  var mb=document.getElementById('ctb-magnet');
+  if(mb){ mb.classList.toggle('on',_magnet);
+    mb.addEventListener('click',function(){ _magnet=!_magnet; try{localStorage.setItem('novo_magnet',_magnet?'1':'0');}catch(_e){} mb.classList.toggle('on',_magnet); }); }
+})();
+// Selection + drag on the chart element (capture phase so it can pre-empt the library's pan when
+// it grabs a drawing; otherwise the chart pans normally and the library owns the gesture).
+(function(){
+  var el=document.getElementById('novo-chart'); if(!el) return;
+  var drag=null;   // {obj, startY, prices:[...]}
+  el.addEventListener('pointerdown',function(e){
+    if(_ctbTool) return;                              // a tool is armed — let _chartClick own the click
+    var rect=el.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(window._measArmed){ _clearMeasure(); }   // an empty click dismisses a finished measurement
+    var hit=_drawHit(x,y);
+    if(!hit){ if(_drawSel && !(e.target&&e.target.closest&&e.target.closest('#draw-chip'))) _drawDeselect(); return; }
+    _drawSelect(hit,x,y);
+    // Draggable: horizontal price line, alert, trend, or fib — vertical price shift of all anchors.
+    drag={obj:hit,startY:y,prices:_specPrices(hit.spec).slice(),startPrice:_novoSeries.coordinateToPrice(y)};
+    try{ _novoChart.applyOptions({handleScroll:false,handleScale:false}); }catch(_e){}
+    el.setPointerCapture&&el.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  },true);
+  el.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    var rect=el.getBoundingClientRect(), y=e.clientY-rect.top;
+    var pNow=_novoSeries.coordinateToPrice(y); if(pNow===null) return;
+    var dP=pNow-drag.startPrice, sp=drag.obj.spec;
+    if(sp.k==='h') sp.p=+(drag.prices[0]+dP).toFixed(2);
+    else if(sp.k==='a') sp.price=+(drag.prices[0]+dP).toFixed(2);
+    else if(sp.k==='t'){ sp.v1=+(drag.prices[0]+dP).toFixed(2); sp.v2=+(drag.prices[1]+dP).toFixed(2); }
+    else if(sp.k==='f'){ sp.v1=+(drag.prices[0]+dP).toFixed(2); sp.v2=+(drag.prices[1]+dP).toFixed(2); }
+    // live re-mount of just this object
+    try{ (drag.obj.lines||[]).forEach(function(pl){_novoSeries.removePriceLine(pl);}); if(drag.obj.series) _novoChart.removeSeries(drag.obj.series); }catch(_e){}
+    var no=_mountDrawing(sp)||drag.obj; var idx=_drawObjs.indexOf(drag.obj); if(idx>=0) _drawObjs[idx]=no; drag.obj=no; _lineWeight(no,true);
+    var chip=document.getElementById('draw-chip'); if(chip){ var yy=_priceCoord(_specPrices(sp)[0]); if(yy!==null){ chip.style.top=yy+'px'; } }
+  },true);
+  function _endDrag(e){
+    if(!drag) return;
+    try{ _novoChart.applyOptions({handleScroll:true,handleScale:true}); }catch(_e){}
+    _drawSnapshot(); _drawSave(_drawObjs.map(function(x){return x.spec;}).concat(_drawUnmounted));
+    drag=null;
+  }
+  el.addEventListener('pointerup',_endDrag,true);
+  el.addEventListener('pointercancel',_endDrag,true);
+  // Right-click context menu.
+  el.addEventListener('contextmenu',function(e){
+    e.preventDefault();
+    var rect=el.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+    var px=_novoSeries.coordinateToPrice(y); px=(px!==null)?+(+px).toFixed(2):null;
+    var m=document.getElementById('chart-ctx');
+    if(!m){ m=document.createElement('div'); m.id='chart-ctx'; el.appendChild(m); }
+    var hit=_drawHit(x,y);
+    var rows=[];
+    if(px!==null) rows.push(['level','Add level here — '+px.toFixed(2)]);
+    if(px!==null) rows.push(['alert','Add alert here — '+px.toFixed(2)]);
+    if(hit) rows.push(['del','Delete this drawing']);
+    rows.push(['sep']); rows.push(['live','Go to live']); rows.push(['reset','Reset view']);
+    rows.push(['clear','Clear all drawings']);
+    m.innerHTML=rows.map(function(r){ return r[0]==='sep'?'<div class="cx-sep"></div>':'<div class="cx-i" data-cx="'+r[0]+'">'+r[1]+'</div>'; }).join('');
+    m.style.left=Math.min(x,el.clientWidth-186)+'px'; m.style.top=Math.min(y,el.clientHeight-10)+'px'; m.classList.add('open');
+    m.querySelectorAll('.cx-i').forEach(function(it){ it.addEventListener('click',function(ev){ ev.stopPropagation();
+      var k=it.getAttribute('data-cx');
+      if(k==='level'&&px!==null) _addDrawing({k:'h',p:px});
+      else if(k==='alert'&&px!==null) _addDrawing({k:'a',price:px});
+      else if(k==='del'&&hit){ _drawSelect(hit,x,y); _drawDeleteSelected(); }
+      else if(k==='live') _goLive();
+      else if(k==='reset'){ try{_novoChart.priceScale('right').applyOptions({autoScale:true});}catch(_e){} _novoRanged=false; loadNovoChart(); }
+      else if(k==='clear') _clearAllConfirm();
+      m.classList.remove('open');
+    }); });
+  });
+  document.addEventListener('click',function(){ var m=document.getElementById('chart-ctx'); if(m) m.classList.remove('open'); });
+})();
+function _clearMeasure(){ if(_measEl){ try{_measEl.remove();}catch(_e){} _measEl=null; }
+  window._measArmed=false;
+  var _mb=document.querySelectorAll('#novo-chart .measure-box'); for(var _i=0;_i<_mb.length;_i++){ try{_mb[_i].remove();}catch(_e){} } }
 document.querySelectorAll('#ctb-tools .ctb-btn[data-tool]').forEach(function(b){
   b.addEventListener('click',function(){
     var t=b.getAttribute('data-tool');
-    _ctbTool=(_ctbTool===t)?null:t; _pendPt=null; _clearMeasure(); _paintCtb();
+    _ctbTool=(_ctbTool===t)?null:t; _pendPt=null; _clearMeasure(); try{_drawDeselect();}catch(_e){} _paintCtb();
   });
 });
+function _clearAllConfirm(){
+  var n=_drawObjs.length+_drawUnmounted.length;
+  if(n>0 && !window.confirm('Clear all '+n+' drawing'+(n===1?'':'s')+' on '+_selTkr()+'? This cannot be undone.')) return;
+  _drawSnapshot(); _drawDeselect(); _unmountDrawings(); _drawUnmounted=[]; _drawSave([]); _clearMeasure();
+}
 var _clr=document.getElementById('ctb-clear');
-if(_clr) _clr.addEventListener('click',function(){ _unmountDrawings(); _drawUnmounted=[]; _drawSave([]); _clearMeasure(); });
+if(_clr) _clr.addEventListener('click',_clearAllConfirm);
 function _chartClick(param){
   if(!_ctbTool||!_novoSeries||!param||!param.point) return;
   var price=_novoSeries.coordinateToPrice(param.point.y);
   if(price===null||!isFinite(price)) return;
   price=+(+price).toFixed(2);
   var t=(typeof param.time==='number')?param.time:null;
+  price=_magSnap(t,price,param.point.y);   // B10: magnet to O/H/L/C
   if(_ctbTool==='h'){ _addDrawing({k:'h',p:price}); _ctbTool=null; _paintCtb(); return; }
+  if(_ctbTool==='a'){ _addDrawing({k:'a',price:price}); _ctbTool=null; _paintCtb(); return; }
   if(_ctbTool==='t'||_ctbTool==='m'){ if(t===null){ return; } }   // needs a bar under the cursor
   if(!_pendPt){ _pendPt={t:t,v:price,x:param.point.x,y:param.point.y}; _paintCtb(); return; }
   if(_ctbTool==='t'){
@@ -3240,8 +3451,15 @@ function _chartClick(param){
       _measEl.style.left=Math.min(param.point.x+12, el.clientWidth-130)+'px';
       _measEl.style.top=Math.max(param.point.y-14,4)+'px';
       el.style.position='relative'; el.appendChild(_measEl);
-      // Timer is OWNED: an uncancelled 8s timeout from measurement #1 used to erase a fresh #2.
-      clearTimeout(window._measTimer); window._measTimer=setTimeout(_clearMeasure, 8000);
+      // Shaded region between the two anchors (B10): a DOM rect, dismissed on the NEXT click or Esc
+      // instead of self-erasing after 8s (which used to wipe a reading you were still looking at).
+      var rx1=Math.min(_pendPt.x,param.point.x), rx2=Math.max(_pendPt.x,param.point.x);
+      var ry1=Math.min(_pendPt.y,param.point.y), ry2=Math.max(_pendPt.y,param.point.y);
+      var box=document.createElement('div'); box.className='measure-box';
+      box.style.cssText='position:absolute;left:'+rx1+'px;top:'+ry1+'px;width:'+(rx2-rx1)+'px;height:'+(ry2-ry1)+'px;'+
+        'background:'+(dv>=0?'rgba(52,211,153,0.10)':'rgba(244,63,94,0.10)')+';border:1px solid '+(dv>=0?'rgba(52,211,153,0.4)':'rgba(244,63,94,0.4)')+';pointer-events:none;z-index:9;';
+      el.appendChild(box);   // relative to #novo-chart (the positioned parent), not the readout pill
+      window._measArmed=true;   // Esc / next empty click dismisses it (no self-erase timer)
     }
   }
   _pendPt=null; _ctbTool=null; _paintCtb();
@@ -4001,6 +4219,9 @@ function _initNovoChart(){
     });
     var _cl=document.getElementById('chart-live');
     if(_cl){ _cl.innerHTML='\u23e9 live'; _cl.addEventListener('click',function(){ _goLive(); }); }
+    if(!document.getElementById('draw-chip')){ var _dc=document.createElement('div'); _dc.id='draw-chip';
+      _dc.innerHTML='<button type="button">Delete</button>'; el.appendChild(_dc);
+      _dc.querySelector('button').addEventListener('click',function(ev){ ev.stopPropagation(); _drawDeleteSelected(); }); }
     // Newest bar leaving the viewport shows the chip; back at the edge hides it (B8).
     try{ _novoChart.timeScale().subscribeVisibleLogicalRangeChange(_updateLiveChip); }catch(_e){}
     _paintWm();
