@@ -1946,6 +1946,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         #chart-ctx .cx-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
         #chart-ctx .cx-sep { height: 1px; background: var(--bdr2); margin: 4px 6px; }
         #novo-chart.alert-flash { animation: alertflash .5s ease-out 3; }
+        #novo-chart.flip-flash { animation: flipflash .5s ease-out 2; }
+        @keyframes flipflash { 0%,100% { box-shadow: 0 1px 6px rgba(0,0,0,.25); } 50% { box-shadow: 0 0 0 2px rgba(34,211,238,.55) inset, 0 1px 6px rgba(0,0,0,.25); } }
+        @media (prefers-reduced-motion: reduce){ #novo-chart.flip-flash { animation: none; } }
         @keyframes alertflash { 0%,100% { box-shadow: 0 1px 6px rgba(0,0,0,.25); } 50% { box-shadow: 0 0 0 2px rgba(244,63,94,.6) inset, 0 1px 6px rgba(0,0,0,.25); } }
         @media (prefers-reduced-motion: reduce){ #novo-chart.alert-flash { animation: none; } }
         /* SPELLED-OUT TOOLBAR (2026-08-31, Jake: "let those names spell out on desktop, let it
@@ -2466,6 +2469,16 @@ function connectTelemetry(){
           }
         }
       }catch(_e){}
+      // B14: regime-tint flip flash — a ~1s cyan pulse when the live tick crosses the gamma flip.
+      try{
+        if(_ctbTog.tint){
+          var _fl=(window._lvlPx&&window._lvlPx.FLIP)||0;
+          if(_fl>0 && window._pxLast>0 && (window._pxLast-_fl)*(p-_fl)<0){
+            var _ef=document.getElementById('novo-chart');
+            if(_ef){ _ef.classList.remove('flip-flash'); void _ef.offsetWidth; _ef.classList.add('flip-flash'); }
+          }
+        }
+      }catch(_e){}
       // Alert lines (B10): fire once when the live tick crosses, either direction. Cheap — only the
       // handful of 'a' specs, only on the exec ticker's own lane (which is where p comes from).
       try{
@@ -2824,6 +2837,7 @@ function _novoMinSpan(){
   try{ return window.matchMedia('(min-width: 769px)').matches ? _NOVO_MIN_SPAN_DESK : _NOVO_MIN_SPAN_MOB; }
   catch(_e){ return _NOVO_MIN_SPAN_DESK; }
 }
+let _novoConeHi=null,_novoConeLo=null;   // B14 EM decay cone
 let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoVolSeries=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
 // ── Ticker switcher state (2026-08-30) ─────────────────────────────────────────────────────────────
 // null = follow the engine's ticker (the pre-switcher behaviour, and what a first-time viewer gets).
@@ -3044,17 +3058,17 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false};
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false};
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol','ha','vp','gex'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
 let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
 try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes), so one
@@ -3783,6 +3797,74 @@ return {
     }];
   }
 }; }
+// ── B14: AMBIENT DEALER VISUALS ──────────────────────────────────────────────
+// Regime tint + gravity halo, one bottom-layer primitive. DEFAULT OFF, per Jake's raw-tape ruling
+// ("demo before defaulting on") — toggles live in the ⚙ canvas menu, persisted. Alphas are
+// whisper-level ceilings; the tape stays unmistakably raw.
+//   tint — a wash above/below the gamma flip: green above (dealers long gamma, mean-reverting
+//          ground), red below (short gamma, accelerant), with a neutral fade band ±0.15% of the
+//          flip so the boundary breathes instead of snapping.
+//   halo — a gradient band on the gravity level whose intensity follows time-to-close (pinning is
+//          an afternoon force: off before 14:00 ET, ramps into the close) and spot's proximity.
+function _makeDealerViz(){
+return {
+  _chart:null,_series:null,
+  attached:function(p){ this._chart=p.chart; this._series=p.series; },
+  detached:function(){ this._chart=null; this._series=null; },
+  updateAllViews:function(){},
+  paneViews:function(){
+    var self=this;
+    return [{
+      zOrder:function(){ return 'bottom'; },
+      renderer:function(){ return { draw:function(target){
+        try{
+          if(!self._series||(!_ctbTog.tint&&!_ctbTog.halo)) return;
+          var px=window._lvlPx||{};
+          target.useBitmapCoordinateSpace(function(scope){
+            var ctx=scope.context, W=scope.bitmapSize.width, H=scope.bitmapSize.height, pr=scope.verticalPixelRatio;
+            if(_ctbTog.tint && px.FLIP>0){
+              var yF=self._series.priceToCoordinate(px.FLIP);
+              if(yF!==null){
+                var band=Math.abs((self._series.priceToCoordinate(px.FLIP*1.0015)||yF)-yF)*pr;
+                var yFp=yF*pr;
+                var gTop=ctx.createLinearGradient(0,Math.max(0,yFp-band),0,yFp);
+                gTop.addColorStop(0,'rgba(52,211,153,0.045)'); gTop.addColorStop(1,'rgba(52,211,153,0)');
+                ctx.fillStyle='rgba(52,211,153,0.045)'; ctx.fillRect(0,0,W,Math.max(0,yFp-band));
+                ctx.fillStyle=gTop; ctx.fillRect(0,Math.max(0,yFp-band),W,band);
+                var gBot=ctx.createLinearGradient(0,yFp,0,Math.min(H,yFp+band));
+                gBot.addColorStop(0,'rgba(244,63,94,0)'); gBot.addColorStop(1,'rgba(244,63,94,0.05)');
+                ctx.fillStyle=gBot; ctx.fillRect(0,yFp,W,band);
+                ctx.fillStyle='rgba(244,63,94,0.05)'; ctx.fillRect(0,Math.min(H,yFp+band),W,Math.max(0,H-yFp-band));
+              }
+            }
+            if(_ctbTog.halo && px.GRAV>0 && _novoViewC && _novoViewC.length){
+              var last=_novoViewC[_novoViewC.length-1];
+              var m=Math.floor(last.time/60)%1440;
+              var tI=(m>=840&&m<960)?((m-840)/120):0;           // 14:00→16:00 ramp; 0 outside
+              if(tI>0){
+                var spot=last.close;
+                var prox=Math.max(0,1-Math.abs(spot-px.GRAV)/(spot*0.003));   // fades to 0 at 0.3% away
+                var inten=0.10*tI*(0.35+0.65*prox);
+                if(inten>0.004){
+                  var yG=self._series.priceToCoordinate(px.GRAV);
+                  if(yG!==null){
+                    var half=Math.abs((self._series.priceToCoordinate(px.GRAV*1.0015)||yG)-yG)*pr;
+                    var yGp=yG*pr;
+                    var g=ctx.createLinearGradient(0,yGp-half,0,yGp+half);
+                    g.addColorStop(0,'rgba(59,130,246,0)');
+                    g.addColorStop(0.5,'rgba(59,130,246,'+inten.toFixed(3)+')');
+                    g.addColorStop(1,'rgba(59,130,246,0)');
+                    ctx.fillStyle=g; ctx.fillRect(0,yGp-half,W,half*2);
+                  }
+                }
+              }
+            }
+          });
+        }catch(_e){}
+      } }; }
+    }];
+  }
+}; }
 // Structural ghost walls: when the ALL-EXPIRY heaviest call-side / put-side strike disagrees with
 // the engine's published wall by ≥ $0.50, draw it as a faint dashed price line — the engine's
 // wall stays THE wall (solid, authoritative); the ghost says where the longer-dated book stacks.
@@ -4216,6 +4298,10 @@ function _scaleMenuRender(){
     {sep:1},
     {k:'zc', lbl:'Zoom to cursor', c:!_scaleCfg.za},
     {k:'zp', lbl:'Zoom to price',  c:_scaleCfg.za},
+    {sep:1},
+    {k:'dvt', lbl:'Regime tint — flip wash', c:_ctbTog.tint},
+    {k:'dvc', lbl:'EM decay cone', c:_ctbTog.cone},
+    {k:'dvh', lbl:'Gravity halo (after 2pm)', c:_ctbTog.halo},
   ];
   m.innerHTML=rows.map(function(r){
     if(r.sep) return '<div class="sm-sep"></div>';
@@ -4231,6 +4317,11 @@ function _scaleMenuRender(){
         _novoRanged=false; _c2Ranged=false; loadNovoChart(); try{ _c2Run(); }catch(_e){} }
       else if(k==='inv'){ _scaleCfg.inv=!_scaleCfg.inv; _ctbSave(); _applyScale(); }
       else if(k==='zc'||k==='zp'){ _scaleCfg.za=(k==='zp'); _ctbSave(); _applyScale(); }
+      else if(k==='dvt'||k==='dvc'||k==='dvh'){
+        var _dk2={dvt:'tint',dvc:'cone',dvh:'halo'}[k];
+        _ctbTog[_dk2]=!_ctbTog[_dk2]; _ctbSave();
+        _novoOvSig=''; _novoHasData=false; loadNovoChart();   // cone/tint/halo re-derive with the overlays
+      }
       else { _scaleCfg.m=+k.slice(1); _ctbSave(); _applyScale(); }
       _scaleMenuRender();   // repaint checks; the menu stays open for a second tweak
     });
@@ -4407,10 +4498,17 @@ function _initNovoChart(){
   // Volume histogram on its own hidden scale, pinned to the bottom ~15% of the pane.
   _novoVolSeries=_novoChart.addHistogramSeries({priceScaleId:'vol',priceFormat:{type:'volume'},
     priceLineVisible:false,lastValueVisible:false});
+  // B14: EM decay cone — the day's REMAINING priced move from each bar's close, ±em$·√(session
+  // fraction left). The static EM_HI/EM_LO rails stay (they are the analyst desk's day envelope,
+  // same number on every surface); the cone is the scalper's forward budget — an "afternoon
+  // breakout" past the cone is a move the options market has not paid for. Default OFF.
+  _novoConeHi=_novoChart.addLineSeries({color:'rgba(139,147,167,0.55)',lineWidth:1,lineStyle:3,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,visible:false,autoscaleInfoProvider:function(){return null;}});
+  _novoConeLo=_novoChart.addLineSeries({color:'rgba(139,147,167,0.55)',lineWidth:1,lineStyle:3,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,visible:false,autoscaleInfoProvider:function(){return null;}});
   try{ _novoChart.priceScale('vol').applyOptions({scaleMargins:{top:0.85,bottom:0},visible:false}); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_sessShade); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_svpPrim); }catch(_e){}
   try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeGexProf(function(){ return (_abData&&_abData.strikes)?_abData.strikes[_selTkr()]:null; })); }catch(_e){}
+  try{ if(_novoSeries.attachPrimitive) _novoSeries.attachPrimitive(_makeDealerViz()); }catch(_e){}
   try{ _applyScale(); }catch(_e){}   // restore the persisted scale mode/invert
   try{ _novoChart.subscribeClick(_chartClick); }catch(_e){}
   try{ _novoChart.timeScale().applyOptions({timeVisible:!(_ctbTf==='1d'||_ctbTf==='1w')}); }catch(_e){}
@@ -4619,6 +4717,25 @@ async function loadNovoChart(){
       // B11: time-keyed maps so the crosshair legend can name the overlay curves at the hovered bar.
       var _mk=function(a){ var m=new Map(); (a||[]).forEach(function(p){ m.set(p.time,p.value); }); return m; };
       window._ovMaps={vwap:_mk(_view.vwap),ema9:_mk(_view.ema9),ema21:_mk(_view.ema21)};
+      // B14: EM decay cone — rebuilt with the overlays (structure moves on the candle refresh).
+      try{
+        if(_ctbTog.cone && !_isDeepTf()){
+          var _B=(_abData&&_abData.board)?_abData.board[_reqTkr]:null;
+          var _em=(_B&&_B.em_high>0&&_B.em_low>0)?(_B.em_high-_B.em_low)/2:0;
+          if(_em>0){
+            var _chi=[],_clo=[];
+            _view.candles.forEach(function(cb){
+              var mm2=Math.floor(cb.time/60)%1440;
+              var fr=(mm2<570)?1:(mm2>=960)?0:(960-mm2)/390;
+              var r2=_em*Math.sqrt(fr);
+              _chi.push({time:cb.time,value:+(cb.close+r2).toFixed(2)});
+              _clo.push({time:cb.time,value:+(cb.close-r2).toFixed(2)});
+            });
+            if(_novoConeHi){ _novoConeHi.setData(_chi); _novoConeHi.applyOptions({visible:true}); }
+            if(_novoConeLo){ _novoConeLo.setData(_clo); _novoConeLo.applyOptions({visible:true}); }
+          }
+        } else if(_novoConeHi){ _novoConeHi.applyOptions({visible:false}); _novoConeLo.applyOptions({visible:false}); }
+      }catch(_e){}
     } else {
       try{   // tip-only move: same length, same penultimate → last point time matches, update() replaces in place
         if(_novoEma9&&_view.ema9&&_view.ema9.length) _novoEma9.update(_view.ema9[_view.ema9.length-1]);
