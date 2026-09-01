@@ -362,3 +362,101 @@ nav { position: relative; }
 .hubsec a{color:var(--txt1);font-weight:650;text-decoration:none;}
 .hubsec a:hover{color:var(--cyan);}
 .hubsec .hd{display:block;font-size:13.5px;color:var(--txt2);font-weight:400;margin-top:2px;line-height:1.5;}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   WIDE SHELL + TWO-ROW HEADER                                    (2026-09-01)
+
+   Jake: "kinda wish it used the whole screen like all my competitors do, mine's
+   centre column only every page" - and then pointed at the Unusual Whales header.
+
+   MEASURED FIRST: content sat in a 1120-1200px column. On a 1920 monitor that is
+   44% of the screen, with a gutter either side wider than a phone. On /plans only
+   11%, on /journal 13%.
+
+   The shell goes to 1560. Running PROSE does not, and that is deliberate: a
+   paragraph at 1500px is unreadable - the comfortable measure is 60-80 characters,
+   about 700-850px, and the longest lines here were already 850-1076px. So the
+   frame widens and the grids, tables, cards and nav fill it, while paragraphs keep
+   a measure you can actually read. Widening everything is not what the wide
+   competitor sites do either.
+
+   Loaded after each page's inline <style>, so these win at equal specificity.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.container, .wrap { max-width: 1560px; }
+
+/* Prose keeps its measure inside the wider frame. Only elements that are ACTUALLY
+   running text - not grid cells, not cards, not table wrappers. */
+.container > p,
+.container > .prose,
+.wrap > p,
+.article-body,
+.prose > p,
+.section-sub,
+.hero-tagline,
+.sub { max-width: 860px; }
+
+/* Centred sections keep their prose centred; left-aligned pages keep it left. */
+.hero > p, .hero .section-sub, .hero-tagline { margin-left: auto; margin-right: auto; }
+
+/* ── THE HEADER, TWO ROWS ────────────────────────────────────────────────────
+   Desktop only. Below 1024 the header already wraps to two rows on its own and
+   hides the links behind the Menu button, and that behaviour is untouched. */
+@media (min-width: 1025px) {
+  .nav-inner { flex-wrap: wrap; row-gap: 4px; align-items: center; }
+
+  /* .nav-actions stops being a flex box so its children become direct children of
+     .nav-inner and can be ordered into two rows. The mobile rules already do this,
+     so the markup is known to survive it. */
+  .nav-actions { display: contents; }
+
+  .nav-logo { order: 1; margin-right: auto; }
+  .ss-wrap  { order: 2; }              /* search, row 1 centre - sized below */
+  .nav-buy  { order: 3; }              /* Plans */
+  .nav-portal { order: 4; }
+
+  /* the row break */
+  .nav-inner::after { content: ""; order: 5; flex-basis: 100%; height: 0; }
+
+  /* every nav link and the More button drop to row 2 and spread */
+  .nav-actions > a:not(.nav-buy):not(.nav-portal),
+  .nav-actions > .nav-link,
+  .nav-more { order: 6; }
+
+  /* row 2 sits under the brand, not indented */
+  .nav-inner > .nav-more { margin-left: 0; }
+}
+
+/* The search box now lives in ROW 1, between the brand and the account buttons,
+   which is the shape Jake pointed at. It is a flex child of .nav-inner there, so
+   it takes the middle and stops growing at a sane reading width. */
+@media (min-width: 1025px) {
+  .ss-wrap { flex: 1 1 320px; max-width: 620px; margin: 0 28px; padding: 0; }
+  nav .ss-wrap { border-top: 0; padding-top: 0; }
+  .ss-wrap input { padding: 8px 13px; font-size: 13.5px; }
+  .ss-panel { left: 0; right: 0; top: calc(100% + 6px); }
+}
+
+/* Prose inside cards and sections keeps a readable measure too. These were the
+   measured offenders at 1920 once the shell went wide: unclassed <p> inside
+   .how-card, .card, .pain-resolve and bare section divs were running to 1450px.
+   Left-aligned, so a plain cap is right - no auto margin, which would centre them. */
+@media (min-width: 1200px) {
+  .how-card p, .card p, .pain-resolve p, .prose p, .article-body p,
+  .lead2 .deck, .cx p { max-width: 78ch; }
+  /* Centred blocks keep their prose centred as well as capped. */
+  .hero p, .hero .section-sub, .section-sub, .hero-tagline,
+  [style*="text-align:center"] > p { margin-inline: auto; }
+}
+
+/* Generalised: any paragraph inside the shell keeps a readable measure, however deeply
+   nested. Chasing container classes one at a time missed unclassed <p> in bare divs on
+   /, /analyst and /trader. Centred blocks get the auto margin so capping does not
+   left-shift them out of a centred section. */
+@media (min-width: 1200px) {
+  .container p, .wrap p, .container li, .wrap li { max-width: 78ch; }
+  .container [style*="text-align:center"] p,
+  .container [style*="text-align: center"] p,
+  .hero p, .hero li { margin-inline: auto; }
+}

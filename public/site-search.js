@@ -52,6 +52,15 @@
     'text-transform:uppercase;}',
     '.ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
     // Narrower gutters on phones, where 22px each side is a real bite out of the field.
+    // DESKTOP: the box rides in ROW 1 beside the brand, the Unusual Whales shape - logo,
+    // search, then the account buttons, with the nav links spread across row 2. It is a flex
+    // child of .nav-inner there (polish.css/blog.css order it), so it takes the middle and
+    // stops growing at a readable width instead of spanning the whole bar.
+    '@media(min-width:1025px){.ss-wrap{width:auto;flex:1 1 300px;max-width:600px;',
+    'margin:0 24px;padding:0;}',
+    'nav .ss-wrap{border-top:0;padding-top:0;}',
+    '.ss-wrap input{padding:8px 13px;font-size:13.5px;}',
+    '.ss-panel{left:0;right:0;top:calc(100% + 6px);}}',
     '@media(max-width:560px){.ss-wrap{padding:0 14px 10px;}',
     'nav .ss-wrap{padding-top:10px;}',
     '.ss-panel{left:14px;right:14px;}}'
@@ -64,7 +73,12 @@
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
     'aria-label="Search the site">' +
     '<div class="ss-panel" id="site-search-results" role="listbox"></div>';
-  inner.insertAdjacentElement('afterend', wrap);
+  // INSIDE .nav-inner, not after it. As a sibling it could never join row 1 - a flex
+  // parent can only order its own children - so the desktop layout Jake asked for (logo,
+  // search, account on row 1; nav links spread across row 2) needs it in the flex context.
+  // At <=1024 the stylesheet gives it order 5 and a 100% basis, so it still takes its own
+  // full-width row on phones exactly as before.
+  inner.appendChild(wrap);
 
   var input = wrap.querySelector('#site-search-input');
 
