@@ -166,6 +166,18 @@ module.exports = async (req, res) => {
           if (d && d.pct != null) f[ven] = { pct: d.pct, n: d.n };
         }
         if (Object.keys(f).length) e.funding = f;
+        // IV vs RV — both already computed by history.py, never rendered until 2026-09-01.
+        // rv = the newest day's realized daily % (sd of 1-min log returns scaled), with its
+        // minute count as the n; iv_daily = DVOL/20, the implied daily move it reads against.
+        const rvd = v.realized_vol_daily && v.realized_vol_daily.series;
+        if (rvd && rvd.length) {
+          const last = rvd[rvd.length - 1];
+          e.rv = { d: last[0], pct: last[1], n_min: last[2] };
+        }
+        if (v.dvol && v.dvol.now != null) {
+          e.dvol = { now: v.dvol.now, pct: v.dvol.pct, n: v.dvol.n,
+                     implied_daily: Math.round(v.dvol.now / 20 * 1000) / 1000 };
+        }
         if (Object.keys(e).length) hist[k] = e;
       }
       if (!Object.keys(hist).length) hist = null;

@@ -1329,6 +1329,29 @@ let _lastDrawn = null;
 // nothing extra on a collector that cannot authenticate to Deribit and lives on per-IP limits.
 // Ranked by PREMIUM rather than a volume/OI ratio: a ratio puts the front expiry in every slot
 // every day, because OI decays there and churn is structurally high.
+// THE CARRY CURVE — crypto's yield curve, measured. Dated futures price holding each expiry
+// the way funding prices holding the perp; the OI-weighted annualised carry is the headline and
+// the convention is printed on the panel because an annualisation you can't check is decoration.
+function basisPanel(d){
+  const b=d&&d.basis; if(!b||!b.rows||!b.rows.length) return '';
+  const rows=b.rows.filter(r=>r.oi_usd>1e6).slice(0,7).map(function(r){
+    const nm=String(r.instrument||'').replace(/^[A-Z]+-/,'');
+    const c=r.carry_ann_pct;
+    return `<tr><td class="mono">${nm}</td>
+      <td class="num">${r.days<10?r.days.toFixed(1):Math.round(r.days)}d</td>
+      <td class="num ${c>=0?'up':'dn'}">${c!=null?(c>=0?'+':'')+c.toFixed(2)+'%':'—'}</td>
+      <td class="num">${money(r.oi_usd)}</td></tr>`;
+  }).join('');
+  const w=b.oiw_carry_ann_pct;
+  return `<div class="panel"><div class="ph"><h2>Carry &middot; dated futures</h2>
+    <span class="sub">${CUR} &middot; annualised, OI-weighted</span></div><div class="pb">
+    <div class="kv"><span class="k">OI-weighted carry</span>
+      <span class="v ${w>=0?'up':'dn'}">${w!=null?(w>=0?'+':'')+w.toFixed(2)+'% / yr':'—'}</span></div>
+    ${rows?`<table style="margin-top:9px"><thead><tr><th>Expiry</th><th>Days</th><th>Carry</th><th>OI</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+    <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+      ${b.convention||''}. Positive carry = the market pays a premium to hold exposure forward
+      (contango); negative = backwardation. Tenors under $1M OI are not listed.</div></div></div>`;
+}
 // THE BLOCK TAPE -- negotiated size, tagged by the venue rather than inferred by us.
 // Everywhere else the map reads what is POSITIONED; this is what was BOUGHT. A wall that has sat
 // for a week and a wall someone paid seven figures for this morning look identical in an OI
@@ -1409,10 +1432,22 @@ function drawCoin(){
           <span>chain OI <b style="color:var(--txt2)">${g.chain_oi?g.chain_oi.toLocaleString(undefined,{maximumFractionDigits:0}):'—'} ${g.oi_unit||CUR}</b></span>
           <span>${g.strikes.length} strikes</span>
           <span>${g.settle} book</span>
+          ${(function(){
+            // SCALE HONESTY (Gap Ledger #8). On five of the seven books the options chain is a
+            // rounding error against the perp market — measured: HYPE gamma is 0.0027% of its
+            // $2B perp OI. Saying so, with the arithmetic shown, routes the reader to the lens
+            // that actually carries this coin instead of letting a tiny book wear a big label.
+            const oi=d.positioning&&d.positioning.total_oi_usd;
+            if(!oi||!g.net_gex) return '';
+            const ratio=Math.abs(g.net_gex)/oi*100;
+            const tiny=ratio<0.05;
+            return `<span${tiny?' style="color:var(--amber)"':''}>net gamma = ${ratio<0.01?ratio.toFixed(4):ratio.toFixed(2)}% of perp OI${tiny?' — the perp lens carries this coin':''}</span>`;
+          })()}
         </div>
       </div>
       ${turnoverPanel(g)}
       ${tapePanel(d)}
+      ${basisPanel(d)}
       ${gauge(g)}
       ${volRow(d,g)}
       <canvas id="gamma"></canvas>
