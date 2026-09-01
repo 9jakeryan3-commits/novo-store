@@ -1314,6 +1314,32 @@ function drawChainToken(){
 
 /* ---------------- coin ---------------- */
 let _lastDrawn = null;
+// 24h TURNOVER -- VOLUME, never flow. It says how much changed hands, never who lifted whom;
+// aggressor is not in this data and inferring it would be a model wearing a measurement's label.
+// The figures ride the same book-summary call the gamma ladder is built from, so this costs
+// nothing extra on a collector that cannot authenticate to Deribit and lives on per-IP limits.
+// Ranked by PREMIUM rather than a volume/OI ratio: a ratio puts the front expiry in every slot
+// every day, because OI decays there and churn is structurally high.
+function turnoverPanel(g){
+  const t=g&&g.turnover; if(!t||!t.premium_usd_24h) return '';
+  const rows=(t.top||[]).slice(0,6).map(function(x){
+    const nm=String(x.instrument||'').replace(/^[A-Z]+-/,'');
+    return `<tr><td class="mono">${nm}</td>
+      <td class="num">${x.contracts!=null?x.contracts.toLocaleString(undefined,{maximumFractionDigits:0}):'—'}</td>
+      <td class="num">${money(x.premium_usd)}</td>
+      <td class="num">${x.oi!=null?x.oi.toLocaleString(undefined,{maximumFractionDigits:0}):'—'}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Options volume &middot; 24h</h2>
+    <span class="sub">${CUR} book &middot; traded, not positioned</span></div><div class="pb">
+    <div class="kv"><span class="k">Premium traded</span><span class="v nu">${money(t.premium_usd_24h)}</span></div>
+    <div class="kv"><span class="k">Contracts</span><span class="v nu">${t.contracts_24h!=null?t.contracts_24h.toLocaleString(undefined,{maximumFractionDigits:0}):'—'}</span></div>
+    <div class="kv"><span class="k">Open interest</span><span class="v nu">${t.oi_contracts!=null?t.oi_contracts.toLocaleString(undefined,{maximumFractionDigits:0}):'—'} contracts</span></div>
+    <div class="kv"><span class="k">Instruments listed</span><span class="v nu">${t.instruments||'—'}</span></div>
+    ${rows?`<table style="margin-top:9px"><thead><tr><th>Contract</th><th>Traded</th><th>Premium</th><th>OI</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+    <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+      Volume, not flow &mdash; how much changed hands over 24 hours, ranked by premium. Which side
+      lifted is not in this data, so it is not claimed.</div></div></div>`;
+}
 function drawCoin(){
   const d=SNAP.coins[CUR]; if(!d) return;
   const tc=d.true_cost, g=d.gamma, pos=d.positioning;
@@ -1344,6 +1370,7 @@ function drawCoin(){
           <span>${g.settle} book</span>
         </div>
       </div>
+      ${turnoverPanel(g)}
       ${gauge(g)}
       ${volRow(d,g)}
       <canvas id="gamma"></canvas>
