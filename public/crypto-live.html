@@ -1497,10 +1497,10 @@ function drawCoin(){
       <span class="v nu">${money(pos.total_oi_usd)}</span></div>
       ${oiP&&oiP.pct!=null?`<div class="kv"><span class="k">Book size vs its own history</span>
       <span class="v ${oiP.pct>=90||oiP.pct<=10?'am':'nu'}">${oiP.pct.toFixed(0)}th percentile</span></div>
-      ${oiP.lt?`<div class="kv"><span class="k">OKX book vs ${ltSpan(oiP.lt)} of its own daily archive</span>
+      ${oiP.lt?`<div class="kv"><span class="k">OKX contracts book (perp + dated) vs ${ltSpan(oiP.lt)} of its own daily archive</span>
       <span class="v ${oiP.lt.pct>=90||oiP.lt.pct<=10?'am':'nu'}">${oiP.lt.pct.toFixed(0)}th percentile</span></div>`:''}
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
-        Measured against this coin's own ${oiP.n} logged readings${oiP.lt?`; the OKX line against ${oiP.lt.n} daily rows from the venue's own archive - like against like, never blended`:''}. How crowded, not which way.</div>`:''}
+        Measured against this coin's own ${oiP.n} logged readings${oiP.lt?`; the OKX line ranks the newest daily row of the venue's own archive (${oiP.lt.n} rows, perp + dated futures combined) inside that same series - like against like, never blended`:''}. How crowded, not which way.</div>`:''}
       </div></div>`;
   }
   h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
