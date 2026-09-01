@@ -1890,6 +1890,20 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           background: #17171a; border: 1px solid var(--bdr); border-radius: 10px; padding: 5px;
           box-shadow: 0 18px 50px rgba(0,0,0,.6); min-width: 190px; font-family: var(--sans); }
         #scale-menu.open { display: block; }
+        /* B8: bar-close countdown pinned to the price axis, and the back-to-live chip. */
+        #chart-countdown { position: absolute; right: 2px; z-index: 13; transform: translateY(-50%);
+          font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: .3px;
+          font-variant-numeric: tabular-nums; padding: 1px 5px; border-radius: 3px;
+          background: #0e3a44; color: #7fe9f5; border: 1px solid rgba(34,211,238,.35);
+          pointer-events: none; display: none; white-space: nowrap; }
+        #chart-countdown.warn { background: #3a2a0e; color: #f5c77f; border-color: rgba(245,158,11,.4); }
+        #chart-live { position: absolute; bottom: 30px; right: 14px; z-index: 14; display: none;
+          align-items: center; gap: 5px; font-family: var(--font); font-size: 10.5px; font-weight: 700;
+          letter-spacing: .4px; padding: 4px 9px; border-radius: 6px; cursor: pointer;
+          background: rgba(20,26,38,.92); color: var(--txt1); border: 1px solid rgba(34,211,238,.4);
+          box-shadow: 0 4px 14px rgba(0,0,0,.4); transition: background .12s, border-color .12s; }
+        #chart-live:hover { background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.7); }
+        #chart-live.show { display: inline-flex; }
         #scale-menu .sm-i { display: flex; align-items: center; gap: 9px; padding: 8px 11px;
           border-radius: 7px; font-size: 11.5px; font-weight: 600; color: var(--txt2); cursor: pointer; }
         #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
@@ -3068,6 +3082,10 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
   b.addEventListener('click',function(){
     var tf=b.getAttribute('data-tf'); if(/^\d+$/.test(tf)) tf=+tf;
     if(tf===_ctbTf) return;
+    // Preserve the viewer's exact time window across the flip (B8): capture the visible RANGE (in
+    // epoch seconds, comparable across TFs) and restore it after the new frame paints, so 1m<->5m
+    // is instant and keeps the same span — a moment NoVo beats TradingView's server-fetch beat.
+    try{ window._tfRestoreRange=_novoChart?_novoChart.timeScale().getVisibleRange():null; }catch(_e){ window._tfRestoreRange=null; }
     _ctbTf=tf; _ctbSave();
     // Same reset as a ticker switch: bucket times share epoch anchors across TFs, so the
     // glitch-guard could mistake the switch for a degraded response and skip it.
@@ -3226,6 +3244,58 @@ const _tfOpenM={1:120,5:96,15:80,'1h':96,'1d':90,'1w':104};
 function _paintWm(){
   var wm=document.getElementById('chart-wm');
   if(wm) wm.textContent=_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf);
+}
+// ── BAR-CLOSE COUNTDOWN (B8) ───────────────────────────────────────────────
+// mm:ss to the next bar boundary, pinned to the price axis at the last close. A 1m scalper keys
+// entries to the close and today mentally diffs the topbar clock; this makes it a glance. Intraday
+// frames only (a countdown on a daily bar is noise), and only while a bar is genuinely forming
+// (RTH + extended, 04:00-20:00 ET) so it doesn't tick through the closed weekend. OWNED + supervised
+// like every other loop: global handle + tick stamp, cleared on arm, so _laneCheck can see and heal it.
+function _cdTick(){
+  var pill=document.getElementById('chart-countdown'); if(!pill) return;
+  try{
+    var lc=_novoLastCandle;
+    if(_isDeepTf() || !lc || !lc.time || !_novoSeries || !_novoTipLive){ pill.style.display='none'; return; }
+    var step=_ctbTf*60;
+    // The forming bar's start is lc.time (ET-shifted). Its close is lc.time+step. Seconds remaining =
+    // that minus 'now' in the SAME ET-shifted basis. lc.time already carries this bar's ET offset, so
+    // ET-now = real-now + (lc.time - realStartOfThisBar). Simpler: seconds-into-bar = realNow mod step
+    // is wrong across the offset; use the tip's own clock — the WS keeps lc current, so remaining is
+    // step - ((realNowUTC + off) - lc.time), where off = lc.time - (its real UTC start). We recover off
+    // from the tip: the forming bar's real start is floor(realNow/step)*step, so off = lc.time - that.
+    var realNow=Math.floor(Date.now()/1000);
+    var realStart=Math.floor(realNow/step)*step;
+    var off=lc.time-realStart;                        // ET shift for this bar, derived, DST-correct
+    var rem=(lc.time+step)-(realNow+off);
+    if(rem<0) rem=0; if(rem>step) rem=step;
+    var mm=Math.floor(rem/60), ss=Math.floor(rem%60);
+    var txt=(step>=3600? (Math.floor(rem/3600)+':'+('0'+mm%60).slice(-2)) : (mm+':'+('0'+ss).slice(-2)));
+    var y=null; try{ y=_novoSeries.priceToCoordinate(lc.close); }catch(_e){}
+    if(y===null){ pill.style.display='none'; return; }
+    pill.textContent=txt;
+    pill.classList.toggle('warn', rem<=10);
+    pill.style.top=y+'px';
+    pill.style.display='block';
+  }catch(_e){ pill.style.display='none'; }
+}
+function _cdStart(){
+  clearInterval(window._cdTimer);
+  window._cdTimer=setInterval(function(){ window._cdTickAt=Date.now(); _cdTick(); },1000);
+  _cdTick();
+}
+// ── BACK-TO-LIVE CHIP (B8) ──────────────────────────────────────────────────
+function _updateLiveChip(range){
+  var chip=document.getElementById('chart-live'); if(!chip) return;
+  try{
+    if(!range || !_novoSeries || !_novoBarCount){ chip.classList.remove('show'); return; }
+    // Newest bar index is _novoBarCount-1; show the chip once it scrolls left of the right edge.
+    var away=(_novoBarCount-1)-range.to;
+    chip.classList.toggle('show', away>2);
+  }catch(_e){ chip.classList.remove('show'); }
+}
+function _goLive(){
+  try{ _novoChart.timeScale().scrollToRealTime(); }catch(_e){}
+  var chip=document.getElementById('chart-live'); if(chip) chip.classList.remove('show');
 }
 function _fmtBarTime(t){
   var d=new Date(t*1000);
@@ -3799,6 +3869,7 @@ function _initNovoChart(){
     // window rendered as 5/0.7 = $7.1 and the lock looked like it was not working.
     rightPriceScale:{borderColor:'rgba(255,255,255,0.08)',scaleMargins:{top:_NOVO_SCALE_PAD,bottom:_NOVO_SCALE_PAD}},
     timeScale:{borderColor:'rgba(255,255,255,0.08)',timeVisible:true,secondsVisible:false,rightOffset:8},  // level tags are back on the axis (2026-08-20), so the last candle needs real clearance or it prints underneath them
+    kineticScroll:{mouse:true,touch:true},   // B8: momentum pan — the feel a scalper expects from a pro chart
     crosshair:{mode:LightweightCharts.CrosshairMode.Normal}
   });
   _novoSeries=_novoChart.addCandlestickSeries({
@@ -3848,10 +3919,15 @@ function _initNovoChart(){
   // markup stays untouched and they exist exactly as long as the chart does.
   try{
     el.style.position='relative';
-    ['chart-wm','chart-legend2','novo-chip','chart-veil'].forEach(function(id){
+    ['chart-wm','chart-legend2','novo-chip','chart-veil','chart-countdown','chart-live'].forEach(function(id){
       if(!document.getElementById(id)){ var d=document.createElement('div'); d.id=id; el.appendChild(d); }
     });
+    var _cl=document.getElementById('chart-live');
+    if(_cl){ _cl.innerHTML='\u23e9 live'; _cl.addEventListener('click',function(){ _goLive(); }); }
+    // Newest bar leaving the viewport shows the chip; back at the edge hides it (B8).
+    try{ _novoChart.timeScale().subscribeVisibleLogicalRangeChange(_updateLiveChip); }catch(_e){}
     _paintWm();
+    _cdStart();   // owned, supervisor-registered 1s countdown timer
     _novoChart.applyOptions({crosshair:{mode:LightweightCharts.CrosshairMode.Normal,
       vertLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'},
       horzLine:{color:'rgba(34,211,238,0.35)',width:1,style:2,labelBackgroundColor:'#0e3a44'}}});
@@ -3985,7 +4061,15 @@ async function loadNovoChart(){
       // (The comment here used to say "Open on the last 6 HOURS … 6h = 360 bars" directly above a line
       // that used 180. The value had been changed and the prose hadn't; the variable was still named
       // _bars6h while holding 3h. Naming it for what it IS so the next edit can't inherit the lie.)
-      if(!_novoRanged){
+      // A TF flip stashed the pre-flip window (B8) — restore it instead of re-fitting, once.
+      if(!_novoRanged && window._tfRestoreRange){
+        const _elr=document.getElementById('novo-chart');
+        if(_elr && _elr.clientWidth>0){
+          const _rng=window._tfRestoreRange; window._tfRestoreRange=null;
+          requestAnimationFrame(()=>{ try{ _novoChart.timeScale().setVisibleRange(_rng); _novoRanged=true; }catch(_e){ _novoRanged=false; } });
+        }
+      }
+      if(!_novoRanged && !window._tfRestoreRange){
         const _el=document.getElementById('novo-chart');
         if(_el && _el.clientWidth>0){
           const _n=_view.candles.length;
@@ -4222,6 +4306,7 @@ function _laneCheck(kick){
       var _v2=document.getElementById('chart-veil');
       if(_v2&&_v2.classList.contains('on')) _veilOff();
     }
+    if(kick || now-(window._cdTickAt||0)>5000){ try{ _cdStart(); }catch(_e){} }   // B8: countdown timer died (bg-throttle/error) — re-arm
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
     if(_splitOn()){ _wireSync(); if(kick || now-(window._c2TickAt||0)>30000) _c2Run(); }
