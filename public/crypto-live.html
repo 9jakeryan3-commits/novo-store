@@ -532,6 +532,13 @@ tr:last-child td{border-bottom:none}
   #novo-ask .deeper{background:none;border:1px solid var(--bdr,#22303f);border-radius:8px;
     color:var(--txt2,#9fb6d1);font-size:11.5px;cursor:pointer;padding:4px 9px;margin:2px 0 0}
   #novo-ask .deeper:hover{color:#eaf3ff;border-color:var(--askacc)}
+  /* A term you can tap. Underlined faintly rather than coloured like a link -- it is a
+     definition, not a navigation, and a paragraph of blue words is unreadable. */
+  #novo-ask .term{border-bottom:1px dotted var(--askacc);cursor:help;text-underline-offset:2px}
+  #novo-ask .term:hover,#novo-ask .term:focus{color:#eaf3ff;border-bottom-style:solid;outline:none}
+  .termpop{position:fixed;z-index:2147483647;background:#0d1620;color:#dce9f7;
+    border:1px solid var(--askacc,#22d3ee);border-radius:10px;padding:9px 11px;font-size:13px;
+    line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.55)}
   @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px} }
   #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
@@ -1802,17 +1809,105 @@ window.addEventListener('hashchange', function(){
       return wrap;
     } catch(_e){ return null; }
   }
+  // ── the glossary ───────────────────────────────────────────────────────────────
+  // Every definition here is one sentence, in NoVo's own register, and says what the thing DOES
+  // rather than what it is made of -- "where dealers stop cushioning moves" beats "the strike at
+  // which aggregate gamma exposure changes sign". Only the FIRST use of a term in an answer is
+  // marked, which is the same discipline the prompt follows: explain once, then get on with it.
+  var GLOSS = {
+    'gamma flip': 'The price where dealers stop cushioning moves and start amplifying them. Same dealers, opposite instructions.',
+    'flip zone': 'The price where dealers stop cushioning moves and start amplifying them.',
+    'net gex': 'How hard dealer hedging is leaning against moves. Positive calms the tape; negative accelerates it.',
+    'call wall': 'The strike carrying the most call open interest. It tends to act as a ceiling.',
+    'put wall': 'The strike carrying the most put open interest. It tends to act as a floor.',
+    'gravity': 'The level dealer positioning pulls price toward, all else equal.',
+    'long gamma': 'Dealers hedging by buying dips and selling rallies. It dampens the tape.',
+    'short gamma': 'Dealers hedging by selling weakness and buying strength. It amplifies the tape.',
+    'expected move': "The range options are pricing for the session -- roughly one standard deviation, not a forecast.",
+    'open interest': 'How many contracts are still open at a strike. Not volume, which is how many traded.',
+    'implied volatility': "The volatility an option's price implies -- what the market is charging for risk.",
+    'realized volatility': 'How much the thing actually moved, after the fact.',
+    'delta': "How much an option's price moves for a $1 move in the underlying.",
+    'gamma': 'How fast delta changes as price moves. Delta is speed; gamma is acceleration.',
+    'theta': 'What an option loses to the passage of time each day.',
+    'vega': "How much an option's price moves per point of implied volatility.",
+    'skew': 'The gap in implied volatility between puts and calls -- what downside protection costs versus upside.',
+    'term structure': 'Implied volatility across expiries. Front above back means the near term is the bid one.',
+    'vix': "The market's expected 30-day volatility on the S&P 500.",
+    'vxn': 'The same idea as VIX, for the Nasdaq 100 -- so it is the gauge for QQQ.',
+    'rvx': 'The same idea as VIX, for the Russell 2000 -- so it is the gauge for IWM.',
+    'percentile': 'Where a reading sits against its own history. The 90th means higher than 90% of past readings.',
+    'dealer': 'The market maker on the other side of the trade. They hedge their book rather than bet on direction.',
+    'pin': 'Price getting held near a strike into expiry by dealer hedging.',
+    'gamma squeeze': 'Dealer hedging that has to chase price in the direction it is already going.',
+    '0dte': 'An option that expires today.',
+    'funding rate': 'The recurring payment between long and short holders of a perpetual, which keeps it near spot.',
+    'perpetual': 'A futures contract with no expiry date, held near spot by funding payments.',
+    'basis': 'The gap between the futures price and spot.',
+    'liquidation': 'A leveraged position force-closed by the exchange when margin runs out.',
+    'dvol': "Deribit's implied volatility index -- the crypto equivalent of VIX.",
+    'short volume': 'The share of volume executed short. A flow reading, not a measure of how many are short.',
+    'base rate': 'How often something has actually resolved a given way, before today. The outside view.',
+    'liquidity': 'How much money sits in the pool to trade against. Thin liquidity means a small order moves price.'
+  };
+  var GLOSS_RE = (function(){
+    var keys = Object.keys(GLOSS).sort(function(a,b){ return b.length - a.length; })
+      .map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+    return new RegExp('\\b(' + keys.join('|') + ')\\b', 'gi');
+  })();
+  function closeTermPop(){ var p = document.getElementById('novo-termpop'); if (p) p.remove(); }
+  document.addEventListener('click', function(e){
+    if (!e.target.closest || !e.target.closest('.term')) closeTermPop();
+  });
+  function showTermPop(span, def){
+    closeTermPop();
+    var p = document.createElement('div');
+    p.id = 'novo-termpop'; p.className = 'termpop'; p.textContent = def;
+    document.body.appendChild(p);
+    var r = span.getBoundingClientRect();
+    // Clamp inside the viewport: these fire near the right edge on a phone constantly.
+    var w = Math.min(300, window.innerWidth - 20);
+    p.style.width = w + 'px';
+    var left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+    p.style.left = left + 'px';
+    var top = r.bottom + 6;
+    if (top + p.offsetHeight > window.innerHeight - 8) top = Math.max(8, r.top - p.offsetHeight - 6);
+    p.style.top = top + 'px';
+  }
+  // Text -> fragment with the first use of each known term made tappable. Runs on TEXT ONLY, so
+  // it can never touch a chart block or the markup around it.
+  function glossFrag(text){
+    var frag = document.createDocumentFragment(), seen = {}, last = 0, m;
+    GLOSS_RE.lastIndex = 0;
+    while ((m = GLOSS_RE.exec(text))){
+      var key = m[1].toLowerCase();
+      if (seen[key]) continue;
+      seen[key] = 1;
+      if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var s = document.createElement('span');
+      s.className = 'term'; s.textContent = m[1]; s.title = GLOSS[key];
+      s.setAttribute('role', 'button'); s.setAttribute('tabindex', '0');
+      (function(def){
+        s.onclick = function(ev){ ev.stopPropagation(); showTermPop(s, def); };
+        s.onkeydown = function(ev){ if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); showTermPop(s, def); } };
+      })(GLOSS[key]);
+      frag.appendChild(s);
+      last = m.index + m[1].length;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    return frag;
+  }
   function renderRich(el, text){
     text = String(text == null ? '' : text);
     var re = /\[\[novochart\s+(\{[\s\S]*?\})\]\]/g, last = 0, m;
     while ((m = re.exec(text))){
-      if (m.index > last) el.appendChild(document.createTextNode(text.slice(last, m.index)));
+      if (m.index > last) el.appendChild(glossFrag(text.slice(last, m.index)));
       var spec = null; try { spec = JSON.parse(m[1]); } catch(_e){}
       var cv = spec && drawNovoChart(spec);
       el.appendChild(cv || document.createTextNode(''));
       last = m.index + m[0].length;
     }
-    el.appendChild(document.createTextNode(text.slice(last)));
+    el.appendChild(glossFrag(text.slice(last)));
   }
   function finishAnswer(d, _qel, el){
     if (!d || !d.ok){
