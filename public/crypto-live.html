@@ -1354,20 +1354,38 @@ function drawCoin(){
     h += venuePanel(g) + exposures(g) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
+    // CROWDING LADDER (2026-09-01). The percentile columns are MEASURED: history.py ranks each
+    // reading against that coin's own sample history and publishes pct + n every pass. They were
+    // computed for weeks and never rendered. n is shown because a percentile without its sample
+    // size is decoration -- and it must NOT be read as direction: funding extremes carry no
+    // demonstrated forward edge in this corpus, so this says how crowded, never which way.
+    const HP=(SNAP.hist&&SNAP.hist[CUR])||null;
+    const pctCell=(o)=>{
+      if(!o||o.pct==null) return '<td class="nu">—</td>';
+      const hot=o.pct>=90||o.pct<=10;
+      return `<td class="nu"${hot?' style="color:var(--amber)"':''} title="${o.n} samples">${o.pct.toFixed(0)}th</td>`;
+    };
     h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
       <span class="sub">per venue · never blended · trusted rows only</span></div><div class="pb">
-      <table><thead><tr><th>Venue</th><th>Funding</th><th>Annualised</th><th>Open interest</th></tr></thead><tbody>`;
+      <table><thead><tr><th>Venue</th><th>Funding</th><th>vs own history</th><th>Annualised</th><th>Open interest</th></tr></thead><tbody>`;
     const oi=Object.fromEntries(pos.open_interest.map(o=>[o.venue,o.oi_usd]));
     const vs=[...new Set([...pos.funding.map(f=>f.venue),...pos.open_interest.map(o=>o.venue)])].sort();
     for(const v of vs){
       const f=pos.funding.find(z=>z.venue===v);
       h+=`<tr><td>${v}</td>
         <td class="${f?(f.rate>0?'up':f.rate<0?'dn':''):''}">${f?(f.rate*100).toFixed(5)+'%':'—'}</td>
+        ${pctCell(HP&&HP.funding&&HP.funding[v])}
         <td class="${f&&f.annualized_pct!=null?(f.annualized_pct>0?'up':f.annualized_pct<0?'dn':''):''}">${f&&f.annualized_pct!=null?f.annualized_pct.toFixed(1)+'%':'—'}</td>
         <td>${oi[v]?money(oi[v]):'—'}</td></tr>`;
     }
+    const oiP=HP&&HP.oi;
     h+=`</tbody></table><div class="kv" style="margin-top:9px"><span class="k">Total open interest</span>
-      <span class="v nu">${money(pos.total_oi_usd)}</span></div></div></div>`;
+      <span class="v nu">${money(pos.total_oi_usd)}</span></div>
+      ${oiP&&oiP.pct!=null?`<div class="kv"><span class="k">Book size vs its own history</span>
+      <span class="v ${oiP.pct>=90||oiP.pct<=10?'am':'nu'}">${oiP.pct.toFixed(0)}th percentile</span></div>
+      <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+        Measured against this coin's own ${oiP.n} logged readings. How crowded, not which way.</div>`:''}
+      </div></div>`;
   }
   h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
     <span class="sub">claims, scored when the horizon passes</span></div><div class="pb">`;

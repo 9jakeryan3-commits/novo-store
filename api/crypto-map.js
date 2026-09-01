@@ -138,11 +138,46 @@ module.exports = async (req, res) => {
   if (!snap || !snap.coins) return res.status(503).json({ error: "snapshot unreadable" });
 
   const ageMin = snap.received ? Math.round((Date.now() - snap.received) / 60000) : null;
+
+  // PERCENTILES — measured, and computed every pass since the history rollup shipped, but never
+  // served. history.py already writes funding[venue].pct and oi.pct for each coin against that
+  // coin's OWN sample history (n is carried alongside, and it is a real n — 1,027 samples on BTC
+  // today). Nothing rendered them because they never left the collector's own key.
+  //
+  // Sliced to {pct, n} rather than forwarding the whole history object: that payload is ~109KB,
+  // almost all of it daily series this dashboard does not draw, against ~17KB for the slice.
+  // Never fails the response — a missing or unreadable history key just means no percentile
+  // columns, which is the honest degradation.
+  let hist = null;
+  try {
+    let hraw = await r.get("crypto:map:history");
+    if (typeof hraw === "string") hraw = JSON.parse(hraw);
+    const hc = hraw && (hraw.coins || hraw);
+    if (hc && typeof hc === "object") {
+      hist = {};
+      for (const k of Object.keys(hc)) {
+        const v = hc[k];
+        if (!v || typeof v !== "object") continue;
+        const e = {};
+        if (v.oi && v.oi.pct != null) e.oi = { pct: v.oi.pct, n: v.oi.n };
+        const f = {};
+        for (const ven of Object.keys(v.funding || {})) {
+          const d = v.funding[ven];
+          if (d && d.pct != null) f[ven] = { pct: d.pct, n: d.n };
+        }
+        if (Object.keys(f).length) e.funding = f;
+        if (Object.keys(e).length) hist[k] = e;
+      }
+      if (!Object.keys(hist).length) hist = null;
+    }
+  } catch (_) { hist = null; }
+
   const coin = (req.query && req.query.coin || "").toUpperCase();
   if (coin) {
     const one = snap.coins[coin];
     if (!one) return res.status(404).json({ error: `no coverage for ${coin}` });
-    return res.status(200).json({ as_of: snap.as_of, age_min: ageMin, coin, data: one });
+    return res.status(200).json({ as_of: snap.as_of, age_min: ageMin, coin, data: one,
+                                  hist: (hist && hist[coin]) || null });
   }
 
   // The chain half goes to every crypto subscriber: it is part of the map, just a different
@@ -166,6 +201,9 @@ module.exports = async (req, res) => {
     // feed -- so a new section has to be named HERE or it never reaches the browser.
     reads: snap.reads || null,
     breadth: snap.breadth, health: snap.health,
+    // Named HERE deliberately — see the whitelist note above. A field this rebuild does not list
+    // never reaches the browser, which is exactly how chain, alerts and feed were each lost once.
+    ...(hist ? { hist } : {}),
     ...(priv && snap.alerts ? { alerts: snap.alerts } : {}),
   });
 };
