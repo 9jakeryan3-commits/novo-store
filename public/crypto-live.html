@@ -1320,6 +1320,38 @@ let _lastDrawn = null;
 // nothing extra on a collector that cannot authenticate to Deribit and lives on per-IP limits.
 // Ranked by PREMIUM rather than a volume/OI ratio: a ratio puts the front expiry in every slot
 // every day, because OI decays there and churn is structurally high.
+// THE BLOCK TAPE -- negotiated size, tagged by the venue rather than inferred by us.
+// Everywhere else the map reads what is POSITIONED; this is what was BOUGHT. A wall that has sat
+// for a week and a wall someone paid seven figures for this morning look identical in an OI
+// ladder, and this is the panel that tells them apart.
+//
+// It reports PRINTS. There is no bullish/bearish aggregate and no aggressor read, because the
+// taker's side is not a market opinion and turning it into one would be a model wearing a
+// measurement's label. Structures are Deribit's own names off the combo id; where the venue does
+// not name one, the cell stays blank rather than guessing.
+function tapePanel(d){
+  const t=d&&d.option_tape; if(!t||!t.prints) return '';
+  const when=(s)=>s?String(s).slice(11,16):'';
+  const rows=(t.blocks||[]).slice(0,8).map(function(b){
+    const nm=String(b.instrument||'').replace(/^[A-Z]+-/,'');
+    return `<tr><td class="mono">${when(b.ts_utc)}</td>
+      <td class="mono">${nm}</td>
+      <td>${b.structure?`<span class="tag">${b.structure}</span>`:'<span style="color:var(--txt4)">&mdash;</span>'}</td>
+      <td class="num">${b.legs}</td>
+      <td class="num">${money(b.premium_usd)}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Block tape &middot; ${t.hours}h</h2>
+    <span class="sub">${CUR} options &middot; venue-tagged blocks, not inferred</span></div><div class="pb">
+    <div class="kv"><span class="k">Premium printed</span><span class="v nu">${money(t.premium_usd)}</span></div>
+    <div class="kv"><span class="k">Of which negotiated blocks</span><span class="v am">${money(t.block_premium_usd)}${t.block_share_pct!=null?` &middot; ${t.block_share_pct}%`:''}</span></div>
+    <div class="kv"><span class="k">Prints kept</span><span class="v nu">${t.prints.toLocaleString()}</span></div>
+    ${t.coverage_gaps?`<div class="kv"><span class="k">Coverage</span><span class="v dn">${t.coverage_gaps} known gap${t.coverage_gaps>1?'s':''} in this window</span></div>`:''}
+    ${rows?`<table style="margin-top:9px"><thead><tr><th>Time</th><th>Contract</th><th>Structure</th><th>Legs</th><th>Premium</th></tr></thead><tbody>${rows}</tbody></table>`:''}
+    <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
+      Blocks are negotiated away from the screen and reported to the venue, which is why they are
+      tagged rather than guessed. Structure names are Deribit&rsquo;s own. Which side lifted is not
+      in this data, so it is not claimed.</div></div></div>`;
+}
 function turnoverPanel(g){
   const t=g&&g.turnover; if(!t||!t.premium_usd_24h) return '';
   const rows=(t.top||[]).slice(0,6).map(function(x){
@@ -1371,6 +1403,7 @@ function drawCoin(){
         </div>
       </div>
       ${turnoverPanel(g)}
+      ${tapePanel(d)}
       ${gauge(g)}
       ${volRow(d,g)}
       <canvas id="gamma"></canvas>
