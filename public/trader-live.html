@@ -2338,6 +2338,12 @@ function _setNovoStatus(){
   if(!_lr) return;
   // Pure market-session light — nothing to do with trading state (Jake, 2026-07-20).
   const open=_novoMktOpen;
+  // Sig-gated (B6): this ran every clock second and rebuilt the row's innerHTML unconditionally -
+  // the last unconditional per-second DOM churn on the page. State is (session, ticker); the live
+  // price inside is written by the STALKER feed directly and survives because we skip the rebuild.
+  const _sk=(open?'1':'0')+'|'+(window._novoExecTkr||'SPY');
+  if(_lr.__h===_sk) return;
+  _lr.__h=_sk;
   const col=open?'#10b981':'#ef4444';                    // green = market OPEN, red = market CLOSED
   const txt=open?'Analyzing..':'Studying...';            // Analyzing while the market is open, Studying when closed
   const _pe=_lr.querySelector('.term-live-price');
@@ -2898,16 +2904,17 @@ function _renderLine(){
     return;
   }
   el.innerHTML=items.map(function(it){
-    var bias=String(it.bias||'').toUpperCase();
+    var bias=escHtml(String(it.bias||'').toUpperCase());
     var cls=/LONG|UP|BULL/.test(bias)?'up':(/SHORT|DOWN|BEAR/.test(bias)?'dn':'');
     var meta=[];
-    if(it.hold) meta.push('<b>Holds:</b> '+it.hold);
-    if(it.brk) meta.push('<b>Breaks:</b> '+it.brk);
-    if(it.watch) meta.push('<b>Watch:</b> '+it.watch);
-    return '<div class="lf-row"><div class="lf-head"><span class="lf-t">'+(it.ts||'')+'</span>'+
-      '<span class="lf-x">'+(it.text||'')+'</span>'+
+    // escHtml on every server string (B6) - this was the page's one unescaped innerHTML sink.
+    if(it.hold) meta.push('<b>Holds:</b> '+escHtml(String(it.hold)));
+    if(it.brk) meta.push('<b>Breaks:</b> '+escHtml(String(it.brk)));
+    if(it.watch) meta.push('<b>Watch:</b> '+escHtml(String(it.watch)));
+    return '<div class="lf-row"><div class="lf-head"><span class="lf-t">'+escHtml(String(it.ts||''))+'</span>'+
+      '<span class="lf-x">'+escHtml(String(it.text||''))+'</span>'+
       (bias?'<span class="lf-bias '+cls+'">'+bias+'</span>':'')+
-      (it.now?'<span class="lf-t">now '+it.now+'</span>':'')+'</div>'+
+      (it.now?'<span class="lf-t">now '+escHtml(String(it.now))+'</span>':'')+'</div>'+
       (meta.length?'<div class="lf-m">'+meta.join(' &middot; ')+'</div>':'')+
       '</div>';
   }).join('');
@@ -3036,14 +3043,15 @@ function _applyTogVis(){
     if(_novoEma9) _novoEma9.applyOptions({visible:_ctbTog.ema});
     if(_novoEma21) _novoEma21.applyOptions({visible:_ctbTog.ema});
     if(_novoVolSeries) _novoVolSeries.applyOptions({visible:_ctbTog.vol});
-    for(var k in _novoLvlSeries){ try{_novoLvlSeries[k].applyOptions({visible:_ctbTog.lvl});}catch(_e){} }
+    for(var k in _novoLvlSeries){ try{_novoLvlSeries[k].applyOptions({visible:_ctbTog.lvl&&!window._lvlUsePL});}catch(_e){} }
     for(var k2 in _novoLines){ try{_novoLines[k2].applyOptions({lineVisible:_ctbTog.lvl,axisLabelVisible:_ctbTog.lvl});}catch(_e){} }
     // Split-pane parity: every toggle drives both panes.
     if(_c2Vwap) _c2Vwap.applyOptions({visible:_ctbTog.vwap});
     if(_c2Ema9) _c2Ema9.applyOptions({visible:_ctbTog.ema});
     if(_c2Ema21) _c2Ema21.applyOptions({visible:_ctbTog.ema});
     if(_c2Vol) _c2Vol.applyOptions({visible:_ctbTog.vol});
-    for(var k3 in _c2LvlSeries){ try{_c2LvlSeries[k3].applyOptions({visible:_ctbTog.lvl,lastValueVisible:_ctbTog.lvl});}catch(_e){} }
+    for(var k3 in _c2LvlSeries){ try{_c2LvlSeries[k3].applyOptions({visible:_ctbTog.lvl&&!window._lvlUsePL,lastValueVisible:_ctbTog.lvl&&!window._lvlUsePL});}catch(_e){} }
+    if(window._lvlUsePL) _lvlSyncPLs();   // level toggle in % modes adds/removes the price-line ladder too (B6)
   }catch(_e){}
 }
 function _paintCtb(){
@@ -3377,8 +3385,11 @@ return {
               var y2=self._series.priceToCoordinate(d.lo+b*d.step);
               if(y1===null||y2===null) continue;
               var w=d.vols[b]/d.max*maxW;
+              // Orientation-agnostic (B6): on an inverted scale y1>y2 and the signed height
+              // collapsed every bucket to a 1px hairline. min/abs draws the same rect either way.
+              var _top=Math.min(y1,y2), _hh=Math.abs(y2-y1);
               ctx.fillStyle=(b===d.poc)?'rgba(245,158,11,0.30)':'rgba(148,163,184,0.10)';
-              ctx.fillRect(W-w, y1*pr+0.5, w, Math.max(1,(y2-y1)*pr-1));
+              ctx.fillRect(W-w, _top*pr+0.5, w, Math.max(1,_hh*pr-1));
             }
           });
         }catch(_e){}
@@ -3594,8 +3605,8 @@ async function _c2Load(){
     drawn.forEach(function(row){
       var lb=row[0], v=row[1], c=_LVL_COLOR[lb]||'#94a3b8';
       var s=_c2chart.addLineSeries({color:c,lineWidth:1,lineStyle:((lb==='EM_LO'||lb==='EM_HI')?2:0),
-        priceLineVisible:false,lastValueVisible:_ctbTog.lvl,crosshairMarkerVisible:false,
-        visible:_ctbTog.lvl,title:(_LVL_TITLE[lb]||lb),autoscaleInfoProvider:function(){return null;}});
+        priceLineVisible:false,lastValueVisible:_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,
+        visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_LVL_TITLE[lb]||lb),autoscaleInfoProvider:function(){return null;}});
       s.setData([{time:f0,value:v},{time:lastT,value:v}]);
       _c2LvlSeries[lb]=s; _c2LvlPx[lb]=v;
     });
@@ -3609,6 +3620,7 @@ async function _c2Load(){
       }catch(_e){}
     });
   }
+  try{ _lvlSyncPLs(); }catch(_e){}   // % modes: pane 2's price-line ladder stays current (B6)
   if(!_c2Ranged){
     // Mirror the MAIN pane's window — the time-range sync keeps them together afterwards.
     try{ var vr=_novoChart&&_novoChart.timeScale().getVisibleRange(); if(vr) _c2chart.timeScale().setVisibleRange(vr); }catch(_e){}
@@ -3657,6 +3669,43 @@ function _applySplit(){
 // The scale controls the library actually has, on a ⚙ in the toolbar: auto-fit, reset view,
 // regular/log/percent/indexed-to-100, invert. Applies to BOTH panes — a split where one side is
 // log and the other linear is a comparison lying to you.
+// -- PERCENT/INDEXED LEVEL PRESENTATION (B6, 2026-09-01) -----------------------------------
+// In Percent / Indexed modes every line series normalizes to ITS OWN first visible point, so a
+// flat level series collapses onto the 0% gridline - the whole 14-level ladder printed as one
+// line. Price lines belong to the CANDLE series and transform with its scale, so in those modes
+// the ladder swaps to price-line form (and back, losslessly - prices live in _lvlPx/_c2LvlPx,
+// which the level passes maintain every poll). Trend drawings have the same self-normalization
+// problem and no price-line form, so they hide in % modes; fib and horizontal drawings are
+// already price lines and transform correctly.
+let _lvlPLs={}, _c2LvlPLs={};
+function _lvlSyncPLs(){
+  try{
+    if(!window._lvlUsePL) return;
+    var syncOne=function(store, series, want){
+      if(!series) return;
+      for(var k in store){ if(!(k in want)||!_ctbTog.lvl){ try{ series.removePriceLine(store[k]); }catch(_e){} delete store[k]; } }
+      if(!_ctbTog.lvl) return;
+      for(var k2 in want){
+        if(store[k2]){ try{ store[k2].applyOptions({price:want[k2]}); }catch(_e){} }
+        else { try{ store[k2]=series.createPriceLine({price:want[k2],color:_LVL_COLOR[k2]||'#8b93a7',lineWidth:1,
+          lineStyle:((k2==='EM_LO'||k2==='EM_HI')?2:0),axisLabelVisible:true,title:_LVL_TITLE[k2]||k2}); }catch(_e){} }
+      }
+    };
+    syncOne(_lvlPLs, _novoSeries, window._lvlPx||{});
+    syncOne(_c2LvlPLs, _c2series, _c2LvlPx||{});
+  }catch(_e){}
+}
+function _lvlScaleMode(usePL){
+  window._lvlUsePL=!!usePL;
+  for(var k in _novoLvlSeries){ try{ _novoLvlSeries[k].applyOptions({visible:_ctbTog.lvl&&!usePL,lastValueVisible:_ctbTog.lvl&&!usePL}); }catch(_e){} }
+  for(var k2 in _c2LvlSeries){ try{ _c2LvlSeries[k2].applyOptions({visible:_ctbTog.lvl&&!usePL,lastValueVisible:_ctbTog.lvl&&!usePL}); }catch(_e){} }
+  _drawObjs.forEach(function(o){ try{ if(o.series) o.series.applyOptions({visible:!usePL}); }catch(_e){} });
+  if(!usePL){
+    for(var k3 in _lvlPLs){ try{ _novoSeries.removePriceLine(_lvlPLs[k3]); }catch(_e){} }
+    for(var k4 in _c2LvlPLs){ try{ if(_c2series) _c2series.removePriceLine(_c2LvlPLs[k4]); }catch(_e){} }
+    _lvlPLs={}; _c2LvlPLs={};
+  } else { _lvlSyncPLs(); }
+}
 function _applyScale(){
   var o={mode:_scaleCfg.m, invertScale:_scaleCfg.inv};
   // Zoom anchor (2026-08-31, Jake): rightBarStaysOnScroll=true pins the newest bar — the wheel
@@ -3664,6 +3713,7 @@ function _applyScale(){
   var t={rightBarStaysOnScroll:_scaleCfg.za};
   try{ if(_novoChart){ _novoChart.priceScale('right').applyOptions(o); _novoChart.timeScale().applyOptions(t); } }catch(_e){}
   try{ if(_c2chart){ _c2chart.priceScale('right').applyOptions(o); _c2chart.timeScale().applyOptions(t); } }catch(_e){}
+  try{ _lvlScaleMode(_scaleCfg.m===2||_scaleCfg.m===3); }catch(_e){}
 }
 function _scaleMenuRender(){
   var m=document.getElementById('scale-menu'); if(!m) return;
@@ -3685,7 +3735,7 @@ function _scaleMenuRender(){
   m.innerHTML=rows.map(function(r){
     if(r.sep) return '<div class="sm-sep"></div>';
     return '<div class="sm-i" data-sk="'+r.k+'"><span class="sm-c">'+(r.c?'&#10003;':'')+'</span>'+r.lbl+'</div>';
-  }).join('');
+  }).join('')+((_scaleCfg.m===2||_scaleCfg.m===3)?'<div style="padding:5px 10px 7px;font-size:10px;color:var(--txt3);max-width:210px;line-height:1.35">Levels ride the price axis in % modes; trend drawings hide (they cannot transform).</div>':'');
   m.querySelectorAll('.sm-i').forEach(function(it){
     it.addEventListener('click',function(ev){
       ev.stopPropagation();
@@ -4084,7 +4134,7 @@ async function loadNovoChart(){
           // Only levels inside the visible price range render a label, so the axis stays readable.
           // visible: set at CREATION so the rebuild path never births a series with the wrong
           // visibility, which is what used to justify calling _applyTogVis on every tick.
-          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl,crosshairMarkerVisible:false,visible:_ctbTog.lvl,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
+          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?(_lvlTitle[lbl]||lbl):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
           _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v;
         } else {
@@ -4108,6 +4158,7 @@ async function loadNovoChart(){
         }catch(_e){}
       });
     }
+    try{ _lvlSyncPLs(); }catch(_e){}   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
