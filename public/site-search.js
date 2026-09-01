@@ -17,22 +17,29 @@
    ~390KB, and charging every visitor to every page for a box most will not open is a real cost
    for an occasional feature. */
 (function () {
-  // LEFT OF THE HOME LINK, not tacked on the end: first child of .nav-actions. Falls back to
-  // sitting before the More button if a template has no .nav-actions, and bails entirely on
-  // pages with no standard header (the three live dashboards) rather than mounting into nothing.
-  var actions = document.querySelector('.nav-actions');
-  var anchor = actions || document.querySelector('.nav-more');
-  if (!anchor || document.getElementById('site-search-input')) return;
+  // ITS OWN ROW, UNDER THE LINKS. Inline in .nav-actions it competed with nine nav links for
+  // one row and pushed them onto two lines. As a sibling AFTER .nav-inner it is a second header
+  // row: full width, centred on the same 1200px measure as the bar above it, and it never has
+  // to fight the nav's flex layout at any width. Bails on pages with no standard header (the
+  // three live dashboards) rather than mounting into nothing.
+  var inner = document.querySelector('.nav-inner');
+  var nav = inner ? inner.parentNode : null;
+  if (!nav || !inner || document.getElementById('site-search-input')) return;
 
   var css = document.createElement('style');
   css.textContent = [
-    '.ss-wrap{position:relative;display:flex;align-items:center;margin:0 6px;}',
-    '.ss-wrap input{width:190px;background:var(--navy2,#1c1d21);border:1px solid var(--bdr,#2e3036);',
-    'border-radius:999px;padding:7px 12px;color:var(--txt1,#eaf3ff);font-size:13px;font-family:inherit;',
-    'outline:none;transition:width .18s ease,border-color .18s ease;}',
-    '.ss-wrap input:focus{width:290px;border-color:#22d3ee;}',
+    // A second header row: full width, centred on the same 1200px measure as the bar above,
+    // separated by a hairline so it reads as part of the header rather than page content.
+    '.ss-wrap{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:0 22px 11px;}',
+    'nav .ss-wrap{border-top:1px solid var(--bdr,#2e3036);padding-top:11px;}',
+    '.ss-wrap input{display:block;width:100%;box-sizing:border-box;background:var(--navy2,#1c1d21);',
+    'border:1px solid var(--bdr,#2e3036);border-radius:10px;padding:10px 14px;',
+    'color:var(--txt1,#eaf3ff);font-size:14px;font-family:inherit;outline:none;',
+    'transition:border-color .18s ease;}',
+    '.ss-wrap input:focus{border-color:#22d3ee;}',
     '.ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
-    '.ss-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;width:min(420px,86vw);',
+    // The panel hangs from the input and matches its width, so results line up with the box.
+    '.ss-panel{display:none;position:absolute;top:calc(100% + 4px);left:22px;right:22px;',
     'background:var(--navy2,#16171a);border:1px solid var(--bdr,#2e3036);border-radius:12px;',
     'box-shadow:0 24px 60px rgba(0,0,0,.55);padding:6px;z-index:400;max-height:min(70vh,460px);',
     'overflow-y:auto;text-align:left;}',
@@ -44,14 +51,10 @@
     '.ss-k{color:var(--txt3,#7d97b8);font-size:11px;font-weight:700;letter-spacing:.09em;',
     'text-transform:uppercase;}',
     '.ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
-    // At <=1024 the header becomes two rows, .nav-actions turns to display:contents and the
-    // individual links are hidden behind the Menu button - so this box becomes a direct flex
-    // child of .nav-inner. It takes the whole second row: order 5 puts it after the
-    // line-break pseudo at order 4, and a 100% basis makes it full width. It used to be
-    // display:none here, which hid it on precisely the screens where the link row is gone.
-    '@media(max-width:1024px){.ss-wrap{order:5;flex-basis:100%;margin:2px 0 0;}',
-    '.ss-wrap input,.ss-wrap input:focus{width:100%;}',
-    '.ss-panel{left:0;right:auto;width:100%;}}'
+    // Narrower gutters on phones, where 22px each side is a real bite out of the field.
+    '@media(max-width:560px){.ss-wrap{padding:0 14px 10px;}',
+    'nav .ss-wrap{padding-top:10px;}',
+    '.ss-panel{left:14px;right:14px;}}'
   ].join('');
   document.head.appendChild(css);
 
@@ -59,10 +62,10 @@
   wrap.className = 'ss-wrap';
   wrap.innerHTML =
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
-    'placeholder="Search…" aria-label="Search the site">' +
+    'placeholder="Search NoVo — guides, coins, tools, the read archive…" '  +
+    'aria-label="Search the site">' +
     '<div class="ss-panel" id="site-search-results" role="listbox"></div>';
-  if (actions) actions.insertBefore(wrap, actions.firstChild);
-  else anchor.parentNode.insertBefore(wrap, anchor);
+  inner.insertAdjacentElement('afterend', wrap);
 
   var input = wrap.querySelector('#site-search-input');
   var panel = wrap.querySelector('#site-search-results');
