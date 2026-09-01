@@ -486,7 +486,11 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .spy-hero { flex-wrap: wrap; row-gap: 6px; }
 @media (max-width: 768px) {
   /* Phone: the hero is two lines — ticker + price first, then the toolbar full-width. */
-  #chart-toolbar { order: 4; flex-basis: 100%; justify-content: flex-start; padding: 2px 0 0; }
+  #chart-toolbar { order: 4; flex-basis: 100%; justify-content: flex-start; padding: 2px 0 0; gap: 4px; row-gap: 5px; }
+  /* B11: the drawing/overlay toolbar was the one control row excluded from the touch-target bump —
+     ~22px tall on the chart-first phone layout. Bring each button up to a fingertip. */
+  #chart-toolbar .ctb-btn { padding: 9px 10px; font-size: 11.5px; }
+  #chart-toolbar .ctb-group { gap: 3px; }
   .b3 td, .b3 th { font-size: 10px; padding: 3px 4px; }
   .b3 .b3-d { font-size: 8.5px; }
 }
@@ -1838,7 +1842,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#128279;<span class="ctb-l">&nbsp;MAGNET</span></button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;<span class="ctb-l">&nbsp;CLEAR</span></button>
             <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
-            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button>
+            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;</button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#128247;</button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
@@ -3550,6 +3554,14 @@ function _renderLegend2(bar){
     '  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>'+
     '  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'+
     '  <span class="dim">V '+_fmtVol(b.v)+'</span>';
+  // Second line: the overlay curves the chart draws are anonymous on hover without this (B11).
+  var mp=window._ovMaps, ind=[];
+  if(mp){
+    if(_ctbTog.vwap && mp.vwap && mp.vwap.has(b.time)) ind.push('<span style="color:#f59e0b">VWAP '+mp.vwap.get(b.time).toFixed(2)+'</span>');
+    if(_ctbTog.ema && mp.ema9 && mp.ema9.has(b.time)) ind.push('<span style="color:#f0f0ee">EMA9 '+mp.ema9.get(b.time).toFixed(2)+'</span>');
+    if(_ctbTog.ema && mp.ema21 && mp.ema21.has(b.time)) ind.push('<span style="color:#6b8cff">EMA21 '+mp.ema21.get(b.time).toFixed(2)+'</span>');
+  }
+  if(ind.length) _h+='<br><span style="font-size:10px">'+ind.join('  ·  ')+'</span>';
   if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h; }   // identical content → zero DOM work
 }
 function _renderChip(){
@@ -3706,6 +3718,35 @@ const _LVL_COLOR={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc1
 const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
   'EM_HI':'EM ▲','EM_LO':'EM ▼','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
   'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
+// Axis-tag priority (B11): confluence is the chart's highest-signal state and, with 14 tags on one
+// axis, its least legible. When two tags fall within a label height, keep the higher-priority one's
+// axis label and drop the other's (the line stays; only its number hides). Dealer structure outranks
+// session levels; VWAP sits between.
+const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
+  'PMH':4,'PML':4,'ORH':4,'ORL':4,'AHH':3,'AHL':3,'YDH':3,'YDL':3};
+function _lvlCollide(){
+  try{
+    if(window._lvlUsePL) return;   // % modes draw the ladder as price lines; this governs line-series tags
+    if(!(window.innerWidth>=769)) return;   // tags are desktop-only anyway
+    var items=[];
+    for(var k in _novoLvlSeries){
+      var px=(window._lvlPx&&window._lvlPx[k]); if(!(px>0)) continue;
+      var y=null; try{ y=_novoSeries.priceToCoordinate(px); }catch(_e){}
+      if(y===null) continue;
+      items.push({k:k,y:y,prio:(_LVL_PRIO[k]||1)});
+    }
+    items.sort(function(a,b){ return a.y-b.y; });
+    var shown=[];   // y-coords whose label is kept
+    // Walk high-priority first so a strong tag claims its slot; a weaker tag within 13px hides.
+    items.slice().sort(function(a,b){ return b.prio-a.prio; }).forEach(function(it){
+      var clash=shown.some(function(y){ return Math.abs(y-it.y)<13; });
+      it.keep=!clash; if(!clash) shown.push(it.y);
+    });
+    items.forEach(function(it){
+      try{ _novoLvlSeries[it.k].applyOptions({lastValueVisible:(_ctbTog.lvl && it.keep)}); }catch(_e){}
+    });
+  }catch(_e){}
+}
 // ── SPLIT VIEW (2026-08-31, Jake; built FULL same day — "shouldn't the split chart match levels,
 // timeframe adjustment and all... gotta build it full") ───────────────────────────────────────
 // A second ticker as a REAL pane: candles at the main TF, the FULL labelled level set, VWAP +
@@ -4053,6 +4094,26 @@ function _scaleMenuRender(){
     });
   });
 }
+(function(){
+  var fb=document.getElementById('ctb-full');
+  if(fb) fb.addEventListener('click',function(){
+    try{ var card=document.getElementById('card-spy')||document.getElementById('novo-chart');
+      if(document.fullscreenElement){ document.exitFullscreen(); } else if(card && card.requestFullscreen){ card.requestFullscreen(); }
+    }catch(_e){}
+  });
+  var sb=document.getElementById('ctb-shot');
+  if(sb) sb.addEventListener('click',function(){
+    try{
+      var cv=_novoChart.takeScreenshot(); if(!cv) return;
+      // Stamp the watermark so a shared shot is attributed. Sandbox-safe: open the dataURL in a tab
+      // (a download link is inert inside the artifact/app sandbox).
+      var ctx=cv.getContext('2d');
+      if(ctx){ ctx.save(); ctx.font='700 13px monospace'; ctx.fillStyle='rgba(255,255,255,0.5)';
+        ctx.textAlign='right'; ctx.fillText('NoVo · '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf), cv.width-12, cv.height-12); ctx.restore(); }
+      var url=cv.toDataURL('image/png'); var w=window.open(); if(w) w.document.write('<img src="'+url+'" style="max-width:100%">');
+    }catch(_e){}
+  });
+})();
 (function(){
   var b=document.getElementById('ctb-scale'); if(!b) return;
   b.addEventListener('click',function(ev){
@@ -4412,6 +4473,9 @@ async function loadNovoChart(){
       if(_novoVwap){ _novoVwap.setData(_view.vwap||[]); }   // VWAP curve
       if(_novoEma9){ _novoEma9.setData(_view.ema9||[]); }   // EMA9 white
       if(_novoEma21){ _novoEma21.setData(_view.ema21||[]); } // EMA21 navy
+      // B11: time-keyed maps so the crosshair legend can name the overlay curves at the hovered bar.
+      var _mk=function(a){ var m=new Map(); (a||[]).forEach(function(p){ m.set(p.time,p.value); }); return m; };
+      window._ovMaps={vwap:_mk(_view.vwap),ema9:_mk(_view.ema9),ema21:_mk(_view.ema21)};
     } else {
       try{   // tip-only move: same length, same penultimate → last point time matches, update() replaces in place
         if(_novoEma9&&_view.ema9&&_view.ema9.length) _novoEma9.update(_view.ema9[_view.ema9.length-1]);
@@ -4542,6 +4606,7 @@ async function loadNovoChart(){
       });
     }
     try{ _lvlSyncPLs(); }catch(_e){}   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
+    try{ _lvlCollide(); }catch(_e){}   // B11: hide lower-priority axis tags that overprint at confluence
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
