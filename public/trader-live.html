@@ -3806,6 +3806,11 @@ async function loadNovoChart(){
       // chart and skip this poll. Only a genuine new session — the first bar's time changes — legitimately
       // resets to fewer bars, and that path re-fits the opening window.
       if(_novoHasData && _firstT === _novoFirstT && _view.candles.length < _novoBarCount){
+        // The chart on screen is GOOD — we are skipping a degraded response, not failing. Leaving
+        // the veil up here is what stranded it over a live chart reading "slow connection —
+        // retrying" (Jake, 2026-09-01): this return sits above the paint's _veilOff(), so once a
+        // short response landed while a switch veil was up, nothing ever took it down again.
+        _veilOff();
         return;
       }
       // HA mode swaps only what is DRAWN. The transform is O(n) over ~3k bars — recomputed per
@@ -3835,6 +3840,7 @@ async function loadNovoChart(){
       _novoHaC = _ctbTog.ha ? _drawC : null;
       _novoHaMap = _ctbTog.ha ? new Map(_drawC.map(function(c){ return [c.time, c]; })) : null;
       try{ _svpCalc(); }catch(_e){}
+      window._paintAt=Date.now();   // last time real candles reached the screen — the supervisor's proof the chart is alive
       _veilOff();
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
       try{ _renderChip(); }catch(_e){}
@@ -4070,6 +4076,14 @@ function _laneCheck(kick){
   try{
     // 2) The HTTP poll chains. Ticks stamp _ncTickAt/_abTickAt; a chain that hasn't ticked in 30s
     //    is dead (thrown outside its try, killed by a frozen renderer, anything) — re-arm it.
+    // A VEIL OVER A LIVE CHART IS A LIE. Whatever put it up, if real candles have painted inside
+    // the last 20s the chart is demonstrably current, so take it down rather than leave a
+    // "retrying" spinner sitting over data the viewer can read (Jake, 2026-09-01). This is the
+    // backstop for any future path that shows the veil and returns before the paint's own clear.
+    if(now-(window._paintAt||0)<20000){
+      var _v2=document.getElementById('chart-veil');
+      if(_v2&&_v2.classList.contains('on')) _veilOff();
+    }
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
     if(_splitOn() && (kick || now-(window._c2TickAt||0)>30000)) _c2Run();
