@@ -148,4 +148,49 @@ async function bundlePitch({ email, question, ledger, kv, commit }) {
   }
 }
 
-module.exports = { bundlePitch, touchesEquities, CARD, PROMPT_LINE, EQUITY_TOOLS, COOLDOWN_S };
+// Tools that are NOT an equity signal. Kept explicitly rather than as "everything else", because
+// "everything else" is what let EQUITY_TOOLS rot silently in the first place.
+const CRYPTO_TOOLS = new Set([
+  "get_chain_token", "get_chain_alerts", "get_crypto_map", "get_crypto_history",
+  "get_crypto_breadth", "get_chain_history",
+]);
+const NEUTRAL_TOOLS = new Set([
+  "search_journal", "search_news", "get_economic_calendar", "get_quote", "get_earnings_dates",
+  "set_alert", "list_alerts", "cancel_alert", "update_reader_memory",
+  "describe_archive", "query_archive", "get_recent_reads",
+]);
+
+/**
+ * DRIFT CHECK — the next tool somebody adds must not be silently invisible here.
+ *
+ * EQUITY_TOOLS is ten hand-typed names. Nothing connected it to the actual tool registry, so a new
+ * equity tool added to _lib/tools.js would simply never trigger the upsell's ledger backstop, and
+ * NO test would fail — the suite would stay green because green is also what "correctly stayed
+ * silent" looks like. Einstein's formulation, from the same class of bug in the privacy walls: a
+ * filter only catches the names it thought of.
+ *
+ * So instead of asserting the ten, this asserts the PARTITION: every tool the model can actually
+ * call must be classified as equity, crypto or neutral. Add a tool and classify it — or this
+ * reports it as unclassified, by name, on the health endpoint. Names here that no longer exist in
+ * the registry are reported too, since a renamed tool leaves a dead entry behind.
+ *
+ * Reporting, never throwing. A misclassification must not be able to take the analyst down; the
+ * whole point of this feature is that it is a marketing surface bolted to a paid one.
+ */
+function auditToolSets() {
+  let declared = [];
+  try { declared = (require("./tools.js").declarations || []).map((d) => d && d.name).filter(Boolean); }
+  catch (e) { return { ok: false, error: "tool registry unreadable: " + e.message }; }
+  const known = new Set([...EQUITY_TOOLS, ...CRYPTO_TOOLS, ...NEUTRAL_TOOLS]);
+  const unclassified = declared.filter((n) => !known.has(n));
+  const stale = [...known].filter((n) => !declared.includes(n));
+  const ok = unclassified.length === 0 && stale.length === 0;
+  if (!ok) {
+    console.error("[upsell] TOOL SET DRIFT — unclassified:", unclassified.join(", ") || "none",
+                  "| stale:", stale.join(", ") || "none");
+  }
+  return { ok, declared: declared.length, unclassified, stale };
+}
+
+module.exports = { bundlePitch, touchesEquities, auditToolSets, CARD, PROMPT_LINE,
+                   EQUITY_TOOLS, CRYPTO_TOOLS, NEUTRAL_TOOLS, COOLDOWN_S };

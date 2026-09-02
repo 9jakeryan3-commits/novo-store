@@ -51,10 +51,30 @@ function link(email) {
   return `${SITE}/api/unsubscribe?e=${encodeURIComponent(String(email).toLowerCase())}&s=${sig}`;
 }
 
-// Remove from BOTH audiences — a paid subscriber who joined the free list is in each, and an opt-out
-// that only clears one keeps sending.
+// Remove from EVERY audience — a paid subscriber who joined the free list is in each, and an
+// opt-out that only clears one keeps sending.
+//
+// ⚠ THE CRYPTO AUDIENCE WAS MISSING, AND THAT MADE THIS A BROKEN PROMISE RATHER THAN AN OVERSIGHT.
+// RESEND_CRYPTO_AUDIENCE_ID has existed since the $79 product shipped and webhook-sub.js adds every
+// crypto subscriber to it (three call sites). This list did not include it, so a crypto subscriber
+// who clicked "unsubscribe", saw the confirmation page, and reasonably believed they were done
+// went on receiving crypto mail indefinitely. An unsubscribe link that does not unsubscribe you is
+// the one bug in this file that is a compliance problem and not a tidiness one.
+//
+// Built from the ENV rather than a hand-kept list for exactly the reason it broke: the audience
+// existed and this array did not know about it. Any RESEND_*_AUDIENCE_ID is now swept in
+// automatically, so the next product's list is covered the day its env var is set — nobody has to
+// remember to come back here. Same fix shape as the entitlement price sets: derive, don't retype.
+function _audienceIds() {
+  return Object.keys(process.env)
+    .filter((k) => /^RESEND_.*AUDIENCE(_ID)?$/.test(k))
+    .map((k) => String(process.env[k] || '').trim())
+    .filter(Boolean)
+    .filter((v, i, a) => a.indexOf(v) === i);   // one id under two names must not be touched twice
+}
+
 async function optOut(email) {
-  const ids = [process.env.RESEND_AUDIENCE_ID, process.env.RESEND_ANALYST_AUDIENCE_ID].filter(Boolean);
+  const ids = _audienceIds();
   let done = 0;
   for (const audienceId of ids) {
     try {

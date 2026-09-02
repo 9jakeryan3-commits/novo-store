@@ -221,5 +221,37 @@ async function entitlements(email) {
   }
 }
 
+/**
+ * DRIFT CHECK — a price that entitles nobody.
+ *
+ * These sets are the only thing standing between a paying subscriber and a locked product, and
+ * they are maintained by hand across five files. The failure is silent and one-directional: add a
+ * new Stripe price to a checkout handler, forget the entitlement set, and checkout SUCCEEDS while
+ * the product stays shut. The customer has paid and cannot get in, and nothing errors anywhere.
+ *
+ * Stripe is the real source of truth and cannot be consulted at module load, so this checks the
+ * next best thing: every STRIPE_PRICE_* env var this deployment actually has must be classified by
+ * one of the sets. That is the same list the checkout handlers select from, so a price wired into
+ * a checkout without being wired into entitlement shows up here by variable name.
+ *
+ * Reports, never throws — a false alarm must not be able to break the paywall it is watching.
+ * Values are never returned or logged, only variable NAMES: a price id is not a secret but this
+ * runs on a public endpoint, and the habit is worth keeping.
+ */
+function auditPriceSets() {
+  const known = new Set([...ANALYST_PRICE_IDS, ...CRYPTO_PRICE_IDS]);
+  // Trader/licence prices are entitlement-by-exclusion (an item that is neither Analyst nor Crypto
+  // IS the Trader item), so they are deliberately not in either set and must not be flagged.
+  const TRADER_VARS = /^STRIPE_PRICE_(SUB|TRADER)/;
+  const unclassified = Object.keys(process.env)
+    .filter((k) => /^STRIPE_PRICE_/.test(k) && !TRADER_VARS.test(k))
+    .filter((k) => { const v = String(process.env[k] || "").trim(); return v && !known.has(v); });
+  if (unclassified.length) {
+    console.error("[entitlements] PRICE SET DRIFT — env prices in no entitlement set:",
+                  unclassified.join(", "));
+  }
+  return { ok: unclassified.length === 0, unclassified };
+}
+
 module.exports = { analystEntitlement, entitlements, subGrantsAnalyst, subGrantsCrypto,
-                   ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };
+                   auditPriceSets, ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };

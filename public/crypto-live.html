@@ -1682,7 +1682,8 @@ function takerFlowPanel(d, g){
   // flow_by_strike, renamed from "strikes" 2026-09-02: analyst-ask.js::_trim deletes that key by
   // NAME from NoVo's grounding, so the panel drew correctly while he could not see the data.
   // The || is a transition shim -- the collector and this deploy land independently, so for one
-  // 5-minute pass a snapshot may still carry the old name. Safe to drop after that.
+  // pass a snapshot may still carry the old name. Safe to drop after one. (Said "5-minute pass"
+  // when written this morning; the pass is really 8-17 min, median ~11 — measured, not assumed.)
   const ks = (t.flow_by_strike || t.strikes || []).slice();
   const mx = ks.reduce((a, r) => Math.max(a, Math.abs(r[1])), 0) || 1;
   const bars = ks.map(function(r){
@@ -2061,7 +2062,20 @@ async function load(){
     `<div class="dstat"><span>Quarantined</span><b>${hl.quarantined||0}</b></div>`+
     (b.median_round_trip_pct?`<div class="dstat"><span>Median round trip</span><b>${b.median_round_trip_pct.toFixed(3)}%</b></div>`:'')+
     `<div class="dstat"><span>Last pass</span><b>${SNAP.age_min!=null?SNAP.age_min+'m ago':'\u2014'}</b></div>`+
-    `<div class="dstat"><span>Pass cadence</span><b>every 5 min</b></div>`+
+    // "Pass cadence: every 5 min" was here and is DELETED rather than re-numbered (2026-09-02).
+    // It was hardcoded and false \u2014 measured 8-17 minutes across a day \u2014 and it sat immediately
+    // beside "Last pass", which renders the REAL age. So on a 13-minute pass the panel said
+    // "13m ago" and "every 5 min" side by side and contradicted itself on screen, which is worse
+    // than saying nothing: it teaches a reader to distrust the numbers next to it.
+    //
+    // Not replaced with "every 11 min" either. A hardcoded constant describing a quantity that
+    // VARIES is the defect itself, not the specific number \u2014 the next drift makes it wrong again
+    // and nothing fails. Deriving a real cadence would need observed pass-interval history the
+    // client does not have, and one sampled gap is not a cadence.
+    //
+    // Nothing is lost. "Last pass" already answers the question this tile pretended to
+    // ("how fresh is what I am looking at?") and answers it truthfully, and "Spot & net GEX:
+    // streamed" carries the live half beside it.
     `<div class="dstat"><span>Spot &amp; net GEX</span><b>streamed</b></div>`;
   if(window._askShow) window._askShow();
   // A remembered coin can drop out of the map, and a hash is just whatever someone typed,
@@ -2736,9 +2750,12 @@ window.addEventListener('hashchange', function(){
 
 load();
 /* ---------------- LIVE GAMMA ----------------------------------------------------
-   The pass runs every five minutes. Net GEX, the regime and the distance to the flip
-   all move with SPOT, and spot moves constantly - so waiting five minutes to redraw
-   the one number people watch is the whole gap between this and a $29 tool.
+   The pass runs on the order of ten minutes - measured 8-17, median ~11 across 77 intervals,
+   and NEVER the "five minutes" this comment used to assert (Xavier, 2026-09-02). The argument
+   below does not weaken with the correction, it gets stronger: net GEX, the regime and the
+   distance to the flip all move with SPOT, spot moves constantly, and waiting a whole pass to
+   redraw the one number people watch is the entire gap between this and a $29 tool. The slower
+   the pass, the more the streamed half is doing the work.
 
    The book is the slow half: open interest and IV per strike barely move between
    passes. Spot is the fast half. So the collector ships `gamma.curve` - net GEX

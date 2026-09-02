@@ -20,13 +20,38 @@ const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
 // reads for free). This pass reconciles the Analyst Resend audience against Stripe. FAIL SAFE like the
 // license pass: it only removes a contact when Stripe gives POSITIVE evidence of a dead sub AND no active
 // paid sub — a contact with NO Stripe sub at all (a possible manual/comp add) is always left alone.
-async function reconcileAnalyst() {
-  if (!resend || !ANALYST_AUD) return { checked: 0, removed: 0, kept: 0, skipped: 0 };
+// ── PARAMETERISED BY AUDIENCE (2026-09-02) ───────────────────────────────────────────────────
+// This ran on the Analyst audience alone. The CRYPTO audience has existed since the $79 product
+// shipped — webhook-sub.js adds every crypto subscriber to it — and nothing ever reconciled it, so
+// a cancelled crypto subscriber stayed on a paid list forever. Same defect as api/unsubscribe.js
+// omitting it, from the same cause: a hand-kept list of audiences that a new product outgrew.
+//
+// SEMANTIC SHARPENING, stated out loud rather than smuggled in: the "still paying" test WAS
+// `subs.some(live)` — any live subscription at all kept you on the paid Analyst list. That is
+// right for Analyst almost by accident (Trader includes Analyst) and would be WRONG for crypto,
+// where a live Trader grants nothing. Both passes now ask the precise question via the shared
+// grant helpers in _lib/entitlements.js — the same functions the paywall and the upsell use, so
+// there is one definition of "this subscription includes X" instead of three.
+//
+// Everything else is unchanged, including the fail-safe direction: a contact is removed ONLY on
+// positive Stripe evidence of a dead sub AND nothing live that grants this product. No Stripe
+// customer at all (a manual/comp add) is always left alone.
+const { subGrantsAnalyst, subGrantsCrypto } = require('./_lib/entitlements.js');
+
+async function reconcileAudience(audId, label, grants) {
+  // LOUD, not silent. This used to return all-zeros when unconfigured, which is byte-identical to
+  // "ran and found nothing to do" — a number that cannot distinguish the two states it exists to
+  // report. A cron that has never run once looks exactly like a clean estate.
+  if (!resend || !audId) {
+    console.warn(`[reconcile-subs] ${label}: NOT RUN — ${!resend ? 'RESEND_API_KEY missing' : 'audience id missing'}`);
+    return { ran: false, reason: !resend ? 'no-resend-key' : 'no-audience-id',
+             checked: 0, removed: 0, kept: 0, skipped: 0 };
+  }
   let contacts = [];
   try {
-    const r = await resend.contacts.list({ audienceId: ANALYST_AUD });
+    const r = await resend.contacts.list({ audienceId: audId });
     contacts = Array.isArray(r?.data?.data) ? r.data.data : (Array.isArray(r?.data) ? r.data : []);
-  } catch (e) { console.error('[reconcile-subs] analyst list failed:', e.message); return { checked: 0, removed: 0, kept: 0, skipped: 0, error: e.message }; }
+  } catch (e) { console.error(`[reconcile-subs] ${label} list failed:`, e.message); return { ran: false, reason: 'list-failed', checked: 0, removed: 0, kept: 0, skipped: 0, error: e.message }; }
   let checked = 0, removed = 0, kept = 0, skipped = 0;
   for (const c of contacts) {
     const email = c && c.email; if (!email) continue;
@@ -51,15 +76,23 @@ async function reconcileAnalyst() {
       }
     } catch (e) { skipped++; continue; }              // can't confirm with Stripe → leave alone (fail safe)
     if (subs.length === 0) { skipped++; continue; }    // no Stripe sub at all → possible manual/comp contact; never auto-remove
-    if (subs.some(s => ['active', 'trialing', 'past_due'].includes(s.status))) { kept++; continue; }  // still paying (incl. Trader)
+    // Still entitled to THIS audience's product — not merely "still paying for something". A live
+    // Trader grants Analyst and grants no crypto, which is why this has to be per-audience.
+    if (subs.some(s => ['active', 'trialing', 'past_due'].includes(s.status) && grants(s))) { kept++; continue; }
     if (subs.some(s => ['canceled', 'unpaid', 'incomplete_expired'].includes(s.status))) {
-      try { await resend.contacts.remove({ audienceId: ANALYST_AUD, email }); } catch (_) {}
+      try { await resend.contacts.remove({ audienceId: audId, email }); } catch (_) {}
       if (FREE_AUD && !isReservedEmail(email)) { try { await resend.contacts.create({ audienceId: FREE_AUD, email, unsubscribed: false }); } catch (_) {} }
       removed++;
     } else { skipped++; }
   }
-  return { checked, removed, kept, skipped };
+  return { ran: true, checked, removed, kept, skipped };
 }
+
+// The two paid audiences. CRYPTO_AUD read here rather than at module top so an env var added
+// without a redeploy is still picked up on the next cold start, same as the others.
+const reconcileAnalyst = () => reconcileAudience(ANALYST_AUD, 'analyst', subGrantsAnalyst);
+const reconcileCrypto = () =>
+  reconcileAudience(process.env.RESEND_CRYPTO_AUDIENCE_ID, 'crypto', subGrantsCrypto);
 
 async function lsGet(path) {
   const r = await fetch(`${LS}${path}`, { headers: { 'X-Admin-Key': ADMIN_KEY } });
@@ -117,11 +150,17 @@ module.exports = async (req, res) => {
       // active / trialing / incomplete -> healthy or pending: leave alone
     }
 
-    let analyst = { checked: 0, removed: 0, kept: 0, skipped: 0 };
+    // `ran: false` is the default, so a pass that THREW is reported as not-run rather than as a
+    // clean zero. Same reason the unconfigured branch says so out loud: every zero on this
+    // endpoint has to be attributable to either "nothing to do" or "never happened".
+    let analyst = { ran: false, reason: 'pass-threw', checked: 0, removed: 0, kept: 0, skipped: 0 };
+    let cryptoAud = { ran: false, reason: 'pass-threw', checked: 0, removed: 0, kept: 0, skipped: 0 };
     try { analyst = await reconcileAnalyst(); } catch (e) { console.error('[reconcile-subs] analyst pass error:', e.message); }
+    try { cryptoAud = await reconcileCrypto(); } catch (e) { console.error('[reconcile-subs] crypto pass error:', e.message); }
 
-    console.log(`[reconcile-subs] licenses checked=${checked} suspended=${suspended} cancelled=${cancelled} skipped=${skipped} | analyst checked=${analyst.checked} removed=${analyst.removed} kept=${analyst.kept} skipped=${analyst.skipped}`);
-    return res.status(200).json({ checked, suspended, cancelled, skipped, analyst });
+    const fmt = (n, a) => `${n} ${a.ran ? `checked=${a.checked} removed=${a.removed} kept=${a.kept} skipped=${a.skipped}` : `NOT RUN (${a.reason})`}`;
+    console.log(`[reconcile-subs] licenses checked=${checked} suspended=${suspended} cancelled=${cancelled} skipped=${skipped} | ${fmt('analyst', analyst)} | ${fmt('crypto', cryptoAud)}`);
+    return res.status(200).json({ checked, suspended, cancelled, skipped, analyst, crypto: cryptoAud });
   } catch (err) {
     console.error('[reconcile-subs] error:', err.message);
     return res.status(500).json({ error: 'Reconcile failed' });
