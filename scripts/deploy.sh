@@ -112,14 +112,24 @@ if [ -n "$PREV" ] && git cat-file -e "${PREV}^{commit}" 2>/dev/null; then
 fi
 
 echo ".. verifying"
-VERIFIED=""
-for i in 1 2 3 4 5 6 7 8 9 10; do
+# 2 minutes, not 40 seconds. The old check compared index.html, a STATIC file that is live the
+# moment the alias moves; the build stamp lives in /api/health, a serverless FUNCTION, and a new
+# function takes noticeably longer to answer at the alias. First real use of the stricter check
+# reported "did not verify" on a deploy that was in fact perfectly healthy and serving the right
+# commit seconds later -- a false negative caused purely by inheriting the old window.
+#
+# A stricter signal has earned more patience: the failure it is protecting against (a deploy that
+# never landed) does not resolve itself in the extra ninety seconds, and the one it was reporting
+# does.
+VERIFIED=""; LAST_SEEN=""
+for i in $(seq 1 30); do
   # 1. STRONGEST: the build stamp the deployment itself carries. Proves the running code is this
   #    commit, regardless of which files moved. null/absent means unknown -- never treat it as a
   #    match (see api/health.js).
   LIVE_SHA=$(curl -s --max-time 10 "https://novo-options.trade/api/health?v=$RANDOM" \
              | grep -oE '"sha"[[:space:]]*:[[:space:]]*"[0-9a-f]{7,40}"' | grep -oE '[0-9a-f]{7,40}' | head -1 || true)
   if [ -n "$LIVE_SHA" ]; then
+    LAST_SEEN="$LIVE_SHA"
     case "$LOCAL" in "$LIVE_SHA"*) VERIFIED="build stamp"; break;; esac
   fi
 
@@ -150,7 +160,15 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
 done
 
 if [ -z "$VERIFIED" ]; then
-  echo "!! production did not verify after 40s"; exit 1
+  # Say WHAT was serving. "did not verify" alone cannot distinguish "the alias never moved" from
+  # "the alias is still on the previous build" from "something is broken", and those need
+  # different reactions.
+  if [ -n "$LAST_SEEN" ]; then
+    echo "!! production did not verify after 120s -- alias still serving $LAST_SEEN, wanted $LOCAL"
+  else
+    echo "!! production did not verify after 120s -- no build stamp answered and no changed file matched"
+  fi
+  exit 1
 fi
 mkdir -p .vercel && printf '%s' "$LOCAL" > "$STAMP"
 if [ "$VERIFIED" = "index.html only" ]; then
