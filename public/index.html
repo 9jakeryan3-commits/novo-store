@@ -206,14 +206,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Who this is for ── */
   .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .for-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 24px; }
+  .for-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
   .for-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .for-card h3.green { color: var(--green); }
   .for-card h3.red { color: var(--red); }
   .for-card ul { list-style: none; }
-  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--bdr); display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--bdr); line-height: 1.5; }
   .for-card li:last-child { border-bottom: none; }
-  .for-card li .mark { flex-shrink: 0; font-weight: 700; margin-top: 1px; }
+  .for-card li .mark { font-weight: 700; margin-right: 9px; }
   .for-card.yes .mark { color: var(--green); }
   .for-card.no .mark { color: var(--red); }
 
