@@ -365,6 +365,10 @@ tr:last-child td{border-bottom:none}
     font-size:10px;letter-spacing:.08em;text-transform:uppercase}
   .tt td{padding:4px 6px;border-bottom:1px solid var(--bdr2);color:var(--txt2)}
   .tt td.num,.tt th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .scrb{background:var(--sunk);border:1px solid var(--bdr2);color:var(--txt3);font:inherit;
+    font-size:11px;padding:5px 11px;border-radius:7px;cursor:pointer;transition:all .12s}
+  .scrb:hover{border-color:var(--cx);color:var(--txt1)}
+  .scrb.on{background:rgba(167,139,250,.14);border-color:var(--cx);color:var(--txt1);font-weight:700}
   .tt tbody tr:last-child td{border-bottom:none}
   .fnote{font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.5;font-family:var(--mono)}
   .hrow{display:flex;align-items:center;gap:8px;margin-bottom:3px}
@@ -1181,6 +1185,10 @@ function drawRail(filter=''){
     h += `<div class="bandhead">What just fired &middot; ${n0(fired)}</div>
       <div class="coin ${FEED?'on':''}" data-feed="1">
         <span class="c">Live reads</span><span class="p">${n0(fresh)} open</span></div>`;
+
+  h += `<div class="bandhead">Across the book</div>
+    <div class="coin ${SCREEN?'on':''}" data-screen="1">
+      <span class="c">Screener</span><span class="p">${Object.keys(SNAP.coins).length} coins</span></div>`;
   }
   for(const b of ['A','B','C']){
     const grp=rows.filter(c=>c.band===b).sort((x,y)=>(y.oi_usd||0)-(x.oi_usd||0));
@@ -1211,12 +1219,14 @@ function drawRail(filter=''){
   $('#rail').innerHTML=h;
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
+  document.querySelectorAll('.coin[data-screen]').forEach(el=>
+    el.onclick=()=>{SCREEN=true;FEED=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawScreener();});
   document.querySelectorAll('.coin[data-feed]').forEach(el=>
-    el.onclick=()=>{FEED=true;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();});
+    el.onclick=()=>{FEED=true;SCREEN=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();});
   document.querySelectorAll('.coin[data-c]').forEach(el=>
-    el.onclick=()=>{FEED=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+    el.onclick=()=>{FEED=false;SCREEN=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
   document.querySelectorAll('.coin[data-tok]').forEach(el=>
-    el.onclick=()=>{FEED=false;TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
+    el.onclick=()=>{FEED=false;SCREEN=false;TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
       document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
 }
 
@@ -1241,7 +1251,7 @@ function drawReadStrip(){
        <span style="color:var(--txt4)">&middot; ${_ago(r.ts_utc)}</span></span>`).join('');
   el.innerHTML = `<span class="rs-ico">\u26a1</span><span class="rs-body">${rows}</span>`+
     `<span class="rs-more">${n0(_reads('last_24h', fd.length))} reads &rsaquo;</span>`;
-  el.onclick = () => { FEED = true; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed(); };
+  el.onclick = () => { FEED = true; SCREEN = false; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed(); };
 }
 
 /* ---------------- what just fired ----------------
@@ -1320,9 +1330,132 @@ function drawFeed(){
    major-venue perp, so gamma, the flip and the walls do not exist for them -- rendering those empty
    would read as missing data rather than as inapplicable. What they have is depth, turnover and the
    wallets behind it, which for an asset whose dominant risk is exit is the honest read. */
-let TOK = null, FEED = false;
+let TOK = null, FEED = false, SCREEN = false;
 const NETLABEL = {robinhood:'Robinhood Chain', solana:'Solana', base:'Base'};
 function _pctv(n){ return n==null?'—':(n>=0?'+':'')+n.toFixed(1)+'%'; }
+/* ---------------- THE SCREENER ----------------
+   The product expression of mapping ninety coins instead of four. Every column here is a
+   MEASURED one this map already publishes per coin, ranked across the whole book at once:
+   what a round trip actually costs, how far the venues disagree about funding, where open
+   interest sits against that coin's own history, what got liquidated, and the dealer read on
+   the seven with a real options book.
+
+   The funding column is the one nobody else can print. Every other dashboard blends venues into
+   a single funding number; this corpus refuses to, so the honest cross-book column is the
+   SPREAD -- the gap between the venue paying most and the venue paying least on the same coin
+   at the same moment. A blended average hides exactly that.
+
+   Sorting is descriptive, never predictive: these are rankings of things that have happened,
+   not a list of trades to take. No column is a signal and none is labelled as one. */
+let SCR_SORT = 'oi', SCR_DIR = -1, SCR_BAND = '';
+
+function _scrRows(){
+  const liq = {};
+  for(const x of ((SNAP.health&&SNAP.health.liquidations_24h)||[])){
+    liq[x.asset_code] = (liq[x.asset_code]||0) + (x.usd||0);
+  }
+  const H = SNAP.hist || {};
+  return Object.entries(SNAP.coins).map(function([k,c]){
+    const f = (c.positioning&&c.positioning.funding)||[];
+    const ann = f.map(x=>x.annualized_pct).filter(v=>v!=null);
+    const h = H[k]||{};
+    // The percentile travels with its own n; a rank off three samples is not a rank.
+    const oiP = h.oi&&h.oi.pct!=null ? h.oi : null;
+    return {
+      asset:k, band:c.band, price:c.price,
+      d1: c.chg&&c.chg.d1!=null ? c.chg.d1 : null,
+      cost: c.round_trip_pct!=null ? c.round_trip_pct : null,
+      oi: c.oi_usd||0,
+      oiPct: oiP?oiP.pct:null, oiN: oiP?oiP.n:null,
+      venues: ann.length,
+      fLo: ann.length?Math.min(...ann):null,
+      fHi: ann.length?Math.max(...ann):null,
+      fSpread: ann.length>1 ? Math.max(...ann)-Math.min(...ann) : null,
+      liq: liq[k]||0,
+      gex: c.gamma&&c.gamma.net_gex!=null ? c.gamma.net_gex : null,
+    };
+  });
+}
+
+const SCR_COLS = [
+  ['asset', 'Coin',            false],
+  ['price', 'Price',           true ],
+  ['d1',    '24h',             true ],
+  ['cost',  'Round trip',      true ],
+  ['fSpread','Funding spread', true ],
+  ['oi',    'Open interest',   true ],
+  ['oiPct', 'OI vs own hist',  true ],
+  ['liq',   'Liquidated 24h',  true ],
+  ['gex',   'Net GEX',         true ],
+];
+
+function drawScreener(){
+  $('#sym').textContent = 'Screener';
+  $('#px').textContent = '';
+  let rows = _scrRows();
+  if(SCR_BAND) rows = rows.filter(r=>r.band===SCR_BAND);
+  const nA = rows.filter(r=>r.band==='A').length;
+  $('#headmeta').innerHTML =
+    `<span class="tag t-n">${rows.length} coins</span><span class="tag t-n">${nA} with a dealer map</span>`;
+  rows.sort(function(a,b){
+    const va=a[SCR_SORT], vb=b[SCR_SORT];
+    if(va==null&&vb==null) return 0;
+    if(va==null) return 1;          // missing always sinks, whichever way the column is sorted
+    if(vb==null) return -1;
+    if(typeof va==='string') return SCR_DIR*va.localeCompare(vb);
+    return SCR_DIR*(va-vb);
+  });
+  const head = SCR_COLS.map(function(c){
+    const on = SCR_SORT===c[0];
+    return `<th class="${c[2]?'num':''}" data-sort="${c[0]}" style="cursor:pointer;${on?'color:var(--cx)':''}">${c[1]}${on?(SCR_DIR<0?' ▾':' ▴'):''}</th>`;
+  }).join('');
+  const body = rows.map(function(r){
+    return `<tr data-c="${r.asset}" style="cursor:pointer">
+      <td><b>${r.asset}</b> <span style="color:var(--txt4);font-size:10px">${r.band}</span></td>
+      <td class="num mono">${r.price!=null?px(r.price):'—'}</td>
+      <td class="num ${r.d1==null?'':(r.d1>=0?'up':'dn')}">${r.d1==null?'—':(r.d1>=0?'+':'')+r.d1.toFixed(2)+'%'}</td>
+      <td class="num">${r.cost==null?'—':r.cost.toFixed(2)+'%'}</td>
+      <td class="num" title="${r.fLo!=null?`${r.fLo.toFixed(2)}% to ${r.fHi.toFixed(2)}% annualised across ${r.venues} venues`:''}">${r.fSpread==null?'—':r.fSpread.toFixed(2)+'pt'}</td>
+      <td class="num">${r.oi?money(r.oi):'—'}</td>
+      <td class="num ${r.oiPct!=null&&(r.oiPct>=90||r.oiPct<=10)?'am':''}" title="${r.oiN?r.oiN+' logged readings':''}">${r.oiPct==null?'—':r.oiPct.toFixed(0)+'th'}</td>
+      <td class="num">${r.liq?money(r.liq):'—'}</td>
+      <td class="num ${r.gex==null?'':(r.gex>=0?'up':'dn')}">${r.gex==null?'—':money(r.gex)}</td></tr>`;
+  }).join('');
+  const bandBtn = (v,l)=>`<button type="button" data-band="${v}" class="scrb${SCR_BAND===v?' on':''}">${l}</button>`;
+  $('#body').innerHTML = `<div class="panel"><div class="ph"><h2>The whole book, ranked</h2>
+    <span class="sub">every column measured &middot; click a heading to sort</span></div><div class="pb">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">
+      ${bandBtn('','All')}${bandBtn('A','Dealer map')}${bandBtn('B','Positioning')}${bandBtn('C','Spot only')}
+    </div>
+    <div style="overflow-x:auto"><table class="tt"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.55;font-family:var(--mono)">
+      <b>Funding spread</b> is the gap between the venue paying most and the venue paying least on
+      the same coin at the same moment &mdash; the number a blended funding average destroys, which
+      is why this map never blends. It compares ANNUALISED rates, each normalised to that
+      venue&rsquo;s own settlement interval (hourly on some, 8-hourly on others), so the venues are
+      genuinely comparable; hover a row for its range and venue count. Wide spreads live on thin
+      coins, and that is the point &mdash; it is a dislocation, not an error. <b>Round trip</b> is the broker&rsquo;s own disclosed markup at
+      real size, not an estimate. <b>OI vs own history</b> ranks against that coin&rsquo;s logged
+      readings, not against other coins; hover for the sample size, and amber marks a top or bottom
+      decile. Net GEX exists only on the ${nA} coins with a real options book. Ranking says what
+      HAS happened, never what will &mdash; nothing here is a signal.</div>
+    </div></div>`;
+  document.querySelectorAll('#body th[data-sort]').forEach(function(el){
+    el.onclick = function(){
+      const k = el.dataset.sort;
+      if(SCR_SORT===k) SCR_DIR = -SCR_DIR; else { SCR_SORT = k; SCR_DIR = (k==='asset')?1:-1; }
+      drawScreener();
+    };
+  });
+  document.querySelectorAll('#body .scrb').forEach(function(el){
+    el.onclick = function(){ SCR_BAND = el.dataset.band; drawScreener(); };
+  });
+  document.querySelectorAll('#body tr[data-c]').forEach(function(el){
+    el.onclick = function(){ SCREEN=false; FEED=false; TOK=null; CUR=el.dataset.c; rememberCoin(CUR); BOOK=null;
+      drawRail($('#search')?$('#search').value:''); drawCoin(); };
+  });
+}
+
 function drawChainToken(){
   const t=TOK; if(!t) return;
   $('#sym').textContent=t.symbol||'?';
@@ -1890,7 +2023,7 @@ async function load(){
   // object, so a refresh updates its numbers instead of freezing them.
   if(TOK) TOK=(SNAP.chain||[]).find(x=>x.address===TOK.address&&x.network===TOK.network)||null;
   drawReadStrip();
-  drawRail(); if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
+  drawRail(); if(SCREEN) drawScreener(); else if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
 }
 
 // Back, forward, or a pasted /crypto/live#SOL once the page is already open.
@@ -2696,7 +2829,7 @@ window.cxLive = (function(){
 })();
 
 setInterval(load, 90000);
-window.addEventListener('resize',()=>{ if(SNAP) drawCoin(); });
+window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) drawCoin(); });
 </script>
 </body>
 </html>
