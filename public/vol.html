@@ -48,7 +48,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<script type="application/ld+json">[{"@context":"https://schema.org","@type":"Dataset","name":"Volatility record — VIX, VVIX and SKEW","description":"Daily history of the CBOE volatility indices — VIX, VVIX and SKEW — with each reading placed against its own distribution.","url":"https://novo-options.trade/vol","isAccessibleForFree":true,"creator":{"@type":"Organization","name":"NoVo Options Trading","url":"https://novo-options.trade/","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}},"license":"https://www.cftc.gov/Whatsnew/index.htm","spatialCoverage":"United States","temporalCoverage":"P12W","variableMeasured":["Non-commercial net position","Commercial net position","Open interest"]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"Volatility record","item":"https://novo-options.trade/vol"}]}]</script>
+<script type="application/ld+json">[{"@context":"https://schema.org","@type":"Dataset","name":"Volatility record — VIX1D to VIX6M, dispersion and correlation","description":"Daily history of the CBOE volatility complex — VIX1D, VIX9D, VIX, VIX3M, VIX6M, VVIX, VXN, RVX, SKEW, GVZ, OVX, VXTLT, DSPX dispersion and implied correlation — with each reading placed against its own full history.","url":"https://novo-options.trade/vol","isAccessibleForFree":true,"creator":{"@type":"Organization","name":"NoVo Options Trading","url":"https://novo-options.trade/","logo":{"@type":"ImageObject","url":"https://novo-options.trade/novo-logo.png"}},"license":"https://www.cboe.com/us/indices/","spatialCoverage":"United States","temporalCoverage":"1990-01-02/..","variableMeasured":["VIX1D","VIX9D","VIX","VIX3M","VIX6M","VVIX","VXN","RVX","SKEW","GVZ","OVX","VXTLT","DSPX","COR1M"]},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://novo-options.trade/"},{"@type":"ListItem","position":2,"name":"Volatility record","item":"https://novo-options.trade/vol"}]}]</script>
 <style>
   :root {
     --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --amber:#f59e0b;
@@ -367,7 +367,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="container" style="padding-top:34px;">
   <div class="lbl">Free &middot; no account</div>
   <h1 style="font-size:clamp(26px,4vw,40px);font-weight:900;color:var(--txt1);letter-spacing:-1px;line-height:1.12;margin:0 0 12px;">The volatility record</h1>
-  <p style="font-size:15.5px;color:var(--txt2);line-height:1.7;margin:0;max-width:800px;">VIX back to 1990. The nine-day-to-six-month term structure, vol-of-vol, and how much the tail is being paid for. Every level ranked against its own full history, not a one-year window.</p>
+  <p style="font-size:15.5px;color:var(--txt2);line-height:1.7;margin:0;max-width:800px;">VIX back to 1990. The one-day-to-six-month term structure, dispersion and correlation, vol-of-vol, and how much the tail is being paid for. Every level ranked against its own full history, not a one-year window.</p>
 </div>
 
 <div class="container sec">
@@ -380,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="container sec">
   <div class="lbl">Term structure</div>
   <h2 style="font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-.02em;margin:6px 0 6px;">Is the front stressed, or the whole curve?</h2>
-  <p style="color:var(--txt2);font-size:15px;max-width:70ch;margin:0 0 18px;">VIX1D measures a single day, VIX9D nine, VIX thirty, VIX3M ninety. When the front sits above the back the market is paying up for the next few sessions specifically, which is a different regime from a curve that has lifted all along &mdash; and on a 0DTE desk the one-day index is the front that actually matters.</p>
+  <p style="color:var(--txt2);font-size:15px;max-width:70ch;margin:0 0 18px;">VIX1D measures a single day, VIX9D nine, VIX thirty, VIX3M ninety. Dispersion and implied correlation answer what no single index can &mdash; whether the index is calm because everything is calm, or because its members are cancelling out &mdash; and VXTLT carries the same reading for bonds. When the front sits above the back the market is paying up for the next few sessions specifically, which is a different regime from a curve that has lifted all along &mdash; and on a 0DTE desk the one-day index is the front that actually matters.</p>
   <div id="vol-term" class="card"><div class="muted">Loading&hellip;</div></div>
 </div>
 
