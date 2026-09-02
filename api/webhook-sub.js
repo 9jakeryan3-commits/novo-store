@@ -389,10 +389,11 @@ async function retireTierSubs(email, newSubId, tiers) {
   return done;
 }
 
-// Entitlement caches (crypto-map.js 'ent:crypto:', trader-live.js 'ent:trader:') hold a
-// verdict for up to 600s (allow) / 120s (deny). Purge both the moment a subscription is
-// born or dies, so a new subscriber is never stuck behind a stale deny and a canceller
-// does not coast on a stale allow. Same sha256(email)[:24] recipe both endpoints use.
+// Entitlement caches (crypto-map.js 'ent:crypto:', trader-live.js 'ent:trader:',
+// analyst-publish.js 'ent:analyst:') hold a verdict for up to 600s (allow) / 120s (deny).
+// Purge all three the moment a subscription is born or dies, so a new subscriber is never
+// stuck behind a stale deny and a canceller does not coast on a stale allow. Same
+// sha256(email)[:24] recipe every endpoint uses.
 async function entCachePurge(email) {
   try {
     const norm = String(email || '').trim().toLowerCase();
@@ -402,6 +403,7 @@ async function entCachePurge(email) {
     const h = require('crypto').createHash('sha256').update(norm).digest('hex').slice(0, 24);
     try { await r.del('ent:crypto:' + h); } catch (_) {}
     try { await r.del('ent:trader:' + h); } catch (_) {}
+    try { await r.del('ent:analyst:' + h); } catch (_) {}
   } catch (_) { /* cache purge is best-effort by definition */ }
 }
 

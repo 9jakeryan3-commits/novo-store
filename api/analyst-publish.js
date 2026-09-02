@@ -182,6 +182,64 @@ function _subIsAnalyst(sub) {
   try { return (sub?.items?.data || []).some(it => ANALYST_PRICE_IDS.has(it?.price?.id)); }
   catch (_) { return false; }
 }
+
+// ── ANALYST ENTITLEMENT (2026-09-01 — Jake: "crypto subs get crypto only") ────────────
+// The member token is IDENTITY, shared across every product's dashboard: a crypto-only
+// $79 subscriber rightly holds one (the crypto map and NoVo both need it). What the token
+// is NOT is Analyst entitlement — and until this gate, any token opened the paid $129
+// equity feed (?live / ?hist). Same architecture as crypto-map.js's gate: COMP_EMAILS
+// short-circuit, the decision read per ITEM off the price sets, verdict cached in KV
+// (allow 600s / deny 120s; webhook-sub.js purges 'ent:analyst:' on checkout + cancel),
+// and FAIL CLOSED on a Stripe error — this gates a paid product.
+// Grants: an Analyst sub, either bundle, or a Trader/license sub (an item that is neither
+// an Analyst nor a Crypto price IS the Trader item — Trader includes Analyst).
+function _subGrantsAnalyst(s) {
+  if (_subIsAnalyst(s)) return true;
+  const t = String(s?.metadata?.tier || '');
+  if (t === 'bundle_ac' || t === 'bundle_all') return true;
+  if (t === 'crypto') return false;
+  try {
+    const items = (s?.items?.data || []).filter(it => it?.price?.id);
+    if (items.length) return items.some(it => !ANALYST_PRICE_IDS.has(it.price.id) && !CRYPTO_PRICE_IDS.has(it.price.id));
+  } catch (_) {}
+  return !_subIsCrypto(s);   // thin object: not crypto = the old "member" answer
+}
+async function _analystEnt(email) {
+  const norm = String(email || '').trim().toLowerCase();
+  if (!norm) return false;
+  try { if (require('./_lib/comp.js').isComp(norm)) return true; } catch (_) {}
+  const r = kv();
+  const ck = 'ent:analyst:' + crypto.createHash('sha256').update(norm).digest('hex').slice(0, 24);
+  if (r) {
+    try {
+      const cached = await r.get(ck);
+      if (cached === '1') return true;
+      if (cached === '0') return false;
+    } catch (_) { /* fall through to a live check */ }
+  }
+  let ok = false;
+  const LIVE = ['active', 'trialing', 'past_due'];
+  try {
+    const seen = new Set();
+    const hit = async (custId) => {
+      const subs = await _stripe.subscriptions.list({ customer: custId, status: 'all', limit: 20 });
+      return subs.data.some(s => LIVE.includes(s.status) && _subGrantsAnalyst(s));
+    };
+    try {
+      const sr = await _stripe.customers.search({ query: `email:"${norm.replace(/"/g, '')}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); if (await hit(c.id)) { ok = true; break; } }
+    } catch (_) { /* search index warming up — list() below still covers it */ }
+    if (!ok) {
+      const custs = await _stripe.customers.list({ email: norm, limit: 100 });
+      for (const c of custs.data) { if (!seen.has(c.id) && await hit(c.id)) { ok = true; break; } }
+    }
+  } catch (e) {
+    console.error('[analyst-live] entitlement check:', e.message);
+    return false;    // FAIL CLOSED — a Stripe outage must not open the paid feed.
+  }
+  if (r) { try { await r.set(ck, ok ? '1' : '0', { ex: ok ? 600 : 120 }); } catch (_) {} }
+  return ok;
+}
 // Resolve a member's tier for push routing: 'trader' (has a live non-analyst sub) | 'analyst' | null. Used only
 // to SUPPRESS the duplicate squeeze push to Trader devices, so it fails OPEN — any Stripe error → null →
 // treated as "not trader" → the device still gets the push. An Analyst-only member is never wrongly suppressed.
@@ -422,10 +480,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ reads: out });
   }
 
-  // Members live-view feed (token-gated) — the /analyst/live dashboard polls this every few seconds.
+  // Members live-view feed (token + Analyst entitlement) — the /analyst/live dashboard polls this.
   if (req.method === 'GET' && req.query && 'live' in req.query) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
     if (!email) return res.status(401).json({ error: 'unauthorized' });
+    // 402, not 401: the caller is who they say they are, they just have not bought THIS.
+    // A crypto-only member's token is valid for the crypto map and NoVo — not this feed.
+    if (!(await _analystEnt(email))) {
+      return res.status(402).json({ error: 'NoVo Analyst is a separate subscription.', subscribe: '/plans' });
+    }
     res.setHeader('Cache-Control', 'no-store');
     const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN) || { updated_at: 0, indices: [], stale: true };
     // Never show a blank "Today's read": fall back to the most recent archived desk note when there's no live one.
@@ -435,10 +498,13 @@ export default async function handler(req, res) {
     }
     return res.status(200).json(state);
   }
-  // Gamma-by-strike history for the heatmap. Same token gate as ?live — this is paid dealer data.
+  // Gamma-by-strike history for the heatmap. Same token + entitlement gate as ?live — paid dealer data.
   if (req.method === 'GET' && req.query && 'hist' in req.query) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
     if (!email) return res.status(401).json({ error: 'unauthorized' });
+    if (!(await _analystEnt(email))) {
+      return res.status(402).json({ error: 'NoVo Analyst is a separate subscription.', subscribe: '/plans' });
+    }
     res.setHeader('Cache-Control', 'no-store');
     const ticker = String(req.query.ticker || 'SPY').replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase();
     const r = kv();

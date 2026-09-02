@@ -1216,6 +1216,13 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     try {
       var r = await fetch('/api/analyst-publish?live=1&t='+encodeURIComponent(TOKEN), { cache:'no-store' });
       if (r.status===401) { try{ localStorage.removeItem('novo_live_t'); }catch(_){}; TOKEN=null; showLogin(); _everShown = true; return; }
+      if (r.status===402) {
+        // Signed in, but their subscription doesn't include Analyst (e.g. crypto-only).
+        showLogin(); _everShown = true;
+        var lm = document.getElementById('lmsg');
+        if (lm) lm.innerHTML = 'You’re signed in, but the Analyst dashboard is a separate subscription — your plan covers the <a href="/crypto/live" style="color:#a78bfa;">Crypto Market Map</a>. Add Analyst on <a href="/plans?plan=bundle-ac" style="color:#22d3ee;">the plans page</a> — the bundle is $169/mo for both.';
+        return;
+      }
       if (r.ok) { STATE = await r.json(); showDash(); render(); _everShown = true; return; }
       _neverBlank();   // 5xx / offline-504: don't sit on a blank page (later successful polls flip to the dashboard)
     } catch(_) { _neverBlank(); }
