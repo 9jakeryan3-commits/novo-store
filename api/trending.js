@@ -38,7 +38,7 @@ async function chartQuote(sym) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=900");
   try {
     const quotes = (await Promise.all(UNIVERSE.map(chartQuote))).filter(Boolean);
     // Biggest absolute movers today, top 8.

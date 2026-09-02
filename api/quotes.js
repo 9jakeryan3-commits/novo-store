@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", _o);
     res.setHeader("Vary", "Origin");
   }
-  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=300");
   const results = await Promise.all(SYMBOLS.map(([n, s]) => one(n, s)));
   const out = {};
   for (const q of results) if (q) out[q.name] = { price: q.price, chg: q.chg };

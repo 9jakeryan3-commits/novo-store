@@ -51,7 +51,7 @@ async function chartQuote(sym) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=900");
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
   try {
     const symbols = [];

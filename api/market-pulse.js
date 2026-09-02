@@ -71,7 +71,7 @@ const pulseLabel = (p) =>
   p == null ? "—" : p < 25 ? "Extreme Fear" : p < 45 ? "Fear" : p < 55 ? "Neutral" : p < 75 ? "Greed" : "Extreme Greed";
 
 module.exports = async (req, res) => {
-  res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=900");
   try {
     const [vixC, vxnC, rvxC] = await Promise.all([volCloses("VIX"), volCloses("VXN"), volCloses("RVX")]);
     const [vix, vxn, rvx, mom] = await Promise.all([

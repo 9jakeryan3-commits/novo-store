@@ -35,7 +35,7 @@ async function forRealDate(realDs, queryDs) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate, s-maxage=21600, stale-while-revalidate=43200");
   try {
     const now = new Date();
     const days = [];   // [realDs, queryDs] — queryDs = realDs + 1 (Nasdaq's day-late bucket; see forRealDate)
