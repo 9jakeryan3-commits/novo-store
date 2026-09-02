@@ -1945,6 +1945,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           box-shadow: 0 4px 14px rgba(0,0,0,.4); transition: background .12s, border-color .12s; }
         #chart-live:hover { background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.7); }
         #chart-live.show { display: inline-flex; }
+        /* Staleness chip (2026-09-02). See _staleChip for why this exists. Bottom-LEFT: the live
+           chip owns bottom-right, the legend top-left, the countdown the price axis. Amber, not
+           red — this is "read this with care", not "something is broken". */
+        #chart-stale { position: absolute; bottom: 30px; left: 12px; z-index: 14; display: none;
+          font-family: var(--font); font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
+          padding: 3px 8px; border-radius: 6px; pointer-events: none; white-space: nowrap;
+          background: rgba(58,42,14,.92); color: #f5c77f; border: 1px solid rgba(245,158,11,.45);
+          box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+        #chart-stale.on { display: inline-block; }
         #scale-menu .sm-i { display: flex; align-items: center; gap: 9px; padding: 8px 11px;
           border-radius: 7px; font-size: 11.5px; font-weight: 600; color: var(--txt2); cursor: pointer; }
         #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
@@ -3734,10 +3743,41 @@ function _cdTick(){
     if(pill.__top!==_top){ pill.__top=_top; pill.style.top=_top+'px'; }
   }catch(_e){ pill.style.display='none'; }
 }
+// ── STALENESS CHIP (2026-09-02) ───────────────────────────────────────────────
+// Today's veil fix was necessary and it cost something: the veil used to say "slow connection —
+// retrying", which was unrecoverable (hence the fix) but HONEST. Removing it leaves a viewer
+// looking at stale candles with no indication they are stale — while the hero price and the level
+// ladder keep streaming off the socket, which makes the chart look MORE alive, not less. A trader
+// can read a level off a chart that stopped ten minutes ago. TRADER_LIVE_SCOPE §6 names exactly
+// this: "a chart that silently stops updating is worse than one that says it stopped — a scalper
+// will trade a frozen level without noticing."
+//
+// So the signal comes back, without the thing that made the veil dangerous: this NEVER blocks. It
+// is a corner chip with pointer-events:none, the chart stays fully readable and interactive
+// underneath, and it disappears by itself the moment a paint lands.
+//
+// It keys on _paintAt, the same stamp the 45s supervisor invariant uses — written only when
+// candles actually reach the screen. Note it does NOT appear overnight or at weekends: the poll
+// keeps succeeding when the market is shut, so paints keep landing and the chip stays hidden. It
+// means "this lane has stopped delivering", never "the market is closed".
+function _staleChip(){
+  try{
+    var el=document.getElementById('chart-stale'); if(!el) return;
+    var pa=window._paintAt||0;
+    var age=Date.now()-pa;
+    if(!pa || age<45000){ if(el.__on){ el.__on=false; el.classList.remove('on'); } return; }
+    var m=Math.floor(age/60000);
+    var txt='bars '+(m>=1?(m+'m'):(Math.floor(age/1000)+'s'))+' old';
+    if(el.__h!==txt){ el.__h=txt; el.textContent=txt; }
+    if(!el.__on){ el.__on=true; el.classList.add('on'); }
+  }catch(_e){}
+}
 function _cdStart(){
   clearInterval(window._cdTimer);
-  window._cdTimer=setInterval(function(){ window._cdTickAt=Date.now(); _cdTick(); },1000);
-  _cdTick();
+  // _staleChip runs OUTSIDE _cdTick deliberately: _cdTick returns early on deep frames and when
+  // the tip is not live, and staleness has to be reported on every frame and in every session.
+  window._cdTimer=setInterval(function(){ window._cdTickAt=Date.now(); _cdTick(); _staleChip(); },1000);
+  _cdTick(); _staleChip();
 }
 // ── BACK-TO-LIVE CHIP (B8) ──────────────────────────────────────────────────
 function _updateLiveChip(range){
@@ -4921,7 +4961,7 @@ function _initNovoChart(){
   // markup stays untouched and they exist exactly as long as the chart does.
   try{
     el.style.position='relative';
-    ['chart-wm','chart-legend2','novo-chip','chart-veil','chart-countdown','chart-live'].forEach(function(id){
+    ['chart-wm','chart-legend2','novo-chip','chart-veil','chart-countdown','chart-live','chart-stale'].forEach(function(id){
       if(!document.getElementById(id)){ var d=document.createElement('div'); d.id=id; el.appendChild(d); }
     });
     var _cl=document.getElementById('chart-live');
