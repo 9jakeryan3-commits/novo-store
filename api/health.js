@@ -54,6 +54,18 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     ok: degraded.length === 0,
     degraded,
+    // WHICH BUILD IS ACTUALLY SERVING. Vercel populates these for a git-linked project even with
+    // auto-deploy disabled, which this project is. Reported because deploy.sh could not previously
+    // answer the question: its post-deploy check compares live `/` against public/index.html, so
+    // for an api-only deploy it matched BEFORE the deploy too and "OK production serves <sha>"
+    // asserted something it had not tested. A build stamp the deployment itself carries is the
+    // only self-evident answer — everything else is inference from a file that may not have moved.
+    // null when unavailable, and the caller must treat null as "unknown", never as "matches".
+    build: {
+      sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
+      ref: process.env.VERCEL_GIT_COMMIT_REF || null,
+      env: process.env.VERCEL_ENV || null,
+    },
     // The switch's real state, server-side. The marketing pages carry their own copy of this as a
     // compiled-in const, so this is the only place the ACTUAL answer can be read.
     sales_paused: salesPaused,
