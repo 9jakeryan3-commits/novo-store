@@ -1558,7 +1558,7 @@ function stablesPanel(){
     const ch = t.d7_usd;
     return `<div class="brow"><span class="bn">${t.symbol}</span>
       <span class="bbar"><i style="width:${w}%;background:var(--cyan)"></i></span>
-      <span class="bv">${money(t.circulating_usd)} <span class="${ch>=0?'up':'dn'}" style="font-size:10px">${ch>=0?'+':''}${money(ch)}</span></span></div>`;
+      <span class="bv">${money(t.circulating_usd)} <span class="${ch>=0?'up':'dn'}" style="font-size:10px">${ch>=0?'+':''}${money(ch)}</span>${t.treasury_usd?` <span class="am" style="font-size:10px" title="authorized ${money(t.authorized_usd)}, of which ${money(t.treasury_usd)} is still in the issuer's own wallets">+${money(t.treasury_usd)} held</span>`:''}</span></div>`;
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Dry powder &middot; stablecoin supply</h2>
     <span class="sub">dollars on the rails${sc.complete===false?' &middot; majors only':''}</span></div><div class="pb">
@@ -1575,6 +1575,7 @@ function stablesPanel(){
     </div>
     ${sc.depegs&&sc.depegs.length?`<div class="kv"><span class="k">Off peg &gt;50bp</span><span class="v am">${sc.depegs.map(d=>`${d.symbol} ${d.price.toFixed(3)}`).join(' &middot; ')}</span></div>`:''}
     <div class="kv"><span class="k">Yield-bearing, kept separate</span><span class="v nu">${money(sc.yield_bearing_usd)} <span style="color:var(--txt4)">across ${sc.n_yield_bearing}</span></span></div>
+    ${sc.treasury_usd?`<div class="kv"><span class="k">Authorized but NOT issued</span><span class="v am">${money(sc.treasury_usd)} <span style="color:var(--txt4)">in ${(sc.treasury_issuers||[]).join(', ')} treasury</span></span></div>`:''}
     <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4);margin:12px 0 7px">Largest issuers &middot; 7-day change</div>
     <div class="bre">${rows}</div>
     <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.55;font-family:var(--mono)">
@@ -1585,8 +1586,16 @@ function stablesPanel(){
       trade at a dollar, so their supply is an accounting figure rather than cash anyone can bid
       with &mdash; every aggregator sums them into the headline anyway. They are counted here and
       excluded from it. Circulating only: no public source publishes an issuer&rsquo;s
-      authorized-but-unissued treasury, so none is claimed. The headline totals every payment
-      issuer; the bars below list the largest, which is why they do not sum to it.</div>
+      authorized-but-unissued treasury &mdash; but the ISSUERS do, and that is the amber line.
+      Tether authorizes tokens into its own wallets before anyone buys them, so at any moment
+      part of the supply exists on-chain and is in nobody&rsquo;s hands; a tracker reading the
+      contract&rsquo;s total supply counts it anyway and is out by ten figures. It is shown as its
+      own number and never added to or subtracted from the float, because pre-minted inventory
+      and circulating cash are different facts &mdash; and inventory falling means issuance
+      happening without a new authorization, which a circulating-only feed shows as ordinary
+      minting. Issuers who mint and burn against redemptions (Circle) publish no treasury, and
+      get no number rather than a zero. The headline totals every payment issuer; the bars list
+      the largest, which is why they do not sum to it.</div>
     </div></div>`;
 }
 
