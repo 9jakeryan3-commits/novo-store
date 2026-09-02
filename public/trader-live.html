@@ -3295,7 +3295,11 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     window._lvlAnc={};   // anchors are snapped to the FRAME's grid — force a re-snap on the new one
     try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
     try{ _showVeil(); _paintWm(); }catch(_e){}
-    _paintCtb(); loadNovoChart();
+    // Through _ncRun, never loadNovoChart directly (2026-09-02): the direct call bypassed the
+    // busy guard, so a click could start a second concurrent load while a poll was mid-flight —
+    // and on the deep frames the loser returns null from _loadHist, which is one of the exits that
+    // used to strand the veil. _ncRun also re-arms the loop at the veil-up cadence.
+    _paintCtb(); window._ncBusy=0; _ncRun();
     try{ _c2Key=''; _c2Ranged=false; _c2Run(); }catch(_e){}   // the split pane follows the main TF
   });
 });
@@ -4745,6 +4749,7 @@ document.addEventListener('keydown',function(e){
 // builds the wrapper and, if a split was saved, restores it.
 try{ _applySplit(); }catch(_e){}
 function _veilOff(){
+  clearTimeout(window._veilKill);
   var v=document.getElementById('chart-veil'); if(v) v.classList.remove('on');
   clearTimeout(window._veilTimer);
 }
@@ -4758,6 +4763,23 @@ function _showVeil(){
     // stamp "slow connection" onto a two-second-old fresh veil.
     clearTimeout(window._veilTimer);
     window._veilTimer=setTimeout(function(){ if(v.classList.contains('on')) v.textContent='slow connection — retrying '+_selTkr()+' · '+(_TF_NAME[_ctbTf]||_ctbTf)+'…'; },10000);
+    // THE VEIL CANNOT OUTLIVE ITS OWN DEADLINE (2026-09-02, Jake: "when i see the candles have
+    // stopped printing and change the timeframe it freezes on the veil").
+    //
+    // OBSERVED, not theorised: driving the real page against the real service, a timeframe click
+    // that lands while the loader is taking any of its early returns leaves this veil up FOREVER.
+    // loadNovoChart has five of them — no API url, a non-200, a ticker mismatch, an empty deep
+    // frame — and several exit above the paint's own _veilOff(). The supervisor cannot rescue it
+    // either: its backstop only lifts the veil when a paint happened in the last 20s, and the
+    // entire problem is that no paint is happening. Same for the 45s delivered-invariant. The
+    // detector fires and the remedy is structurally unable to act.
+    //
+    // So the veil now removes ITSELF. A stale chart a trader can read always beats a blocking
+    // spinner that never ends: whatever went wrong, the bars underneath are the last real bars and
+    // the level ladder and hero price are still live. 6s is longer than any healthy switch (the
+    // poll answers in well under a second) and far short of "is this thing broken".
+    clearTimeout(window._veilKill);
+    window._veilKill=setTimeout(function(){ try{ _veilOff(); }catch(_e){} },6000);
   }
 }
 _paintCtb();
@@ -4862,17 +4884,17 @@ function _initNovoChart(){
 }
 async function loadNovoChart(){
   try{
-    if(!_initNovoChart()) return;
+    if(!_initNovoChart()) return;   // chart not built yet — the veil's own deadline covers this
     const _reqTkr=_selTkr();
-    const _u=NOVO_URL('/api/spy-chart'); if(!_u) return;   // pre-handshake: skip; the bootstrap retries
-    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _reauth401(r); return; }
+    const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
+    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
     const d=await r.json();
     // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
     // that answers for a ticker other than the current selection. A payload with NO d.ticker is a
     // pre-rollout server that ignored the query param and served the ENGINE ticker's data — accept
     // it only when that is what the viewer selected, or SPY candles would paint under a QQQ caption.
-    if(d.ticker){ if(d.ticker!==_selTkr()) return; }
-    else if(!_selIsExec()) return;
+    if(d.ticker){ if(d.ticker!==_selTkr()) return; }        // stale answer for a previous selection; the
+    else if(!_selIsExec()){ _veilOff(); return; }           // in-flight request for the CURRENT one still owns the veil
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
     // Deep frames NEVER go through _tfView: its bucket step is _ctbTf*60, and '1h'*60 is NaN —
@@ -4884,7 +4906,7 @@ async function loadNovoChart(){
       // Keep the current chart until history answers, but a SUCCESSFUL empty answer means this
       // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
       // the veil cadence forever (the weekend switch-to-QQQ trap).
-      if(!_hc||!_hc.length){ if(_hc) _veilOff(); return; }
+      if(!_hc||!_hc.length){ _veilOff(); return; }   // null (a concurrent load) used to skip the clear and strand the veil (2026-09-02)
       // EMAs on H/D/W run continuous (no session reseed) — reseeding a daily EMA is meaningless.
       _view={candles:_hc, vwap:[], ema9:_emaOn(_hc,9,false), ema21:_emaOn(_hc,21,false)};
     }
