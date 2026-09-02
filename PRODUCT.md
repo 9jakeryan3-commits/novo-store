@@ -59,7 +59,7 @@ moved behind a free account (see the next section). `api/levels.js` enforces it 
 | Futures positioning — weekly CFTC Commitments of Traders | `/positioning` ← `api/positioning.js` |
 | The track record — ten public claims scored, sample sizes shown | `/track-record` ← `api/track-record.js` |
 | The public read archive — every desk note, after its session | `/analyst/archive` ← `api/analyst-publish.js` |
-| The NoVo Journal — 1,042 articles | `/journal/` |
+| The NoVo Journal — 1,287 articles | `/journal/` |
 | Options 101, the 0DTE guide, 5 learn guides | `/options-101`, `/0dte`, `/learn/*` |
 | Five calculators — expected move, max pain, position size, options P&L, Greeks | `/tools/*` |
 | TradingView script — flip, walls and expected-move band on your own chart | `/tradingview` |
@@ -123,7 +123,7 @@ layer underneath. Nothing in this section appears on any free page.
 - The Open, The Close, the Sunday Week Ahead — dashboard first, emailed, **and pushed**. Each cites
   what the current setup has historically resolved to, with its sample size — the read carries a
   record, not only a reading.
-- **NoVo, the AI market analyst** — retrieval over 1,039 articles + its own logged observations,
+- **NoVo, the AI market analyst** — retrieval over 1,287 articles + its own logged observations,
   plus **28 read-only live lookups** spanning both maps: dealer levels, gamma profile, session
   history, **base rates**, its own track record, its recent reads, market internals, the
   **volatility record back to 1990** (every gauge with its percentile), **CFTC futures
