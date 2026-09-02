@@ -157,21 +157,46 @@ layer underneath. Nothing in this section appears on any free page.
 
 ## NoVo Trader — $209/mo · includes all of Analyst
 
-**The angle (2026-08-31): Trader is the instrument, Analyst is the research desk.** The overlap
-between the two dashboards is the product design, not a defect: everything act-now lives on the
-Trader terminal; the step-back surfaces — NoVo the chat, the gamma-by-strike heatmap, the in-house
-flow tape, the historical analogues, push notifications — live on the Analyst desk. Sell the pair
-as "the cockpit and the desk."
+**The angle (2026-08-31, amended 2026-09-01): Trader is the instrument, Analyst is the research
+desk.** The overlap between the two dashboards is the product design, not a defect: everything
+act-now lives on the Trader terminal; the step-back surfaces — NoVo the chat, the in-house flow
+tape, the historical analogues, push notifications — live on the Analyst desk. Sell the pair as
+"the cockpit and the desk." **Amendment (Apex build, 2026-09-01): dealer STRUCTURE now also rides
+the cockpit** — the gamma-by-strike profile and the strike×time gamma field draw directly on the
+Trader chart, under the live tape. The desk keeps the step-back READING of that structure (the
+chat, analogues, flow tape); the cockpit shows it where the trade happens. That is the line now:
+Analyst interprets, Trader renders.
 
 - **The live dealer map, streamed** — the levels drawn on a candle chart that moves with the tape
 - **Ticker switcher (2026-08-30)** — SPY / QQQ / IWM pills in the chart hero; per-viewer, instant,
   no restart. Candles, VWAP, EMAs, session levels and dealer levels all follow the selection; the
   Market Intel strip still describes the engine’s ticker (named in the nav pill)
-- **Charting terminal (2026-08-30 late)** — six timeframes (1m/5m/15m client-agg; 1H/D/W off the
-  engine’s dxFeed history lanes: ~9.5 months hourly incl. 24/5 overnight sessions, 10y daily, 15y
-  weekly); drawing tools (h-line/trendline/fib/measure, persisted per ticker); volume histogram;
-  TradingView-style extended-hours shading; OHLCV crosshair legend; per-ticker read chip (net-GEX
-  sign + % from flip); ticker·frame watermark. Chart runs 24/5 including Sunday nights
+- **Charting terminal (2026-08-30 late; Apex build 2026-09-01)** — six timeframes (1m/5m/15m
+  client-agg; 1H/D/W off the engine’s dxFeed history lanes: ~9.5 months hourly incl. 24/5
+  overnight sessions, 10y daily, 15y weekly); volume histogram; TradingView-style extended-hours
+  shading; OHLCV crosshair legend **with VWAP/EMA values named at the hovered bar**; per-ticker
+  read chip (net-GEX sign + % from flip); ticker·frame watermark. Chart runs 24/5 including
+  Sunday nights. Timeframe flips are instant and keep the viewer’s exact window
+- **Drawing editor (Apex, 2026-09-01)** — h-line / trendline / fib (conventional retracement
+  ladder) / measure, persisted per ticker, **plus**: click-to-select, drag, per-drawing delete,
+  undo, magnet snap to O/H/L/C, a right-click context menu, and **in-page price alert lines** —
+  a dragged line that flashes the pane and beeps when the live tape crosses it. Client-side only:
+  an alert touches no server and no broker
+- **Scalper timing (Apex)** — a bar-close countdown pinned to the price axis at the live tip, a
+  back-to-live chip when you’ve panned into history, and a full keyboard map (1-6 timeframes,
+  arrows/+/- pan-zoom, Esc, Alt+H level drop, ? for the cheat sheet). Fullscreen and screenshot
+  buttons on the toolbar
+- **Dealer structure ON the chart (Apex)** — the GEX-by-strike histogram behind the candles
+  (all-expiry structure faint, 0DTE bright — the wall is the biggest bar); dealer levels carry
+  **strength** (line weight from the gamma behind them, fading as it decays into the close);
+  levels in confluence merge into one stacked label; ‘The Line’ lost/reclaimed events pin to
+  their bars; a net-GEX sparkline in the Market Intel strip; ghost lines where the longer-dated
+  book disagrees with the day’s wall
+- **⚙ dealer visuals, all default OFF** (the raw tape stays raw; each is a menu toggle) — regime
+  tint above/below the flip, the EM decay cone (the day’s REMAINING priced move, √-decaying into
+  the close), a gravity halo that turns on after 2pm, today’s wall-migration trails, a drift
+  arrow (labelled “modeled”), and the **strike×time gamma heatmap** — the field drawn under the
+  live tape, snapshot-cadence columns, mutually exclusive with the tint
 - **ANALYSIS tab** — Analysis Feed | NoVo’s written read side by side; ‘The Line’ level-break
   playbook feed (per ticker); **The Three Books** — all three tickers’ dealer structure in one
   table incl. put/call skew and the MM fast/slow hedging split; What NoVo Knows beneath. Market
@@ -185,7 +210,8 @@ as "the cockpit and the desk."
 - Live tape + full options chain for SPY, QQQ and IWM; live market data included
 - Placed trades, broker connections and API keys are **not** part of this product
 - Regime · Retail State · RVOL · Tape Imbalance
-- **No push notifications** — by design; you are on the dashboard when you trade
+- **No push notifications** — by design; you are on the dashboard when you trade. (The chart’s
+  in-page alert lines are not push: they fire in the open tab, from the tape, and nowhere else)
 
 **Brokers: none.** NoVo does not connect to a brokerage account, hold API keys, or place orders.
 You trade wherever you already trade. Non-custodial in the strongest sense: there is no connection
