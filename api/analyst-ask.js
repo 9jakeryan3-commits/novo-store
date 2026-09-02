@@ -294,15 +294,32 @@ function _focus(f) {
 // the map grows -- that has already cost this pipeline four fields on the publish side alone -- while
 // a length cap catches the next chart array nobody remembered to tell this function about.
 const _CHART_KEYS = new Set(['strikes', 'curve', 'term', 'heatmap', 'skew_curve', 'spark']);
-function _trim(o, maxLen = 12) {
-  if (Array.isArray(o)) return o.length > maxLen ? undefined : o.map((x) => _trim(x, maxLen));
+
+// AND IT SAYS WHAT IT DROPPED. Silence here cost real data: the crypto taker-flow panel named its
+// per-strike field "strikes", so this function deleted it from NoVo's grounding by NAME while the
+// dashboard rendered it perfectly -- the analyst was blind to a panel the reader was looking at,
+// and nothing anywhere said so. The engineer who added it had already capped the array at 12 rows
+// to survive the length rule and walked straight into the name rule.
+//
+// A field trimmed for length was also indistinguishable from a field never collected, which
+// matters more than it sounds: get_crypto_map's own tool description tells the model that an
+// absent key means the data does not exist. So trimming quietly taught NoVo a falsehood about his
+// own coverage. Now the key survives as a marker naming what went and why, which costs a few
+// tokens, keeps the payload small, and makes the next collision visible in one answer instead of
+// by accident weeks later.
+function _trim(o, maxLen = 12, dropped = null) {
+  if (Array.isArray(o)) return o.length > maxLen ? undefined : o.map((x) => _trim(x, maxLen, dropped));
   if (o && typeof o === 'object') {
     const out = {};
+    const cut = [];
     for (const [k, v] of Object.entries(o)) {
-      if (_CHART_KEYS.has(k)) continue;
-      const t = _trim(v, maxLen);
-      if (t !== undefined) out[k] = t;
+      if (_CHART_KEYS.has(k)) { cut.push(k + ' (chart series)'); continue; }
+      const t = _trim(v, maxLen, dropped);
+      if (t !== undefined) { out[k] = t; continue; }
+      cut.push(k + ' (' + (Array.isArray(v) ? v.length + ' rows, over ' + maxLen : 'too large') + ')');
     }
+    // Only when something actually went, so the common payload is byte-identical to before.
+    if (cut.length) out._trimmed = cut;
     return out;
   }
   return o;
@@ -613,53 +630,33 @@ function sinceBlock(lines, ageMin) {
 // It rides in the prompt rather than being fetched by a tool because the point is that NoVo knows
 // its weak spots WITHOUT being asked. A model that has to decide to look up its own record is a
 // model that will not look when it matters.
-const LESSON_MIN_N = 20;
-
-// FIVE DIFFERENT CLAIMS BEAT ONE CLAIM FIVE TIMES. The same claim scores on SPY, QQQ and IWM and
-// again as a backtest, so a naive top-5 was "expected move" four ways — true, and nearly no
-// information. One entry per claim NAME, the best-sampled instance of each.
-function _byClaim(list) {
-  const best = new Map();
-  for (const s of list) {
-    const name = s.replace(/^\S+\s/, '').split(':')[0];
-    const n = parseInt((s.match(/n=(\d+)/) || [])[1] || '0', 10);
-    const cur = best.get(name);
-    if (!cur || n > cur.n) best.set(name, { s, n });
-  }
-  return [...best.values()].sort((a, b) => b.n - a.n).slice(0, 5).map((x) => x.s);
-}
+const { readRecord, byClaim } = require('./_lib/record-reader.js');
 
 function lessonsBlock(tr) {
-  if (!tr || !tr.tickers) return '';
-  const strong = [], weak = [];
-  for (const [tk, claims] of Object.entries(tr.tickers)) {
-    if (!claims || typeof claims !== 'object') continue;
-    for (const [name, c] of Object.entries(claims)) {
-      if (!c || typeof c !== 'object') continue;
-      const n = c.sessions || c.n || 0;
-      const label = `${tk} ${name.replace(/_/g, ' ')}`;
-      // A claim with a rate and a baseline it must beat is the scoreable kind.
-      if (typeof c.rate === 'number' && typeof c.baseline === 'number' && n >= LESSON_MIN_N) {
-        const d = c.rate - c.baseline;
-        (d >= 5 ? strong : d <= -5 ? weak : null)?.push(
-          `${label}: ${c.rate.toFixed(0)}% vs ${c.baseline}% baseline (n=${n})`);
-      } else if (c.holds === false && (c.strength === 'strong' || c.strength === 'moderate')) {
-        // Graded and it did NOT hold, with enough signal to mean it.
-        weak.push(`${label}: does not hold in the current window`);
-      } else if (c.holds === true && c.strength === 'strong' && n >= LESSON_MIN_N) {
-        strong.push(`${label}: holds, strong`);
-      }
-    }
+  // Field access and the holding/failing verdict both live in _lib/record-reader.js so this can
+  // never again drift from the public page that reads the same record. See that file for what the
+  // drift cost: the strongest claim in the product scored n=0 and the failing list could not be
+  // entered at all.
+  const { holding, failing, asOf } = readRecord(tr);
+  if (!holding.length && !failing.length) return '';
+
+  // A record that has gone stale must say so rather than be quoted as "right now" -- it is written
+  // with a 14-day TTL and no version history, so an old copy looks identical to a fresh one.
+  let age = '';
+  if (asOf) {
+    const days = (Date.now() - Number(asOf)) / 86400000;
+    if (days > 2) age = ` (last scored ${Math.round(days)} days ago -- say so if you lean on it)`;
   }
-  if (!strong.length && !weak.length) return '';
-  const L = ['MY OWN RECORD ON MY OWN CLAIMS (scored, not remembered — this is what the public',
-             'track record says about me right now):'];
-  if (strong.length) L.push('Holding up: ' + _byClaim(strong).join(' · '));
-  if (weak.length) L.push('NOT holding up: ' + _byClaim(weak).join(' · '));
-  L.push(weak.length
-    ? 'Lean on the first list. When a question turns on something in the second, say so in one ' +
-      'line before answering — a claim my own record does not support is one I flag, not one I ' +
-      'quietly reuse.'
+
+  const L = ['MY OWN RECORD ON MY OWN CLAIMS (scored, not remembered -- this is what the public',
+             `track record says about me right now${age}):`];
+  if (holding.length) L.push('Holding up: ' + byClaim(holding).join(' · '));
+  if (failing.length) L.push('NOT holding up: ' + byClaim(failing).join(' · '));
+  L.push(failing.length
+    ? 'Lean on the first list. When a question turns on something in the second, SAY SO before ' +
+      'answering -- a claim my own record contradicts is one I flag, not one I quietly reuse. ' +
+      'That includes when the record says a claim is INVERTED: state it plainly rather than ' +
+      'reaching for the version of it that still sounds right.'
     : 'Lean on these where they apply, and if my record does not cover what is being asked, say ' +
       'that rather than borrowing confidence from a claim about something else.');
   L.push('Never cite a rate from here without the n beside it.', '', '');
