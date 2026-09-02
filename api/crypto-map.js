@@ -225,6 +225,10 @@ module.exports = async (req, res) => {
     // feed -- so a new section has to be named HERE or it never reaches the browser.
     reads: snap.reads || null,
     breadth: snap.breadth, health: snap.health,
+    // The dry powder: USD stablecoin supply and its 1d/7d direction. Market-wide, so it is a
+    // top-level field and has to be named HERE -- same whitelist that silently dropped chain,
+    // then alerts, then feed, then reads.
+    stablecoins: snap.stablecoins || null,
     // Named HERE deliberately — see the whitelist note above. A field this rebuild does not list
     // never reaches the browser, which is exactly how chain, alerts and feed were each lost once.
     ...(hist ? { hist } : {}),

@@ -1415,6 +1415,47 @@ function basisPanel(d){
 // taker's side is not a market opinion and turning it into one would be a model wearing a
 // measurement's label. Structures are Deribit's own names off the combo id; where the venue does
 // not name one, the cell stays blank rather than guessing.
+function stablesPanel(){
+  const sc = SNAP.stablecoins; if(!sc || !sc.payment_usd) return '';
+  const up = sc.d7_usd >= 0;
+  const d1up = sc.d1_usd >= 0;
+  const mx = (sc.top||[]).reduce((a,t)=>Math.max(a, t.circulating_usd), 0) || 1;
+  const rows = (sc.top||[]).map(function(t){
+    const w = Math.max(2, t.circulating_usd/mx*100);
+    const ch = t.d7_usd;
+    return `<div class="brow"><span class="bn">${t.symbol}</span>
+      <span class="bbar"><i style="width:${w}%;background:var(--cyan)"></i></span>
+      <span class="bv">${money(t.circulating_usd)} <span class="${ch>=0?'up':'dn'}" style="font-size:10px">${ch>=0?'+':''}${money(ch)}</span></span></div>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Dry powder &middot; stablecoin supply</h2>
+    <span class="sub">${sc.n_payment} payment stablecoins &middot; dollars on the rails</span></div><div class="pb">
+    <div class="mgrid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="mcell"><div class="mk">Circulating</div>
+        <div class="mv nu">${money(sc.payment_usd)}</div>
+        <div class="ms">payment stablecoins only</div></div>
+      <div class="mcell"><div class="mk">24 hours</div>
+        <div class="mv ${d1up?'up':'dn'}">${d1up?'+':''}${money(sc.d1_usd)}</div>
+        <div class="ms">${sc.d1_pct!=null?`${sc.d1_pct>=0?'+':''}${sc.d1_pct.toFixed(3)}% of the float`:''}</div></div>
+      <div class="mcell"><div class="mk">7 days</div>
+        <div class="mv ${up?'up':'dn'}">${up?'+':''}${money(sc.d7_usd)}</div>
+        <div class="ms">${up?'net minting &mdash; cash arriving':'net redemption &mdash; cash leaving'}</div></div>
+    </div>
+    ${sc.depegs&&sc.depegs.length?`<div class="kv"><span class="k">Off peg &gt;50bp</span><span class="v am">${sc.depegs.map(d=>`${d.symbol} ${d.price.toFixed(3)}`).join(' &middot; ')}</span></div>`:''}
+    <div class="kv"><span class="k">Yield-bearing, kept separate</span><span class="v nu">${money(sc.yield_bearing_usd)} <span style="color:var(--txt4)">across ${sc.n_yield_bearing}</span></span></div>
+    <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4);margin:12px 0 7px">Largest issuers &middot; 7-day change</div>
+    <div class="bre">${rows}</div>
+    <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.55;font-family:var(--mono)">
+      Crypto has no central bank to read, but stablecoins are minted against dollars wired in and
+      burned on redemption &mdash; so net issuance is the closest public read on money entering or
+      leaving. Funding says what leverage <i>costs</i>; this says how much cash stands behind it.
+      <b>Two totals, never one:</b> tokenized treasury funds (USYC, USDY) accrue yield and do not
+      trade at a dollar, so their supply is an accounting figure rather than cash anyone can bid
+      with &mdash; every aggregator sums them into the headline anyway. They are counted here and
+      excluded from it. Circulating only: no public source publishes an issuer&rsquo;s
+      authorized-but-unissued treasury, so none is claimed.</div>
+    </div></div>`;
+}
+
 function liqProfilePanel(d){
   const p = d && d.liq_profile; if(!p || !p.profile || !p.profile.length) return '';
   // Same colour law as the Liquidations panel above: red = longs carried out, green = shorts.
@@ -1729,6 +1770,8 @@ function drawCoin(){
   }
 
   // Breadth — structurally impossible on three tickers, so it is this map's own panel.
+  s+=stablesPanel();
+
   const B=SNAP.breadth||{};
   if(B.cheapest&&B.cheapest.length){
     const mk=(rows,col)=>rows.slice(0,4).map(function(r){
