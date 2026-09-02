@@ -1904,7 +1904,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           box-shadow: 0 18px 50px rgba(0,0,0,.6); min-width: 190px; font-family: var(--sans); }
         #scale-menu.open { display: block; }
         /* B8: bar-close countdown pinned to the price axis, and the back-to-live chip. */
-        #chart-countdown { position: absolute; right: 2px; z-index: 13; transform: translateY(-50%);
+        /* NOT translateY(-50%) (fixed 2026-09-02, Jake: "sitting on top of the current price
+           label"). Centred on the price coordinate is exactly where the axis price label lives —
+           measured at 14px tall, extending 7.4px below that coordinate — so the pill covered the
+           one number that must always read. It hangs BELOW the label now, TradingView's own
+           placement, positioned from the top in JS. */
+        #chart-countdown { position: absolute; right: 2px; z-index: 13;
           font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: .3px;
           font-variant-numeric: tabular-nums; padding: 1px 5px; border-radius: 3px;
           background: #0e3a44; color: #7fe9f5; border: 1px solid rgba(34,211,238,.35);
@@ -3568,6 +3573,9 @@ function _paintWm(){
 // frames only (a countdown on a daily bar is noise), and only while a bar is genuinely forming
 // (RTH + extended, 04:00-20:00 ET) so it doesn't tick through the closed weekend. OWNED + supervised
 // like every other loop: global handle + tick stamp, cleared on arm, so _laneCheck can see and heal it.
+// Measured against the rendered axis label (headless, 2026-09-02): 14px tall, reaching 7.4px
+// below the price coordinate. 8 clears it; the caller adds a 2px gap.
+const _CD_LBL=8;
 function _cdTick(){
   var pill=document.getElementById('chart-countdown'); if(!pill) return;
   try{
@@ -3591,8 +3599,16 @@ function _cdTick(){
     if(y===null){ pill.style.display='none'; return; }
     pill.textContent=txt;
     pill.classList.toggle('warn', rem<=10);
-    pill.style.top=y+'px';
-    pill.style.display='block';
+    // Hang BELOW the price label, never on it (2026-09-02). _CD_LBL is measured, not guessed: the
+    // axis last-value label renders 14px tall and reaches 7.4px past the price coordinate, so the
+    // pill clears it by a hair plus a 2px gap. Flips ABOVE when the live price sits near the pane
+    // floor — otherwise the countdown would hang off the bottom exactly when price is falling.
+    pill.style.display='block';                       // measure with layout, before positioning
+    var _ph=pill.offsetHeight||16, _pane=(document.getElementById('novo-chart')||{}).clientHeight||0;
+    var _top=y+_CD_LBL+2;
+    if(_pane && _top+_ph>_pane-2) _top=y-_CD_LBL-2-_ph;
+    if(_top<2) _top=2;
+    if(pill.__top!==_top){ pill.__top=_top; pill.style.top=_top+'px'; }
   }catch(_e){ pill.style.display='none'; }
 }
 function _cdStart(){
@@ -4149,7 +4165,15 @@ function _lvlCollide(){
     // of the live price overprints the one number that must always read.
     try{
       var _lp=(_novoLastCandle&&_novoLastCandle.close)||((_novoViewC&&_novoViewC.length)?_novoViewC[_novoViewC.length-1].close:null);
-      if(_lp>0){ var _lpy=_novoSeries.priceToCoordinate(_lp); if(_lpy!==null) shown.push(_lpy); }
+      if(_lp>0){ var _lpy=_novoSeries.priceToCoordinate(_lp);
+        if(_lpy!==null){ shown.push(_lpy);
+          // The countdown pill hangs just under that label and is axis furniture too (2026-09-02)
+          // — reserve its band as well, or a level tag prints beneath the price and under the
+          // clock, which is the same collision one row down.
+          var _cdp=document.getElementById('chart-countdown');
+          if(_cdp && _cdp.style.display==='block') shown.push(_lpy+_CD_LBL+2+((_cdp.offsetHeight||16)/2));
+        }
+      }
     }catch(_e){}
     // Walk high-priority first so a strong tag claims its slot; a weaker tag within 13px hides.
     items.slice().sort(function(a,b){ return b.prio-a.prio; }).forEach(function(it){
