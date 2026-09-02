@@ -30,9 +30,19 @@ module.exports = async (req, res) => {
   // plan: 'yearly' picks the annual price ($1,290/yr); anything else = monthly ($129/mo).
   // Hardcoded to the $129/$1,290 price IDs (created 2026-08-16). The older $129/$1,290 and $69/$690 prices stay live in Stripe so
   // existing Analyst subscribers keep their rate for life — only new checkouts hit $129/$1,290. Env overrides win.
+  if (require('./_lib/sales-gate.js').blockIfPaused(req, res, 'checkout-analyst')) return;
+
+  // An ABSENT plan still means monthly — this endpoint sells one product and its pages have always
+  // posted bare for the monthly case, so requiring it would break a working flow for no gain.
+  // But a plan that is PRESENT and unrecognised is now a 400 rather than a silent monthly sale:
+  // "yearly" misspelled, or a toggle that set the wrong value, used to sell the $129 instead of
+  // the $1,290 and look like a successful checkout from both ends. Reject what we cannot read.
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (b && b.plan != null && b.plan !== 'monthly' && b.plan !== 'yearly') {
+      return res.status(400).json({ error: "plan must be 'monthly' or 'yearly'" });
+    }
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
   // Fallbacks refreshed 2026-09-01 to the LLC-account ids (acct_1U8720B1Bq29OALa) the env

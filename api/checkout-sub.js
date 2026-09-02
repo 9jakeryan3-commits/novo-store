@@ -25,6 +25,10 @@ module.exports = async (req, res) => {
   // Cross-instance shared rate limit (the per-lambda _rl above can't aggregate on Vercel). Fails open if KV unset. (audit #13)
   if (!(await require('./_kv').rateOk('ckt_sub:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
+  // SALES_PAUSED, server-side. It has always existed as a const in the marketing pages, which
+  // stopped BUTTONS and not CHECKOUTS — see api/_lib/sales-gate.js.
+  if (require('./_lib/sales-gate.js').blockIfPaused(req, res, 'checkout-sub')) return;
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

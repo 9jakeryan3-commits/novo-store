@@ -53,12 +53,34 @@ module.exports = async (req, res) => {
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
   if (!(await require('./_kv').rateOk('ckt_bn:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
-  let bundle = 'ac', plan = 'monthly';
-  try {
-    const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    if (b && b.bundle === 'all') bundle = 'all';
-    if (b && b.plan === 'yearly') plan = 'yearly';
-  } catch (_) {}
+  if (require('./_lib/sales-gate.js').blockIfPaused(req, res, 'checkout-bundle')) return;
+
+  // DEFAULT DENY. This read `let bundle = 'ac', plan = 'monthly'` and then only ever UPGRADED off
+  // those defaults, so an empty body — `POST /api/checkout-bundle` with `{}` — minted a valid
+  // Analyst + Crypto monthly session. Nobody could be charged without completing Stripe's own
+  // page, so this was never a security hole; it was a CORRECTNESS one, and on the one endpoint
+  // where a wrong default is a wrong PRODUCT at a different price ($169 vs $239).
+  //
+  // The failure it actually invites is a client bug, and this codebase has already shipped that
+  // exact bug once: ga-events.js documents plans.html's plan toggle storing its value in a global
+  // the onclick never read, so every annual sale reported at the monthly value. A handler that
+  // silently substitutes a default cannot tell "the user chose AC monthly" from "the page failed
+  // to tell me what the user chose" — and it sells something either way.
+  //
+  // Safe to require: the only live caller (plans.html:680) always sends both explicitly —
+  // `_bundleGo('ac'|'all', window._bundleAcPlan || 'monthly', ...)`. Verified before changing it.
+  let body = {};
+  try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); }
+  catch (_) { return res.status(400).json({ error: 'malformed request body' }); }
+
+  const bundle = String(body.bundle || '');
+  const plan = String(body.plan || '');
+  if (bundle !== 'ac' && bundle !== 'all') {
+    return res.status(400).json({ error: "bundle must be 'ac' or 'all'" });
+  }
+  if (plan !== 'monthly' && plan !== 'yearly') {
+    return res.status(400).json({ error: "plan must be 'monthly' or 'yearly'" });
+  }
 
   const yearly = plan === 'yearly';
   const items = bundle === 'all'

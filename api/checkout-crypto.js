@@ -31,9 +31,16 @@ module.exports = async (req, res) => {
   if (_rateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
   if (!(await require('./_kv').rateOk('ckt_cx:' + ip, 8, 60))) return res.status(429).json({ error: 'Too many requests' });
 
+  if (require('./_lib/sales-gate.js').blockIfPaused(req, res, 'checkout-crypto')) return;
+
+  // Absent plan = monthly (unchanged); a PRESENT but unrecognised plan is a 400 rather than a
+  // silent monthly sale. Same reasoning as checkout-analyst.js — see the note there.
   let plan = 'monthly';
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (b && b.plan != null && b.plan !== 'monthly' && b.plan !== 'yearly') {
+      return res.status(400).json({ error: "plan must be 'monthly' or 'yearly'" });
+    }
     if (b && b.plan === 'yearly') plan = 'yearly';
   } catch (_) {}
 
