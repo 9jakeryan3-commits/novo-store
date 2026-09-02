@@ -186,12 +186,13 @@ Analyst interprets, Trader renders.
   back-to-live chip when you’ve panned into history, and a full keyboard map (1-6 timeframes,
   arrows/+/- pan-zoom, Esc, Alt+H level drop, ? for the cheat sheet). Fullscreen and screenshot
   buttons on the toolbar
-- **Dealer structure ON the chart (Apex)** — the GEX-by-strike histogram behind the candles
-  (all-expiry structure faint, 0DTE bright — the wall is the biggest bar); dealer levels carry
+- **Dealer structure ON the chart (Apex)** — always on with the levels layer: dealer levels carry
   **strength** (line weight from the gamma behind them, fading as it decays into the close);
   levels in confluence merge into one stacked label; ‘The Line’ lost/reclaimed events pin to
   their bars; a net-GEX sparkline in the Market Intel strip; ghost lines where the longer-dated
-  book disagrees with the day’s wall
+  book disagrees with the day’s wall. The **GEX-by-strike histogram** behind the candles
+  (all-expiry structure faint, 0DTE bright — the wall is the biggest bar) is a **toolbar toggle,
+  off until you flip it** — same discipline as the ⚙ visuals below
 - **⚙ dealer visuals, all default OFF** (the raw tape stays raw; each is a menu toggle) — regime
   tint above/below the flip, the EM decay cone (the day’s REMAINING priced move, √-decaying into
   the close), a gravity halo that turns on after 2pm, today’s wall-migration trails, a drift
