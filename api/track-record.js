@@ -97,12 +97,23 @@ module.exports = async (req, res) => {
       ok: true, head: check.head, intact: links.length ? check.intact : null, links: links.length,
       history: links.slice(0, want).map((L, i) => ({
         ts: L.ts, generated: L.generated, hash: L.hash, prev: L.prev,
+        // WITHOUT THESE TWO THE PUBLISHED HASH CANNOT BE CHECKED BY THE PERSON READING IT.
+        // This view served `claims` and `hash` and nothing that connects them, so a reader could
+        // compare fingerprints across time but could not confirm that the numbers shown are the
+        // numbers that produced the fingerprint shown -- they still had to trust our own
+        // verifier for the last step. I found it by fetching this endpoint and recomputing the
+        // hash with my own code, the way an outsider would, and watching it fail to reconcile.
+        // A published hash nobody else can recompute is decoration.
+        payloadHash: L.payloadHash, contentHash: L.contentHash,
         claims: L.claims,
         // What actually moved since the publish before it -- the reason to keep history at all.
         changed: i + 1 < links.length ? diffLinks(L, links[i + 1]).changed : undefined,
       })),
       note: "One entry per publish that CHANGED a scored claim; identical republishes are not " +
-            "recorded. `hash` covers the entry and the one before it.",
+            "recorded. To check an entry yourself, with no access to us: canonicalise " +
+            "{claims, payload: payloadHash} as JSON with every object's keys sorted, SHA-256 it " +
+            "to get contentHash, then SHA-256 the string (prev + contentHash) to get hash. Each " +
+            "entry's prev is the hash of the publish before it; the first is 64 zeroes.",
     });
   }
 
