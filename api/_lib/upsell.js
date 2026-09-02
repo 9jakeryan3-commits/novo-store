@@ -34,6 +34,10 @@ const { eh } = require("./member-memory.js");
 // acceptable to pitch a paying member?" — and the honest answer is a good deal less often than
 // they sit down. Six hours means an evening's questions produce one pitch, and somebody who
 // comes back tomorrow sees it once more.
+//
+// Julie put the reason better than the number does (2026-09-02): "if it ever becomes every
+// answer, it stops being an offer and starts being a nag." That is the line to defend if anyone
+// ever proposes shortening this.
 const COOLDOWN_S = 6 * 3600;
 
 // Equity terms that are unambiguous — no crypto book has an SPX or an IWM.
@@ -68,16 +72,27 @@ function touchesEquities(question, ledger) {
 
 // THE COPY. It lives here, in one place, so changing what NoVo pitches is a one-file edit and
 // not a hunt through an endpoint. Prices are the plans.html card verbatim ($169/mo, $1,690/yr,
-// $39/mo under Analyst + Crypto bought apart, 7-day trial) — if that card moves, move this.
+// $39 against Analyst + Crypto separately, 7-day trial) — if that card moves, move this.
+//
+// Wording is Julie's, approved by Jake 2026-09-02, and her four edits are worth keeping as
+// reasoning rather than just as a result:
+//   - "less than the two separately", not "under the two bought apart" — this is the line a buyer
+//     does arithmetic against, and "bought apart" is a construction nobody says out loud.
+//   - the CTA names what they GET, not the SKU. The title already carries the SKU; the button is
+//     the one place the value can go.
+//   - "the half you're not seeing", not "the other half of what I watch" — the card sells their
+//     gap, not NoVo's coverage. Same voice, different subject.
+//   - no "You're on the crypto map" opener. They are looking at the crypto map while they read
+//     this; it is orientation, not offer.
 const CARD = {
   kind: "bundle_ac",
   eyebrow: "The equity map",
   title: "Analyst + Crypto",
-  body: "You're on the crypto map. The live SPY, QQQ and IWM dealer map — every strike, the flip level, "
-      + "the Open and Close reads — is the other half of what I watch. This adds it to what you already have.",
-  price: "$169/mo · $39 under the two bought apart",
+  body: "The live SPY, QQQ and IWM dealer map — every strike, the flip level, the Open and Close "
+      + "reads — is the half you're not seeing. This adds it to what you already have.",
+  price: "$169/mo · $39 less than the two separately",
   trial: "7-day free trial · cancel any time",
-  cta: { label: "See the bundle", href: "/plans?plan=bundle-ac" },
+  cta: { label: "Add the equity map", href: "/plans?plan=bundle-ac" },
 };
 
 // What the model is told when the pitch is armed. Deliberately narrow: it may acknowledge the
