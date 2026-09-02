@@ -3082,18 +3082,32 @@ _abRun();
 // The server stays 1-min; timeframes are aggregated here so no second data path exists to drift.
 // Drawings persist per ticker in localStorage as SPECS (prices/times), and are rebuilt as chart
 // objects on load and on every ticker switch — the objects themselves never serialize.
-let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:false,tint:false,cone:false,halo:false,trails:false,drift:false,heat:false};
+// gex DEFAULTS ON (Jake, 2026-09-01): the dealer book is the product, and the GEX-by-strike
+// histogram is a right-edge dock, not a background wash — it does not compete with the tape the
+// way the ⚙ visuals would, so it is what a viewer should see on the first open. Everything else
+// keeps its default; the six ambient visuals stay off.
+let _ctbTf=1, _ctbTog={vwap:true,ema:true,lvl:true,vol:false,ha:false,vp:false,gex:true,tint:false,cone:false,halo:false,trails:false,drift:false,heat:false};
+const _CTB_V=2;   // bump when a DEFAULT changes and saved states should adopt it once
 try{
   var _cs=JSON.parse(localStorage.getItem('novo_ctb')||'{}');
   if([1,5,15,'1h','1d','1w'].indexOf(_cs.tf)>=0) _ctbTf=_cs.tf;
-  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo','trails','drift','heat'].forEach(function(k){ if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k]; });
+  // A saved state written BEFORE this version carries gex:false only because that was the old
+  // default — the toolbar persists every key the moment you touch any control, so an implicit
+  // false is indistinguishable from a chosen one unless we version it. States older than _CTB_V
+  // adopt the new default once; the next save stamps v, so a viewer who then turns it off keeps
+  // it off forever. Never re-applies, never overrides a real choice.
+  var _stale=(_cs.v!==_CTB_V);
+  ['vwap','ema','lvl','vol','ha','vp','gex','tint','cone','halo','trails','drift','heat'].forEach(function(k){
+    if(_stale && k==='gex') return;   // let the new default stand for one load
+    if(typeof _cs[k]==='boolean') _ctbTog[k]=_cs[k];
+  });
   if(_ctbTog.heat&&_ctbTog.tint) _ctbTog.tint=false;   // B16: field and wash are mutually exclusive
 }catch(_e){}
 // Canvas settings (2026-08-31): price-scale mode (0 regular / 1 log / 2 percent / 3 indexed-to-100
 // — lightweight-charts' own enum) + inverted scale. Persisted with the rest of the toolbar state.
 let _scaleCfg={m:0,inv:false,za:false};   // za: zoom anchor — false = to cursor (library default), true = to price (right edge pinned)
 try{ if([0,1,2,3].indexOf(_cs.sm)>=0) _scaleCfg.m=_cs.sm; if(typeof _cs.inv==='boolean') _scaleCfg.inv=_cs.inv; if(typeof _cs.za==='boolean') _scaleCfg.za=_cs.za; }catch(_e){}
-function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,trails:_ctbTog.trails,drift:_ctbTog.drift,heat:_ctbTog.heat,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
+function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({v:_CTB_V,tf:_ctbTf,vwap:_ctbTog.vwap,ema:_ctbTog.ema,lvl:_ctbTog.lvl,vol:_ctbTog.vol,ha:_ctbTog.ha,vp:_ctbTog.vp,gex:_ctbTog.gex,tint:_ctbTog.tint,cone:_ctbTog.cone,halo:_ctbTog.halo,trails:_ctbTog.trails,drift:_ctbTog.drift,heat:_ctbTog.heat,sm:_scaleCfg.m,inv:_scaleCfg.inv,za:_scaleCfg.za})); }catch(_e){} }
 
 // Every polling fetch gets a hard deadline. A phone radio can hold a request open for MINUTES,
 // and the chart/board loops are self-scheduling (next tick only after the last completes), so one
