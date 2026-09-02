@@ -1415,6 +1415,55 @@ function basisPanel(d){
 // taker's side is not a market opinion and turning it into one would be a model wearing a
 // measurement's label. Structures are Deribit's own names off the combo id; where the venue does
 // not name one, the cell stays blank rather than guessing.
+function takerFlowPanel(d, g){
+  const t = d && d.taker_flow; if(!t || !t.prints) return '';
+  // THE COMPARISON IS THE POINT. g.net_gex is a POSITION whose dealer sign is a convention
+  // (calls +, puts -). t.net_flow_gex is a FLOW whose sign is MEASURED off the venue's own
+  // taker tag. They are never summed and never differenced -- shown side by side, labelled
+  // for what each one is, and allowed to disagree.
+  const flow = t.net_flow_gex, book = g && g.net_gex;
+  const share = (book && Math.abs(book) > 0) ? Math.abs(flow) / Math.abs(book) * 100 : null;
+  const disagree = (book != null) && ((flow < 0) !== (book < 0));
+  const ks = (t.strikes || []).slice();
+  const mx = ks.reduce((a, r) => Math.max(a, Math.abs(r[1])), 0) || 1;
+  const bars = ks.map(function(r){
+    const k = r[0], v = r[1], pos = v >= 0;
+    const w = Math.max(1, Math.abs(v) / mx * 50);
+    return `<tr><td class="mono">${px(k)}</td>`
+      + `<td style="width:100%"><div style="display:flex;align-items:center;height:13px">`
+      + `<div style="width:50%;display:flex;justify-content:flex-end">${!pos?`<div style="height:9px;width:${w}%;background:var(--red);border-radius:2px 0 0 2px"></div>`:''}</div>`
+      + `<div style="width:50%">${pos?`<div style="height:9px;width:${w}%;background:var(--green);border-radius:0 2px 2px 0"></div>`:''}</div>`
+      + `</div></td>`
+      + `<td class="num ${pos?'up':'dn'}">${money(v)}</td></tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Taker-flow gamma &middot; ${t.hours}h</h2>
+    <span class="sub">${CUR} screen prints &middot; the dealer side MEASURED, not assumed</span></div><div class="pb">
+    <div class="mgrid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="mcell"><div class="mk">Makers took on &middot; measured</div>
+        <div class="mv ${flow>=0?'up':'dn'}">${money(flow)}</div>
+        <div class="ms">${flow>=0?'long gamma &mdash; takers were net sellers':'short gamma &mdash; takers were net buyers'}</div></div>
+      <div class="mcell"><div class="mk">The book says &middot; by convention</div>
+        <div class="mv ${book>=0?'up':'dn'}">${book!=null?money(book):'&mdash;'}</div>
+        <div class="ms">open interest signed calls&nbsp;+ / puts&nbsp;&minus;, dealer side assumed</div></div>
+    </div>
+    ${disagree?`<div class="kv"><span class="k">These disagree</span><span class="v am">flow is ${flow<0?'short':'long'} where the book reads ${book<0?'short':'long'}</span></div>`:''}
+    ${share!=null?`<div class="kv"><span class="k">Flow vs the standing book</span><span class="v nu">${share.toFixed(1)}% of |net GEX|</span></div>`:''}
+    <div class="kv"><span class="k">Takers bought / sold</span><span class="v nu">${money(t.taker_buy_premium_usd)} <span style="color:var(--txt4)">/</span> ${money(t.taker_sell_premium_usd)}</span></div>
+    <div class="kv"><span class="k">Screen prints measured</span><span class="v nu">${t.prints.toLocaleString()}${t.expired_excluded?` <span style="color:var(--txt4)">&middot; ${t.expired_excluded} already settled</span>`:''}</span></div>
+    ${t.coverage_gaps?`<div class="kv"><span class="k">Coverage</span><span class="v dn">${t.coverage_gaps} known gap${t.coverage_gaps>1?'s':''} in this window</span></div>`:''}
+    ${bars?`<table class="tt" style="margin-top:10px"><thead><tr><th>Strike</th><th style="text-align:center">maker short &larr; &rarr; maker long</th><th class="num">Gamma</th></tr></thead><tbody>${bars}</tbody></table>`:''}
+    <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.55;font-family:var(--mono)">
+      METHOD, so you can check it: Deribit publishes which side the TAKER was on, so the maker&rsquo;s
+      side is a fact, not a guess &mdash; a taker who buys leaves the maker short that option, a taker
+      who sells leaves them long, and calls and puts count the same because a long option is long
+      gamma either way. <b>Blocks are excluded</b>: they are negotiated first and reported after, so
+      their taker tag is a reporting convention rather than evidence of who leaned on whom &mdash; they
+      are in the block tape instead. This is FLOW over ${t.hours} hours, never a position, so it is
+      shown beside the standing book and never added to it. Priced at today&rsquo;s spot off the
+      ${t.spot_book} book with each print&rsquo;s own traded IV.</div>
+    </div></div>`;
+}
+
 function tapePanel(d){
   const t=d&&d.option_tape; if(!t||!t.prints) return '';
   const when=(s)=>s?String(s).slice(11,16):'';
@@ -1500,7 +1549,7 @@ function drawCoin(){
         </div>
       </div>
       ${turnoverPanel(g)}
-      ${tapePanel(d)}
+      ${takerFlowPanel(d,g)}${tapePanel(d)}
       ${basisPanel(d)}
       ${gauge(g)}
       ${volRow(d,g)}

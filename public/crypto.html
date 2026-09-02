@@ -695,6 +695,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span class="hero-chip">Positioning vs its own history</span>
       <span class="hero-chip">24h options volume</span>
       <span class="hero-chip">Block tape</span>
+      <span class="hero-chip">Taker-flow gamma</span>
       <span class="hero-chip">Liquidation flow</span>
       <span class="hero-chip">Price / OI regime</span>
       <span class="hero-chip">True cost to trade</span>
@@ -806,6 +807,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><span class="mark">&#10003;</span>24-hour options volume on every book &mdash; premium traded and the contracts that carried it</li>
           <li><span class="mark">&#10003;</span>The <strong>block tape</strong> &mdash; negotiated option trades the venue itself tagged, with premium, leg count and the exchange&rsquo;s own structure names</li>
           <li><span class="mark">&#10003;</span>The <strong>carry curve</strong> &mdash; annualised basis on every dated future carrying real open interest, the convention printed on the panel</li>
+          <li><span class="mark">&#10003;</span><strong>Taker-flow gamma</strong> &mdash; the dealer side <em>measured</em> off the venue&rsquo;s own taker tag instead of assumed from a call/put convention, blocks excluded and the method printed beside it</li>
           <li><span class="mark">&#10003;</span><strong>Implied vs realized</strong>, side by side &mdash; DVOL&rsquo;s daily move against the move the tape actually printed, minute count shown</li>
           <li><span class="mark">&#10003;</span>24-hour liquidation flow, per coin, longs and shorts split</li>
           <li><span class="mark">&#10003;</span>The retail round trip, read from the venue's own disclosed markup</li>
@@ -842,7 +844,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       from the venue that made it.</p>
     <div class="covgrid">
       <div class="covcard"><div class="cvn">The options book</div><div class="cvt">Gamma, greeks, DVOL</div>
-        <p class="cvd">The venue carrying the overwhelming majority of crypto options open interest. Gamma, greeks, open interest by strike, the volatility index, the block tape and the dated-futures carry curve.</p></div>
+        <p class="cvd">The venue carrying the overwhelming majority of crypto options open interest. Gamma, greeks, open interest by strike, the volatility index, the block tape, the dated-futures carry curve, and the taker-side tag that makes measured dealer gamma possible.</p></div>
       <div class="covcard"><div class="cvn">Six venues</div><div class="cvt">Leverage</div>
         <p class="cvd">The six perp venues that carry the leverage. Kept separate, because they disagree and the disagreement is the signal.</p></div>
       <div class="covcard"><div class="cvn">Both sides</div><div class="cvt">Crypto-native and US-listed</div>
@@ -898,7 +900,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p style="font-size:16px;color:var(--txt2);max-width:620px;margin:0 auto;line-height:1.7;">What the market gives away, we give away.</p>
     <div class="split">
       <div class="split-card free"><h4>Free, on every coin</h4><p>Current funding by venue, open interest, 24-hour liquidations, and the BTC and ETH gamma read. Free at <a href="/market-data" style="color:#f59e0b;">market data</a>, no account needed.</p></div>
-      <div class="split-card paid"><h4>The subscription</h4><p>Gamma by strike, the walls and the flip across all <span data-bookcount>7</span> books. DVOL, expected move and skew, with implied and realized side by side. The block tape and the dated-futures carry curve. History and percentiles. What a round trip actually costs at retail. Every call NoVo has made and how it scored. And NoVo himself.</p></div>
+      <div class="split-card paid"><h4>The subscription</h4><p>Gamma by strike, the walls and the flip across all <span data-bookcount>7</span> books. DVOL, expected move and skew, with implied and realized side by side. The block tape, the dated-futures carry curve, and taker-flow gamma &mdash; the dealer side measured rather than assumed. History and percentiles. What a round trip actually costs at retail. Every call NoVo has made and how it scored. And NoVo himself.</p></div>
     </div>
   </div>
 </section>
