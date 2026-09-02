@@ -3563,6 +3563,11 @@ const _TF_NAME={1:'1m',5:'5m',15:'15m','1h':'1H','1d':'D','1w':'W'};
 // the split pane never got its fitted opening view). Desktop: the full regular session of 1m, a
 // day and a half of 5m, two weeks of hourly, nine months of daily. Mobile: its own tighter map.
 const _tfOpen={1:390,5:288,15:192,'1h':240,'1d':190,'1w':156};
+// Bar width in seconds per frame, and the bounds of a window worth restoring across a switch.
+// 12 bars is about the fewest that still reads as a chart; 3000 is past the point where bars are
+// sub-pixel on any real screen. Outside either, the frame's own opening window is the better view.
+const _TF_SECS={1:60,5:300,15:900,'1h':3600,'1d':86400,'1w':604800};
+const _TF_MIN_BARS=12, _TF_MAX_BARS=3000;
 const _tfOpenM={1:120,5:96,15:80,'1h':96,'1d':90,'1w':104};
 function _paintWm(){
   var wm=document.getElementById('chart-wm');
@@ -4917,12 +4922,39 @@ async function loadNovoChart(){
       // (The comment here used to say "Open on the last 6 HOURS … 6h = 360 bars" directly above a line
       // that used 180. The value had been changed and the prose hadn't; the variable was still named
       // _bars6h while holding 3h. Naming it for what it IS so the next edit can't inherit the lie.)
-      // A TF flip stashed the pre-flip window (B8) — restore it instead of re-fitting, once.
+      // A TF flip stashed the pre-flip window (B8) — restore it, but ONLY where the target frame
+      // can actually show it (fixed 2026-09-02, Jake: "the chart still freezes up sometime when
+      // switching timeframes... the candles stop printing").
+      //
+      // B8 restored the pre-switch TIME RANGE onto whatever came next, and the frames hold wildly
+      // different spans: 1m/5m/15m share 5 trading days, 1H ~9.5 months, D ~10y, W ~15y. Measured
+      // across all 30 frame pairs, 18 were nonsense — D->1m restored a 190-DAY window onto 5.3 days
+      // of data, squashing the whole session into a few pixels at the right edge, and 1m->W asked
+      // for 0.04 of a bar. That is the "freeze", and it is also why the candles looked stopped:
+      // they were still printing, inside a sliver, while the price line kept moving across the pane.
+      //
+      // So: clamp the request to the data actually loaded, and only honour it if what survives is a
+      // window a human would recognise (>= _TF_MIN_BARS and <= _TF_MAX_BARS of the NEW frame).
+      // Anything else falls through to that frame's own opening window — the pre-B8 behaviour, which
+      // was always correct. The 1m<->5m<->15m switches, which share a span and are where a scalper
+      // actually flips, keep the instant window preservation intact.
       if(!_novoRanged && window._tfRestoreRange){
         const _elr=document.getElementById('novo-chart');
         if(_elr && _elr.clientWidth>0){
           const _rng=window._tfRestoreRange; window._tfRestoreRange=null;
-          requestAnimationFrame(()=>{ try{ _novoChart.timeScale().setVisibleRange(_rng); _novoRanged=true; }catch(_e){ _novoRanged=false; } });
+          const _bw=_TF_SECS[_ctbTf]||60;
+          const _dLo=_view.candles[0].time, _dHi=_view.candles[_view.candles.length-1].time;
+          const _from=Math.max(_rng.from,_dLo), _to=Math.min(_rng.to,_dHi);
+          const _barsVis=(_to-_from)/_bw;
+          if(_to>_from && _barsVis>=_TF_MIN_BARS && _barsVis<=_TF_MAX_BARS){
+            requestAnimationFrame(()=>{ try{ _novoChart.timeScale().setVisibleRange({from:_from,to:_to}); _novoRanged=true; }catch(_e){ _novoRanged=false; } });
+          }
+          // else: leave _novoRanged false with the stash already cleared, so the opening-window
+          // branch below runs on this same pass. No frame is ever left without a range.
+        } else {
+          // No width yet (hidden mobile tab, mid-layout). Drop the stash rather than hold it: while
+          // it was set, the fallback branch below was gated off and NO range was applied at all.
+          window._tfRestoreRange=null;
         }
       }
       if(!_novoRanged && !window._tfRestoreRange){
