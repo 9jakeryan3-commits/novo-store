@@ -234,9 +234,37 @@ Two halves, and the copy should never describe it as one brokerage's product lis
   via `<span data-bookcount>`. BTC and ETH also carry the US-listed ETF book (IBIT / ETHA) beside
   the crypto one — but an ETF book must never be the DEFAULT for a coin, or the page renders an
   ETF share price under a coin header.
-- **The on-chain half — 200+ tokens** on Solana and Robinhood Chain. No options book, no perp, so
+- **The on-chain half — 250+ tokens** on Solana, Base and Robinhood Chain. No options book, no perp, so
   no gamma: the read is liquidity structure. Keyed on contract ADDRESS, never ticker.
 - **Total ≈ 270 tokens.** The rail says "filter N tokens" from that total.
+
+**What the paid map reads, added 2026-09-01/02** (each measured, each already on `/crypto`):
+
+- **Taker-flow gamma** — maker gamma from the venue's own taker-side tag on SCREEN prints, blocks
+  excluded because a block is negotiated then reported. Shown BESIDE the OI-built book, never summed
+  with it: one is a position on an assumed dealer sign, the other a flow with a measured one, and
+  they are allowed to disagree. The method string ships inside the payload.
+- **The settlement clock** — live countdown to the front expiry, what rolls off at it, the map
+  recomputed WITHOUT today's expiry (net/flip/walls), and the 30-minute settlement TWAP forming.
+  The TWAP is a RECONSTRUCTION from our own 1s index ticks, not the venue's settlement print, and
+  its sample coverage renders beside it.
+- **Where the flush landed** — realized liquidations bucketed by the price they cleared at. This is
+  the measured counterpart to the modelled liquidation heatmap on the never-build list. **OKX only**
+  (Binance answers 451, Bybit 403 from this box) and the panel says so in amber; never imply a
+  market-wide total.
+- **Dry powder** — USD stablecoin supply and its direction, with two totals that are never summed:
+  payment stablecoins vs yield-bearing tokenized funds (~$5.3B of the $310B naive total). Plus the
+  issuer-published **authorized-but-unissued** split (~$10.2B of USDT), which aggregators do not
+  carry. Issuers who mint-and-burn publish none, and get NULL rather than zero.
+- **The carry curve, IV-vs-RV, the 3-book block tape, the long-lens percentiles** (venue archives:
+  DVOL to 2021, hourly HL funding, OKX daily OI — a SEPARATE population, never pooled with the live
+  5-minute samples).
+- **The screener** — all 91 coins ranked on every measured column, including the **funding spread**
+  (the gap between the venue paying most and least), which is exactly what a blended funding number
+  destroys and therefore something no competitor can print.
+
+**Free, and not a tier change:** `/api/mcp` exposes the ten free `/developers` endpoints as an MCP
+server — nine read-only tools, no key. Paid surfaces are absent from it rather than gated-and-erroring.
 
 **Claims to avoid** (all were on the site and all are refutable): "every book that exists",
 "the gamma tools stop at four coins", and any competitor price band quoted as the market — one
