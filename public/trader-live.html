@@ -4286,17 +4286,27 @@ function _lvlStrengthApply(){
     window._lvlWKey=window._lvlWKey||{};
     ['CW','PW','GRAV','FLIP'].forEach(function(lbl){
       var s=_novoLvlSeries[lbl]; if(!s||!(px[lbl]>0)) return;
-      var w=1;
+      // STRENGTH IS BRIGHTNESS, NOT THICKNESS (Jake, 2026-09-02: "those big fat levels are just
+      // ugly on the chart"). It used to map gamma share to lineWidth 1-4, so the flip and the call
+      // wall both sat at 4px whenever they were on a heavy strike — most days — and several slabs
+      // at once is a lot of ink on a chart whose whole point is the tape. Every level is a 1px
+      // hairline again, like the session levels, and the same information rides the alpha: a
+      // bright thin line is a wall with weight behind it, a dim one is a level with little.
+      var share=0;
       if(st&&st.sa&&st.sa.length){
-        var bd=1e9, share=0;
+        var bd=1e9;
         st.sa.forEach(function(r){ var d2=Math.abs(r[0]-px[lbl]); if(d2<bd){ bd=d2; share=r[1]; } });
-        if(bd<=1.5) w=1+Math.round(share*3);
+        if(bd>1.5) share=0;   // no strike near this level -> nothing to claim about its weight
       }
-      var al=+(0.45+0.55*dk).toFixed(2);
-      var key=w+':'+al;
+      // Strength and session decay BOTH live in alpha now, so they are combined with a floor
+      // rather than multiplied: a weak level late in the day must still be visible, just quiet.
+      // 0.40 floor -> 1.0 ceiling; a level with no strike behind it sits at the floor and reads
+      // exactly as what it is.
+      var al=+Math.max(0.40, Math.min(1, (0.40 + 0.60*share) * (0.55 + 0.45*dk))).toFixed(2);
+      var key='1:'+al;
       if(window._lvlWKey[lbl]===key) return;
       window._lvlWKey[lbl]=key;
-      s.applyOptions({lineWidth:w,color:_hexA(_LVL_COLOR[lbl]||'#8b93a7',al)});
+      s.applyOptions({lineWidth:1,color:_hexA(_LVL_COLOR[lbl]||'#8b93a7',al)});
     });
   }catch(_e){}
 }
