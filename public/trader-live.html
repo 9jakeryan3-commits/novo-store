@@ -2294,10 +2294,13 @@ const SUGGEST_INPUT_MAP={trend_apex_floor:'trig-trend',confluence_floor:'trig-co
 async function sendCommand(cmd){
   logTerminal(`> CMD: ${cmd.toUpperCase()}`,'sys');
   try {
-    const r=await fetch(NOVO_URL('/api/command/' + cmd),{method:'POST',headers:{'Content-Type':'application/json'}});
+    const _cu=NOVO_URL('/api/command/' + cmd);
+    if(!_cu){ logTerminal('✗ Not connected.','sys'); return; }
+    const r=await _tfetch(_cu,15000,{method:'POST',headers:{'Content-Type':'application/json'}});
+    if(!r.ok){ logTerminal(`✗ ${r.status===401?'Session expired':'Failed ('+r.status+')'}`,'sys'); return; }
     const d=await r.json();
     logTerminal(d.status==='success'?'✓ Transmitted.':`✗ ${d.message}`,'sys');
-  } catch(e){ logTerminal(`✗ ${e}`,'sys'); }
+  } catch(e){ logTerminal(`✗ ${(e&&e.name==='AbortError')?'Timed out':e}`,'sys'); }
 }
 
 // RUN ANALYSIS — the only command this dashboard can send.
@@ -2341,12 +2344,16 @@ window.runAnalysis = async function(){
     var u = (typeof NOVO_URL === 'function') ? NOVO_URL('/api/command/chart')
                                              : location.origin + '/api/command/chart';
     if(!u){ done('err', 'Not connected'); return; }
-    var r = await fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}});
+    // 15s deadline (2026-09-02). This was one of three bare fetches left on the page after the
+    // freeze work: a POST that hangs never rejects, so `done()` never runs and the button sits on
+    // "Asking NoVo…" until a reload. It cannot freeze the CHART -- it is user-triggered, not in the
+    // polling path -- but a control that never comes back reads exactly like one that is broken.
+    var r = await _tfetch(u, 15000, {method:'POST', headers:{'Content-Type':'application/json'}});
     if(!r.ok){ done('err', r.status === 401 ? 'Session expired' : 'Failed'); return; }
     var d = await r.json();
     done(d && d.status === 'success' ? 'ok' : 'err',
          d && d.status === 'success' ? 'Sent — watch Analysis' : ((d && d.message) || 'Failed'));
-  }catch(e){ done('err', 'Failed'); }
+  }catch(e){ done('err', (e && e.name === 'AbortError') ? 'Timed out' : 'Failed'); }
 };
 
 // MANUAL ENTRY (2026-07-16) — you take the trade, NoVo executes it. ONE CLICK, NO CONFIRM.
@@ -3155,7 +3162,9 @@ function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({v:_CTB
 // hung fetch used to freeze the whole lane, switch veil stuck on, candles dead while the WS kept
 // the hero price moving (Jake's 2026-08-31 split-screen freeze). Abort → catch → the loop's
 // finally schedules the next tick and the chart heals on its own.
-function _tfetch(u,ms){
+function _tfetch(u,ms,init){
+  // `init` added 2026-09-02 so the command POSTs can share this one deadline implementation
+  // instead of hand-rolling a second one. Existing callers pass nothing and are unaffected.
   var ac=('AbortController' in window)?new AbortController():null;
   var tm=ac?setTimeout(function(){ try{ac.abort();}catch(_e){} },ms||12000):null;
   var _clr=function(){ if(tm){ clearTimeout(tm); tm=null; } };
@@ -3173,7 +3182,10 @@ function _tfetch(u,ms){
   //
   // The body is now drained inside the same deadline and the timer is cleared only once it is
   // actually consumed. Callers are unchanged: every one of the seven uses only ok / status / json().
-  return fetch(u,ac?{signal:ac.signal,cache:'no-store'}:{cache:'no-store'})
+  var _o={cache:'no-store'};
+  if(init){ for(var _k in init) _o[_k]=init[_k]; }
+  if(ac) _o.signal=ac.signal;
+  return fetch(u,_o)
     .then(function(r){
       return r.text().then(function(t){
         _clr();
