@@ -10,9 +10,17 @@
 // more than publishing nothing.
 
 const { kv } = require("./_kv.js");
+const { appendLink, readChain, verifyChain, diffLinks } = require("./_lib/record-chain.js");
 
 const KEY = "novo:track_record";
 const TTL = 14 * 24 * 60 * 60;   // survives a long engine outage; staleness is shown, not hidden
+
+// THE OVERWRITE THAT MADE THE RECORD UNCHECKABLE. `set` on one key, per publish, meant every
+// publish destroyed the one before it -- values drifted between two reads hours apart and the
+// earlier ones were unrecoverable. So a figure printed in copy on Monday could not be verified on
+// Friday, and the prompt's "you do not get to edit it" was simply false. The snapshot above is
+// still the fast read path; the chain beside it is the history. See _lib/record-chain.js, which
+// is also explicit about what a server-held chain does NOT prove.
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -30,14 +38,52 @@ module.exports = async (req, res) => {
     if (!b || b.ok !== true || !b.tickers) return res.status(400).json({ error: "bad payload" });
     if (!r) return res.status(200).json({ ok: false, note: "kv unavailable" });
     try {
-      await r.set(KEY, JSON.stringify({ ...b, received: Date.now() }), { ex: TTL });
-      return res.status(200).json({ ok: true });
+      const received = Date.now();
+      await r.set(KEY, JSON.stringify({ ...b, received }), { ex: TTL });
+      // Appended after the snapshot lands and never allowed to fail the publish: losing one link
+      // is recoverable, losing the publish is not. Silent on the unchanged path, which is most.
+      const link = await appendLink(r, b, received);
+      return res.status(200).json({ ok: true, chain: link });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
   if (req.method !== "GET") return res.status(405).json({ error: "GET or POST" });
+
+  // ── THE RECORD AS IT STOOD BEFORE ─────────────────────────────────────────────────────────
+  // ?history=N  the last N publishes that CHANGED anything, newest first, each with its hash
+  // ?verify=1   recompute the chain and report any link that does not match
+  // Both are the same data the page serves, so a number quoted anywhere can be traced to the
+  // publish it came from -- which is the only thing that makes "audited" mean more than "stated".
+  if (req.query && (req.query.history || req.query.verify)) {
+    res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=600");
+    if (!r) return res.status(200).json({ ok: false, note: "unavailable" });
+    const want = Math.max(1, Math.min(parseInt(req.query.history, 10) || 30, 200));
+    const links = await readChain(r, req.query.verify ? 200 : want);
+    const check = verifyChain(links);
+    if (req.query.verify) {
+      return res.status(200).json({
+        ok: true, ...check,
+        note: check.intact
+          ? "Every published record still hashes to the record before it, so nothing earlier has " +
+            "been altered since it was written. This is a server-held chain: it makes a silent " +
+            "revision detectable, it does not make one impossible."
+          : "One or more links do not reconcile. Treat the affected records as unverified.",
+      });
+    }
+    return res.status(200).json({
+      ok: true, head: check.head, intact: check.intact, links: links.length,
+      history: links.slice(0, want).map((L, i) => ({
+        ts: L.ts, generated: L.generated, hash: L.hash, prev: L.prev,
+        claims: L.claims,
+        // What actually moved since the publish before it -- the reason to keep history at all.
+        changed: i + 1 < links.length ? diffLinks(L, links[i + 1]).changed : undefined,
+      })),
+      note: "One entry per publish that CHANGED a scored claim; identical republishes are not " +
+            "recorded. `hash` covers the entry and the one before it.",
+    });
+  }
 
   // 30 minutes of edge cache with no browser max-age meant a fresh push could sit invisible for
   // half an hour, and browsers fell back to heuristic caching on top of that. The record changes
