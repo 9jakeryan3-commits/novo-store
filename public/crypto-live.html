@@ -2429,6 +2429,10 @@ window.addEventListener('hashchange', function(){
       var db = deeperBtn(_turn.q);
       if (db) ansEl.parentNode.insertBefore(db, ansEl.nextSibling);
     }
+    // Deliberately NOT stored on _turn: the card is a live prompt, not part of the transcript.
+    // Persisting it would redraw the pitch on every reload of a conversation, which is the nag
+    // the server's once-a-sitting cooldown exists to prevent.
+    if (d.upsell){ var _uc = upsellCard(d.upsell); if (_uc) logAdd(_uc); }
     TURNS.push(_turn); saveTurns(); pinTop(_qel);
   }
   // ── plain English ──────────────────────────────────────────────────────────────
@@ -2464,6 +2468,50 @@ window.addEventListener('hashchange', function(){
     b.title = 'Full desk report on this question';
     b.onclick = function(){ b.remove(); window.novoAsk(q, { deep: true }); };
     return b;
+  }
+
+  // THE BUNDLE CARD. Drawn only when the server sends d.upsell — meaning this member holds the
+  // crypto map alone and the question they just asked ran onto the equity side. The server owns
+  // the decision, the wording AND the price; this file only draws what it is handed. A price
+  // written in here is a price that goes stale the day plans.html changes and nobody thinks to
+  // grep a dashboard for it. Same reason the button is built as a real <a> element: NoVo's prose
+  // is rendered as text nodes, so a URL in the answer would arrive as unclickable punctuation.
+  function upsellCard(u){
+    if (!u || !u.cta || !u.cta.href) return null;
+    var box = document.createElement('div');
+    box.className = 'novo-upsell';
+    box.style.cssText = 'margin:9px 0 3px;padding:12px 14px;border:1px solid rgba(34,211,238,.42);'
+      + 'border-radius:12px;background:linear-gradient(180deg,rgba(34,211,238,.075),rgba(34,211,238,.02));';
+
+    function line(txt, css){
+      var e = document.createElement('div');
+      e.style.cssText = css; e.textContent = txt; box.appendChild(e); return e;
+    }
+    if (u.eyebrow) line(u.eyebrow, 'font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);opacity:.95;');
+    if (u.title)   line(u.title, 'font-size:15px;font-weight:700;margin-top:2px;');
+    if (u.body)    line(u.body, 'font-size:12.5px;line-height:1.5;margin-top:5px;opacity:.88;');
+
+    var meta = [u.price, u.trial].filter(Boolean).join(' · ');
+    if (meta) line(meta, 'font-size:11.5px;margin-top:7px;color:var(--cyan);font-variant-numeric:tabular-nums;');
+
+    var a = document.createElement('a');
+    a.href = u.cta.href; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = u.cta.label || 'See the bundle';
+    // inline-flex + min-height rather than padding alone: measured at 390px the padded version
+    // came out 29px tall, which is a fiddly target on the phone this dashboard is mostly read on.
+    a.style.cssText = 'display:inline-flex;align-items:center;margin-top:10px;padding:0 18px;'
+      + 'min-height:40px;border-radius:999px;background:var(--cyan);color:#04121a;'
+      + 'font-size:12.5px;font-weight:700;text-decoration:none;';
+    // Measured, because an upgrade path nobody can count is one nobody can improve. The landing
+    // page fires begin_checkout on the button there; these two say how many got that far.
+    a.addEventListener('click', function(){
+      try { if (typeof gtag === 'function') gtag('event', 'select_promotion',
+        { promotion_id: u.kind, promotion_name: u.title, creative_slot: 'novo_ask_crypto' }); } catch(_e){}
+    });
+    box.appendChild(a);
+    try { if (typeof gtag === 'function') gtag('event', 'view_promotion',
+      { promotion_id: u.kind, promotion_name: u.title, creative_slot: 'novo_ask_crypto' }); } catch(_e){}
+    return box;
   }
 
   // paste or attach a chart image; it rides the next question

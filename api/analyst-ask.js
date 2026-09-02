@@ -21,6 +21,10 @@ const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
 const { getMemory, eh } = require('./_lib/member-memory.js');
 const { nowBlock } = require('./_clock.js');
+// The crypto→bundle pitch. Decision and copy both live in _lib/upsell.js; this file only asks
+// it two questions and passes the answer through. Nothing here gates or withholds anything —
+// a crypto-only member gets the same answer they always got, with a card under it.
+const { bundlePitch, PROMPT_LINE: UPSELL_LINE } = require('./_lib/upsell.js');
 
 // Three rounds is enough for the deepest real chain — look up the map, notice a gap, fill it,
 // answer — and bounded so a question cannot spend a subscriber's wait on the model talking to
@@ -1064,6 +1068,17 @@ module.exports = async (req, res) => {
   const marketJson = JSON.stringify({ live, history: ctx, crypto: cryptoInv,
                                       crypto_live: cryptoLead, private_alerts: privateAlerts });
 
+  // IS THIS READER ON CRYPTO ALONE, AND DID THEY JUST ASK ABOUT EQUITIES? Asked BEFORE the model
+  // runs so NoVo can close in his own voice rather than having a sentence bolted on afterwards.
+  // The question text is the only signal available this early; the tool ledger is checked again
+  // after the answer, which catches the phrasings the text test misses. `commit: false` — this
+  // pass must not burn the once-a-sitting cooldown on an answer that may never mention equities.
+  let upsell = null;
+  try {
+    upsell = await bundlePitch({ email, question, ledger: null, kv: kv(), commit: false });
+  } catch (_) { upsell = null; }
+  const upsellNote = upsell ? UPSELL_LINE : '';
+
   const prompt =
       nowBlock(lastSession, surface) +
       surfaceBlock(surface, focus) +
@@ -1086,6 +1101,10 @@ module.exports = async (req, res) => {
       // 3/25 voice checks missed against the lean local prompt, 7/25 against production, and the
       // misses were the analyst going impersonal — exactly the failure a distant instruction
       // predicts. Same words, restated last, where nothing follows them.
+      // Sits here, immediately before the voice contract, for the reason the comment above gives:
+      // an instruction thousands of tokens upstream loses to the data. Empty string for everyone
+      // who is not a crypto-only member asking about equities — which is almost every question.
+      upsellNote +
       'ANSWER AS YOURSELF: match the length to the question (a one-line question gets one to three ' +
       'sentences), first sentence answers it in under twenty words, say "I" at least once, use ' +
       'contractions, no summary paragraph, and do not list every number you hold.';
@@ -1267,6 +1286,16 @@ module.exports = async (req, res) => {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
+    // SECOND PASS, now that the ledger exists. The pre-model check only had the question's words;
+    // this one also sees which tools NoVo actually reached for, so "where's the flip today?" — no
+    // equity term in it anywhere — is still caught by the get_dealer_levels call it triggered.
+    // `commit: true`: this is the pass that attaches the card, so this is the pass that burns the
+    // cooldown. Re-running the check is cheap — the entitlement verdict is KV-cached from the
+    // first pass, so the common path adds one cache read, not a second Stripe walk.
+    try {
+      upsell = await bundlePitch({ email, question, ledger, kv: kv(), commit: true });
+    } catch (_) { upsell = null; }
+
     if (sse) {
       sse({
         type: 'done', ok: true, mode: deep ? 'deep' : 'fast', answer: clean,
@@ -1275,6 +1304,7 @@ module.exports = async (req, res) => {
         lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
         verified,
         indexBuilt: idx.built || null,
+        upsell,
       });
       return res.end();
     }
@@ -1290,6 +1320,9 @@ module.exports = async (req, res) => {
       lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
       verified,
       indexBuilt: idx.built || null,
+      // null for everyone except a crypto-only member who just asked about equities. The client
+      // renders it as a card with a real button — a URL in the prose would arrive as dead text.
+      upsell,
     });
   } catch (e) {
     console.error('[analyst-ask]', e);

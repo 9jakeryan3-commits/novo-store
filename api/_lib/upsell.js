@@ -1,0 +1,121 @@
+// api/_lib/upsell.js — the one place the crypto→Analyst pitch is decided and worded.
+//
+// THE RULE THIS IMPLEMENTS (Jake, 2026-09-01, after reversing an earlier gating design):
+// a crypto-only member who asks about equities still gets a real answer. Nothing is blocked,
+// nothing is degraded, no tool is withheld. What they do not get is the equity MAP — that is
+// the paid artifact — so when the conversation wanders onto equities we say, once, that the
+// map lives in Analyst + Crypto, and give them a button.
+//
+// "Better than free, but still just text, no map, only when they ask, and pushes the upgrade
+// on them." That sentence is the whole specification.
+//
+// THREE DESIGN CHOICES WORTH THE WORDS, because each one is a trap avoided:
+//
+//   1. THE PRICE IS NOT IN THE MODEL'S MOUTH. The model gets a one-line nudge with no number
+//      in it; the number rides in a structured field the client renders. A price a language
+//      model recites is a price that drifts the day it changes, and a wrong price quoted by
+//      our own analyst to a paying member is worse than no pitch at all. Same reason the CTA
+//      is a rendered button rather than a URL in prose: the panel emits text nodes, so a typed
+//      URL arrives as dead, unclickable text.
+//
+//   2. IT FAILS OPEN. Entitlement is tri-state; only a definite 'deny' arms the pitch. If
+//      Stripe is unreachable we say nothing. Advertising the bundle to somebody who already
+//      bought the bundle, because our own dependency blinked, is the one outcome here that
+//      actually costs trust.
+//
+//   3. IT FIRES ONCE A SITTING, NOT ONCE A MESSAGE. An upsell on every reply is not a pitch,
+//      it is a nag, and the member is already paying us.
+
+const { analystEntitlement } = require("./entitlements.js");
+const { eh } = require("./member-memory.js");
+
+// Six hours, not the 45-minute SEEN_STALE_MIN the "what changed since you were last here" line
+// uses. That constant answers "is this the same sitting?"; this one answers "how often is it
+// acceptable to pitch a paying member?" — and the honest answer is a good deal less often than
+// they sit down. Six hours means an evening's questions produce one pitch, and somebody who
+// comes back tomorrow sees it once more.
+const COOLDOWN_S = 6 * 3600;
+
+// Equity terms that are unambiguous — no crypto book has an SPX or an IWM.
+const STRONG_RE = /\b(spy|qqq|iwm|spx|ndx|rut|dia|s&p|s ?and ?p|sp500|nasdaq|russell|dow|equit(?:y|ies)|stock market|stocks|0dte|opex|dealer map for)\b/i;
+
+// Terms that LEAN equity but have a crypto reading — DVOL is spoken of as "the crypto VIX",
+// and TLT/ES come up in macro questions a crypto trader legitimately asks. These arm the pitch
+// only when nothing crypto-native is in the same question, so "how does DVOL compare to VIX"
+// stays a crypto question and gets no advert.
+const WEAK_RE = /\b(vix|vvix|vxn|tlt|skew index)\b/i;
+const CRYPTO_RE = /\b(btc|eth|sol|bitcoin|ethereum|solana|crypto|deribit|dvol|funding|perp|perpetual|on-?chain|stablecoin|usdt|usdc|liquidation)\b/i;
+
+// Tools that only exist because there is an equity desk behind them. If NoVo reached for one of
+// these, the question touched equities whatever words it used — this is the backstop for the
+// phrasings the regexes above miss ("what's the flip level today?").
+//
+// get_chain_history is NOT here on purpose: it is the ON-CHAIN corpus keyed network:address,
+// not an option chain. Reading it as equity would have fired this advert on pure crypto
+// questions, which is precisely the failure the whole feature exists to avoid.
+const EQUITY_TOOLS = new Set([
+  "get_dealer_levels", "get_gamma_profile", "get_session_history", "get_market_internals",
+  "get_live_chain", "get_market_breadth", "get_vol_history", "get_futures_positioning",
+  "get_base_rates", "get_track_record",
+]);
+
+function touchesEquities(question, ledger) {
+  const q = String(question || "");
+  if (STRONG_RE.test(q)) return true;
+  if (WEAK_RE.test(q) && !CRYPTO_RE.test(q)) return true;
+  try { return (ledger || []).some((l) => EQUITY_TOOLS.has(l && l.tool)); } catch (_) { return false; }
+}
+
+// THE COPY. It lives here, in one place, so changing what NoVo pitches is a one-file edit and
+// not a hunt through an endpoint. Prices are the plans.html card verbatim ($169/mo, $1,690/yr,
+// $39/mo under Analyst + Crypto bought apart, 7-day trial) — if that card moves, move this.
+const CARD = {
+  kind: "bundle_ac",
+  eyebrow: "The equity map",
+  title: "Analyst + Crypto",
+  body: "You're on the crypto map. The live SPY, QQQ and IWM dealer map — every strike, the flip level, "
+      + "the Open and Close reads — is the other half of what I watch. This adds it to what you already have.",
+  price: "$169/mo · $39 under the two bought apart",
+  trial: "7-day free trial · cancel any time",
+  cta: { label: "See the bundle", href: "/plans?plan=bundle-ac" },
+};
+
+// What the model is told when the pitch is armed. Deliberately narrow: it may acknowledge the
+// boundary in ONE sentence and must still answer the question in full. No number, no link, no
+// pitch paragraph — the card underneath carries all of that.
+const PROMPT_LINE =
+  "ONE MORE THING, AND ONLY IF THIS ANSWER TOUCHED EQUITIES: this reader's plan is the crypto map, " +
+  "not the equity one. Answer their question completely and normally — withhold nothing. Then close " +
+  "with a single short sentence, in your own voice, noting that the live equity dealer map itself " +
+  "sits on the Analyst side rather than their plan. State no price and no link; a card below your " +
+  "answer carries both. Do not apologise and do not repeat this if the conversation already covered it.\n\n";
+
+/**
+ * Should this answer carry the bundle pitch?
+ * Returns the card, or null. Never throws — a marketing surface must not be able to break a
+ * paid answer, so every failure path here resolves to "say nothing".
+ *
+ * `commit` is false for the pre-model check (which only decides whether to arm the prompt line)
+ * and true for the post-answer check that actually attaches the card and burns the cooldown.
+ */
+async function bundlePitch({ email, question, ledger, kv, commit }) {
+  try {
+    if (!email) return null;
+    if (!touchesEquities(question, ledger)) return null;
+
+    const ck = "upsell:ac:" + eh(email);
+    if (kv) {
+      try { if (await kv.get(ck)) return null; } catch (_) { /* cache down — carry on */ }
+    }
+
+    if ((await analystEntitlement(email)) !== "deny") return null;   // allow OR unknown → silence
+
+    if (commit && kv) { try { await kv.set(ck, "1", { ex: COOLDOWN_S }); } catch (_) {} }
+    return CARD;
+  } catch (e) {
+    console.error("[upsell]", e && e.message);
+    return null;
+  }
+}
+
+module.exports = { bundlePitch, touchesEquities, CARD, PROMPT_LINE, EQUITY_TOOLS, COOLDOWN_S };
