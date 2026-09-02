@@ -1219,8 +1219,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      as :last-child and derived from the nav's own height, so it follows the last card around instead of
      being re-tuned every time the order changes -- the previous fix was a bare 72px pinned to
      #card-intel's log-area, which stopped being last the moment the panel landed beneath it, and
-     ignored the safe-area inset besides. */
-  #col-feed > .card:last-child { padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 18px); }
+     ignored the safe-area inset besides.
+     REVISED (polish, 2026-09-01): a ::after spacer, not :last-child padding. card-brain now boots
+     display:none until data arrives, and display:none does NOT unmatch :last-child -- the
+     clearance would ride the hidden card while the visually-last card slid under the nav. A
+     pseudo-element is always the true end of the scroll content, whatever is hidden above it. */
+  #col-feed::after { content: ""; display: block; flex: none;
+    height: calc(52px + env(safe-area-inset-bottom, 0px) + 18px); }
   /* The install prompt is position:fixed bottom-right from an inline style, so on a phone it landed
      ON TOP of the tab bar and covered RUN -- the newest button on the page, hidden by a prompt the
      moment a first-time visitor arrives. Lifted above the bar using the same 52px + inset the
@@ -1347,6 +1352,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   gap: 1px; background: var(--bdr); }
 #card-brain .brain-col { background: var(--bg2); padding: 10px 14px 12px; min-width: 0;
   min-height: 158px; }   /* reserved, so arriving data fills the panel instead of growing it */
+/* An empty area reads as not-applicable; three bare headers read as an unfinished product. The
+   card boots hidden and renderBrain reveals it with its first ok payload (polish, 2026-09-01).
+   !important because the Analysis views switch card display on — empty must beat visible. */
+#card-brain.brain-empty { display: none !important; }
 #card-brain .brain-h { font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
   color: var(--txt3); margin-bottom: 8px; }
 #card-brain .brain-lead { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
@@ -1842,7 +1851,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#128279;<span class="ctb-l">&nbsp;MAGNET</span></button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#128465;<span class="ctb-l">&nbsp;CLEAR</span></button>
             <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
-            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;</button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#128247;</button>
+            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;<span class="ctb-l">&nbsp;FULL</span></button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#9113;<span class="ctb-l">&nbsp;SHOT</span></button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
@@ -2077,7 +2086,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       </div>
     </div>
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
-    <div id="card-brain" class="card" style="flex-direction:column;overflow:hidden;">
+    <div id="card-brain" class="card brain-empty" style="flex-direction:column;overflow:hidden;">
       <div class="ch">
         <span class="ch-title">What NoVo Knows</span>
         <span id="brain-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
@@ -3620,7 +3629,13 @@ function _renderLegend2(bar){
     if(_ctbTog.ema && mp.ema21 && mp.ema21.has(b.time)) ind.push('<span style="color:#6b8cff">EMA21 '+mp.ema21.get(b.time).toFixed(2)+'</span>');
   }
   if(ind.length) _h+='<br><span style="font-size:10px">'+ind.join('  ·  ')+'</span>';
-  if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h; }   // identical content → zero DOM work
+  if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h;
+    // Chip clears the legend whatever its line count (polish, 2026-09-01): with the indicator
+    // line added the fixed top:27px chip sat ON the values — Jake's screenshot caught the overlap.
+    try{ var _ch=document.getElementById('novo-chip');
+      if(_ch){ var _ct=8+el.offsetHeight+4; if(_ch.__top!==_ct){ _ch.__top=_ct; _ch.style.top=_ct+'px'; } }
+    }catch(_e){}
+  }
 }
 function _renderChip(){
   var el=document.getElementById('novo-chip'); if(!el) return;
@@ -3793,20 +3808,25 @@ return {
           target.useBitmapCoordinateSpace(function(scope){
             var ctx=scope.context, W=scope.bitmapSize.width, pr=scope.verticalPixelRatio, hpr=scope.horizontalPixelRatio;
             var maxW=W*0.18;
-            var draw=function(profile, aG, aR, thick){
+            var draw=function(profile, aG, aR, thick, pocI){
               if(!profile) return;
               for(var i=0;i<profile.length;i++){
                 var y=self._series.priceToCoordinate(profile[i][0]);
                 if(y===null) continue;
                 var w=Math.max(1,profile[i][1]*maxW);
                 var pos=(profile[i][2]===undefined)?true:(profile[i][2]>=0);
-                ctx.fillStyle=pos?('rgba(52,211,153,'+aG+')'):('rgba(244,63,94,'+aR+')');
+                ctx.fillStyle=(i===pocI)?'rgba(245,158,11,0.24)'
+                  :(pos?('rgba(52,211,153,'+aG+')'):('rgba(244,63,94,'+aR+')'));
                 var hh=Math.max(1*pr, thick*pr);
                 ctx.fillRect(W-w, y*pr-hh/2, w, hh);
               }
             };
-            draw(st.sa, 0.10, 0.10, 3);    // structural: faint, slightly thick
-            draw(st.s0, 0.26, 0.26, 1.6);  // 0DTE: brighter, tighter — stacks over structure at shared strikes
+            // POC of the structural book, computed once per payload (polish): amber like the
+            // volume profile's — "the wall is the biggest bar" now says so in color.
+            if(st._pocI===undefined){ var _mx=-1; st._pocI=-1;
+              for(var _pi=0;_pi<st.sa.length;_pi++){ if(st.sa[_pi][1]>_mx){ _mx=st.sa[_pi][1]; st._pocI=_pi; } } }
+            draw(st.sa, 0.10, 0.10, 3, st._pocI);   // structural: faint, slightly thick, POC amber
+            draw(st.s0, 0.26, 0.26, 1.6, -1);       // 0DTE: brighter, tighter — stacks over structure at shared strikes
           });
         }catch(_e){}
       } }; }
@@ -4111,6 +4131,12 @@ function _lvlCollide(){
     }
     items.sort(function(a,b){ return a.y-b.y; });
     var shown=[];   // y-coords whose label is kept
+    // The current-price label owns its slot outright (polish): a level tag within a label height
+    // of the live price overprints the one number that must always read.
+    try{
+      var _lp=(_novoLastCandle&&_novoLastCandle.close)||((_novoViewC&&_novoViewC.length)?_novoViewC[_novoViewC.length-1].close:null);
+      if(_lp>0){ var _lpy=_novoSeries.priceToCoordinate(_lp); if(_lpy!==null) shown.push(_lpy); }
+    }catch(_e){}
     // Walk high-priority first so a strong tag claims its slot; a weaker tag within 13px hides.
     items.slice().sort(function(a,b){ return b.prio-a.prio; }).forEach(function(it){
       var clash=shown.some(function(y){ return Math.abs(y-it.y)<13; });
@@ -5348,6 +5374,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 
   function renderBrain(d){
     if(!d||!d.ok) return;
+    try{ document.getElementById('card-brain').classList.remove('brain-empty'); }catch(_e){}
     var st=d.setup||{}, tr=d.track||{}, se=d.session||{}, el;
 
     // what is on screen right now, and what it has done before
@@ -5406,6 +5433,8 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
     // One number. "Level held" graded a bar NoVo never sets for itself -- the alert's body is
     // branches, not predictions -- and came off the site for that reason.
     if(ln&&ln.enough) r+=_brw('The Line owns the level',_bn(ln.direction_rate,0,'%')+' of '+ln.n,ln.holds?'b-up':'b-dn');
+    // A header with nothing under it renders as nothing at all (polish).
+    if(r==='<div class="brain-h">Its own record</div>') r='';
     el=document.getElementById('brain-record'); if(el) el.innerHTML=r;
 
     // what kind of day this is
@@ -5435,7 +5464,11 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
     if(!document.body.classList.contains('v-feeds')
        && document.body.getAttribute('data-mtab')!=='3') return;
     var _b=NOVO_URL('/api/brain'); if(!_b) return;   // pre-handshake: skip
-    fetch(_b,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    // Hardened lane (polish, 2026-09-01): this was the last raw fetch on the page — no deadline,
+    // no 401 recovery — so an expired ticket starved the card silently and it sat as three bare
+    // headers over dead space (Jake's screenshot). Same _tfetch + reauth contract as every lane.
+    _tfetch(_b,12000).then(function(r){ if(!r.ok){ _reauth401(r); return null; } return r.json(); }).then(function(d){
+      if(!d) return;
       try{
         renderBrain(d);
         var s=document.getElementById('brain-stamp');
