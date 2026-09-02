@@ -26,6 +26,9 @@ node scripts/build-sitemap.js
 #     the duplicate merges, and all 8 crypto articles were missing -- the $79 product's whole
 #     education surface was unfindable in the Journal's own search box.
 node scripts/build-search-index.js
+#   - the journal hub promises "Everything in the Journal" and was listing 1,002 of 1,287:
+#     static markup that nothing regenerated, so every article published drifted it further
+node scripts/build-journal-archive.js
 node scripts/stamp-assets.js
 #   - every coin count on /crypto was hand-typed and drifted: the page claimed 89 coins and 82
 #     with leverage positioning while the collector was publishing 90 and 83
