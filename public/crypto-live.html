@@ -1415,6 +1415,41 @@ function basisPanel(d){
 // taker's side is not a market opinion and turning it into one would be a model wearing a
 // measurement's label. Structures are Deribit's own names off the combo id; where the venue does
 // not name one, the cell stays blank rather than guessing.
+function liqProfilePanel(d){
+  const p = d && d.liq_profile; if(!p || !p.profile || !p.profile.length) return '';
+  // Same colour law as the Liquidations panel above: red = longs carried out, green = shorts.
+  const mx = p.profile.reduce((a,b)=>Math.max(a, b[1]+b[2]), 0) || 1;
+  const spot = d.price;
+  const rows = p.profile.slice().reverse().map(function(b){
+    const lo=b[0], L=b[1], S=b[2], n=b[3], t=L+S;
+    const w = t/mx*100;
+    const lw = t ? (L/t*100) : 0;
+    // The bucket holding spot gets a marker: the flush is only readable against where price is now.
+    const here = spot!=null && spot>=lo && spot<lo+p.bucket_width;
+    return `<div class="liqrow" style="${here?'color:var(--txt1);font-weight:700':''}">
+        <span class="mono">${px(lo)}${here?' <span style="color:var(--amber);font-size:9.5px;letter-spacing:1px">SPOT</span>':''}</span>
+        <span class="liqv">${t?money(t):'<span style="color:var(--txt4)">&mdash;</span>'}${n?` <span style="color:var(--txt4);font-size:10px">${n}</span>`:''}</span></div>
+      <span class="liqbar" style="width:${t?Math.max(3,w):0}%;background:linear-gradient(90deg,var(--red) ${lw}%,var(--green) ${lw}%)"></span>`;
+  }).join('');
+  const oneVenue = p.venue_count === 1;
+  return `<div class="panel"><div class="ph"><h2>Where the flush landed &middot; ${p.hours}h</h2>
+    <span class="sub">realized, by the price it cleared at &mdash; not a projection</span></div><div class="pb">
+    <div class="kv"><span class="k">Heaviest price</span><span class="v am">${px(p.heaviest_price)} &middot; ${money(p.heaviest_usd)}</span></div>
+    <div class="kv"><span class="k">Longs / shorts forced out</span><span class="v nu"><span class="dn">${money(p.longs_usd)}</span> <span style="color:var(--txt4)">/</span> <span class="up">${money(p.shorts_usd)}</span></span></div>
+    <div class="kv"><span class="k">Venue coverage</span><span class="v ${oneVenue?'am':'nu'}">${p.venues.join(', ')}${oneVenue?' only':''} &middot; ${p.polls} polls</span></div>
+    <div class="liq" style="margin-top:10px">${rows}</div>
+    <div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.55;font-family:var(--mono)">
+      red = longs liquidated &middot; green = shorts &middot; the number beside each bar is fills.
+      Every other desk draws a liquidation HEATMAP: estimated leverage applied to open interest to
+      project where liquidations <i>would</i> happen. Per-account leverage and entry prices are not
+      public on any venue, so that picture is a model wearing a measurement&rsquo;s clothes, and this
+      map will not draw one. This is the same question pointed backwards and answerable: the venue
+      publishes its <b>filled</b> liquidation orders and the price each cleared at, so where the
+      flush landed is a fact. It says nothing about where the next one lands.
+      ${oneVenue?`Read on <b>${p.venues[0]}</b> alone &mdash; it is the one venue that serves forced flow to a US caller (Binance answers 451, Bybit 403), so this is that venue&rsquo;s book, never a market-wide total.`:''}</div>
+    </div></div>`;
+}
+
 function takerFlowPanel(d, g){
   const t = d && d.taker_flow; if(!t || !t.prints) return '';
   // THE COMPARISON IS THE POINT. g.net_gex is a POSITION whose dealer sign is a convention
@@ -1663,6 +1698,8 @@ function drawCoin(){
       `</div><div style="font-size:10px;color:var(--txt4);margin-top:9px;line-height:1.5;font-family:var(--mono)">
         red = longs liquidated · green = shorts</div></div></div>`;
   }
+
+  s+=liqProfilePanel(d);
 
   if(d.spark && d.spark.length>4){
     const ch=((d.spark[d.spark.length-1]/d.spark[0])-1)*100;
