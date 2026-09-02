@@ -460,7 +460,7 @@ You can call read-only lookups for what you were not handed: the live dealer rea
 
 GROUNDING
 - The date, the time and the market's open/closed state come from RIGHT NOW at the top of the prompt, and from nowhere else. Never work out what day it is from a timestamp in MARKET DATA, from the newest session in your archive, or from anything you remember. The map is frequently from an earlier session than today; that says nothing about today's date.
-- The chain tokens in that inventory are a COUNT, not the data. When a question names a memecoin or asks what is moving on-chain, call get_chain_token - do not answer that you only cover the 90 coins, because you do not. Those tokens have no options book and no major-venue perp, so gamma, the flip and the walls do not exist for them: read them on depth, turnover and wallets, and never apologise for panels that were never applicable.
+- The chain tokens in that inventory are a COUNT, not the data. When a question names a memecoin or asks what is moving on-chain, call get_chain_token - do not answer that you only cover the mapped coins, because you do not. Those tokens have no options book and no major-venue perp, so gamma, the flip and the walls do not exist for them: read them on depth, turnover and wallets, and never apologise for panels that were never applicable.
 - MARKET DATA carries BOTH maps: the equity dealer read and, under the crypto key, what the crypto map currently holds — coins tracked, which of them have real gamma books, the on-chain tokens, breadth and corpus counts. When you are asked what you cover, how much data you have, or how long you have been logging, ANSWER FROM BOTH. A COVERAGE answer must not change depending on which dashboard the question came from — it is one archive. What DOES change is which map you LEAD with: the dashboard names the map on the reader's screen, and an open-ended question is answered from that map first, with the other as the cross-read. WHERE THIS QUESTION CAME FROM, near the top of the prompt, says which. Per-coin crypto detail is a tool call — except on the crypto dashboard, where the coin on screen and the book's liquidation flow are already in front of you under crypto_live.
 - Every number you state comes from MARKET DATA or from a lookup you actually ran in this conversation. If it is in neither, say you do not have it. Never estimate a level, never invent a statistic.
 - When you lean on logged history, state the session count. A few dozen sessions is a count, not "usually".
@@ -814,7 +814,7 @@ module.exports = async (req, res) => {
     const hits = deep ? search(idx, qv, 9, 3) : search(idx, qv, 6);
 
     const r = kv();
-    let live = null, ctx = null, trackRec = null;
+    let live = null, ctx = null, trackRec = null, liveSrc = 'none';
     // What NoVo remembers about THIS reader — market interests and preferences they stated,
     // loaded on every question so continuity is real rather than performed.
     let readerMem = null;
@@ -839,6 +839,13 @@ module.exports = async (req, res) => {
         r.get('novo:track_record')]);
       const liveMirror = typeof lv === 'string' ? JSON.parse(lv) : lv;
       live = liveMirror || (typeof l === 'string' ? JSON.parse(l) : l);
+      // WHICH SLOT ANSWERED. `analyst:live_levels` expires in an hour; `public:levels` has NO TTL
+      // and is the deliberately 15-30 minute delayed anonymous slot, missing netGex, gravity and
+      // ATM IV entirely. So every night, weekend, holiday and engine gap over an hour, the block
+      // headed "every number you may state is here" was the STALE one, with nothing saying so and
+      // a tool handing the model `live: true` besides. An analyst that cannot report the freshness
+      // of its own primary input has a self-description, not a self-model.
+      liveSrc = liveMirror ? 'live' : (live ? 'delayed-public' : 'none');
       ctx = typeof c === 'string' ? JSON.parse(c) : c;
       trackRec = typeof tr === 'string' ? JSON.parse(tr) : tr;
     } catch (_) {}
@@ -1076,8 +1083,18 @@ module.exports = async (req, res) => {
   } catch (_) { upsell = null; }
   const upsellNote = upsell ? UPSELL_LINE : '';
 
+  // Said only when it is true, so the common path costs nothing.
+  const staleBlock = liveSrc === 'delayed-public'
+    ? ['THE DEALER NUMBERS BELOW ARE THE DELAYED PUBLIC SLOT, not your live mirror. They run',
+       '15-30 minutes behind and they do not carry net GEX, gravity or ATM IV at all. If you quote',
+       'a level from them, say it is delayed; if you are asked for one of the missing figures, say',
+       'you do not have it right now rather than reaching for a stale substitute.',
+       '', ''].join('\n')
+    : '';
+
   const prompt =
       nowBlock(lastSession, surface) +
+      staleBlock +
       surfaceBlock(surface, focus) +
       sinceBlock(sinceLines, sinceAge) +
       lessonsBlock(trackRec) +
@@ -1214,7 +1231,14 @@ module.exports = async (req, res) => {
             ]);
           } catch (e) { out = { error: `${name} failed` }; }
         }
-        ledger.push({ tool: name, args, ok: !(out && out.error) });
+        // `ok` is shown to the reader as "Checked: ..." and sold as the difference between an
+        // answer you can check and one you have to trust. A lookup that came back not_found or
+        // empty was rendering as ok, so a reader saw a green check on a question nothing answered.
+        const _empty = out && typeof out === 'object' && !out.error &&
+          (out.not_found === true || out.rows_returned === 0 ||
+           (Array.isArray(out.rows) && out.rows.length === 0));
+        ledger.push({ tool: name, args, ok: !(out && out.error) && !_empty,
+                      empty: !!_empty || undefined });
         return { functionResponse: { name, response: (out && typeof out === 'object') ? out : { value: out } } };
       }));
       contents.push({ role: 'user', parts: responses });

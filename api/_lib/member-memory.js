@@ -31,6 +31,14 @@ const LEVELS = ["plain", "standard", "desk"];
 // Position/account-shaped content is refused at the write, whatever the model asked for.
 const ACCOUNT_SHAPED = /\b(my (position|account|portfolio|p&?l|pnl|balance)|(bought|sold|holding|long|short)\s+\d|\d+\s*(shares|contracts)|stop\s*(loss)?\s*(at|@)|entry\s*(at|@)|\$\d{2,})\b/i;
 
+// AND INSTRUCTION SHAPES. A note is rendered VERBATIM into the prompt, above MARKET DATA and above
+// the question, and it persists for that reader indefinitely -- so a note is a durable instruction
+// channel, not just a preference. The account regex above screens what the note is ABOUT; this
+// screens what it TRIES TO DO. Bounded blast radius (a reader can only do this to their own
+// answers) which is why it is a refusal rather than an alarm, but a stored "ignore your previous
+// instructions" would ride every future prompt for that member until they cleared it.
+const INSTRUCTION_SHAPED = /\b(ignore|disregard|forget|override)\s+(all\s+|any\s+|your\s+|the\s+|previous\s+|prior\s+)*(instruction|rule|prompt|guideline|boundary|system)|^\s*(you are|you must|you should always|from now on|act as|pretend|roleplay|new instructions?)\b|\bsystem\s*prompt\b|<\/?(system|instructions?)>/i;
+
 const eh = (email) =>
   crypto.createHash("sha256").update(String(email || "").trim().toLowerCase())
     .digest("hex").slice(0, 16);
@@ -78,7 +86,7 @@ async function updateMemory(email, { add_interests, remove_interests, note, leve
 
   if (note) {
     const nt = clean(note, MAX_NOTE_LEN);
-    if (ACCOUNT_SHAPED.test(nt)) refused.push(nt);
+    if (ACCOUNT_SHAPED.test(nt) || INSTRUCTION_SHAPED.test(nt)) refused.push(nt);
     else if (nt && !cur.notes.includes(nt)) cur.notes = [...cur.notes, nt].slice(-MAX_NOTES);
   }
 

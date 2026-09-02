@@ -130,7 +130,7 @@ const declarations = [
   {
     name: "get_crypto_breadth",
     description:
-      "The CROSS-SECTIONAL crypto read across all 89 coins at once: median round-trip cost, the cheapest and " +
+      "The CROSS-SECTIONAL crypto read across every mapped coin at once: median round-trip cost, the cheapest and " +
       "priciest coins to trade on Robinhood, the largest open interest, and 24h liquidation flow by coin and side. " +
       "Use for 'what is crypto doing overall', 'which coin is cheapest to trade', 'where did the liquidations hit'. " +
       "This is the crypto equivalent of market internals - there is no per-coin call that answers it.",
@@ -634,7 +634,9 @@ function makeExecutors(ctx = {}) {
     if (!tk) return { error: "ticker must be SPY, QQQ or IWM" };
     if (!r) return { error: "gamma profile unavailable" };
     const look = Math.min(Math.max(Number(lookback_minutes) || 120, 15), 480);
-    const day = new Date().toISOString().slice(0, 10);
+    // THE TRADING DAY IS EASTERN. Keyed on the UTC date, "how did gamma build today" silently
+    // returned nothing from 20:00 ET onward -- the exact hours someone reviews the session.
+    const day = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 10);
     let raw = [];
     try { raw = await r.lrange(`gh:${tk}:${day}`, 0, 119); } catch (_) { raw = []; }
     const cutoff = Date.now() - look * 60000;
@@ -664,8 +666,26 @@ function makeExecutors(ctx = {}) {
     try { ctxs = await r.get("analyst:context"); } catch (_) { ctxs = null; }
     if (typeof ctxs === "string") { try { ctxs = JSON.parse(ctxs); } catch (_) { ctxs = null; } }
     if (!ctxs) return { error: "no logged session history yet" };
-    const scoped = ctxs[tk] || ctxs[tk.toLowerCase()] || ctxs;
-    return { ticker: tk, history: scoped, note: "counts and medians over the sessions NoVo has logged, not a forecast" };
+    // THE CONTEXT IS KEYED BY SECTION, WITH THE TICKER ONE LEVEL DOWN --
+    // {coverage, sessions:{SPY..}, volatility:{SPY..}, participation:{SPY..}, flow:{SPY..}}.
+    // `ctxs[tk]` therefore never matched, and the `|| ctxs` fallback handed back the ENTIRE
+    // all-ticker blob. Every ticker got byte-identical bytes under a different label, which means
+    // every SPY-vs-QQQ comparison built on this tool was comparing a thing to itself.
+    const scoped = {};
+    for (const [section, val] of Object.entries(ctxs)) {
+      if (val && typeof val === "object" && !Array.isArray(val) &&
+          (tk in val || tk.toLowerCase() in val)) {
+        scoped[section] = val[tk] !== undefined ? val[tk] : val[tk.toLowerCase()];
+      } else {
+        // Sections with no ticker keys are market-wide -- `coverage`, and `occ_market`, which is
+        // the whole listed options market. They are equally true of every ticker, so they belong
+        // in every scoped read. Tested by shape rather than by name: the producer has added two
+        // market-wide sections already, and a hardcoded list would silently drop the third.
+        scoped[section] = val;
+      }
+    }
+    if (!Object.keys(scoped).length) return { error: `no logged session history for ${tk} yet` };
+    return { ticker: tk, history: scoped, note: "counts and medians over the sessions NoVo has logged for THIS ticker, not a forecast" };
   }
 
   async function search_journal({ query, source }) {
@@ -1128,6 +1148,13 @@ function makeExecutors(ctx = {}) {
   }
 
   async function query_archive({ db, sql, max_rows } = {}) {
+    // AN UNRECOGNISED DB MUST NOT SILENTLY BECOME THE DEALER CORPUS. `db === "crypto" ? ... :
+    // "dealer"` sent a typo, an empty string, or a future third corpus straight at the equity
+    // archive and answered as though that had been asked -- a wrong-corpus answer is
+    // indistinguishable from a right one at the far end. Name the corpora, refuse the rest.
+    if (db !== undefined && db !== null && db !== "crypto" && db !== "dealer") {
+      return { error: `unknown archive '${String(db).slice(0, 40)}' - call describe_archive; the corpora are 'dealer' and 'crypto'` };
+    }
     const k = db === "crypto" ? "crypto" : "dealer";
     return _archiveFetch("/api/archive/query", {
       method: "POST",
