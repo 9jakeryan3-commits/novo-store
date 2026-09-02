@@ -63,13 +63,30 @@ module.exports = async (req, res) => {
     const links = await readChain(r, req.query.verify ? 200 : want);
     const check = verifyChain(links);
     if (req.query.verify) {
+      // AN EMPTY CHAIN IS NOT AN INTACT CHAIN. verifyChain() has nothing to disagree with when it
+      // is handed zero links, so it returns intact:true -- and shipping that as "every published
+      // record still hashes to the one before it" is a green light over an empty room. It is the
+      // same false-green shape as a wall test that passes because the query errored. Nothing has
+      // published since this shipped, so this is the state it will be in first, and it must not
+      // read as reassurance.
+      if (!links.length) {
+        return res.status(200).json({
+          ok: true, links: 0, intact: null, head: null, problems: [],
+          note: "No publishes have been recorded yet, so there is nothing to verify. This is not " +
+                "a passing check -- it is an empty one. The first engine publish starts the chain.",
+        });
+      }
       return res.status(200).json({
         ok: true, ...check,
         note: check.intact
-          ? "Every published record still hashes to the record before it, so nothing earlier has " +
-            "been altered since it was written. This is a server-held chain: it makes a silent " +
-            "revision detectable, it does not make one impossible."
-          : "One or more links do not reconcile. Treat the affected records as unverified.",
+          ? `All ${check.links} recorded publishes still hash to the record before them, so none ` +
+            "has been altered since it was written. This is a server-held chain: it makes a " +
+            "silent revision detectable, it does not make one impossible." +
+            (check.oldestPrevUnchecked
+              ? " The oldest record shown links to one older than the window kept, so its own " +
+                "predecessor is outside what this check can see."
+              : "")
+          : "One or more records do not reconcile. Treat the affected ones as unverified.",
       });
     }
     return res.status(200).json({
