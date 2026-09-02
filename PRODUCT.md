@@ -280,6 +280,22 @@ vendor publishes gamma on ~10 currencies for less than $79. Say "most stop at tw
 4. **Options flow is volume-based**, not buy/sell prints. Sweeps & blocks is the separate,
    real print-tape feature.
 5. **Analyst refresh ~60s, Trader telemetry ~5s.** That gap is the tier line, not an error.
+6. **The house-analyst doctrine — the CHAT is not the paid artifact; the MAP is.** Any valid member
+   token gets full answers from the analyst chat. The thing a subscription buys is the **data**:
+   the dealer map, the live levels, the chain map — and that stays product-scoped, gated at the
+   feed (`4de337de9`, "crypto subs get crypto only"). **There is deliberately NO entitlement check
+   in `api/analyst-ask.js`, and adding one would be a regression, not a fix.**
+
+   *Ruled by Jake 2026-09-02 (F-4), confirmed directly.* Recorded here because it was previously
+   only INHERITED — the absence of a gate looked like an oversight, so sessions kept re-raising it
+   as a defect and proposing to "fix" it. It is a decision. If you are reading this because you
+   just found that the chat answers a crypto-only subscriber's equity question: that is correct
+   behaviour, it is not a leak, and the leak to actually look for is an ungated endpoint serving
+   the paid KV keys (`analyst:live_levels`, `public:levels`, `crypto:map:*`) — check there instead.
+
+   The reason it is drawn this way: a member who cannot get a straight answer from the analyst
+   churns, and answering them costs a model call, while the map is the asset with a marginal cost
+   and a competitor's incentive to scrape it.
 
 ## Card parity
 
