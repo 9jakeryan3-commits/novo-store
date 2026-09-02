@@ -999,7 +999,7 @@ function exposures(g){
 // authority), and says what measurably rolls off at it: the front's share of the book's
 // open interest, its share of net gamma, its max pain. All of it from g.term — measured
 // per expiry every pass. The ticking is one textContent write per second, no redraw.
-function clockPanel(g){
+function clockPanel(g,d){
   const t=(g&&g.term)||[]; if(!t.length) return '';
   const f=t[0]; if(!f||!f.e) return '';
   const totOi=t.reduce((a,x)=>a+(x.oi||0),0);
@@ -1023,6 +1023,42 @@ function clockPanel(g){
         <div class="mv nu">${f.max_pain!=null?px(f.max_pain):'—'}</div>
         <div class="ms">P/C ${f.pc!=null?f.pc.toFixed(2):'—'} &middot; ATM IV ${f.atm_iv!=null?f.atm_iv.toFixed(1)+'%':'—'}</div></div>
     </div>
+    ${(function(){
+      // THE MAP AFTER 08:00. Same maths, same spot, only the leg set changes -- so the two are
+      // directly comparable, and on a daily-expiry market this is the more useful of the pair
+      // after lunchtime. Not a forecast: today's open interest at every expiry that is not
+      // today's, priced now.
+      const x = g && g.ex_front; if(!x) return '';
+      const fl = g.flip_zone, xf = x.flip_zone;
+      const move = (fl!=null&&xf!=null) ? xf-fl : null;
+      return `<div style="margin-top:11px;border-top:1px solid var(--bdr2);padding-top:10px">
+        <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--txt4);margin-bottom:7px">The map after this settlement &middot; ${x.expiries} later expiries</div>
+        <table class="tt"><thead><tr><th></th><th class="num">Now</th><th class="num">After 08:00</th></tr></thead><tbody>
+        <tr><td>Net GEX</td><td class="num ${g.net_gex>=0?'up':'dn'}">${money(g.net_gex)}</td><td class="num ${x.net_gex>=0?'up':'dn'}">${money(x.net_gex)}</td></tr>
+        <tr><td>Gamma flip</td><td class="num">${fl!=null?px(fl):'&mdash;'}</td><td class="num ${move?(move>0?'up':'dn'):''}">${xf!=null?px(xf):'&mdash;'}${move?` <span style="font-size:10px">${move>0?'+':''}${money(move)}</span>`:''}</td></tr>
+        <tr><td>Call wall</td><td class="num">${g.call_wall!=null?px(g.call_wall):'&mdash;'}</td><td class="num">${x.call_wall!=null?px(x.call_wall):'&mdash;'}</td></tr>
+        <tr><td>Put wall</td><td class="num">${g.put_wall!=null?px(g.put_wall):'&mdash;'}</td><td class="num">${x.put_wall!=null?px(x.put_wall):'&mdash;'}</td></tr>
+        </tbody></table></div>`;
+    })()}
+    ${(function(){
+      // THE SETTLEMENT PRICE ITSELF, forming. Deribit settles on the 30-minute average of its
+      // index, so for half an hour a day the number deciding which strikes pay is being written
+      // in public. Ours is a RECONSTRUCTION from the 1s ticks we record, and the coverage says
+      // how complete it is rather than asking to be trusted.
+      const t = d && d.settle_twap; if(!t) return '';
+      const live = t.state === 'forming';
+      return `<div style="margin-top:11px;border-top:1px solid var(--bdr2);padding-top:10px">
+        <div class="kv"><span class="k">${live?`Settlement forming &middot; ${t.minutes_elapsed} of 30 min`:'Last settlement average'}</span>
+          <span class="v ${live?'am':'nu'}">${px(t.twap)}</span></div>
+        <div class="kv"><span class="k">Window &middot; ${t.window_start_utc.slice(11,16)}&ndash;${t.window_end_utc.slice(11,16)} UTC</span>
+          <span class="v nu">${t.lo!=null?`${px(t.lo)} &ndash; ${px(t.hi)}`:''}</span></div>
+        <div class="kv"><span class="k">Sample coverage</span><span class="v ${t.coverage_pct<60?'am':'nu'}">${t.coverage_pct}% &middot; ${t.seconds_observed.toLocaleString()} of ${t.seconds_possible.toLocaleString()} seconds</span></div>
+        <div style="font-size:10px;color:var(--txt4);margin-top:7px;line-height:1.5;font-family:var(--mono)">
+          Every expiring option settles against the AVERAGE of the index over this window, not the
+          last print &mdash; so this is the number that decides which strikes pay, forming. It is
+          reconstructed from the 1-second index ticks this map records, not the venue&rsquo;s own
+          settlement print, which is why the coverage is shown beside it.</div></div>`;
+    })()}
     <div class="fnote">What expires stops hedging: the front's gamma leaves the book at settlement, and the dampening or amplifying it did leaves with it. Measured shares, not a forecast.</div>
     </div></div>`;
 }
@@ -1777,7 +1813,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h += venuePanel(g) + exposures(g) + clockPanel(g) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
+    h += venuePanel(g) + exposures(g) + clockPanel(g,d) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
   }
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     // CROWDING LADDER (2026-09-01). The percentile columns are MEASURED: history.py ranks each
