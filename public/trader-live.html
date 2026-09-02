@@ -3135,8 +3135,29 @@ function _ctbSave(){ try{ localStorage.setItem('novo_ctb',JSON.stringify({v:_CTB
 function _tfetch(u,ms){
   var ac=('AbortController' in window)?new AbortController():null;
   var tm=ac?setTimeout(function(){ try{ac.abort();}catch(_e){} },ms||12000):null;
-  var p=fetch(u,ac?{signal:ac.signal,cache:'no-store'}:{cache:'no-store'});
-  return p.finally(function(){ if(tm)clearTimeout(tm); });
+  var _clr=function(){ if(tm){ clearTimeout(tm); tm=null; } };
+  // THE DEADLINE COVERS THE WHOLE EXCHANGE (fixed 2026-09-02 — Jake: "it freezes after its been
+  // minimized then reopened. this cant happen").
+  //
+  // fetch() resolves on HEADERS, not on the body. This used to clear the abort timer in .finally()
+  // the instant the headers landed, which left the very next line — `await r.json()` — reading a
+  // streaming body with NO timeout of any kind. A body that stalls mid-stream (precisely what a
+  // minimised window's resumed connection does) then hung that promise FOREVER: loadNovoChart never
+  // settled, so _ncRun's .finally never re-armed the loop, the veil never came down, and the
+  // candles froze at the last paint — while the WebSocket, a separate connection, kept the price
+  // and the levels moving. That is the exact signature Jake photographed: live price, dead candles,
+  // a stuck "slow connection — retrying" veil, 18 minutes after a restore.
+  //
+  // The body is now drained inside the same deadline and the timer is cleared only once it is
+  // actually consumed. Callers are unchanged: every one of the seven uses only ok / status / json().
+  return fetch(u,ac?{signal:ac.signal,cache:'no-store'}:{cache:'no-store'})
+    .then(function(r){
+      return r.text().then(function(t){
+        _clr();
+        return { ok:r.ok, status:r.status,
+                 json:function(){ return JSON.parse(t); } };
+      }, function(e){ _clr(); throw e; });
+    }, function(e){ _clr(); throw e; });
 }
 function _reauth401(r){ try{ if(r&&r.status===401&&window.novoReauth) window.novoReauth(); }catch(_e){} }
 function _isDeepTf(){ return typeof _ctbTf==='string'; }
@@ -5239,7 +5260,16 @@ async function loadNovoChart(){
 // Re-armable chart loop — same contract as _abArm above. 4s not 2s (2026-07-30): the 0.5s WS
 // keeps the price + forming bar live; this heavy 5-day fetch/parse only refreshes bar structure.
 function _ncArm(ms){ clearTimeout(window._ncTimer); window._ncTimer=setTimeout(_ncRun, ms); }
-function _ncRun(){ window._ncTickAt=Date.now(); Promise.resolve(loadNovoChart()).catch(function(){}).finally(function(){
+function _ncRun(){
+  // ONE LOAD AT A TIME, and never a stuck one. _ncTickAt is stamped when a load STARTS, which is
+  // why a permanently-hung load looked healthy to the supervisor forever — it measured the attempt,
+  // not the arrival. The busy flag carries its own deadline so it can never latch: with the
+  // _tfetch fix above every load settles inside ~12s, and 20s is past any legitimate one.
+  var _n0=Date.now();
+  if(window._ncBusy && _n0-(window._ncBusyAt||0)<20000) return;
+  window._ncBusy=1; window._ncBusyAt=_n0;
+  window._ncTickAt=_n0; Promise.resolve(loadNovoChart()).catch(function(){}).finally(function(){
+    window._ncBusy=0;
   // Veil up = a switch is waiting on data. Retry at 1.5s, not 4s — a failed switch fetch should
   // cost the viewer one breath, not a quarter of a minute of spinner.
   var _v=document.getElementById('chart-veil');
@@ -5284,6 +5314,12 @@ function _laneCheck(kick){
     }
     if(kick || now-(window._cdTickAt||0)>5000){ try{ _cdStart(); }catch(_e){} }   // B8: countdown timer died (bg-throttle/error) — re-arm
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
+    // THE INVARIANT (2026-09-02): a lane that has not DELIVERED in 45s is dead, whatever its
+    // attempt stamp says. _paintAt is only ever written when candles actually reach the screen, so
+    // this is the one check that cannot be satisfied by a load that started and never finished —
+    // the exact hole that let an 18-minute freeze look healthy. Cheap: _ncRun's own busy guard
+    // collapses this into the in-flight load when one is genuinely running.
+    if(now-(window._paintAt||0)>45000) _ncRun();
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
     if(_splitOn()){ _wireSync(); if(kick || now-(window._c2TickAt||0)>30000) _c2Run(); }
   }catch(_e){}
