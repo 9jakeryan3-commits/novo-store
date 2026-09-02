@@ -54,7 +54,13 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
   // Weekly data — cache hard. A miss costs four upstream calls; a hit costs nothing.
-  res.setHeader("Cache-Control", "public, s-maxage=21600, stale-while-revalidate=86400");
+  // max-age added 2026-09-02: Vercel consumes s-maxage and stale-while-revalidate but passes
+  // `public` through, so this reached browsers as the bare header "Cache-Control: public" — no
+  // freshness lifetime at all, which invites heuristic caching rather than preventing it. Six
+  // hours is the same bound the edge already had; CFTC positioning only moves weekly.
+  // See api/levels.js for the full note — the discriminator is the word `public`, not the
+  // absence of max-age, and endpoints without `public` get Vercel's safe default instead.
+  res.setHeader("Cache-Control", "public, max-age=21600, s-maxage=21600, stale-while-revalidate=86400");
   try {
     const out = [];
     for (const [label, market, etf] of MARKETS) {

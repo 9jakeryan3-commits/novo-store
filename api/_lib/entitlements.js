@@ -133,4 +133,93 @@ async function analystEntitlement(email) {
   return ok ? "allow" : "deny";
 }
 
-module.exports = { analystEntitlement, subGrantsAnalyst, ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };
+// Does this subscription include the Crypto Market Map? An explicit crypto price, either bundle,
+// or the metadata tier. Note what this does NOT do: it never infers crypto from the absence of
+// something else. That asymmetry is the whole point of the function.
+function subGrantsCrypto(s) {
+  if (_isCryptoPrice(s)) return true;
+  const t = String(s?.metadata?.tier || "");
+  return t === "bundle_ac" || t === "bundle_all";
+}
+
+/**
+ * BOTH questions, from ONE subscription walk.
+ *
+ * WHY THIS EXISTS — and it is a correction to my own design, so it is worth stating plainly.
+ * analystEntitlement() returns allow/deny/unknown, which is the right axis for "MAY I SERVE
+ * THIS?" and the wrong axis for "WHO IS THIS?". The upsell asked the first question and then
+ * wrote copy that asserted the answer to the second: it fired on `analyst === 'deny'` — meaning
+ * only "no live Analyst-granting sub" — and told the reader "this adds it to what you already
+ * have."
+ *
+ * Everyone with no subscription at all satisfies that. So does everyone who just CANCELLED:
+ * _signToken's own comment records that tokens outlive cancellation on purpose ("7-day TTL bounds
+ * post-cancel access"), so a churned member keeps a working token for a week. The worst case is a
+ * churned TRADER — they resolve to deny too, so they were pitched a bundle days after cancelling
+ * the tier that INCLUDED Analyst. Found by Einstein probing the endpoint rather than reading it;
+ * both cases reproduced in the harness before this was written.
+ *
+ * The fix is a positive test. Returns { analyst, crypto }, each 'allow' | 'deny' | 'unknown',
+ * from a single customers+subscriptions walk — the audience check costs no extra Stripe calls,
+ * because both answers were always in the same list of subscriptions.
+ */
+async function entitlements(email) {
+  const norm = String(email || "").trim().toLowerCase();
+  if (!norm) return { analyst: "unknown", crypto: "unknown" };
+
+  // A comped seat holds everything by definition, and is never an upsell audience either way.
+  try { if (require("./comp.js").isComp(norm)) return { analyst: "allow", crypto: "allow" }; } catch (_) {}
+
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return { analyst: "unknown", crypto: "unknown" };
+
+  // A SHORT cache, and it is not an optimisation — without it this walk runs TWICE PER QUESTION
+  // (bundlePitch asks once before the model to arm the prompt line, once after to attach the
+  // card), on a paid endpoint, for every member whose question touches equities. The previous
+  // single-answer path was KV-cached; dropping that quietly would have traded a copy bug for a
+  // latency-and-cost one.
+  //
+  // 120s flat rather than the 600/120 split the paywall's cache uses. Its own key, NOT a reuse of
+  // 'ent:analyst:' — that one is read by the fail-CLOSED live gate, and a marketing surface must
+  // never be able to write a value the paywall then trusts. Two minutes bounds the case that
+  // actually matters: someone buys the bundle and we keep pitching it at them.
+  const r = kv();
+  const ck = "ent:both:" + crypto.createHash("sha256").update(norm).digest("hex").slice(0, 24);
+  if (r) {
+    try {
+      const hit = await r.get(ck);
+      const v = typeof hit === "string" ? JSON.parse(hit) : hit;
+      if (v && v.analyst && v.crypto) return v;
+    } catch (_) { /* unreadable cache — fall through to a live check */ }
+  }
+
+  try {
+    const stripe = require("stripe")(key);
+    const seen = new Set();
+    let analyst = false, crypto = false;
+    const scan = async (custId) => {
+      const subs = await stripe.subscriptions.list({ customer: custId, status: "all", limit: 20 });
+      for (const s of subs.data) {
+        if (!LIVE.includes(s.status)) continue;      // canceled/incomplete grant nothing
+        if (subGrantsAnalyst(s)) analyst = true;
+        if (subGrantsCrypto(s)) crypto = true;
+      }
+    };
+    try {
+      const sr = await stripe.customers.search({ query: `email:"${norm.replace(/"/g, "")}"`, limit: 20 });
+      for (const c of sr.data) { seen.add(c.id); await scan(c.id); }
+    } catch (_) { /* search index warming — list() below still covers it */ }
+    const custs = await stripe.customers.list({ email: norm, limit: 100 });
+    for (const c of custs.data) { if (!seen.has(c.id)) await scan(c.id); }
+    const out = { analyst: analyst ? "allow" : "deny", crypto: crypto ? "allow" : "deny" };
+    if (r) { try { await r.set(ck, JSON.stringify(out), { ex: 120 }); } catch (_) {} }
+    return out;
+  } catch (e) {
+    console.error("[entitlements] combined lookup:", e.message);
+    // NEVER cached: 'unknown' is a statement about OUR availability, not about this member.
+    return { analyst: "unknown", crypto: "unknown" };   // caller decides; the upsell stays silent
+  }
+}
+
+module.exports = { analystEntitlement, entitlements, subGrantsAnalyst, subGrantsCrypto,
+                   ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };

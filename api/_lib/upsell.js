@@ -26,7 +26,7 @@
 //   3. IT FIRES ONCE A SITTING, NOT ONCE A MESSAGE. An upsell on every reply is not a pitch,
 //      it is a nag, and the member is already paying us.
 
-const { analystEntitlement } = require("./entitlements.js");
+const { entitlements } = require("./entitlements.js");
 const { eh } = require("./member-memory.js");
 
 // Six hours, not the 45-minute SEEN_STALE_MIN the "what changed since you were last here" line
@@ -123,7 +123,22 @@ async function bundlePitch({ email, question, ledger, kv, commit }) {
       try { if (await kv.get(ck)) return null; } catch (_) { /* cache down — carry on */ }
     }
 
-    if ((await analystEntitlement(email)) !== "deny") return null;   // allow OR unknown → silence
+    // THE AUDIENCE TEST, and it is a POSITIVE one. This used to fire on
+    // `analystEntitlement(email) === 'deny'` alone — "no live Analyst-granting subscription" —
+    // which is a statement about what someone LACKS, while the card's copy asserts what they
+    // HAVE ("this adds it to what you already have").
+    //
+    // Everyone with no subscription satisfies "lacks Analyst". So does everyone who just
+    // cancelled: tokens outlive cancellation by design (7 days), so a churned member kept a
+    // working token and, asking one more equity question, was told they still held the crypto
+    // map. Worst case was a churned TRADER — also 'deny' — pitched the bundle days after
+    // cancelling the tier that INCLUDED Analyst. Both reproduced in the harness.
+    //
+    // So: they must positively hold crypto AND positively lack Analyst. 'unknown' on either side
+    // is silence, which keeps the fail-open posture intact — an outage produces no advert rather
+    // than a wrong one.
+    const ent = await entitlements(email);
+    if (ent.crypto !== "allow" || ent.analyst !== "deny") return null;
 
     if (commit && kv) { try { await kv.set(ck, "1", { ex: COOLDOWN_S }); } catch (_) {} }
     return CARD;

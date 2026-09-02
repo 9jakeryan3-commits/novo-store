@@ -404,6 +404,10 @@ async function entCachePurge(email) {
     try { await r.del('ent:crypto:' + h); } catch (_) {}
     try { await r.del('ent:trader:' + h); } catch (_) {}
     try { await r.del('ent:analyst:' + h); } catch (_) {}
+    // The combined {analyst, crypto} verdict the upsell audience check reads (_lib/entitlements.js).
+    // Its own TTL is only 120s, so this purge is belt-and-braces — but the case it covers is the
+    // embarrassing one: somebody buys the bundle and keeps being pitched the bundle.
+    try { await r.del('ent:both:' + h); } catch (_) {}
   } catch (_) { /* cache purge is best-effort by definition */ }
 }
 
