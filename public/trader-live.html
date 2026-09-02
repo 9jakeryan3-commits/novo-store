@@ -66,7 +66,20 @@
       return false;
     }
     try {
-      var r = await fetch('/api/trader-live?t=' + encodeURIComponent(TOKEN), { cache: 'no-store' });
+      // THE ONE REQUEST THAT HAD NO DEADLINE (fixed 2026-09-02). Every poll on this page runs
+      // through _tfetch, which carries an AbortController; this handshake did not -- it is defined
+      // in an earlier <script> block, above _tfetch, and was simply never brought in. So the single
+      // request whose failure gags ticket renewal was the only one able to hang forever, and it is
+      // reached at exactly the wrong moment: a socket parked through a long minimise, being reused
+      // on resume. 12s, covering the body read too (fetch resolves on HEADERS -- the lesson from
+      // this morning's freeze, which this line had escaped).
+      var _hsAc = ('AbortController' in window) ? new AbortController() : null;
+      var _hsTm = _hsAc ? setTimeout(function(){ try{ _hsAc.abort(); }catch(_e){} }, 12000) : null;
+      var r;
+      try {
+        r = await fetch('/api/trader-live?t=' + encodeURIComponent(TOKEN),
+                        _hsAc ? { cache: 'no-store', signal: _hsAc.signal } : { cache: 'no-store' });
+      } finally { if (_hsTm) clearTimeout(_hsTm); }
       if (r.status === 401) {
         try { localStorage.removeItem('novo_live_t'); } catch(_){}
         TOKEN = null;
@@ -82,7 +95,9 @@
       }
       if (!r.ok) { return false; }
 
-      var d = await r.json();
+      var d = await r.json();   // body is small and same-origin; the abort above still covers the
+                                // socket if it stalls before this resolves (the timer is cleared in
+                                // the finally only once fetch itself has settled).
       window.NOVO_WS = d.ws || '';
       window.NOVO_API = d.api || '';
       var mt = /[?&]t=([^&]+)/.exec(window.NOVO_WS);
@@ -102,10 +117,17 @@
      grew ~60 concurrent chains hammering a dead endpoint, then a thundering herd of handshakes and
      sockets the moment the network returned. clearTimeout-on-arm collapses any number of callers
      into exactly one pending retry. */
-  var _rcBusy = false;
+  /* LATCHES THAT CANNOT LATCH (2026-09-02). _rcBusy and _reauthBusy were each set immediately
+     before `await novoHandshake()` and cleared ONLY by that promise settling -- no finally, no TTL.
+     A handshake that never settled therefore gagged BOTH ticket-minting paths permanently: every
+     later 401 returned instantly at the guard, and novoReconnect could not help because it only
+     runs when the WebSocket is dead -- and the socket, validated at connect only, stays alive and
+     streaming the price. That is a frozen chart with a live hero price and no way back but a
+     reload. Both guards now carry a timestamp and expire, the same shape _ncBusy already uses. */
+  var _rcBusy = false, _rcBusyAt = 0;
   window.novoReconnect = async function(){
-    if (_rcBusy) return;
-    _rcBusy = true; clearTimeout(window._rcTimer);
+    if (_rcBusy && Date.now() - _rcBusyAt < 20000) return;
+    _rcBusy = true; _rcBusyAt = Date.now(); clearTimeout(window._rcTimer);
     var ok = false;
     try { ok = await window.novoHandshake(); } catch(_){ ok = false; }
     _rcBusy = false;
@@ -117,10 +139,11 @@
      poll just returned silently forever and the chart froze while the page looked alive. Debounced
      so a burst of 401s from parallel pollers mints ONE new ticket; does not touch the WS (a dead
      socket heals through its own onclose path). */
-  var _reauthBusy = false;
+  var _reauthBusy = false, _reauthBusyAt = 0;
   window.novoReauth = function(){
-    if (_reauthBusy || Date.now() - _handshakeAt < 20000) return;
-    _reauthBusy = true;
+    if (_reauthBusy && Date.now() - _reauthBusyAt < 20000) return;
+    if (Date.now() - _handshakeAt < 20000) return;
+    _reauthBusy = true; _reauthBusyAt = Date.now();
     window.novoHandshake().then(function(){ _reauthBusy = false; },
                                function(){ _reauthBusy = false; });
   };
