@@ -2474,8 +2474,21 @@ function connectTelemetry(){
       var e=document.getElementById('t-spy'); if(e) e.textContent='$'+p.toFixed(2);
       try{
         if(_novoTipLive && !_ctbTog.ha && _novoSeries && _novoLastCandle && _novoLastCandle.time){
-          var _ref=_novoLastCandle.open||_novoLastCandle.close||0;   // reject a tip >0.6% off the bar open (frozen/bad-tick guard)
-          if(_ref>0 && Math.abs(p/_ref-1)<=0.006){
+          // Anchor the bad-tick guard on the bar's LAST KNOWN price, not its open (2026-09-02). A
+          // 15m bucket's open is up to fifteen minutes stale, so a legitimate run could drift past
+          // 0.6% of it and silently switch the glide off — reintroducing the exact stutter this
+          // change removes. The close walks with ticks that already passed the guard, so a frozen
+          // or garbage tick is still rejected just as hard, and on 1m the two are near-identical.
+          var _ref=_novoLastCandle.close||_novoLastCandle.open||0;
+          // ...and only while the wall clock is still INSIDE this bar's own window. Bar times are
+          // ET-shifted and every ET offset is a whole number of hours, while 60/300/900 all divide
+          // 3600 — so for a bar that is still forming, (barTime - the current step boundary) lands
+          // exactly on an hour, and for one that has closed it cannot. Without this the glide kept
+          // stretching a COMPLETED bar for up to 4s until the poll rewrote it: invisible at 1m,
+          // obvious at 5m/15m now that a countdown announces the boundary.
+          var _cdStep=(typeof _ctbTf==='number')?_ctbTf*60:0;
+          var _barCur=(_cdStep>0) && ((((_novoLastCandle.time - Math.floor(Math.floor(Date.now()/1000)/_cdStep)*_cdStep) % 3600)|0)===0);
+          if(_barCur && _ref>0 && Math.abs(p/_ref-1)<=0.006){
             _novoLastCandle.close=p;
             if(p>_novoLastCandle.high) _novoLastCandle.high=p;
             if(p<_novoLastCandle.low)  _novoLastCandle.low =p;
@@ -4910,8 +4923,21 @@ async function loadNovoChart(){
       // bar structure — adding a new minute, correcting O/H/L — this only lets the CURRENT bar's close track
       // the 2s live quote at WS frame rate (~2Hz) instead of stepping once per poll. On a minute rollover the
       // poll replaces this within one bar-cache cycle, so the tip can't drift onto a stale bar for long.
-      _novoLastCandle = (_ctbTf===1) ? Object.assign({}, _view.candles[_view.candles.length-1]) : null;
-      _novoTipLive = (d.tip_live === true && _ctbTf===1);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
+      // THE LIVE TIP RUNS ON EVERY CLIENT-AGGREGATED FRAME (2026-09-02, Jake: "other timeframes
+      // dont have the clock... the 5 and 15m charts was jumping every few seconds"). This was
+      // pinned to _ctbTf===1 by the commit that INTRODUCED timeframes on 2026-08-30 — the glide
+      // predates them by six weeks and simply never got widened, so 5m/15m redrew only when the 4s
+      // poll landed (the visible stutter) and the bar-close countdown, which gates on _novoTipLive,
+      // never appeared there at all.
+      //
+      // 1m/5m/15m are all bucketed by _tfView from the SAME live 1-minute array the tip belongs to,
+      // so gliding the forming bucket is exactly as correct as gliding the 1m bar: a 5m bucket's
+      // close IS the latest 1m close. Deep frames stay off — 1H/D/W come from /api/chart-history
+      // through a 60s client cache, and painting a live tick onto a cached hourly bar would be a
+      // different object wearing "live".
+      const _tipFrame = !_isDeepTf();
+      _novoLastCandle = _tipFrame ? Object.assign({}, _view.candles[_view.candles.length-1]) : null;
+      _novoTipLive = (d.tip_live === true && _tipFrame);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
       // Opening window — per-frame maps _tfOpen/_tfOpenM below (widened 2026-08-31).
       // Initial view ONLY: _novoRanged latches after the first successful set, so panning and zooming
       // afterwards are never fought.
