@@ -2999,8 +2999,42 @@ function _gexSpark(){
     ctx.stroke();
   }catch(_e){}
 }
+// The same line beside the VIX readout (Jake, 2026-09-02: "cant you add that same line to vix?").
+// Deliberately NOT a copy of _gexSpark in two respects:
+//   - no zero line. VIX has no meaningful zero, so the reference drawn is the SESSION OPEN — the
+//     shape then answers the question actually asked of VIX, "up or down from where it started".
+//   - colour follows direction against that open (rising vol red, falling green), not the sign of
+//     the value, which is always positive.
+// Follows the ENGINE ticker like the readout beside it and the GEX line above it, and the server
+// column is per-ticker, so on SPY this is VIX, on QQQ VXN, on IWM RVX — always the number printed
+// next to it. Not trial-scrubbed: the fear gauge is public data and free on the site already.
+function _vixSpark(){
+  try{
+    var host=document.getElementById('t-vix'); if(!host||!host.parentNode) return;
+    var vp=(_abData&&_abData.vixpath)?_abData.vixpath[(window._novoExecTkr||'SPY')]:null;
+    var c=document.getElementById('t-vix-spark');
+    if(!c){ c=document.createElement('canvas'); c.id='t-vix-spark'; c.width=128; c.height=32;
+      c.style.cssText='width:64px;height:16px;margin:0 6px 0 auto;align-self:center;';
+      host.parentNode.insertBefore(c,host); }
+    if(!vp||vp.length<3){ c.style.display='none'; return; }
+    c.style.display='';
+    var ctx=c.getContext('2d'); ctx.clearRect(0,0,128,32);
+    var vs=vp.map(function(r){return r[1];});
+    var mn=Math.min.apply(null,vs), mx=Math.max.apply(null,vs);
+    if(mx-mn<1e-9){ mx=mn+1; }
+    var open=vs[0], last=vs[vs.length-1];
+    var oy=30-((open-mn)/(mx-mn))*28;               // the session open, the only reference VIX has
+    ctx.strokeStyle='rgba(139,147,167,0.40)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(128,oy); ctx.stroke();
+    ctx.strokeStyle=(last>open)?'#f43f5e':'#34d399';   // vol UP is the risk direction, so red
+    ctx.lineWidth=2; ctx.beginPath();
+    vp.forEach(function(r,i){ var x=i/(vp.length-1)*126+1, y=30-((r[1]-mn)/(mx-mn))*28;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.stroke();
+  }catch(_e){}
+}
 function _renderBoard(){
-  _gexSpark();
+  _gexSpark(); _vixSpark();
   var tb=document.querySelector('#b3-table tbody'); if(!tb||!_abData) return;
   var B=_abData.board||{}, TKS=['SPY','QQQ','IWM'];
   function cell(tk,fn){ var b=B[tk]; return b?fn(b):'<td class="b3-d">&mdash;</td>'; }
