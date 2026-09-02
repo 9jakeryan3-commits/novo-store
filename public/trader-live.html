@@ -3235,6 +3235,7 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     // glitch-guard could mistake the switch for a degraded response and skip it.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoLastCandle=null;
+    window._lvlAnc={};   // anchors are snapped to the FRAME's grid — force a re-snap on the new one
     try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
     try{ _showVeil(); _paintWm(); }catch(_e){}
     _paintCtb(); loadNovoChart();
@@ -4106,6 +4107,35 @@ const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','
 // session levels; VWAP sits between.
 const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
   'PMH':4,'PML':4,'ORH':4,'ORL':4,'AHH':3,'AHL':3,'YDH':3,'YDL':3};
+// ── LEVEL ANCHORS (2026-09-02, Jake: "dealer levels can run full, session levels at the bar
+// that made them") ───────────────────────────────────────────────────────────────
+// A session high is a FACT ABOUT A BAR — drawing it back through two prior sessions says the
+// level existed before anything made it. The server has always derived the establishing bar
+// (level_from in /api/spy-chart: the extreme bar of each level's own window); this reads it.
+//
+// THE DEALER LEVELS ARE DIFFERENT and stay full-width: flip, walls, gravity and the expected-move
+// rails are recomputed from the option chain continuously, so no single bar "sets" them.
+//
+// WHY THIS IS SAFE NOW, having been reverted once for flicker: the old version fell straight back
+// to full width whenever an origin failed to resolve for a poll, so the left edge snapped between
+// a segment and the full pane frame to frame. The anchor is LATCHED per ticker instead — a
+// transient miss holds the last good origin, and only a genuinely new origin replaces it. Snapped
+// to the active frame's grid (the drawing tools' _snapT) so an anchor always lands on a real bar
+// rather than injecting a phantom column, and clamped to the loaded window so a level established
+// before the left edge simply starts at it.
+const _LVL_FULLW={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1};
+function _lvlAnchorFor(lbl, from, firstT){
+  try{
+    if(_LVL_FULLW[lbl]) return firstT;
+    var store=(window._lvlOrig=window._lvlOrig||{});
+    var per=(store[_selTkr()]=store[_selTkr()]||{});
+    var t=(+from>0)?+from:0;
+    if(t) per[lbl]=t; else t=per[lbl]||0;      // LATCH: a missing origin keeps the last known one
+    if(!t) return firstT;                      // never known — behave exactly as before
+    t=_snapT(t);                               // land on a real bar of the active frame
+    return (t>firstT)?t:firstT;                // established off the left edge → start at the edge
+  }catch(_e){ return firstT; }
+}
 // B12: short badge names for merged-confluence titles and event markers.
 const _LVL_SHORT={'FLIP':'FLIP','CW':'CW','PW':'PW','GRAV':'GRAV','VWAP':'VWAP','EM_HI':'EM▲','EM_LO':'EM▼',
   'PMH':'PMH','PML':'PML','ORH':'ORH','ORL':'ORL','AHH':'AHH','AHL':'AHL','YDH':'PDH','YDL':'PDL'};
@@ -5082,18 +5112,16 @@ async function loadNovoChart(){
     if(_sig !== _novoLvlSig){
       for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){} }
       for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){} }
-      _novoLines={}; _novoLvlSeries={}; window._lvlPx={};
+      _novoLines={}; _novoLvlSeries={}; window._lvlPx={}; window._lvlAnc={};
       _drawn.forEach(function(row){
         const lbl=row[0], v=row[1], c=lc[lbl]||'#94a3b8';
-        // ALWAYS draw a SOLID, FULL-WIDTH line (first bar -> newest bar). Two bugs killed here:
-        // (1) dotted: a transient null origin used to fall back to a dotted price line and, because the extend
-        //     branch below only touches solid series, it stayed STUCK dotted until the next rebuild.
-        // (2) left-edge jump: anchoring the segment to the per-level origin `from` made the line's left edge
-        //     flicker between a partial segment and full width as `from` resolved/unresolved frame to frame.
-        // Jake's call: just keep the full line. Anchor every level at _firstT — one stable horizontal line,
-        // never dotted, never jumping. (autoscaleInfoProvider:()=>null — the candle series' provider already
-        // expands the scale from _novoLevelVals.) `from` is intentionally unused now.
-        const _anchor = _firstT;
+        // Session levels start at the bar that MADE them; dealer levels run the full width. See
+        // _lvlAnchorFor above for why the origin is latched (this drew flickering left edges the
+        // first time it shipped). Still always a SOLID line series, never the dotted price-line
+        // fallback that used to strand itself dotted until the next rebuild.
+        // (autoscaleInfoProvider:()=>null — the candle series' provider already expands the scale
+        // from _novoLevelVals.)
+        const _anchor = _lvlAnchorFor(lbl, _lvlFrom[lbl], _firstT);
         if(_anchor && _lastT){
           // A series `title` rides on its last-value axis label, so the level reads "VWAP 764.93" on the
           // price scale instead of being an anonymous coloured line you have to match against a side panel.
@@ -5104,7 +5132,7 @@ async function loadNovoChart(){
           // visibility, which is what used to justify calling _applyTogVis on every tick.
           const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?((_lvlTitle[lbl]||lbl)+(window._lvlMerged&&window._lvlMerged[lbl]?' · '+window._lvlMerged[lbl].map(function(m){return _LVL_SHORT[m]||m;}).join(' · '):'')):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
-          _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v;
+          _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v; window._lvlAnc[lbl]=_anchor;
         } else {
           // No candles at all (chart still loading) — a solid, not dotted, full-width line as the last resort.
           _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),lineVisible:_ctbTog.lvl,axisLabelVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
@@ -5116,10 +5144,12 @@ async function loadNovoChart(){
         const lbl=row[0], v=row[1], s=_novoLvlSeries[lbl];
         if(!s) return;
         try{
-          if(window._lvlPx && window._lvlPx[lbl]!==v){
-            // This one level MOVED — re-data just its two points; every other series is untouched.
-            s.setData([{time:_firstT,value:v},{time:_lastT,value:v}]);
-            window._lvlPx[lbl]=v;
+          const _a=_lvlAnchorFor(lbl, _lvlFrom[lbl], _firstT);
+          // A new session extreme moves the PRICE and its origin together; a tie can move the
+          // origin alone. Either re-datas this one series — every other one is untouched.
+          if((window._lvlPx && window._lvlPx[lbl]!==v) || (window._lvlAnc && window._lvlAnc[lbl]!==_a)){
+            s.setData([{time:_a,value:v},{time:_lastT,value:v}]);
+            window._lvlPx[lbl]=v; window._lvlAnc[lbl]=_a;
           } else {
             s.update({time:_lastT, value:v});   // unchanged → just extend onto the newest bar
           }
