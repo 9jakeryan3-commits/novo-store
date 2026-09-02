@@ -1428,11 +1428,11 @@ function stablesPanel(){
       <span class="bv">${money(t.circulating_usd)} <span class="${ch>=0?'up':'dn'}" style="font-size:10px">${ch>=0?'+':''}${money(ch)}</span></span></div>`;
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Dry powder &middot; stablecoin supply</h2>
-    <span class="sub">${sc.n_payment} payment stablecoins &middot; dollars on the rails</span></div><div class="pb">
+    <span class="sub">dollars on the rails${sc.complete===false?' &middot; majors only':''}</span></div><div class="pb">
     <div class="mgrid" style="grid-template-columns:repeat(3,1fr)">
       <div class="mcell"><div class="mk">Circulating</div>
         <div class="mv nu">${money(sc.payment_usd)}</div>
-        <div class="ms">payment stablecoins only</div></div>
+        <div class="ms">${sc.complete===false?'majors above $100M only':'payment stablecoins, every issuer'}</div></div>
       <div class="mcell"><div class="mk">24 hours</div>
         <div class="mv ${d1up?'up':'dn'}">${d1up?'+':''}${money(sc.d1_usd)}</div>
         <div class="ms">${sc.d1_pct!=null?`${sc.d1_pct>=0?'+':''}${sc.d1_pct.toFixed(3)}% of the float`:''}</div></div>
@@ -1452,7 +1452,8 @@ function stablesPanel(){
       trade at a dollar, so their supply is an accounting figure rather than cash anyone can bid
       with &mdash; every aggregator sums them into the headline anyway. They are counted here and
       excluded from it. Circulating only: no public source publishes an issuer&rsquo;s
-      authorized-but-unissued treasury, so none is claimed.</div>
+      authorized-but-unissued treasury, so none is claimed. The headline totals every payment
+      issuer; the bars below list the largest, which is why they do not sum to it.</div>
     </div></div>`;
 }
 
