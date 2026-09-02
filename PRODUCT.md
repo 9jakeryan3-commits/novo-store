@@ -191,8 +191,9 @@ Analyst interprets, Trader renders.
   levels in confluence merge into one stacked label; ‘The Line’ lost/reclaimed events pin to
   their bars; a net-GEX sparkline in the Market Intel strip; ghost lines where the longer-dated
   book disagrees with the day’s wall. The **GEX-by-strike histogram** behind the candles
-  (all-expiry structure faint, 0DTE bright — the wall is the biggest bar) is a **toolbar toggle,
-  off until you flip it** — same discipline as the ⚙ visuals below
+  (all-expiry structure faint, 0DTE bright — the wall is the biggest bar) is **on by default**
+  (Jake, 2026-09-01) — it is a right-edge dock, not a background wash, so it does not compete with
+  the tape the way the ⚙ visuals would. Still a toolbar toggle: switch it off and it stays off
 - **⚙ dealer visuals, all default OFF** (the raw tape stays raw; each is a menu toggle) — regime
   tint above/below the flip, the EM decay cone (the day’s REMAINING priced move, √-decaying into
   the close), a gravity halo that turns on after 2pm, today’s wall-migration trails, a drift
