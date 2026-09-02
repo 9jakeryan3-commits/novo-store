@@ -90,7 +90,11 @@ module.exports = async (req, res) => {
       });
     }
     return res.status(200).json({
-      ok: true, head: check.head, intact: check.intact, links: links.length,
+      // Same vacuous green as the verify branch had, one return statement away: verifyChain()
+      // reports intact:true over zero links because it finds nothing to disagree with. I fixed
+      // that branch and left this one, which is the whole reason the rule is to sweep for the
+      // SHAPE of a bug rather than move on to the next file.
+      ok: true, head: check.head, intact: links.length ? check.intact : null, links: links.length,
       history: links.slice(0, want).map((L, i) => ({
         ts: L.ts, generated: L.generated, hash: L.hash, prev: L.prev,
         claims: L.claims,
