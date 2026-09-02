@@ -2854,6 +2854,37 @@ window.cxLive = (function(){
             d.textContent=(pc>=0?'+':'')+pc.toFixed(2)+'%';
           }
         });
+        // THE SPOT ROW HAS TO MOVE TOO. ladder() sorts every row descending by value WITH spot
+        // among them, but a tick only ever rewrote .ldist — so once streamed spot crossed a
+        // level, every distance stayed correct while the spot ROW sat in its render-time slot.
+        // Jake's screenshot: four levels all reading positive distances (i.e. all above spot)
+        // with spot sitting second from the top.
+        //
+        // The two clocks make this the normal case rather than an edge one: spot streams about
+        // once a second, the ladder is only re-rendered per collector pass (8-17 min), so any
+        // coin that crosses a level between passes shows it for the whole gap.
+        //
+        // ⚠ PLACED INSIDE paint() DELIBERATELY, because paint() is the ONLY painter: the socket
+        // calls it with the streamed price, revert() calls it with snap.spot on every coin
+        // switch and disconnect. Ordering therefore follows whichever spot the caller supplied,
+        // and the live path and the revert path cannot disagree. Teaching one painter a new rule
+        // and not the other is exactly how this component's -96% ETH bug happened (Xavier).
+        const spotRow = lad.querySelector('[data-spot]');
+        if(spotRow && spot>0){
+          const levels = [].slice.call(lad.children).filter(function(r){ return r.hasAttribute('data-lv'); });
+          let above = 0;
+          levels.forEach(function(r){
+            const lv = parseFloat(r.getAttribute('data-lv'));
+            if(isFinite(lv) && lv > spot) above++;      // strictly above; a level ON spot sits under it
+          });
+          const before = levels[above] || null;         // null => spot belongs last
+          // Only move when it is genuinely wrong. insertBefore on a node already in position
+          // still detaches and reattaches it, which would restart the tick-flash animation on
+          // every single tick and make the price strobe.
+          const wrong = before ? (spotRow.nextElementSibling !== before)
+                               : (lad.lastElementChild !== spotRow);
+          if(wrong) lad.insertBefore(spotRow, before);
+        }
       }
     }
     const line=el('lgex-live');
