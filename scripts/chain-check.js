@@ -95,9 +95,18 @@ const rec = (z, n) => ({
       const res = await fetch(`${base.replace(/\/$/, "")}/api/track-record?verify=1`);
       const j = await res.json();
       console.log(`  links=${j.links} head=${j.head ? j.head.slice(0, 16) + "…" : "none"}`);
-      check("live chain intact", j.intact, true);
-      if (j.problems && j.problems.length) j.problems.forEach((p) => console.log("   -", p.problem));
-      if (j.links === 0) console.log("  (empty chain — nothing has published since this shipped)");
+      // AN EMPTY CHAIN IS NOT A FAILING CHAIN. The endpoint deliberately answers intact:null with
+      // zero links rather than a vacuous true, so asserting `intact === true` here turned that
+      // honesty into a red — the same false signal as the vacuous green, pointing the other way.
+      // Until the engine publishes, there is nothing to check and this must say so.
+      if (j.links === 0) {
+        console.log("  nothing to check yet — no publish has been recorded since this shipped.");
+        console.log(`  the endpoint reports intact=${JSON.stringify(j.intact)}, which is correct:` +
+                    " an empty check is not a passing one.");
+      } else {
+        check("live chain intact", j.intact, true);
+        if (j.problems && j.problems.length) j.problems.forEach((p) => console.log("   -", p.problem));
+      }
     } catch (e) {
       failures++;
       console.log("  FAIL could not read the live chain:", e.message);
