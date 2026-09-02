@@ -3209,7 +3209,17 @@ async function _loadHist(){
   _histC.inflight=true;
   try{
     var u=NOVO_URL('/api/chart-history'); if(!u) return null;
-    var r=await _tfetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf, 15000);
+    // cache:'no-cache' — REVALIDATE, never serve stale (2026-09-02). B2 added ETags to
+    // /api/chart-history and I claimed 304s the page could never receive, because every fetch here
+    // ran cache:'no-store', which suppresses the conditional request entirely. 'no-cache' is the
+    // one that earns them: the browser sends If-None-Match, the server answers 304 with an empty
+    // body, and JS still sees a normal 200 with the full candles reconstituted from cache.
+    // Measured in headless Chrome: no-store = full body on every request; no-cache = full body
+    // once, then 304s. These are the 350-626KB payloads, so it is the biggest wire win on the page.
+    // NOT plain caching: 'no-store' -> dropping the header entirely would let the browser serve up
+    // to max-age=60 WITHOUT asking, compounding with this loader's own 60s TTL to ~2 minutes of
+    // staleness on a forming hourly bar — the exact thing that TTL exists to prevent.
+    var r=await _tfetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf, 15000, {cache:'no-cache'});
     if(!r.ok){ _reauth401(r); return (_histC.key===key)?_histC.candles:null; }
     var d=await r.json();
     if(d.ticker!==_selTkr()||d.tf!==_ctbTf) return null;   // stale response from before a switch
@@ -4411,7 +4421,7 @@ async function _c2Load(){
     var key=tk+':'+_ctbTf, hc=_c2HistC[key], cand=null;
     if(hc && (Date.now()-hc.ts)<60000){ cand=hc.c; }
     else{
-      var r2=await _tfetch(NOVO_URL('/api/chart-history')+'&ticker='+encodeURIComponent(tk)+'&tf='+_ctbTf,15000);
+      var r2=await _tfetch(NOVO_URL('/api/chart-history')+'&ticker='+encodeURIComponent(tk)+'&tf='+_ctbTf,15000,{cache:'no-cache'});   // same revalidate-don't-restale rule as the main pane
       if(!r2.ok){ _reauth401(r2); return; }
       var d2=await r2.json();
       if(d2.ticker!==tk||d2.tf!==_ctbTf) return;
