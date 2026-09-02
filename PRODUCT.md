@@ -268,12 +268,15 @@ server — nine read-only tools, no key. Paid surfaces are absent from it rather
 
 **Claims to avoid** (all were on the site and all are refutable): "every book that exists",
 "the gamma tools stop at four coins", and any competitor price band quoted as the market — one
-vendor publishes gamma on ~10 currencies for less than $79. Say "most stop at two to four".
+vendor publishes gamma on ~10 currencies for less than $79. Do NOT say "most stop at two to four": Glassnode covers five (BTC, ETH, SOL, XRP, PAXG on Deribit), measured, and the live pages say "the closest comparables cover five coins".
 
 ## Standing rules this offering depends on
 
-1. **Entry is always the user's click.** Only exits are automated. No auto-entry, no autonomy
-   toggle, ever. Any copy or screenshot implying otherwise is a defect.
+1. **NoVo never places or manages a trade.** Execution was removed from the product on
+   2026-08-30: no orders, no brokerage connection, no API keys, no stops and no exits.
+   Every trade is placed by the user, wherever they already trade. Any copy or screenshot
+   implying otherwise is a defect — including "only exits are automated", which is what
+   this rule itself said until 2026-09-02, contradicting "Brokers: none" forty lines above.
 2. **No performance claims** — no win rates, P&L figures or implied returns on public pages.
 3. **The AI reads the market, not your account.** Enforced structurally: no tool in
    `api/_lib/tools.js` can reach an account, an order or `trades.db`.
