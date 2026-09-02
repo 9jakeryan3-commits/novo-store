@@ -1679,7 +1679,11 @@ function takerFlowPanel(d, g){
   const flow = t.net_flow_gex, book = g && g.net_gex;
   const share = (book && Math.abs(book) > 0) ? Math.abs(flow) / Math.abs(book) * 100 : null;
   const disagree = (book != null) && ((flow < 0) !== (book < 0));
-  const ks = (t.strikes || []).slice();
+  // flow_by_strike, renamed from "strikes" 2026-09-02: analyst-ask.js::_trim deletes that key by
+  // NAME from NoVo's grounding, so the panel drew correctly while he could not see the data.
+  // The || is a transition shim -- the collector and this deploy land independently, so for one
+  // 5-minute pass a snapshot may still carry the old name. Safe to drop after that.
+  const ks = (t.flow_by_strike || t.strikes || []).slice();
   const mx = ks.reduce((a, r) => Math.max(a, Math.abs(r[1])), 0) || 1;
   const bars = ks.map(function(r){
     const k = r[0], v = r[1], pos = v >= 0;

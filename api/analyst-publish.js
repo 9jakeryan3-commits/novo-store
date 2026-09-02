@@ -769,6 +769,19 @@ async function _publishLiveLevels(state) {
     if (!rows.length) return;
     await r.set(LIVE_LEVELS_KEY, JSON.stringify({
       asof: Date.now(), session: state.session || null, live: true, tickers: rows,
+      // "TODAY LOOKS LIKE": the closest prior setups and how they actually resolved.
+      //
+      // This is a THIRD field-by-field whitelist in the same pipeline, and it had been quietly
+      // eating this since the analogue engine was built. The engine computes analogues per ticker
+      // every cycle (main.py:1393) and sends them in the live-state payload — the DASHBOARD has
+      // rendered them all along. But the rebuild above maps state.indices into twelve named
+      // fields, so everything else in that payload stopped here, and the ANALYST never received
+      // them. Meanwhile ai.html sells "Historical analogues" as one of his capabilities and
+      // analyst-ask.js's own prompt tells him "historical analogues with their sample size are
+      // all yours to give" — an instruction to use data that was never arriving.
+      //
+      // Cheap: k=3 per ticker. Well inside the 12 that analyst-ask.js's _trim drops above.
+      analogues: (state && state.analogues_by) || null,
     }), { ex: 3600 });
   } catch (_) { /* the members' live save must never fail over this mirror */ }
 }
