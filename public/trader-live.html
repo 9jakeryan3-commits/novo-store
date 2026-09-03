@@ -4992,6 +4992,13 @@ async function loadNovoChart(){
   try{
     if(!_initNovoChart()) return;   // chart not built yet — the veil's own deadline covers this
     const _reqTkr=_selTkr();
+    // THE FRAME THIS LOAD IS FOR (2026-09-03). The ticker had a staleness guard from the day the
+    // switcher shipped; the timeframe never got one, and this function awaits THREE times. Every
+    // timeframe click also clears _ncBusy on purpose (see the tf handler) so the switch is not
+    // blocked by an in-flight poll — which means switching back and forth GUARANTEES overlapping
+    // loads, and with no frame guard the loser paints into the winner's frame. Captured here and
+    // compared after each await, exactly like _reqTkr.
+    const _reqTf=_ctbTf;
     const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
     const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
     const d=await r.json();
@@ -5001,6 +5008,10 @@ async function loadNovoChart(){
     // it only when that is what the viewer selected, or SPY candles would paint under a QQQ caption.
     if(d.ticker){ if(d.ticker!==_selTkr()) return; }        // stale answer for a previous selection; the
     else if(!_selIsExec()){ _veilOff(); return; }           // in-flight request for the CURRENT one still owns the veil
+    // Same rule for the FRAME. No _veilOff() on this exit for the same reason as the ticker guard:
+    // the load started by the switch owns the veil now, and clearing it here strands the spinner
+    // logic the other way.
+    if(_ctbTf!==_reqTf) return;
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
     // Deep frames NEVER go through _tfView: its bucket step is _ctbTf*60, and '1h'*60 is NaN —
@@ -5009,6 +5020,11 @@ async function loadNovoChart(){
     let _view=_isDeepTf()?null:_tfView(d);
     if(_isDeepTf()){
       const _hc=await _loadHist();
+      // The third await, and the one that actually mixed the grids: _loadHist() resolves for
+      // whatever frame was current when it was CALLED, so a switch during the fetch lands one
+      // frame's bars in another frame's series. Checked BEFORE the empty-answer branch below so a
+      // superseded load never clears the veil the live one is holding.
+      if(_ctbTf!==_reqTf) return;
       // Keep the current chart until history answers, but a SUCCESSFUL empty answer means this
       // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
       // the veil cadence forever (the weekend switch-to-QQQ trap).
@@ -5219,7 +5235,19 @@ async function loadNovoChart(){
             if(_novoConeHi){ _novoConeHi.setData(_chi); _novoConeHi.applyOptions({visible:true}); }
             if(_novoConeLo){ _novoConeLo.setData(_clo); _novoConeLo.applyOptions({visible:true}); }
           }
-        } else if(_novoConeHi){ _novoConeHi.applyOptions({visible:false}); _novoConeLo.applyOptions({visible:false}); }
+        } else if(_novoConeHi){
+          // HIDING A SERIES DOES NOT TAKE ITS DATA OFF THE TIME AXIS (2026-09-03). Measured against
+          // our own vendored lightweight-charts 4.2.3: four hourly candles alone render with pixel
+          // gaps [6,6,6]; add a visible:false series holding two off-hour points and the same four
+          // candles render [12,12,6] — doubled exactly where the hidden points sit, untouched where
+          // they don't. The time scale is the union of EVERY series' times; `visible` only skips
+          // drawing. This cone is built on intraday frames from _view.candles, so on 15m it holds
+          // 09:30/09:45/10:00 buckets; switching to 1H hid it and KEPT those times, injecting
+          // 15-minute slots into the hourly axis across the intraday window and spreading the
+          // hourly candles into the thin, sparse bars Jake screenshotted. Clear, don't just hide.
+          try{ _novoConeHi.setData([]); _novoConeLo.setData([]); }catch(_e){}
+          _novoConeHi.applyOptions({visible:false}); _novoConeLo.applyOptions({visible:false});
+        }
       }catch(_e){}
     } else {
       try{   // tip-only move: same length, same penultimate → last point time matches, update() replaces in place
@@ -5400,7 +5428,22 @@ async function loadNovoChart(){
     // above is microseconds; the DOM replacement was the cost.)
     const lg=document.getElementById('novo-chart-legend');
     if(lg){ const _lh=leg.join(''); if(lg.__h!==_lh){ lg.__h=_lh; lg.innerHTML=_lh; } }
-  }catch(e){console.error('novo chart:',e);}
+  }catch(e){
+    // A THROW HERE STOPS THE CANDLES AND THE SUPERVISOR CANNOT TELL (2026-09-03). window._paintAt
+    // only advances on a SUCCESSFUL paint, so a paint that throws every cycle is indistinguishable
+    // from a download that never lands: _laneCheck keeps re-kicking a load that was never stuck,
+    // forever, and only a reload clears it — "refresh fixes it, until it freezes again". The log
+    // line was already here, but nothing survived the moment: if the console was not open WHEN it
+    // broke, the evidence was gone, which is most of why this cost a day. Keep the record on the
+    // page instead — what threw, how many times, and in which ticker/frame, since every one of
+    // these has turned on which frame was current. Read window._ncLastErr after the fact.
+    try{
+      window._ncErrN=(window._ncErrN||0)+1;
+      window._ncLastErr={n:window._ncErrN, at:new Date().toISOString(), tkr:_selTkr(), tf:_ctbTf,
+                         msg:String((e&&e.message)||e), stack:String((e&&e.stack)||'')};
+      console.error('novo chart:',_selTkr(),_ctbTf,'#'+window._ncErrN,e);
+    }catch(_e2){ console.error('novo chart:',e); }
+  }
   // _applyTogVis() is NOT called here any more (2026-08-31 audit): visibility is set at series
   // creation now, and re-applying ~20 applyOptions per tick forced a wasted repaint each cycle.
   // The toolbar click handler still calls it — the one place visibility actually changes.
