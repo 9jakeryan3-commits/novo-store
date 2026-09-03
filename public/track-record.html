@@ -442,7 +442,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="card" style="margin-top:16px;">
     <div class="lbl">Claim seven</div>
     <h2 class="h2" style="font-size:19px;margin:5px 0 4px;">Walls are not barriers</h2>
-    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. Everyone treats them as a ceiling and a floor. This is what actually happened on every session since 2008 where price reached one &mdash; measured across that whole session, from a map built off the previous close.</p>
+    <p class="plain">The call wall is the strike with the most call options stacked above price; the put wall is the same below it. Everyone treats them as a ceiling and a floor. This is what actually happened on sessions since 2008 where price reached one &mdash; measured across that whole session, from a map built off the previous close. (The archive is not continuous: no data 2025-12-16 to 2026-07-26.)</p>
     <p class="sub" style="margin:0 0 12px;font-size:13.5px;">Days price never came near the wall are dropped, not counted as holds &mdash; counting those is how a level ends up looking infallible.</p>
     <div id="tr-wall"><div class="muted">Loading&hellip;</div></div>
   </div>
@@ -520,15 +520,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (_cc0) _cc0.style.display = 'none';
       return;
     }
-    // Everything the page scores, not just the live map -- otherwise the header says 23 sessions
-    // while a claim below it says 1,008. Falls back to the live-only fields if the engine is older.
-    // Two spans, said as two spans. The scored record starts in 2020 because that is when the
-    // engine began logging dealer maps; the price history runs far longer and is price only.
-    // Stating them in one breath as a single number would be the averaging error this page
-    // exists to avoid.
-    var _meta = Number(d.sessions_scored || d.sessions_logged).toLocaleString()
-      + ' sessions scored, ' + (d.scored_from || d.from) + ' to ' + (d.scored_to || d.to)
-      + ' · ' + Number(d.snapshots).toLocaleString() + ' snapshots.';
+    // Two eras, said as two eras (2026-09-02). The old header pooled a 1,008-session backtest
+    // with ~31 live sessions into "1,039 sessions scored, 2020-01-02 to 2026-09-02" -- one number,
+    // one continuous-looking range, when the backtest ends 2023-12-29 and live capture began
+    // 2026-07-24 with nothing scored between. The payload has always shipped the split
+    // (sessions_logged / snapshots_live); the header just never used it. The backtest dates are
+    // stated literally because the backtest table is a frozen archive load -- if it ever refreshes,
+    // this line is part of that change.
+    var _live = Number(d.sessions_logged || 0), _bt = Number(d.sessions_scored || 0) - _live;
+    var _meta = (_live
+        ? _live.toLocaleString() + ' live sessions, ' + (d.from || '') + ' to ' + (d.to || '')
+          + ' (' + Number(d.snapshots_live || d.snapshots).toLocaleString() + ' snapshots)'
+        : Number(d.sessions_scored || 0).toLocaleString() + ' sessions scored')
+      + (_bt > 0 ? ' · plus a separate ' + _bt.toLocaleString()
+          + '-session backtest, 2020-01-02 to 2023-12-29. Two eras, never merged; nothing was scored between them.'
+        : '.');
     if (d.price_base_rates && d.price_base_rates.from) {
       var _y = new Date().getFullYear() - Number(String(d.price_base_rates.from).slice(0, 4));
       _meta += ' Plus ' + _y + ' years of daily price history per ticker.';
@@ -553,8 +559,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            // The same formula over years rather than weeks. Its own line and its own n --
            // these are backtested sessions, not calls NoVo published, and the two never merge.
            + (bt.enough ? '<div class="muted" style="font-size:12px;margin-top:3px;">backtested '
-               + String(bt.first).slice(0,4) + '&ndash;' + String(bt.last).slice(0,4) + ': <b style="color:var(--txt1)">'
-               + Number(bt.inside).toLocaleString() + ' of ' + Number(bt.sessions).toLocaleString() + '</b> &middot; ' + pct(bt.rate) + '</div>' : '')
+               + String(bt.first).slice(0,4) + '&ndash;' + String(bt.last).slice(0,4) + ' (series ends ' + String(bt.last) + '): <b style="color:var(--txt1)">'
+               + Number(bt.inside).toLocaleString() + ' of ' + Number(bt.sessions).toLocaleString() + '</b> &middot; ' + pct(bt.rate) + '</div>'
+             : '<div class="muted" style="font-size:12px;margin-top:3px;">no backtest exists for ' + tk + ' &mdash; live sessions only</div>')
            + arch(t.archive, (t.archive && t.archive.expected_move)
                ? ('closed inside the band <b style="color:var(--txt1)">' + t.archive.expected_move.inside_pct
                   + '%</b> of ' + nn(t.archive.expected_move.n) + ' sessions') : '')
@@ -580,6 +587,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + bar(f.negative_median_pct, mx, '#f43f5e')
            + '</div>';
       } else {
+        // A blank card is a hidden reading. When the engine declines to grade, the page says so
+        // instead of rendering nothing under the heading (2026-09-02, Jake's correct-and-fact rule).
+        fl += '<div class="tg" style="margin-bottom:16px;">'
+           + hd(tk, 'no verdict yet &mdash; too few live sessions to grade', null)
+           + '</div>';
       }
       // The claim NoVo is built on, asked of 17 years instead of 22 sessions. Daily RANGE, not
       // the hourly move above -- named so, because they are not the same measurement.
@@ -669,8 +681,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function arch(a, body){
       if (!a || !a.enough) return '';
       var win = String(a.from||'').slice(0,4) + '&ndash;' + String(a.to||'').slice(0,4);
+      // The archive is two runs, not one: the reconstruction stops 2025-12-15 and live end-of-day
+      // capture picks up 2026-07-27 -- a 7.4-month hole the old "2008-2026" span papered over.
+      // The counts come from the payload; the boundary dates are stated literally because the API
+      // does not ship them (measured from dealer_map_daily: zero rows between those dates).
+      var s = a.sources || {};
+      var src = (s.backfill != null || s.live_eod != null)
+        ? ' &mdash; ' + nn(s.backfill || 0) + ' reconstructed sessions + ' + nn(s.live_eod || 0)
+          + ' live closes; no data 2025-12-16 to 2026-07-26'
+        : '';
       return '<div class="muted" style="font-size:12px;margin-top:3px;">reconstructed ' + win
-           + ': ' + body + '</div>';
+           + ': ' + body + src + '</div>';
     }
 
     var gv='', wl='', sk='', sq='', ln='', wb='';
@@ -686,7 +707,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + nn(g.far_n) + ')</span>'
                   + (g.pull_closer_rate != null ? '<br>It does <b>not</b> reel price back in: from 0.15%+ away, price ended closer only '
                      + g.pull_closer_rate + '% of the time <span class="muted">(n=' + nn(g.pull_n) + ')</span>.' : ''));
-      } else { }
+      } else { gv += hd(tk, 'no verdict yet &mdash; too few sessions to grade', null); }
 
       var w = t.wall_respect || {};
       if (w.enough) {
@@ -694,7 +715,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         wl += hd(tk, (cok && pok) ? 'both sides hold' : (cok || pok) ? 'one side holds' : 'neither side holds', (cok && pok) ? true : (cok || pok) ? null : false)
             + sub('call wall held <b>' + w.call_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.call_n) + ')</span>'
                   + ' &middot; put wall held <b>' + w.put_wall_held_rate + '%</b> <span class="muted">(n=' + nn(w.put_n) + ')</span>');
-      } else { }
+      } else { wl += hd(tk, 'no verdict yet &mdash; too few sessions to grade', null); }
 
       var s2 = t.skew_signal || {};
       if (s2.enough) {
@@ -703,14 +724,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                   + '%</b> <span class="muted">(n=' + nn(s2.high_n) + ')</span>'
                   + ' &middot; flat (&le; ' + s2.low_threshold + ') &rarr; <b>' + s2.low_median_move_pct
                   + '%</b> <span class="muted">(n=' + nn(s2.low_n) + ')</span>');
-      } else { }
+      } else { sk += hd(tk, 'no verdict yet &mdash; too few sessions to grade', null); }
 
       var q = t.squeeze_bands || {}, bs = (q.bands||[]).filter(function(b){ return b.usable; });
       if (bs.length >= 2) {
         sq += hd(tk, q.monotonic ? 'the scale holds' : 'the bands do not separate', !!q.monotonic)
             + sub(bs.map(function(b){ return b.band + ' <b>' + b.median_abs_move_pct + '%</b> <span class="muted">(n=' + nn(b.n) + ')</span>'; }).join(' &rarr; ')
                   + ' <span class="muted">&mdash; median absolute move over the next hour</span>');
-      } else { }
+      } else { sq += hd(tk, 'no verdict yet &mdash; the bands are not separable at this sample', null); }
 
       var L = t.line_record || {};
       if (L.enough) {
@@ -725,12 +746,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         ln += hd(tk, L.holds ? 'owns it more often than not' : 'does not own it in this window', !!L.holds, L)
             + sub('still on that side an hour later <b>'
                   + (L.still_beyond_rate != null ? L.still_beyond_rate : L.direction_rate)
-                  + '%</b> of the time <span class="muted">(n=' + nn(L.n) + ')</span>')
+                  + '%</b> of the time <span class="muted">(n=' + nn(L.n)
+                  + (L.live_n != null && L.replay_n != null
+                      ? ': ' + nn(L.live_n) + ' live + ' + nn(L.replay_n) + ' replayed' : '')
+                  + ')</span>')
             + (L.reached_next_rate != null
                 ? sub('reached the next level on the map inside the hour <b>' + L.reached_next_rate
                       + '%</b> of the time <span class="muted">(n=' + nn(L.reached_next_n) + ')</span>')
                 : '');
-      } else { }
+      } else { ln += hd(tk, 'no verdict yet &mdash; too few fires to grade', null); }
 
       // Claim seven. No strength badge on purpose: sg() grades a claim against a 50% baseline, and
       // "price got through it 69% of the time" is a measurement, not a coin-flip claim. The sample
