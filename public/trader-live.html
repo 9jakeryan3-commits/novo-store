@@ -5087,9 +5087,24 @@ async function loadNovoChart(){
         // a bar is not a new session, and re-fitting there yanked the viewer's pan back to the
         // opening window ~hourly on 1H. Only intraday first-bar changes are session rolls.
         if(_firstT !== _novoFirstT && !_isDeepTf()) _novoRanged=false;
-      } else {
+      } else if(_drawC.length && _novoViewC && _novoViewC.length
+                && _drawC[_drawC.length-1].time === _novoViewC[_novoViewC.length-1].time){
         _novoSeries.update(_drawC[_drawC.length-1]);   // same-count steady state → smooth-update the forming candle
         if(_novoVolSeries) _novoVolSeries.update(_volBar(_view.candles[_view.candles.length-1]));
+      } else {
+        // WHY UPDATE() IS NOW TIME-CHECKED (2026-09-03). update() only REPLACES when the time
+        // already exists in the series; with any other time it APPENDS. The branch above is chosen
+        // on COUNTS, and _novoBarCount is written back from _view.candles.length — the VIEW's
+        // length, never the series' — so an appended bar makes the series permanently longer than
+        // the number this code reasons about, and the `length > _novoBarCount` test that triggers
+        // the cleaning setData compares view-to-view and can never see it. One appended
+        // foreign-resolution bar therefore stays until the page is reloaded, which is exactly the
+        // "refresh fixes it and then it comes back" shape.
+        // Same count but the last bar's time MOVED is not a steady state, so take the full set:
+        // strictly more setData than before, never fewer, and setData replaces rather than merges,
+        // so it is also the thing that CLEANS a series that already got contaminated.
+        _novoSeries.setData(_drawC); _novoHasData=true;
+        if(_novoVolSeries) _novoVolSeries.setData(_view.candles.map(_volBar));
       }
       _novoFirstT = _firstT;
       _novoBarCount = _view.candles.length;
