@@ -185,4 +185,40 @@ if [ "$VERIFIED" = "index.html only" ]; then
 else
   echo "OK  production serves $LOCAL (verified by $VERIFIED)"
 fi
+
+# ── post-deploy smoke: the deploy landed; now prove the product still ANSWERS ────────────────
+# ~20 deploys/12h shipped with no checkout-path smoke at all (register lead). Read-only GETs only
+# -- no Stripe sessions are minted by a deploy. A failure here exits 1 with wording DISTINCT from
+# a failed deploy, because it is the worse case: the alias is already serving this commit.
+# 200-with-nothing is the vacuous trap, so every probe demands a minimum body size, and the two
+# APIs must show a real field, not merely answer.
+SMOKE_FAIL=""
+smoke() { # url  min_bytes  [needle-regex]
+  local u="$1" mb="$2" needle="${3:-}" body code have="absent" try
+  for try in 1 2; do
+    body=$(curl -s --max-time 15 -w '\n%{http_code}' "$u?v=$RANDOM" || true)
+    code="${body##*$'\n'}"; body="${body%$'\n'*}"
+    if [ -n "$needle" ] && printf '%s' "$body" | grep -qE "$needle"; then have="found"; fi
+    if [ "$code" = "200" ] && [ "${#body}" -ge "$mb" ] && { [ -z "$needle" ] || [ "$have" = "found" ]; }; then
+      return 0
+    fi
+    sleep 3
+  done
+  SMOKE_FAIL="${SMOKE_FAIL}
+!!   $u -> http=${code:-none} bytes=${#body}${needle:+ needle=$have}"
+}
+echo ".. smoke"
+smoke "https://novo-options.trade/api/health"       50   '"sha"'
+smoke "https://novo-options.trade/"                 5000
+smoke "https://novo-options.trade/plans"            5000
+smoke "https://novo-options.trade/analyst"          5000
+smoke "https://novo-options.trade/crypto"           5000
+smoke "https://novo-options.trade/track-record"     5000
+smoke "https://novo-options.trade/api/track-record" 200  '"ok"'
+if [ -n "$SMOKE_FAIL" ]; then
+  echo "!! DEPLOY LANDED ($LOCAL) BUT SMOKE FAILED:$SMOKE_FAIL"
+  echo "!! the alias is already serving this commit -- fix forward or revert; re-running deploy changes nothing"
+  exit 1
+fi
+echo "OK  smoke: 7/7 surfaces answering with real bodies"
 exit 0
