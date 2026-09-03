@@ -101,9 +101,24 @@ module.exports = async (req, res) => {
   const r = kv();
   if (!r) return res.status(503).json({ error: "kv unavailable" });
   try {
-    // 2h TTL: long enough to survive a collector restart or a quiet stretch, short enough
-    // that a dead box shows as stale rather than silently serving yesterday's map.
-    await r.set("crypto:map:live", payload, { ex: 7200 });
+    // 7d TTL (raised from 2h, 2026-09-03). The old comment's INTENT was right — "a dead box shows
+    // as stale" — but 2h did not achieve it: when this key expires, /api/crypto-map returns
+    // 503 "no live snapshot" (crypto-map.js:141) and the paid $79 map goes BLANK, not stale. So a
+    // two-hour power cut, a long Windows update, or an overnight internet outage took a paid
+    // product completely off the air, which is the harshest possible failure for the mildest cause.
+    //
+    // Stale is ALREADY handled honestly downstream, which is what makes this safe: crypto-map.js
+    // returns age_min on every response, and crypto-live.html:2049 flips an amber STALE badge at
+    // age_min > 20 and prints "Last pass: Nm ago". A subscriber can therefore never mistake an old
+    // map for a live one — the page says so in words, at 20 minutes, long before this TTL matters.
+    // Given that, a labelled 6-hour-old map beats a 503 every time.
+    // 7 days covers every realistic outage (reboot, power cut, ISP failure, hardware swap) while
+    // still clearing eventually if the collector is truly abandoned.
+    //
+    // NOT applied to trader:snapshot:delayed, whose 900s TTL is a DELIBERATE opposite call
+    // (trader-snapshot.js:23) — for a CHART, "a missing key is a clearer failure than an old one",
+    // because a chart looks live by its nature. Different data, different right answer.
+    await r.set("crypto:map:live", payload, { ex: 604800 });
     // Reader-defined crypto price alerts, evaluated on the pass that just landed.
     try { await require("./_lib/alerts.js").evaluateCrypto(b); } catch (_) {}
     const shape = {};
