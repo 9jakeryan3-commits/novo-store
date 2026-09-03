@@ -111,6 +111,13 @@ module.exports = async (req, res) => {
   });
   return res.status(200).json({
     as_of: snap.as_of,
+    // Rows in the crypto corpus, reported by the collector that owns it (publish.py build_snapshot).
+    // Exposed here so the ENGINE can read it: since the 2026-09-03 cutover the two run in separate
+    // containers, so the engine's old _cnt("../Novo-crypto/data/novo_crypto.db") counts a path that
+    // does not exist over there and silently returned 0 -- taking ~6.5M rows off the public
+    // data-point total on /ai with nothing announcing it. Not a secret: it is a count of how much
+    // data exists, exactly like /api/datapoints itself.
+    corpus_rows: (snap.corpus_rows == null ? null : snap.corpus_rows),
     // The count used by the "all N coins" copy, which is specifically about COST TO TRADE -- a
     // figure read back from a broker's disclosed markup, so it exists only for coins that broker
     // lists. It is NOT the size of the map: the map is this plus every options-book coin without a
