@@ -2010,11 +2010,34 @@ function drawSpark(v){
 }
 
 /* ---------------- load ---------------- */
+// NEVER TEAR DOWN A MAP THAT IS ALREADY ON SCREEN (2026-09-03).
+// Every failure path below used to call showLogin(), which hides #app and shows the sign-in /
+// paywall card. So one dropped packet on a phone, one Vercel 502, or one Upstash blip took a
+// PAYING subscriber who was reading the map and replaced it with a card asking them to sign in --
+// destroying data they already had rather than degrading it. That is the exact opposite of the TTL
+// work done earlier today (crypto:map:live 2h -> 7d), which existed to make this product go STALE
+// instead of dark.
+// 401 and 402 keep their hard teardown, and that is deliberate: both are real answers from a pure
+// HMAC verifier with no network call behind it (api/crypto-map.js verifyToken), so neither can be
+// transient. Everything else is transport, and transport gets the amber STALE badge the page
+// already has.
+var _mapShown = false;
+function _mapDegrade(msg){
+  try{
+    var p=document.querySelector('#live'); if(p) p.classList.add('stale');
+    var t=document.querySelector('#live-t'); if(t) t.textContent='STALE';
+    if(msg) console.warn('crypto map degraded:', msg);
+  }catch(_){}
+}
 async function load(){
   if(!TOKEN){ showLogin(); return; }
   let r;
   try { r = await fetch('/api/crypto-map?t='+encodeURIComponent(TOKEN)); }
-  catch(_){ showLogin('Could not reach the map. Try again in a moment.'); return; }
+  catch(_){
+    if(!_mapShown) showLogin('Could not reach the map. Try again in a moment.');
+    else _mapDegrade('network');
+    return;
+  }
   if(r.status===401){
     try{ localStorage.removeItem('novo_live_t'); }catch(_){}
     TOKEN=null; showLogin('That session expired. Sign in again from the member portal.'); return;
@@ -2040,9 +2063,15 @@ async function load(){
   if(!r.ok){
     let m='The crypto collector is not reporting right now.';
     try{ const j=await r.json(); if(j&&j.error) m=j.error; }catch(_){}
-    showLogin(m); return;
+    // Includes the 503 the server now returns when it cannot REACH Stripe to verify entitlement
+    // (api/crypto-map.js). Tearing the map down for that would undo the whole point of that fix:
+    // it exists so an upstream outage never tells a paying subscriber they are not one.
+    if(!_mapShown) showLogin(m);
+    else _mapDegrade(m);
+    return;
   }
   SNAP = await r.json();
+  _mapShown = true;
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
   if(window.cxInstall) cxInstall.entered();   // subscriber is in - now offer the install
   const b=SNAP.breadth||{}, hl=SNAP.health||{};
