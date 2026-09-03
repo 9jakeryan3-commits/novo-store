@@ -44,8 +44,11 @@
     var f = e.target;
     if (!f) return;
     var id = f.id || '';
-    var cls = f.className || '';
-    if (id === 'np-subscribe' || id === 'fb-sub' || cls.indexOf('np-form') >= 0) {
+    // The np-form class match moved to np-form.js (2026-09-02), which every capture page loads —
+    // this file is on 6 pages, 4 of which also load np-form.js, and both handlers are capture-
+    // phase, so keeping the clause here would double-count leads on exactly those 4. The two ids
+    // stay: plans.html (np-subscribe) and the footer form (fb-sub) have inline handlers instead.
+    if (id === 'np-subscribe' || id === 'fb-sub') {
       gtag('event', 'generate_lead', { currency: 'USD', value: 0 });
     }
   }, true);

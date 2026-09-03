@@ -36,7 +36,13 @@ module.exports = async (req, res) => {
       // silently beat the committed value and could have billed a $1 test price.
       line_items: [{ price: 'price_1U8R0zB1Bq29OALaAdZzFw8S', quantity: 1 }],
       mode: 'subscription',
-      success_url: 'https://app.novo-aitrading.app/portal',
+      // Land on the site's own success page first (2026-09-02): it fires the GA4 purchase event
+      // where the _ga cookie lives (the portal is a different host — a purchase fired there, or
+      // server-side, would never join the session or the ad click), then hands the user the
+      // portal button with the create-account-with-this-email instruction the portal itself
+      // never gives. {CHECKOUT_SESSION_ID} is Stripe's template, not JS — it becomes the real
+      // session id and dedupes the event on refresh.
+      success_url: `${SITE}/success?tier=trader&plan=monthly&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
     });

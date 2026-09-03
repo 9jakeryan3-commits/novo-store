@@ -85,5 +85,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script defer src="/_vercel/insights/script.js"></script>
   <script defer src="/polish.js?v=a8cd8f59"></script>
 <script defer src="/chat-widget.js?v=c7ecf766"></script>
+<script>
+// GA4 purchase (2026-09-02). Checkout lands here now (was: straight to the portal on another
+// host, where the _ga session cookie cannot follow — the site had NO purchase event anywhere).
+// tier/plan arrive from the checkout's success_url; sid is Stripe's real session id, used as
+// transaction_id so a refresh cannot double-count. The value table mirrors ga-events.js's
+// begin_checkout table — for the trial tiers this fires at trial START with the plan's price,
+// which is the committed subscription value, not cash collected today.
+(function(){
+  try {
+    var q = new URLSearchParams(location.search);
+    var tier = q.get('tier') || '';
+    var plan = q.get('plan') === 'yearly' ? 'yearly' : 'monthly';
+    var V = { trader:     { monthly: 209, yearly: 2000 },
+              analyst:    { monthly: 129, yearly: 1290 },
+              crypto:     { monthly: 79,  yearly: 790  },
+              bundle_ac:  { monthly: 169, yearly: 1690 },
+              bundle_all: { monthly: 239, yearly: 2300 } };
+    if (!V[tier] || typeof window.gtag !== 'function') return;
+    window.gtag('event', 'purchase', {
+      transaction_id: q.get('sid') || ('nosid_' + Date.now()),
+      currency: 'USD',
+      value: V[tier][plan],
+      items: [{ item_id: tier + '_' + plan, item_name: 'NoVo ' + tier + ' (' + plan + ')',
+                price: V[tier][plan], quantity: 1 }]
+    });
+  } catch (_) { /* analytics must never break the confirmation page */ }
+})();
+</script>
 </body>
 </html>

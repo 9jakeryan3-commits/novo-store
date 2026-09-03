@@ -101,7 +101,8 @@ module.exports = async (req, res) => {
         // 7-day card-upfront trial on the AC bundle only — see the header note on 'all'.
         ...(bundle === 'ac' ? { trial_period_days: 7 } : {}),
       },
-      success_url: 'https://app.novo-aitrading.app/portal',
+      // Site success page first — GA4 purchase fires where the _ga cookie lives; see checkout-sub.js.
+      success_url: `${SITE}/success?tier=${tier}&plan=${plan}&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/plans`,
       billing_address_collection: 'auto',
     });

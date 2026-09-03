@@ -35,7 +35,8 @@ module.exports = async (req, res) => {
       // Trader $2,000/yr. Hardcoded on purpose - see checkout-sub.js.
       line_items: [{ price: 'price_1U8R1cB1Bq29OALaUL53wxgD', quantity: 1 }],
       mode: 'subscription',
-      success_url: 'https://app.novo-aitrading.app/portal',
+      // Site success page first — GA4 purchase fires where the _ga cookie lives; see checkout-sub.js.
+      success_url: `${SITE}/success?tier=trader&plan=yearly&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
     });

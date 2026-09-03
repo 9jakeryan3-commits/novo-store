@@ -61,7 +61,8 @@ module.exports = async (req, res) => {
       metadata: { tier: 'analyst', plan },
       // 7-day free trial — card collected upfront so it auto-converts (highest-converting trial in this category).
       subscription_data: { metadata: { tier: 'analyst', plan }, trial_period_days: 7 },
-      success_url: 'https://app.novo-aitrading.app/portal',
+      // Site success page first — GA4 purchase fires where the _ga cookie lives; see checkout-sub.js.
+      success_url: `${SITE}/success?tier=analyst&plan=${plan}&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/analyst`,
       billing_address_collection: 'auto',
     });
