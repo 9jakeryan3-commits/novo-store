@@ -2911,6 +2911,16 @@ let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma2
 // so everything it drives — the hero price, the change %, the forming-bar glide — is gated on the
 // selection actually BEING the engine ticker; on any other selection those render from the 4s chart
 // poll's own payload instead (its price is the ticker's forming dxFeed bar).
+// ONE NUMBER THAT MEANS "THE VIEWER CHANGED WHAT THEY ARE LOOKING AT" (2026-09-03).
+// loadNovoChart awaits three times and then mutates a series that LIVES ACROSS SWITCHES, so every
+// await is a place the world can change under it. That was guarded per-dimension and per-site: a
+// ticker check landed the day the switcher shipped, a timeframe check only today, and each new
+// await needed somebody to remember to add both. Correctness by remembering does not hold — this
+// file has nine early exits and the missing frame guard is what let one frame's bars paint into
+// another frame's series.
+// So: bump this on ANY change of selection, capture it once at the top of a load, and compare
+// after every await. One decision point instead of N, and it covers awaits nobody has added yet.
+let _novoGen=0;
 let _novoSelTkr=null;
 try{ var _st=localStorage.getItem('novo_trader_tkr'); if(_st==='SPY'||_st==='QQQ'||_st==='IWM') _novoSelTkr=_st; }catch(_e){}
 const _TKR_NAME={SPY:'S&P 500',QQQ:'Nasdaq 100',IWM:'Russell 2000'};
@@ -2949,6 +2959,7 @@ function _paintTkrUI(){
 }
 function _setTkr(tk){
   if(tk!==_selTkr()){
+    _novoGen++;              // any load already in flight is now for the previous ticker
     _novoSelTkr=tk;
     try{ localStorage.setItem('novo_trader_tkr',tk); }catch(_e){}
     // Full chart reset. The glitch-guard in loadNovoChart compares first-bar times, and two tickers'
@@ -3352,6 +3363,7 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     // epoch seconds, comparable across TFs) and restore it after the new frame paints, so 1m<->5m
     // is instant and keeps the same span — a moment NoVo beats TradingView's server-fetch beat.
     try{ window._tfRestoreRange=_novoChart?_novoChart.timeScale().getVisibleRange():null; }catch(_e){ window._tfRestoreRange=null; }
+    _novoGen++;              // any load already in flight is now for the previous frame
     _ctbTf=tf; _ctbSave();
     // Same reset as a ticker switch: bucket times share epoch anchors across TFs, so the
     // glitch-guard could mistake the switch for a degraded response and skip it.
@@ -5019,6 +5031,10 @@ async function loadNovoChart(){
     // loads, and with no frame guard the loser paints into the winner's frame. Captured here and
     // compared after each await, exactly like _reqTkr.
     const _reqTf=_ctbTf;
+    // The generation this load belongs to. _reqTkr/_reqTf above stay because they still name WHICH
+    // dimension moved when one does (useful in _ncBailN); this is the thing actually compared, so a
+    // future switchable dimension is covered without touching this function at all.
+    const _reqGen=_novoGen;
     const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _ncBail('no-ticket'); _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
     const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _ncBail('http-'+r.status); _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
     const d=await r.json();
@@ -5031,7 +5047,7 @@ async function loadNovoChart(){
     // Same rule for the FRAME. No _veilOff() on this exit for the same reason as the ticker guard:
     // the load started by the switch owns the veil now, and clearing it here strands the spinner
     // logic the other way.
-    if(_ctbTf!==_reqTf){ _ncBail('tf-changed-fetch'); return; }
+    if(_novoGen!==_reqGen){ _ncBail(_ctbTf!==_reqTf?'superseded-tf-fetch':'superseded-tkr-fetch'); return; }
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
     // Deep frames NEVER go through _tfView: its bucket step is _ctbTf*60, and '1h'*60 is NaN —
@@ -5044,7 +5060,7 @@ async function loadNovoChart(){
       // whatever frame was current when it was CALLED, so a switch during the fetch lands one
       // frame's bars in another frame's series. Checked BEFORE the empty-answer branch below so a
       // superseded load never clears the veil the live one is holding.
-      if(_ctbTf!==_reqTf){ _ncBail('tf-changed-hist'); return; }
+      if(_novoGen!==_reqGen){ _ncBail(_ctbTf!==_reqTf?'superseded-tf-hist':'superseded-tkr-hist'); return; }
       // Keep the current chart until history answers, but a SUCCESSFUL empty answer means this
       // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
       // the veil cadence forever (the weekend switch-to-QQQ trap).
