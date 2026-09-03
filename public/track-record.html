@@ -563,11 +563,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var f = t.flip_regime || {};
       if (f.enough) {
         var mx = Math.max(f.positive_median_pct, f.negative_median_pct);
+        // ROUTED THROUGH hd() LIKE EVERY OTHER CLAIM (2026-09-02). This block printed raw
+        // f.holds in green/red and was the ONE claim bypassing the guard. SPY's flip cell is
+        // graded strength:'inconclusive' with effect_r -0.03, so the page showed a hard red
+        // "does not hold in this window" for a cell the scorer had declined to grade at all --
+        // exactly what hd() exists to prevent, on the most prominent claim we publish. It now
+        // reads "not yet distinguishable from chance" in grey, which is what was measured.
         fl += '<div class="tg" style="margin-bottom:16px;">'
-           + '<div style="font-size:13.5px;font-weight:800;color:var(--txt1);margin-bottom:6px;">' + tk
-           + ' <span style="font-weight:600;color:' + (f.holds ? 'var(--green)' : 'var(--red)') + ';">'
-           + (f.holds ? 'holds · ' + f.ratio + 'x further in negative gamma' : 'does not hold in this window')
-           + '</span>' + sg(f) + '</div>'
+           + hd(tk, f.holds ? 'holds · ' + f.ratio + 'x further in negative gamma'
+                            : 'does not hold in this window', !!f.holds, f)
            + '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:3px;">positive gamma &mdash; median hour '
            + f.positive_median_pct + '% <span class="muted">(n=' + Number(f.positive_n).toLocaleString() + ')</span></div>'
            + bar(f.positive_median_pct, mx, '#10b981')
