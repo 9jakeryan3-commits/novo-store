@@ -160,7 +160,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .pain-resolve strong { color: var(--blue); display: block; margin-top: 8px; font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
 
   /* ── Who this is for ── */
-  .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  /* Stacked at EVERY width (2026-09-03, Jake): side by side, the two cards are wildly uneven --
+     five short bullets against sixteen long ones -- so the left card ended a third of the way
+     down and left a tall empty panel beside the right one. Stacking removes the void and lets
+     each card end where its content does. */
+  .for-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
   .for-card { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
   .for-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .for-card h3.green { color: var(--green); }
@@ -392,7 +396,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     .stat { border-right: none; }
     .pain-grid { grid-template-columns: 1fr; }
-    .for-grid { grid-template-columns: 1fr; }
+    /* .for-grid dropped here: it is single-column at every width now, so this override was dead. */
     .how-grid, .how-grid-2 { grid-template-columns: 1fr; }
     .dp-metrics { grid-template-columns: repeat(2, 1fr); }
     .dp-metric:nth-child(2) { border-right: none; }
