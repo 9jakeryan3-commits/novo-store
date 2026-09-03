@@ -23,7 +23,14 @@ const crypto = require("crypto");
 const Stripe = require("stripe");
 const { kv } = require("./_kv");
 
-const _stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
+// BOUNDED (2026-09-03). The default stripe-node client is 80s timeout with retries, and this
+// function makes up to 1 search + 1 list + N subscription lists per call. On a SLOW Stripe — not
+// even a down one — that outlives the serverless function's own deadline, so the request dies with
+// no response at all and the paid map shows nothing. 8s x 1 retry keeps the worst case inside the
+// platform default with room for the KV read that follows.
+const _stripe = process.env.STRIPE_SECRET_KEY
+  ? Stripe(process.env.STRIPE_SECRET_KEY, { timeout: 8000, maxNetworkRetries: 1 })
+  : null;
 
 // Crypto Market Map price ids. Env wins; add the literal ids here once they exist in
 // Stripe so the check keeps working if an env var is ever dropped.
@@ -75,19 +82,31 @@ const COMP = new Set(
     .split(",").map(e => e.trim().toLowerCase()).filter(Boolean)
 );
 
+// Returns "yes" | "no" | "unknown".
+//
+// The tri-state is the point. This used to return a bare boolean, and an EXCEPTION from Stripe came
+// back as false — indistinguishable from Stripe answering "this person has not bought it". The
+// caller then showed a 402 upsell, so a Stripe blip greeted PAYING subscribers with
+// "Start the 7-day free trial — $79/mo". Failing closed is right; selling to an existing customer
+// because an upstream was slow is not. "unknown" now means exactly that, and the caller says so.
 async function hasCryptoSub(email) {
   const norm = String(email || "").trim().toLowerCase();
-  if (!norm) return false;
-  if (COMP.has(norm)) return true;
-  if (!_stripe || CRYPTO_PRICE_IDS.size === 0) return false;   // not configured yet -> closed, not open
+  if (!norm) return "no";
+  if (COMP.has(norm)) return "yes";
+  if (!_stripe || CRYPTO_PRICE_IDS.size === 0) return "no";   // not configured yet -> closed, not open
 
   const r = kv();
   const ck = "ent:crypto:" + crypto.createHash("sha256").update(norm).digest("hex").slice(0, 24);
+  // Last-known-good, kept far longer than the 10-minute positive cache. It is ONLY consulted when
+  // Stripe fails to answer, and it can only ever have been written by a real verified "yes", so it
+  // grants nothing to anyone who was never entitled — it just stops an upstream outage from
+  // retroactively un-subscribing a customer who paid.
+  const gk = ck + ":grace";
   if (r) {
     try {
       const cached = await r.get(ck);
-      if (cached === "1") return true;
-      if (cached === "0") return false;
+      if (cached === "1") return "yes";
+      if (cached === "0") return "no";
     } catch (_) { /* fall through to a live check */ }
   }
 
@@ -107,11 +126,24 @@ async function hasCryptoSub(email) {
     }
   } catch (e) {
     console.error("[crypto-map] entitlement check:", e.message);
-    return false;    // FAIL CLOSED. This gates a paid product; a Stripe outage must not open it.
+    // STILL FAILS CLOSED for anyone we have never verified: no grace record, no access. But a
+    // customer we positively verified within the grace window keeps what they paid for while the
+    // upstream is unavailable, rather than being told they do not own the product.
+    if (r) {
+      try { if (await r.get(gk) === "1") { console.warn("[crypto-map] stripe unavailable — honouring grace for a previously verified subscriber"); return "yes"; } }
+      catch (_) { /* KV down too — fall through to unknown */ }
+    }
+    return "unknown";
   }
 
-  if (r) { try { await r.set(ck, ok ? "1" : "0", { ex: ok ? 600 : 120 }); } catch (_) {} }
-  return ok;
+  if (r) {
+    try { await r.set(ck, ok ? "1" : "0", { ex: ok ? 600 : 120 }); } catch (_) {}
+    // 72h: long enough to ride out any realistic Stripe or KV incident, short enough that a genuine
+    // cancellation stops working within days rather than indefinitely. Only ever written on a real
+    // verified "yes", and refreshed on every successful check.
+    if (ok) { try { await r.set(gk, "1", { ex: 259200 }); } catch (_) {} }
+  }
+  return ok ? "yes" : "no";
 }
 
 module.exports = async (req, res) => {
@@ -122,7 +154,20 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: "sign in to open the Crypto Market Map" });
   }
 
-  if (!(await hasCryptoSub(email))) {
+  const ent = await hasCryptoSub(email);
+  if (ent === "unknown") {
+    // We could not REACH Stripe and have no verified history for this address. That is our problem,
+    // not theirs, and it must not be dressed up as "you have not bought this" — a 402 upsell shown
+    // to a paying subscriber during an upstream outage is the worst thing this endpoint can do.
+    // 503 + Retry-After is the honest answer, and the client can say "checking your subscription"
+    // rather than "subscribe".
+    res.setHeader("Retry-After", "30");
+    return res.status(503).json({
+      error: "cannot verify your subscription right now - this is on us, please retry shortly",
+      retry: true,
+    });
+  }
+  if (ent === "no") {
     // 402, not 401: the caller is who they say they are, they just have not bought this.
     // The dashboard uses the distinction to show "subscribe" rather than "sign in again".
     return res.status(402).json({
@@ -134,9 +179,23 @@ module.exports = async (req, res) => {
   const r = kv();
   if (!r) return res.status(503).json({ error: "store unavailable" });
 
-  let raw = null;
-  try { raw = await r.get("crypto:map:live"); }
-  catch (_) { return res.status(503).json({ error: "store read failed" }); }
+  // ONE RETRY (2026-09-03). A single transient Upstash read failure used to take the paid map
+  // fully dark — there is no server-side cache and no CDN buffer behind this, so one dropped
+  // connection was a blank product. A brief retry converts the common case (a momentary blip) into
+  // a slightly slower response instead of an outage; a genuine outage still 503s on the second try.
+  let raw = null, _readErr = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try { raw = await r.get("crypto:map:live"); _readErr = null; break; }
+    catch (e) {
+      _readErr = e;
+      if (attempt === 0) await new Promise(s => setTimeout(s, 250));
+    }
+  }
+  if (_readErr) {
+    console.error("[crypto-map] kv read failed twice:", _readErr.message);
+    res.setHeader("Retry-After", "15");
+    return res.status(503).json({ error: "store read failed", retry: true });
+  }
   if (!raw) return res.status(503).json({ error: "no live snapshot - the crypto collector is not reporting" });
 
   let snap = raw;
