@@ -141,6 +141,14 @@ module.exports = async (req, res) => {
       retired: ch.base_rates_retired || null,
       openClaims: ch.open_claims ?? null,
       asOf: ch.received || null,
+      // THE LAST MILE OF "PUBLISH BOTH". The engine now measures each chain rule's edge on two
+      // denominators -- every path, and only the paths that resolved a barrier -- because 23-35%
+      // of fired paths resolve neither, and the two disagree enough to invert two rules. Writing
+      // it into the map history would have left it sitting in KV: this block is what makes it
+      // public. Passed through whole rather than field-picked, so a denominator, a caveat or a
+      // censoring figure added upstream cannot be silently dropped here.
+      ruleEdges: ch.rule_edges || null,
+      ruleEdgesNote: ch.rule_edges_note || null,
       note: "Self-scored crypto claims, graded at their own horizons against the series each " +
             "claim was made on. n_cells (independent coin-days) is the denominator that matters; " +
             "a row with trustworthy:false is an early reading, not a base rate. Directional kinds " +
