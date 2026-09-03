@@ -4988,9 +4988,29 @@ function _initNovoChart(){
   try{ _reloadDrawings(); _applyTogVis(); }catch(_e){}
   return true;
 }
+// EVERY EARLY EXIT NOW SAYS SO (2026-09-03). loadNovoChart has nine returns and most are
+// correct by design: a newer load owns the screen and will paint. That assumption holds in
+// the designed case and fails exactly when the newer load never arrives, or takes the same
+// exit — and then the chart stops with NO exception anywhere: polls firing, nothing
+// painting, only a reload fixes it. window._ncLastErr covers the THROW family; this covers
+// the RETURN family, so a reproduced freeze is one console paste either way rather than
+// another day of candidate generation. Per-site counters, because the question is never
+// "did it bail" but "which exit, and is it taking it EVERY time".
+// Read together with window._paintAt: a _ncLastBail newer than the last paint is the freeze.
+function _ncBail(where){
+  try{
+    window._ncBailN=window._ncBailN||{};
+    window._ncBailN[where]=(window._ncBailN[where]||0)+1;
+    window._ncLastBail={where:where, at:new Date().toISOString(), n:window._ncBailN[where],
+                        tkr:(typeof _selTkr==='function'?_selTkr():null), tf:_ctbTf};
+  }catch(_e){}
+}
 async function loadNovoChart(){
   try{
-    if(!_initNovoChart()) return;   // chart not built yet — the veil's own deadline covers this
+    // The chart object is not built. _laneCheck re-injects the library for exactly this case,
+    // but if that never takes, EVERY later load returns on line one forever — silent, and the
+    // single most likely shape of a freeze that leaves _ncLastErr empty.
+    if(!_initNovoChart()){ _ncBail('init'); return; }   // chart not built yet — the veil's own deadline covers this
     const _reqTkr=_selTkr();
     // THE FRAME THIS LOAD IS FOR (2026-09-03). The ticker had a staleness guard from the day the
     // switcher shipped; the timeframe never got one, and this function awaits THREE times. Every
@@ -4999,19 +5019,19 @@ async function loadNovoChart(){
     // loads, and with no frame guard the loser paints into the winner's frame. Captured here and
     // compared after each await, exactly like _reqTkr.
     const _reqTf=_ctbTf;
-    const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
-    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
+    const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _ncBail('no-ticket'); _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
+    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _ncBail('http-'+r.status); _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
     const d=await r.json();
     // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
     // that answers for a ticker other than the current selection. A payload with NO d.ticker is a
     // pre-rollout server that ignored the query param and served the ENGINE ticker's data — accept
     // it only when that is what the viewer selected, or SPY candles would paint under a QQQ caption.
-    if(d.ticker){ if(d.ticker!==_selTkr()) return; }        // stale answer for a previous selection; the
-    else if(!_selIsExec()){ _veilOff(); return; }           // in-flight request for the CURRENT one still owns the veil
+    if(d.ticker){ if(d.ticker!==_selTkr()){ _ncBail('ticker-changed'); return; } }        // stale answer for a previous selection; the
+    else if(!_selIsExec()){ _ncBail('no-ticker-field'); _veilOff(); return; }           // in-flight request for the CURRENT one still owns the veil
     // Same rule for the FRAME. No _veilOff() on this exit for the same reason as the ticker guard:
     // the load started by the switch owns the veil now, and clearing it here strands the spinner
     // logic the other way.
-    if(_ctbTf!==_reqTf) return;
+    if(_ctbTf!==_reqTf){ _ncBail('tf-changed-fetch'); return; }
     // Timeframe pipeline: the server stays 1-min; the selected TF is aggregated here, and the
     // VWAP/EMA overlays are re-derived on the aggregate so every drawn line matches its bars.
     // Deep frames NEVER go through _tfView: its bucket step is _ctbTf*60, and '1h'*60 is NaN —
@@ -5024,11 +5044,11 @@ async function loadNovoChart(){
       // whatever frame was current when it was CALLED, so a switch during the fetch lands one
       // frame's bars in another frame's series. Checked BEFORE the empty-answer branch below so a
       // superseded load never clears the veil the live one is holding.
-      if(_ctbTf!==_reqTf) return;
+      if(_ctbTf!==_reqTf){ _ncBail('tf-changed-hist'); return; }
       // Keep the current chart until history answers, but a SUCCESSFUL empty answer means this
       // frame genuinely has no bars right now: clear the veil instead of spinning + hammering at
       // the veil cadence forever (the weekend switch-to-QQQ trap).
-      if(!_hc||!_hc.length){ _veilOff(); return; }   // null (a concurrent load) used to skip the clear and strand the veil (2026-09-02)
+      if(!_hc||!_hc.length){ _ncBail('hist-empty'); _veilOff(); return; }   // null (a concurrent load) used to skip the clear and strand the veil (2026-09-02)
       // EMAs on H/D/W run continuous (no session reseed) — reseeding a daily EMA is meaningless.
       _view={candles:_hc, vwap:[], ema9:_emaOn(_hc,9,false), ema21:_emaOn(_hc,21,false)};
     }
@@ -5068,6 +5088,7 @@ async function loadNovoChart(){
         // the veil up here is what stranded it over a live chart reading "slow connection —
         // retrying" (Jake, 2026-09-01): this return sits above the paint's _veilOff(), so once a
         // short response landed while a switch veil was up, nothing ever took it down again.
+        _ncBail('degraded-shrink');
         _veilOff();
         return;
       }
