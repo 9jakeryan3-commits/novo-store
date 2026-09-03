@@ -14,6 +14,13 @@ cd "$(dirname "$0")/.."
 BRANCH=$(git branch --show-current)
 [ "$BRANCH" = "master" ] || { echo "!! on '$BRANCH', not master"; exit 1; }
 
+# Two repos hold one significance threshold (record-reader.js MIN_EFFECT_R mirrors the engine's
+# claim_strength.py _BIG_GROUP_R) with nothing else crossing the boundary. If they drift, the
+# store silently grades claims the engine refused — so drift fails the deploy out loud instead.
+# The check was sabotage-tested in all three failure directions (drift / renamed constant /
+# missing file) before it was wired here; env overrides PARITY_JS / PARITY_PY re-run those tests.
+node scripts/threshold-parity-check.js
+
 # Regenerate the derived artefacts BEFORE the clean-tree check, so a stale sitemap
 # or a stale asset hash becomes a loud failure instead of silent drift.
 #   - the sitemap was hand-maintained and reached 2,149 entries for 1,067 URLs
