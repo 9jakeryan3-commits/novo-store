@@ -573,10 +573,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            + hd(tk, f.holds ? 'holds · ' + f.ratio + 'x further in negative gamma'
                             : 'does not hold in this window', !!f.holds, f)
            + '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:3px;">positive gamma &mdash; median hour '
-           + f.positive_median_pct + '% <span class="muted">(n=' + Number(f.positive_n).toLocaleString() + ')</span></div>'
+           + f.positive_median_pct + '% <span class="muted">' + fu(f.positive_sessions, f.positive_n) + '</span></div>'
            + bar(f.positive_median_pct, mx, '#10b981')
            + '<div style="font-size:12.5px;color:var(--txt2);margin:7px 0 3px;">negative gamma &mdash; median hour '
-           + f.negative_median_pct + '% <span class="muted">(n=' + Number(f.negative_n).toLocaleString() + ')</span></div>'
+           + f.negative_median_pct + '% <span class="muted">' + fu(f.negative_sessions, f.negative_n) + '</span></div>'
            + bar(f.negative_median_pct, mx, '#f43f5e')
            + '</div>';
       } else {
@@ -652,6 +652,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     function sub(s){ return '<div style="font-size:12.5px;color:var(--txt2);margin-bottom:10px;">' + s + '</div>'; }
     function nn(v){ return Number(v).toLocaleString(); }
+    // THE UNIT THAT STARTED F-6. This block printed "(n=4,011)" beside a claim and every
+    // reader took it for sessions. It was ~60-second snapshots, and since the gamma sign is
+    // a whole-day property those snapshots are not independent -- ~4,000 of them are about
+    // 19 trading days. Printing the big number made a three-week reading look like sixteen
+    // years of evidence. Sessions when the engine sends them; until it does, the snapshot
+    // count is still shown but NAMED, so it can never again be mistaken for a session count.
+    function fu(sessions, snaps){
+      return sessions ? '(' + nn(sessions) + ' sessions)'
+                      : '(' + nn(snaps) + ' snapshots)';
+    }
     // A line from the reconstructed archive. Muted and separate from the live cell above it on
     // purpose: a 17-year daily figure and a 22-session hourly one answer the same question with
     // different instruments, and merging them would let a backtest borrow a live record's
