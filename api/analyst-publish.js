@@ -284,12 +284,31 @@ async function _memberTier(email) {
 // ── PUBLIC ARCHIVE (folded in here as a GET rather than its own function — the account is on Pro, so
 //    this is no longer working around the Hobby 12-function cap it was originally written for; it stays
 //    folded because the archive shares this file's blob helpers and secret-derived paths) ──
-async function _loadJson(prefix, token) {
+async function _loadJson(prefix, token, opts) {
+  // ABSENT AND UNREADABLE ARE DIFFERENT ANSWERS (2026-09-03).
+  // This returned null for both, and the ?live= handler turned null into a FABRICATED
+  // { updated_at: 0, indices: [] } -- which the dashboard renders as MARKET CLOSED with blank
+  // tiles. So a transient Vercel Blob hiccup told a PAYING subscriber, mid-session, that the
+  // market was shut. Indistinguishable from the real thing, and self-inflicted.
+  // Callers that genuinely want "null on any problem" are unchanged; the live path passes
+  // throwOnError so it can answer 503 and let the client keep the dashboard it already has.
+  // The deadline matters for the same reason quotes.js needed one: list()+fetch had none, in a
+  // function on the platform-default duration, so a slow Blob could burn the whole invocation.
+  const _ac = new AbortController();
+  const _tm = setTimeout(() => { try { _ac.abort(); } catch (_) {} }, (opts && opts.timeoutMs) || 8000);
   try {
     const { blobs } = await list({ prefix, token });
-    if (blobs && blobs[0]) { const r = await fetch(blobs[0].url); if (r.ok) return await r.json(); }
-  } catch (_) {}
-  return null;
+    if (blobs && blobs[0]) {
+      const r = await fetch(blobs[0].url, { signal: _ac.signal });
+      if (r.ok) return await r.json();
+    }
+    return null;                       // genuinely nothing published under this prefix
+  } catch (e) {
+    if (opts && opts.throwOnError) throw e;
+    return null;
+  } finally {
+    clearTimeout(_tm);
+  }
 }
 // Fallback for the members live view when there's no fresh live read (weekends / between sessions): serve the
 // most recent archived desk note so "Today's read" is never a blank card. Cached ~5 min to avoid per-poll blob reads.
@@ -490,7 +509,19 @@ export default async function handler(req, res) {
       return res.status(402).json({ error: 'NoVo Analyst is a separate subscription.', subscribe: '/plans' });
     }
     res.setHeader('Cache-Control', 'no-store');
-    const state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN) || { updated_at: 0, indices: [], stale: true };
+    let state;
+    try {
+      state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN, { throwOnError: true });
+    } catch (e) {
+      // We could not READ it. Saying "market closed, no data" would be a claim we cannot support,
+      // and the client's _neverBlank() keeps whatever dashboard is already on screen when it sees
+      // a non-200 — so 503 degrades honestly where a fabricated empty state degrades into a lie.
+      console.error('[analyst-publish] live blob read failed:', e && e.message);
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(503).json({ error: 'could not read the live state right now', retry: true });
+    }
+    // Genuinely nothing published yet (a fresh install, or before the first publish of the day).
+    if (!state) state = { updated_at: 0, indices: [], stale: true };
     // Never show a blank "Today's read": fall back to the most recent archived desk note when there's no live one.
     if (!state.read || !state.read.text) {
       const fb = await _latestArchivedRead(process.env.BLOB_READ_WRITE_TOKEN);
