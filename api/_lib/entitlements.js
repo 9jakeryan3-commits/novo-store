@@ -45,11 +45,6 @@ const CRYPTO_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL_YEARLY,
   "price_1UB0ZhB1Bq29OALa8iLZSSL5", "price_1UB0ZhB1Bq29OALamNjyA6Y9",   // $40/$400 beside Analyst
   "price_1UB0ZhB1Bq29OALaOw2hUHWS", "price_1UB0ZhB1Bq29OALaWQPTPOs7",   // $30/$300 beside Trader
-  // Bundle v2 ($50/$590 beside Trader): ACTIVE on the account but referenced by no handler - the
-  // account audit's first real catch (09-04). Classified here so a purchase through any future
-  // wiring (or a payment link) grants the crypto companion instead of falling to Trader-by-
-  // exclusion. If v2 is truly abandoned, deactivate it in Stripe and drop these two lines.
-  "price_1UB4bHB1Bq29OALamUSMTww0", "price_1UB4bIB1Bq29OALaf4aeeBnj",   // $50/$590 bundle v2
 ].filter(Boolean));
 
 const LIVE = ["active", "trialing", "past_due"];
