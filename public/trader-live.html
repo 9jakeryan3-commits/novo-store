@@ -5046,6 +5046,46 @@ function _ncBail(where){
                         tkr:(typeof _selTkr==='function'?_selTkr():null), tf:_ctbTf};
   }catch(_e){}
 }
+// ── PULL-FIRST CHART SOURCE (2026-09-04) ─────────────────────────────────────────────────────
+// Jake: "NoVo Options Trading should be collecting all the data pooling and the dashboards pulling
+// it", and then "we need a reliable fast chart!".
+//
+// This page used to reach BACK to the chart service on every 4s poll for a 335-400KB payload,
+// cross-origin, while the Analyst dashboard and Crypto map have always pulled published state from
+// this same origin. The engine now publishes each ticker's chart to /api/trader-chart, so the
+// normal path is a same-origin GET off Vercel's edge: no cross-origin handshake before the first
+// candle, a real 304 when nothing has changed, and a chart that survives an engine redeploy
+// because the store still holds the last frame.
+//
+// THE REACH-BACK IS KEPT AS A FALLBACK, DELIBERATELY. It is the authoritative source and it is the
+// path that has been running for months. If the store has nothing yet (404 on a cold deploy), the
+// ticket is refused, or the published frame is too old to trust, this drops straight back to it —
+// so the worst case of this whole change is exactly the behaviour that shipped before it.
+//
+// The age test is what makes the fallback meaningful, and it only works because the publisher
+// re-publishes an UNCHANGED payload every 60s: as_of therefore means "the engine was alive at T",
+// not "the price last moved at T". Without that heartbeat every overnight poll would look stale
+// and bounce to the engine, quietly restoring the architecture this replaces.
+const _NC_STORE_MAX_AGE_S = 150;   // 2.5 heartbeats — tolerates one missed publish
+window._ncSrc = '';                // 'store' | 'engine' — visible in the console for diagnosis
+async function _ncPull(tkr, engineUrl){
+  if(window.NOVO_TICKET){
+    try{
+      const _su = '/api/trader-chart?ticker=' + encodeURIComponent(tkr)
+                + '&t=' + encodeURIComponent(window.NOVO_TICKET);
+      const _sr = await _tfetch(_su, 12000, {cache:'no-cache'});
+      if(_sr && _sr.ok){
+        const _as  = Number(_sr.headers.get('X-Novo-As-Of') || 0);
+        const _age = _as ? (Date.now()/1000 - _as) : 1e9;
+        window._ncStoreAge = Math.round(_age);
+        if(_age <= _NC_STORE_MAX_AGE_S){ window._ncSrc = 'store'; return _sr; }
+      } else if(_sr){ window._ncStoreMiss = _sr.status; }
+    }catch(_e){ window._ncStoreMiss = 'throw'; }
+  }
+  window._ncSrc = 'engine';
+  return await _tfetch(engineUrl + '&ticker=' + encodeURIComponent(tkr));
+}
+
 async function loadNovoChart(){
   try{
     // The chart object is not built. _laneCheck re-injects the library for exactly this case,
@@ -5065,7 +5105,7 @@ async function loadNovoChart(){
     // future switchable dimension is covered without touching this function at all.
     const _reqGen=_novoGen;
     const _u=NOVO_URL('/api/spy-chart'); if(!_u){ _ncBail('no-ticket'); _veilOff(); return; }   // pre-handshake: skip; the bootstrap retries. Veil DOWN — "no ticket yet" is not "loading candles" (2026-09-02)
-    const r=await _tfetch(_u+'&ticker='+encodeURIComponent(_reqTkr)); if(!r.ok){ _ncBail('http-'+r.status); _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
+    const r=await _ncPull(_reqTkr,_u); if(!r.ok){ _ncBail('http-'+r.status); _reauth401(r); _veilOff(); return; }   // a 401/500 is a failed round, not a pending one — never leave the spinner behind it (2026-09-02)
     const d=await r.json();
     // A slow response from BEFORE a switch must not paint over the new ticker: reject any payload
     // that answers for a ticker other than the current selection. A payload with NO d.ticker is a
