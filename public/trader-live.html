@@ -2590,7 +2590,18 @@ function connectTelemetry(){
   ws.onmessage=function(ev){
     window._wsLastMsg=Date.now();   // liveness stamp — the resume handler reads it to spot zombie sockets
     let data;try{data=JSON.parse(ev.data);}catch(e){return;};
-    if(data.type==='px'){ if(data.px) _applyLivePx(data.px); return; }   // FAST LANE: up to 40Hz dedup-on-change — price/tip/change, rAF-coalesced to one repaint per frame, skip the heavy handler
+    if(data.type==='px'){
+      // PER-TICKER FAST LANE (2026-09-04). This used to take data.px, a single price — the exec
+      // ticker's — so SPY glided at ~10Hz while QQQ and IWM crawled on the 2s poll. The engine now
+      // streams a tick for all three and sends them as data.pxs; data.px is still the exec price
+      // and is the fallback, so a pre-rollout engine (or a frame in flight during a deploy) keeps
+      // behaving exactly as before rather than freezing the tip.
+      var _pv = null;
+      try{ if(data.pxs) _pv = data.pxs[_selTkr()]; }catch(_e){}
+      if(_pv == null) _pv = (_selIsExec() ? data.px : null);
+      if(_pv) _applyLivePx(_pv);
+      return;
+    }   // FAST LANE: dedup-on-change, rAF-coalesced to one repaint per frame, skip the heavy handler
     if(data.type==='hb'){ return; }   // keepalive while identical heavy frames are suppressed (B2) — the liveness stamp above is all it carries; falling through would blank the CORE tile
     if(data.trial){document.body.classList.add('trial-mode');}
 
