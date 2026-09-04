@@ -3259,7 +3259,11 @@ function _tfetch(u,ms,init){
     .then(function(r){
       return r.text().then(function(t){
         _clr();
-        return { ok:r.ok, status:r.status,
+        // headers exposed 2026-09-04: the pull path reads X-Novo-As-Of to judge whether the
+        // published frame is fresh enough to trust. Without this the wrapper silently had no
+        // .headers, the read threw, and the caller fell back to the engine on EVERY poll --
+        // a pull architecture that never actually pulled.
+        return { ok:r.ok, status:r.status, headers:r.headers,
                  json:function(){ return JSON.parse(t); } };
       }, function(e){ _clr(); throw e; });
     }, function(e){ _clr(); throw e; });
@@ -5071,9 +5075,16 @@ window._ncSrc = '';                // 'store' | 'engine' — visible in the cons
 async function _ncPull(tkr, engineUrl){
   if(window.NOVO_TICKET){
     try{
-      const _su = '/api/trader-chart?ticker=' + encodeURIComponent(tkr)
-                + '&t=' + encodeURIComponent(window.NOVO_TICKET);
-      const _sr = await _tfetch(_su, 12000, {cache:'no-cache'});
+      // THE TICKET GOES IN A HEADER, NOT THE URL, AND THAT IS THE POINT OF DOING THIS HERE.
+      // The ticket rotates every 5 minutes. In the query string it is part of the cache key, so
+      // every rotation orphaned the browser's cached copy and turned the next poll into a full
+      // ~56KB download instead of a 304. A stable per-ticker URL keeps revalidation working
+      // across rotations. Safe only because this is SAME-ORIGIN: a custom header cross-origin
+      // would force a CORS preflight and cost an extra round trip, which is exactly why the
+      // engine path below still carries its ticket in the query string.
+      const _su = '/api/trader-chart?ticker=' + encodeURIComponent(tkr);
+      const _sr = await _tfetch(_su, 12000,
+                                {cache:'no-cache', headers:{'x-novo-ticket': window.NOVO_TICKET}});
       if(_sr && _sr.ok){
         const _as  = Number(_sr.headers.get('X-Novo-As-Of') || 0);
         const _age = _as ? (Date.now()/1000 - _as) : 1e9;

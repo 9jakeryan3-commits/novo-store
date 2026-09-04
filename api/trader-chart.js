@@ -115,8 +115,17 @@ module.exports = async (req, res) => {
 
   // private: this is paid live market data, and it is per-member. Never let a shared cache hold it.
   res.setHeader("Cache-Control", "private, no-cache");
+  // The response now depends on a request HEADER, so any cache keyed on URL alone would be wrong.
+  // "private" already keeps this out of shared caches; Vary makes the dependency explicit rather
+  // than relying on that one word to carry it.
+  res.setHeader("Vary", "x-novo-ticket");
 
-  const email = verifyTicket((req.query && req.query.t) || "");
+  // Header first, query second. The dashboard sends it as a header so the URL -- and therefore
+  // the browser cache key -- stays stable while the ticket rotates every 5 minutes; without that,
+  // each rotation threw away the cached copy and turned the next poll into a full download
+  // instead of a 304. The query form stays supported for probes and for any client that cannot
+  // set headers. Same-origin only, so a custom header costs no CORS preflight.
+  const email = verifyTicket(req.headers["x-novo-ticket"] || (req.query && req.query.t) || "");
   if (!email) {
     // 401 and not a redirect: the caller is a fetch(), not a navigation, and the page has a
     // re-handshake path (_reauth401) that knows what to do with this.
