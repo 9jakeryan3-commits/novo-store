@@ -5158,7 +5158,62 @@ async function _histPull(tkr, tf, engineUrl){
                        15000, {cache:'no-cache'});
 }
 
+// ── TAIL MERGE (2026-09-04) ───────────────────────────────────────────────────────────────────
+// The live frame is ~58KB gzipped and the 4s poll re-downloaded all of it while only the LAST BAR
+// moved — about 50MB an hour on a tablet. The engine now publishes a 90-bar tail of the SAME frame
+// (measured 2.3KB, 96% smaller), and this merges it into the full frame already held.
+//
+// EVERY PATH FALLS BACK TO A FULL FETCH. A tail is only used when there is a cached full frame for
+// this exact ticker, it is younger than the resync interval, and the tail OVERLAPS it. Anything
+// else — first load, ticker switch, a gap, a short series, a missing field — refetches the whole
+// thing. The worst case is the behaviour that shipped before this.
+const _NC_RESYNC_MS = 300000;   // full refetch at least every 5 minutes regardless
+const _ncFullCache = {};        // ticker -> {at, d}
+function _ncMergeTail(base, tail){
+  try{
+    if(!base || !tail || tail.ticker !== base.ticker) return null;
+    const bc = base.candles || [], tc = tail.candles || [];
+    if(!bc.length || !tc.length) return null;
+    // The tail must reach back into what we already have, or there is a hole between them and
+    // merging would splice two disjoint series into one continuous-looking chart.
+    if(tc[0].time > bc[bc.length-1].time) return null;
+    const merge = (a, b) => {
+      const m = new Map();
+      for(const x of a) m.set(x.time, x);
+      for(const x of b) m.set(x.time, x);   // tail wins on any shared timestamp
+      return Array.from(m.values()).sort((x,y)=>x.time-y.time);
+    };
+    const out = Object.assign({}, base, tail);   // scalars (price, levels, tip_live...) from tail
+    out.candles = merge(bc, tc);
+    out.vwap = merge(base.vwap || [], tail.vwap || []);
+    delete out.tail;
+    // A merge must never SHRINK the history. If it did, something is wrong and a full fetch is
+    // cheaper than a wrong chart.
+    if(out.candles.length < bc.length) return null;
+    return out;
+  }catch(_e){ return null; }
+}
+
 async function _ncPull(tkr, engineUrl){
+  // Tail path first, when we legitimately can.
+  try{
+    const _c = _ncFullCache[tkr];
+    if(_c && _c.d && (Date.now() - _c.at) < _NC_RESYNC_MS && window.NOVO_TICKET){
+      const _tr = await _storeGet('/api/trader-chart?ticker=' + encodeURIComponent(tkr) + '&tf=tail',
+                                  _NC_STORE_MAX_AGE_S);
+      if(_tr){
+        const _merged = _ncMergeTail(_c.d, _tr.json());
+        if(_merged){
+          window._ncSrc = 'store-tail';
+          return { ok:true, status:200, headers:_tr.headers, json:function(){ return _merged; } };
+        }
+      }
+    }
+  }catch(_e){}
+  return await _ncPullFull(tkr, engineUrl);
+}
+
+async function _ncPullFull(tkr, engineUrl){
   if(window.NOVO_TICKET){
     try{
       // THE TICKET GOES IN A HEADER, NOT THE URL, AND THAT IS THE POINT OF DOING THIS HERE.
@@ -5182,6 +5237,22 @@ async function _ncPull(tkr, engineUrl){
   window._ncSrc = 'engine';
   return await _tfetch(engineUrl + '&ticker=' + encodeURIComponent(tkr));
 }
+
+// Remember the full frame so the next poll can ride a tail. Wraps rather than edits the callers:
+// whatever _ncPullFull returns, cache its payload against the ticker it was fetched for.
+const _ncPullFullInner = _ncPullFull;
+_ncPullFull = async function(tkr, engineUrl){
+  const r = await _ncPullFullInner(tkr, engineUrl);
+  try{
+    if(r && r.ok){
+      const d = r.json();
+      if(d && Array.isArray(d.candles) && d.candles.length && !d.tail){
+        _ncFullCache[tkr] = {at: Date.now(), d: d};
+      }
+    }
+  }catch(_e){}
+  return r;
+};
 
 async function loadNovoChart(){
   try{
