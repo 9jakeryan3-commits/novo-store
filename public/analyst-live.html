@@ -424,7 +424,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="login" class="lv-login hidden">
     <h1>Analyst <span class="accent">Live</span></h1>
     <p>The live SPY / QQQ / IWM dealer map — updating through the session. Sign in to your member portal, then open the Analyst dashboard from there.</p>
-    <a href="https://app.novo-aitrading.app" style="display:inline-block;padding:12px 26px;border-radius:9px;border:0;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;text-decoration:none;">Go to the member portal →</a>
+    <a href="/portal" style="display:inline-block;padding:12px 26px;border-radius:9px;border:0;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;font-weight:800;font-size:14px;text-decoration:none;">Go to the member portal →</a>
     <div id="lmsg" class="lv-msg"></div>
     <p style="font-size:12.5px;color:var(--txt3);margin-top:20px;">Not a subscriber yet? <a href="/analyst" style="color:#22d3ee;">Start a free 7-day trial →</a></p>
   </div>
@@ -539,8 +539,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="nf-note">Turn any channel off without touching your subscription — the dashboard is always your home base.</div>
     </div>
     <div class="dgrp">Account</div>
-    <a class="dlink" href="https://app.novo-aitrading.app/portal">Member portal<span class="ar">&rarr;</span></a>
-    <a class="dlink" href="https://app.novo-aitrading.app/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/portal">Member portal<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
     <a class="dlink" href="/analyst/methodology">How the map is built<span class="ar">&rarr;</span></a>
     <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
   </div>
@@ -583,7 +583,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
   function showDash(){ $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); }
 
-  // Sign-in happens at the member portal (app.novo-aitrading.app) — it deep-links back here with a ?t= token.
+  // Sign-in happens at the member portal (novo-options.trade/portal) — it deep-links back here with a ?t= token.
   // The login gate here is just a link to that portal (see the LOGIN GATE markup above).
 
   var _gexMoney = function(v){ if(v==null) return 'n/a'; var a=Math.abs(v), s=v>=0?'+':'-'; return a>=9.995e8?(s+'$'+(a/1e9).toFixed(1)+'B'):a>=1e6?(s+'$'+(a/1e6).toFixed(1)+'M'):(s+'$'+Math.round(a).toLocaleString()); };

@@ -475,6 +475,82 @@
   ],
   "rewrites": [
     {
+      "source": "/portal",
+      "destination": "https://app.novo-aitrading.app/portal"
+    },
+    {
+      "source": "/portal/:path*",
+      "destination": "https://app.novo-aitrading.app/portal/:path*"
+    },
+    {
+      "source": "/signup",
+      "destination": "https://app.novo-aitrading.app/signup"
+    },
+    {
+      "source": "/signup/:path*",
+      "destination": "https://app.novo-aitrading.app/signup/:path*"
+    },
+    {
+      "source": "/login",
+      "destination": "https://app.novo-aitrading.app/login"
+    },
+    {
+      "source": "/login/:path*",
+      "destination": "https://app.novo-aitrading.app/login/:path*"
+    },
+    {
+      "source": "/logout",
+      "destination": "https://app.novo-aitrading.app/logout"
+    },
+    {
+      "source": "/logout/:path*",
+      "destination": "https://app.novo-aitrading.app/logout/:path*"
+    },
+    {
+      "source": "/status",
+      "destination": "https://app.novo-aitrading.app/status"
+    },
+    {
+      "source": "/status/:path*",
+      "destination": "https://app.novo-aitrading.app/status/:path*"
+    },
+    {
+      "source": "/verify",
+      "destination": "https://app.novo-aitrading.app/verify"
+    },
+    {
+      "source": "/verify/:path*",
+      "destination": "https://app.novo-aitrading.app/verify/:path*"
+    },
+    {
+      "source": "/reset",
+      "destination": "https://app.novo-aitrading.app/reset"
+    },
+    {
+      "source": "/reset/:path*",
+      "destination": "https://app.novo-aitrading.app/reset/:path*"
+    },
+    {
+      "source": "/forgot",
+      "destination": "https://app.novo-aitrading.app/forgot"
+    },
+    {
+      "source": "/forgot/:path*",
+      "destination": "https://app.novo-aitrading.app/forgot/:path*"
+    },
+    {
+      "source": "/connect",
+      "destination": "https://app.novo-aitrading.app/connect"
+    },
+    {
+      "source": "/connect/:path*",
+      "destination": "https://app.novo-aitrading.app/connect/:path*"
+    },
+    {
+      "source": "/account/:path*",
+      "destination": "https://app.novo-aitrading.app/account/:path*"
+    },
+    {
       "source": "/trader",
       "destination": "/trader.html"
     },

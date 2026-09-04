@@ -62,7 +62,7 @@
   window.novoHandshake = async function(){
     if (!TOKEN) {
       gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Sign in to open the Trader dashboard</div>'
-         + '<a href="https://app.novo-aitrading.app/portal" style="color:#22d3ee">Go to the member portal &rarr;</a></div>');
+         + '<a href="/portal" style="color:#22d3ee">Go to the member portal &rarr;</a></div>');
       return false;
     }
     try {
@@ -84,7 +84,7 @@
         try { localStorage.removeItem('novo_live_t'); } catch(_){}
         TOKEN = null;
         gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Your session expired</div>'
-           + '<a href="https://app.novo-aitrading.app/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
+           + '<a href="/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
         return false;
       }
       if (r.status === 402) {
@@ -1808,7 +1808,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <div class="hdr-menu-wrap">
       <button class="hdr-menu-btn" onclick="toggleHdrMenu(event)" title="Menu">&#8942;</button>
       <div class="hdr-dropdown" id="hdr-dropdown">
-        <a class="hdr-dd-item hdr-dd-logout" href="https://app.novo-aitrading.app/portal">Back to portal</a>
+        <a class="hdr-dd-item hdr-dd-logout" href="/portal">Back to portal</a>
       </div>
     </div>
   </div>

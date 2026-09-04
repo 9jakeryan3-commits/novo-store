@@ -1,4 +1,13 @@
 const Stripe = require('stripe');
+
+// SENDING DOMAIN, ONE KNOB (2026-09-04). Every customer-facing address used to be written out
+// long-hand here, five of them hardcoded on the Stripe order-confirmation path — the emails that
+// must never fail. Retiring novo-aitrading.app meant editing seven places across two repos and
+// hoping none was missed. MAIL_DOMAIN moves them together.
+// The DEFAULT stays novo-aitrading.app on purpose: it is the domain Resend has verified today, and
+// sending from an unverified domain fails outright. Flip this only once novo-options.trade shows
+// verified, then redeploy (Vercel bakes env at BUILD time).
+const MAIL_DOMAIN = process.env.MAIL_DOMAIN || 'novo-options.trade';
 const { Resend } = require('resend');
 const { claimOnce, releaseClaim } = require('./_kv');
 
@@ -708,7 +717,7 @@ const handler = async (req, res) => {
         console.log(`[webhook-sub] conflicting ${_tier} purchase by ${email} — cancelled ${obj.subscription} (charged=${r2.charged}, refunded=${r2.refunded})`);
         try {
           await resend.emails.send({
-            from: 'NoVo <orders@novo-aitrading.app>',
+            from: `NoVo <orders@${MAIL_DOMAIN}>`,
             replyTo: 'support@novo-options.trade', to: [email],
             subject: r2.charged ? 'Duplicate bundle cancelled — your refund is on its way'
                                 : 'No charge — duplicate bundle subscription cancelled',
@@ -757,7 +766,7 @@ const handler = async (req, res) => {
                 console.log(`[webhook-sub] repeat trial via bundle_ac by ${email} — trial ended, sub ${obj.subscription}`);
                 try {
                   await resend.emails.send({
-                    from: 'NoVo <orders@novo-aitrading.app>',
+                    from: `NoVo <orders@${MAIL_DOMAIN}>`,
                     replyTo: 'support@novo-options.trade', to: [email],
                     subject: 'Your bundle started paid — the free trial was already used',
                     html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
@@ -786,7 +795,7 @@ const handler = async (req, res) => {
       // this event are already blocked by the event-id claim at the top of the handler.
       try {
         await resend.emails.send({
-          from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',
+          from: `NoVo - AI Market Analyst <orders@${MAIL_DOMAIN}>`,
           replyTo: 'support@novo-options.trade', to: [email],
           subject: _isAll ? 'Welcome to NoVo Complete — the whole desk' : 'Welcome to NoVo — Analyst + Crypto',
           html: (_isAll ? bundleAllWelcomeHtml : bundleAcWelcomeHtml)(`${SITE}/api/discord?cs=${obj.id}`),
@@ -820,7 +829,7 @@ const handler = async (req, res) => {
           console.log(`[webhook-sub] duplicate Crypto purchase by ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
           try {
             await resend.emails.send({
-              from: 'NoVo <orders@novo-aitrading.app>',
+              from: `NoVo <orders@${MAIL_DOMAIN}>`,
               replyTo: 'support@novo-options.trade', to: [email],
               subject: 'You already have the Crypto Market Map — duplicate cancelled',
               html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
@@ -847,7 +856,7 @@ const handler = async (req, res) => {
       if (!existed) {
         try {
           await resend.emails.send({
-            from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',   // hardcoded verified domain, same as the other tiers
+            from: `NoVo - AI Market Analyst <orders@${MAIL_DOMAIN}>`,   // hardcoded verified domain, same as the other tiers
             replyTo: 'support@novo-options.trade', to: [email],
             subject: 'Welcome to the NoVo Crypto Market Map',
             html: cryptoWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
@@ -881,7 +890,7 @@ const handler = async (req, res) => {
           console.log(`[webhook-sub] duplicate Analyst purchase by active Trader sub ${email} — cancelled ${obj.subscription} (charged=${charged})`);
           try {
             await resend.emails.send({
-              from: 'NoVo <orders@novo-aitrading.app>',
+              from: `NoVo <orders@${MAIL_DOMAIN}>`,
               replyTo: 'support@novo-options.trade', to: [email],
               subject: 'You already have NoVo Analyst — duplicate subscription cancelled',
               html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;background:#1c1d21;color:#c2d2e6;padding:28px;border:1px solid #2e3036;border-radius:12px;line-height:1.65;">
@@ -923,7 +932,7 @@ const handler = async (req, res) => {
       if (!_r.existed) {         // skip re-welcoming on a Stripe retry of the same event (they were already added)
         try {
           await resend.emails.send({
-            from: 'NoVo - AI Market Analyst <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
+            from: `NoVo - AI Market Analyst <orders@${MAIL_DOMAIN}>`,   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
             replyTo: 'support@novo-options.trade', to: [email],
             subject: 'Welcome to NoVo Analyst', html: analystWelcomeHtml(`${SITE}/api/discord?cs=${obj.id}`),
           });
@@ -954,7 +963,7 @@ const handler = async (req, res) => {
       console.log(`[webhook-sub] duplicate Trader purchase by ${_bundleHeld ? 'bundle holder' : 'active Trader'} ${email} — cancelled ${obj.subscription} (charged=${charged}, refunded=${refunded})`);
       try {
         await resend.emails.send({
-          from: 'NoVo <orders@novo-aitrading.app>',
+          from: `NoVo <orders@${MAIL_DOMAIN}>`,
           replyTo: 'support@novo-options.trade', to: [email],
           subject: _bundleHeld ? 'Your bundle already covers this — duplicate Trader purchase cancelled'
                                : 'You already have NoVo Trader — duplicate subscription cancelled',
@@ -993,7 +1002,7 @@ const handler = async (req, res) => {
     // on success AND on Resend failure, so genuine retries are rare — a duplicate welcome beats no onboarding.) (audit #11)
     try {
       await resend.emails.send({
-        from: 'NoVo <orders@novo-aitrading.app>',   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
+        from: `NoVo <orders@${MAIL_DOMAIN}>`,   // hardcoded verified domain — a bad FROM_EMAIL env 403s + silently kills sends
         replyTo: 'support@novo-options.trade',
         to: [email],
         subject: 'Welcome to NoVo Trader — open your portal',

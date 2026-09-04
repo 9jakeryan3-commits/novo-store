@@ -9,7 +9,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // merge tag would render as literal text -- it needs a real signed link.
 const { isReservedEmail } = require('./_lib/reserved-email.js');
 const { link: unsubLink, postalHtml } = require('./unsubscribe.js');
-const FROM = 'NoVo <orders@novo-aitrading.app>';
+// Sending domain via MAIL_DOMAIN — see the note in webhook-sub.js. Default stays the
+// currently-verified domain; flip the variable once novo-options.trade verifies.
+const FROM = `NoVo <orders@${process.env.MAIL_DOMAIN || 'novo-options.trade'}>`;
 const OWNER = 'novotrades26@gmail.com';
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 

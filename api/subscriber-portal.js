@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
         return_url: `${SITE}/subscriber`,
       });
       await resend.emails.send({
-        from: process.env.FROM_EMAIL || 'NoVo <orders@novo-aitrading.app>',
+        from: process.env.FROM_EMAIL || `NoVo <orders@${process.env.MAIL_DOMAIN || 'novo-options.trade'}>`,
         replyTo: 'support@novo-options.trade',
         to: [email],
         subject: 'NoVo — Manage your subscription',

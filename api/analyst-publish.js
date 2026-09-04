@@ -27,7 +27,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const { link: unsubLink, postalHtml } = require('./unsubscribe.js');
 // These are market reads, not journal entries -- the sender says so. (The Journal keeps its own
 // name in skills/journal_publisher.py, which sends the actual articles.)
-const FROM = process.env.ANALYST_FROM_EMAIL || 'NoVo - AI Market Analyst <analyst@novo-aitrading.app>';
+const FROM = process.env.ANALYST_FROM_EMAIL || `NoVo - AI Market Analyst <analyst@${process.env.MAIL_DOMAIN || 'novo-options.trade'}>`;
 
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
