@@ -10,11 +10,11 @@
 <title>Liquidation Feeds Undercount, and by How Much Matters | NoVo Options Trading</title>
 <meta name="description" content="Major venues throttle their liquidation feeds &mdash; sampling one event per interval &mdash; so public totals are floors, not counts. Read the shape, not the sum.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/liquidation-data-undercounts.html">
+<link rel="canonical" href="https://novo-options.trade/journal/liquidation-data-undercounts">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/liquidation-data-undercounts.html">
+<meta property="og:url" content="https://novo-options.trade/journal/liquidation-data-undercounts">
 <meta property="og:title" content="Liquidation Feeds Undercount, and by How Much Matters">
 <meta property="og:description" content="Major venues throttle their liquidation feeds &mdash; sampling one event per interval &mdash; so public totals are floors, not counts. Read the shape, not the sum.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Liquidation Feeds Undercount, and by How Much Matters", "description": "Major venues throttle their liquidation feeds — sampling one event per interval — so public totals are floors, not counts. Read the shape, not the sum.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/liquidation-data-undercounts.html", "articleSection": "Margin & Liquidation", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Liquidation Feeds Undercount, and by How Much Matters", "description": "Major venues throttle their liquidation feeds — sampling one event per interval — so public totals are floors, not counts. Read the shape, not the sum.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/liquidation-data-undercounts", "articleSection": "Margin & Liquidation", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Liquidation Feeds Undercount, and by How Much Matters", "item": "https://novo-options.trade/journal/liquidation-data-undercounts.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Liquidation Feeds Undercount, and by How Much Matters", "item": "https://novo-options.trade/journal/liquidation-data-undercounts"}]}
 </script>
 </head>
 <body>
@@ -59,14 +59,14 @@
 <h2>The throttled feed</h2>
 <p>Several large venues deliberately limit their public liquidation streams &mdash; broadcasting on the order of one event per symbol per interval rather than every forced close. In a cascade, when hundreds fire per second, the feed reports a trickle. Aggregators sum these trickles into headline totals, which is why &ldquo;record liquidation&rdquo; days are records of REPORTED flow &mdash; the true figure is a multiple nobody outside the venues can compute.</p>
 <h2>Why venues do it, and what it preserves</h2>
-<p>The stated logic is protecting proprietary flow data; the effect is that levels are honest while magnitudes are not. Timing survives: throttled or not, the feed still says WHEN forced flow clustered and on <a href="/journal/liquidations-by-side-reading-the-flow.html">which side</a>. Relative comparisons survive within a venue&rsquo;s consistent throttle. Absolute totals, and cross-venue comparisons of them, do not.</p>
+<p>The stated logic is protecting proprietary flow data; the effect is that levels are honest while magnitudes are not. Timing survives: throttled or not, the feed still says WHEN forced flow clustered and on <a href="/journal/liquidations-by-side-reading-the-flow">which side</a>. Relative comparisons survive within a venue&rsquo;s consistent throttle. Absolute totals, and cross-venue comparisons of them, do not.</p>
 <h2>The reading posture</h2>
-<p>This is the general lesson of crypto data hygiene &mdash; the same one <a href="/journal/wash-trading-and-on-chain-volume.html">volume</a> and <a href="/journal/tvl-is-a-price-not-a-quantity.html">TVL</a> teach: know how each number is manufactured before weighting it. A floor with known bias is usable; a floor mistaken for a count is a trap.</p>
+<p>This is the general lesson of crypto data hygiene &mdash; the same one <a href="/journal/wash-trading-and-on-chain-volume">volume</a> and <a href="/journal/tvl-is-a-price-not-a-quantity">TVL</a> teach: know how each number is manufactured before weighting it. A floor with known bias is usable; a floor mistaken for a count is a trap.</p>
 <h2>Reading it</h2>
 <p>Use liquidation data for timing, side and clustering; never for magnitude claims or venue comparisons. When a headline total impresses you, remember it is the visible fraction of a larger event &mdash; which usually makes the read STRONGER, not weaker.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/liquidations-by-side-reading-the-flow.html"><span class="rk">Crypto Market Structure</span>Which Side Got Carried Out: Liquidations by Side</a></li><li><a href="/journal/wash-trading-and-on-chain-volume.html"><span class="rk">Crypto Market Structure</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/tvl-is-a-price-not-a-quantity.html"><span class="rk">Crypto Market Structure</span>TVL Is a Price, Not a Quantity</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/liquidations-by-side-reading-the-flow"><span class="rk">Crypto Market Structure</span>Which Side Got Carried Out: Liquidations by Side</a></li><li><a href="/journal/wash-trading-and-on-chain-volume"><span class="rk">Crypto Market Structure</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/tvl-is-a-price-not-a-quantity"><span class="rk">Crypto Market Structure</span>TVL Is a Price, Not a Quantity</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

@@ -10,11 +10,11 @@
 <title>Open Interest Is How Much Leverage Is in the System | NoVo Options Trading</title>
 <meta name="description" content="Open interest counts contracts outstanding, not activity. Rising OI means positions are being built; falling OI means they are being closed.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/open-interest-and-system-leverage.html">
+<link rel="canonical" href="https://novo-options.trade/journal/open-interest-and-system-leverage">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/open-interest-and-system-leverage.html">
+<meta property="og:url" content="https://novo-options.trade/journal/open-interest-and-system-leverage">
 <meta property="og:title" content="Open Interest Is How Much Leverage Is in the System">
 <meta property="og:description" content="Open interest counts contracts outstanding, not activity. Rising OI means positions are being built; falling OI means they are being closed.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Open Interest Is How Much Leverage Is in the System", "description": "Open interest counts contracts outstanding, not activity. Rising OI means positions are being built; falling OI means they are being closed.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/open-interest-and-system-leverage.html", "articleSection": "Perps & Funding", "wordCount": 297, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Open Interest Is How Much Leverage Is in the System", "description": "Open interest counts contracts outstanding, not activity. Rising OI means positions are being built; falling OI means they are being closed.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/open-interest-and-system-leverage", "articleSection": "Perps & Funding", "wordCount": 297, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Open Interest Is How Much Leverage Is in the System", "item": "https://novo-options.trade/journal/open-interest-and-system-leverage.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Open Interest Is How Much Leverage Is in the System", "item": "https://novo-options.trade/journal/open-interest-and-system-leverage"}]}
 </script>
 </head>
 <body>
@@ -57,18 +57,18 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>Open interest is the number of contracts currently outstanding. A trade between two people opening new positions raises it; a trade between two people closing lowers it; a transfer between one opener and one closer leaves it unchanged.</p>
-    <p>So volume and open interest can move independently, and the same distinction applies as in <a href="/journal/pool-depth-is-not-volume.html">pool depth versus volume</a>: one is a flow, the other a stock.</p>
+    <p>So volume and open interest can move independently, and the same distinction applies as in <a href="/journal/pool-depth-is-not-volume">pool depth versus volume</a>: one is a flow, the other a stock.</p>
     <h2>Why the stock is the risk measure</h2>
-    <p>Open positions are what has to be unwound. High open interest means a large book of leveraged exposure that must eventually close &mdash; voluntarily or, if price moves far enough, through the <a href="/journal/liquidation-price-and-leverage-math.html">liquidation engine</a>.</p>
+    <p>Open positions are what has to be unwound. High open interest means a large book of leveraged exposure that must eventually close &mdash; voluntarily or, if price moves far enough, through the <a href="/journal/liquidation-price-and-leverage-math">liquidation engine</a>.</p>
     <p>A market can trade enormous volume with flat open interest, which is churn: the same exposure changing hands. And it can trade modest volume with steadily rising open interest, which is quiet accumulation of leverage &mdash; less visible and more consequential.</p>
     <h2>Direction plus open interest</h2>
-    <p>The pairing is the standard read, and it is genuinely informative: price and open interest rising together means new positions funding the move, while price rising as open interest falls means the move is closing positions rather than opening them. That framework is set out fully in <a href="/journal/crypto-open-interest-price-quadrant.html">open interest and price</a>.</p>
+    <p>The pairing is the standard read, and it is genuinely informative: price and open interest rising together means new positions funding the move, while price rising as open interest falls means the move is closing positions rather than opening them. That framework is set out fully in <a href="/journal/crypto-open-interest-price-quadrant">open interest and price</a>.</p>
     <h2>The denomination trap</h2>
     <p>Open interest can be quoted in contracts, in the coin, or in dollars, and the three tell different stories. Dollar-denominated open interest rises when price rises even if not one new contract was opened, so a chart of dollar OI in a rally partly measures the rally.</p>
-    <p>Coin-denominated open interest is usually the cleaner read on whether leverage is genuinely being added. Anyone comparing OI across time or across coins should say which denomination they are using, for the same reason <a href="/journal/funding-payment-schedules-differ-by-venue.html">a funding rate needs its interval</a>.</p>
+    <p>Coin-denominated open interest is usually the cleaner read on whether leverage is genuinely being added. Anyone comparing OI across time or across coins should say which denomination they are using, for the same reason <a href="/journal/funding-payment-schedules-differ-by-venue">a funding rate needs its interval</a>.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/system-leverage-vs-your-leverage.html"><span class="rk">Margin &amp; Liquidation</span>Your Leverage and the System’s Leverage Are Different Risks</a></li><li><a href="/journal/wash-trading-and-on-chain-volume.html"><span class="rk">On-Chain Structure</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/why-a-stablecoin-appears-in-a-coin-map.html"><span class="rk">Per-Coin Structure</span>Why a Stablecoin Shows Up in a Coin Map</a></li><li><a href="/journal/chainlink-market-structure.html"><span class="rk">Per-Coin Structure</span>Chainlink: Demand From Usage Rather Than From Holding</a></li><li><a href="/journal/do-you-need-options-data-to-trade-crypto.html"><span class="rk">Crypto FAQ</span>Do You Need Options Data to Trade Crypto?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/system-leverage-vs-your-leverage"><span class="rk">Margin &amp; Liquidation</span>Your Leverage and the System’s Leverage Are Different Risks</a></li><li><a href="/journal/wash-trading-and-on-chain-volume"><span class="rk">On-Chain Structure</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/why-a-stablecoin-appears-in-a-coin-map"><span class="rk">Per-Coin Structure</span>Why a Stablecoin Shows Up in a Coin Map</a></li><li><a href="/journal/chainlink-market-structure"><span class="rk">Per-Coin Structure</span>Chainlink: Demand From Usage Rather Than From Holding</a></li><li><a href="/journal/do-you-need-options-data-to-trade-crypto"><span class="rk">Crypto FAQ</span>Do You Need Options Data to Trade Crypto?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

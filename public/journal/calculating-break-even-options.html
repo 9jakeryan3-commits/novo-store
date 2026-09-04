@@ -10,11 +10,11 @@
 <title>Calculating Break-Even on a Long Call or Put | NoVo</title>
 <meta name="description" content="Break-even on a long call is strike plus premium; on a long put it's strike minus premium.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/calculating-break-even-options.html">
+<link rel="canonical" href="https://novo-options.trade/journal/calculating-break-even-options">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/calculating-break-even-options.html">
+<meta property="og:url" content="https://novo-options.trade/journal/calculating-break-even-options">
 <meta property="og:title" content="Calculating Break-Even on a Long Call or Put">
 <meta property="og:description" content="Call break-even = strike + premium; put = strike − premium. Why that's the expiration number, not your intraday one.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Calculating Break-Even on a Long Call or Put", "description": "Call break-even = strike + premium; put = strike − premium. Why that's the expiration number, not your intraday one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/calculating-break-even-options.html", "articleSection": "Options 101", "wordCount": 561, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Calculating Break-Even on a Long Call or Put", "description": "Call break-even = strike + premium; put = strike − premium. Why that's the expiration number, not your intraday one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/calculating-break-even-options", "articleSection": "Options 101", "wordCount": 561, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Calculating Break-Even on a Long Call or Put", "item": "https://novo-options.trade/journal/calculating-break-even-options.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Calculating Break-Even on a Long Call or Put", "item": "https://novo-options.trade/journal/calculating-break-even-options"}]}
 </script>
 </head>
 <body>
@@ -61,10 +61,10 @@
     <p><strong>Long call break-even = strike + premium paid.</strong> Buy the SPY 741 call for $1.20 and, held to expiration, you break even at 742.20 &mdash; SPY has to clear the strike <em>and</em> pay back your premium.<br>
     <strong>Long put break-even = strike &minus; premium paid.</strong> Buy the 739 put for $1.00 and you break even at 738.00.</p>
     <h2>Why scalpers profit long before break-even</h2>
-    <p>That formula assumes you hold to expiration, when only intrinsic value remains. A scalper almost never does. Intraday, your option still carries <a href="/journal/intrinsic-vs-extrinsic-value.html">extrinsic (time) value</a>, so a favorable move makes you money well before price reaches the expiration break-even. If you buy the 741 call and SPY jumps to 741.50 in ten minutes, you're likely green &mdash; even though the &ldquo;break-even&rdquo; is 742.20 &mdash; because the option still holds time value.</p>
+    <p>That formula assumes you hold to expiration, when only intrinsic value remains. A scalper almost never does. Intraday, your option still carries <a href="/journal/intrinsic-vs-extrinsic-value">extrinsic (time) value</a>, so a favorable move makes you money well before price reaches the expiration break-even. If you buy the 741 call and SPY jumps to 741.50 in ten minutes, you're likely green &mdash; even though the &ldquo;break-even&rdquo; is 742.20 &mdash; because the option still holds time value.</p>
     <p class="pull">Break-even is where a <em>holder</em> profits. A scalper is a renter of time value &mdash; you're out long before the clock forces the question.</p>
     <h2>The trap</h2>
-    <p>The danger runs the other way too: as expiration nears, that time-value cushion evaporates (<a href="/journal/theta-decay-explained.html">theta</a>), and the expiration break-even becomes very real very fast. An option that was green mid-morning can need SPY to actually clear break-even by mid-afternoon. Know both numbers &mdash; the intraday reality and the expiration line &mdash; and don't let a winning scalp turn into a hold that has to reach break-even to survive.</p>
+    <p>The danger runs the other way too: as expiration nears, that time-value cushion evaporates (<a href="/journal/theta-decay-explained">theta</a>), and the expiration break-even becomes very real very fast. An option that was green mid-morning can need SPY to actually clear break-even by mid-afternoon. Know both numbers &mdash; the intraday reality and the expiration line &mdash; and don't let a winning scalp turn into a hold that has to reach break-even to survive.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -93,7 +93,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/higher-order-greeks-for-0dte.html"><span class="rk">Greeks</span>Higher-Order Greeks for 0DTE: What Actually Matters</a></li><li><a href="/journal/moneyness-itm-atm-otm.html"><span class="rk">Options 101</span>Moneyness: ITM, ATM &amp; OTM Options, Explained</a></li><li><a href="/journal/spy-options-scalping-glossary.html"><span class="rk">Glossary</span>A SPY-Options Scalper's Glossary: 40 Terms to Know</a></li><li><a href="/journal/what-is-0dte-options-trading.html"><span class="rk">Plain English</span>What Is 0DTE Options Trading? A Plain-English Guide</a></li><li><a href="/journal/what-is-delta-neutral.html"><span class="rk">Greeks</span>What Is Delta Neutral? Trading Without Directional Bias</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/higher-order-greeks-for-0dte"><span class="rk">Greeks</span>Higher-Order Greeks for 0DTE: What Actually Matters</a></li><li><a href="/journal/moneyness-itm-atm-otm"><span class="rk">Options 101</span>Moneyness: ITM, ATM &amp; OTM Options, Explained</a></li><li><a href="/journal/spy-options-scalping-glossary"><span class="rk">Glossary</span>A SPY-Options Scalper's Glossary: 40 Terms to Know</a></li><li><a href="/journal/what-is-0dte-options-trading"><span class="rk">Plain English</span>What Is 0DTE Options Trading? A Plain-English Guide</a></li><li><a href="/journal/what-is-delta-neutral"><span class="rk">Greeks</span>What Is Delta Neutral? Trading Without Directional Bias</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

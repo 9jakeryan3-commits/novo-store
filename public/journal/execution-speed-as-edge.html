@@ -11,9 +11,9 @@
 <meta name="description" content="On short-term trades, how fast and consistently you execute is itself an edge — often bigger than the entry signal.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/execution-speed-as-edge.html">
+<link rel="canonical" href="https://novo-options.trade/journal/execution-speed-as-edge">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/execution-speed-as-edge.html">
+<meta property="og:url" content="https://novo-options.trade/journal/execution-speed-as-edge">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Execution Speed as an Edge">
 <meta property="og:description" content="Execution speed as an edge: why consistent fast fills matter more than the signal on short-term trades.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Execution Speed as an Edge", "description": "On short-term trades, how fast and consistently you execute is itself an edge — often bigger than the entry signal. Here is why speed compounds, and why humans structurally can't match a machine on it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-11-28", "dateModified": "2025-11-28", "mainEntityOfPage": "https://novo-options.trade/journal/execution-speed-as-edge.html", "articleSection": "Execution", "wordCount": 548, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Execution Speed as an Edge", "description": "On short-term trades, how fast and consistently you execute is itself an edge — often bigger than the entry signal. Here is why speed compounds, and why humans structurally can't match a machine on it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-11-28", "dateModified": "2025-11-28", "mainEntityOfPage": "https://novo-options.trade/journal/execution-speed-as-edge", "articleSection": "Execution", "wordCount": 548, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Execution Speed as an Edge", "item": "https://novo-options.trade/journal/execution-speed-as-edge.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Execution Speed as an Edge", "item": "https://novo-options.trade/journal/execution-speed-as-edge"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-11-28">Nov 28, 2025</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p>Most traders pour energy into the entry signal and treat execution as a formality. On short-term trading, that's backwards. A mediocre signal executed with speed and discipline often beats a great signal executed late, hesitantly, and inconsistently. <strong>Execution speed is an edge</strong> — sometimes the biggest one you have.</p>
     <h2>Why speed compounds</h2>
-    <p>On a <a href="/journal/why-0dte-fills-are-hard.html">fast instrument</a>, every fraction of a second between the signal and the fill is <a href="/journal/latency-in-retail-trading.html">latency</a> that turns into <a href="/journal/slippage-on-1dte-options.html">slippage</a>. Do that hundreds of times and the cost compounds into the difference between a profitable system and a break-even one. The signal fires the same for everyone; who captures it depends on who executes it cleanly.</p>
+    <p>On a <a href="/journal/why-0dte-fills-are-hard">fast instrument</a>, every fraction of a second between the signal and the fill is <a href="/journal/latency-in-retail-trading">latency</a> that turns into <a href="/journal/slippage-on-1dte-options">slippage</a>. Do that hundreds of times and the cost compounds into the difference between a profitable system and a break-even one. The signal fires the same for everyone; who captures it depends on who executes it cleanly.</p>
     <h2>The human ceiling</h2>
     <p>A human can be fast occasionally, but not <em>consistently</em> fast under pressure. Fatigue, emotion, distraction, and the flinch after a losing trade all slow and distort execution exactly when it matters. The variance in human execution is itself a leak — some fills sharp, some late, some skipped, some chased. Machines don't have a bad afternoon.</p>
     <p class="pull">A great signal you execute late and scared is worth less than an average one you execute instantly and identically.</p>
     <h2>Structural, not heroic</h2>
-    <p>The point isn't to become a faster human — it's to make the decision smaller by the time it arrives. If the levels are already mapped and the setup already scored, you aren't analysing under pressure; you're acting on a read you made when you were calm. That is where the speed actually comes from, and it's the part <a href="/journal/what-novo-is.html">NoVo</a> does for you — the click, the size, and the exit stay yours.</p>
+    <p>The point isn't to become a faster human — it's to make the decision smaller by the time it arrives. If the levels are already mapped and the setup already scored, you aren't analysing under pressure; you're acting on a read you made when you were calm. That is where the speed actually comes from, and it's the part <a href="/journal/what-novo-is">NoVo</a> does for you — the click, the size, and the exit stay yours.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/market-order-vs-limit-order.html"><span class="rk">Order Types</span>Market Orders vs. Limit Orders</a></li><li><a href="/journal/ratio-spreads.html"><span class="rk">Options Strategy</span>Ratio Spreads</a></li><li><a href="/journal/the-collar-strategy.html"><span class="rk">Options Strategy</span>The Collar Strategy</a></li><li><a href="/journal/what-is-a-fill-or-kill-order.html"><span class="rk">Order Types</span>Fill-or-Kill, All-or-None, and IOC Orders Explained</a></li><li><a href="/journal/what-is-a-stop-limit-order.html"><span class="rk">Order Types</span>What Is a Stop-Limit Order? A Stop With Price Control</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/market-order-vs-limit-order"><span class="rk">Order Types</span>Market Orders vs. Limit Orders</a></li><li><a href="/journal/ratio-spreads"><span class="rk">Options Strategy</span>Ratio Spreads</a></li><li><a href="/journal/the-collar-strategy"><span class="rk">Options Strategy</span>The Collar Strategy</a></li><li><a href="/journal/what-is-a-fill-or-kill-order"><span class="rk">Order Types</span>Fill-or-Kill, All-or-None, and IOC Orders Explained</a></li><li><a href="/journal/what-is-a-stop-limit-order"><span class="rk">Order Types</span>What Is a Stop-Limit Order? A Stop With Price Control</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -11,9 +11,9 @@
 <meta name="description" content="Exercise turns an option into shares; assignment is being on the other side of it. Here is how both work, when assignment risk is real, and why long option buyers.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/options-assignment-and-exercise.html">
+<link rel="canonical" href="https://novo-options.trade/journal/options-assignment-and-exercise">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/options-assignment-and-exercise.html">
+<meta property="og:url" content="https://novo-options.trade/journal/options-assignment-and-exercise">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Assignment & Exercise, Explained">
 <meta property="og:description" content="Assignment and exercise explained: how options convert to shares, and when the risk actually matters.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Assignment & Exercise, Explained", "description": "Exercise turns an option into shares; assignment is being on the other side of it. Here is how both work, when assignment risk is real, and why long option buyers rarely worry about it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-14", "dateModified": "2026-01-14", "mainEntityOfPage": "https://novo-options.trade/journal/options-assignment-and-exercise.html", "articleSection": "Options 101", "wordCount": 554, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Assignment & Exercise, Explained", "description": "Exercise turns an option into shares; assignment is being on the other side of it. Here is how both work, when assignment risk is real, and why long option buyers rarely worry about it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-14", "dateModified": "2026-01-14", "mainEntityOfPage": "https://novo-options.trade/journal/options-assignment-and-exercise", "articleSection": "Options 101", "wordCount": 554, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Assignment & Exercise, Explained", "item": "https://novo-options.trade/journal/options-assignment-and-exercise.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Assignment & Exercise, Explained", "item": "https://novo-options.trade/journal/options-assignment-and-exercise"}]}
 </script>
 </head>
 <body>
@@ -56,11 +56,11 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-01-14">Jan 14, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Exercise</strong> is when an option holder uses their right to buy (call) or sell (put) the underlying shares at the strike. <strong>Assignment</strong> is the flip side: the option <em>seller</em> is obligated to deliver. If you are long a <a href="/journal/call-vs-put-options.html">call or put</a> you bought, you control whether to exercise. If you sold one, you can be assigned.</p>
+    <p><strong>Exercise</strong> is when an option holder uses their right to buy (call) or sell (put) the underlying shares at the strike. <strong>Assignment</strong> is the flip side: the option <em>seller</em> is obligated to deliver. If you are long a <a href="/journal/call-vs-put-options">call or put</a> you bought, you control whether to exercise. If you sold one, you can be assigned.</p>
     <h2>When it happens</h2>
-    <p>Most options are never exercised - traders close the position for cash instead. Exercise typically only makes sense at or near <a href="/journal/options-expiration-explained.html">expiration</a>, and mainly when the option is in the money. American-style options can be exercised any time before expiry; European-style only at expiry. Assignment risk for sellers rises as an option goes deep in the money and as expiration approaches, especially around dividends.</p>
+    <p>Most options are never exercised - traders close the position for cash instead. Exercise typically only makes sense at or near <a href="/journal/options-expiration-explained">expiration</a>, and mainly when the option is in the money. American-style options can be exercised any time before expiry; European-style only at expiry. Assignment risk for sellers rises as an option goes deep in the money and as expiration approaches, especially around dividends.</p>
     <h2>Why long buyers rarely worry</h2>
     <p>If you buy options and sell them to close before expiration - which is how most active traders operate - assignment is not your problem; it belongs to whoever sold. You simply capture the option's value in cash. The people who lose sleep over assignment are option <em>sellers</em> who leave short positions open into expiration.</p>
     <p class="pull">Buy an option and close it for cash, and assignment is somebody else's problem.</p>
@@ -68,7 +68,7 @@
     <p>Know your style. If you trade long options intraday or over a few days and flatten before expiry, exercise and assignment are edge cases. If you sell options, respect that assignment can arrive early and unannounced on in-the-money contracts - and never carry short in-the-money options into the final hours without a plan.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/options-assignment-exercise-fees.html">Assignment Fees, Exercise Fees, and Per-Contract Costs</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/options-assignment-exercise-fees">Assignment Fees, Exercise Fees, and Per-Contract Costs</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/stop-on-option-price-not-underlying.html"><span class="rk">Options 101</span>Your Options Stop Triggers on the Option Price, Not on SPY</a></li><li><a href="/journal/what-is-a-fill.html"><span class="rk">Basics</span>What Is a Fill? How Your Order Becomes a Position</a></li><li><a href="/journal/what-is-early-exercise.html"><span class="rk">Options 101</span>What Is Early Exercise? Using an Option Before Expiration</a></li><li><a href="/journal/when-do-spy-0dte-options-stop-trading.html"><span class="rk">Options 101</span>When Do SPY 0DTE Options Stop Trading? 4:00 vs 4:15 PM</a></li><li><a href="/journal/calculating-break-even-options.html"><span class="rk">Options 101</span>Calculating Break-Even on a Long Call or Put</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/stop-on-option-price-not-underlying"><span class="rk">Options 101</span>Your Options Stop Triggers on the Option Price, Not on SPY</a></li><li><a href="/journal/what-is-a-fill"><span class="rk">Basics</span>What Is a Fill? How Your Order Becomes a Position</a></li><li><a href="/journal/what-is-early-exercise"><span class="rk">Options 101</span>What Is Early Exercise? Using an Option Before Expiration</a></li><li><a href="/journal/when-do-spy-0dte-options-stop-trading"><span class="rk">Options 101</span>When Do SPY 0DTE Options Stop Trading? 4:00 vs 4:15 PM</a></li><li><a href="/journal/calculating-break-even-options"><span class="rk">Options 101</span>Calculating Break-Even on a Long Call or Put</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

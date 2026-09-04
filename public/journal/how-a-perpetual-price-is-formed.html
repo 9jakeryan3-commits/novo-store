@@ -10,11 +10,11 @@
 <title>How a Perpetual&rsquo;s Price Is Actually Formed | NoVo Options Trading</title>
 <meta name="description" content="A perpetual has two forces acting on it: an order book that sets the price and a funding mechanism that argues with it. Knowing which is winning is most of the read.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html">
+<link rel="canonical" href="https://novo-options.trade/journal/how-a-perpetual-price-is-formed">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html">
+<meta property="og:url" content="https://novo-options.trade/journal/how-a-perpetual-price-is-formed">
 <meta property="og:title" content="How a Perpetual&rsquo;s Price Is Actually Formed">
 <meta property="og:description" content="A perpetual has two forces acting on it: an order book that sets the price and a funding mechanism that argues with it. Knowing which is winning is most of the read.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "How a Perpetual’s Price Is Actually Formed", "description": "The perp trades on its own order book, which can go anywhere. Funding is the tether, and it pulls slowly rather than clamping.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html", "articleSection": "Perps & Funding", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "How a Perpetual’s Price Is Actually Formed", "description": "The perp trades on its own order book, which can go anywhere. Funding is the tether, and it pulls slowly rather than clamping.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed", "articleSection": "Perps & Funding", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "How a Perpetual’s Price Is Actually Formed", "item": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "How a Perpetual’s Price Is Actually Formed", "item": "https://novo-options.trade/journal/how-a-perpetual-price-is-formed"}]}
 </script>
 </head>
 <body>
@@ -57,20 +57,20 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>The perpetual&rsquo;s price is set the ordinary way &mdash; buyers and sellers on its own book. Nothing mechanically ties it to spot in the moment.</p>
-    <p>What ties it over time is <a href="/journal/what-is-a-perpetual-swap.html">funding</a>: a recurring payment that makes the crowded side pay rent. It is an incentive, not a constraint, so it works by persuasion and works slowly.</p>
+    <p>What ties it over time is <a href="/journal/what-is-a-perpetual-swap">funding</a>: a recurring payment that makes the crowded side pay rent. It is an incentive, not a constraint, so it works by persuasion and works slowly.</p>
     <h2>The tether is loose on purpose</h2>
-    <p>Because funding settles only at intervals and is <a href="/journal/funding-rate-caps-and-clamps.html">capped</a>, the perpetual can trade meaningfully away from its <a href="/journal/the-index-price-behind-a-perpetual.html">index</a> for as long as somebody is willing to pay for the privilege.</p>
-    <p>That gap is the <a href="/journal/basis-as-a-leverage-gauge.html">basis</a>, and its persistence is the informative part. A gap that closes immediately says arbitrage capital is present and cheap. One that persists says capital cannot get there, which is a statement about the venue, not about the asset.</p>
+    <p>Because funding settles only at intervals and is <a href="/journal/funding-rate-caps-and-clamps">capped</a>, the perpetual can trade meaningfully away from its <a href="/journal/the-index-price-behind-a-perpetual">index</a> for as long as somebody is willing to pay for the privilege.</p>
+    <p>That gap is the <a href="/journal/basis-as-a-leverage-gauge">basis</a>, and its persistence is the informative part. A gap that closes immediately says arbitrage capital is present and cheap. One that persists says capital cannot get there, which is a statement about the venue, not about the asset.</p>
     <h2>What actually closes it</h2>
-    <p>Traders taking the paid side, and <a href="/journal/the-cash-and-carry-trade.html">cash-and-carry</a> desks holding spot against a short perpetual. Both need capital on the venue and both accept its <a href="/journal/socialized-loss-and-exchange-risk.html">counterparty risk</a>, which is why the closing force is finite rather than instant.</p>
+    <p>Traders taking the paid side, and <a href="/journal/the-cash-and-carry-trade">cash-and-carry</a> desks holding spot against a short perpetual. Both need capital on the venue and both accept its <a href="/journal/socialized-loss-and-exchange-risk">counterparty risk</a>, which is why the closing force is finite rather than instant.</p>
     <h2>Where it breaks down</h2>
-    <p>In a violent move. Funding cannot reprice fast enough, arbitrageurs widen or withdraw, and the perpetual detaches from the index by more than usual &mdash; at the same moment <a href="/journal/order-book-depth-on-a-crypto-venue.html">book depth</a> thins.</p>
-    <p>This is why the mark for margin purposes is taken from the index rather than from this book: valuing positions on a detached price would liquidate accounts on a dislocation the wider market did not share, which is the reasoning in <a href="/journal/mark-price-vs-last-price.html">mark price versus last price</a>.</p>
+    <p>In a violent move. Funding cannot reprice fast enough, arbitrageurs widen or withdraw, and the perpetual detaches from the index by more than usual &mdash; at the same moment <a href="/journal/order-book-depth-on-a-crypto-venue">book depth</a> thins.</p>
+    <p>This is why the mark for margin purposes is taken from the index rather than from this book: valuing positions on a detached price would liquidate accounts on a dislocation the wider market did not share, which is the reasoning in <a href="/journal/mark-price-vs-last-price">mark price versus last price</a>.</p>
     <h2>The read</h2>
     <p>Watch the perpetual against its index rather than in isolation. Trading rich is leveraged demand paying up; trading cheap is the reverse. And a gap that will not close is telling you something about the plumbing rather than the price.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/mark-price-vs-last-price.html"><span class="rk">Margin &amp; Liquidation</span>Mark Price vs Last Price: Which One Liquidates You</a></li><li><a href="/journal/socialized-loss-and-exchange-risk.html"><span class="rk">Margin &amp; Liquidation</span>Socialised Loss: When the Venue Is the Risk</a></li><li><a href="/journal/two-books-one-coin-reading-both.html"><span class="rk">Crypto Dealer Flow</span>Reading Two Books on One Coin Without Mixing Them</a></li><li><a href="/journal/what-the-quote-asset-tells-you.html"><span class="rk">On-Chain Structure</span>What the Quote Asset Tells You</a></li><li><a href="/journal/bnb-market-structure.html"><span class="rk">Per-Coin Structure</span>BNB: A Token Whose Demand Comes From a Venue</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/mark-price-vs-last-price"><span class="rk">Margin &amp; Liquidation</span>Mark Price vs Last Price: Which One Liquidates You</a></li><li><a href="/journal/socialized-loss-and-exchange-risk"><span class="rk">Margin &amp; Liquidation</span>Socialised Loss: When the Venue Is the Risk</a></li><li><a href="/journal/two-books-one-coin-reading-both"><span class="rk">Crypto Dealer Flow</span>Reading Two Books on One Coin Without Mixing Them</a></li><li><a href="/journal/what-the-quote-asset-tells-you"><span class="rk">On-Chain Structure</span>What the Quote Asset Tells You</a></li><li><a href="/journal/bnb-market-structure"><span class="rk">Per-Coin Structure</span>BNB: A Token Whose Demand Comes From a Venue</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

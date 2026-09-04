@@ -11,9 +11,9 @@
 <meta name="description" content="A trading system can pull market data on a timer (polling) or receive it pushed in real time (streaming).">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/polling-vs-streaming-data.html">
+<link rel="canonical" href="https://novo-options.trade/journal/polling-vs-streaming-data">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/polling-vs-streaming-data.html">
+<meta property="og:url" content="https://novo-options.trade/journal/polling-vs-streaming-data">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Polling vs Streaming Data">
 <meta property="og:description" content="Polling vs streaming market data explained: why pushed real-time feeds beat timer-based pulls for execution.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Polling vs Streaming Data", "description": "A trading system can pull market data on a timer (polling) or receive it pushed in real time (streaming). Here is the difference, why streaming wins for fast execution, and the freshness problem behind stale quotes.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-23", "dateModified": "2026-01-23", "mainEntityOfPage": "https://novo-options.trade/journal/polling-vs-streaming-data.html", "articleSection": "Trading Infrastructure", "wordCount": 570, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Polling vs Streaming Data", "description": "A trading system can pull market data on a timer (polling) or receive it pushed in real time (streaming). Here is the difference, why streaming wins for fast execution, and the freshness problem behind stale quotes.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-23", "dateModified": "2026-01-23", "mainEntityOfPage": "https://novo-options.trade/journal/polling-vs-streaming-data", "articleSection": "Trading Infrastructure", "wordCount": 570, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Polling vs Streaming Data", "item": "https://novo-options.trade/journal/polling-vs-streaming-data.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Polling vs Streaming Data", "item": "https://novo-options.trade/journal/polling-vs-streaming-data"}]}
 </script>
 </head>
 <body>
@@ -56,18 +56,18 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-01-23">Jan 23, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p>A trading system needs current market data, and there are two ways to get it. <strong>Polling</strong> means asking the data source "what's the price now?" on a repeating timer. <strong>Streaming</strong> means opening a persistent connection (a websocket) and having the source <em>push</em> updates the instant they change. The choice shapes how fresh your view of the market is.</p>
     <h2>The freshness gap</h2>
-    <p>Polling every second means your data can be up to a second stale, and on a <a href="/journal/why-0dte-fills-are-hard.html">fast-moving option</a>, a second-old quote is a wrong quote. Poll faster and you hammer rate limits and waste calls when nothing changed. Streaming eliminates the gap: you know the moment the price moves, with no timer lag and no wasted requests.</p>
+    <p>Polling every second means your data can be up to a second stale, and on a <a href="/journal/why-0dte-fills-are-hard">fast-moving option</a>, a second-old quote is a wrong quote. Poll faster and you hammer rate limits and waste calls when nothing changed. Streaming eliminates the gap: you know the moment the price moves, with no timer lag and no wasted requests.</p>
     <h2>Why streaming wins for execution</h2>
-    <p>Combined with an <a href="/journal/async-event-loops-trading.html">event loop</a>, a streaming feed lets a system react the instant the market moves rather than on its next scheduled check. That's the difference between acting on a live tape and acting on a slightly-old snapshot — exactly where <a href="/journal/latency-in-retail-trading.html">latency</a> and <a href="/journal/slippage-on-1dte-options.html">slippage</a> creep in for short-term trades.</p>
+    <p>Combined with an <a href="/journal/async-event-loops-trading">event loop</a>, a streaming feed lets a system react the instant the market moves rather than on its next scheduled check. That's the difference between acting on a live tape and acting on a slightly-old snapshot — exactly where <a href="/journal/latency-in-retail-trading">latency</a> and <a href="/journal/slippage-on-1dte-options">slippage</a> creep in for short-term trades.</p>
     <p class="pull">Polling asks "what's the price?" and hopes it's still true. Streaming already knows it changed.</p>
     <h2>The resilience nuance</h2>
-    <p>Streaming has a catch: connections drop. A robust system treats a stale or dead stream as a red flag — it knows the difference between "the price hasn't moved" and "I've stopped hearing about it," and refuses to trade on data it can't trust. Prioritizing a fresh streaming feed, with polling as a backstop and a staleness guard, is the kind of data hygiene a live dealer map like <a href="/journal/how-novo-reads-the-market.html">NoVo</a> is built around.</p>
+    <p>Streaming has a catch: connections drop. A robust system treats a stale or dead stream as a red flag — it knows the difference between "the price hasn't moved" and "I've stopped hearing about it," and refuses to trade on data it can't trust. Prioritizing a fresh streaming feed, with polling as a backstop and a staleness guard, is the kind of data hygiene a live dealer map like <a href="/journal/how-novo-reads-the-market">NoVo</a> is built around.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-data-does-novo-see.html">What Data Does NoVo See? Transparency on Inputs and Levels</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-data-does-novo-see">What Data Does NoVo See? Transparency on Inputs and Levels</a></p>
 
 
   <div class="cta">
@@ -97,7 +97,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/variance-vs-edge.html"><span class="rk">Quantitative Trading</span>Variance vs Edge: Why Good Systems Have Bad Weeks</a></li><li><a href="/journal/where-ai-has-a-real-edge-in-market-analysis.html"><span class="rk">AI &amp; Market Analysis</span>Where AI Has a Real Edge in Market Analysis</a></li><li><a href="/journal/ai-vs-rules-engine.html"><span class="rk">AI in Trading</span>AI vs a Rules Engine in Trading: What's the Difference?</a></li><li><a href="/journal/can-ai-predict-the-stock-market.html"><span class="rk">AI in Trading</span>Can AI Predict the Stock Market? The Honest Answer</a></li><li><a href="/journal/future-of-ai-market-analysis.html"><span class="rk">AI &amp; Market Analysis</span>The Future of AI in Market Analysis</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/variance-vs-edge"><span class="rk">Quantitative Trading</span>Variance vs Edge: Why Good Systems Have Bad Weeks</a></li><li><a href="/journal/where-ai-has-a-real-edge-in-market-analysis"><span class="rk">AI &amp; Market Analysis</span>Where AI Has a Real Edge in Market Analysis</a></li><li><a href="/journal/ai-vs-rules-engine"><span class="rk">AI in Trading</span>AI vs a Rules Engine in Trading: What's the Difference?</a></li><li><a href="/journal/can-ai-predict-the-stock-market"><span class="rk">AI in Trading</span>Can AI Predict the Stock Market? The Honest Answer</a></li><li><a href="/journal/future-of-ai-market-analysis"><span class="rk">AI &amp; Market Analysis</span>The Future of AI in Market Analysis</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

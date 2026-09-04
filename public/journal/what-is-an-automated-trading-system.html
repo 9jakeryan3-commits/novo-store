@@ -11,9 +11,9 @@
 <meta name="description" content="An automated trading system executes entries, exits, sizing, and risk by rules through a broker API — no human clicking. Here are its parts, and what separates.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-an-automated-trading-system.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-an-automated-trading-system">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-an-automated-trading-system.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-an-automated-trading-system">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="What Is an Automated Trading System?">
 <meta property="og:description" content="What an automated trading system is, its parts, and what makes one safe vs dangerous.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is an Automated Trading System?", "description": "An automated trading system executes entries, exits, sizing, and risk by rules through a broker API — no human clicking. Here are its parts, and what separates a good one from a dangerous one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-05-13", "dateModified": "2026-05-13", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-an-automated-trading-system.html", "articleSection": "Algo Trading 101", "wordCount": 500, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is an Automated Trading System?", "description": "An automated trading system executes entries, exits, sizing, and risk by rules through a broker API — no human clicking. Here are its parts, and what separates a good one from a dangerous one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-05-13", "dateModified": "2026-05-13", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-an-automated-trading-system", "articleSection": "Algo Trading 101", "wordCount": 500, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "What Is an Automated Trading System?", "item": "https://novo-options.trade/journal/what-is-an-automated-trading-system.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "What Is an Automated Trading System?", "item": "https://novo-options.trade/journal/what-is-an-automated-trading-system"}]}
 </script>
 </head>
 <body>
@@ -58,12 +58,12 @@
   <div class="article-body">
 <p>An <strong>automated trading system (ATS)</strong> is software that handles the full trade lifecycle by rules — deciding, sizing, executing, and exiting — through a broker's API, without a human placing each order. Here's what one is actually made of.</p>
 <h2>The core parts</h2>
-<p>A <strong>data feed</strong> (the live inputs), a <strong>signal/decision layer</strong> (the rules that decide direction), a <strong>risk layer</strong> (position sizing, stops, exposure caps), and an <strong>execution layer</strong> (placing and managing orders). A weak link in any one poisons the whole thing (<a href="/journal/how-does-ai-trading-work.html">the pipeline explained</a>).</p>
+<p>A <strong>data feed</strong> (the live inputs), a <strong>signal/decision layer</strong> (the rules that decide direction), a <strong>risk layer</strong> (position sizing, stops, exposure caps), and an <strong>execution layer</strong> (placing and managing orders). A weak link in any one poisons the whole thing (<a href="/journal/how-does-ai-trading-work">the pipeline explained</a>).</p>
 <h2>What makes one good</h2>
-<p>The difference between a safe ATS and a dangerous one is the <strong>risk layer</strong> and the <strong>fail-safes</strong>. A good system has hard limits it can't override, a kill switch, and sane behavior when data goes stale or a connection drops (<a href="/journal/kill-switch-fail-safes.html">kill switches</a>, <a href="/journal/resilient-trading-loop.html">a resilient trading loop</a>).</p>
+<p>The difference between a safe ATS and a dangerous one is the <strong>risk layer</strong> and the <strong>fail-safes</strong>. A good system has hard limits it can't override, a kill switch, and sane behavior when data goes stale or a connection drops (<a href="/journal/kill-switch-fail-safes">kill switches</a>, <a href="/journal/resilient-trading-loop">a resilient trading loop</a>).</p>
 <p class="pull">The signal layer gets all the attention. The risk layer is what keeps you solvent. Judge a system by its guardrails, not its entries.</p>
 <h2>Non-custodial by design</h2>
-<p>A well-built ATS runs in <em>your</em> broker account via API keys — it never holds your money. That's the model to insist on (<a href="/journal/your-money-your-broker.html">your money, your keys</a>). See also <a href="/journal/manual-vs-automated-execution.html">Manual vs Automated Execution: The Consistency Gap</a> and <a href="/journal/do-you-need-to-code-to-algo-trade.html">whether you need to code</a>.</p>
+<p>A well-built ATS runs in <em>your</em> broker account via API keys — it never holds your money. That's the model to insist on (<a href="/journal/your-money-your-broker">your money, your keys</a>). See also <a href="/journal/manual-vs-automated-execution">Manual vs Automated Execution: The Consistency Gap</a> and <a href="/journal/do-you-need-to-code-to-algo-trade">whether you need to code</a>.</p>
   </div>
 
   <div class="cta">
@@ -93,7 +93,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/why-trading-signal-groups-disappoint.html"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test.html"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work.html"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission.html"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li><li><a href="/journal/monte-carlo-trading.html"><span class="rk">Quantitative Trading</span>Monte Carlo: Stress-Testing a System Before the Market Does</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/why-trading-signal-groups-disappoint"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li><li><a href="/journal/monte-carlo-trading"><span class="rk">Quantitative Trading</span>Monte Carlo: Stress-Testing a System Before the Market Does</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->
 <div style="max-width:620px;margin:0 auto;padding:36px 24px;text-align:center;">

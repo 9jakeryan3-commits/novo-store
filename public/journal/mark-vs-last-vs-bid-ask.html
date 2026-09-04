@@ -10,11 +10,11 @@
 <title>Mark vs Last vs Bid/Ask: Why Your Options P&amp;L Looks Wrong | NoVo Options Trading</title>
 <meta name="description" content="Your platform shows an option's mark, its last trade, and a bid/ask, and they can all differ.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/mark-vs-last-vs-bid-ask.html">
+<link rel="canonical" href="https://novo-options.trade/journal/mark-vs-last-vs-bid-ask">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/mark-vs-last-vs-bid-ask.html">
+<meta property="og:url" content="https://novo-options.trade/journal/mark-vs-last-vs-bid-ask">
 <meta property="og:title" content="Mark vs Last vs Bid/Ask: Why Your Options P&amp;L Looks Wrong">
 <meta property="og:description" content="Mark, last, and bid/ask are three different numbers. Why your P&L uses the mark, and why the fill can look nothing like it.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Mark vs Last vs Bid/Ask: Why Your Options P&L Looks Wrong", "description": "Mark, last, and bid/ask are three different numbers. Why your P&L uses the mark, and why the fill can look nothing like it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/mark-vs-last-vs-bid-ask.html", "articleSection": "Options 101", "wordCount": 568, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Mark vs Last vs Bid/Ask: Why Your Options P&L Looks Wrong", "description": "Mark, last, and bid/ask are three different numbers. Why your P&L uses the mark, and why the fill can look nothing like it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/mark-vs-last-vs-bid-ask", "articleSection": "Options 101", "wordCount": 568, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Mark vs Last vs Bid/Ask: Why Your Options P&L Looks Wrong", "item": "https://novo-options.trade/journal/mark-vs-last-vs-bid-ask.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Mark vs Last vs Bid/Ask: Why Your Options P&L Looks Wrong", "item": "https://novo-options.trade/journal/mark-vs-last-vs-bid-ask"}]}
 </script>
 </head>
 <body>
@@ -59,11 +59,11 @@
     <p>Open an options position and your platform shows several prices at once. They measure different things, and confusing them is why your P&amp;L can look better (or worse) than what you can actually get.</p>
     <h2>The three numbers</h2>
     <p><strong>Bid / Ask.</strong> The best price someone will buy from you (bid) and sell to you (ask) <em>right now</em>. This is what you can actually transact at &mdash; the real, tradable price.<br>
-    <strong>Mark.</strong> Usually the <a href="/journal/getting-filled-at-the-mid.html">midpoint</a> of the bid and ask. Brokers use the mark to value your open positions, so your <strong>unrealized P&amp;L is calculated off the mark</strong>, not off what you'd get selling into the bid.<br>
+    <strong>Mark.</strong> Usually the <a href="/journal/getting-filled-at-the-mid">midpoint</a> of the bid and ask. Brokers use the mark to value your open positions, so your <strong>unrealized P&amp;L is calculated off the mark</strong>, not off what you'd get selling into the bid.<br>
     <strong>Last.</strong> The price of the most recent actual trade. On a thin strike, the last trade could be minutes old and far from the current market &mdash; a stale number.</p>
     <p class="pull">Your P&amp;L is marked to the mid; your exit fills at the bid. On a wide strike, that gap is the surprise.</p>
     <h2>Why the P&L looks wrong</h2>
-    <p>If your position is marked at the 1.25 mid but the bid is only 1.15, selling gives you 1.15 &mdash; a dime worse than the P&amp;L implied, because you cross half the <a href="/journal/bid-ask-spread-explained.html">spread</a> to exit. On a wide or thin strike that difference is real money. The mark is a fair-value estimate, not a guaranteed exit.</p>
+    <p>If your position is marked at the 1.25 mid but the bid is only 1.15, selling gives you 1.15 &mdash; a dime worse than the P&amp;L implied, because you cross half the <a href="/journal/bid-ask-spread-explained">spread</a> to exit. On a wide or thin strike that difference is real money. The mark is a fair-value estimate, not a guaranteed exit.</p>
     <h2>The takeaway</h2>
     <p>Trust the <strong>bid/ask</strong> for what a trade will really cost or return, treat the <strong>mark</strong> as an estimate of fair value, and be skeptical of a stale <strong>last</strong> on illiquid strikes. Trading liquid, near-the-money SPY strikes keeps all three numbers close together &mdash; which is exactly what you want when a scalp comes down to pennies.</p>
   </div>
@@ -94,7 +94,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/spy-options-cash-vs-physical-settlement.html"><span class="rk">Options 101</span>Are SPY Options Cash-Settled or Physically Settled? What It Means at Expiration</a></li><li><a href="/journal/what-drives-option-prices.html"><span class="rk">Options 101</span>What Drives Option Prices? The 5 Key Factors</a></li><li><a href="/journal/what-is-color-greek.html"><span class="rk">Greeks</span>What Is Color (the Greek)? Gamma Decay Over Time</a></li><li><a href="/journal/what-is-vega.html"><span class="rk">Options 101</span>What Is Vega?</a></li><li><a href="/journal/box-spread-explained.html"><span class="rk">Options 101</span>The Box Spread, Explained (and How Traders Blew Up With It)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/spy-options-cash-vs-physical-settlement"><span class="rk">Options 101</span>Are SPY Options Cash-Settled or Physically Settled? What It Means at Expiration</a></li><li><a href="/journal/what-drives-option-prices"><span class="rk">Options 101</span>What Drives Option Prices? The 5 Key Factors</a></li><li><a href="/journal/what-is-color-greek"><span class="rk">Greeks</span>What Is Color (the Greek)? Gamma Decay Over Time</a></li><li><a href="/journal/what-is-vega"><span class="rk">Options 101</span>What Is Vega?</a></li><li><a href="/journal/box-spread-explained"><span class="rk">Options 101</span>The Box Spread, Explained (and How Traders Blew Up With It)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

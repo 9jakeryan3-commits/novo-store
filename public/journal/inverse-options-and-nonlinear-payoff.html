@@ -10,11 +10,11 @@
 <title>Inverse Options: When the Payoff Is Not a Straight Line | NoVo Options Trading</title>
 <meta name="description" content="A contract settled in the coin it is written on has a payoff curved by the coin price itself. The Greeks you are used to do not describe it.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff.html">
+<link rel="canonical" href="https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff.html">
+<meta property="og:url" content="https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff">
 <meta property="og:title" content="Inverse Options: When the Payoff Is Not a Straight Line">
 <meta property="og:description" content="A contract settled in the coin it is written on has a payoff curved by the coin price itself. The Greeks you are used to do not describe it.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Inverse Options: When the Payoff Is Not a Straight Line", "description": "A contract settled in the coin it is written on has a payoff curved by the coin price itself. The Greeks you are used to do not describe it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff.html", "articleSection": "Crypto Dealer Flow", "wordCount": 340, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Inverse Options: When the Payoff Is Not a Straight Line", "description": "A contract settled in the coin it is written on has a payoff curved by the coin price itself. The Greeks you are used to do not describe it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff", "articleSection": "Crypto Dealer Flow", "wordCount": 340, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Inverse Options: When the Payoff Is Not a Straight Line", "item": "https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Inverse Options: When the Payoff Is Not a Straight Line", "item": "https://novo-options.trade/journal/inverse-options-and-nonlinear-payoff"}]}
 </script>
 </head>
 <body>
@@ -60,16 +60,16 @@
     <p>An <strong>inverse</strong> option settles in the underlying coin. The payoff, measured in dollars, is the intrinsic value <em>divided by</em> the coin price, because you receive coins, and each coin is worth whatever it is worth at that moment.</p>
     <h2>What that does to the shape</h2>
     <p>It curves it. For a call, price rising increases intrinsic value and simultaneously means each coin received is worth more, so the dollar payoff rises faster than linearly. For a put, price falling increases intrinsic value while each coin received is worth less, so the dollar payoff is damped &mdash; the position is fighting itself on the way to being right.</p>
-    <p>This is the same reflexivity described in <a href="/journal/coin-margined-vs-stablecoin-margined.html">coin-margined versus stablecoin-margined</a>, applied to an option payoff instead of to collateral. Same root cause: the asset appears on both sides of the equation.</p>
+    <p>This is the same reflexivity described in <a href="/journal/coin-margined-vs-stablecoin-margined">coin-margined versus stablecoin-margined</a>, applied to an option payoff instead of to collateral. Same root cause: the asset appears on both sides of the equation.</p>
     <h2>Why it matters for a dealer map</h2>
     <p>Because the gamma of an inverse contract is not the gamma of the equivalent cash-settled one, and a map that treats them identically is aggregating quantities that are not the same thing.</p>
     <p>It also means dealer hedging of an inverse book has a component that has nothing to do with the option&rsquo;s directional exposure and everything to do with the settlement currency. Two dealers with identical option positions in inverse and linear contracts do not hedge the same way.</p>
     <h2>Which contract you are looking at</h2>
     <p>Crypto venues list both inverse and stablecoin-settled options, sometimes on the same underlying, and the ticker is where the distinction lives &mdash; it is not visible in a price chart. Anything computed across a mixture without accounting for settlement type is combining two payoff shapes into one number.</p>
-    <p>Practically, for anyone reading a map rather than building one: check which contract the numbers came from, exactly as you would check <a href="/journal/usdc-settled-vs-coin-settled-options.html">the settlement currency</a> before comparing two figures.</p>
+    <p>Practically, for anyone reading a map rather than building one: check which contract the numbers came from, exactly as you would check <a href="/journal/usdc-settled-vs-coin-settled-options">the settlement currency</a> before comparing two figures.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/open-interest-migration-across-expiries.html"><span class="rk">Crypto Dealer Flow</span>The Roll: When Open Interest Moves Rather Than Leaves</a></li><li><a href="/journal/the-cash-and-carry-trade.html"><span class="rk">Perps &amp; Funding</span>The Cash-and-Carry Trade, and What It Really Costs</a></li><li><a href="/journal/what-a-crypto-fee-schedule-actually-says.html"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility.html"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li><li><a href="/journal/concentrated-liquidity-explained.html"><span class="rk">On-Chain Structure</span>Concentrated Liquidity: Deep in a Band, Empty Outside It</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/open-interest-migration-across-expiries"><span class="rk">Crypto Dealer Flow</span>The Roll: When Open Interest Moves Rather Than Leaves</a></li><li><a href="/journal/the-cash-and-carry-trade"><span class="rk">Perps &amp; Funding</span>The Cash-and-Carry Trade, and What It Really Costs</a></li><li><a href="/journal/what-a-crypto-fee-schedule-actually-says"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li><li><a href="/journal/concentrated-liquidity-explained"><span class="rk">On-Chain Structure</span>Concentrated Liquidity: Deep in a Band, Empty Outside It</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

@@ -10,11 +10,11 @@
 <title>What Is a Stop Order? Your Automatic Exit Trigger | NoVo</title>
 <meta name="description" content="A stop order becomes a market order once a trigger price is hit — used to automatically cut a losing trade.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-a-stop-order.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-a-stop-order">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-a-stop-order.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-a-stop-order">
 <meta property="og:title" content="What Is a Stop Order? Your Automatic Exit Trigger">
 <meta property="og:description" content="A stop order becomes a market order when a trigger price hits — used to auto-cut losers. How they work, their slippage limit, and why 0DTE needs them.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is a Stop Order? Your Automatic Exit Trigger", "description": "A stop order becomes a market order when a trigger price hits — used to auto-cut losers. How they work, their slippage limit, and why 0DTE needs them.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-a-stop-order.html", "articleSection": "Order Types", "wordCount": 511, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is a Stop Order? Your Automatic Exit Trigger", "description": "A stop order becomes a market order when a trigger price hits — used to auto-cut losers. How they work, their slippage limit, and why 0DTE needs them.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-a-stop-order", "articleSection": "Order Types", "wordCount": 511, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "What Is a Stop Order? Your Automatic Exit Trigger", "item": "https://novo-options.trade/journal/what-is-a-stop-order.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "What Is a Stop Order? Your Automatic Exit Trigger", "item": "https://novo-options.trade/journal/what-is-a-stop-order"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
   <div class="article-body">
-    <p>A <strong>stop order</strong> (stop-loss) becomes a <a href="/journal/what-is-a-market-order.html">market order</a> once a trigger price is hit &mdash; used to automatically cut a losing trade. It&rsquo;s the mechanism behind a <a href="/journal/hard-stop-vs-mental-stop-0dte.html">hard stop</a>.</p>
+    <p>A <strong>stop order</strong> (stop-loss) becomes a <a href="/journal/what-is-a-market-order">market order</a> once a trigger price is hit &mdash; used to automatically cut a losing trade. It&rsquo;s the mechanism behind a <a href="/journal/hard-stop-vs-mental-stop-0dte">hard stop</a>.</p>
     <h2>How it works</h2>
     <p>You set a trigger (stop) price. When the market trades there, your stop <em>activates</em> as a market order and fills at the next available price. For a long option, you&rsquo;d place a sell stop below your entry &mdash; if the option drops to your level, it triggers and exits you. It executes without you watching, which is exactly the point.</p>
     <h2>The key limitation</h2>
-    <p>Because a triggered stop becomes a <em>market</em> order, it fills at the next available price, which in a <a href="/journal/holding-0dte-into-close.html">fast or gapping market</a> can be well beyond your trigger (<a href="/journal/why-fill-price-differ-from-quote.html">slippage</a>). So a stop caps your <em>intended</em> loss but can&rsquo;t guarantee the exact exit price. A <a href="/journal/stop-limit-vs-stop-market-options.html">stop-limit</a> adds price control (but risks not filling at all).</p>
+    <p>Because a triggered stop becomes a <em>market</em> order, it fills at the next available price, which in a <a href="/journal/holding-0dte-into-close">fast or gapping market</a> can be well beyond your trigger (<a href="/journal/why-fill-price-differ-from-quote">slippage</a>). So a stop caps your <em>intended</em> loss but can&rsquo;t guarantee the exact exit price. A <a href="/journal/stop-limit-vs-stop-market-options">stop-limit</a> adds price control (but risks not filling at all).</p>
     <p class="pull">A stop order is a promise to exit, not a promise of price. It fires when you&rsquo;re wrong &mdash; then takes whatever the market offers next.</p>
     <h2>The takeaway</h2>
-    <p>Stop orders enforce your exit automatically &mdash; essential on fast 0DTE where <a href="/journal/hard-stop-vs-mental-stop-0dte.html">mental stops fail</a>. Size for possible slippage (<a href="/journal/size-off-worst-case.html">worst case</a>). NoVo&rsquo;s dealer map shows where the structure sits, so the stop you place at your broker can sit at a level that actually means something.
+    <p>Stop orders enforce your exit automatically &mdash; essential on fast 0DTE where <a href="/journal/hard-stop-vs-mental-stop-0dte">mental stops fail</a>. Size for possible slippage (<a href="/journal/size-off-worst-case">worst case</a>). NoVo&rsquo;s dealer map shows where the structure sits, so the stop you place at your broker can sit at a level that actually means something.
   </p></div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/butterfly-spread.html"><span class="rk">Options Strategy</span>The Butterfly Spread</a></li><li><a href="/journal/delta-neutral-trading.html"><span class="rk">Options Strategy</span>Delta-Neutral Trading</a></li><li><a href="/journal/iron-condor-explained.html"><span class="rk">Options Strategy</span>The Iron Condor, Explained</a></li><li><a href="/journal/pullback-entry-strategy.html"><span class="rk">Trading Strategy</span>The Pullback Entry</a></li><li><a href="/journal/spy-qqq-iwm-which-to-trade.html"><span class="rk">Strategy</span>SPY, QQQ or IWM: Picking Your One Ticker</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/butterfly-spread"><span class="rk">Options Strategy</span>The Butterfly Spread</a></li><li><a href="/journal/delta-neutral-trading"><span class="rk">Options Strategy</span>Delta-Neutral Trading</a></li><li><a href="/journal/iron-condor-explained"><span class="rk">Options Strategy</span>The Iron Condor, Explained</a></li><li><a href="/journal/pullback-entry-strategy"><span class="rk">Trading Strategy</span>The Pullback Entry</a></li><li><a href="/journal/spy-qqq-iwm-which-to-trade"><span class="rk">Strategy</span>SPY, QQQ or IWM: Picking Your One Ticker</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

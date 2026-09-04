@@ -10,11 +10,11 @@
 <title>The Volatility Surface, and What Its Shape Says | NoVo Options Trading</title>
 <meta name="description" content="Implied volatility across every strike and expiry at once. The surface is where skew and term structure stop being two charts and become one object.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-crypto-volatility-surface.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-crypto-volatility-surface">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/the-crypto-volatility-surface.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-crypto-volatility-surface">
 <meta property="og:title" content="The Volatility Surface, and What Its Shape Says">
 <meta property="og:description" content="Implied volatility across every strike and expiry at once. The surface is where skew and term structure stop being two charts and become one object.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Volatility Surface, and What Its Shape Says", "description": "Implied volatility across every strike and expiry at once. The surface is where skew and term structure stop being two charts and become one object.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-crypto-volatility-surface.html", "articleSection": "Crypto Volatility", "wordCount": 334, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Volatility Surface, and What Its Shape Says", "description": "Implied volatility across every strike and expiry at once. The surface is where skew and term structure stop being two charts and become one object.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-crypto-volatility-surface", "articleSection": "Crypto Volatility", "wordCount": 334, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Volatility Surface, and What Its Shape Says", "item": "https://novo-options.trade/journal/the-crypto-volatility-surface.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Volatility Surface, and What Its Shape Says", "item": "https://novo-options.trade/journal/the-crypto-volatility-surface"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Plot implied volatility against strike and you get <a href="/journal/crypto-skew-what-it-prices.html">skew</a>. Plot it against expiry and you get <a href="/journal/crypto-options-term-structure.html">term structure</a>. Plot it against both and you get the surface &mdash; one object describing what the market charges for every combination of direction and horizon.</p>
+    <p>Plot implied volatility against strike and you get <a href="/journal/crypto-skew-what-it-prices">skew</a>. Plot it against expiry and you get <a href="/journal/crypto-options-term-structure">term structure</a>. Plot it against both and you get the surface &mdash; one object describing what the market charges for every combination of direction and horizon.</p>
     <h2>What only the surface shows</h2>
     <p>Whether the skew is the same at every expiry. It usually is not. Short-dated skew can lean hard one way while longer-dated skew is nearly flat, and that difference is a statement about what the market thinks is a near-term worry versus a durable characteristic of the asset.</p>
     <p>Two markets can have identical headline implied volatility and identical front-month skew, and completely different surfaces. Reading either slice alone cannot distinguish them.</p>
     <h2>The crypto surface is coarse</h2>
     <p>A liquid equity index surface is dense &mdash; many strikes, many expiries, most of them traded. The crypto surface is sparser, especially away from the majors, and beyond a few strikes and expiries it is largely interpolated rather than observed.</p>
-    <p>That matters because an interpolated point looks exactly like a traded one on a chart. A surface rendered smoothly across a book with only a handful of liquid strikes is mostly the interpolation method&rsquo;s opinion, which is the same hazard as reading a level off <a href="/journal/reading-a-thin-options-book.html">a thin options book</a>.</p>
+    <p>That matters because an interpolated point looks exactly like a traded one on a chart. A surface rendered smoothly across a book with only a handful of liquid strikes is mostly the interpolation method&rsquo;s opinion, which is the same hazard as reading a level off <a href="/journal/reading-a-thin-options-book">a thin options book</a>.</p>
     <h2>What moves it</h2>
     <p>The whole surface lifting or falling is a change in how much movement the market expects overall. A twist &mdash; one part rising while another falls &mdash; is more informative, because it says <em>where</em> the concern moved to rather than how much there is.</p>
     <p>A front-end lift with the back end unchanged is a near-term event being priced. A skew twist with the level flat is a change of direction in the concern, not of magnitude.</p>
     <h2>Reading it beside the dealer map</h2>
-    <p>The surface prices what the market expects; <a href="/journal/gamma-by-strike-vs-aggregate-gex.html">the gamma profile</a> describes what dealers are obliged to do about it. They are different questions and the disagreements between them are where the interesting reads live.</p>
+    <p>The surface prices what the market expects; <a href="/journal/gamma-by-strike-vs-aggregate-gex">the gamma profile</a> describes what dealers are obliged to do about it. They are different questions and the disagreements between them are where the interesting reads live.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-a-crypto-options-quote-means.html"><span class="rk">Crypto Options 101</span>The Spread Is the Cost You Are Not Quoting Yourself</a></li><li><a href="/journal/why-crypto-volatility-clusters.html"><span class="rk">Crypto Volatility</span>Why Volatility Clusters, and What Sustains It in Crypto</a></li><li><a href="/journal/covered-calls-on-crypto.html"><span class="rk">Crypto Options 101</span>Covered Calls on a Coin You Hold</a></li><li><a href="/journal/european-style-and-cash-settlement-in-crypto.html"><span class="rk">Crypto Options 101</span>European Style and Cash Settled: No Assignment, Ever</a></li><li><a href="/journal/implied-vs-realised-volatility-in-crypto.html"><span class="rk">Crypto Volatility</span>Implied vs Realised: What the Options Charged and What Happened</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-a-crypto-options-quote-means"><span class="rk">Crypto Options 101</span>The Spread Is the Cost You Are Not Quoting Yourself</a></li><li><a href="/journal/why-crypto-volatility-clusters"><span class="rk">Crypto Volatility</span>Why Volatility Clusters, and What Sustains It in Crypto</a></li><li><a href="/journal/covered-calls-on-crypto"><span class="rk">Crypto Options 101</span>Covered Calls on a Coin You Hold</a></li><li><a href="/journal/european-style-and-cash-settlement-in-crypto"><span class="rk">Crypto Options 101</span>European Style and Cash Settled: No Assignment, Ever</a></li><li><a href="/journal/implied-vs-realised-volatility-in-crypto"><span class="rk">Crypto Volatility</span>Implied vs Realised: What the Options Charged and What Happened</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

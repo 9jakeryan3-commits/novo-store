@@ -11,9 +11,9 @@
 <meta name="description" content="A 45% win rate hands you six straight losses about every 55 trades. Expectancy describes the average, not the path - how to tell noise from a dead system.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/variance-vs-edge.html">
+<link rel="canonical" href="https://novo-options.trade/journal/variance-vs-edge">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/variance-vs-edge.html">
+<meta property="og:url" content="https://novo-options.trade/journal/variance-vs-edge">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Variance vs Edge: Why Good Systems Have Bad Weeks">
 <meta property="og:description" content="A 45% win rate hands you six straight losses about every 55 trades. Expectancy describes the average, not the path - how to tell noise from a dead system.">
@@ -28,8 +28,8 @@
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Variance vs Edge: Why Good Systems Have Bad Weeks", "description": "A 45% win rate hands you six straight losses about every 55 trades. Expectancy describes the average, not the path - how to tell noise from a dead system.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/variance-vs-edge.html", "articleSection": "Quantitative Trading", "wordCount": 839, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Variance vs Edge: Why Good Systems Have Bad Weeks", "item": "https://novo-options.trade/journal/variance-vs-edge.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Variance vs Edge: Why Good Systems Have Bad Weeks", "description": "A 45% win rate hands you six straight losses about every 55 trades. Expectancy describes the average, not the path - how to tell noise from a dead system.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/variance-vs-edge", "articleSection": "Quantitative Trading", "wordCount": 839, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Variance vs Edge: Why Good Systems Have Bad Weeks", "item": "https://novo-options.trade/journal/variance-vs-edge"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -56,29 +56,29 @@
 <p>Six losses in a row. The system is broken — obviously. Except a system that wins 45% of the time will hand you six straight losses roughly every 55 trades. If you trade a few times a day, that's a normal fortnight. Nothing broke. That's just what a 45% win rate <em>looks like</em> from the inside.</p>
 
 <h2>Edge is the average. Variance is everything else.</h2>
-<p>Your <a href="/journal/expectancy.html">expectancy</a> describes what happens on average over many trades. It says nothing about the path. Variance is the scatter around that average, and in the short run, variance is far louder than edge.</p>
+<p>Your <a href="/journal/expectancy">expectancy</a> describes what happens on average over many trades. It says nothing about the path. Variance is the scatter around that average, and in the short run, variance is far louder than edge.</p>
 <p>Over ten trades, variance dominates completely; the edge is invisible. Over a thousand, edge dominates and variance is a texture. The whole discipline of systematic trading is surviving the first regime long enough to reach the second.</p>
 
 <p class="pull">In the short run, your results are mostly variance. In the long run, they're mostly edge. The trouble is you live in the short run.</p>
 
 <h2>The streaks are not optional</h2>
 <p>Some rough intuition for a 45%-win system: six losses in a row happens about every 55 trades. Eight in a row, every 250 or so. Ten straight will happen if you trade long enough. None of that is a malfunction — it's the arithmetic of a coin that lands your way slightly less than half the time but pays more when it does.</p>
-<p>If your plan doesn't survive a ten-loss streak, your plan doesn't survive your strategy. That's not a variance problem, it's a <a href="/journal/position-sizing-risk.html">sizing</a> problem, and it's the one that actually ends accounts (<a href="/journal/risk-of-ruin.html">risk of ruin</a>).</p>
+<p>If your plan doesn't survive a ten-loss streak, your plan doesn't survive your strategy. That's not a variance problem, it's a <a href="/journal/position-sizing-risk">sizing</a> problem, and it's the one that actually ends accounts (<a href="/journal/risk-of-ruin">risk of ruin</a>).</p>
 
 <h2>Telling the two apart</h2>
 <p>So how do you know if it's noise or death? Honestly: not quickly, and not from the streak itself. What helps:</p>
-<p><strong>Know your streak distribution in advance.</strong> If you've simulated it (<a href="/journal/monte-carlo-trading.html">Monte Carlo</a>), a six-loss run is a shrug rather than an emergency. Expected pain is manageable pain.</p>
+<p><strong>Know your streak distribution in advance.</strong> If you've simulated it (<a href="/journal/monte-carlo-trading">Monte Carlo</a>), a six-loss run is a shrug rather than an emergency. Expected pain is manageable pain.</p>
 <p><strong>Watch the mechanics, not the P&L.</strong> Are the setups still appearing? Filling normally? Behaving as designed? A strategy that's still doing exactly what it was built to do and losing is probably in a drawdown. One that's firing in situations you don't recognise has genuinely changed.</p>
-<p><strong>Check the sample, not the feeling.</strong> A bad week is 20 trades. Your <a href="/journal/sample-size-trading.html">sample</a> needs hundreds. The week has almost no informational content, however loud it is.</p>
+<p><strong>Check the sample, not the feeling.</strong> A bad week is 20 trades. Your <a href="/journal/sample-size-trading">sample</a> needs hundreds. The week has almost no informational content, however loud it is.</p>
 <p><strong>Look for a reason, not a result.</strong> Regimes do change and edges do decay. But the evidence should be structural — the conditions your edge depends on have gone — not just "it lost".</p>
 
 <h2>The failure mode</h2>
 <p>The classic account-killer isn't a losing streak. It's the <em>response</em> to one: change the system after six losses, catch the next six losses of the new version, change again. You end up with a strategy assembled entirely from reactions to noise, and every piece of it was added at the exact moment you were least able to judge it.</p>
 <p>The counter-discipline is unglamorous. Decide in advance what would make you stop. Make it structural and specific, and larger than any streak you should expect. Then let the system run through the pain it was always going to produce.</p>
-<p>See also: <a href="/journal/what-is-drawdown.html">what is drawdown</a> and <a href="/journal/emotional-discipline-the-real-edge.html">emotional discipline</a>.</p>
+<p>See also: <a href="/journal/what-is-drawdown">what is drawdown</a> and <a href="/journal/emotional-discipline-the-real-edge">emotional discipline</a>.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/sunk-cost-fallacy-in-trading.html">The Sunk-Cost Fallacy in Trading: Throwing Good Money After Bad</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/sunk-cost-fallacy-in-trading">The Sunk-Cost Fallacy in Trading: Throwing Good Money After Bad</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -106,7 +106,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/where-ai-has-a-real-edge-in-market-analysis.html"><span class="rk">AI &amp; Market Analysis</span>Where AI Has a Real Edge in Market Analysis</a></li><li><a href="/journal/ai-vs-rules-engine.html"><span class="rk">AI in Trading</span>AI vs a Rules Engine in Trading: What's the Difference?</a></li><li><a href="/journal/can-ai-predict-the-stock-market.html"><span class="rk">AI in Trading</span>Can AI Predict the Stock Market? The Honest Answer</a></li><li><a href="/journal/future-of-ai-market-analysis.html"><span class="rk">AI &amp; Market Analysis</span>The Future of AI in Market Analysis</a></li><li><a href="/journal/latency-in-retail-trading.html"><span class="rk">Trading Infrastructure</span>Latency in Retail Trading</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/where-ai-has-a-real-edge-in-market-analysis"><span class="rk">AI &amp; Market Analysis</span>Where AI Has a Real Edge in Market Analysis</a></li><li><a href="/journal/ai-vs-rules-engine"><span class="rk">AI in Trading</span>AI vs a Rules Engine in Trading: What's the Difference?</a></li><li><a href="/journal/can-ai-predict-the-stock-market"><span class="rk">AI in Trading</span>Can AI Predict the Stock Market? The Honest Answer</a></li><li><a href="/journal/future-of-ai-market-analysis"><span class="rk">AI &amp; Market Analysis</span>The Future of AI in Market Analysis</a></li><li><a href="/journal/latency-in-retail-trading"><span class="rk">Trading Infrastructure</span>Latency in Retail Trading</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

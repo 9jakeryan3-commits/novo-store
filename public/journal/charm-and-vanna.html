@@ -11,9 +11,9 @@
 <meta name="description" content="Charm and vanna are second-order greeks that drive dealer hedging flows - and can quietly push the market. Here is what they measure and why they matter around.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/charm-and-vanna.html">
+<link rel="canonical" href="https://novo-options.trade/journal/charm-and-vanna">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/charm-and-vanna.html">
+<meta property="og:url" content="https://novo-options.trade/journal/charm-and-vanna">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Charm & Vanna, Explained">
 <meta property="og:description" content="Charm and vanna explained: the second-order greeks behind dealer hedging flows and their market impact.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Charm & Vanna, Explained", "description": "Charm and vanna are second-order greeks that drive dealer hedging flows - and can quietly push the market. Here is what they measure and why they matter around expiration and volatility shifts.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-12-10", "dateModified": "2025-12-10", "mainEntityOfPage": "https://novo-options.trade/journal/charm-and-vanna.html", "articleSection": "Dealer Flow", "wordCount": 522, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Charm & Vanna, Explained", "description": "Charm and vanna are second-order greeks that drive dealer hedging flows - and can quietly push the market. Here is what they measure and why they matter around expiration and volatility shifts.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-12-10", "dateModified": "2025-12-10", "mainEntityOfPage": "https://novo-options.trade/journal/charm-and-vanna", "articleSection": "Dealer Flow", "wordCount": 522, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Charm & Vanna, Explained", "item": "https://novo-options.trade/journal/charm-and-vanna.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Charm & Vanna, Explained", "item": "https://novo-options.trade/journal/charm-and-vanna"}]}
 </script>
 </head>
 <body>
@@ -56,19 +56,19 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-12-10">Dec 10, 2025</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
   <div class="article-body">
-    <p>Most traders learn the first-order <a href="/journal/options-greeks-explained.html">greeks</a> and stop. But dealer hedging - the mechanical buying and selling that shapes intraday price - is driven partly by <em>second-order</em> greeks: <strong>charm</strong> and <strong>vanna</strong>. They are advanced, but their footprint on the tape is real.</p>
+    <p>Most traders learn the first-order <a href="/journal/options-greeks-explained">greeks</a> and stop. But dealer hedging - the mechanical buying and selling that shapes intraday price - is driven partly by <em>second-order</em> greeks: <strong>charm</strong> and <strong>vanna</strong>. They are advanced, but their footprint on the tape is real.</p>
     <h2>Charm: delta decay over time</h2>
-    <p><strong>Charm</strong> measures how an option's <a href="/journal/what-is-delta-options.html">delta</a> changes as time passes. As expiration approaches, deltas shift, and dealers must re-hedge accordingly. This is a driver of the "charm flow" that can nudge markets in predictable directions into the close and into <a href="/journal/options-expiration-explained.html">expiration</a>, especially on big <a href="/journal/triple-witching.html">OpEx</a> days.</p>
+    <p><strong>Charm</strong> measures how an option's <a href="/journal/what-is-delta-options">delta</a> changes as time passes. As expiration approaches, deltas shift, and dealers must re-hedge accordingly. This is a driver of the "charm flow" that can nudge markets in predictable directions into the close and into <a href="/journal/options-expiration-explained">expiration</a>, especially on big <a href="/journal/triple-witching">OpEx</a> days.</p>
     <h2>Vanna: delta's reaction to volatility</h2>
-    <p><strong>Vanna</strong> measures how delta changes as <a href="/journal/what-is-implied-volatility.html">implied volatility</a> changes. When IV shifts - say, a fear spike fades - dealers' hedges shift too, generating "vanna flows." A falling-VIX environment can create steady dealer buying via vanna, part of why calm, drifting-up tapes persist.</p>
+    <p><strong>Vanna</strong> measures how delta changes as <a href="/journal/what-is-implied-volatility">implied volatility</a> changes. When IV shifts - say, a fear spike fades - dealers' hedges shift too, generating "vanna flows." A falling-VIX environment can create steady dealer buying via vanna, part of why calm, drifting-up tapes persist.</p>
     <p class="pull">You don't trade charm and vanna. You trade the dealer hedging they force - if you can read it.</p>
     <h2>Why it matters to you</h2>
-    <p>You don't need to calculate these to benefit from understanding them. They explain <em>why</em> <a href="/journal/what-is-gamma-exposure-gex.html">dealer positioning</a> creates the pinning, drifting, and acceleration you see near key strikes and around expiration. Systematic reads that account for dealer flow are, in part, accounting for charm and vanna - the mechanics beneath the surface of the tape.</p>
+    <p>You don't need to calculate these to benefit from understanding them. They explain <em>why</em> <a href="/journal/what-is-gamma-exposure-gex">dealer positioning</a> creates the pinning, drifting, and acceleration you see near key strikes and around expiration. Systematic reads that account for dealer flow are, in part, accounting for charm and vanna - the mechanics beneath the surface of the tape.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/volland-vs-spotgamma.html">Volland vs SpotGamma: Higher-Order Greeks or Curated Levels?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/volland-vs-spotgamma">Volland vs SpotGamma: Higher-Order Greeks or Curated Levels?</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/european-open-us-futures.html"><span class="rk">Structure</span>Europe's Open at 3am ET: How the Overseas Session Moves US Futures</a></li><li><a href="/journal/how-market-makers-hedge.html"><span class="rk">Dealer Flow</span>How Market Makers Hedge (and Why It Shows Up on Your Chart)</a></li><li><a href="/journal/opening-range-first-30-minutes.html"><span class="rk">Market Structure</span>The Opening Range: Why the First 30 Minutes Set the Day</a></li><li><a href="/journal/sector-rotation.html"><span class="rk">Market Structure</span>Sector Rotation, Explained</a></li><li><a href="/journal/vanna-flows-explained.html"><span class="rk">Dealer Flow</span>Vanna Flows Explained: How Falling Volatility Buys the Market</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/european-open-us-futures"><span class="rk">Structure</span>Europe's Open at 3am ET: How the Overseas Session Moves US Futures</a></li><li><a href="/journal/how-market-makers-hedge"><span class="rk">Dealer Flow</span>How Market Makers Hedge (and Why It Shows Up on Your Chart)</a></li><li><a href="/journal/opening-range-first-30-minutes"><span class="rk">Market Structure</span>The Opening Range: Why the First 30 Minutes Set the Day</a></li><li><a href="/journal/sector-rotation"><span class="rk">Market Structure</span>Sector Rotation, Explained</a></li><li><a href="/journal/vanna-flows-explained"><span class="rk">Dealer Flow</span>Vanna Flows Explained: How Falling Volatility Buys the Market</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

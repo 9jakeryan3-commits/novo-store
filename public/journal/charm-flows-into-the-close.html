@@ -10,11 +10,11 @@
 <title>Charm Flows Into the Close: The Daily Pinning Engine | NoVo</title>
 <meta name="description" content="Charm flows are the dealer hedging trades driven by delta decay as time passes — strongest into the 4pm close, where they pin price to heavy strikes. Here's how.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/charm-flows-into-the-close.html">
+<link rel="canonical" href="https://novo-options.trade/journal/charm-flows-into-the-close">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/charm-flows-into-the-close.html">
+<meta property="og:url" content="https://novo-options.trade/journal/charm-flows-into-the-close">
 <meta property="og:title" content="Charm Flows Into the Close: The Daily Pinning Engine">
 <meta property="og:description" content="Charm flows are dealer hedges driven by delta decay as time passes — strongest into the close, where they pin price to heavy strikes. How they work.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Charm Flows Into the Close: The Daily Pinning Engine", "description": "Charm flows are dealer hedges driven by delta decay as time passes — strongest into the close, where they pin price to heavy strikes. How they work.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/charm-flows-into-the-close.html", "articleSection": "Dealer Flow", "wordCount": 516, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Charm Flows Into the Close: The Daily Pinning Engine", "description": "Charm flows are dealer hedges driven by delta decay as time passes — strongest into the close, where they pin price to heavy strikes. How they work.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/charm-flows-into-the-close", "articleSection": "Dealer Flow", "wordCount": 516, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Charm Flows Into the Close: The Daily Pinning Engine", "item": "https://novo-options.trade/journal/charm-flows-into-the-close.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Charm Flows Into the Close: The Daily Pinning Engine", "item": "https://novo-options.trade/journal/charm-flows-into-the-close"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
-    <p><strong>Charm flows</strong> are the <a href="/journal/how-market-makers-hedge.html">dealer hedging</a> trades driven by <a href="/journal/what-is-charm.html">charm</a> &mdash; delta decay as time passes. They strengthen into the 4pm close, where they can pin price to heavy <a href="/journal/what-does-pinned-to-strike-mean.html">strikes</a> (the <a href="/journal/the-end-of-day-pin.html">end-of-day pin</a>).</p>
+    <p><strong>Charm flows</strong> are the <a href="/journal/how-market-makers-hedge">dealer hedging</a> trades driven by <a href="/journal/what-is-charm">charm</a> &mdash; delta decay as time passes. They strengthen into the 4pm close, where they can pin price to heavy <a href="/journal/what-does-pinned-to-strike-mean">strikes</a> (the <a href="/journal/the-end-of-day-pin">end-of-day pin</a>).</p>
     <h2>The mechanism</h2>
-    <p>As expiration nears, options&rsquo; deltas drift toward 0 or 1.0 (charm). Dealers hedging that drift must trade to stay neutral, and near a big strike this hedging tends to <em>counteract</em> moves &mdash; buying dips toward the strike, selling rips away from it &mdash; which pins price. On a heavy 0DTE or <a href="/journal/charm-and-opex.html">OPEX</a> day, charm flow can dominate the last hour.</p>
+    <p>As expiration nears, options&rsquo; deltas drift toward 0 or 1.0 (charm). Dealers hedging that drift must trade to stay neutral, and near a big strike this hedging tends to <em>counteract</em> moves &mdash; buying dips toward the strike, selling rips away from it &mdash; which pins price. On a heavy 0DTE or <a href="/journal/charm-and-opex">OPEX</a> day, charm flow can dominate the last hour.</p>
     <h2>Why it produces the pin</h2>
-    <p>The strike with the most open interest becomes a magnet: charm-driven hedging concentrates there, and in a <a href="/journal/positive-vs-negative-gamma.html">positive-gamma</a> environment the effect is amplified (dealers damp volatility). The result is the familiar drift-and-stick into 4pm &mdash; low-conviction, range-bound, magnetized to a round number.</p>
+    <p>The strike with the most open interest becomes a magnet: charm-driven hedging concentrates there, and in a <a href="/journal/positive-vs-negative-gamma">positive-gamma</a> environment the effect is amplified (dealers damp volatility). The result is the familiar drift-and-stick into 4pm &mdash; low-conviction, range-bound, magnetized to a round number.</p>
     <p class="pull">Charm flow is the reason the last hour so often refuses to trend: dealers bleeding off delta quietly pin price to the heaviest strike into the bell.</p>
     <h2>What it means for a scalper</h2>
-    <p>Charm flows explain why <a href="/journal/the-closing-drive.html">the close</a> is often a pinning grind rather than a trend, and why <a href="/journal/holding-0dte-into-close.html">holding 0DTE into it</a> is treacherous. Recognize a forming pin (price magnetized to a heavy strike) and trade accordingly &mdash; fade toward it while it holds. Its volatility-based counterpart is <a href="/journal/vanna-flows-explained.html">vanna flow</a>.
+    <p>Charm flows explain why <a href="/journal/the-closing-drive">the close</a> is often a pinning grind rather than a trend, and why <a href="/journal/holding-0dte-into-close">holding 0DTE into it</a> is treacherous. Recognize a forming pin (price magnetized to a heavy strike) and trade accordingly &mdash; fade toward it while it holds. Its volatility-based counterpart is <a href="/journal/vanna-flows-explained">vanna flow</a>.
   </p></div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/fair-value-gaps.html"><span class="rk">Market Structure</span>Fair Value Gaps, Explained</a></li><li><a href="/journal/how-to-trade-negative-gamma.html"><span class="rk">Dealer Flow</span>How to Trade a Negative-Gamma Regime Without Getting Run Over</a></li><li><a href="/journal/options-pinning-max-pain.html"><span class="rk">Dealer Flow</span>Options Pinning &amp; Max Pain</a></li><li><a href="/journal/short-interest-and-float.html"><span class="rk">Market Structure</span>Short Interest &amp; Float, Explained</a></li><li><a href="/journal/vanna-rally-explained.html"><span class="rk">Dealer Flow</span>The Vanna Rally: How Calming Volatility Fuels a Melt-Up</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/fair-value-gaps"><span class="rk">Market Structure</span>Fair Value Gaps, Explained</a></li><li><a href="/journal/how-to-trade-negative-gamma"><span class="rk">Dealer Flow</span>How to Trade a Negative-Gamma Regime Without Getting Run Over</a></li><li><a href="/journal/options-pinning-max-pain"><span class="rk">Dealer Flow</span>Options Pinning &amp; Max Pain</a></li><li><a href="/journal/short-interest-and-float"><span class="rk">Market Structure</span>Short Interest &amp; Float, Explained</a></li><li><a href="/journal/vanna-rally-explained"><span class="rk">Dealer Flow</span>The Vanna Rally: How Calming Volatility Fuels a Melt-Up</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -10,11 +10,11 @@
 <title>Reading the Basis as the Price of Leverage | NoVo Options Trading</title>
 <meta name="description" content="The gap between the perpetual and spot is what the market pays to be levered. It moves before funding does and it has no cap.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/basis-as-a-leverage-gauge.html">
+<link rel="canonical" href="https://novo-options.trade/journal/basis-as-a-leverage-gauge">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/basis-as-a-leverage-gauge.html">
+<meta property="og:url" content="https://novo-options.trade/journal/basis-as-a-leverage-gauge">
 <meta property="og:title" content="Reading the Basis as the Price of Leverage">
 <meta property="og:description" content="The gap between the perpetual and spot is what the market pays to be levered. It moves before funding does and it has no cap.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Reading the Basis as the Price of Leverage", "description": "The gap between the perpetual and spot is what the market pays to be levered. It moves before funding does and it has no cap.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/basis-as-a-leverage-gauge.html", "articleSection": "Perps & Funding", "wordCount": 276, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Reading the Basis as the Price of Leverage", "description": "The gap between the perpetual and spot is what the market pays to be levered. It moves before funding does and it has no cap.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/basis-as-a-leverage-gauge", "articleSection": "Perps & Funding", "wordCount": 276, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading the Basis as the Price of Leverage", "item": "https://novo-options.trade/journal/basis-as-a-leverage-gauge.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading the Basis as the Price of Leverage", "item": "https://novo-options.trade/journal/basis-as-a-leverage-gauge"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Basis is the difference between the perpetual&rsquo;s price and the spot index. Positive means the perpetual trades above spot, which means demand for levered long exposure exceeds the other side. The general mechanic is in <a href="/journal/spot-perp-basis-explained.html">spot-perp basis</a>.</p>
+    <p>Basis is the difference between the perpetual&rsquo;s price and the spot index. Positive means the perpetual trades above spot, which means demand for levered long exposure exceeds the other side. The general mechanic is in <a href="/journal/spot-perp-basis-explained">spot-perp basis</a>.</p>
     <p>Funding is computed from it. So the basis is the underlying quantity and funding is a periodic, clamped summary of it.</p>
     <h2>Three reasons to watch the basis directly</h2>
-    <p><strong>It is continuous.</strong> Funding settles at <a href="/journal/funding-payment-schedules-differ-by-venue.html">an interval</a>; basis moves tick by tick. During a fast repricing, funding is a lagging summary of something already visible.</p>
-    <p><strong>It has no ceiling.</strong> When <a href="/journal/funding-rate-caps-and-clamps.html">funding is pinned at its cap</a>, basis keeps moving. That is the one condition where funding stops measuring and basis does not.</p>
+    <p><strong>It is continuous.</strong> Funding settles at <a href="/journal/funding-payment-schedules-differ-by-venue">an interval</a>; basis moves tick by tick. During a fast repricing, funding is a lagging summary of something already visible.</p>
+    <p><strong>It has no ceiling.</strong> When <a href="/journal/funding-rate-caps-and-clamps">funding is pinned at its cap</a>, basis keeps moving. That is the one condition where funding stops measuring and basis does not.</p>
     <p><strong>It is directly interpretable.</strong> Basis is a price gap. Funding is a rate over an interval that must be normalised before comparison, and normalised wrongly, frequently is.</p>
     <h2>What it is not</h2>
-    <p>A direction signal, for exactly the reasons in <a href="/journal/funding-as-a-crowding-gauge.html">funding as a crowding gauge</a>. A rich basis says leveraged longs are paying up; it does not say they are wrong, and it can stay rich through an entire trend.</p>
+    <p>A direction signal, for exactly the reasons in <a href="/journal/funding-as-a-crowding-gauge">funding as a crowding gauge</a>. A rich basis says leveraged longs are paying up; it does not say they are wrong, and it can stay rich through an entire trend.</p>
     <p>It describes the cost and the crowding. The fuel, not the spark.</p>
     <h2>Where it becomes a trade</h2>
-    <p>The basis is what <a href="/journal/the-cash-and-carry-trade.html">cash-and-carry</a> harvests: hold spot, short the perpetual, collect the convergence and the funding. Which is also why persistent basis is informative &mdash; it survives only because capturing it costs capital, fees and venue risk.</p>
-    <p>A wide basis that nobody is closing is telling you something about how hard capital is to deploy there, in the same way <a href="/journal/fragmented-liquidity-across-crypto-venues.html">a persistent gap between venues</a> does.</p>
+    <p>The basis is what <a href="/journal/the-cash-and-carry-trade">cash-and-carry</a> harvests: hold spot, short the perpetual, collect the convergence and the funding. Which is also why persistent basis is informative &mdash; it survives only because capturing it costs capital, fees and venue risk.</p>
+    <p>A wide basis that nobody is closing is telling you something about how hard capital is to deploy there, in the same way <a href="/journal/fragmented-liquidity-across-crypto-venues">a persistent gap between venues</a> does.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-open-interest-price-quadrant.html"><span class="rk">Crypto Positioning</span>Open Interest and Price: The Four Regimes</a></li><li><a href="/journal/funding-as-a-crowding-gauge.html"><span class="rk">Perps &amp; Funding</span>Funding Is a Crowding Gauge, Not a Direction Signal</a></li><li><a href="/journal/layer-2-tokens-and-value-accrual.html"><span class="rk">Per-Coin Structure</span>Layer-2 Tokens and the Value-Accrual Question</a></li><li><a href="/journal/paxg-and-tokenised-commodities.html"><span class="rk">Per-Coin Structure</span>PAXG: A Commodity Wearing a Crypto Rail</a></li><li><a href="/journal/the-gamma-flip-in-crypto.html"><span class="rk">Crypto Dealer Flow</span>The Gamma Flip in Crypto, and Why It Is Often Far Away</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-open-interest-price-quadrant"><span class="rk">Crypto Positioning</span>Open Interest and Price: The Four Regimes</a></li><li><a href="/journal/funding-as-a-crowding-gauge"><span class="rk">Perps &amp; Funding</span>Funding Is a Crowding Gauge, Not a Direction Signal</a></li><li><a href="/journal/layer-2-tokens-and-value-accrual"><span class="rk">Per-Coin Structure</span>Layer-2 Tokens and the Value-Accrual Question</a></li><li><a href="/journal/paxg-and-tokenised-commodities"><span class="rk">Per-Coin Structure</span>PAXG: A Commodity Wearing a Crypto Rail</a></li><li><a href="/journal/the-gamma-flip-in-crypto"><span class="rk">Crypto Dealer Flow</span>The Gamma Flip in Crypto, and Why It Is Often Far Away</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

@@ -10,11 +10,11 @@
 <title>Maker and Taker Fees: You Are Being Paid to Wait | NoVo Options Trading</title>
 <meta name="description" content="Providing liquidity costs less than removing it, sometimes less than nothing. The gap is usually larger than the spread you were trying to avoid.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy.html">
+<link rel="canonical" href="https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy.html">
+<meta property="og:url" content="https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy">
 <meta property="og:title" content="Maker and Taker Fees: You Are Being Paid to Wait">
 <meta property="og:description" content="Providing liquidity costs less than removing it, sometimes less than nothing. The gap is usually larger than the spread you were trying to avoid.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Maker and Taker Fees: You Are Being Paid to Wait", "description": "Providing liquidity costs less than removing it, sometimes less than nothing. The gap is usually larger than the spread you were trying to avoid.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy.html", "articleSection": "Crypto Costs", "wordCount": 331, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Maker and Taker Fees: You Are Being Paid to Wait", "description": "Providing liquidity costs less than removing it, sometimes less than nothing. The gap is usually larger than the spread you were trying to avoid.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy", "articleSection": "Crypto Costs", "wordCount": 331, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Maker and Taker Fees: You Are Being Paid to Wait", "item": "https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Maker and Taker Fees: You Are Being Paid to Wait", "item": "https://novo-options.trade/journal/maker-taker-fees-and-what-they-buy"}]}
 </script>
 </head>
 <body>
@@ -60,18 +60,18 @@
     <p>The economics are obvious from the venue&rsquo;s side: a book with no resting orders has nothing to trade against, so resting orders are subsidised.</p>
     <h2>Why the gap matters more than it looks</h2>
     <p>For a strategy trading frequently, the maker-taker difference compounds across every fill. A system that always crosses pays the taker fee on every entry and every exit; one that can wait pays much less and is sometimes paid.</p>
-    <p>Over enough trades that difference can exceed the strategy&rsquo;s entire edge. This is the same arithmetic as <a href="/journal/gas-fees-as-a-trading-cost.html">gas fees on-chain</a>: a per-transaction cost that is trivial once and decisive at frequency.</p>
+    <p>Over enough trades that difference can exceed the strategy&rsquo;s entire edge. This is the same arithmetic as <a href="/journal/gas-fees-as-a-trading-cost">gas fees on-chain</a>: a per-transaction cost that is trivial once and decisive at frequency.</p>
     <h2>What waiting actually costs</h2>
     <p>Not nothing, which is the part usually omitted. A resting order is a free option granted to the market: it fills when someone wants to trade against you, which is disproportionately when they know something or when the market is moving through your price.</p>
     <p>So maker fills are cheaper in fees and systematically worse in timing. The rebate is compensation for adverse selection, not a discount for patience.</p>
     <h2>The tier structure</h2>
     <p>Fees usually improve with volume, which means the same trade costs different amounts for different participants. A strategy that is marginal at retail fee tiers can be comfortably profitable at institutional ones, and a backtest run on one tier says little about the other.</p>
-    <p>Anyone evaluating a published crypto strategy should ask which fee tier it assumed, in the same way <a href="/journal/what-a-crypto-options-quote-means.html">any options strategy should be priced at fills rather than mids</a>.</p>
+    <p>Anyone evaluating a published crypto strategy should ask which fee tier it assumed, in the same way <a href="/journal/what-a-crypto-options-quote-means">any options strategy should be priced at fills rather than mids</a>.</p>
     <h2>The rule</h2>
     <p>Fee structure is part of the strategy, not an afterthought applied to it. A method that must take liquidity is a different business from one that can provide it, and the two should not be compared on gross results.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/routing-pools-vs-real-demand.html"><span class="rk">On-Chain Structure</span>Why the Biggest Pool on a Chain Is Usually Plumbing</a></li><li><a href="/journal/trading-a-market-with-no-close.html"><span class="rk">Crypto Discipline</span>A Market With No Close Removes Your Structure</a></li><li><a href="/journal/what-is-robinhood-chain.html"><span class="rk">On-Chain Structure</span>What Is Robinhood Chain, and Why Does It Matter to a Trader?</a></li><li><a href="/journal/bitcoin-options-expiry-0800-utc.html"><span class="rk">Crypto Dealer Flow</span>The 08:00 UTC Expiry: Why Crypto Pins Every Single Day</a></li><li><a href="/journal/crypto-options-position-limits-and-caps.html"><span class="rk">Crypto Options 101</span>The Limits Around a Crypto Options Position</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/routing-pools-vs-real-demand"><span class="rk">On-Chain Structure</span>Why the Biggest Pool on a Chain Is Usually Plumbing</a></li><li><a href="/journal/trading-a-market-with-no-close"><span class="rk">Crypto Discipline</span>A Market With No Close Removes Your Structure</a></li><li><a href="/journal/what-is-robinhood-chain"><span class="rk">On-Chain Structure</span>What Is Robinhood Chain, and Why Does It Matter to a Trader?</a></li><li><a href="/journal/bitcoin-options-expiry-0800-utc"><span class="rk">Crypto Dealer Flow</span>The 08:00 UTC Expiry: Why Crypto Pins Every Single Day</a></li><li><a href="/journal/crypto-options-position-limits-and-caps"><span class="rk">Crypto Options 101</span>The Limits Around a Crypto Options Position</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

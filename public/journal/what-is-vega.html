@@ -11,9 +11,9 @@
 <meta name="description" content="Vega measures how much an option's price changes when implied volatility moves. Here is why it matters, why it's biggest for at-the-money and longer-dated options.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-vega.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-vega">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-vega.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-vega">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="What Is Vega?">
 <meta property="og:description" content="Vega explained: how options react to changes in implied volatility, and why it punishes buyers after events.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Vega?", "description": "Vega measures how much an option's price changes when implied volatility moves. Here is why it matters, why it's biggest for at-the-money and longer-dated options, and how it burns earnings buyers.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-10-08", "dateModified": "2025-10-08", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-vega.html", "articleSection": "Options 101", "wordCount": 516, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Vega?", "description": "Vega measures how much an option's price changes when implied volatility moves. Here is why it matters, why it's biggest for at-the-money and longer-dated options, and how it burns earnings buyers.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-10-08", "dateModified": "2025-10-08", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-vega", "articleSection": "Options 101", "wordCount": 516, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Vega?", "item": "https://novo-options.trade/journal/what-is-vega.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Vega?", "item": "https://novo-options.trade/journal/what-is-vega"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-10-08">Oct 8, 2025</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Vega</strong> is one of the option <a href="/journal/options-greeks-explained.html">greeks</a>: it measures how much an option's price changes for a one-point move in <a href="/journal/what-is-implied-volatility.html">implied volatility</a>. If an option has a vega of 0.10, a one-point rise in IV adds roughly ten cents to its price - before any move in the underlying at all.</p>
+    <p><strong>Vega</strong> is one of the option <a href="/journal/options-greeks-explained">greeks</a>: it measures how much an option's price changes for a one-point move in <a href="/journal/what-is-implied-volatility">implied volatility</a>. If an option has a vega of 0.10, a one-point rise in IV adds roughly ten cents to its price - before any move in the underlying at all.</p>
     <h2>Why it matters</h2>
     <p>Options are priced partly on expected future movement. When implied volatility rises - fear, uncertainty, an event approaching - option prices inflate, and vega measures that sensitivity. When IV falls, prices deflate. You can be right on direction and still lose if IV collapses against you. That is a vega loss.</p>
     <h2>Where vega is biggest</h2>
-    <p>Vega is largest for at-the-money options and for those with more time to expiration. Long-dated, at-the-money contracts move a lot on IV swings; short-dated, far-out-of-the-money ones barely respond. This is why the <a href="/journal/trading-around-earnings.html">IV crush</a> after earnings hits at-the-money buyers hardest.</p>
+    <p>Vega is largest for at-the-money options and for those with more time to expiration. Long-dated, at-the-money contracts move a lot on IV swings; short-dated, far-out-of-the-money ones barely respond. This is why the <a href="/journal/trading-around-earnings">IV crush</a> after earnings hits at-the-money buyers hardest.</p>
     <p class="pull">Vega is the price of fear baked into your option. When the fear leaves, so does the premium.</p>
     <h2>The practical takeaway</h2>
-    <p>Buying options when IV is high means paying up for vega you'll likely lose when volatility normalizes. Buying when IV is low - checking <a href="/journal/iv-rank-vs-iv-percentile.html">IV rank</a> first - stacks vega in your favor. Understanding vega turns "why did my option lose when I was right?" into a question you can answer before you enter.</p>
+    <p>Buying options when IV is high means paying up for vega you'll likely lose when volatility normalizes. Buying when IV is low - checking <a href="/journal/iv-rank-vs-iv-percentile">IV rank</a> first - stacks vega in your favor. Understanding vega turns "why did my option lose when I was right?" into a question you can answer before you enter.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/box-spread-explained.html"><span class="rk">Options 101</span>The Box Spread, Explained (and How Traders Blew Up With It)</a></li><li><a href="/journal/far-otm-0dte-lottery-trap.html"><span class="rk">Options 101</span>Far-OTM 0DTE Options: The Lottery-Ticket Trap, With the Math</a></li><li><a href="/journal/long-vs-short-explained.html"><span class="rk">Trading Basics</span>Going Long vs. Going Short, Explained</a></li><li><a href="/journal/single-options-vs-spreads-scalping.html"><span class="rk">Options 101</span>Single Options vs Spreads for Scalping: Why Simpler Usually Wins</a></li><li><a href="/journal/what-does-dte-mean.html"><span class="rk">Basics</span>What Does DTE Mean? Days to Expiration, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/box-spread-explained"><span class="rk">Options 101</span>The Box Spread, Explained (and How Traders Blew Up With It)</a></li><li><a href="/journal/far-otm-0dte-lottery-trap"><span class="rk">Options 101</span>Far-OTM 0DTE Options: The Lottery-Ticket Trap, With the Math</a></li><li><a href="/journal/long-vs-short-explained"><span class="rk">Trading Basics</span>Going Long vs. Going Short, Explained</a></li><li><a href="/journal/single-options-vs-spreads-scalping"><span class="rk">Options 101</span>Single Options vs Spreads for Scalping: Why Simpler Usually Wins</a></li><li><a href="/journal/what-does-dte-mean"><span class="rk">Basics</span>What Does DTE Mean? Days to Expiration, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

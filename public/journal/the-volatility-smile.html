@@ -11,9 +11,9 @@
 <meta name="description" content="The volatility smile is the U-shaped curve of implied volatility across strikes — showing the market prices tail risk into far out-of-the-money options.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-volatility-smile.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-volatility-smile">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/the-volatility-smile.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-volatility-smile">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="The Volatility Smile">
 <meta property="og:description" content="Volatility smile explained: why implied volatility rises at the wings, what it reveals, and how it relates to skew.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Volatility Smile", "description": "The volatility smile is the U-shaped curve of implied volatility across strikes — showing the market prices tail risk into far out-of-the-money options. Here is what it reveals and how it relates to skew.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-13", "dateModified": "2026-03-13", "mainEntityOfPage": "https://novo-options.trade/journal/the-volatility-smile.html", "articleSection": "Volatility", "wordCount": 557, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Volatility Smile", "description": "The volatility smile is the U-shaped curve of implied volatility across strikes — showing the market prices tail risk into far out-of-the-money options. Here is what it reveals and how it relates to skew.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-13", "dateModified": "2026-03-13", "mainEntityOfPage": "https://novo-options.trade/journal/the-volatility-smile", "articleSection": "Volatility", "wordCount": 557, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Volatility & Macro", "item": "https://novo-options.trade/journal/volatility-macro"}, {"@type": "ListItem", "position": 4, "name": "The Volatility Smile", "item": "https://novo-options.trade/journal/the-volatility-smile.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Volatility & Macro", "item": "https://novo-options.trade/journal/volatility-macro"}, {"@type": "ListItem", "position": 4, "name": "The Volatility Smile", "item": "https://novo-options.trade/journal/the-volatility-smile"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-03-13">Mar 13, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p>If you plot the <a href="/journal/what-is-implied-volatility.html">implied volatility</a> of options across strikes (for one expiration), you rarely get a flat line. Often you get a U-shape — higher IV for deep out-of-the-money puts and calls, lower in the middle. That curve is the <strong>volatility smile</strong>. It reveals that the market prices <em>tail risk</em> into the wings.</p>
+    <p>If you plot the <a href="/journal/what-is-implied-volatility">implied volatility</a> of options across strikes (for one expiration), you rarely get a flat line. Often you get a U-shape — higher IV for deep out-of-the-money puts and calls, lower in the middle. That curve is the <strong>volatility smile</strong>. It reveals that the market prices <em>tail risk</em> into the wings.</p>
     <h2>Why the smile exists</h2>
     <p>The classic Black-Scholes model assumes a single, constant volatility and normally-distributed returns. Reality disagrees: markets have fat tails — extreme moves happen more often than a normal distribution predicts. So traders bid up the price (and thus implied volatility) of far-out-of-the-money options that pay off in those extreme moves. The smile is the market correcting the model's tail blindness.</p>
     <h2>Smile vs skew</h2>
-    <p>The smile and <a href="/journal/volatility-skew-explained.html">skew</a> are related views of the same surface. A symmetric smile (both wings elevated) reflects tail risk in both directions. In equity indexes, the curve is usually lopsided — a <em>skew</em> — with downside puts far more expensive than upside calls, because crashes are faster and hedging demand is one-sided. The "smile" often looks more like a "smirk" in stocks.</p>
+    <p>The smile and <a href="/journal/volatility-skew-explained">skew</a> are related views of the same surface. A symmetric smile (both wings elevated) reflects tail risk in both directions. In equity indexes, the curve is usually lopsided — a <em>skew</em> — with downside puts far more expensive than upside calls, because crashes are faster and hedging demand is one-sided. The "smile" often looks more like a "smirk" in stocks.</p>
     <p class="pull">The volatility smile is the options market saying, out loud, that the tails are fatter than the textbook admits.</p>
     <h2>Why it matters</h2>
-    <p>The smile shapes what you pay: far-OTM options are relatively expensive because their IV is elevated. It also feeds <a href="/journal/what-is-gamma-exposure-gex.html">dealer positioning</a> and how the tape behaves near big strikes. You don't need to trade the surface to benefit — just to know that "cheap" and "expensive" options are priced by a curve that already respects tail risk, not by distance-from-strike alone.</p>
+    <p>The smile shapes what you pay: far-OTM options are relatively expensive because their IV is elevated. It also feeds <a href="/journal/what-is-gamma-exposure-gex">dealer positioning</a> and how the tape behaves near big strikes. You don't need to trade the surface to benefit — just to know that "cheap" and "expensive" options are priced by a curve that already respects tail risk, not by distance-from-strike alone.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/vix-spike-fade.html"><span class="rk">Volatility</span>The VIX Fear Spike Fade: Why Panic Often Marks the Low</a></li><li><a href="/journal/what-is-the-vix.html"><span class="rk">Volatility</span>What Is the VIX? The Market's Fear Gauge, Explained</a></li><li><a href="/journal/earnings-season-explained.html"><span class="rk">Catalysts</span>Earnings Season</a></li><li><a href="/journal/ism-pmi-explained.html"><span class="rk">Catalysts</span>ISM &amp; PMI, Explained</a></li><li><a href="/journal/post-event-iv-crush.html"><span class="rk">Volatility</span>The Post-Event IV Crush on SPY Options</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/volatility-macro" style="color:var(--cyan);font-weight:700;">All Volatility &amp; Macro articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/vix-spike-fade"><span class="rk">Volatility</span>The VIX Fear Spike Fade: Why Panic Often Marks the Low</a></li><li><a href="/journal/what-is-the-vix"><span class="rk">Volatility</span>What Is the VIX? The Market's Fear Gauge, Explained</a></li><li><a href="/journal/earnings-season-explained"><span class="rk">Catalysts</span>Earnings Season</a></li><li><a href="/journal/ism-pmi-explained"><span class="rk">Catalysts</span>ISM &amp; PMI, Explained</a></li><li><a href="/journal/post-event-iv-crush"><span class="rk">Volatility</span>The Post-Event IV Crush on SPY Options</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/volatility-macro" style="color:var(--cyan);font-weight:700;">All Volatility &amp; Macro articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

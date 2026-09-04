@@ -10,11 +10,11 @@
 <title>Where Your Liquidation Price Actually Sits | NoVo Options Trading</title>
 <meta name="description" content="Leverage is usually quoted as a multiple. The number that matters is the percentage move against you that ends the position, and it is not linear.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/liquidation-price-and-leverage-math.html">
+<link rel="canonical" href="https://novo-options.trade/journal/liquidation-price-and-leverage-math">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/liquidation-price-and-leverage-math.html">
+<meta property="og:url" content="https://novo-options.trade/journal/liquidation-price-and-leverage-math">
 <meta property="og:title" content="Where Your Liquidation Price Actually Sits">
 <meta property="og:description" content="Leverage is usually quoted as a multiple. The number that matters is the percentage move against you that ends the position, and it is not linear.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Where Your Liquidation Price Actually Sits", "description": "Leverage is usually quoted as a multiple. The number that matters is the percentage move against you that ends the position, and it is not linear.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/liquidation-price-and-leverage-math.html", "articleSection": "Margin & Liquidation", "wordCount": 294, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Where Your Liquidation Price Actually Sits", "description": "Leverage is usually quoted as a multiple. The number that matters is the percentage move against you that ends the position, and it is not linear.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/liquidation-price-and-leverage-math", "articleSection": "Margin & Liquidation", "wordCount": 294, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where Your Liquidation Price Actually Sits", "item": "https://novo-options.trade/journal/liquidation-price-and-leverage-math.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where Your Liquidation Price Actually Sits", "item": "https://novo-options.trade/journal/liquidation-price-and-leverage-math"}]}
 </script>
 </head>
 <body>
@@ -62,13 +62,13 @@
     <p>So the interesting region is entirely at the low end. Above roughly 20x the position is already living inside ordinary intraday noise, and further increases barely change a survival profile that is already governed by luck.</p>
     <h2>What makes it tighter than the arithmetic</h2>
     <p>Three things, all of which move the wrong way at once.</p>
-    <p><strong>Maintenance margin</strong> means you are closed before the equity is gone, and the requirement <a href="/journal/initial-and-maintenance-margin-crypto.html">rises with position size</a>. <strong>Funding</strong> is deducted while you hold, so a position on the crowded side is paying rent that erodes the buffer without price moving at all. And it is all measured against <a href="/journal/mark-price-vs-last-price.html">the mark price</a>, not the chart.</p>
+    <p><strong>Maintenance margin</strong> means you are closed before the equity is gone, and the requirement <a href="/journal/initial-and-maintenance-margin-crypto">rises with position size</a>. <strong>Funding</strong> is deducted while you hold, so a position on the crowded side is paying rent that erodes the buffer without price moving at all. And it is all measured against <a href="/journal/mark-price-vs-last-price">the mark price</a>, not the chart.</p>
     <h2>The right way to size</h2>
     <p>Backwards, from the level rather than from the multiple. Decide where price would prove the idea wrong, put the liquidation meaningfully beyond it, and let that determine the leverage &mdash; instead of picking a multiple and discovering afterwards where the liquidation landed.</p>
-    <p>This matters more in a thin market than a deep one, because the move that reaches you is smaller and, per <a href="/journal/thin-liquidity-and-volatility.html">thin liquidity and volatility</a>, more likely to extend once it starts.</p>
+    <p>This matters more in a thin market than a deep one, because the move that reaches you is smaller and, per <a href="/journal/thin-liquidity-and-volatility">thin liquidity and volatility</a>, more likely to extend once it starts.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/position-sizing-in-a-market-that-never-closes.html"><span class="rk">Margin &amp; Liquidation</span>Sizing a Position You Cannot Watch</a></li><li><a href="/journal/the-true-cost-of-a-crypto-round-trip.html"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc.html"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure.html"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin.html"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/position-sizing-in-a-market-that-never-closes"><span class="rk">Margin &amp; Liquidation</span>Sizing a Position You Cannot Watch</a></li><li><a href="/journal/the-true-cost-of-a-crypto-round-trip"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

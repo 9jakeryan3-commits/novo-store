@@ -10,11 +10,11 @@
 <title>Funding Arbitrage Between Venues | NoVo Options Trading</title>
 <meta name="description" content="When two venues disagree on funding, the spread is capturable. What it costs to capture is why the disagreement persists.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks.html">
+<link rel="canonical" href="https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks.html">
+<meta property="og:url" content="https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks">
 <meta property="og:title" content="Funding Arbitrage Between Venues">
 <meta property="og:description" content="When two venues disagree on funding, the spread is capturable. What it costs to capture is why the disagreement persists.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Funding Arbitrage Between Venues", "description": "When two venues disagree on funding, the spread is capturable. What it costs to capture is why the disagreement persists.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks.html", "articleSection": "Perps & Funding", "wordCount": 311, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Funding Arbitrage Between Venues", "description": "When two venues disagree on funding, the spread is capturable. What it costs to capture is why the disagreement persists.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks", "articleSection": "Perps & Funding", "wordCount": 311, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Funding Arbitrage Between Venues", "item": "https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Funding Arbitrage Between Venues", "item": "https://novo-options.trade/journal/funding-arbitrage-and-its-real-risks"}]}
 </script>
 </head>
 <body>
@@ -56,20 +56,20 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Because <a href="/journal/why-funding-is-never-blended-across-venues.html">every venue computes its own funding</a>, two can print materially different rates on the same coin at the same moment. Long the perpetual where funding is negative, short it where funding is positive, and you are delta-flat while collecting both.</p>
+    <p>Because <a href="/journal/why-funding-is-never-blended-across-venues">every venue computes its own funding</a>, two can print materially different rates on the same coin at the same moment. Long the perpetual where funding is negative, short it where funding is positive, and you are delta-flat while collecting both.</p>
     <p>It is a real trade. It is also a good lesson in why persistent spreads are usually persistent for a reason.</p>
     <h2>Capital in two places</h2>
     <p>Both legs need margin, on separate venues, and neither knows about the other. Each judges its leg on its own rules, which means an adverse move can liquidate one side while the other sits comfortably in profit, leaving you suddenly directional.</p>
-    <p>The defence is holding far more margin than the nominal position requires, which immediately reduces the return on the capital committed. That trade-off is the arbitrage&rsquo;s central problem, and it is the same failure mode as <a href="/journal/the-cash-and-carry-trade.html">the cash-and-carry trade</a> in a different arrangement.</p>
+    <p>The defence is holding far more margin than the nominal position requires, which immediately reduces the return on the capital committed. That trade-off is the arbitrage&rsquo;s central problem, and it is the same failure mode as <a href="/journal/the-cash-and-carry-trade">the cash-and-carry trade</a> in a different arrangement.</p>
     <h2>The rate is not fixed and neither is the gap</h2>
     <p>Funding recalculates every interval. The spread you entered on can narrow, vanish, or invert, at which point you are paying on both legs while still carrying the execution risk of two positions on two venues.</p>
-    <p>And the intervals themselves may differ &mdash; <a href="/journal/funding-payment-schedules-differ-by-venue.html">venues settle on different schedules</a> &mdash; so a spread computed from two raw rates can be an artefact of comparing numbers measured over different periods rather than a real edge.</p>
+    <p>And the intervals themselves may differ &mdash; <a href="/journal/funding-payment-schedules-differ-by-venue">venues settle on different schedules</a> &mdash; so a spread computed from two raw rates can be an artefact of comparing numbers measured over different periods rather than a real edge.</p>
     <h2>Why the spread survives</h2>
-    <p>Collateral does not move instantly between venues, transfers cost money, and each venue carries its own <a href="/journal/socialized-loss-and-exchange-risk.html">counterparty risk</a>. The spread is roughly the market&rsquo;s price for tying up capital in two places and accepting both venues&rsquo; risk.</p>
+    <p>Collateral does not move instantly between venues, transfers cost money, and each venue carries its own <a href="/journal/socialized-loss-and-exchange-risk">counterparty risk</a>. The spread is roughly the market&rsquo;s price for tying up capital in two places and accepting both venues&rsquo; risk.</p>
     <p>Which is exactly why the disagreement is worth reading even if you never trade it: a persistent gap is telling you something about where leverage sits and how hard it is to move capital there.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/layer-1-tokens-as-a-structural-family.html"><span class="rk">Per-Coin Structure</span>Layer-1 Tokens: You Are Buying the Gas</a></li><li><a href="/journal/partial-fills-and-order-types-in-crypto.html"><span class="rk">Crypto Costs</span>Order Types Are Not Standardised Here</a></li><li><a href="/journal/the-dollar-and-crypto.html"><span class="rk">Crypto Macro</span>The Dollar Is the Denominator</a></li><li><a href="/journal/what-a-liquidation-wick-tells-you.html"><span class="rk">Margin &amp; Liquidation</span>Reading a Liquidation Wick</a></li><li><a href="/journal/why-funding-is-never-blended-across-venues.html"><span class="rk">Perps &amp; Funding</span>Why Funding Should Never Be Blended Across Venues</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/layer-1-tokens-as-a-structural-family"><span class="rk">Per-Coin Structure</span>Layer-1 Tokens: You Are Buying the Gas</a></li><li><a href="/journal/partial-fills-and-order-types-in-crypto"><span class="rk">Crypto Costs</span>Order Types Are Not Standardised Here</a></li><li><a href="/journal/the-dollar-and-crypto"><span class="rk">Crypto Macro</span>The Dollar Is the Denominator</a></li><li><a href="/journal/what-a-liquidation-wick-tells-you"><span class="rk">Margin &amp; Liquidation</span>Reading a Liquidation Wick</a></li><li><a href="/journal/why-funding-is-never-blended-across-venues"><span class="rk">Perps &amp; Funding</span>Why Funding Should Never Be Blended Across Venues</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

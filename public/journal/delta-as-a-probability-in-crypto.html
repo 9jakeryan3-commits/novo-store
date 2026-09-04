@@ -10,11 +10,11 @@
 <title>Delta as a Rough Probability, and Where That Breaks | NoVo Options Trading</title>
 <meta name="description" content="The shorthand is useful and it is a shorthand. It inherits every assumption of the pricing model underneath, and crypto strains several of them.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/delta-as-a-probability-in-crypto.html">
+<link rel="canonical" href="https://novo-options.trade/journal/delta-as-a-probability-in-crypto">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/delta-as-a-probability-in-crypto.html">
+<meta property="og:url" content="https://novo-options.trade/journal/delta-as-a-probability-in-crypto">
 <meta property="og:title" content="Delta as a Rough Probability, and Where That Breaks">
 <meta property="og:description" content="The shorthand is useful and it is a shorthand. It inherits every assumption of the pricing model underneath, and crypto strains several of them.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Delta as a Rough Probability, and Where That Breaks", "description": "Delta approximates the chance of finishing in the money. The approximation leans on assumptions crypto satisfies less well than equities do.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/delta-as-a-probability-in-crypto.html", "articleSection": "Crypto Options 101", "wordCount": 300, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Delta as a Rough Probability, and Where That Breaks", "description": "Delta approximates the chance of finishing in the money. The approximation leans on assumptions crypto satisfies less well than equities do.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/delta-as-a-probability-in-crypto", "articleSection": "Crypto Options 101", "wordCount": 300, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Delta as a Rough Probability, and Where That Breaks", "item": "https://novo-options.trade/journal/delta-as-a-probability-in-crypto.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Delta as a Rough Probability, and Where That Breaks", "item": "https://novo-options.trade/journal/delta-as-a-probability-in-crypto"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>A 25-delta option is loosely described as having about a 25% chance of expiring in the money. The general relationship, and its caveats, are in <a href="/journal/delta-probability-in-the-money.html">delta and probability</a>.</p>
+    <p>A 25-delta option is loosely described as having about a 25% chance of expiring in the money. The general relationship, and its caveats, are in <a href="/journal/delta-probability-in-the-money">delta and probability</a>.</p>
     <p>It is a convenient approximation of a model output, not a measured frequency, and the model assumes returns are distributed in a way crypto respects less than most markets.</p>
     <h2>The fat tails problem</h2>
-    <p>The pricing model assumes a distribution with thinner tails than crypto actually has. Large moves happen more often than the model expects, partly because of the leverage feedback in <a href="/journal/why-crypto-volatility-clusters.html">why crypto volatility clusters</a>.</p>
+    <p>The pricing model assumes a distribution with thinner tails than crypto actually has. Large moves happen more often than the model expects, partly because of the leverage feedback in <a href="/journal/why-crypto-volatility-clusters">why crypto volatility clusters</a>.</p>
     <p>So far out-of-the-money options are more likely to finish in the money than their delta suggests. The market knows this and prices it, which is why the volatility surface is not flat, and it means delta-as-probability is least reliable exactly at the strikes where people most want a probability.</p>
     <h2>Settlement changes what delta even means</h2>
-    <p>On a coin-settled contract, delta is expressed against the coin while the payoff is curved in dollars. So a 25-delta call is not a 25% chance of a proportional dollar gain &mdash; the relationship is bent by <a href="/journal/moneyness-in-an-inverse-contract.html">the inverse payoff</a>.</p>
-    <p>Comparing a 25-delta strike on a coin-settled book with one on a linear book is therefore comparing two different things, the aggregation trap from <a href="/journal/usdc-settled-vs-coin-settled-options.html">settlement currency decides what the numbers mean</a>.</p>
+    <p>On a coin-settled contract, delta is expressed against the coin while the payoff is curved in dollars. So a 25-delta call is not a 25% chance of a proportional dollar gain &mdash; the relationship is bent by <a href="/journal/moneyness-in-an-inverse-contract">the inverse payoff</a>.</p>
+    <p>Comparing a 25-delta strike on a coin-settled book with one on a linear book is therefore comparing two different things, the aggregation trap from <a href="/journal/usdc-settled-vs-coin-settled-options">settlement currency decides what the numbers mean</a>.</p>
     <h2>What it is still good for</h2>
     <p>Comparing strikes on the same book, which is the job it actually does well. Delta-based strike selection is a consistent ruler even when its absolute interpretation is loose, and skew is defined as a comparison at equal deltas for exactly that reason.</p>
     <h2>The framing</h2>
     <p>Treat delta as a position on a ruler, not as a forecast. Every use that survives contact with crypto is a relative one.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/holder-concentration-and-exit-risk.html"><span class="rk">On-Chain Structure</span>Holder Concentration: Many Wallets or a Few</a></li><li><a href="/journal/maker-taker-fees-and-what-they-buy.html"><span class="rk">Crypto Costs</span>Maker and Taker Fees: You Are Being Paid to Wait</a></li><li><a href="/journal/routing-pools-vs-real-demand.html"><span class="rk">On-Chain Structure</span>Why the Biggest Pool on a Chain Is Usually Plumbing</a></li><li><a href="/journal/trading-a-market-with-no-close.html"><span class="rk">Crypto Discipline</span>A Market With No Close Removes Your Structure</a></li><li><a href="/journal/what-is-robinhood-chain.html"><span class="rk">On-Chain Structure</span>What Is Robinhood Chain, and Why Does It Matter to a Trader?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/holder-concentration-and-exit-risk"><span class="rk">On-Chain Structure</span>Holder Concentration: Many Wallets or a Few</a></li><li><a href="/journal/maker-taker-fees-and-what-they-buy"><span class="rk">Crypto Costs</span>Maker and Taker Fees: You Are Being Paid to Wait</a></li><li><a href="/journal/routing-pools-vs-real-demand"><span class="rk">On-Chain Structure</span>Why the Biggest Pool on a Chain Is Usually Plumbing</a></li><li><a href="/journal/trading-a-market-with-no-close"><span class="rk">Crypto Discipline</span>A Market With No Close Removes Your Structure</a></li><li><a href="/journal/what-is-robinhood-chain"><span class="rk">On-Chain Structure</span>What Is Robinhood Chain, and Why Does It Matter to a Trader?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

@@ -10,11 +10,11 @@
 <title>TVL Is a Price, Not a Quantity | NoVo Options Trading</title>
 <meta name="description" content="Total value locked moves when prices move, double-counts looped positions, and can be rented &mdash; the industry&rsquo;s favorite metric measures less than it claims.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity.html">
+<link rel="canonical" href="https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity.html">
+<meta property="og:url" content="https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity">
 <meta property="og:title" content="TVL Is a Price, Not a Quantity">
 <meta property="og:description" content="Total value locked moves when prices move, double-counts looped positions, and can be rented &mdash; the industry&rsquo;s favorite metric measures less than it claims.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "TVL Is a Price, Not a Quantity", "description": "Total value locked moves when prices move, double-counts looped positions, and can be rented — the industry’s favorite metric measures less than it claims.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity.html", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "TVL Is a Price, Not a Quantity", "description": "Total value locked moves when prices move, double-counts looped positions, and can be rented — the industry’s favorite metric measures less than it claims.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "TVL Is a Price, Not a Quantity", "item": "https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "TVL Is a Price, Not a Quantity", "item": "https://novo-options.trade/journal/tvl-is-a-price-not-a-quantity"}]}
 </script>
 </head>
 <body>
@@ -59,14 +59,14 @@
 <h2>The denominator problem</h2>
 <p>Total value locked is denominated in dollars, but the locked things are volatile tokens &mdash; so TVL rises when prices rise with no new deposit anywhere. Half of every TVL boom is just the market marking itself up; comparing TVL across time without price-adjusting is comparing temperatures in two different units.</p>
 <h2>The double-counting problem</h2>
-<p>Deposits loop: a token is staked, its receipt is <a href="/journal/why-wrapped-assets-exist.html">wrapped</a>, the wrapper is posted as collateral, the borrowed asset is deposited again. Each hop counts as new value locked. Recursive positions mean headline TVL can exceed the capital that actually entered by multiples &mdash; leverage wearing a growth costume.</p>
+<p>Deposits loop: a token is staked, its receipt is <a href="/journal/why-wrapped-assets-exist">wrapped</a>, the wrapper is posted as collateral, the borrowed asset is deposited again. Each hop counts as new value locked. Recursive positions mean headline TVL can exceed the capital that actually entered by multiples &mdash; leverage wearing a growth costume.</p>
 <h2>The rented problem</h2>
-<p>Incentive programs rent TVL the way <a href="/journal/optimism-market-structure.html">emissions rent usage</a>: capital arrives for the subsidy and leaves with it, having proven only that yield attracts money. Sticky TVL &mdash; deposits that survive incentive expiry &mdash; is the honest core, and no dashboard headline separates it for you.</p>
+<p>Incentive programs rent TVL the way <a href="/journal/optimism-market-structure">emissions rent usage</a>: capital arrives for the subsidy and leaves with it, having proven only that yield attracts money. Sticky TVL &mdash; deposits that survive incentive expiry &mdash; is the honest core, and no dashboard headline separates it for you.</p>
 <h2>Reading it</h2>
-<p>Use TVL in native units for real growth, watch flows around incentive cliffs for stickiness, and discount every recursive layer you can identify. As with <a href="/journal/wash-trading-and-on-chain-volume.html">on-chain volume</a>, the metric is manufactured exactly as often as it is meaningful &mdash; the reading skill is telling which.</p>
+<p>Use TVL in native units for real growth, watch flows around incentive cliffs for stickiness, and discount every recursive layer you can identify. As with <a href="/journal/wash-trading-and-on-chain-volume">on-chain volume</a>, the metric is manufactured exactly as often as it is meaningful &mdash; the reading skill is telling which.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/wash-trading-and-on-chain-volume.html"><span class="rk">Coins &amp; Chains</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/why-wrapped-assets-exist.html"><span class="rk">Coins &amp; Chains</span>Why Wrapped Assets Exist, and What They Cost You</a></li><li><a href="/journal/optimism-market-structure.html"><span class="rk">Coins &amp; Chains</span>OP: A Token That Spends Itself on Its Own Ecosystem</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/wash-trading-and-on-chain-volume"><span class="rk">Coins &amp; Chains</span>On-Chain Volume Is the Easiest Number to Manufacture</a></li><li><a href="/journal/why-wrapped-assets-exist"><span class="rk">Coins &amp; Chains</span>Why Wrapped Assets Exist, and What They Cost You</a></li><li><a href="/journal/optimism-market-structure"><span class="rk">Coins &amp; Chains</span>OP: A Token That Spends Itself on Its Own Ecosystem</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 
 </div>
 

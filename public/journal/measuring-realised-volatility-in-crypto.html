@@ -10,11 +10,11 @@
 <title>Measuring Realised Volatility Without Fooling Yourself | NoVo Options Trading</title>
 <meta name="description" content="The window, the sampling frequency and the annualisation factor are all choices, and each one changes the answer. In a 24/7 market one of them is usually wrong.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/measuring-realised-volatility-in-crypto.html">
+<link rel="canonical" href="https://novo-options.trade/journal/measuring-realised-volatility-in-crypto">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/measuring-realised-volatility-in-crypto.html">
+<meta property="og:url" content="https://novo-options.trade/journal/measuring-realised-volatility-in-crypto">
 <meta property="og:title" content="Measuring Realised Volatility Without Fooling Yourself">
 <meta property="og:description" content="The window, the sampling frequency and the annualisation factor are all choices, and each one changes the answer. In a 24/7 market one of them is usually wrong.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Measuring Realised Volatility Without Fooling Yourself", "description": "The window, the sampling frequency and the annualisation factor are all choices, and each one changes the answer. In a 24/7 market one of them is usually wrong.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/measuring-realised-volatility-in-crypto.html", "articleSection": "Crypto Volatility", "wordCount": 329, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Measuring Realised Volatility Without Fooling Yourself", "description": "The window, the sampling frequency and the annualisation factor are all choices, and each one changes the answer. In a 24/7 market one of them is usually wrong.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/measuring-realised-volatility-in-crypto", "articleSection": "Crypto Volatility", "wordCount": 329, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Measuring Realised Volatility Without Fooling Yourself", "item": "https://novo-options.trade/journal/measuring-realised-volatility-in-crypto.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Measuring Realised Volatility Without Fooling Yourself", "item": "https://novo-options.trade/journal/measuring-realised-volatility-in-crypto"}]}
 </script>
 </head>
 <body>
@@ -59,19 +59,19 @@
     <p>Realised volatility is computed from returns over some period. Simple enough &mdash; except that the period, the sampling interval and the scaling to an annual figure are all choices, and reasonable choices produce meaningfully different numbers for the same market.</p>
     <h2>The window</h2>
     <p>Short windows are responsive and noisy; long ones are stable and slow. Neither is correct in general &mdash; the right window is the one matching the horizon of the decision. Measuring 90-day realised volatility to size a position you will hold for two hours answers a question you did not ask.</p>
-    <p>The honest practice is to compute several and look at whether they agree, which is what <a href="/journal/volatility-cones-for-crypto.html">a volatility cone</a> does systematically.</p>
+    <p>The honest practice is to compute several and look at whether they agree, which is what <a href="/journal/volatility-cones-for-crypto">a volatility cone</a> does systematically.</p>
     <h2>The sampling interval</h2>
     <p>Daily closes are the convention. Higher-frequency sampling captures intraday movement that daily closes miss entirely &mdash; an asset that swings violently and closes flat looks calm on daily data and is not.</p>
     <p>Higher frequency also picks up microstructure noise: the bid-ask bounce inflates measured volatility at very short intervals without any real movement occurring. So finer is not simply better, and the interval should be stated alongside the number.</p>
     <h2>The annualisation factor, which is where crypto trips people</h2>
     <p>Scaling a period volatility to an annual figure multiplies by the square root of the number of periods in a year. Equity convention uses roughly 252 trading days.</p>
     <p><strong>Crypto trades every day.</strong> Using 252 on a market with 365 days produces a number about 20% too low, consistently, invisibly, and in a way that makes every comparison against an equity figure wrong in the same direction.</p>
-    <p>This is a close cousin of <a href="/journal/funding-payment-schedules-differ-by-venue.html">annualising a funding rate with the wrong interval</a>: an arithmetic constant, carried across from another market, producing an authoritative figure that is wrong by a fixed multiple.</p>
+    <p>This is a close cousin of <a href="/journal/funding-payment-schedules-differ-by-venue">annualising a funding rate with the wrong interval</a>: an arithmetic constant, carried across from another market, producing an authoritative figure that is wrong by a fixed multiple.</p>
     <h2>Reporting it honestly</h2>
     <p>Window, sampling interval and annualisation basis, stated with the number. Without those three, a realised volatility figure cannot be reproduced or compared, which makes it a claim rather than a measurement.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/solana-market-structure.html"><span class="rk">Per-Coin Structure</span>Solana: An Options Book on One Side, a Whole Chain on the Other</a></li><li><a href="/journal/usdc-settled-vs-coin-settled-options.html"><span class="rk">Crypto Dealer Flow</span>Settlement Currency Decides What the Numbers Mean</a></li><li><a href="/journal/what-to-check-before-trading-a-new-token.html"><span class="rk">Crypto Discipline</span>What to Check Before Trading a Token You Just Found</a></li><li><a href="/journal/bridges-and-cross-chain-risk.html"><span class="rk">On-Chain Structure</span>A Bridged Token Is a Claim, Not the Asset</a></li><li><a href="/journal/defi-governance-tokens.html"><span class="rk">Per-Coin Structure</span>DeFi Governance Tokens: Revenue, or Only a Vote?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/solana-market-structure"><span class="rk">Per-Coin Structure</span>Solana: An Options Book on One Side, a Whole Chain on the Other</a></li><li><a href="/journal/usdc-settled-vs-coin-settled-options"><span class="rk">Crypto Dealer Flow</span>Settlement Currency Decides What the Numbers Mean</a></li><li><a href="/journal/what-to-check-before-trading-a-new-token"><span class="rk">Crypto Discipline</span>What to Check Before Trading a Token You Just Found</a></li><li><a href="/journal/bridges-and-cross-chain-risk"><span class="rk">On-Chain Structure</span>A Bridged Token Is a Claim, Not the Asset</a></li><li><a href="/journal/defi-governance-tokens"><span class="rk">Per-Coin Structure</span>DeFi Governance Tokens: Revenue, or Only a Vote?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

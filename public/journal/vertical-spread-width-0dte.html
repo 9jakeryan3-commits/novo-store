@@ -10,11 +10,11 @@
 <title>How Wide Should a Vertical Spread Be on SPY 0DTE? | NoVo</title>
 <meta name="description" content="A vertical spread's width sets its cost, its max payoff, and how much it behaves like a single option.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/vertical-spread-width-0dte.html">
+<link rel="canonical" href="https://novo-options.trade/journal/vertical-spread-width-0dte">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/vertical-spread-width-0dte.html">
+<meta property="og:url" content="https://novo-options.trade/journal/vertical-spread-width-0dte">
 <meta property="og:title" content="How Wide Should a Vertical Spread Be on SPY 0DTE?">
 <meta property="og:description" content="Spread width trades cost against payoff and single-option-like behavior. How to size a SPY 0DTE vertical to your target.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "How Wide Should a Vertical Spread Be on SPY 0DTE?", "description": "Spread width trades cost against payoff and single-option-like behavior. How to size a SPY 0DTE vertical to your target.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/vertical-spread-width-0dte.html", "articleSection": "Options 101", "wordCount": 600, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "How Wide Should a Vertical Spread Be on SPY 0DTE?", "description": "Spread width trades cost against payoff and single-option-like behavior. How to size a SPY 0DTE vertical to your target.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/vertical-spread-width-0dte", "articleSection": "Options 101", "wordCount": 600, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "How Wide Should a Vertical Spread Be on SPY 0DTE?", "item": "https://novo-options.trade/journal/vertical-spread-width-0dte.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "How Wide Should a Vertical Spread Be on SPY 0DTE?", "item": "https://novo-options.trade/journal/vertical-spread-width-0dte"}]}
 </script>
 </head>
 <body>
@@ -52,18 +52,18 @@
   <header class="article-head">
     <div class="kicker">Options 101</div>
     <h1>How Wide Should a Vertical Spread Be on SPY 0DTE?</h1>
-    <p class="standfirst">If you do trade a <a href="/journal/debit-spread-to-cut-theta.html">vertical</a> on 0DTE, its width is the main dial &mdash; and most traders set it without thinking about what it actually controls.</p>
+    <p class="standfirst">If you do trade a <a href="/journal/debit-spread-to-cut-theta">vertical</a> on 0DTE, its width is the main dial &mdash; and most traders set it without thinking about what it actually controls.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/0dte">0DTE options guide</a></div>
   <div class="article-body">
-    <p>A vertical spread's <strong>width</strong> &mdash; the distance between the long and short strikes &mdash; is its defining parameter. It sets what the spread costs, what it can pay, and how much it behaves like a plain <a href="/journal/single-options-vs-spreads-scalping.html">single option</a>. On a fast 0DTE trade, getting it right is most of the decision.</p>
+    <p>A vertical spread's <strong>width</strong> &mdash; the distance between the long and short strikes &mdash; is its defining parameter. It sets what the spread costs, what it can pay, and how much it behaves like a plain <a href="/journal/single-options-vs-spreads-scalping">single option</a>. On a fast 0DTE trade, getting it right is most of the decision.</p>
     <h2>The trade-off width controls</h2>
-    <p>A <strong>narrow</strong> spread ($1&ndash;2 wide on SPY) is cheap, decays slowly, and has a modest, quickly-capped payoff &mdash; a defined, low-cost bet to a nearby level. A <strong>wide</strong> spread costs more, pays more, and behaves increasingly like a single long option (more <a href="/journal/theta-decay-explained.html">theta</a>, more premium at risk), because the far short strike does less to finance the trade. Width is the slider between &ldquo;cheap and capped&rdquo; and &ldquo;expensive and open.&rdquo;</p>
+    <p>A <strong>narrow</strong> spread ($1&ndash;2 wide on SPY) is cheap, decays slowly, and has a modest, quickly-capped payoff &mdash; a defined, low-cost bet to a nearby level. A <strong>wide</strong> spread costs more, pays more, and behaves increasingly like a single long option (more <a href="/journal/theta-decay-explained">theta</a>, more premium at risk), because the far short strike does less to finance the trade. Width is the slider between &ldquo;cheap and capped&rdquo; and &ldquo;expensive and open.&rdquo;</p>
     <h2>Match width to the target</h2>
-    <p>The clean rule: set the short strike <strong>at your target level</strong>. If you're playing a grind up to the <a href="/journal/gamma-walls-explained.html">call wall</a> two dollars away, a spread whose short strike sits at that wall captures the whole expected move and caps you exactly where you'd have taken profit anyway, so the cap costs you nothing real. Width beyond your realistic target just adds cost for payoff you won't reach; width short of it caps you before the move is done.</p>
+    <p>The clean rule: set the short strike <strong>at your target level</strong>. If you're playing a grind up to the <a href="/journal/gamma-walls-explained">call wall</a> two dollars away, a spread whose short strike sits at that wall captures the whole expected move and caps you exactly where you'd have taken profit anyway, so the cap costs you nothing real. Width beyond your realistic target just adds cost for payoff you won't reach; width short of it caps you before the move is done.</p>
     <p class="pull">Don't pick a width &mdash; pick a target, and let the target set the width. The short strike belongs at the level you're aiming for.</p>
     <h2>Frame it against the move</h2>
-    <p>Anchor the whole thing to the <a href="/journal/the-expected-move.html">expected move</a>. A spread wider than the day's realistic range is paying for territory the session won't cover; one that fits inside the expected move to a real level is sized to what can actually happen. And if you find yourself wanting a wide spread for open-ended upside, that's a sign a <a href="/journal/single-options-vs-spreads-scalping.html">single option</a> was the right tool all along.</p>
+    <p>Anchor the whole thing to the <a href="/journal/the-expected-move">expected move</a>. A spread wider than the day's realistic range is paying for territory the session won't cover; one that fits inside the expected move to a real level is sized to what can actually happen. And if you find yourself wanting a wide spread for open-ended upside, that's a sign a <a href="/journal/single-options-vs-spreads-scalping">single option</a> was the right tool all along.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-reclaim.html"><span class="rk">Glossary</span>What Is a "Reclaim" of a Level?</a></li><li><a href="/journal/what-is-lifting-the-offer.html"><span class="rk">Glossary</span>What Does "Lifting the Offer" Mean?</a></li><li><a href="/journal/0dte-loss-right-after-buying.html"><span class="rk">Options 101</span>Why Your 0DTE Option Shows a Loss the Second You Buy It</a></li><li><a href="/journal/debit-spread-to-cut-theta.html"><span class="rk">Options 101</span>Using a Debit Spread to Cut Theta on a Directional 0DTE Bet</a></li><li><a href="/journal/index-options-vs-etf-options.html"><span class="rk">Basics</span>Index Options vs ETF Options: SPX vs SPY, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-reclaim"><span class="rk">Glossary</span>What Is a "Reclaim" of a Level?</a></li><li><a href="/journal/what-is-lifting-the-offer"><span class="rk">Glossary</span>What Does "Lifting the Offer" Mean?</a></li><li><a href="/journal/0dte-loss-right-after-buying"><span class="rk">Options 101</span>Why Your 0DTE Option Shows a Loss the Second You Buy It</a></li><li><a href="/journal/debit-spread-to-cut-theta"><span class="rk">Options 101</span>Using a Debit Spread to Cut Theta on a Directional 0DTE Bet</a></li><li><a href="/journal/index-options-vs-etf-options"><span class="rk">Basics</span>Index Options vs ETF Options: SPX vs SPY, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

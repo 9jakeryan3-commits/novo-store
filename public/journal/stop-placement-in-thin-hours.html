@@ -10,11 +10,11 @@
 <title>Where to Put a Stop When Liquidity Is Thin | NoVo Options Trading</title>
 <meta name="description" content="A stop is a market order waiting to happen. In thin conditions it executes into whatever is there, which may be a long way from your level.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/stop-placement-in-thin-hours.html">
+<link rel="canonical" href="https://novo-options.trade/journal/stop-placement-in-thin-hours">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/stop-placement-in-thin-hours.html">
+<meta property="og:url" content="https://novo-options.trade/journal/stop-placement-in-thin-hours">
 <meta property="og:title" content="Where to Put a Stop When Liquidity Is Thin">
 <meta property="og:description" content="A stop is a market order waiting to happen. In thin conditions it executes into whatever is there, which may be a long way from your level.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Where to Put a Stop When Liquidity Is Thin", "description": "A stop is a market order waiting to happen. In thin conditions it executes into whatever is there, which may be a long way from your level.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/stop-placement-in-thin-hours.html", "articleSection": "Crypto Discipline", "wordCount": 290, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Where to Put a Stop When Liquidity Is Thin", "description": "A stop is a market order waiting to happen. In thin conditions it executes into whatever is there, which may be a long way from your level.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/stop-placement-in-thin-hours", "articleSection": "Crypto Discipline", "wordCount": 290, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where to Put a Stop When Liquidity Is Thin", "item": "https://novo-options.trade/journal/stop-placement-in-thin-hours.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where to Put a Stop When Liquidity Is Thin", "item": "https://novo-options.trade/journal/stop-placement-in-thin-hours"}]}
 </script>
 </head>
 <body>
@@ -58,19 +58,19 @@
   <div class="article-body">
     <p>A stop is an instruction to trade at market once a level is touched. It controls the decision, not the fill. In a deep book the difference is small; in a thin one it can be large.</p>
     <h2>Why the thin hours are worse in three ways at once</h2>
-    <p>Spreads are wider, so the fill starts further away. <a href="/journal/order-book-depth-on-a-crypto-venue.html">Depth is thinner</a>, so the order walks further through the book. And moves travel further, so more stops trigger together and compete for the same depth.</p>
+    <p>Spreads are wider, so the fill starts further away. <a href="/journal/order-book-depth-on-a-crypto-venue">Depth is thinner</a>, so the order walks further through the book. And moves travel further, so more stops trigger together and compete for the same depth.</p>
     <p>Those effects compound rather than add, which is why an overnight stop-out can fill meaningfully worse than the same stop in a main session.</p>
     <h2>The wick problem</h2>
-    <p>Thin conditions produce the sharp, fully retraced spikes described in <a href="/journal/what-a-liquidation-wick-tells-you.html">reading a liquidation wick</a>. A stop inside wick range is taken out by a move that means nothing and reverses within minutes.</p>
+    <p>Thin conditions produce the sharp, fully retraced spikes described in <a href="/journal/what-a-liquidation-wick-tells-you">reading a liquidation wick</a>. A stop inside wick range is taken out by a move that means nothing and reverses within minutes.</p>
     <p>That is the most expensive failure available: correct thesis, correct level, removed by a mechanical event.</p>
     <h2>What follows for placement</h2>
     <p>Wider stops than a main-session equivalent, sized so the wider stop still leaves an acceptable loss, which usually means a <em>smaller position</em> rather than a tighter stop. That is the trade-off, and tightening the stop to keep the size is the wrong side of it.</p>
     <p>And placement away from the obvious cluster levels, since those are where forced flow concentrates. A stop just beyond a round number sits exactly where the liquidations are.</p>
     <h2>The mark price wrinkle</h2>
-    <p>On a perpetual, your stop executes on the traded price while your liquidation is judged on <a href="/journal/mark-price-vs-last-price.html">the mark</a>. Those can differ during a violent move, so the two protections do not trigger on the same number &mdash; worth knowing before assuming a stop will always fire first.</p>
+    <p>On a perpetual, your stop executes on the traded price while your liquidation is judged on <a href="/journal/mark-price-vs-last-price">the mark</a>. Those can differ during a violent move, so the two protections do not trigger on the same number &mdash; worth knowing before assuming a stop will always fire first.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/volatility-of-volatility-in-crypto.html"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li><li><a href="/journal/why-a-distant-flip-is-still-an-answer.html"><span class="rk">Crypto Dealer Flow</span>A Level Far From Spot Is Not a Broken Calculation</a></li><li><a href="/journal/can-you-read-dealer-positioning-on-altcoins.html"><span class="rk">Crypto FAQ</span>Can You Read Dealer Positioning on Altcoins?</a></li><li><a href="/journal/deribit-dominance-one-venue-one-book.html"><span class="rk">Crypto Dealer Flow</span>One Venue Carries the Book, and That Changes the Read</a></li><li><a href="/journal/how-a-perpetual-price-is-formed.html"><span class="rk">Perps &amp; Funding</span>How a Perpetual&rsquo;s Price Is Actually Formed</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/volatility-of-volatility-in-crypto"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li><li><a href="/journal/why-a-distant-flip-is-still-an-answer"><span class="rk">Crypto Dealer Flow</span>A Level Far From Spot Is Not a Broken Calculation</a></li><li><a href="/journal/can-you-read-dealer-positioning-on-altcoins"><span class="rk">Crypto FAQ</span>Can You Read Dealer Positioning on Altcoins?</a></li><li><a href="/journal/deribit-dominance-one-venue-one-book"><span class="rk">Crypto Dealer Flow</span>One Venue Carries the Book, and That Changes the Read</a></li><li><a href="/journal/how-a-perpetual-price-is-formed"><span class="rk">Perps &amp; Funding</span>How a Perpetual&rsquo;s Price Is Actually Formed</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

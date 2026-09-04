@@ -11,9 +11,9 @@
 <meta name="description" content="A covered call sells a call against stock you own to collect premium. Here is how it works, the income-vs-upside trade-off, and the risk that's often underestimated.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/covered-calls.html">
+<link rel="canonical" href="https://novo-options.trade/journal/covered-calls">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/covered-calls.html">
+<meta property="og:url" content="https://novo-options.trade/journal/covered-calls">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Covered Calls, Explained">
 <meta property="og:description" content="Covered calls explained: selling calls against stock for income, and the capped-upside trade-off you accept.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Covered Calls, Explained", "description": "A covered call sells a call against stock you own to collect premium. Here is how it works, the income-vs-upside trade-off, and the risk that's often underestimated.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-07", "dateModified": "2026-01-07", "mainEntityOfPage": "https://novo-options.trade/journal/covered-calls.html", "articleSection": "Options Strategy", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Covered Calls, Explained", "description": "A covered call sells a call against stock you own to collect premium. Here is how it works, the income-vs-upside trade-off, and the risk that's often underestimated.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-07", "dateModified": "2026-01-07", "mainEntityOfPage": "https://novo-options.trade/journal/covered-calls", "articleSection": "Options Strategy", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Covered Calls, Explained", "item": "https://novo-options.trade/journal/covered-calls.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Covered Calls, Explained", "item": "https://novo-options.trade/journal/covered-calls"}]}
 </script>
 </head>
 <body>
@@ -56,9 +56,9 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-01-07">Jan 7, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p>A <strong>covered call</strong> is selling a <a href="/journal/call-vs-put-options.html">call option</a> against shares you already own (100 shares per contract). You collect the premium upfront. If the stock stays below the strike at <a href="/journal/options-expiration-explained.html">expiration</a>, you keep both your shares and the premium; if it rises above, your shares are called away at the strike.</p>
+    <p>A <strong>covered call</strong> is selling a <a href="/journal/call-vs-put-options">call option</a> against shares you already own (100 shares per contract). You collect the premium upfront. If the stock stays below the strike at <a href="/journal/options-expiration-explained">expiration</a>, you keep both your shares and the premium; if it rises above, your shares are called away at the strike.</p>
     <h2>The trade-off</h2>
     <p>The premium is income — a small, steady yield on stock you hold. But you've sold your upside above the strike. If the stock rockets, you miss everything above where you sold the call; you keep the premium and the gains up to the strike, and no more. You're trading unlimited upside for a modest, certain payment.</p>
     <h2>The underestimated risk</h2>
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/how-novo-builds-a-read.html"><span class="rk">Execution</span>How NoVo Builds a Read, and Scores It</a></li><li><a href="/journal/opening-range-breakout-strategy.html"><span class="rk">Trading Strategy</span>Opening Range Breakout</a></li><li><a href="/journal/rolling-options.html"><span class="rk">Options Strategy</span>Rolling Options</a></li><li><a href="/journal/theta-selling-strategies-risks.html"><span class="rk">Strategy</span>The Hidden Risks of Theta-Selling (Premium-Selling) Strategies</a></li><li><a href="/journal/what-is-a-limit-order.html"><span class="rk">Order Types</span>What Is a Limit Order? Price Control, Explained</a></li><li><a href="/journal/covered-calls-on-crypto.html"><span class="rk">The Crypto Twin</span>Covered Calls on a Coin You Hold</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/how-novo-builds-a-read"><span class="rk">Execution</span>How NoVo Builds a Read, and Scores It</a></li><li><a href="/journal/opening-range-breakout-strategy"><span class="rk">Trading Strategy</span>Opening Range Breakout</a></li><li><a href="/journal/rolling-options"><span class="rk">Options Strategy</span>Rolling Options</a></li><li><a href="/journal/theta-selling-strategies-risks"><span class="rk">Strategy</span>The Hidden Risks of Theta-Selling (Premium-Selling) Strategies</a></li><li><a href="/journal/what-is-a-limit-order"><span class="rk">Order Types</span>What Is a Limit Order? Price Control, Explained</a></li><li><a href="/journal/covered-calls-on-crypto"><span class="rk">The Crypto Twin</span>Covered Calls on a Coin You Hold</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

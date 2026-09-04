@@ -10,11 +10,11 @@
 <title>What Actually Determines an Option's Price: The Six Inputs | NoVo Options Trading</title>
 <meta name="description" content="An option's price comes from six inputs: the underlying price, the strike, time to expiration, implied volatility, interest rates, and dividends.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-determines-an-options-price.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-determines-an-options-price">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-determines-an-options-price.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-determines-an-options-price">
 <meta property="og:title" content="What Actually Determines an Option's Price: The Six Inputs">
 <meta property="og:description" content="The six inputs behind every option price — and which ones actually move a 0DTE SPY contract (and which you can ignore).">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Actually Determines an Option's Price: The Six Inputs", "description": "The six inputs behind every option price — and which ones actually move a 0DTE SPY contract (and which you can ignore).", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/what-determines-an-options-price.html", "articleSection": "Options 101", "wordCount": 628, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Actually Determines an Option's Price: The Six Inputs", "description": "The six inputs behind every option price — and which ones actually move a 0DTE SPY contract (and which you can ignore).", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/what-determines-an-options-price", "articleSection": "Options 101", "wordCount": 628, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Actually Determines an Option's Price: The Six Inputs", "item": "https://novo-options.trade/journal/what-determines-an-options-price.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Actually Determines an Option's Price: The Six Inputs", "item": "https://novo-options.trade/journal/what-determines-an-options-price"}]}
 </script>
 </head>
 <body>
@@ -58,19 +58,19 @@
   <div class="article-body">
     <p>Every options pricing model, from Black-Scholes on, takes the same six inputs and returns a fair value. You don't need the math to trade well, but knowing what feeds the price tells you what can move it, and what can quietly work against you.</p>
     <h2>The six inputs</h2>
-    <p><strong>1. Underlying price.</strong> Where SPY is trading. The most obvious driver &mdash; how it flows into the option is <a href="/journal/what-is-delta-options.html">delta</a>.<br>
+    <p><strong>1. Underlying price.</strong> Where SPY is trading. The most obvious driver &mdash; how it flows into the option is <a href="/journal/what-is-delta-options">delta</a>.<br>
     <strong>2. Strike price.</strong> The fixed level your option is measured against. It sets how far in- or out-of-the-money you are.<br>
-    <strong>3. Time to expiration.</strong> More time = more premium, because more can happen. As time runs out, that value bleeds away &mdash; <a href="/journal/theta-decay-explained.html">theta</a>.<br>
-    <strong>4. Implied volatility.</strong> The market's expected movement. Higher <a href="/journal/what-is-implied-volatility.html">IV</a> means a richer premium; a drop deflates it (IV crush).<br>
+    <strong>3. Time to expiration.</strong> More time = more premium, because more can happen. As time runs out, that value bleeds away &mdash; <a href="/journal/theta-decay-explained">theta</a>.<br>
+    <strong>4. Implied volatility.</strong> The market's expected movement. Higher <a href="/journal/what-is-implied-volatility">IV</a> means a richer premium; a drop deflates it (IV crush).<br>
     <strong>5. Interest rates.</strong> A small carry effect &mdash; matters for long-dated options, negligible intraday.<br>
     <strong>6. Dividends.</strong> Expected payouts before expiration nudge call and put values; for a same-day SPY trade, essentially a rounding error.</p>
     <h2>Which ones matter for a 0DTE scalp</h2>
     <p>On a same-day SPY option, the price is dominated by <strong>the underlying, the strike, time, and IV</strong>. Rates and dividends are noise on that timescale. Practically: the stock moving your way helps (via delta), the clock always hurts (theta), and a shift in expected volatility can help or hurt (IV). That's the trio a scalper actually manages.</p>
     <p class="pull">Four inputs move your 0DTE trade: price, strike, time, and IV. The other two are rounding errors before the bell rings again.</p>
     <h2>Why this is worth knowing</h2>
-    <p>When your option does something that surprises you &mdash; green stock, red option; a fill that jumps &mdash; it's almost always one of these six inputs, not a glitch. Understanding them is how you stop being surprised. From there, the game is entering where the underlying has room to move faster than time decays it. See <a href="/journal/the-expected-move.html">the expected move</a> for how far a session is realistically likely to travel.</p>
+    <p>When your option does something that surprises you &mdash; green stock, red option; a fill that jumps &mdash; it's almost always one of these six inputs, not a glitch. Understanding them is how you stop being surprised. From there, the game is entering where the underlying has room to move faster than time decays it. See <a href="/journal/the-expected-move">the expected move</a> for how far a session is realistically likely to travel.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/is-ai-trading-profitable.html">Is AI Trading Profitable? What Actually Determines It</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/is-ai-trading-profitable">Is AI Trading Profitable? What Actually Determines It</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -98,7 +98,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-an-etf-spy.html"><span class="rk">Instruments</span>What Is an ETF?</a></li><li><a href="/journal/what-is-rho.html"><span class="rk">Options 101</span>What Is Rho?</a></li><li><a href="/journal/analyst-vs-trader-plan.html"><span class="rk">Pricing</span>Analyst vs Trader: Which NoVo Plan Actually Fits You</a></li><li><a href="/journal/do-spy-options-trade-after-hours.html"><span class="rk">Options 101</span>Do SPY Options Trade After Hours? What to Know</a></li><li><a href="/journal/iv-crush-around-events.html"><span class="rk">Options 101</span>IV Crush on SPY Around Scheduled Events: CPI, FOMC, and NFP</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-an-etf-spy"><span class="rk">Instruments</span>What Is an ETF?</a></li><li><a href="/journal/what-is-rho"><span class="rk">Options 101</span>What Is Rho?</a></li><li><a href="/journal/analyst-vs-trader-plan"><span class="rk">Pricing</span>Analyst vs Trader: Which NoVo Plan Actually Fits You</a></li><li><a href="/journal/do-spy-options-trade-after-hours"><span class="rk">Options 101</span>Do SPY Options Trade After Hours? What to Know</a></li><li><a href="/journal/iv-crush-around-events"><span class="rk">Options 101</span>IV Crush on SPY Around Scheduled Events: CPI, FOMC, and NFP</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

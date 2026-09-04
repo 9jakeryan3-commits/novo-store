@@ -10,11 +10,11 @@
 <title>Reduce-Only: The Setting That Stops a Stop Reversing You | NoVo Options Trading</title>
 <meta name="description" content="Without reduce-only, a stop sized for a position that has already partly closed can open a new one on the other side. One setting, one whole class of accident.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/reduce-only-and-position-safety-settings.html">
+<link rel="canonical" href="https://novo-options.trade/journal/reduce-only-and-position-safety-settings">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/reduce-only-and-position-safety-settings.html">
+<meta property="og:url" content="https://novo-options.trade/journal/reduce-only-and-position-safety-settings">
 <meta property="og:title" content="Reduce-Only: The Setting That Stops a Stop Reversing You">
 <meta property="og:description" content="Without reduce-only, a stop sized for a position that has already partly closed can open a new one on the other side. One setting, one whole class of accident.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Reduce-Only: The Setting That Stops a Stop Reversing You", "description": "Without it, a stop that fires on a partially closed position can open a new one on the other side. It is a one-click setting with a large failure mode behind it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/reduce-only-and-position-safety-settings.html", "articleSection": "Margin & Liquidation", "wordCount": 283, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Reduce-Only: The Setting That Stops a Stop Reversing You", "description": "Without it, a stop that fires on a partially closed position can open a new one on the other side. It is a one-click setting with a large failure mode behind it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/reduce-only-and-position-safety-settings", "articleSection": "Margin & Liquidation", "wordCount": 283, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reduce-Only: The Setting That Stops a Stop Reversing You", "item": "https://novo-options.trade/journal/reduce-only-and-position-safety-settings.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reduce-Only: The Setting That Stops a Stop Reversing You", "item": "https://novo-options.trade/journal/reduce-only-and-position-safety-settings"}]}
 </script>
 </head>
 <body>
@@ -60,16 +60,16 @@
     <p>Without it, an ordinary order that outsizes the position opens a new one in the opposite direction. You intended to close and you are now short.</p>
     <h2>How it actually happens</h2>
     <p>Rarely by carelessness. Usually by a sequence: a position partially closes &mdash; a partial fill, a scale-out, a partial liquidation &mdash; while a stop for the original size is still resting. The stop fires at full size against a reduced position, closes what is left, and opens the remainder the other way.</p>
-    <p>The trader is now in a position they never chose, in a fast market, having just been stopped out. This is the compounding failure described in <a href="/journal/partial-fills-and-order-types-in-crypto.html">order types are not standardised</a>, and it is why that article says to confirm reduce-only exists before automating anything.</p>
+    <p>The trader is now in a position they never chose, in a fast market, having just been stopped out. This is the compounding failure described in <a href="/journal/partial-fills-and-order-types-in-crypto">order types are not standardised</a>, and it is why that article says to confirm reduce-only exists before automating anything.</p>
     <h2>Why crypto surfaces it more</h2>
-    <p>Partial closes are more common here: thin books produce <a href="/journal/slippage-and-price-impact-on-chain.html">partial fills</a>, and liquidation engines close positions incrementally rather than all at once. Both leave a resting order sized for a position that no longer exists.</p>
-    <p>And the market never closes, so the sequence can complete while nobody is watching &mdash; the exposure in <a href="/journal/position-sizing-in-a-market-that-never-closes.html">sizing a position you cannot watch</a>.</p>
+    <p>Partial closes are more common here: thin books produce <a href="/journal/slippage-and-price-impact-on-chain">partial fills</a>, and liquidation engines close positions incrementally rather than all at once. Both leave a resting order sized for a position that no longer exists.</p>
+    <p>And the market never closes, so the sequence can complete while nobody is watching &mdash; the exposure in <a href="/journal/position-sizing-in-a-market-that-never-closes">sizing a position you cannot watch</a>.</p>
     <h2>The related settings worth checking once</h2>
-    <p>Whether stops trigger on last price or <a href="/journal/mark-price-vs-last-price.html">the mark</a>, since that decides whether a wick takes you out. Whether the venue offers reduce-only at all. And whether closing an entire position is a distinct order type rather than a sized order that could overshoot.</p>
+    <p>Whether stops trigger on last price or <a href="/journal/mark-price-vs-last-price">the mark</a>, since that decides whether a wick takes you out. Whether the venue offers reduce-only at all. And whether closing an entire position is a distinct order type rather than a sized order that could overshoot.</p>
     <p>Three questions, answered once per venue, that remove an entire class of accident.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/token-unlocks-and-supply-cliffs.html"><span class="rk">On-Chain Structure</span>Token Unlocks: Supply You Can See Coming</a></li><li><a href="/journal/what-is-a-perpetual-swap.html"><span class="rk">Perps &amp; Funding</span>What Is a Perpetual Swap?</a></li><li><a href="/journal/bitcoin-gamma-exposure-explained.html"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li><li><a href="/journal/crypto-option-expiry-calendar.html"><span class="rk">Crypto Options 101</span>The Crypto Expiry Calendar: Daily, Weekly, Monthly, Quarterly</a></li><li><a href="/journal/funding-payment-schedules-differ-by-venue.html"><span class="rk">Perps &amp; Funding</span>Funding Schedules Differ, and It Changes the Cost</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/token-unlocks-and-supply-cliffs"><span class="rk">On-Chain Structure</span>Token Unlocks: Supply You Can See Coming</a></li><li><a href="/journal/what-is-a-perpetual-swap"><span class="rk">Perps &amp; Funding</span>What Is a Perpetual Swap?</a></li><li><a href="/journal/bitcoin-gamma-exposure-explained"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li><li><a href="/journal/crypto-option-expiry-calendar"><span class="rk">Crypto Options 101</span>The Crypto Expiry Calendar: Daily, Weekly, Monthly, Quarterly</a></li><li><a href="/journal/funding-payment-schedules-differ-by-venue"><span class="rk">Perps &amp; Funding</span>Funding Schedules Differ, and It Changes the Cost</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

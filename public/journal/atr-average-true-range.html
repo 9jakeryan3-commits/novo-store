@@ -11,9 +11,9 @@
 <meta name="description" content="Average True Range measures how much an instrument typically moves in a period. Here is how it's calculated, why it's a volatility gauge not a direction signal.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/atr-average-true-range.html">
+<link rel="canonical" href="https://novo-options.trade/journal/atr-average-true-range">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/atr-average-true-range.html">
+<meta property="og:url" content="https://novo-options.trade/journal/atr-average-true-range">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="What Is ATR?">
 <meta property="og:description" content="ATR explained: how Average True Range measures volatility and how traders use it to place stops.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is ATR?", "description": "Average True Range measures how much an instrument typically moves in a period. Here is how it's calculated, why it's a volatility gauge not a direction signal, and how to size stops with it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-02-25", "dateModified": "2026-02-25", "mainEntityOfPage": "https://novo-options.trade/journal/atr-average-true-range.html", "articleSection": "Indicators", "wordCount": 556, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is ATR?", "description": "Average True Range measures how much an instrument typically moves in a period. Here is how it's calculated, why it's a volatility gauge not a direction signal, and how to size stops with it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-02-25", "dateModified": "2026-02-25", "mainEntityOfPage": "https://novo-options.trade/journal/atr-average-true-range", "articleSection": "Indicators", "wordCount": 556, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "What Is ATR?", "item": "https://novo-options.trade/journal/atr-average-true-range.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "What Is ATR?", "item": "https://novo-options.trade/journal/atr-average-true-range"}]}
 </script>
 </head>
 <body>
@@ -56,19 +56,19 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-02-25">Feb 25, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
   <div class="article-body">
     <p><strong>Average True Range (ATR)</strong> measures volatility - the typical size of a bar's move over a set period. It says nothing about direction. It answers one question: how much does this thing normally move in a given window? That answer is the foundation of intelligent stop placement.</p>
     <h2>How it's built</h2>
     <p>"True range" is the largest of: the current bar's high-low, the high versus the prior close, or the low versus the prior close - which captures gaps. ATR averages that over a period (commonly 14 bars). A rising ATR means the market is getting more volatile; a falling ATR means it is calming.</p>
     <h2>Sizing stops with ATR</h2>
-    <p>A fixed-point <a href="/journal/stop-loss-orders-explained.html">stop</a> ignores how volatile the market is right now. A one-point stop that makes sense in a quiet tape gets hit constantly in a fast one. Placing stops as a multiple of ATR adapts to conditions - wider when the market is jumpy, tighter when it is calm - so you are stopped out by a real reversal, not by normal noise.</p>
+    <p>A fixed-point <a href="/journal/stop-loss-orders-explained">stop</a> ignores how volatile the market is right now. A one-point stop that makes sense in a quiet tape gets hit constantly in a fast one. Placing stops as a multiple of ATR adapts to conditions - wider when the market is jumpy, tighter when it is calm - so you are stopped out by a real reversal, not by normal noise.</p>
     <p class="pull">A stop that ignores volatility isn't a stop - it's a coin flip on getting shaken out.</p>
     <h2>Volatility as a regime tell</h2>
-    <p>ATR also flags regime shifts. A sudden expansion often precedes or accompanies a trending move; a long contraction (a "volatility squeeze") frequently precedes a breakout. Read alongside <a href="/journal/what-is-the-vix.html">the VIX</a> and volume, ATR helps you calibrate how aggressive to be - and how much room a trade needs to breathe.</p>
+    <p>ATR also flags regime shifts. A sudden expansion often precedes or accompanies a trending move; a long contraction (a "volatility squeeze") frequently precedes a breakout. Read alongside <a href="/journal/what-is-the-vix">the VIX</a> and volume, ATR helps you calibrate how aggressive to be - and how much room a trade needs to breathe.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/atr-expected-range.html">ATR-Based Expected-Range Framing for a 0DTE Session</a> &middot; <a href="/journal/donchian-channels.html">Donchian Channels</a> &middot; <a href="/journal/ichimoku-cloud.html">The Ichimoku Cloud</a> &middot; <a href="/journal/keltner-channels.html">Keltner Channels</a> &middot; <a href="/journal/parabolic-sar.html">The Parabolic SAR</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/atr-expected-range">ATR-Based Expected-Range Framing for a 0DTE Session</a> &middot; <a href="/journal/donchian-channels">Donchian Channels</a> &middot; <a href="/journal/ichimoku-cloud">The Ichimoku Cloud</a> &middot; <a href="/journal/keltner-channels">Keltner Channels</a> &middot; <a href="/journal/parabolic-sar">The Parabolic SAR</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/cumulative-tick.html"><span class="rk">Charting</span>Reading the Cumulative TICK for Intraday Bias</a></li><li><a href="/journal/head-and-shoulders-pattern.html"><span class="rk">Chart Patterns</span>The Head &amp; Shoulders Pattern, Explained</a></li><li><a href="/journal/micro-pullback-pattern.html"><span class="rk">Charting</span>The Micro-Pullback Pattern in a Fast SPY Trend</a></li><li><a href="/journal/pivot-point-dealer-confluence.html"><span class="rk">Charting</span>Pivot-Point Confluence With Dealer Levels: When Math Lines Agree</a></li><li><a href="/journal/supertrend-indicator.html"><span class="rk">Charting</span>The Supertrend Indicator: What It Does and Its Limits</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/cumulative-tick"><span class="rk">Charting</span>Reading the Cumulative TICK for Intraday Bias</a></li><li><a href="/journal/head-and-shoulders-pattern"><span class="rk">Chart Patterns</span>The Head &amp; Shoulders Pattern, Explained</a></li><li><a href="/journal/micro-pullback-pattern"><span class="rk">Charting</span>The Micro-Pullback Pattern in a Fast SPY Trend</a></li><li><a href="/journal/pivot-point-dealer-confluence"><span class="rk">Charting</span>Pivot-Point Confluence With Dealer Levels: When Math Lines Agree</a></li><li><a href="/journal/supertrend-indicator"><span class="rk">Charting</span>The Supertrend Indicator: What It Does and Its Limits</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

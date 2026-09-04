@@ -11,9 +11,9 @@
 <meta name="description" content="An option's price is part real value and part time-and-volatility premium. Here is the difference between intrinsic and extrinsic value, and why understanding it.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/intrinsic-vs-extrinsic-value.html">
+<link rel="canonical" href="https://novo-options.trade/journal/intrinsic-vs-extrinsic-value">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/intrinsic-vs-extrinsic-value.html">
+<meta property="og:url" content="https://novo-options.trade/journal/intrinsic-vs-extrinsic-value">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Intrinsic vs. Extrinsic Value">
 <meta property="og:description" content="Intrinsic vs. extrinsic value explained: the two halves of an option's price and why the split matters.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Intrinsic vs. Extrinsic Value", "description": "An option's price is part real value and part time-and-volatility premium. Here is the difference between intrinsic and extrinsic value, and why understanding it explains where your money goes.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-14", "dateModified": "2026-01-14", "mainEntityOfPage": "https://novo-options.trade/journal/intrinsic-vs-extrinsic-value.html", "articleSection": "Options Basics", "wordCount": 549, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Intrinsic vs. Extrinsic Value", "description": "An option's price is part real value and part time-and-volatility premium. Here is the difference between intrinsic and extrinsic value, and why understanding it explains where your money goes.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-14", "dateModified": "2026-01-14", "mainEntityOfPage": "https://novo-options.trade/journal/intrinsic-vs-extrinsic-value", "articleSection": "Options Basics", "wordCount": 549, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Intrinsic vs. Extrinsic Value", "item": "https://novo-options.trade/journal/intrinsic-vs-extrinsic-value.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Intrinsic vs. Extrinsic Value", "item": "https://novo-options.trade/journal/intrinsic-vs-extrinsic-value"}]}
 </script>
 </head>
 <body>
@@ -56,19 +56,19 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-01-14">Jan 14, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
     <p>An option's premium is made of two parts. <strong>Intrinsic value</strong> is the real, in-the-money value - how much you would gain by exercising right now. <strong>Extrinsic value</strong> (or time value) is everything else: the premium you pay for the <em>possibility</em> the option moves further your way before expiration.</p>
     <h2>Intrinsic value</h2>
     <p>A call is in the money when the stock is above the strike; intrinsic value is simply that difference. A $500 call with the stock at $510 has $10 of intrinsic value. An out-of-the-money option has <em>zero</em> intrinsic value - its entire price is extrinsic. That is a crucial thing to notice before you buy.</p>
     <h2>Extrinsic value</h2>
-    <p>Extrinsic value is driven by time remaining and <a href="/journal/what-is-implied-volatility.html">implied volatility</a>. More time and higher volatility mean more extrinsic value, because there is more room for the option to pay off. This is the part that <a href="/journal/theta-decay-explained.html">decays every day</a> and that a volatility crush can gut - which is why you can be right on direction and still lose.</p>
+    <p>Extrinsic value is driven by time remaining and <a href="/journal/what-is-implied-volatility">implied volatility</a>. More time and higher volatility mean more extrinsic value, because there is more room for the option to pay off. This is the part that <a href="/journal/theta-decay-explained">decays every day</a> and that a volatility crush can gut - which is why you can be right on direction and still lose.</p>
     <p class="pull">Buy an out-of-the-money option and you own pure hope - 100% extrinsic value, evaporating by the hour.</p>
     <h2>Why the split matters</h2>
-    <p>Knowing the mix tells you what you are really buying. Deep-in-the-money options are mostly intrinsic value - they track the stock closely and decay slowly. Far-out-of-the-money and short-dated options are almost pure extrinsic value - cheap, fast, and racing the clock. That is the whole tension inside <a href="/journal/what-is-0dte-options-trading.html">0DTE trading</a>: maximum leverage, minimum time value left to protect you.</p>
+    <p>Knowing the mix tells you what you are really buying. Deep-in-the-money options are mostly intrinsic value - they track the stock closely and decay slowly. Far-out-of-the-money and short-dated options are almost pure extrinsic value - cheap, fast, and racing the clock. That is the whole tension inside <a href="/journal/what-is-0dte-options-trading">0DTE trading</a>: maximum leverage, minimum time value left to protect you.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-is-parity.html">What Is Parity? When an Option Trades at Intrinsic Value</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-is-parity">What Is Parity? When an Option Trades at Intrinsic Value</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/options-greeks-explained.html"><span class="rk">Options 101</span>The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega)</a></li><li><a href="/journal/theta-vs-vega.html"><span class="rk">Greeks</span>Theta vs Vega: Time Decay vs Volatility Exposure</a></li><li><a href="/journal/what-is-a-liquidity-void.html"><span class="rk">Glossary</span>What Is a "Liquidity Void" and How Does Price Move Through It?</a></li><li><a href="/journal/what-is-intrinsic-value.html"><span class="rk">Options 101</span>What Is Intrinsic Value in Options?</a></li><li><a href="/journal/why-your-call-lost-money-spy-went-up.html"><span class="rk">Options 101</span>Your Call Lost Money Even Though SPY Went Up: Here's Why</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/options-greeks-explained"><span class="rk">Options 101</span>The Options Greeks Explained in Plain English (Delta, Gamma, Theta, Vega)</a></li><li><a href="/journal/theta-vs-vega"><span class="rk">Greeks</span>Theta vs Vega: Time Decay vs Volatility Exposure</a></li><li><a href="/journal/what-is-a-liquidity-void"><span class="rk">Glossary</span>What Is a "Liquidity Void" and How Does Price Move Through It?</a></li><li><a href="/journal/what-is-intrinsic-value"><span class="rk">Options 101</span>What Is Intrinsic Value in Options?</a></li><li><a href="/journal/why-your-call-lost-money-spy-went-up"><span class="rk">Options 101</span>Your Call Lost Money Even Though SPY Went Up: Here's Why</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

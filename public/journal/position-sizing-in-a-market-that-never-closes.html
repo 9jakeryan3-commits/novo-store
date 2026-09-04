@@ -10,11 +10,11 @@
 <title>Sizing a Position You Cannot Watch | NoVo Options Trading</title>
 <meta name="description" content="A 24/7 market means every position is held through hours you are asleep. Sizing has to assume you are not there, because most of the time you are not.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes.html">
+<link rel="canonical" href="https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes.html">
+<meta property="og:url" content="https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes">
 <meta property="og:title" content="Sizing a Position You Cannot Watch">
 <meta property="og:description" content="A 24/7 market means every position is held through hours you are asleep. Sizing has to assume you are not there, because most of the time you are not.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Sizing a Position You Cannot Watch", "description": "A 24/7 market means every position is held through hours you are asleep. Sizing has to assume you are not there, because most of the time you are not.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes.html", "articleSection": "Margin & Liquidation", "wordCount": 331, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Sizing a Position You Cannot Watch", "description": "A 24/7 market means every position is held through hours you are asleep. Sizing has to assume you are not there, because most of the time you are not.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes", "articleSection": "Margin & Liquidation", "wordCount": 331, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Sizing a Position You Cannot Watch", "item": "https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Sizing a Position You Cannot Watch", "item": "https://novo-options.trade/journal/position-sizing-in-a-market-that-never-closes"}]}
 </script>
 </head>
 <body>
@@ -59,19 +59,19 @@
     <p>In equities you cannot trade overnight, so risk arrives as a gap and everyone faces the same constraint. In crypto the market runs continuously, so a position is live and manageable at every hour &mdash; by anyone who happens to be awake.</p>
     <p>You are not. Which means, in practice, most positions spend most of their life unmanaged.</p>
     <h2>The asymmetry</h2>
-    <p>Your stop is not watching in the way you would be. It executes at whatever the book offers, and the hours you are asleep are disproportionately the thin ones where <a href="/journal/why-crypto-spreads-widen-when-you-need-them.html">spreads are widest</a> and a move travels furthest.</p>
-    <p>Meanwhile the <a href="/journal/liquidation-price-and-leverage-math.html">liquidation engine</a> runs at full attention, judged on <a href="/journal/mark-price-vs-last-price.html">the mark price</a>, indifferent to your sleep schedule.</p>
+    <p>Your stop is not watching in the way you would be. It executes at whatever the book offers, and the hours you are asleep are disproportionately the thin ones where <a href="/journal/why-crypto-spreads-widen-when-you-need-them">spreads are widest</a> and a move travels furthest.</p>
+    <p>Meanwhile the <a href="/journal/liquidation-price-and-leverage-math">liquidation engine</a> runs at full attention, judged on <a href="/journal/mark-price-vs-last-price">the mark price</a>, indifferent to your sleep schedule.</p>
     <h2>Sizing from the unattended case</h2>
     <p>The useful question is not how much you can afford to lose, but <em>what happens to this position in the worst eight hours you are not looking at it</em>. Size so that answer is survivable, then the attended hours take care of themselves.</p>
-    <p>Concretely that means leverage low enough that an ordinary bad night does not approach liquidation, and it means treating <a href="/journal/weekend-gamma-and-thin-books.html">weekends</a> as their own case rather than as more of the same.</p>
+    <p>Concretely that means leverage low enough that an ordinary bad night does not approach liquidation, and it means treating <a href="/journal/weekend-gamma-and-thin-books">weekends</a> as their own case rather than as more of the same.</p>
     <h2>Why hard stops are not the whole answer</h2>
-    <p>A stop bounds the loss and executes into whatever exists. In the thin conditions where you most need it, that fill can be materially worse than the level &mdash; the round-trip asymmetry in <a href="/journal/the-true-cost-of-a-crypto-round-trip.html">the true cost of a round trip</a>.</p>
+    <p>A stop bounds the loss and executes into whatever exists. In the thin conditions where you most need it, that fill can be materially worse than the level &mdash; the round-trip asymmetry in <a href="/journal/the-true-cost-of-a-crypto-round-trip">the true cost of a round trip</a>.</p>
     <p>So a stop is a limit on how wrong things get, not a guarantee of the price. Sizing has to assume the fill is worse than the level, particularly overnight.</p>
     <h2>The one that scales with everything else</h2>
-    <p>Be smaller when <a href="/journal/system-leverage-vs-your-leverage.html">system leverage</a> is high, because that is when an ordinary move becomes a cascade. Sizing is the only defence that works in every one of these scenarios at once, which is why it is the thing to get right rather than the thing to optimise last.</p>
+    <p>Be smaller when <a href="/journal/system-leverage-vs-your-leverage">system leverage</a> is high, because that is when an ordinary move becomes a cascade. Sizing is the only defence that works in every one of these scenarios at once, which is why it is the thing to get right rather than the thing to optimise last.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-true-cost-of-a-crypto-round-trip.html"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc.html"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure.html"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin.html"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li><li><a href="/journal/funding-arbitrage-and-its-real-risks.html"><span class="rk">Perps &amp; Funding</span>Funding Arbitrage Between Venues</a></li><li><a href="/journal/0dte-position-sizing.html"><span class="rk">The Equity Twin</span>Position Sizing for 0DTE Options</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-true-cost-of-a-crypto-round-trip"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li><li><a href="/journal/funding-arbitrage-and-its-real-risks"><span class="rk">Perps &amp; Funding</span>Funding Arbitrage Between Venues</a></li><li><a href="/journal/0dte-position-sizing"><span class="rk">The Equity Twin</span>Position Sizing for 0DTE Options</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

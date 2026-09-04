@@ -10,11 +10,11 @@
 <title>What Is Vomma? Vega Convexity, Explained Simply | NoVo</title>
 <meta name="description" content="Vomma measures how an option's vega changes as implied volatility changes — the 'convexity' of volatility exposure.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-vomma.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-vomma">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-vomma.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-vomma">
 <meta property="og:title" content="What Is Vomma? Vega Convexity, Explained Simply">
 <meta property="og:description" content="Vomma measures how vega changes as implied volatility moves — the convexity of vol exposure. OTM options have the most. What it means.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Vomma? Vega Convexity, Explained Simply", "description": "Vomma measures how vega changes as implied volatility moves — the convexity of vol exposure. OTM options have the most. What it means.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-vomma.html", "articleSection": "Greeks", "wordCount": 501, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Vomma? Vega Convexity, Explained Simply", "description": "Vomma measures how vega changes as implied volatility moves — the convexity of vol exposure. OTM options have the most. What it means.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-vomma", "articleSection": "Greeks", "wordCount": 501, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Vomma? Vega Convexity, Explained Simply", "item": "https://novo-options.trade/journal/what-is-vomma.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Vomma? Vega Convexity, Explained Simply", "item": "https://novo-options.trade/journal/what-is-vomma"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
   <div class="article-body">
-    <p><strong>Vomma</strong> (also <em>vega convexity</em> or <em>volga</em>) measures how an option&rsquo;s <a href="/journal/theta-vs-vega.html">vega</a> changes as <a href="/journal/what-is-implied-volatility.html">implied volatility</a> changes. It&rsquo;s a <a href="/journal/second-order-greeks-explained.html">second-order Greek</a> &mdash; the &ldquo;acceleration&rdquo; of your volatility exposure.</p>
+    <p><strong>Vomma</strong> (also <em>vega convexity</em> or <em>volga</em>) measures how an option&rsquo;s <a href="/journal/theta-vs-vega">vega</a> changes as <a href="/journal/what-is-implied-volatility">implied volatility</a> changes. It&rsquo;s a <a href="/journal/second-order-greeks-explained">second-order Greek</a> &mdash; the &ldquo;acceleration&rdquo; of your volatility exposure.</p>
     <h2>What vomma captures</h2>
     <p>Vega tells you how much an option gains per point of IV. But vega isn&rsquo;t constant &mdash; it grows or shrinks as IV moves. Vomma measures that: high vomma means your volatility exposure <em>increases</em> as vol rises, so the option can gain value at an accelerating rate in a vol spike. It&rsquo;s convexity applied to volatility.</p>
     <h2>Where vomma lives</h2>
-    <p>Vomma is highest for <a href="/journal/itm-vs-otm-options.html">out-of-the-money</a> options and lowest for at-the-money ones (whose vega stays roughly constant with vol). That&rsquo;s part of why far-OTM options can behave explosively when volatility surges &mdash; their vega, and thus their price sensitivity, ramps up. It also connects to the <a href="/journal/volatility-skew-explained.html">volatility skew</a> and <a href="/journal/what-is-vol-of-vol.html">vol-of-vol</a>.</p>
+    <p>Vomma is highest for <a href="/journal/itm-vs-otm-options">out-of-the-money</a> options and lowest for at-the-money ones (whose vega stays roughly constant with vol). That&rsquo;s part of why far-OTM options can behave explosively when volatility surges &mdash; their vega, and thus their price sensitivity, ramps up. It also connects to the <a href="/journal/volatility-skew-explained">volatility skew</a> and <a href="/journal/what-is-vol-of-vol">vol-of-vol</a>.</p>
     <p class="pull">Vega is your volatility exposure; vomma is how fast that exposure grows when volatility itself moves. It&rsquo;s why a vol spike can light up OTM options.</p>
     <h2>What it means for a scalper</h2>
-    <p>Vomma is advanced and you won&rsquo;t trade it directly, but it explains why option behavior in <a href="/journal/vix-above-30-regime.html">high-vol regimes</a> can be non-linear, and why OTM lottos occasionally explode. It rounds out the <a href="/journal/higher-order-greeks-for-0dte.html">higher-order Greek</a> picture alongside <a href="/journal/what-is-vanna.html">vanna</a> and <a href="/journal/what-is-charm.html">charm</a>.
+    <p>Vomma is advanced and you won&rsquo;t trade it directly, but it explains why option behavior in <a href="/journal/vix-above-30-regime">high-vol regimes</a> can be non-linear, and why OTM lottos occasionally explode. It rounds out the <a href="/journal/higher-order-greeks-for-0dte">higher-order Greek</a> picture alongside <a href="/journal/what-is-vanna">vanna</a> and <a href="/journal/what-is-charm">charm</a>.
   </p></div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/broken-wing-butterfly.html"><span class="rk">Options 101</span>The Broken-Wing Butterfly, Explained</a></li><li><a href="/journal/free-trials-and-refunds.html"><span class="rk">Pricing</span>Free Trials and Refunds: The Honest "Try Before You Buy"</a></li><li><a href="/journal/low-vix-does-not-mean-low-risk.html"><span class="rk">Plain English</span>Low VIX Doesn't Mean Low Risk: A Same-Day Options Trader's Guide</a></li><li><a href="/journal/spy-dividend-and-options.html"><span class="rk">Options 101</span>How SPY's Dividend Affects Its Options (and Early Assignment)</a></li><li><a href="/journal/what-does-the-tape-mean.html"><span class="rk">Glossary</span>What Does "The Tape" Mean in Day Trading?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/broken-wing-butterfly"><span class="rk">Options 101</span>The Broken-Wing Butterfly, Explained</a></li><li><a href="/journal/free-trials-and-refunds"><span class="rk">Pricing</span>Free Trials and Refunds: The Honest "Try Before You Buy"</a></li><li><a href="/journal/low-vix-does-not-mean-low-risk"><span class="rk">Plain English</span>Low VIX Doesn't Mean Low Risk: A Same-Day Options Trader's Guide</a></li><li><a href="/journal/spy-dividend-and-options"><span class="rk">Options 101</span>How SPY's Dividend Affects Its Options (and Early Assignment)</a></li><li><a href="/journal/what-does-the-tape-mean"><span class="rk">Glossary</span>What Does "The Tape" Mean in Day Trading?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

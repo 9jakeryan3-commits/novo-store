@@ -10,11 +10,11 @@
 <title>Reading a Greeks Panel Without Over-Reading It | NoVo Options Trading</title>
 <meta name="description" content="The Greeks are derivatives in the calculus sense: rates of change at a point. They describe the next small move, not the move you are worried about.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows">
 <meta property="og:title" content="Reading a Greeks Panel Without Over-Reading It">
 <meta property="og:description" content="The Greeks are derivatives in the calculus sense: rates of change at a point. They describe the next small move, not the move you are worried about.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Reading a Greeks Panel Without Over-Reading It", "description": "Five numbers describing how a position responds to five different changes. Each is a first-order estimate that stops being accurate as soon as anything moves.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows.html", "articleSection": "Crypto Options 101", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Reading a Greeks Panel Without Over-Reading It", "description": "Five numbers describing how a position responds to five different changes. Each is a first-order estimate that stops being accurate as soon as anything moves.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows", "articleSection": "Crypto Options 101", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading a Greeks Panel Without Over-Reading It", "item": "https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading a Greeks Panel Without Over-Reading It", "item": "https://novo-options.trade/journal/what-a-crypto-greeks-panel-shows"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Delta, gamma, theta, vega and rho each answer one question: how does this position change if one input changes and everything else stays still. The general definitions are in <a href="/journal/options-greeks-explained.html">the Greeks explained</a>.</p>
+    <p>Delta, gamma, theta, vega and rho each answer one question: how does this position change if one input changes and everything else stays still. The general definitions are in <a href="/journal/options-greeks-explained">the Greeks explained</a>.</p>
     <p>The limitation is built into the definition. They are accurate for a small move and progressively wrong for a large one, which is precisely the move that matters.</p>
     <h2>Where crypto stretches them</h2>
-    <p><strong>Delta is quoted against the coin</strong>, so on a <a href="/journal/inverse-options-and-nonlinear-payoff.html">coin-settled contract</a> the same delta is a different dollar exposure than on a linear one. A panel that does not say which contract it is describing is ambiguous by construction.</p>
+    <p><strong>Delta is quoted against the coin</strong>, so on a <a href="/journal/inverse-options-and-nonlinear-payoff">coin-settled contract</a> the same delta is a different dollar exposure than on a linear one. A panel that does not say which contract it is describing is ambiguous by construction.</p>
     <p><strong>Gamma matters more</strong>, because the underlying moves more. A delta that is accurate for a one percent move is a weak guide to an asset that regularly moves several &mdash; the estimate degrades faster here than in equities.</p>
-    <p><strong>Theta is continuous</strong>, with no weekend discontinuity to allow for &mdash; <a href="/journal/theta-in-a-market-that-never-closes.html">theta in a market that never closes</a>.</p>
+    <p><strong>Theta is continuous</strong>, with no weekend discontinuity to allow for &mdash; <a href="/journal/theta-in-a-market-that-never-closes">theta in a market that never closes</a>.</p>
     <p><strong>Rho is close to irrelevant</strong> on short-dated crypto contracts, and it is the one people ignore correctly.</p>
     <h2>The panel is a snapshot of a moving thing</h2>
     <p>Every Greek changes as spot, volatility and time change. Gamma is itself the rate at which delta changes, so a large move invalidates the delta the panel just showed you, which is the whole reason gamma is worth reading at all.</p>
-    <p>For a dealer this is the job: re-hedging as the Greeks move is <a href="/journal/delta-hedging-in-a-market-that-never-closes.html">what generates the flow</a> a dealer map reads.</p>
+    <p>For a dealer this is the job: re-hedging as the Greeks move is <a href="/journal/delta-hedging-in-a-market-that-never-closes">what generates the flow</a> a dealer map reads.</p>
     <h2>The useful habit</h2>
     <p>Read the panel for the shape of the exposure rather than for precise numbers, and re-price the position at two or three candidate spot levels instead of extrapolating from delta. That is a minute of work and it replaces an estimate that was only ever valid where you already are.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/why-crypto-spreads-widen-when-you-need-them.html"><span class="rk">Crypto Costs</span>Spreads Widen Exactly When You Need Them Tight</a></li><li><a href="/journal/correlation-blindness-in-crypto-portfolios.html"><span class="rk">Crypto Discipline</span>Ten Positions, One Bet</a></li><li><a href="/journal/ethereum-market-structure.html"><span class="rk">Per-Coin Structure</span>Ethereum: A Book, an ETF, and a Yield That Changes the Holder</a></li><li><a href="/journal/impermanent-loss-and-why-liquidity-leaves.html"><span class="rk">On-Chain Structure</span>Impermanent Loss, and Why Liquidity Leaves</a></li><li><a href="/journal/on-chain-liquidity-vs-order-book.html"><span class="rk">On-Chain Structure</span>On-Chain Liquidity vs an Order Book</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/why-crypto-spreads-widen-when-you-need-them"><span class="rk">Crypto Costs</span>Spreads Widen Exactly When You Need Them Tight</a></li><li><a href="/journal/correlation-blindness-in-crypto-portfolios"><span class="rk">Crypto Discipline</span>Ten Positions, One Bet</a></li><li><a href="/journal/ethereum-market-structure"><span class="rk">Per-Coin Structure</span>Ethereum: A Book, an ETF, and a Yield That Changes the Holder</a></li><li><a href="/journal/impermanent-loss-and-why-liquidity-leaves"><span class="rk">On-Chain Structure</span>Impermanent Loss, and Why Liquidity Leaves</a></li><li><a href="/journal/on-chain-liquidity-vs-order-book"><span class="rk">On-Chain Structure</span>On-Chain Liquidity vs an Order Book</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

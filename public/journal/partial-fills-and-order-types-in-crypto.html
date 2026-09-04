@@ -10,11 +10,11 @@
 <title>Order Types Are Not Standardised Here | NoVo Options Trading</title>
 <meta name="description" content="The same order type can behave differently across crypto venues. Assuming equity semantics produces fills you did not intend.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto.html">
+<link rel="canonical" href="https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto.html">
+<meta property="og:url" content="https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto">
 <meta property="og:title" content="Order Types Are Not Standardised Here">
 <meta property="og:description" content="The same order type can behave differently across crypto venues. Assuming equity semantics produces fills you did not intend.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Order Types Are Not Standardised Here", "description": "The same order type can behave differently across crypto venues. Assuming equity semantics produces fills you did not intend.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto.html", "articleSection": "Crypto Costs", "wordCount": 276, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Order Types Are Not Standardised Here", "description": "The same order type can behave differently across crypto venues. Assuming equity semantics produces fills you did not intend.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto", "articleSection": "Crypto Costs", "wordCount": 276, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Order Types Are Not Standardised Here", "item": "https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Order Types Are Not Standardised Here", "item": "https://novo-options.trade/journal/partial-fills-and-order-types-in-crypto"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>An equity trader carries a set of assumptions about what a limit, stop or market order does &mdash; assumptions backed by regulation and near-universal across venues. The general vocabulary is in <a href="/journal/order-types-and-market-mechanics.html">order types and market mechanics</a>.</p>
+    <p>An equity trader carries a set of assumptions about what a limit, stop or market order does &mdash; assumptions backed by regulation and near-universal across venues. The general vocabulary is in <a href="/journal/order-types-and-market-mechanics">order types and market mechanics</a>.</p>
     <p>Crypto has no equivalent standard. Each venue defines its own behaviour, and the definitions differ in ways that matter.</p>
     <h2>Where they diverge</h2>
-    <p><strong>Post-only.</strong> An order that must rest rather than cross, so it earns the <a href="/journal/maker-taker-fees-and-what-they-buy.html">maker</a> side. If it would cross, some venues reject it and some silently amend it, and those are very different outcomes.</p>
+    <p><strong>Post-only.</strong> An order that must rest rather than cross, so it earns the <a href="/journal/maker-taker-fees-and-what-they-buy">maker</a> side. If it would cross, some venues reject it and some silently amend it, and those are very different outcomes.</p>
     <p><strong>Reduce-only.</strong> An order that can only shrink a position. Essential for anything automated, since without it a stop can accidentally open a position on the other side. Not universally available.</p>
-    <p><strong>Stop trigger reference.</strong> Some venues trigger stops on last price, others on <a href="/journal/mark-price-vs-last-price.html">the mark</a>. That single setting decides whether a <a href="/journal/what-a-liquidation-wick-tells-you.html">liquidation wick</a> takes you out or leaves you alone.</p>
+    <p><strong>Stop trigger reference.</strong> Some venues trigger stops on last price, others on <a href="/journal/mark-price-vs-last-price">the mark</a>. That single setting decides whether a <a href="/journal/what-a-liquidation-wick-tells-you">liquidation wick</a> takes you out or leaves you alone.</p>
     <p><strong>Time-in-force.</strong> Fill-or-kill and immediate-or-cancel exist widely and their partial-fill handling is not consistent.</p>
     <h2>Partial fills</h2>
     <p>A large order against a thin book fills in pieces at worsening prices. In a fast market the remainder can rest unfilled while price runs, leaving a position half the intended size and an average nothing like the quote.</p>
-    <p>That is <a href="/journal/slippage-and-price-impact-on-chain.html">price impact</a> expressed through the fill schedule, and it is why sizing to visible depth matters more than the ladder suggests.</p>
+    <p>That is <a href="/journal/slippage-and-price-impact-on-chain">price impact</a> expressed through the fill schedule, and it is why sizing to visible depth matters more than the ladder suggests.</p>
     <h2>The habit</h2>
     <p>Read the venue&rsquo;s order documentation once, and specifically confirm the stop trigger reference and whether reduce-only exists. Both are one-line answers that change what your risk controls actually do &mdash; and both are assumed rather than checked by almost everyone arriving from equities.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-dollar-and-crypto.html"><span class="rk">Crypto Macro</span>The Dollar Is the Denominator</a></li><li><a href="/journal/what-a-liquidation-wick-tells-you.html"><span class="rk">Margin &amp; Liquidation</span>Reading a Liquidation Wick</a></li><li><a href="/journal/why-funding-is-never-blended-across-venues.html"><span class="rk">Perps &amp; Funding</span>Why Funding Should Never Be Blended Across Venues</a></li><li><a href="/journal/crypto-and-the-rates-cycle.html"><span class="rk">Crypto Macro</span>Crypto and the Rates Cycle</a></li><li><a href="/journal/event-volatility-and-scheduled-catalysts.html"><span class="rk">Crypto Volatility</span>Scheduled Events: The Volatility You Can See Coming</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-dollar-and-crypto"><span class="rk">Crypto Macro</span>The Dollar Is the Denominator</a></li><li><a href="/journal/what-a-liquidation-wick-tells-you"><span class="rk">Margin &amp; Liquidation</span>Reading a Liquidation Wick</a></li><li><a href="/journal/why-funding-is-never-blended-across-venues"><span class="rk">Perps &amp; Funding</span>Why Funding Should Never Be Blended Across Venues</a></li><li><a href="/journal/crypto-and-the-rates-cycle"><span class="rk">Crypto Macro</span>Crypto and the Rates Cycle</a></li><li><a href="/journal/event-volatility-and-scheduled-catalysts"><span class="rk">Crypto Volatility</span>Scheduled Events: The Volatility You Can See Coming</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

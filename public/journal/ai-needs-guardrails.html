@@ -11,9 +11,9 @@
 <meta name="description" content="An AI that can place trades without hard limits is a liability, not an asset. Here is why guardrails — risk caps, deterministic gates, human-set boundaries.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/ai-needs-guardrails.html">
+<link rel="canonical" href="https://novo-options.trade/journal/ai-needs-guardrails">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/ai-needs-guardrails.html">
+<meta property="og:url" content="https://novo-options.trade/journal/ai-needs-guardrails">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Why AI Needs Guardrails">
 <meta property="og:description" content="Why AI trading needs guardrails: risk caps and deterministic limits that keep an autonomous system safe.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Why AI Needs Guardrails", "description": "An AI that can place trades without hard limits is a liability, not an asset. Here is why guardrails — risk caps, deterministic gates, human-set boundaries — are what make AI execution safe.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-05-29", "dateModified": "2026-05-29", "mainEntityOfPage": "https://novo-options.trade/journal/ai-needs-guardrails.html", "articleSection": "AI in Trading", "wordCount": 554, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Why AI Needs Guardrails", "description": "An AI that can place trades without hard limits is a liability, not an asset. Here is why guardrails — risk caps, deterministic gates, human-set boundaries — are what make AI execution safe.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-05-29", "dateModified": "2026-05-29", "mainEntityOfPage": "https://novo-options.trade/journal/ai-needs-guardrails", "articleSection": "AI in Trading", "wordCount": 554, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Why AI Needs Guardrails", "item": "https://novo-options.trade/journal/ai-needs-guardrails.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Why AI Needs Guardrails", "item": "https://novo-options.trade/journal/ai-needs-guardrails"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-05-29">May 29, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p>The scariest phrase in fintech marketing is "AI that trades for you" with no mention of limits. An AI layer is powerful for <a href="/journal/llm-in-trading-loop.html">reading the market</a>, but an AI with an order button and no hard boundaries is a liability waiting to happen. The <strong>guardrails</strong> are not a footnote; they're the first thing to evaluate in any tool that can touch an order.</p>
+    <p>The scariest phrase in fintech marketing is "AI that trades for you" with no mention of limits. An AI layer is powerful for <a href="/journal/llm-in-trading-loop">reading the market</a>, but an AI with an order button and no hard boundaries is a liability waiting to happen. The <strong>guardrails</strong> are not a footnote; they're the first thing to evaluate in any tool that can touch an order.</p>
     <h2>Why unconstrained AI is dangerous</h2>
     <p>AI models are non-deterministic and can occasionally be confidently wrong. Give one unconstrained access to real orders and a single bad output could oversize a position, over-trade, or ignore risk. You cannot have a probabilistic system improvising with your capital — the tail risk is unacceptable no matter how good it usually is.</p>
     <h2>What guardrails look like</h2>
-    <p>Real guardrails are deterministic and non-negotiable: hard <a href="/journal/position-sizing-risk.html">position-size limits</a>, mechanical <a href="/journal/stop-loss-orders-explained.html">stops</a> and exits that fire regardless of what any model "thinks," gates that refuse trades in unsafe conditions, and boundaries the <em>user</em> sets and the AI cannot override. The intelligence proposes context; the guardrails dispose of anything outside the risk envelope.</p>
+    <p>Real guardrails are deterministic and non-negotiable: hard <a href="/journal/position-sizing-risk">position-size limits</a>, mechanical <a href="/journal/stop-loss-orders-explained">stops</a> and exits that fire regardless of what any model "thinks," gates that refuse trades in unsafe conditions, and boundaries the <em>user</em> sets and the AI cannot override. The intelligence proposes context; the guardrails dispose of anything outside the risk envelope.</p>
     <p class="pull">The AI is allowed to be smart. It is never allowed to be unlimited. That line is the whole safety model.</p>
     <h2>Autonomy is not the absence of control</h2>
-    <p>This is the core of responsible AI execution, and it's why <a href="/journal/what-autonomous-really-means.html">"autonomous" doesn't mean "unsupervised."</a> A well-built system runs inside a cage <em>you</em> define: it executes intelligently, but it can never exceed the risk, size, or rules you set. NoVo sits on the far side of that line entirely: it reads the tape and maps dealer positioning, but it has no order button — it never connects to a brokerage and never touches your money. Every order is yours, at your broker, inside limits you set and enforce yourself.</p>
+    <p>This is the core of responsible AI execution, and it's why <a href="/journal/what-autonomous-really-means">"autonomous" doesn't mean "unsupervised."</a> A well-built system runs inside a cage <em>you</em> define: it executes intelligently, but it can never exceed the risk, size, or rules you set. NoVo sits on the far side of that line entirely: it reads the tape and maps dealer positioning, but it has no order button — it never connects to a brokerage and never touches your money. Every order is yours, at your broker, inside limits you set and enforce yourself.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/backtesting-101.html"><span class="rk">Algo Trading 101</span>Backtesting 101</a></li><li><a href="/journal/do-you-need-to-code-to-algo-trade.html"><span class="rk">Algo Trading 101</span>Do You Need to Code to Algo Trade? Not Necessarily</a></li><li><a href="/journal/in-memory-state-trading.html"><span class="rk">Trading Infrastructure</span>In-Memory State in Trading</a></li><li><a href="/journal/neural-networks-for-trading.html"><span class="rk">AI in Trading</span>Neural Networks for Trading</a></li><li><a href="/journal/the-gap-between-a-signal-and-a-fill.html"><span class="rk">Signals vs Systems</span>Signal vs Fill: The Gap</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/backtesting-101"><span class="rk">Algo Trading 101</span>Backtesting 101</a></li><li><a href="/journal/do-you-need-to-code-to-algo-trade"><span class="rk">Algo Trading 101</span>Do You Need to Code to Algo Trade? Not Necessarily</a></li><li><a href="/journal/in-memory-state-trading"><span class="rk">Trading Infrastructure</span>In-Memory State in Trading</a></li><li><a href="/journal/neural-networks-for-trading"><span class="rk">AI in Trading</span>Neural Networks for Trading</a></li><li><a href="/journal/the-gap-between-a-signal-and-a-fill"><span class="rk">Signals vs Systems</span>Signal vs Fill: The Gap</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

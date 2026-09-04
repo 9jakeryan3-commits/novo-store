@@ -11,9 +11,9 @@
 <meta name="description" content="Machine learning in trading means training a model on historical data to recognize patterns in features like volatility and order flow. Here&#x27;s how it works.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/machine-learning-in-trading.html">
+<link rel="canonical" href="https://novo-options.trade/journal/machine-learning-in-trading">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/machine-learning-in-trading.html">
+<meta property="og:url" content="https://novo-options.trade/journal/machine-learning-in-trading">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Machine Learning in Trading">
 <meta property="og:description" content="How ML is actually used in trading — features, training, and why it overfits so easily.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Machine Learning in Trading, Explained", "description": "Machine learning in trading means training a model on historical data to recognize patterns in features like volatility and order flow. Here's how it works — and why it overfits so easily.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-04", "dateModified": "2026-03-04", "mainEntityOfPage": "https://novo-options.trade/journal/machine-learning-in-trading.html", "articleSection": "AI in Trading", "wordCount": 545, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Machine Learning in Trading, Explained", "description": "Machine learning in trading means training a model on historical data to recognize patterns in features like volatility and order flow. Here's how it works — and why it overfits so easily.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-04", "dateModified": "2026-03-04", "mainEntityOfPage": "https://novo-options.trade/journal/machine-learning-in-trading", "articleSection": "AI in Trading", "wordCount": 545, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Machine Learning in Trading", "item": "https://novo-options.trade/journal/machine-learning-in-trading.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Machine Learning in Trading", "item": "https://novo-options.trade/journal/machine-learning-in-trading"}]}
 </script>
 </head>
 <body>
@@ -60,12 +60,12 @@
 <h2>Features are everything</h2>
 <p>An ML model never sees raw price — it sees <strong>features</strong> you engineer: relative volume, trend strength, volatility regime, order-flow imbalance, and so on. The model is only as smart as those inputs. Great features with a simple model beat bad features with a fancy one, every time.</p>
 <h2>Training, then testing on unseen data</h2>
-<p>You train the model on one slice of history, then test it on a slice it has never seen. If it only performs on the training slice, it <strong>overfit</strong> — it memorized noise instead of learning signal. This is the single most common failure in ML trading, and it's why an honest test is out-of-sample (<a href="/journal/backtest-vs-forward-test.html">backtest vs forward test</a>, <a href="/journal/walk-forward-optimization.html">walk-forward optimization</a>).</p>
+<p>You train the model on one slice of history, then test it on a slice it has never seen. If it only performs on the training slice, it <strong>overfit</strong> — it memorized noise instead of learning signal. This is the single most common failure in ML trading, and it's why an honest test is out-of-sample (<a href="/journal/backtest-vs-forward-test">backtest vs forward test</a>, <a href="/journal/walk-forward-optimization">walk-forward optimization</a>).</p>
 <p class="pull">In markets, a model that fits the past perfectly is usually the <em>worst</em> one — it learned the noise, and noise never repeats.</p>
 <h2>Why simpler often wins</h2>
-<p>The more parameters a model has, the more ways it finds to fit noise. In the low-signal, adversarial environment of markets, robust and simple usually beats complex and fragile. That's why many production systems lean on transparent rules with ML in a supporting role, not a black box making every call — see <a href="/journal/ai-vs-rules-engine.html">AI vs a rules engine</a>.</p>
+<p>The more parameters a model has, the more ways it finds to fit noise. In the low-signal, adversarial environment of markets, robust and simple usually beats complex and fragile. That's why many production systems lean on transparent rules with ML in a supporting role, not a black box making every call — see <a href="/journal/ai-vs-rules-engine">AI vs a rules engine</a>.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/reinforcement-learning-in-trading.html">Reinforcement Learning in Trading</a> &middot; <a href="/journal/what-is-quantitative-trading.html">What Is Quantitative Trading?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/reinforcement-learning-in-trading">Reinforcement Learning in Trading</a> &middot; <a href="/journal/what-is-quantitative-trading">What Is Quantitative Trading?</a></p>
 
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/sample-size-trading.html"><span class="rk">Quantitative Trading</span>How Many Trades Before You Believe It?</a></li><li><a href="/journal/what-an-ai-market-analyst-does.html"><span class="rk">AI &amp; Market Analysis</span>What an AI Market Analyst Actually Does</a></li><li><a href="/journal/why-a-raw-llm-cant-trade.html"><span class="rk">AI in Trading</span>Why a Raw LLM Can't Trade For You</a></li><li><a href="/journal/algorithmic-trading-strategies.html"><span class="rk">Algo Trading 101</span>Algorithmic Trading Strategies</a></li><li><a href="/journal/conviction-based-position-sizing.html"><span class="rk">The System</span>Conviction-Based Sizing</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/sample-size-trading"><span class="rk">Quantitative Trading</span>How Many Trades Before You Believe It?</a></li><li><a href="/journal/what-an-ai-market-analyst-does"><span class="rk">AI &amp; Market Analysis</span>What an AI Market Analyst Actually Does</a></li><li><a href="/journal/why-a-raw-llm-cant-trade"><span class="rk">AI in Trading</span>Why a Raw LLM Can't Trade For You</a></li><li><a href="/journal/algorithmic-trading-strategies"><span class="rk">Algo Trading 101</span>Algorithmic Trading Strategies</a></li><li><a href="/journal/conviction-based-position-sizing"><span class="rk">The System</span>Conviction-Based Sizing</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->
 <div style="max-width:620px;margin:0 auto;padding:36px 24px;text-align:center;">

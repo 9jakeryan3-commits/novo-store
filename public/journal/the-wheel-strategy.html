@@ -11,9 +11,9 @@
 <meta name="description" content="The wheel loops cash-secured puts and covered calls to generate ongoing premium. Here is how the cycle works, why it feels safe, and the market condition.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-wheel-strategy.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-wheel-strategy">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/the-wheel-strategy.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-wheel-strategy">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="The Wheel Strategy">
 <meta property="og:description" content="The wheel strategy explained: cycling cash-secured puts and covered calls for premium, and where it breaks.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Wheel Strategy", "description": "The wheel loops cash-secured puts and covered calls to generate ongoing premium. Here is how the cycle works, why it feels safe, and the market condition that breaks it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-02-04", "dateModified": "2026-02-04", "mainEntityOfPage": "https://novo-options.trade/journal/the-wheel-strategy.html", "articleSection": "Options Strategy", "wordCount": 543, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Wheel Strategy", "description": "The wheel loops cash-secured puts and covered calls to generate ongoing premium. Here is how the cycle works, why it feels safe, and the market condition that breaks it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-02-04", "dateModified": "2026-02-04", "mainEntityOfPage": "https://novo-options.trade/journal/the-wheel-strategy", "articleSection": "Options Strategy", "wordCount": 543, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "The Wheel Strategy", "item": "https://novo-options.trade/journal/the-wheel-strategy.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "The Wheel Strategy", "item": "https://novo-options.trade/journal/the-wheel-strategy"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-02-04">Feb 4, 2026</time> &middot; <a class="hub-link" href="/options-101">options basics</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p>The <strong>wheel</strong> is a cyclical options-income strategy. Step one: sell a <a href="/journal/cash-secured-puts.html">cash-secured put</a> on a stock you're willing to own. If assigned, step two: you now hold the shares, so you sell <a href="/journal/covered-calls.html">covered calls</a> against them. If the shares get called away, you're back to cash and start over. Around and around it "wheels."</p>
+    <p>The <strong>wheel</strong> is a cyclical options-income strategy. Step one: sell a <a href="/journal/cash-secured-puts">cash-secured put</a> on a stock you're willing to own. If assigned, step two: you now hold the shares, so you sell <a href="/journal/covered-calls">covered calls</a> against them. If the shares get called away, you're back to cash and start over. Around and around it "wheels."</p>
     <h2>Why it feels safe</h2>
     <p>In flat or slowly rising markets, the wheel produces a steady stream of premium — puts expire worthless, calls expire worthless, you collect income repeatedly. The win rate is high and the equity curve looks smooth. That consistency is exactly why it's popular and heavily marketed.</p>
     <h2>What breaks it</h2>
-    <p>The wheel's weakness is a stock that trends down and stays down. You get assigned puts as it falls, then you're stuck selling covered calls below your cost basis — either capping your recovery or getting called away at a loss. The steady premium doesn't come close to offsetting a large drawdown in the underlying. It's the classic "win small often, lose big rarely" profile — the <a href="/journal/iron-condor-explained.html">iron condor</a> problem in a different wrapper.</p>
+    <p>The wheel's weakness is a stock that trends down and stays down. You get assigned puts as it falls, then you're stuck selling covered calls below your cost basis — either capping your recovery or getting called away at a loss. The steady premium doesn't come close to offsetting a large drawdown in the underlying. It's the classic "win small often, lose big rarely" profile — the <a href="/journal/iron-condor-explained">iron condor</a> problem in a different wrapper.</p>
     <p class="pull">The wheel prints income for months, then hands it all back on the one stock that won't stop falling.</p>
     <h2>The honest framing</h2>
-    <p>The wheel is a volatility-selling, mildly bullish strategy dressed as passive income. It works while the underlying cooperates and demands you only run it on names you genuinely want to own, and size so one bad cycle can't wreck you. Understand it's a <a href="/journal/win-rate-vs-profit-factor.html">high-win-rate, negatively-skewed</a> approach, not free money.</p>
+    <p>The wheel is a volatility-selling, mildly bullish strategy dressed as passive income. It works while the underlying cooperates and demands you only run it on names you genuinely want to own, and size so one bad cycle can't wreck you. Understand it's a <a href="/journal/win-rate-vs-profit-factor">high-win-rate, negatively-skewed</a> approach, not free money.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-limit-on-close-order.html"><span class="rk">Order Types</span>What Is a Limit-on-Close (LOC) Order?</a></li><li><a href="/journal/what-is-a-stop-order.html"><span class="rk">Order Types</span>What Is a Stop Order? Your Automatic Exit Trigger</a></li><li><a href="/journal/butterfly-spread.html"><span class="rk">Options Strategy</span>The Butterfly Spread</a></li><li><a href="/journal/delta-neutral-trading.html"><span class="rk">Options Strategy</span>Delta-Neutral Trading</a></li><li><a href="/journal/iron-condor-explained.html"><span class="rk">Options Strategy</span>The Iron Condor, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-limit-on-close-order"><span class="rk">Order Types</span>What Is a Limit-on-Close (LOC) Order?</a></li><li><a href="/journal/what-is-a-stop-order"><span class="rk">Order Types</span>What Is a Stop Order? Your Automatic Exit Trigger</a></li><li><a href="/journal/butterfly-spread"><span class="rk">Options Strategy</span>The Butterfly Spread</a></li><li><a href="/journal/delta-neutral-trading"><span class="rk">Options Strategy</span>Delta-Neutral Trading</a></li><li><a href="/journal/iron-condor-explained"><span class="rk">Options Strategy</span>The Iron Condor, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

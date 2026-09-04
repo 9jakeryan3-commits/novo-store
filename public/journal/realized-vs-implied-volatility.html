@@ -11,9 +11,9 @@
 <meta name="description" content="Realized volatility is how much price actually moved; implied volatility is how much the market expects it to move. Here is the difference, the gap between them.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/realized-vs-implied-volatility.html">
+<link rel="canonical" href="https://novo-options.trade/journal/realized-vs-implied-volatility">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/realized-vs-implied-volatility.html">
+<meta property="og:url" content="https://novo-options.trade/journal/realized-vs-implied-volatility">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Realized vs Implied Volatility">
 <meta property="og:description" content="Realized vs implied volatility explained: past movement vs expected movement, and why the gap drives options.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Realized vs Implied Volatility", "description": "Realized volatility is how much price actually moved; implied volatility is how much the market expects it to move. Here is the difference, the gap between them, and why it matters for options.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-06", "dateModified": "2026-06-06", "mainEntityOfPage": "https://novo-options.trade/journal/realized-vs-implied-volatility.html", "articleSection": "Volatility", "wordCount": 542, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Realized vs Implied Volatility", "description": "Realized volatility is how much price actually moved; implied volatility is how much the market expects it to move. Here is the difference, the gap between them, and why it matters for options.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-06", "dateModified": "2026-06-06", "mainEntityOfPage": "https://novo-options.trade/journal/realized-vs-implied-volatility", "articleSection": "Volatility", "wordCount": 542, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Volatility & Macro", "item": "https://novo-options.trade/journal/volatility-macro"}, {"@type": "ListItem", "position": 4, "name": "Realized vs Implied Volatility", "item": "https://novo-options.trade/journal/realized-vs-implied-volatility.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Volatility & Macro", "item": "https://novo-options.trade/journal/volatility-macro"}, {"@type": "ListItem", "position": 4, "name": "Realized vs Implied Volatility", "item": "https://novo-options.trade/journal/realized-vs-implied-volatility"}]}
 </script>
 </head>
 <body>
@@ -56,19 +56,19 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-06-06">Jun 6, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Realized volatility</strong> (also called historical or statistical volatility) measures how much price <em>actually</em> moved over a past period. <strong><a href="/journal/what-is-implied-volatility.html">Implied volatility</a></strong> (IV) is how much the market <em>expects</em> price to move, derived from current option prices. One is a measurement; the other is a forecast.</p>
+    <p><strong>Realized volatility</strong> (also called historical or statistical volatility) measures how much price <em>actually</em> moved over a past period. <strong><a href="/journal/what-is-implied-volatility">Implied volatility</a></strong> (IV) is how much the market <em>expects</em> price to move, derived from current option prices. One is a measurement; the other is a forecast.</p>
     <h2>The gap between them</h2>
     <p>The relationship between the two tells you whether options are cheap or expensive relative to how much the underlying is really moving. When IV sits well above realized vol, options are pricing in more movement than is happening - expensive premium. When IV is below realized, options may be underpricing the actual movement - potentially cheap.</p>
     <h2>Why it matters for options</h2>
-    <p>Option buyers effectively bet that realized volatility will exceed the implied volatility they paid for. If you pay for 20% implied and the underlying only delivers 12% realized, you overpaid - the extra premium bleeds away, much like an <a href="/journal/trading-around-earnings.html">IV crush</a>. Sellers bet the opposite. The IV-vs-realized gap is the core edge (or trap) in volatility trading.</p>
+    <p>Option buyers effectively bet that realized volatility will exceed the implied volatility they paid for. If you pay for 20% implied and the underlying only delivers 12% realized, you overpaid - the extra premium bleeds away, much like an <a href="/journal/trading-around-earnings">IV crush</a>. Sellers bet the opposite. The IV-vs-realized gap is the core edge (or trap) in volatility trading.</p>
     <p class="pull">Buy an option and you're betting reality will be more volatile than the price you paid assumed.</p>
     <h2>The practical use</h2>
-    <p>Comparing implied to realized - alongside <a href="/journal/iv-rank-vs-iv-percentile.html">IV rank</a> - tells you whether you're buying volatility cheap or dear before you enter. Systematic approaches care deeply about this: paying up for inflated IV is one of the quietest ways a "correct" directional call still loses money.</p>
+    <p>Comparing implied to realized - alongside <a href="/journal/iv-rank-vs-iv-percentile">IV rank</a> - tells you whether you're buying volatility cheap or dear before you enter. Systematic approaches care deeply about this: paying up for inflated IV is one of the quietest ways a "correct" directional call still loses money.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> Implied vs Realized Volatility: Expected vs Actual &middot; <a href="/journal/why-did-iv-drop.html">Why Did Implied Volatility Drop and Sink My Option?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> Implied vs Realized Volatility: Expected vs Actual &middot; <a href="/journal/why-did-iv-drop">Why Did Implied Volatility Drop and Sink My Option?</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/ten-year-yield-spy-tell.html"><span class="rk">Macro</span>The 10-Year Yield Tell: How Rate Moves Hit SPY Intraday</a></li><li><a href="/journal/treasury-auctions.html"><span class="rk">Catalysts</span>Treasury Auctions</a></li><li><a href="/journal/volatility-skew-explained.html"><span class="rk">Volatility</span>Volatility Skew, Explained</a></li><li><a href="/journal/consumer-sentiment-index.html"><span class="rk">Catalysts</span>Consumer Sentiment Indexes</a></li><li><a href="/journal/gdp-and-the-market.html"><span class="rk">Catalysts</span>GDP &amp; the Market</a></li><li><a href="/journal/implied-vs-realised-volatility-in-crypto.html"><span class="rk">The Crypto Twin</span>Implied vs Realised: What the Options Charged and What Happened</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/volatility-macro" style="color:var(--cyan);font-weight:700;">All Volatility &amp; Macro articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/ten-year-yield-spy-tell"><span class="rk">Macro</span>The 10-Year Yield Tell: How Rate Moves Hit SPY Intraday</a></li><li><a href="/journal/treasury-auctions"><span class="rk">Catalysts</span>Treasury Auctions</a></li><li><a href="/journal/volatility-skew-explained"><span class="rk">Volatility</span>Volatility Skew, Explained</a></li><li><a href="/journal/consumer-sentiment-index"><span class="rk">Catalysts</span>Consumer Sentiment Indexes</a></li><li><a href="/journal/gdp-and-the-market"><span class="rk">Catalysts</span>GDP &amp; the Market</a></li><li><a href="/journal/implied-vs-realised-volatility-in-crypto"><span class="rk">The Crypto Twin</span>Implied vs Realised: What the Options Charged and What Happened</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/volatility-macro" style="color:var(--cyan);font-weight:700;">All Volatility &amp; Macro articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

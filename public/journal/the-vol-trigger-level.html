@@ -10,11 +10,11 @@
 <title>The Vol-Trigger Level: The Other GEX Number Traders Miss | NoVo Options Trading</title>
 <meta name="description" content="Beyond the gamma flip, dealer-positioning models flag a 'vol trigger' — a level below which volatility tends to expand.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-vol-trigger-level.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-vol-trigger-level">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/the-vol-trigger-level.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-vol-trigger-level">
 <meta property="og:title" content="The Vol-Trigger Level: The Other GEX Number Traders Miss">
 <meta property="og:description" content="The vol trigger is a modeled level below which volatility expands — related to but not the same as the gamma flip.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Vol-Trigger Level: The Other GEX Number Traders Miss", "description": "The vol trigger is a modeled level below which volatility expands — related to but not the same as the gamma flip.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/the-vol-trigger-level.html", "articleSection": "Dealer Flow", "wordCount": 582, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Vol-Trigger Level: The Other GEX Number Traders Miss", "description": "The vol trigger is a modeled level below which volatility expands — related to but not the same as the gamma flip.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/the-vol-trigger-level", "articleSection": "Dealer Flow", "wordCount": 582, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "The Vol-Trigger Level: The Other GEX Number Traders Miss", "item": "https://novo-options.trade/journal/the-vol-trigger-level.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "The Vol-Trigger Level: The Other GEX Number Traders Miss", "item": "https://novo-options.trade/journal/the-vol-trigger-level"}]}
 </script>
 </head>
 <body>
@@ -52,20 +52,20 @@
   <header class="article-head">
     <div class="kicker">Dealer Flow</div>
     <h1>The Vol-Trigger Level: The Other GEX Number Traders Miss</h1>
-    <p class="standfirst">Everyone watches the <a href="/journal/the-gamma-flip.html">gamma flip</a>. Fewer know about its quieter cousin &mdash; a modeled level that flags where volatility is likely to expand.</p>
+    <p class="standfirst">Everyone watches the <a href="/journal/the-gamma-flip">gamma flip</a>. Fewer know about its quieter cousin &mdash; a modeled level that flags where volatility is likely to expand.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
-    <p>Dealer-positioning models surface more than one important level. Alongside the <a href="/journal/the-gamma-flip.html">gamma flip</a>, several frameworks compute a <strong>&ldquo;vol trigger&rdquo;</strong> &mdash; a price below which the model expects <em>volatility to expand</em>, as dealer hedging shifts from suppressing movement to feeding it.</p>
+    <p>Dealer-positioning models surface more than one important level. Alongside the <a href="/journal/the-gamma-flip">gamma flip</a>, several frameworks compute a <strong>&ldquo;vol trigger&rdquo;</strong> &mdash; a price below which the model expects <em>volatility to expand</em>, as dealer hedging shifts from suppressing movement to feeding it.</p>
     <h2>How it differs from the flip</h2>
     <p>The two are cousins, not twins. The gamma flip is strictly the zero-line of net dealer gamma &mdash; the boundary between dampening and amplifying. The vol trigger is a related but separately-modeled level that emphasizes the <em>volatility regime</em>: above it, ranges tend to stay compressed; below it, expect bigger, faster candles. In practice they often sit near each other, and when they don't, the gap between them is a zone of transition worth respecting.</p>
     <p class="pull">The flip asks &ldquo;dampen or amplify?&rdquo; The vol trigger asks &ldquo;compressed or expanding?&rdquo; Related questions, not identical ones.</p>
     <h2>How to use it</h2>
-    <p>Treat the vol trigger as a heads-up on <em>character</em>, not a precise pivot. Trading above it, lean toward range and reversion tactics; if price loses it, widen your expectations for the size of moves and be quicker to switch to a <a href="/journal/how-to-trade-negative-gamma.html">momentum posture</a>. It pairs naturally with the flip: losing both the flip and the vol trigger is a strong signal the calm regime is over.</p>
+    <p>Treat the vol trigger as a heads-up on <em>character</em>, not a precise pivot. Trading above it, lean toward range and reversion tactics; if price loses it, widen your expectations for the size of moves and be quicker to switch to a <a href="/journal/how-to-trade-negative-gamma">momentum posture</a>. It pairs naturally with the flip: losing both the flip and the vol trigger is a strong signal the calm regime is over.</p>
     <h2>The honest caveat</h2>
-    <p>Like every level on the map, the vol trigger is a <strong>model estimate</strong> reconstructed from options data, and different providers compute it differently. It's context that tilts the odds toward compression or expansion, not a line that must hold. Used that way, it's a useful second read on the same question the whole <a href="/journal/full-dealer-positioning-read.html">dealer map</a> is answering: what kind of tape are you in?</p>
+    <p>Like every level on the map, the vol trigger is a <strong>model estimate</strong> reconstructed from options data, and different providers compute it differently. It's context that tilts the odds toward compression or expansion, not a line that must hold. Used that way, it's a useful second read on the same question the whole <a href="/journal/full-dealer-positioning-read">dealer map</a> is answering: what kind of tape are you in?</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/producer-price-index-ppi.html">The Producer Price Index (PPI): The Other Inflation Number</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/producer-price-index-ppi">The Producer Price Index (PPI): The Other Inflation Number</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -93,7 +93,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-cboe.html"><span class="rk">Market Structure</span>What Is the Cboe? The Options Exchange Behind SPX and VIX</a></li><li><a href="/journal/0dte-gamma-feedback-loop.html"><span class="rk">Dealer Flow</span>The 0DTE Gamma Feedback Loop, Explained</a></li><li><a href="/journal/dealer-long-gamma-assumption.html"><span class="rk">Dealer Flow</span>The Dealer-Long-Gamma Assumption: When It's Wrong</a></li><li><a href="/journal/gamma-walls-explained.html"><span class="rk">Dealer Flow</span>Gamma Walls Explained</a></li><li><a href="/journal/market-wide-circuit-breaker.html"><span class="rk">Market Structure</span>Market-Wide vs Single-Stock Circuit Breakers: The Difference</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-cboe"><span class="rk">Market Structure</span>What Is the Cboe? The Options Exchange Behind SPX and VIX</a></li><li><a href="/journal/0dte-gamma-feedback-loop"><span class="rk">Dealer Flow</span>The 0DTE Gamma Feedback Loop, Explained</a></li><li><a href="/journal/dealer-long-gamma-assumption"><span class="rk">Dealer Flow</span>The Dealer-Long-Gamma Assumption: When It's Wrong</a></li><li><a href="/journal/gamma-walls-explained"><span class="rk">Dealer Flow</span>Gamma Walls Explained</a></li><li><a href="/journal/market-wide-circuit-breaker"><span class="rk">Market Structure</span>Market-Wide vs Single-Stock Circuit Breakers: The Difference</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -11,9 +11,9 @@
 <meta name="description" content="Your equity curve is one ordering of your trades. Reshuffling that order thousands of times shows the deeper drawdowns luck happened to spare you.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/monte-carlo-trading.html">
+<link rel="canonical" href="https://novo-options.trade/journal/monte-carlo-trading">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/monte-carlo-trading.html">
+<meta property="og:url" content="https://novo-options.trade/journal/monte-carlo-trading">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Monte Carlo: Stress-Testing a System Before the Market Does">
 <meta property="og:description" content="Your equity curve is one ordering of your trades. Reshuffling that order thousands of times shows the deeper drawdowns luck happened to spare you.">
@@ -28,8 +28,8 @@
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Monte Carlo: Stress-Testing a System Before the Market Does", "description": "Your equity curve is one ordering of your trades. Reshuffling that order thousands of times shows the deeper drawdowns luck happened to spare you.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/monte-carlo-trading.html", "articleSection": "Quantitative Trading", "wordCount": 778, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Monte Carlo: Stress-Testing a System Before the Market Does", "item": "https://novo-options.trade/journal/monte-carlo-trading.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Monte Carlo: Stress-Testing a System Before the Market Does", "description": "Your equity curve is one ordering of your trades. Reshuffling that order thousands of times shows the deeper drawdowns luck happened to spare you.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/monte-carlo-trading", "articleSection": "Quantitative Trading", "wordCount": 778, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Monte Carlo: Stress-Testing a System Before the Market Does", "item": "https://novo-options.trade/journal/monte-carlo-trading"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -63,8 +63,8 @@
 <p class="pull">The drawdown in your backtest isn't your worst case. It's one sample from a distribution you never looked at.</p>
 
 <h2>What it answers</h2>
-<p><strong>How bad can the drawdown get?</strong> The one that matters for sizing, and the one nobody plans for honestly (<a href="/journal/what-is-drawdown.html">drawdown</a>).</p>
-<p><strong>What's the chance of ruin?</strong> Run the simulations, count how many hit zero or your quit-point. That's your <a href="/journal/risk-of-ruin.html">risk of ruin</a>, measured rather than assumed.</p>
+<p><strong>How bad can the drawdown get?</strong> The one that matters for sizing, and the one nobody plans for honestly (<a href="/journal/what-is-drawdown">drawdown</a>).</p>
+<p><strong>What's the chance of ruin?</strong> Run the simulations, count how many hit zero or your quit-point. That's your <a href="/journal/risk-of-ruin">risk of ruin</a>, measured rather than assumed.</p>
 <p><strong>How long can a losing streak run?</strong> Knowing the answer in advance is the difference between sitting through the streak and abandoning a working system in the middle of it.</p>
 <p><strong>How wide is the range of outcomes?</strong> If the simulations spread from +40% to -30%, your "expected" return is a lot less meaningful than it looked.</p>
 
@@ -72,12 +72,12 @@
 <p>Monte Carlo is a stress test, not a crystal ball, and it has real limits.</p>
 <p><strong>Shuffling assumes trades are independent.</strong> They usually aren't. Losses cluster because market conditions cluster — a bad regime produces a run of losses together, not scattered evenly. Simple reshuffling can understate that clustering, which means it may understate your real drawdown.</p>
 <p><strong>It can only resample what you gave it.</strong> If your history never contained a 2008 or a 2020, no amount of shuffling will invent one. Monte Carlo explores the outcomes your data implies, not the ones it never saw.</p>
-<p><strong>Garbage in, confident garbage out.</strong> Run it on an <a href="/journal/overfitting-in-trading.html">overfitted</a> backtest and you get a beautifully rigorous distribution of a fantasy.</p>
+<p><strong>Garbage in, confident garbage out.</strong> Run it on an <a href="/journal/overfitting-in-trading">overfitted</a> backtest and you get a beautifully rigorous distribution of a fantasy.</p>
 
 <h2>Using it properly</h2>
 <p>The practical value isn't the headline number. It's the humility. You size for the drawdown the simulations show, not the one your backtest happened to produce. You decide in advance what losing streak you'll sit through, because you've seen how long they run. And you stop mistaking one lucky path for a property of your system.</p>
 <p>That's the whole point: to meet your worst case in a spreadsheet, at leisure, instead of live, at speed, with money on the line.</p>
-<p>See also: <a href="/journal/reading-your-equity-curve.html">reading your equity curve</a> and <a href="/journal/variance-vs-edge.html">variance vs edge</a>.</p>
+<p>See also: <a href="/journal/reading-your-equity-curve">reading your equity curve</a> and <a href="/journal/variance-vs-edge">variance vs edge</a>.</p>
   </div>
 
   <div class="cta">
@@ -107,7 +107,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/survivorship-bias-backtesting.html"><span class="rk">The System</span>Survivorship Bias</a></li><li><a href="/journal/what-is-an-automated-trading-system.html"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li><li><a href="/journal/why-trading-signal-groups-disappoint.html"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test.html"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work.html"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/survivorship-bias-backtesting"><span class="rk">The System</span>Survivorship Bias</a></li><li><a href="/journal/what-is-an-automated-trading-system"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li><li><a href="/journal/why-trading-signal-groups-disappoint"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

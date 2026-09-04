@@ -10,11 +10,11 @@
 <title>The Limits Around a Crypto Options Position | NoVo Options Trading</title>
 <meta name="description" content="Limits are usually treated as a constraint on large traders. They are also a venue publishing its own opinion of a market&rsquo;s depth, for free.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/crypto-options-position-limits-and-caps.html">
+<link rel="canonical" href="https://novo-options.trade/journal/crypto-options-position-limits-and-caps">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/crypto-options-position-limits-and-caps.html">
+<meta property="og:url" content="https://novo-options.trade/journal/crypto-options-position-limits-and-caps">
 <meta property="og:title" content="The Limits Around a Crypto Options Position">
 <meta property="og:description" content="Limits are usually treated as a constraint on large traders. They are also a venue publishing its own opinion of a market&rsquo;s depth, for free.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Limits Around a Crypto Options Position", "description": "Venues cap contracts, notional and Greeks exposure. The caps are published, coin-specific, and a free read on how liquid the venue thinks a book is.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-options-position-limits-and-caps.html", "articleSection": "Crypto Options 101", "wordCount": 273, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Limits Around a Crypto Options Position", "description": "Venues cap contracts, notional and Greeks exposure. The caps are published, coin-specific, and a free read on how liquid the venue thinks a book is.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-options-position-limits-and-caps", "articleSection": "Crypto Options 101", "wordCount": 273, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Limits Around a Crypto Options Position", "item": "https://novo-options.trade/journal/crypto-options-position-limits-and-caps.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Limits Around a Crypto Options Position", "item": "https://novo-options.trade/journal/crypto-options-position-limits-and-caps"}]}
 </script>
 </head>
 <body>
@@ -57,20 +57,20 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>Options venues impose limits: a maximum number of contracts per strike or expiry, a cap on total notional, and sometimes limits on aggregate exposure to a single Greek.</p>
-    <p>They exist because the venue must be able to manage the position if something goes wrong &mdash; the same logic behind <a href="/journal/leverage-tiers-and-position-limits.html">leverage tiers</a> on perpetuals.</p>
+    <p>They exist because the venue must be able to manage the position if something goes wrong &mdash; the same logic behind <a href="/journal/leverage-tiers-and-position-limits">leverage tiers</a> on perpetuals.</p>
     <h2>Why they are informative</h2>
     <p>Limits are set against how much the venue believes a book can absorb. A generous cap on BTC and a tight one on a newly listed altcoin is the venue stating, in public, that the second book is thin.</p>
-    <p>That is a free liquidity read requiring no data at all, and it is a useful cross-check on figures computed from a <a href="/journal/reading-a-thin-options-book.html">thin book</a> that look more solid than they are.</p>
+    <p>That is a free liquidity read requiring no data at all, and it is a useful cross-check on figures computed from a <a href="/journal/reading-a-thin-options-book">thin book</a> that look more solid than they are.</p>
     <h2>What they mean in practice</h2>
     <p>For most retail positions, nothing &mdash; the caps sit well above ordinary size. Where they bite is on anyone trying to express a large view in a small book, which is precisely the case where the position would be hard to exit anyway.</p>
-    <p>So the limit is usually enforcing a constraint the market would have enforced through <a href="/journal/liquidity-by-strike-in-crypto-options.html">execution cost</a> regardless.</p>
+    <p>So the limit is usually enforcing a constraint the market would have enforced through <a href="/journal/liquidity-by-strike-in-crypto-options">execution cost</a> regardless.</p>
     <h2>The knock-on for the dealer map</h2>
-    <p>Limits bound how concentrated open interest at a single strike can become, which puts a ceiling on how large a wall any one participant can create &mdash; a partial mitigation of the <a href="/journal/block-trades-and-rfq-in-crypto-options.html">block trade</a> problem, though a high one.</p>
+    <p>Limits bound how concentrated open interest at a single strike can become, which puts a ceiling on how large a wall any one participant can create &mdash; a partial mitigation of the <a href="/journal/block-trades-and-rfq-in-crypto-options">block trade</a> problem, though a high one.</p>
     <h2>The check</h2>
     <p>Read the limits table alongside the contract specification, once per venue and per coin. It takes a minute and tells you what the venue thinks of the book before you compute anything from it.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/funding-resets-after-a-flush.html"><span class="rk">Margin &amp; Liquidation</span>Funding After a Flush: The Cleanest Confirmation</a></li><li><a href="/journal/liquidation-price-and-leverage-math.html"><span class="rk">Margin &amp; Liquidation</span>Where Your Liquidation Price Actually Sits</a></li><li><a href="/journal/position-sizing-in-a-market-that-never-closes.html"><span class="rk">Margin &amp; Liquidation</span>Sizing a Position You Cannot Watch</a></li><li><a href="/journal/the-true-cost-of-a-crypto-round-trip.html"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc.html"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/funding-resets-after-a-flush"><span class="rk">Margin &amp; Liquidation</span>Funding After a Flush: The Cleanest Confirmation</a></li><li><a href="/journal/liquidation-price-and-leverage-math"><span class="rk">Margin &amp; Liquidation</span>Where Your Liquidation Price Actually Sits</a></li><li><a href="/journal/position-sizing-in-a-market-that-never-closes"><span class="rk">Margin &amp; Liquidation</span>Sizing a Position You Cannot Watch</a></li><li><a href="/journal/the-true-cost-of-a-crypto-round-trip"><span class="rk">Crypto Costs</span>The Round Trip Is the Only Cost That Matters</a></li><li><a href="/journal/what-happens-at-0800-utc"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

@@ -10,11 +10,11 @@
 <title>VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY | NoVo Options Trading</title>
 <meta name="description" content="VWAP bands plot standard-deviation envelopes around VWAP, marking how stretched price is from fair value.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/vwap-bands-stretch-reversion.html">
+<link rel="canonical" href="https://novo-options.trade/journal/vwap-bands-stretch-reversion">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/vwap-bands-stretch-reversion.html">
+<meta property="og:url" content="https://novo-options.trade/journal/vwap-bands-stretch-reversion">
 <meta property="og:title" content="VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY">
 <meta property="og:description" content="VWAP bands (1σ/2σ) mark how stretched price is from fair value — outer bands are reversion zones on calm days.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY", "description": "VWAP bands (1σ/2σ) mark how stretched price is from fair value — outer bands are reversion zones on calm days.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/vwap-bands-stretch-reversion.html", "articleSection": "Charting", "wordCount": 565, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY", "description": "VWAP bands (1σ/2σ) mark how stretched price is from fair value — outer bands are reversion zones on calm days.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/vwap-bands-stretch-reversion", "articleSection": "Charting", "wordCount": 565, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY", "item": "https://novo-options.trade/journal/vwap-bands-stretch-reversion.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY", "item": "https://novo-options.trade/journal/vwap-bands-stretch-reversion"}]}
 </script>
 </head>
 <body>
@@ -52,18 +52,18 @@
   <header class="article-head">
     <div class="kicker">Charting</div>
     <h1>VWAP Bands (1σ/2σ): Reading Stretch and Reversion on SPY</h1>
-    <p class="standfirst"><a href="/journal/vwap-explained.html">VWAP</a> tells you fair value; VWAP bands tell you how far price has stretched from it &mdash; and on a calm day, how far is a tradeable question.</p>
+    <p class="standfirst"><a href="/journal/vwap-explained">VWAP</a> tells you fair value; VWAP bands tell you how far price has stretched from it &mdash; and on a calm day, how far is a tradeable question.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time></div>
   <div class="article-body">
-    <p>VWAP bands are standard-deviation envelopes plotted around <a href="/journal/vwap-explained.html">VWAP</a> &mdash; typically at 1&sigma; and 2&sigma; above and below. They measure <strong>how stretched price is from the volume-weighted mean</strong>: near VWAP is fair value; out at the 2&sigma; band is statistically extended. That stretch is the signal.</p>
+    <p>VWAP bands are standard-deviation envelopes plotted around <a href="/journal/vwap-explained">VWAP</a> &mdash; typically at 1&sigma; and 2&sigma; above and below. They measure <strong>how stretched price is from the volume-weighted mean</strong>: near VWAP is fair value; out at the 2&sigma; band is statistically extended. That stretch is the signal.</p>
     <h2>Reading the bands</h2>
-    <p>Price spends most of its time inside the 1&sigma; band, oscillating around VWAP. Pushes to the <strong>outer (2&sigma;) band</strong> are stretched moves that, on a calm day, tend to revert back toward the mean &mdash; the same logic as fading the <a href="/journal/expected-move-boundary-trade.html">expected-move edge</a>. The bands turn &ldquo;price is high&rdquo; into a measurable &ldquo;price is two standard deviations above fair value.&rdquo;</p>
+    <p>Price spends most of its time inside the 1&sigma; band, oscillating around VWAP. Pushes to the <strong>outer (2&sigma;) band</strong> are stretched moves that, on a calm day, tend to revert back toward the mean &mdash; the same logic as fading the <a href="/journal/expected-move-boundary-trade">expected-move edge</a>. The bands turn &ldquo;price is high&rdquo; into a measurable &ldquo;price is two standard deviations above fair value.&rdquo;</p>
     <h2>How to trade them</h2>
-    <p>On a <a href="/journal/trading-positive-gamma-mean-revert.html">positive-gamma, range day</a>, a rejection at the outer band is a reversion scalp back toward VWAP &mdash; fade the stretch. Enter on the rejection at the band, target VWAP (the mean), stop on acceptance beyond the band. It pairs naturally with <a href="/journal/dealer-hedging-mean-reversion.html">dealer-hedging mean reversion</a>: the bands measure the stretch, the regime tells you it'll revert.</p>
+    <p>On a <a href="/journal/trading-positive-gamma-mean-revert">positive-gamma, range day</a>, a rejection at the outer band is a reversion scalp back toward VWAP &mdash; fade the stretch. Enter on the rejection at the band, target VWAP (the mean), stop on acceptance beyond the band. It pairs naturally with <a href="/journal/dealer-hedging-mean-reversion">dealer-hedging mean reversion</a>: the bands measure the stretch, the regime tells you it'll revert.</p>
     <p class="pull">The outer band isn't &ldquo;price is high&rdquo; &mdash; it's &ldquo;price is stretched two sigma from fair value.&rdquo; On a calm day, that stretch is a fade.</p>
     <h2>The trend-day warning</h2>
-    <p>Bands mislead on <a href="/journal/trend-day-recognition-checklist.html">trend days</a>: in a strong trend, price can <strong>ride the outer band</strong> for hours, and fading each band tag is a slow bleed. The bands are a reversion tool for a reversion regime &mdash; in negative gamma, a tag of the band is often continuation, not exhaustion. As always, <a href="/journal/net-gex-regime-filter.html">read the regime first</a>: fade the bands when you should be fading, respect them when the tape is trending.</p>
+    <p>Bands mislead on <a href="/journal/trend-day-recognition-checklist">trend days</a>: in a strong trend, price can <strong>ride the outer band</strong> for hours, and fading each band tag is a slow bleed. The bands are a reversion tool for a reversion regime &mdash; in negative gamma, a tag of the band is often continuation, not exhaustion. As always, <a href="/journal/net-gex-regime-filter">read the regime first</a>: fade the bands when you should be fading, respect them when the tape is trending.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/anchored-vwap-from-day-low.html"><span class="rk">Charting</span>Anchored VWAP From the Day's Low: A Dynamic Support Line for Scalps</a></li><li><a href="/journal/change-of-character-choch.html"><span class="rk">Charting</span>Change of Character (CHoCH): Spotting the Intraday Turn</a></li><li><a href="/journal/engulfing-candlestick.html"><span class="rk">Charting</span>Engulfing Candlestick Patterns, Explained</a></li><li><a href="/journal/keltner-channels.html"><span class="rk">Indicators</span>Keltner Channels</a></li><li><a href="/journal/opening-range-volatility-gauge.html"><span class="rk">Charting</span>The Opening Range as a Volatility Gauge, Not Just a Breakout Trigger</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/anchored-vwap-from-day-low"><span class="rk">Charting</span>Anchored VWAP From the Day's Low: A Dynamic Support Line for Scalps</a></li><li><a href="/journal/change-of-character-choch"><span class="rk">Charting</span>Change of Character (CHoCH): Spotting the Intraday Turn</a></li><li><a href="/journal/engulfing-candlestick"><span class="rk">Charting</span>Engulfing Candlestick Patterns, Explained</a></li><li><a href="/journal/keltner-channels"><span class="rk">Indicators</span>Keltner Channels</a></li><li><a href="/journal/opening-range-volatility-gauge"><span class="rk">Charting</span>The Opening Range as a Volatility Gauge, Not Just a Breakout Trigger</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

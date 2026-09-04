@@ -10,11 +10,11 @@
 <title>When the Chain Pauses: Downtime as a Position Risk | NoVo Options Trading</title>
 <meta name="description" content="L2 sequencers and young chains halt, and a halted chain is a market where your position ages while only off-chain prices move. Plan for the pause.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/sequencer-downtime-and-halted-chains.html">
+<link rel="canonical" href="https://novo-options.trade/journal/sequencer-downtime-and-halted-chains">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/sequencer-downtime-and-halted-chains.html">
+<meta property="og:url" content="https://novo-options.trade/journal/sequencer-downtime-and-halted-chains">
 <meta property="og:title" content="When the Chain Pauses: Downtime as a Position Risk">
 <meta property="og:description" content="L2 sequencers and young chains halt, and a halted chain is a market where your position ages while only off-chain prices move. Plan for the pause.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "When the Chain Pauses: Downtime as a Position Risk", "description": "L2 sequencers and young chains halt, and a halted chain is a market where your position ages while only off-chain prices move. Plan for the pause.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/sequencer-downtime-and-halted-chains.html", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "When the Chain Pauses: Downtime as a Position Risk", "description": "L2 sequencers and young chains halt, and a halted chain is a market where your position ages while only off-chain prices move. Plan for the pause.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/sequencer-downtime-and-halted-chains", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "When the Chain Pauses: Downtime as a Position Risk", "item": "https://novo-options.trade/journal/sequencer-downtime-and-halted-chains.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "When the Chain Pauses: Downtime as a Position Risk", "item": "https://novo-options.trade/journal/sequencer-downtime-and-halted-chains"}]}
 </script>
 </head>
 <body>
@@ -59,14 +59,14 @@
 <h2>Single-file exits, single points of pause</h2>
 <p>Most L2s run one sequencer &mdash; a single operator ordering transactions &mdash; and young L1s halt under bugs or consensus faults, some famously and repeatedly. When it happens, the market does not pause with the chain: prices on centralized venues and other chains keep moving while every on-chain position sits frozen mid-trade, mid-liquidation, or mid-exit.</p>
 <h2>What resumes is not what stopped</h2>
-<p>Restart is a repricing event: oracles refresh to wherever the world moved, <a href="/journal/oracle-marks-and-liquidation-cascades.html">marks jump</a> discontinuously, and queued liquidations execute into the first blocks. Positions that were healthy at the halt can be underwater at the resume with no tradable moment between &mdash; gap risk, manufactured by infrastructure.</p>
+<p>Restart is a repricing event: oracles refresh to wherever the world moved, <a href="/journal/oracle-marks-and-liquidation-cascades">marks jump</a> discontinuously, and queued liquidations execute into the first blocks. Positions that were healthy at the halt can be underwater at the resume with no tradable moment between &mdash; gap risk, manufactured by infrastructure.</p>
 <h2>The structural residue</h2>
-<p>Chains carry their outage history as a discount: reliability is priced like a fundamental, which is why halt-prone networks trade at persistent skepticism and why <a href="/journal/solana-market-structure.html">Solana&rsquo;s</a> maturation out of its outage era was a repricing story in itself. Escape hatches &mdash; forced-inclusion queues, decentralized sequencer roadmaps &mdash; are the category&rsquo;s answer, mostly still promissory.</p>
+<p>Chains carry their outage history as a discount: reliability is priced like a fundamental, which is why halt-prone networks trade at persistent skepticism and why <a href="/journal/solana-market-structure">Solana&rsquo;s</a> maturation out of its outage era was a repricing story in itself. Escape hatches &mdash; forced-inclusion queues, decentralized sequencer roadmaps &mdash; are the category&rsquo;s answer, mostly still promissory.</p>
 <h2>Reading it</h2>
 <p>Size on-chain leverage to survive a market that moves while you cannot; know the chain&rsquo;s halt history and the venue&rsquo;s oracle-restart behavior. Downtime is rare exactly until it is the only thing that matters.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/oracle-marks-and-liquidation-cascades.html"><span class="rk">Coins &amp; Chains</span>Oracle Marks: The Price That Liquidates You</a></li><li><a href="/journal/solana-market-structure.html"><span class="rk">Coins &amp; Chains</span>Solana: An Options Book on One Side, a Whole Chain on the Other</a></li><li><a href="/journal/bridges-and-cross-chain-risk.html"><span class="rk">Coins &amp; Chains</span>A Bridged Token Is a Claim, Not the Asset</a></li><li><a href="/journal/circuit-breakers-market-halts.html"><span class="rk">The Equity Twin</span>Circuit Breakers & Market Halts</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/oracle-marks-and-liquidation-cascades"><span class="rk">Coins &amp; Chains</span>Oracle Marks: The Price That Liquidates You</a></li><li><a href="/journal/solana-market-structure"><span class="rk">Coins &amp; Chains</span>Solana: An Options Book on One Side, a Whole Chain on the Other</a></li><li><a href="/journal/bridges-and-cross-chain-risk"><span class="rk">Coins &amp; Chains</span>A Bridged Token Is a Claim, Not the Asset</a></li><li><a href="/journal/circuit-breakers-market-halts"><span class="rk">The Equity Twin</span>Circuit Breakers & Market Halts</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 
 </div>
 

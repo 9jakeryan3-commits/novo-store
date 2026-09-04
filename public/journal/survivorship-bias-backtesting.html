@@ -11,9 +11,9 @@
 <meta name="description" content="If your backtest only includes stocks that still exist today, it's ignoring every company that failed, and its results are a lie. Here is how survivorship bias.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/survivorship-bias-backtesting.html">
+<link rel="canonical" href="https://novo-options.trade/journal/survivorship-bias-backtesting">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/survivorship-bias-backtesting.html">
+<meta property="og:url" content="https://novo-options.trade/journal/survivorship-bias-backtesting">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Survivorship Bias">
 <meta property="og:description" content="Survivorship bias in backtesting explained: why testing only surviving stocks inflates results and how to avoid it.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Survivorship Bias", "description": "If your backtest only includes stocks that still exist today, it's ignoring every company that failed, and its results are a lie. Here is how survivorship bias inflates backtests and how to avoid it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-06", "dateModified": "2026-03-06", "mainEntityOfPage": "https://novo-options.trade/journal/survivorship-bias-backtesting.html", "articleSection": "The System", "wordCount": 562, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Survivorship Bias", "description": "If your backtest only includes stocks that still exist today, it's ignoring every company that failed, and its results are a lie. Here is how survivorship bias inflates backtests and how to avoid it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-03-06", "dateModified": "2026-03-06", "mainEntityOfPage": "https://novo-options.trade/journal/survivorship-bias-backtesting", "articleSection": "The System", "wordCount": 562, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Survivorship Bias", "item": "https://novo-options.trade/journal/survivorship-bias-backtesting.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Survivorship Bias", "item": "https://novo-options.trade/journal/survivorship-bias-backtesting"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-03-06">Mar 6, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test.html">backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it, and the results are dangerously flattering.</p>
+    <p><strong>Survivorship bias</strong> is one of the most insidious flaws in <a href="/journal/backtest-vs-forward-test">backtesting</a>: if your historical data only includes companies that <em>survived</em> to today, you've silently excluded every one that went bankrupt, got delisted, or was acquired at a loss. The strategy is tested only on winners that made it, and the results are dangerously flattering.</p>
     <h2>How it inflates results</h2>
     <p>Imagine backtesting "buy the S&amp;P 500 and hold" using <em>today's</em> 500 members over the last 20 years. Every company that got kicked out for underperforming is missing — you're testing only the ones that thrived enough to still be in the index. The backtest looks great, but it was never available to trade in real time: you couldn't have known which companies would survive. The test rewards you for hindsight you didn't have.</p>
     <h2>Where it hides</h2>
     <p>It's everywhere backtests use a "current" universe: current index constituents, currently-listed stocks, currently-available funds. It also lurks in strategy marketing — "these signals would have returned X%" using a survivor-only dataset. The failed companies, the delisted tickers, the blown-up funds all vanish from the record, leaving an unrealistically rosy picture.</p>
     <p class="pull">A backtest on survivors is a study of who won, sold to you as a strategy for picking winners. It isn't.</p>
     <h2>How to avoid it</h2>
-    <p>Use <em>point-in-time</em>, survivorship-bias-free data that includes delisted and dead securities as they existed historically. And treat any backtest — especially a beautiful one — with skepticism until it's validated <a href="/journal/backtest-vs-forward-test.html">forward</a> on unseen data. Survivorship bias is a core reason forward results, not historical ones, are the truth. Honest system development refuses to trust a backtest that quietly buried its losers.</p>
+    <p>Use <em>point-in-time</em>, survivorship-bias-free data that includes delisted and dead securities as they existed historically. And treat any backtest — especially a beautiful one — with skepticism until it's validated <a href="/journal/backtest-vs-forward-test">forward</a> on unseen data. Survivorship bias is a core reason forward results, not historical ones, are the truth. Honest system development refuses to trust a backtest that quietly buried its losers.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-an-automated-trading-system.html"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li><li><a href="/journal/why-trading-signal-groups-disappoint.html"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test.html"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work.html"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission.html"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-an-automated-trading-system"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li><li><a href="/journal/why-trading-signal-groups-disappoint"><span class="rk">Signals vs Systems</span>Why Trading Signal Groups Disappoint (Structurally)</a></li><li><a href="/journal/backtest-vs-forward-test"><span class="rk">The System</span>Backtest vs Forward-Test</a></li><li><a href="/journal/do-trading-bots-really-work"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

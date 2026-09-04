@@ -11,9 +11,9 @@
 <meta name="description" content="An options chain lists every strike and expiration with its price, volume, and open interest. Here is how to read the grid, what each column means, and what.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/how-to-read-an-options-chain.html">
+<link rel="canonical" href="https://novo-options.trade/journal/how-to-read-an-options-chain">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/how-to-read-an-options-chain.html">
+<meta property="og:url" content="https://novo-options.trade/journal/how-to-read-an-options-chain">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="How to Read an Options Chain">
 <meta property="og:description" content="A plain-English guide to reading an options chain: strikes, expirations, bid/ask, volume, and open interest.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "How to Read an Options Chain", "description": "An options chain lists every strike and expiration with its price, volume, and open interest. Here is how to read the grid, what each column means, and what actually matters.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-04-29", "dateModified": "2026-04-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-to-read-an-options-chain.html", "articleSection": "Options Basics", "wordCount": 568, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "How to Read an Options Chain", "description": "An options chain lists every strike and expiration with its price, volume, and open interest. Here is how to read the grid, what each column means, and what actually matters.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-04-29", "dateModified": "2026-04-29", "mainEntityOfPage": "https://novo-options.trade/journal/how-to-read-an-options-chain", "articleSection": "Options Basics", "wordCount": 568, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "How to Read an Options Chain", "item": "https://novo-options.trade/journal/how-to-read-an-options-chain.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "How to Read an Options Chain", "item": "https://novo-options.trade/journal/how-to-read-an-options-chain"}]}
 </script>
 </head>
 <body>
@@ -56,18 +56,18 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-04-29">Apr 29, 2026</time> &middot; <a class="hub-link" href="/options-101">options basics</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-options-trading-explained" style="color:var(--cyan);text-decoration:none;font-weight:700;">Options Trading, Explained</a> guide &rarr;</div>
   <div class="article-body">
     <p>An <strong>options chain</strong> is the menu of every contract available on a stock - organized by <em>expiration date</em> and, within each, by <em>strike price</em>. Calls are usually on one side, puts on the other, with the current stock price near the middle.</p>
     <h2>The columns that matter</h2>
-    <p>For each strike you will see the <strong>bid</strong> (what buyers will pay), the <strong>ask</strong> (what sellers want), the <strong>last</strong> traded price, <strong>volume</strong> (contracts traded today), and <strong>open interest</strong> (contracts still open). The gap between bid and ask is the <a href="/journal/what-market-makers-do.html">spread</a> - your immediate cost to get in and out. Tight spreads mean liquidity; wide spreads mean you are paying a toll on every trade.</p>
+    <p>For each strike you will see the <strong>bid</strong> (what buyers will pay), the <strong>ask</strong> (what sellers want), the <strong>last</strong> traded price, <strong>volume</strong> (contracts traded today), and <strong>open interest</strong> (contracts still open). The gap between bid and ask is the <a href="/journal/what-market-makers-do">spread</a> - your immediate cost to get in and out. Tight spreads mean liquidity; wide spreads mean you are paying a toll on every trade.</p>
     <h2>Volume vs. open interest</h2>
-    <p>These two get confused constantly. <em>Volume</em> is how many contracts changed hands today; <em>open interest</em> is how many contracts exist and have not been closed. High volume means active trading right now; high <a href="/journal/what-is-open-interest.html">open interest</a> means a lot of positioning is parked at that strike - which can matter for how the stock behaves near it.</p>
+    <p>These two get confused constantly. <em>Volume</em> is how many contracts changed hands today; <em>open interest</em> is how many contracts exist and have not been closed. High volume means active trading right now; high <a href="/journal/what-is-open-interest">open interest</a> means a lot of positioning is parked at that strike - which can matter for how the stock behaves near it.</p>
     <p class="pull">The chain is not a wall of noise. It is a map of where liquidity and positioning actually sit.</p>
     <h2>What to focus on</h2>
-    <p>For short-dated trading on a liquid product like SPY, focus on: the expiration you want, strikes near the money (where <a href="/journal/what-is-delta-options.html">delta</a> is meaningful), the spread (tight is non-negotiable), and enough volume to fill without slippage. The rest is detail. Reading the chain well is not about memorizing every column - it is about quickly finding a contract you can enter and exit cleanly.</p>
+    <p>For short-dated trading on a liquid product like SPY, focus on: the expiration you want, strikes near the money (where <a href="/journal/what-is-delta-options">delta</a> is meaningful), the spread (tight is non-negotiable), and enough volume to fill without slippage. The rest is detail. Reading the chain well is not about memorizing every column - it is about quickly finding a contract you can enter and exit cleanly.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/how-to-read-options-ticker.html">How to Read a SPY Options Ticker: Strike, Expiry, and C/P Decoded</a> &middot; <a href="/journal/what-is-a-mini-option.html">What Is a Mini Option?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/how-to-read-options-ticker">How to Read a SPY Options Ticker: Strike, Expiry, and C/P Decoded</a> &middot; <a href="/journal/what-is-a-mini-option">What Is a Mini Option?</a></p>
 
 
   <div class="cta">
@@ -97,7 +97,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/options-assignment-and-exercise.html"><span class="rk">Options 101</span>Options Assignment &amp; Exercise, Explained</a></li><li><a href="/journal/stop-on-option-price-not-underlying.html"><span class="rk">Options 101</span>Your Options Stop Triggers on the Option Price, Not on SPY</a></li><li><a href="/journal/what-is-a-fill.html"><span class="rk">Basics</span>What Is a Fill? How Your Order Becomes a Position</a></li><li><a href="/journal/what-is-early-exercise.html"><span class="rk">Options 101</span>What Is Early Exercise? Using an Option Before Expiration</a></li><li><a href="/journal/when-do-spy-0dte-options-stop-trading.html"><span class="rk">Options 101</span>When Do SPY 0DTE Options Stop Trading? 4:00 vs 4:15 PM</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/options-assignment-and-exercise"><span class="rk">Options 101</span>Options Assignment &amp; Exercise, Explained</a></li><li><a href="/journal/stop-on-option-price-not-underlying"><span class="rk">Options 101</span>Your Options Stop Triggers on the Option Price, Not on SPY</a></li><li><a href="/journal/what-is-a-fill"><span class="rk">Basics</span>What Is a Fill? How Your Order Becomes a Position</a></li><li><a href="/journal/what-is-early-exercise"><span class="rk">Options 101</span>What Is Early Exercise? Using an Option Before Expiration</a></li><li><a href="/journal/when-do-spy-0dte-options-stop-trading"><span class="rk">Options 101</span>When Do SPY 0DTE Options Stop Trading? 4:00 vs 4:15 PM</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -10,11 +10,11 @@
 <title>Delta vs Gamma: The Difference Every Options Trader Needs | NoVo Options Trading</title>
 <meta name="description" content="Delta measures how much an option moves per $1 in the underlying; gamma measures how fast delta itself changes.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/delta-vs-gamma.html">
+<link rel="canonical" href="https://novo-options.trade/journal/delta-vs-gamma">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/delta-vs-gamma.html">
+<meta property="og:url" content="https://novo-options.trade/journal/delta-vs-gamma">
 <meta property="og:title" content="Delta vs Gamma: The Difference Every Options Trader Needs">
 <meta property="og:description" content="Delta measures option move per $1 underlying; gamma measures how fast delta changes. The difference and why it matters most on 0DTE.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Delta vs Gamma: The Difference Every Options Trader Needs", "description": "Delta measures option move per $1 underlying; gamma measures how fast delta changes. The difference and why it matters most on 0DTE.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/delta-vs-gamma.html", "articleSection": "Greeks", "wordCount": 513, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Delta vs Gamma: The Difference Every Options Trader Needs", "description": "Delta measures option move per $1 underlying; gamma measures how fast delta changes. The difference and why it matters most on 0DTE.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/delta-vs-gamma", "articleSection": "Greeks", "wordCount": 513, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Delta vs Gamma: The Difference Every Options Trader Needs", "item": "https://novo-options.trade/journal/delta-vs-gamma.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Delta vs Gamma: The Difference Every Options Trader Needs", "item": "https://novo-options.trade/journal/delta-vs-gamma"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
-    <p><a href="/journal/what-is-delta-options.html">Delta</a> measures how much an option moves per $1 in the underlying; <a href="/journal/what-is-gamma-exposure-gex.html">gamma</a> measures how fast delta itself changes. Together they explain an option&rsquo;s responsiveness &mdash; and the difference matters most on 0DTE.</p>
+    <p><a href="/journal/what-is-delta-options">Delta</a> measures how much an option moves per $1 in the underlying; <a href="/journal/what-is-gamma-exposure-gex">gamma</a> measures how fast delta itself changes. Together they explain an option&rsquo;s responsiveness &mdash; and the difference matters most on 0DTE.</p>
     <h2>Delta: the speed</h2>
-    <p>Delta is your option&rsquo;s <em>current</em> sensitivity to price &mdash; a 0.50-delta option gains ~$0.50 per $1 up-move. It&rsquo;s also a rough probability of finishing <a href="/journal/itm-vs-otm-options.html">in the money</a>. Delta is the first thing to check for whether an option will <a href="/journal/why-isnt-my-option-moving.html">respond to a move</a>.</p>
+    <p>Delta is your option&rsquo;s <em>current</em> sensitivity to price &mdash; a 0.50-delta option gains ~$0.50 per $1 up-move. It&rsquo;s also a rough probability of finishing <a href="/journal/itm-vs-otm-options">in the money</a>. Delta is the first thing to check for whether an option will <a href="/journal/why-isnt-my-option-moving">respond to a move</a>.</p>
     <h2>Gamma: the acceleration</h2>
     <p>Gamma tells you how fast delta <em>changes</em> as price moves. High gamma means delta swings quickly, so the option gets more (or less) responsive fast. Think of delta as speed and gamma as acceleration: gamma is <em>why</em> an option&rsquo;s behavior can change dramatically during a move, especially near the money.</p>
     <p class="pull">Delta is how fast your option moves now; gamma is how fast that speed changes. Speed and acceleration &mdash; and on 0DTE, the acceleration is extreme.</p>
     <h2>Why it matters on 0DTE</h2>
-    <p>On 0DTE, gamma is at its <a href="/journal/why-gamma-matters-for-0dte.html">maximum</a>, so delta swings violently &mdash; a near-the-money option&rsquo;s delta can jump from 0.2 to 0.8 on a modest move. That&rsquo;s why 0DTE options are so responsive and so whippy. Understanding both Greeks explains the sharp, fast behavior that defines the 0DTE tape.
+    <p>On 0DTE, gamma is at its <a href="/journal/why-gamma-matters-for-0dte">maximum</a>, so delta swings violently &mdash; a near-the-money option&rsquo;s delta can jump from 0.2 to 0.8 on a modest move. That&rsquo;s why 0DTE options are so responsive and so whippy. Understanding both Greeks explains the sharp, fast behavior that defines the 0DTE tape.
   </p></div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-drives-option-prices.html">What Drives Option Prices?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-drives-option-prices">What Drives Option Prices?</a></p>
 
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -94,7 +94,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/itm-vs-otm-options.html"><span class="rk">Basics</span>ITM vs OTM Options: In-the-Money vs Out-of-the-Money</a></li><li><a href="/journal/premium-vs-notional-leverage.html"><span class="rk">Options 101</span>Premium Paid vs Notional Controlled: The Leverage Hiding in One Contract</a></li><li><a href="/journal/weekend-theta-decay.html"><span class="rk">Options 101</span>Weekend Theta: Why Holding Options Friday to Monday Quietly Costs You</a></li><li><a href="/journal/what-is-a-spread-in-options.html"><span class="rk">Options 101</span>What Is a Spread in Options? (Two Meanings)</a></li><li><a href="/journal/what-is-option-premium.html"><span class="rk">Basics</span>What Is an Option Premium? What You Actually Pay</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/itm-vs-otm-options"><span class="rk">Basics</span>ITM vs OTM Options: In-the-Money vs Out-of-the-Money</a></li><li><a href="/journal/premium-vs-notional-leverage"><span class="rk">Options 101</span>Premium Paid vs Notional Controlled: The Leverage Hiding in One Contract</a></li><li><a href="/journal/weekend-theta-decay"><span class="rk">Options 101</span>Weekend Theta: Why Holding Options Friday to Monday Quietly Costs You</a></li><li><a href="/journal/what-is-a-spread-in-options"><span class="rk">Options 101</span>What Is a Spread in Options? (Two Meanings)</a></li><li><a href="/journal/what-is-option-premium"><span class="rk">Basics</span>What Is an Option Premium? What You Actually Pay</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

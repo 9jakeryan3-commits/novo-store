@@ -10,11 +10,11 @@
 <title>Check the Contract Multiplier Before You Compute Anything | NoVo Options Trading</title>
 <meta name="description" content="A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/crypto-option-contract-specs.html">
+<link rel="canonical" href="https://novo-options.trade/journal/crypto-option-contract-specs">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/crypto-option-contract-specs.html">
+<meta property="og:url" content="https://novo-options.trade/journal/crypto-option-contract-specs">
 <meta property="og:title" content="Check the Contract Multiplier Before You Compute Anything">
 <meta property="og:description" content="A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Check the Contract Multiplier Before You Compute Anything", "description": "A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-option-contract-specs.html", "articleSection": "Crypto Options 101", "wordCount": 349, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Check the Contract Multiplier Before You Compute Anything", "description": "A crypto option is not 100 shares, and it is not always one coin either. Contract size varies by product, and a carried-over multiplier ruins every figure downstream.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-option-contract-specs", "articleSection": "Crypto Options 101", "wordCount": 349, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Check the Contract Multiplier Before You Compute Anything", "item": "https://novo-options.trade/journal/crypto-option-contract-specs.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Check the Contract Multiplier Before You Compute Anything", "item": "https://novo-options.trade/journal/crypto-option-contract-specs"}]}
 </script>
 </head>
 <body>
@@ -64,15 +64,15 @@
     <h2>Where it goes wrong</h2>
     <p><strong>Notional.</strong> Contract count means nothing without the multiplier. Comparing open interest between two chains by counting contracts compares quantities in different units.</p>
     <p><strong>Dollar gamma.</strong> A dealer map multiplies open interest by gamma and by a multiplier. Get the multiplier wrong and the shape of the map survives while every magnitude is fiction &mdash; worse than an obvious error, because the picture still looks right.</p>
-    <p><strong>Cross-book comparison.</strong> This is why figures should be computed and reported per book rather than aggregated, the same argument as in <a href="/journal/usdc-settled-vs-coin-settled-options.html">settlement currency decides what the numbers mean</a>.</p>
+    <p><strong>Cross-book comparison.</strong> This is why figures should be computed and reported per book rather than aggregated, the same argument as in <a href="/journal/usdc-settled-vs-coin-settled-options">settlement currency decides what the numbers mean</a>.</p>
     <h2>The other specs that vary the same way</h2>
-    <p>Strike increments are coarser relative to price than on a liquid equity, which affects how precisely a wall can sit. Tick sizes are quoted in the settlement currency. And settlement type &mdash; coin or stablecoin &mdash; changes the payoff shape itself, not just the currency, per <a href="/journal/inverse-options-and-nonlinear-payoff.html">inverse options</a>.</p>
+    <p>Strike increments are coarser relative to price than on a liquid equity, which affects how precisely a wall can sit. Tick sizes are quoted in the settlement currency. And settlement type &mdash; coin or stablecoin &mdash; changes the payoff shape itself, not just the currency, per <a href="/journal/inverse-options-and-nonlinear-payoff">inverse options</a>.</p>
     <h2>The habit that prevents all of it</h2>
     <p>Read the contract specification once per product, and write the multiplier down before computing anything. It is a thirty-second check protecting every downstream number, and it is exactly the sort of error that survives review &mdash; because nobody re-derives a constant they believe they already know.</p>
 
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/funding-extremes-and-what-follows.html"><span class="rk">Perps &amp; Funding</span>Funding Extremes: What Actually Follows</a></li><li><a href="/journal/leverage-tiers-and-position-limits.html"><span class="rk">Margin &amp; Liquidation</span>Leverage Tiers: The Maximum Shrinks as You Grow</a></li><li><a href="/journal/perp-liquidity-versus-spot-liquidity.html"><span class="rk">Perps &amp; Funding</span>The Perp Is Usually Deeper Than the Spot</a></li><li><a href="/journal/the-halving-and-what-it-does-not-tell-you.html"><span class="rk">Crypto Macro</span>The Halving: A Known Event Cannot Be an Edge</a></li><li><a href="/journal/what-changes-when-a-coin-gets-an-options-book.html"><span class="rk">Per-Coin Structure</span>What Changes the Day a Coin Gets an Options Book</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/funding-extremes-and-what-follows"><span class="rk">Perps &amp; Funding</span>Funding Extremes: What Actually Follows</a></li><li><a href="/journal/leverage-tiers-and-position-limits"><span class="rk">Margin &amp; Liquidation</span>Leverage Tiers: The Maximum Shrinks as You Grow</a></li><li><a href="/journal/perp-liquidity-versus-spot-liquidity"><span class="rk">Perps &amp; Funding</span>The Perp Is Usually Deeper Than the Spot</a></li><li><a href="/journal/the-halving-and-what-it-does-not-tell-you"><span class="rk">Crypto Macro</span>The Halving: A Known Event Cannot Be an Edge</a></li><li><a href="/journal/what-changes-when-a-coin-gets-an-options-book"><span class="rk">Per-Coin Structure</span>What Changes the Day a Coin Gets an Options Book</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

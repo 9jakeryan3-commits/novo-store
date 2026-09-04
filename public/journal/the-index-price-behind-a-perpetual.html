@@ -10,11 +10,11 @@
 <title>The Index Price a Perpetual Is Anchored To | NoVo Options Trading</title>
 <meta name="description" content="A perpetual tracks an index built from several spot venues, not any single exchange. The construction of that index decides your margin and your funding.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-index-price-behind-a-perpetual.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-index-price-behind-a-perpetual">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/the-index-price-behind-a-perpetual.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-index-price-behind-a-perpetual">
 <meta property="og:title" content="The Index Price a Perpetual Is Anchored To">
 <meta property="og:description" content="A perpetual tracks an index built from several spot venues, not any single exchange. The construction of that index decides your margin and your funding.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Index Price a Perpetual Is Anchored To", "description": "A perpetual tracks an index built from several spot venues, not any single exchange. The construction of that index decides your margin and your funding.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-index-price-behind-a-perpetual.html", "articleSection": "Perps & Funding", "wordCount": 293, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Index Price a Perpetual Is Anchored To", "description": "A perpetual tracks an index built from several spot venues, not any single exchange. The construction of that index decides your margin and your funding.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-index-price-behind-a-perpetual", "articleSection": "Perps & Funding", "wordCount": 293, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Index Price a Perpetual Is Anchored To", "item": "https://novo-options.trade/journal/the-index-price-behind-a-perpetual.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Index Price a Perpetual Is Anchored To", "item": "https://novo-options.trade/journal/the-index-price-behind-a-perpetual"}]}
 </script>
 </head>
 <body>
@@ -57,19 +57,19 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>A perpetual has no expiry to force convergence, so it needs an external reference for what the asset is worth. That reference is an <em>index</em>, usually a weighted composite of several spot exchanges.</p>
-    <p>Funding is computed against it, and the <a href="/journal/mark-price-vs-last-price.html">mark price</a> that decides your margin is derived from it. So the index is doing more work in your position than the venue&rsquo;s own last trade.</p>
+    <p>Funding is computed against it, and the <a href="/journal/mark-price-vs-last-price">mark price</a> that decides your margin is derived from it. So the index is doing more work in your position than the venue&rsquo;s own last trade.</p>
     <h2>Why it is a composite</h2>
     <p>Because a single-venue reference is manipulable. Move one thin book and, if that book set the index, you would move margin and funding across the entire venue. Averaging across exchanges makes that prohibitively expensive &mdash; you would have to move all of them at once.</p>
     <p>Most venues also drop outliers, so one exchange printing wildly away from the others is excluded rather than averaged in.</p>
     <h2>Where the construction bites</h2>
-    <p><strong>The constituent list differs by venue.</strong> Two exchanges&rsquo; perpetuals on the same coin can have slightly different indices, which is one reason their funding differs &mdash; the argument in <a href="/journal/why-funding-is-never-blended-across-venues.html">why funding should never be blended</a>.</p>
+    <p><strong>The constituent list differs by venue.</strong> Two exchanges&rsquo; perpetuals on the same coin can have slightly different indices, which is one reason their funding differs &mdash; the argument in <a href="/journal/why-funding-is-never-blended-across-venues">why funding should never be blended</a>.</p>
     <p><strong>A constituent can break.</strong> If an index exchange has an outage or its own liquidity event, the index inherits it. This is the mechanism by which a problem at a venue you have never used reaches your position.</p>
-    <p><strong>Stablecoin denomination.</strong> Constituent prices are usually quoted in a stablecoin, so a <a href="/journal/stablecoin-depegs-and-collateral-risk.html">depeg</a> makes the index itself ambiguous.</p>
+    <p><strong>Stablecoin denomination.</strong> Constituent prices are usually quoted in a stablecoin, so a <a href="/journal/stablecoin-depegs-and-collateral-risk">depeg</a> makes the index itself ambiguous.</p>
     <h2>What to actually do</h2>
-    <p>Read which venues make up the index for the contract you trade, and note whether any of them is thin. And when the venue&rsquo;s own price departs visibly from the index, treat that as a liquidity signal about the venue &mdash; the same read as a persistent gap in <a href="/journal/dex-vs-cex-price-discovery.html">where the price is actually made</a>.</p>
+    <p>Read which venues make up the index for the contract you trade, and note whether any of them is thin. And when the venue&rsquo;s own price departs visibly from the index, treat that as a liquidity signal about the venue &mdash; the same read as a persistent gap in <a href="/journal/dex-vs-cex-price-discovery">where the price is actually made</a>.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-crossing-the-flip-actually-does.html"><span class="rk">Crypto Dealer Flow</span>What Crossing the Gamma Flip Actually Does</a></li><li><a href="/journal/xrp-market-structure.html"><span class="rk">Per-Coin Structure</span>XRP: A Real Book Without a DeFi Ecosystem Underneath It</a></li><li><a href="/journal/crypto-funding-rates-explained.html"><span class="rk">Crypto Positioning</span>Crypto Funding Rates: A Published Price for Crowding</a></li><li><a href="/journal/float-versus-market-cap.html"><span class="rk">Per-Coin Structure</span>Market Cap Is the Wrong Denominator</a></li><li><a href="/journal/is-crypto-gamma-data-free-anywhere.html"><span class="rk">Crypto FAQ</span>Is Crypto Gamma Data Free Anywhere?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-crossing-the-flip-actually-does"><span class="rk">Crypto Dealer Flow</span>What Crossing the Gamma Flip Actually Does</a></li><li><a href="/journal/xrp-market-structure"><span class="rk">Per-Coin Structure</span>XRP: A Real Book Without a DeFi Ecosystem Underneath It</a></li><li><a href="/journal/crypto-funding-rates-explained"><span class="rk">Crypto Positioning</span>Crypto Funding Rates: A Published Price for Crowding</a></li><li><a href="/journal/float-versus-market-cap"><span class="rk">Per-Coin Structure</span>Market Cap Is the Wrong Denominator</a></li><li><a href="/journal/is-crypto-gamma-data-free-anywhere"><span class="rk">Crypto FAQ</span>Is Crypto Gamma Data Free Anywhere?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

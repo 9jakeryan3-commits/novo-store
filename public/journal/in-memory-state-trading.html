@@ -11,9 +11,9 @@
 <meta name="description" content="Fast trading systems keep their live state in memory (RAM), not on disk, so reads and writes happen in microseconds. Here is why disk is too slow for the trading.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/in-memory-state-trading.html">
+<link rel="canonical" href="https://novo-options.trade/journal/in-memory-state-trading">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/in-memory-state-trading.html">
+<meta property="og:url" content="https://novo-options.trade/journal/in-memory-state-trading">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="In-Memory State in Trading">
 <meta property="og:description" content="In-memory state explained: why real-time trading systems keep live state in RAM for microsecond access.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "In-Memory State in Trading", "description": "Fast trading systems keep their live state in memory (RAM), not on disk, so reads and writes happen in microseconds. Here is why disk is too slow for the trading loop and what in-memory stores solve.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-09", "dateModified": "2026-01-09", "mainEntityOfPage": "https://novo-options.trade/journal/in-memory-state-trading.html", "articleSection": "Trading Infrastructure", "wordCount": 579, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "In-Memory State in Trading", "description": "Fast trading systems keep their live state in memory (RAM), not on disk, so reads and writes happen in microseconds. Here is why disk is too slow for the trading loop and what in-memory stores solve.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-01-09", "dateModified": "2026-01-09", "mainEntityOfPage": "https://novo-options.trade/journal/in-memory-state-trading", "articleSection": "Trading Infrastructure", "wordCount": 579, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "In-Memory State in Trading", "item": "https://novo-options.trade/journal/in-memory-state-trading.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "In-Memory State in Trading", "item": "https://novo-options.trade/journal/in-memory-state-trading"}]}
 </script>
 </head>
 <body>
@@ -56,7 +56,7 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-01-09">Jan 9, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p>A live trading system constantly reads and writes state — the current quote, open positions, cooldowns, recent signals. If it hit a spinning disk or a slow database for each of those, the trading loop would crawl. Fast systems keep this hot, frequently-changing state <strong>in memory</strong> — in RAM, or a dedicated in-memory data store — where access is measured in microseconds.</p>
     <h2>Why disk is too slow</h2>
@@ -65,10 +65,10 @@
     <p>An in-memory store gives the trading loop a shared, blazing-fast scratchpad: the latest quotes any component can read, position state that updates atomically, transient flags that expire on their own. It's the system's short-term memory — fast enough to keep up with the tape, structured enough that every part of the system sees a consistent picture.</p>
     <p class="pull">Durability lives on disk. Speed lives in RAM. A trading loop that confuses the two is a trading loop that's late.</p>
     <h2>Why it matters to you</h2>
-    <p>This is the plumbing behind responsiveness. A system that keeps its live state in memory can react to a new tick without a storage bottleneck — the architectural reason it can act on a <a href="/journal/why-0dte-fills-are-hard.html">short-dated setup</a> in real time. Pair it with an <a href="/journal/async-event-loops-trading.html">event loop</a> and you have the foundation a tool like <a href="/journal/how-novo-thinks-and-learns.html">NoVo</a> stands on: fast memory, fast reactions, honest state.</p>
+    <p>This is the plumbing behind responsiveness. A system that keeps its live state in memory can react to a new tick without a storage bottleneck — the architectural reason it can act on a <a href="/journal/why-0dte-fills-are-hard">short-dated setup</a> in real time. Pair it with an <a href="/journal/async-event-loops-trading">event loop</a> and you have the foundation a tool like <a href="/journal/how-novo-thinks-and-learns">NoVo</a> stands on: fast memory, fast reactions, honest state.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/the-tick-and-trin.html">The TICK and TRIN Explained: Real-Time Market Internals</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/the-tick-and-trin">The TICK and TRIN Explained: Real-Time Market Internals</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/neural-networks-for-trading.html"><span class="rk">AI in Trading</span>Neural Networks for Trading</a></li><li><a href="/journal/the-gap-between-a-signal-and-a-fill.html"><span class="rk">Signals vs Systems</span>Signal vs Fill: The Gap</a></li><li><a href="/journal/what-is-quantitative-trading.html"><span class="rk">Algo Trading 101</span>What Is Quantitative Trading? Quant Trading Explained (2026)</a></li><li><a href="/journal/ai-needs-guardrails.html"><span class="rk">AI in Trading</span>Why an AI Trader Needs Hard Guardrails</a></li><li><a href="/journal/backtesting-101.html"><span class="rk">Algo Trading 101</span>Backtesting 101</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/neural-networks-for-trading"><span class="rk">AI in Trading</span>Neural Networks for Trading</a></li><li><a href="/journal/the-gap-between-a-signal-and-a-fill"><span class="rk">Signals vs Systems</span>Signal vs Fill: The Gap</a></li><li><a href="/journal/what-is-quantitative-trading"><span class="rk">Algo Trading 101</span>What Is Quantitative Trading? Quant Trading Explained (2026)</a></li><li><a href="/journal/ai-needs-guardrails"><span class="rk">AI in Trading</span>Why an AI Trader Needs Hard Guardrails</a></li><li><a href="/journal/backtesting-101"><span class="rk">Algo Trading 101</span>Backtesting 101</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -11,9 +11,9 @@
 <meta name="description" content="The MFI is like RSI but volume-weighted — a momentum oscillator that factors in how much money moved, not just price. Here is what that adds and why divergence.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/money-flow-index.html">
+<link rel="canonical" href="https://novo-options.trade/journal/money-flow-index">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/money-flow-index.html">
+<meta property="og:url" content="https://novo-options.trade/journal/money-flow-index">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="The Money Flow Index">
 <meta property="og:description" content="Money Flow Index (MFI) explained: a volume-weighted RSI, what volume adds, and reading divergence.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Money Flow Index", "description": "The MFI is like RSI but volume-weighted — a momentum oscillator that factors in how much money moved, not just price. Here is what that adds and why divergence is its strongest signal.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-10-24", "dateModified": "2025-10-24", "mainEntityOfPage": "https://novo-options.trade/journal/money-flow-index.html", "articleSection": "Indicators", "wordCount": 545, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Money Flow Index", "description": "The MFI is like RSI but volume-weighted — a momentum oscillator that factors in how much money moved, not just price. Here is what that adds and why divergence is its strongest signal.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-10-24", "dateModified": "2025-10-24", "mainEntityOfPage": "https://novo-options.trade/journal/money-flow-index", "articleSection": "Indicators", "wordCount": 545, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "The Money Flow Index", "item": "https://novo-options.trade/journal/money-flow-index.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Charting & Indicators", "item": "https://novo-options.trade/journal/charting"}, {"@type": "ListItem", "position": 4, "name": "The Money Flow Index", "item": "https://novo-options.trade/journal/money-flow-index"}]}
 </script>
 </head>
 <body>
@@ -56,19 +56,19 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-10-24">Oct 24, 2025</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-market-structure-dealer-flow" style="color:var(--cyan);text-decoration:none;font-weight:700;">Market Structure &amp; Dealer Flow</a> guide &rarr;</div>
   <div class="article-body">
-    <p>The <strong>Money Flow Index (MFI)</strong> is often called "volume-weighted <a href="/journal/rsi-explained.html">RSI</a>." Like RSI, it's a 0-100 momentum oscillator flagging overbought (typically above 80) and oversold (below 20) conditions — but it incorporates <a href="/journal/on-balance-volume.html">volume</a>, not just price. It measures the flow of money into and out of an asset.</p>
+    <p>The <strong>Money Flow Index (MFI)</strong> is often called "volume-weighted <a href="/journal/rsi-explained">RSI</a>." Like RSI, it's a 0-100 momentum oscillator flagging overbought (typically above 80) and oversold (below 20) conditions — but it incorporates <a href="/journal/on-balance-volume">volume</a>, not just price. It measures the flow of money into and out of an asset.</p>
     <h2>What volume adds</h2>
     <p>By weighting price moves by volume, MFI distinguishes a rally on heavy participation (real money flowing in) from a drift on thin volume (weak, suspect). A price rise on low volume that fails to push MFI up is a warning the move lacks conviction. This is the same insight as OBV, packaged as a bounded oscillator.</p>
     <h2>Divergence is the strongest signal</h2>
     <p>MFI's most useful read is divergence: price makes a new high but MFI doesn't (money isn't following the price up — bearish), or price makes a new low but MFI holds (selling is drying up — bullish). Because it captures volume, MFI divergence can be an earlier, more meaningful tell than price-only oscillator divergence.</p>
     <p class="pull">When price makes a new high but the money flow doesn't follow, the rally is running on fumes.</p>
     <h2>Using it</h2>
-    <p>Like every oscillator, MFI's overbought/oversold levels are traps in strong trends — it can pin high while price climbs. Its edge is the volume dimension: use it to judge whether a move has real participation behind it and to spot divergences, alongside price structure and <a href="/journal/momentum-vs-mean-reversion.html">regime</a>. One input, weighed with the rest.</p>
+    <p>Like every oscillator, MFI's overbought/oversold levels are traps in strong trends — it can pin high while price climbs. Its edge is the volume dimension: use it to judge whether a move has real participation behind it and to spot divergences, alongside price structure and <a href="/journal/momentum-vs-mean-reversion">regime</a>. One input, weighed with the rest.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/chaikin-money-flow.html">The Chaikin Money Flow (CMF), Explained</a> &middot; <a href="/journal/what-is-an-index-option.html">What Is an Index Option?</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/chaikin-money-flow">The Chaikin Money Flow (CMF), Explained</a> &middot; <a href="/journal/what-is-an-index-option">What Is an Index Option?</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -96,7 +96,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/pivot-points.html"><span class="rk">Indicators</span>Pivot Points, Explained</a></li><li><a href="/journal/the-failed-auction.html"><span class="rk">Charting</span>The Failed Auction: Reading a Rejected Breakout at Range Extremes</a></li><li><a href="/journal/wick-rejection-at-a-level.html"><span class="rk">Charting</span>Reading Wick Rejection at a Mapped Level</a></li><li><a href="/journal/anchored-vwap-yearly-open.html"><span class="rk">Charting</span>Anchored VWAP From the Yearly Open: The Big-Picture Line</a></li><li><a href="/journal/composite-volume-profile.html"><span class="rk">Charting</span>Reading a Composite Volume Profile Across the Week</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/pivot-points"><span class="rk">Indicators</span>Pivot Points, Explained</a></li><li><a href="/journal/the-failed-auction"><span class="rk">Charting</span>The Failed Auction: Reading a Rejected Breakout at Range Extremes</a></li><li><a href="/journal/wick-rejection-at-a-level"><span class="rk">Charting</span>Reading Wick Rejection at a Mapped Level</a></li><li><a href="/journal/anchored-vwap-yearly-open"><span class="rk">Charting</span>Anchored VWAP From the Yearly Open: The Big-Picture Line</a></li><li><a href="/journal/composite-volume-profile"><span class="rk">Charting</span>Reading a Composite Volume Profile Across the Week</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/charting" style="color:var(--cyan);font-weight:700;">All Charting &amp; Indicators articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

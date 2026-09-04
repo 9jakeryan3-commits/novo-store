@@ -10,11 +10,11 @@
 <title>What Is a Perpetual Swap? | NoVo Options Trading</title>
 <meta name="description" content="A futures contract with no expiry should drift away from spot forever. Funding is the mechanism that stops it, and it is what makes the instrument readable.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-a-perpetual-swap.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-a-perpetual-swap">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-a-perpetual-swap.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-a-perpetual-swap">
 <meta property="og:title" content="What Is a Perpetual Swap?">
 <meta property="og:description" content="A futures contract with no expiry should drift away from spot forever. Funding is the mechanism that stops it, and it is what makes the instrument readable.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is a Perpetual Swap?", "description": "A futures contract with no expiry should drift away from spot forever. Funding is the mechanism that stops it, and it is what makes the instrument readable.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-a-perpetual-swap.html", "articleSection": "Perps & Funding", "wordCount": 383, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is a Perpetual Swap?", "description": "A futures contract with no expiry should drift away from spot forever. Funding is the mechanism that stops it, and it is what makes the instrument readable.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-a-perpetual-swap", "articleSection": "Perps & Funding", "wordCount": 383, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "What Is a Perpetual Swap?", "item": "https://novo-options.trade/journal/what-is-a-perpetual-swap.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "What Is a Perpetual Swap?", "item": "https://novo-options.trade/journal/what-is-a-perpetual-swap"}]}
 </script>
 </head>
 <body>
@@ -60,18 +60,18 @@
     <p>A perpetual swap has no deadline. It never settles, so nothing mechanically drags it back, and without a substitute it could trade at any premium or discount indefinitely.</p>
     <h2>Funding is the substitute</h2>
     <p>At regular intervals, one side pays the other. When the perpetual trades above spot the longs pay the shorts, which makes being long more expensive and being short more attractive, and that pressure closes the gap. Below spot it runs the other way.</p>
-    <p>The elegant part is that it is a <em>price</em> rather than a rule. Nobody forces convergence; holding the crowded side simply costs money, continuously, until enough people stop. The mechanics of the payment itself are covered in <a href="/journal/crypto-funding-rates-explained.html">crypto funding rates explained</a>.</p>
+    <p>The elegant part is that it is a <em>price</em> rather than a rule. Nobody forces convergence; holding the crowded side simply costs money, continuously, until enough people stop. The mechanics of the payment itself are covered in <a href="/journal/crypto-funding-rates-explained">crypto funding rates explained</a>.</p>
     <h2>Why this matters to someone reading structure</h2>
     <p>Because it makes positioning <strong>observable</strong>. In equities, whether the crowd is leaning long is inferred &mdash; from surveys, from put/call ratios, from flow. In perpetuals the market publishes a number that says which side is paying to hold its position, and it updates several times a day.</p>
-    <p>That is a genuinely unusual piece of public data, and it is why funding sits beside a dealer map in the <a href="/crypto">NoVo Crypto Market Map</a>: for the coins with no options book, and therefore <a href="/journal/on-chain-liquidity-vs-order-book.html">no hedger to read</a>, the leverage layer is the structure.</p>
+    <p>That is a genuinely unusual piece of public data, and it is why funding sits beside a dealer map in the <a href="/crypto">NoVo Crypto Market Map</a>: for the coins with no options book, and therefore <a href="/journal/on-chain-liquidity-vs-order-book">no hedger to read</a>, the leverage layer is the structure.</p>
     <h2>What it is not</h2>
     <p>It is not a prediction. Positive funding says longs are paying; it does not say they are wrong. Crowded can stay crowded for a long time, and a trend can run for weeks with funding positive the entire way.</p>
-    <p>The honest reading is that funding measures <em>cost and crowding</em>, not direction &mdash; a distinction worth holding onto, and one taken up properly in <a href="/journal/funding-as-a-crowding-gauge.html">funding as a crowding gauge</a>.</p>
+    <p>The honest reading is that funding measures <em>cost and crowding</em>, not direction &mdash; a distinction worth holding onto, and one taken up properly in <a href="/journal/funding-as-a-crowding-gauge">funding as a crowding gauge</a>.</p>
     <h2>The three numbers that describe one position</h2>
-    <p>Price, open interest and funding answer different questions: what it costs, how much is on, and who is paying to keep it there. Any one alone is ambiguous; together they are close to a complete picture of the leverage in an asset &mdash; which is the argument in <a href="/journal/crypto-open-interest-price-quadrant.html">open interest and price</a>.</p>
+    <p>Price, open interest and funding answer different questions: what it costs, how much is on, and who is paying to keep it there. Any one alone is ambiguous; together they are close to a complete picture of the leverage in an asset &mdash; which is the argument in <a href="/journal/crypto-open-interest-price-quadrant">open interest and price</a>.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/bitcoin-gamma-exposure-explained.html"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li><li><a href="/journal/crypto-option-expiry-calendar.html"><span class="rk">Crypto Options 101</span>The Crypto Expiry Calendar: Daily, Weekly, Monthly, Quarterly</a></li><li><a href="/journal/funding-payment-schedules-differ-by-venue.html"><span class="rk">Perps &amp; Funding</span>Funding Schedules Differ, and It Changes the Cost</a></li><li><a href="/journal/liquid-staking-tokens.html"><span class="rk">Per-Coin Structure</span>Liquid Staking Tokens: A Yield With a Wrapper Around It</a></li><li><a href="/journal/pool-depth-is-not-volume.html"><span class="rk">On-Chain Structure</span>Pool Depth Is Not Volume</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/bitcoin-gamma-exposure-explained"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li><li><a href="/journal/crypto-option-expiry-calendar"><span class="rk">Crypto Options 101</span>The Crypto Expiry Calendar: Daily, Weekly, Monthly, Quarterly</a></li><li><a href="/journal/funding-payment-schedules-differ-by-venue"><span class="rk">Perps &amp; Funding</span>Funding Schedules Differ, and It Changes the Cost</a></li><li><a href="/journal/liquid-staking-tokens"><span class="rk">Per-Coin Structure</span>Liquid Staking Tokens: A Yield With a Wrapper Around It</a></li><li><a href="/journal/pool-depth-is-not-volume"><span class="rk">On-Chain Structure</span>Pool Depth Is Not Volume</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

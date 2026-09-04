@@ -11,9 +11,9 @@
 <meta name="description" content="Most losing trades misread context, not direction. Inside the case for fusing several independent live reads into one picture instead of trusting a single signal.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/how-novo-reads-the-market.html">
+<link rel="canonical" href="https://novo-options.trade/journal/how-novo-reads-the-market">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/how-novo-reads-the-market.html">
+<meta property="og:url" content="https://novo-options.trade/journal/how-novo-reads-the-market">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="How NoVo Reads the Market">
 <meta property="og:description" content="The tape, dealer gamma, the macro backdrop, and a live structural read — fused into one conviction score.">
@@ -28,8 +28,8 @@
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How NoVo Reads the Market", "description": "NoVo doesn't read off one indicator. It fuses the live tape, options-dealer positioning, the macro backdrop, retail psychology, and an AI structural read into a single conviction score. Here's how it perceives the market.", "image": "https://novo-options.trade/novo-logo.png", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-28", "dateModified": "2026-06-28", "mainEntityOfPage": "https://novo-options.trade/journal/how-novo-reads-the-market.html", "articleSection": "Perception", "wordCount": 922, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "How NoVo Reads the Market", "item": "https://novo-options.trade/journal/how-novo-reads-the-market.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How NoVo Reads the Market", "description": "NoVo doesn't read off one indicator. It fuses the live tape, options-dealer positioning, the macro backdrop, retail psychology, and an AI structural read into a single conviction score. Here's how it perceives the market.", "image": "https://novo-options.trade/novo-logo.png", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-28", "dateModified": "2026-06-28", "mainEntityOfPage": "https://novo-options.trade/journal/how-novo-reads-the-market", "articleSection": "Perception", "wordCount": 922, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "How NoVo Reads the Market", "item": "https://novo-options.trade/journal/how-novo-reads-the-market"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -52,9 +52,9 @@
   </header>
   <div class="article-meta">NoVo Options Trading · Jun 28, 2026 &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p>Most losing trades aren't wrong about direction. They're wrong about <em>context</em> — taking a clean-looking setup at the exact moment the <a href="/journal/confluence-in-trading.html">broader environment</a> makes it a trap. NoVo's answer is to never look at any one read in isolation. It reads several independent streams continuously and fuses them into one honest picture of the context — so when you go to take a trade, you're seeing the whole environment, not a single clean-looking setup.</p>
+    <p>Most losing trades aren't wrong about direction. They're wrong about <em>context</em> — taking a clean-looking setup at the exact moment the <a href="/journal/confluence-in-trading">broader environment</a> makes it a trap. NoVo's answer is to never look at any one read in isolation. It reads several independent streams continuously and fuses them into one honest picture of the context — so when you go to take a trade, you're seeing the whole environment, not a single clean-looking setup.</p>
 
     <h2>The live tape</h2>
     <p>NoVo keeps a constant connection to the live tape on SPY itself, capturing the flow of trades as they happen — not a delayed chart, but the actual order flow on the underlying. From that raw stream it builds a picture of where real money is being aggressive: whether buyers or sellers are leaning on the market, how the current pace of volume compares to normal, and whether a burst of activity is a genuine move or a head-fake that immediately reverses. Reading the tape this way filters out a large share of false signals before anything else even runs.</p>
@@ -106,12 +106,12 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/one-more-trade-trap.html"><span class="rk">Discipline</span>The 'One More Trade' Trap</a></li><li><a href="/journal/risk-of-ruin.html"><span class="rk">Discipline &amp; Risk</span>Risk of Ruin, Explained</a></li><li><a href="/journal/the-disposition-effect.html"><span class="rk">Trading Psychology</span>The Disposition Effect</a></li><li><a href="/journal/what-is-drawdown.html"><span class="rk">Risk Management</span>What Is Drawdown?</a></li><li><a href="/journal/building-a-0dte-account-from-5k.html"><span class="rk">Risk</span>Building a 0DTE Account From $5K: A Realistic Path</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/one-more-trade-trap"><span class="rk">Discipline</span>The 'One More Trade' Trap</a></li><li><a href="/journal/risk-of-ruin"><span class="rk">Discipline &amp; Risk</span>Risk of Ruin, Explained</a></li><li><a href="/journal/the-disposition-effect"><span class="rk">Trading Psychology</span>The Disposition Effect</a></li><li><a href="/journal/what-is-drawdown"><span class="rk">Risk Management</span>What Is Drawdown?</a></li><li><a href="/journal/building-a-0dte-account-from-5k"><span class="rk">Risk</span>Building a 0DTE Account From $5K: A Realistic Path</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
 
 <nav class="more">
   <div class="label">Keep reading</div>
-  <a href="/journal/dealer-levels-are-structure-not-signals.html">Why Dealer Levels Are Structure, Not Signals</a>
-  <a href="/journal/how-novo-thinks-and-learns.html">How NoVo Thinks <span>The three AI layers, the honest record, and the line the AI never crosses.</span></a>
+  <a href="/journal/dealer-levels-are-structure-not-signals">Why Dealer Levels Are Structure, Not Signals</a>
+  <a href="/journal/how-novo-thinks-and-learns">How NoVo Thinks <span>The three AI layers, the honest record, and the line the AI never crosses.</span></a>
 </nav>
 </main>
 

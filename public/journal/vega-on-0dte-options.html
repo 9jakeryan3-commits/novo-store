@@ -10,11 +10,11 @@
 <title>Why Vega Barely Matters on 0DTE Options | NoVo</title>
 <meta name="description" content="Vega measures sensitivity to implied volatility, and it scales with time to expiration — so on a 0DTE option it's tiny.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/vega-on-0dte-options.html">
+<link rel="canonical" href="https://novo-options.trade/journal/vega-on-0dte-options">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/vega-on-0dte-options.html">
+<meta property="og:url" content="https://novo-options.trade/journal/vega-on-0dte-options">
 <meta property="og:title" content="Why Vega Barely Matters on 0DTE Options">
 <meta property="og:description" content="Vega scales with time, so on 0DTE it's near zero — IV changes barely move a same-day option. Gamma and theta rule instead.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Why Vega Barely Matters on 0DTE Options", "description": "Vega scales with time, so on 0DTE it's near zero — IV changes barely move a same-day option. Gamma and theta rule instead.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/vega-on-0dte-options.html", "articleSection": "The Greeks", "wordCount": 558, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Why Vega Barely Matters on 0DTE Options", "description": "Vega scales with time, so on 0DTE it's near zero — IV changes barely move a same-day option. Gamma and theta rule instead.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-17", "dateModified": "2026-07-17", "mainEntityOfPage": "https://novo-options.trade/journal/vega-on-0dte-options", "articleSection": "The Greeks", "wordCount": 558, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Why Vega Barely Matters on 0DTE Options", "item": "https://novo-options.trade/journal/vega-on-0dte-options.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Why Vega Barely Matters on 0DTE Options", "item": "https://novo-options.trade/journal/vega-on-0dte-options"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-17">Jul 17, 2026</time> &middot; <a class="hub-link" href="/0dte">0DTE options guide</a></div>
   <div class="article-body">
-    <p><strong>Vega</strong> measures how much an option's price moves for a 1-point change in <a href="/journal/what-is-implied-volatility.html">implied volatility</a>. It's the greek that makes longer-dated options swing when the vol environment shifts. On a 0DTE contract, it's nearly irrelevant, and that's a feature worth understanding.</p>
+    <p><strong>Vega</strong> measures how much an option's price moves for a 1-point change in <a href="/journal/what-is-implied-volatility">implied volatility</a>. It's the greek that makes longer-dated options swing when the vol environment shifts. On a 0DTE contract, it's nearly irrelevant, and that's a feature worth understanding.</p>
     <h2>Vega scales with time</h2>
     <p>Volatility is about how far price can travel over the <em>remaining life</em> of the option. With weeks left, a change in expected volatility has lots of time to matter, so vega is large. With hours left, there's almost no runway for vol to play out, so vega collapses toward zero. A same-day at-the-money SPY option has a fraction of the vega of a monthly.</p>
     <h2>What this means in practice</h2>
     <p>On longer-dated options, an <strong>IV crush</strong> after a catalyst can gut your position even if you're right on direction &mdash; that's vega at work. On a 0DTE option, a drop in IV barely registers through vega, because there's almost no vega to hit. That removes one of the classic ways to lose while being right. But it doesn't make 0DTE safer overall &mdash; it just changes which greek is dangerous.</p>
     <p class="pull">On 0DTE, vega goes quiet and gamma and theta take the wheel. You're not fighting the vol environment &mdash; you're fighting the clock and the whip.</p>
     <h2>The greeks that take over</h2>
-    <p>With vega muted, a same-day option's price is dominated by <strong>gamma</strong> (the <a href="/journal/why-atm-options-have-most-gamma.html">explosive at-the-money whip</a>) and <strong>theta</strong> (the <a href="/journal/theta-decay-explained.html">relentless time bleed</a>). That's the 0DTE trade in one line: little vol sensitivity, enormous move-sensitivity, and a clock that never stops. Trade it knowing which forces are actually on the field.</p>
+    <p>With vega muted, a same-day option's price is dominated by <strong>gamma</strong> (the <a href="/journal/why-atm-options-have-most-gamma">explosive at-the-money whip</a>) and <strong>theta</strong> (the <a href="/journal/theta-decay-explained">relentless time bleed</a>). That's the 0DTE trade in one line: little vol sensitivity, enormous move-sensitivity, and a clock that never stops. Trade it knowing which forces are actually on the field.</p>
   </div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-mini-option.html"><span class="rk">Options 101</span>What Is a Mini Option? Smaller-Size Contracts, Explained</a></li><li><a href="/journal/what-is-leverage.html"><span class="rk">Trading Basics</span>What Is Leverage?</a></li><li><a href="/journal/xsp-0dte-options.html"><span class="rk">Basics</span>XSP 0DTE Options: The Cash-Settled, Tax-Friendly Mini-SPX</a></li><li><a href="/journal/day-vs-gtc-orders.html"><span class="rk">Options 101</span>Day vs GTC Orders: Why Your 0DTE Order Dies at the Close</a></li><li><a href="/journal/how-to-read-options-ticker.html"><span class="rk">Options 101</span>How to Read a SPY Options Ticker: Strike, Expiry, and C/P Decoded</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-mini-option"><span class="rk">Options 101</span>What Is a Mini Option? Smaller-Size Contracts, Explained</a></li><li><a href="/journal/what-is-leverage"><span class="rk">Trading Basics</span>What Is Leverage?</a></li><li><a href="/journal/xsp-0dte-options"><span class="rk">Basics</span>XSP 0DTE Options: The Cash-Settled, Tax-Friendly Mini-SPX</a></li><li><a href="/journal/day-vs-gtc-orders"><span class="rk">Options 101</span>Day vs GTC Orders: Why Your 0DTE Order Dies at the Close</a></li><li><a href="/journal/how-to-read-options-ticker"><span class="rk">Options 101</span>How to Read a SPY Options Ticker: Strike, Expiry, and C/P Decoded</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

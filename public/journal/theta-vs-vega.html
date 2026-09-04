@@ -10,11 +10,11 @@
 <title>Theta vs Vega: Time Decay vs Volatility Exposure | NoVo</title>
 <meta name="description" content="Theta measures how much an option loses to time decay each day; vega measures how much it moves per point of implied volatility.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/theta-vs-vega.html">
+<link rel="canonical" href="https://novo-options.trade/journal/theta-vs-vega">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/theta-vs-vega.html">
+<meta property="og:url" content="https://novo-options.trade/journal/theta-vs-vega">
 <meta property="og:title" content="Theta vs Vega: Time Decay vs Volatility Exposure">
 <meta property="og:description" content="Theta measures daily time decay; vega measures sensitivity to implied volatility. The difference and why theta dominates 0DTE.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Theta vs Vega: Time Decay vs Volatility Exposure", "description": "Theta measures daily time decay; vega measures sensitivity to implied volatility. The difference and why theta dominates 0DTE.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/theta-vs-vega.html", "articleSection": "Greeks", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Theta vs Vega: Time Decay vs Volatility Exposure", "description": "Theta measures daily time decay; vega measures sensitivity to implied volatility. The difference and why theta dominates 0DTE.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/theta-vs-vega", "articleSection": "Greeks", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Theta vs Vega: Time Decay vs Volatility Exposure", "item": "https://novo-options.trade/journal/theta-vs-vega.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "Theta vs Vega: Time Decay vs Volatility Exposure", "item": "https://novo-options.trade/journal/theta-vs-vega"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/tools/expected-move">expected-move calculator</a></div>
   <div class="article-body">
-    <p><a href="/journal/theta-decay-explained.html">Theta</a> measures how much an option loses to time decay each day; <strong>vega</strong> measures how much it moves per point of <a href="/journal/what-is-implied-volatility.html">implied volatility</a>. Here&rsquo;s the difference &mdash; and why theta dominates 0DTE while vega barely matters.</p>
+    <p><a href="/journal/theta-decay-explained">Theta</a> measures how much an option loses to time decay each day; <strong>vega</strong> measures how much it moves per point of <a href="/journal/what-is-implied-volatility">implied volatility</a>. Here&rsquo;s the difference &mdash; and why theta dominates 0DTE while vega barely matters.</p>
     <h2>Theta: the time decay</h2>
-    <p>Theta is the daily erosion of an option&rsquo;s <a href="/journal/intrinsic-vs-extrinsic-value.html">time value</a> &mdash; it works <em>against</em> option buyers and <em>for</em> sellers. It accelerates as expiration nears, so on 0DTE it&rsquo;s ferocious: an ATM option can lose a big chunk of value in a single quiet lunch hour. Theta is a constant drag you&rsquo;re racing when you buy 0DTE.</p>
+    <p>Theta is the daily erosion of an option&rsquo;s <a href="/journal/intrinsic-vs-extrinsic-value">time value</a> &mdash; it works <em>against</em> option buyers and <em>for</em> sellers. It accelerates as expiration nears, so on 0DTE it&rsquo;s ferocious: an ATM option can lose a big chunk of value in a single quiet lunch hour. Theta is a constant drag you&rsquo;re racing when you buy 0DTE.</p>
     <h2>Vega: the volatility sensitivity</h2>
-    <p>Vega is how much an option&rsquo;s price changes per point of IV. High vega means volatility swings move your option a lot. It&rsquo;s large for longer-dated options and <em>tiny</em> for 0DTE (little time left for vol to matter &mdash; that&rsquo;s <a href="/journal/what-is-veta-greek.html">veta</a>). So the <a href="/journal/post-event-iv-crush.html">IV crush</a> that devastates monthlies barely touches a 0DTE option.</p>
+    <p>Vega is how much an option&rsquo;s price changes per point of IV. High vega means volatility swings move your option a lot. It&rsquo;s large for longer-dated options and <em>tiny</em> for 0DTE (little time left for vol to matter &mdash; that&rsquo;s <a href="/journal/what-is-veta-greek">veta</a>). So the <a href="/journal/post-event-iv-crush">IV crush</a> that devastates monthlies barely touches a 0DTE option.</p>
     <p class="pull">Theta bills you for time; vega prices your exposure to fear. On 0DTE, theta is a wrecking ball and vega is a whisper.</p>
     <h2>Why it matters on 0DTE</h2>
-    <p>On 0DTE, your P&amp;L is dominated by <a href="/journal/delta-vs-gamma.html">delta/gamma</a> (direction) and <strong>theta</strong> (decay) &mdash; vega is negligible. So you trade direction against the clock, not volatility. That&rsquo;s why 0DTE is a pure <a href="/journal/higher-order-greeks-for-0dte.html">direction-and-time game</a>. Respect theta; ignore vega.
+    <p>On 0DTE, your P&amp;L is dominated by <a href="/journal/delta-vs-gamma">delta/gamma</a> (direction) and <strong>theta</strong> (decay) &mdash; vega is negligible. So you trade direction against the clock, not volatility. That&rsquo;s why 0DTE is a pure <a href="/journal/higher-order-greeks-for-0dte">direction-and-time game</a>. Respect theta; ignore vega.
   </p></div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/weekend-theta-decay.html">Weekend Theta: Why Holding Options Friday to Monday Quietly Costs You</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/weekend-theta-decay">Weekend Theta: Why Holding Options Friday to Monday Quietly Costs You</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -93,7 +93,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-liquidity-void.html"><span class="rk">Glossary</span>What Is a "Liquidity Void" and How Does Price Move Through It?</a></li><li><a href="/journal/what-is-intrinsic-value.html"><span class="rk">Options 101</span>What Is Intrinsic Value in Options?</a></li><li><a href="/journal/why-your-call-lost-money-spy-went-up.html"><span class="rk">Options 101</span>Your Call Lost Money Even Though SPY Went Up: Here's Why</a></li><li><a href="/journal/choosing-a-strike-for-0dte-scalp.html"><span class="rk">Options 101</span>Choosing a Strike for a 0DTE Scalp: How Far Out-of-the-Money?</a></li><li><a href="/journal/how-to-read-an-options-chain.html"><span class="rk">Options Basics</span>How to Read an Options Chain</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-is-a-liquidity-void"><span class="rk">Glossary</span>What Is a "Liquidity Void" and How Does Price Move Through It?</a></li><li><a href="/journal/what-is-intrinsic-value"><span class="rk">Options 101</span>What Is Intrinsic Value in Options?</a></li><li><a href="/journal/why-your-call-lost-money-spy-went-up"><span class="rk">Options 101</span>Your Call Lost Money Even Though SPY Went Up: Here's Why</a></li><li><a href="/journal/choosing-a-strike-for-0dte-scalp"><span class="rk">Options 101</span>Choosing a Strike for a 0DTE Scalp: How Far Out-of-the-Money?</a></li><li><a href="/journal/how-to-read-an-options-chain"><span class="rk">Options Basics</span>How to Read an Options Chain</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

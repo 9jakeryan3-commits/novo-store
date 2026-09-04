@@ -10,11 +10,11 @@
 <title>Liquid Staking Tokens: A Yield With a Wrapper Around It | NoVo Options Trading</title>
 <meta name="description" content="An LST represents staked capital and trades freely. The wrapper adds a peg to maintain and a queue to exit through.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/liquid-staking-tokens.html">
+<link rel="canonical" href="https://novo-options.trade/journal/liquid-staking-tokens">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/liquid-staking-tokens.html">
+<meta property="og:url" content="https://novo-options.trade/journal/liquid-staking-tokens">
 <meta property="og:title" content="Liquid Staking Tokens: A Yield With a Wrapper Around It">
 <meta property="og:description" content="An LST represents staked capital and trades freely. The wrapper adds a peg to maintain and a queue to exit through.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Liquid Staking Tokens: A Yield With a Wrapper Around It", "description": "An LST represents staked capital and trades freely. The wrapper adds a peg to maintain and a queue to exit through.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/liquid-staking-tokens.html", "articleSection": "Per-Coin Structure", "wordCount": 314, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Liquid Staking Tokens: A Yield With a Wrapper Around It", "description": "An LST represents staked capital and trades freely. The wrapper adds a peg to maintain and a queue to exit through.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/liquid-staking-tokens", "articleSection": "Per-Coin Structure", "wordCount": 314, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Liquid Staking Tokens: A Yield With a Wrapper Around It", "item": "https://novo-options.trade/journal/liquid-staking-tokens.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Liquid Staking Tokens: A Yield With a Wrapper Around It", "item": "https://novo-options.trade/journal/liquid-staking-tokens"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Staking commits capital and removes it from circulation &mdash; the float effect in <a href="/journal/cardano-market-structure.html">Cardano</a>. A liquid staking token represents that staked position and can itself be traded, so a holder keeps the yield and regains liquidity.</p>
+    <p>Staking commits capital and removes it from circulation &mdash; the float effect in <a href="/journal/cardano-market-structure">Cardano</a>. A liquid staking token represents that staked position and can itself be traded, so a holder keeps the yield and regains liquidity.</p>
     <p>What they now hold is a claim on staked capital rather than the capital, and that difference is the structure.</p>
     <h2>The peg is a market outcome, not a guarantee</h2>
     <p>An LST should be worth the underlying it represents plus accrued rewards. It trades at whatever the market says, and the mechanism keeping it aligned is arbitrage: buy the discount, redeem for the underlying.</p>
     <p>That arbitrage takes time, because unstaking has an unbonding period. So the discount can persist for as long as the queue is long, and it widens exactly when many holders want out at once.</p>
-    <p>The result is a familiar shape: a peg that holds comfortably in calm conditions and stretches under stress, which is the same profile as <a href="/journal/stablecoin-depegs-and-collateral-risk.html">a stablecoin depeg</a>, driven by a queue rather than by reserves.</p>
+    <p>The result is a familiar shape: a peg that holds comfortably in calm conditions and stretches under stress, which is the same profile as <a href="/journal/stablecoin-depegs-and-collateral-risk">a stablecoin depeg</a>, driven by a queue rather than by reserves.</p>
     <h2>Where it becomes systemic</h2>
-    <p>LSTs are widely used as collateral. So a discount does not stay contained in the token &mdash; it reduces collateral value across every position using it, simultaneously. That is a correlated shock arriving at many leveraged accounts at once, the mechanism behind <a href="/journal/crypto-liquidation-cascades.html">cascades</a>.</p>
+    <p>LSTs are widely used as collateral. So a discount does not stay contained in the token &mdash; it reduces collateral value across every position using it, simultaneously. That is a correlated shock arriving at many leveraged accounts at once, the mechanism behind <a href="/journal/crypto-liquidation-cascades">cascades</a>.</p>
     <h2>Reading one</h2>
-    <p>Track the discount to the underlying rather than the dollar price &mdash; the price can rise while the discount widens, and the discount is the risk. Know the unbonding period, because it bounds how fast the discount can close. And treat the governing protocol as counterparty exposure, in the same category as <a href="/journal/socialized-loss-and-exchange-risk.html">venue risk</a>.</p>
+    <p>Track the discount to the underlying rather than the dollar price &mdash; the price can rise while the discount widens, and the discount is the risk. Know the unbonding period, because it bounds how fast the discount can close. And treat the governing protocol as counterparty exposure, in the same category as <a href="/journal/socialized-loss-and-exchange-risk">venue risk</a>.</p>
     <h2>Why it belongs in a structure map</h2>
-    <p>Because the token trades in pools like any other, so <a href="/journal/on-chain-liquidity-vs-order-book.html">depth and exit cost</a> apply unchanged &mdash; and in the stress scenario, the peg widening and the depth thinning happen together.</p>
+    <p>Because the token trades in pools like any other, so <a href="/journal/on-chain-liquidity-vs-order-book">depth and exit cost</a> apply unchanged &mdash; and in the stress scenario, the peg widening and the depth thinning happen together.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/pool-depth-is-not-volume.html"><span class="rk">On-Chain Structure</span>Pool Depth Is Not Volume</a></li><li><a href="/journal/the-index-price-behind-a-perpetual.html"><span class="rk">Perps &amp; Funding</span>The Index Price a Perpetual Is Anchored To</a></li><li><a href="/journal/what-crossing-the-flip-actually-does.html"><span class="rk">Crypto Dealer Flow</span>What Crossing the Gamma Flip Actually Does</a></li><li><a href="/journal/xrp-market-structure.html"><span class="rk">Per-Coin Structure</span>XRP: A Real Book Without a DeFi Ecosystem Underneath It</a></li><li><a href="/journal/crypto-funding-rates-explained.html"><span class="rk">Crypto Positioning</span>Crypto Funding Rates: A Published Price for Crowding</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/pool-depth-is-not-volume"><span class="rk">On-Chain Structure</span>Pool Depth Is Not Volume</a></li><li><a href="/journal/the-index-price-behind-a-perpetual"><span class="rk">Perps &amp; Funding</span>The Index Price a Perpetual Is Anchored To</a></li><li><a href="/journal/what-crossing-the-flip-actually-does"><span class="rk">Crypto Dealer Flow</span>What Crossing the Gamma Flip Actually Does</a></li><li><a href="/journal/xrp-market-structure"><span class="rk">Per-Coin Structure</span>XRP: A Real Book Without a DeFi Ecosystem Underneath It</a></li><li><a href="/journal/crypto-funding-rates-explained"><span class="rk">Crypto Positioning</span>Crypto Funding Rates: A Published Price for Crowding</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 
 </div>
 

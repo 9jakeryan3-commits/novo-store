@@ -10,11 +10,11 @@
 <title>What the Quote Asset Tells You | NoVo Options Trading</title>
 <meta name="description" content="A token paired against a stablecoin, against the gas asset, or against another token are three different instruments with three different risks.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-the-quote-asset-tells-you.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-the-quote-asset-tells-you">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-the-quote-asset-tells-you.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-the-quote-asset-tells-you">
 <meta property="og:title" content="What the Quote Asset Tells You">
 <meta property="og:description" content="A token paired against a stablecoin, against the gas asset, or against another token are three different instruments with three different risks.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What the Quote Asset Tells You", "description": "A token paired against a stablecoin, against the gas asset, or against another token are three different instruments with three different risks.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-the-quote-asset-tells-you.html", "articleSection": "On-Chain Structure", "wordCount": 371, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What the Quote Asset Tells You", "description": "A token paired against a stablecoin, against the gas asset, or against another token are three different instruments with three different risks.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/what-the-quote-asset-tells-you", "articleSection": "On-Chain Structure", "wordCount": 371, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "What the Quote Asset Tells You", "item": "https://novo-options.trade/journal/what-the-quote-asset-tells-you.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "What the Quote Asset Tells You", "item": "https://novo-options.trade/journal/what-the-quote-asset-tells-you"}]}
 </script>
 </head>
 <body>
@@ -58,19 +58,19 @@
   <div class="article-body">
     <p>A pool has two sides. Traders habitually treat the second one as a unit of account and stop thinking about it, which works right up until the quote asset does something.</p>
     <h2>Against a dollar stablecoin</h2>
-    <p>The simplest case, and the one where the price reads as a price. Even here the specific stablecoin is information: it names a counterparty. Different issuers carry different reserve structures and different regulatory footing, and a chain quoting primarily in a stablecoin issued by <em>the chain&rsquo;s own operator</em> &mdash; as described in <a href="/journal/what-is-robinhood-chain.html">what is Robinhood Chain</a> &mdash; concentrates two exposures in one party rather than spreading them across two.</p>
+    <p>The simplest case, and the one where the price reads as a price. Even here the specific stablecoin is information: it names a counterparty. Different issuers carry different reserve structures and different regulatory footing, and a chain quoting primarily in a stablecoin issued by <em>the chain&rsquo;s own operator</em> &mdash; as described in <a href="/journal/what-is-robinhood-chain">what is Robinhood Chain</a> &mdash; concentrates two exposures in one party rather than spreading them across two.</p>
     <h2>Against the gas asset</h2>
     <p>Now the quote is itself volatile, and the pair prices a <em>ratio</em> rather than a value. A token can rise against ETH while falling in dollars, and a chart of the pair will show you only the first.</p>
-    <p>This also changes the provider&rsquo;s position in the way described in <a href="/journal/impermanent-loss-and-why-liquidity-leaves.html">impermanent loss</a>: when both sides move, the rebalancing works differently than it does against a stable side. So the depth in a volatile-quoted pool behaves differently under stress from depth in a stable-quoted one, even at the same size.</p>
+    <p>This also changes the provider&rsquo;s position in the way described in <a href="/journal/impermanent-loss-and-why-liquidity-leaves">impermanent loss</a>: when both sides move, the rebalancing works differently than it does against a stable side. So the depth in a volatile-quoted pool behaves differently under stress from depth in a stable-quoted one, even at the same size.</p>
     <h2>Against another token</h2>
-    <p>The thinnest case and usually the least useful. Both sides are volatile, both can be illiquid, and to get to dollars you need a further hop, which means a second lot of <a href="/journal/slippage-and-price-impact-on-chain.html">price impact</a> that does not appear in the pool you were looking at.</p>
+    <p>The thinnest case and usually the least useful. Both sides are volatile, both can be illiquid, and to get to dollars you need a further hop, which means a second lot of <a href="/journal/slippage-and-price-impact-on-chain">price impact</a> that does not appear in the pool you were looking at.</p>
     <p>A token whose only meaningful depth is against another thin token has an exit that is two problems long, and quoting its liquidity from that single pool overstates it substantially.</p>
     <h2>The practical rule</h2>
     <p>Read the pair, not the token, and price your exit in the asset you actually want to end up holding. Depth against a volatile or thin quote is not equivalent to the same depth against a dollar, and totalling them into one liquidity figure hides exactly the difference that matters.</p>
     <p>It is the same discipline as everywhere else in this series: the number is fine, the question is what it is a number <em>about</em>. The <a href="/crypto">NoVo Crypto Market Map</a> classifies quote assets per network before it ranks anything, for that reason.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/bnb-market-structure.html"><span class="rk">Per-Coin Structure</span>BNB: A Token Whose Demand Comes From a Venue</a></li><li><a href="/journal/crypto-skew-what-it-prices.html"><span class="rk">Crypto Volatility</span>Crypto Skew: What It Prices, and Why the Equity Prior Fails</a></li><li><a href="/journal/gamma-profile-through-a-session.html"><span class="rk">Crypto Dealer Flow</span>The Profile Changes While You Watch It</a></li><li><a href="/journal/liquidity-by-strike-in-crypto-options.html"><span class="rk">Crypto Options 101</span>Liquidity by Strike: Where the Book Actually Trades</a></li><li><a href="/journal/reading-a-thin-options-book.html"><span class="rk">Crypto Dealer Flow</span>Reading a Thin Options Book Without Over-Reading It</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/bnb-market-structure"><span class="rk">Per-Coin Structure</span>BNB: A Token Whose Demand Comes From a Venue</a></li><li><a href="/journal/crypto-skew-what-it-prices"><span class="rk">Crypto Volatility</span>Crypto Skew: What It Prices, and Why the Equity Prior Fails</a></li><li><a href="/journal/gamma-profile-through-a-session"><span class="rk">Crypto Dealer Flow</span>The Profile Changes While You Watch It</a></li><li><a href="/journal/liquidity-by-strike-in-crypto-options"><span class="rk">Crypto Options 101</span>Liquidity by Strike: Where the Book Actually Trades</a></li><li><a href="/journal/reading-a-thin-options-book"><span class="rk">Crypto Dealer Flow</span>Reading a Thin Options Book Without Over-Reading It</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 </div>
 
 </main>

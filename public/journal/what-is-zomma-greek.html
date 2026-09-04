@@ -10,11 +10,11 @@
 <title>What Is Zomma? Gamma's Sensitivity to Volatility | NoVo</title>
 <meta name="description" content="Zomma measures how an option's gamma changes as implied volatility changes — a third-order Greek connecting gamma and vol. Here's what zomma is and why it's mostly.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-zomma-greek.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-zomma-greek">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-zomma-greek.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-zomma-greek">
 <meta property="og:title" content="What Is Zomma? Gamma's Sensitivity to Volatility">
 <meta property="og:description" content="Zomma measures how gamma changes as implied volatility moves — a third-order Greek linking gamma and vol. What it is and who cares.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Zomma? Gamma's Sensitivity to Volatility", "description": "Zomma measures how gamma changes as implied volatility moves — a third-order Greek linking gamma and vol. What it is and who cares.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-zomma-greek.html", "articleSection": "Greeks", "wordCount": 509, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Zomma? Gamma's Sensitivity to Volatility", "description": "Zomma measures how gamma changes as implied volatility moves — a third-order Greek linking gamma and vol. What it is and who cares.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-zomma-greek", "articleSection": "Greeks", "wordCount": 509, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Zomma? Gamma's Sensitivity to Volatility", "item": "https://novo-options.trade/journal/what-is-zomma-greek.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Zomma? Gamma's Sensitivity to Volatility", "item": "https://novo-options.trade/journal/what-is-zomma-greek"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
-    <p><strong>Zomma</strong> measures how an option&rsquo;s <a href="/journal/what-is-gamma-exposure-gex.html">gamma</a> changes as <a href="/journal/what-is-implied-volatility.html">implied volatility</a> changes &mdash; a third-order Greek linking gamma and vol. It&rsquo;s mostly a quant/dealer concern, but it completes the <a href="/journal/higher-order-greeks-for-0dte.html">higher-order Greek</a> picture.</p>
+    <p><strong>Zomma</strong> measures how an option&rsquo;s <a href="/journal/what-is-gamma-exposure-gex">gamma</a> changes as <a href="/journal/what-is-implied-volatility">implied volatility</a> changes &mdash; a third-order Greek linking gamma and vol. It&rsquo;s mostly a quant/dealer concern, but it completes the <a href="/journal/higher-order-greeks-for-0dte">higher-order Greek</a> picture.</p>
     <h2>What zomma captures</h2>
     <p>Gamma isn&rsquo;t independent of volatility &mdash; a change in IV reshapes an option&rsquo;s gamma profile. Zomma quantifies that: how much gamma shifts per point of IV change. It matters for traders and dealers running large, gamma-sensitive books who need to hedge as volatility moves, because their gamma exposure itself is moving underneath them.</p>
     <h2>Why it exists</h2>
-    <p>For precise hedging, dealers can&rsquo;t treat gamma as fixed when vol is changing &mdash; zomma tells them how their gamma (and thus their delta-hedging needs) will shift as IV moves. It interacts with <a href="/journal/what-is-vanna.html">vanna</a> and <a href="/journal/what-is-vomma.html">vomma</a> in the full second- and third-order hedging math that drives some market flows.</p>
+    <p>For precise hedging, dealers can&rsquo;t treat gamma as fixed when vol is changing &mdash; zomma tells them how their gamma (and thus their delta-hedging needs) will shift as IV moves. It interacts with <a href="/journal/what-is-vanna">vanna</a> and <a href="/journal/what-is-vomma">vomma</a> in the full second- and third-order hedging math that drives some market flows.</p>
     <p class="pull">Zomma answers &ldquo;how does my gamma change if volatility moves?&rdquo; &mdash; a question only a large, precisely-hedged options book really needs to ask.</p>
     <h2>What it means for a scalper</h2>
-    <p>Practically nothing directly &mdash; zomma is dealer/quant territory. Its value to you is conceptual: it shows how deep the hedging math goes, and why big options books generate flows that move the tape in ways no single first-order Greek explains. You trade the <em>result</em> (the <a href="/journal/dealer-levels-are-structure-not-signals.html">dealer levels</a>), not the zomma.
+    <p>Practically nothing directly &mdash; zomma is dealer/quant territory. Its value to you is conceptual: it shows how deep the hedging math goes, and why big options books generate flows that move the tape in ways no single first-order Greek explains. You trade the <em>result</em> (the <a href="/journal/dealer-levels-are-structure-not-signals">dealer levels</a>), not the zomma.
   </p></div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/buying-vs-selling-options.html"><span class="rk">Basics</span>Buying vs Selling Options: Which Approach Fits You?</a></li><li><a href="/journal/getting-filled-at-the-mid.html"><span class="rk">Options 101</span>Getting Filled at the Mid on SPY Options</a></li><li><a href="/journal/mark-vs-last-vs-bid-ask.html"><span class="rk">Options 101</span>Mark vs Last vs Bid/Ask: Why Your Options P&amp;L Looks Wrong</a></li><li><a href="/journal/spy-options-cash-vs-physical-settlement.html"><span class="rk">Options 101</span>Are SPY Options Cash-Settled or Physically Settled? What It Means at Expiration</a></li><li><a href="/journal/what-drives-option-prices.html"><span class="rk">Options 101</span>What Drives Option Prices? The 5 Key Factors</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/buying-vs-selling-options"><span class="rk">Basics</span>Buying vs Selling Options: Which Approach Fits You?</a></li><li><a href="/journal/getting-filled-at-the-mid"><span class="rk">Options 101</span>Getting Filled at the Mid on SPY Options</a></li><li><a href="/journal/mark-vs-last-vs-bid-ask"><span class="rk">Options 101</span>Mark vs Last vs Bid/Ask: Why Your Options P&amp;L Looks Wrong</a></li><li><a href="/journal/spy-options-cash-vs-physical-settlement"><span class="rk">Options 101</span>Are SPY Options Cash-Settled or Physically Settled? What It Means at Expiration</a></li><li><a href="/journal/what-drives-option-prices"><span class="rk">Options 101</span>What Drives Option Prices? The 5 Key Factors</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

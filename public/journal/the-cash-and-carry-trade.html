@@ -10,11 +10,11 @@
 <title>The Cash-and-Carry Trade, and What It Really Costs | NoVo Options Trading</title>
 <meta name="description" content="Buy spot, short the perpetual, collect funding. The delta is neutral and the risks that remain are the ones that end the trade.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-cash-and-carry-trade.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-cash-and-carry-trade">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/the-cash-and-carry-trade.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-cash-and-carry-trade">
 <meta property="og:title" content="The Cash-and-Carry Trade, and What It Really Costs">
 <meta property="og:description" content="Buy spot, short the perpetual, collect funding. The delta is neutral and the risks that remain are the ones that end the trade.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Cash-and-Carry Trade, and What It Really Costs", "description": "Buy spot, short the perpetual, collect funding. The delta is neutral and the risks that remain are the ones that end the trade.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-cash-and-carry-trade.html", "articleSection": "Perps & Funding", "wordCount": 318, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Cash-and-Carry Trade, and What It Really Costs", "description": "Buy spot, short the perpetual, collect funding. The delta is neutral and the risks that remain are the ones that end the trade.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-cash-and-carry-trade", "articleSection": "Perps & Funding", "wordCount": 318, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Cash-and-Carry Trade, and What It Really Costs", "item": "https://novo-options.trade/journal/the-cash-and-carry-trade.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Cash-and-Carry Trade, and What It Really Costs", "item": "https://novo-options.trade/journal/the-cash-and-carry-trade"}]}
 </script>
 </head>
 <body>
@@ -62,13 +62,13 @@
     <p>Nothing fixes it. It is recalculated every interval and it can go negative, at which point the trade pays instead of earning. Modelling a period of high funding forward as though it were a yield is the most common error, and it makes a variable stream look like an instrument it is not.</p>
     <h2>The margin leg is where it breaks</h2>
     <p>The short perpetual needs margin, and if price rises sharply that leg loses. On paper the spot leg gains exactly as much, but they usually sit in different places, and the venue holding the short will liquidate it on its own margin rules without any knowledge that you are hedged elsewhere.</p>
-    <p>That is the real failure mode: a delta-neutral position liquidated on one leg, leaving you long spot into whatever comes next, at the worst possible moment. Under <a href="/journal/isolated-vs-cross-margin.html">isolated margin</a> the leg dies alone; under cross it can take the rest of the account with it.</p>
+    <p>That is the real failure mode: a delta-neutral position liquidated on one leg, leaving you long spot into whatever comes next, at the worst possible moment. Under <a href="/journal/isolated-vs-cross-margin">isolated margin</a> the leg dies alone; under cross it can take the rest of the account with it.</p>
     <h2>The costs that eat the yield</h2>
-    <p>Fees on both legs at entry and exit, and again on any rebalance. Slippage on both. The <a href="/journal/mark-price-vs-last-price.html">mark price</a> governing your margin coming from an index, not from the venue where you bought spot, so the legs can disagree briefly. And the <a href="/journal/socialized-loss-and-exchange-risk.html">venue risk</a> on whatever holds the collateral.</p>
+    <p>Fees on both legs at entry and exit, and again on any rebalance. Slippage on both. The <a href="/journal/mark-price-vs-last-price">mark price</a> governing your margin coming from an index, not from the venue where you bought spot, so the legs can disagree briefly. And the <a href="/journal/socialized-loss-and-exchange-risk">venue risk</a> on whatever holds the collateral.</p>
     <p>None of these is exotic. Together they turn a headline funding yield into something considerably smaller, and a trade described as risk-free into one whose risks simply moved somewhere less visible than price.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-a-crypto-fee-schedule-actually-says.html"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility.html"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li><li><a href="/journal/concentrated-liquidity-explained.html"><span class="rk">On-Chain Structure</span>Concentrated Liquidity: Deep in a Band, Empty Outside It</a></li><li><a href="/journal/etf-options-book-vs-coin-options-book.html"><span class="rk">Crypto Dealer Flow</span>IBIT Is Not Bitcoin: Two Books, Two Maps</a></li><li><a href="/journal/hype-market-structure.html"><span class="rk">Per-Coin Structure</span>HYPE: The Only Book Written on a Venue Rather Than an Asset</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-a-crypto-fee-schedule-actually-says"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li><li><a href="/journal/concentrated-liquidity-explained"><span class="rk">On-Chain Structure</span>Concentrated Liquidity: Deep in a Band, Empty Outside It</a></li><li><a href="/journal/etf-options-book-vs-coin-options-book"><span class="rk">Crypto Dealer Flow</span>IBIT Is Not Bitcoin: Two Books, Two Maps</a></li><li><a href="/journal/hype-market-structure"><span class="rk">Per-Coin Structure</span>HYPE: The Only Book Written on a Venue Rather Than an Asset</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

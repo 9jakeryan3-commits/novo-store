@@ -10,11 +10,11 @@
 <title>Reading Order Book Depth Without Trusting It | NoVo Options Trading</title>
 <meta name="description" content="The book shows resting size at every level. Much of it will not be there when you arrive, and that is not necessarily deception.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue.html">
+<link rel="canonical" href="https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue.html">
+<meta property="og:url" content="https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue">
 <meta property="og:title" content="Reading Order Book Depth Without Trusting It">
 <meta property="og:description" content="The book shows resting size at every level. Much of it will not be there when you arrive, and that is not necessarily deception.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Reading Order Book Depth Without Trusting It", "description": "The book shows resting size at every level. Much of it will not be there when you arrive, and that is not necessarily deception.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue.html", "articleSection": "Crypto Costs", "wordCount": 335, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Reading Order Book Depth Without Trusting It", "description": "The book shows resting size at every level. Much of it will not be there when you arrive, and that is not necessarily deception.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue", "articleSection": "Crypto Costs", "wordCount": 335, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading Order Book Depth Without Trusting It", "item": "https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Reading Order Book Depth Without Trusting It", "item": "https://novo-options.trade/journal/order-book-depth-on-a-crypto-venue"}]}
 </script>
 </head>
 <body>
@@ -56,22 +56,22 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>A crypto venue publishes its order book: resting bids and offers at each price. Unlike <a href="/journal/on-chain-liquidity-vs-order-book.html">an on-chain pool</a>, where depth is capital committed to a contract, book depth is a set of orders that can be cancelled in the time it takes your order to arrive.</p>
+    <p>A crypto venue publishes its order book: resting bids and offers at each price. Unlike <a href="/journal/on-chain-liquidity-vs-order-book">an on-chain pool</a>, where depth is capital committed to a contract, book depth is a set of orders that can be cancelled in the time it takes your order to arrive.</p>
     <h2>Why it evaporates</h2>
     <p>Market makers quote continuously and manage risk continuously. When the market starts moving, the rational response is to pull quotes and re-post wider, not manipulation, simply not wanting to be run over.</p>
-    <p>The consequence is that depth is thinnest exactly when you most want it. A book that looks deep in calm conditions can be a fraction of that during the move you are trying to exit into, which is the same pattern as on-chain liquidity <a href="/journal/liquidity-added-vs-pulled.html">leaving during a move</a>, arriving by a different route.</p>
+    <p>The consequence is that depth is thinnest exactly when you most want it. A book that looks deep in calm conditions can be a fraction of that during the move you are trying to exit into, which is the same pattern as on-chain liquidity <a href="/journal/liquidity-added-vs-pulled">leaving during a move</a>, arriving by a different route.</p>
     <h2>Spoofing, and why it matters less than people think</h2>
     <p>Orders posted with no intention of being filled do exist, and reading a large resting order as commitment is naive. But the more common reason depth disappears is the mundane one above &mdash; genuine quotes being genuinely withdrawn.</p>
     <p>Treating every vanished bid as manipulation leads to a worse model of the market than treating depth as provisional by default.</p>
     <h2>What it is genuinely good for</h2>
     <p><strong>Relative comparison.</strong> Which of two venues is deeper right now, or how this hour compares with this morning, is a reasonable read even if the absolute numbers are soft.</p>
     <p><strong>Sizing.</strong> Not &ldquo;how much can I trade&rdquo; but &ldquo;what fraction of visible depth is my order&rdquo;. An order that is a large share of the visible book will move price regardless of what the ladder promises.</p>
-    <p><strong>Structure.</strong> Persistent clusters of resting size at particular levels are worth noting, in the same qualified way as <a href="/journal/liquidation-heatmaps-what-they-show.html">a liquidation heatmap</a>: a zone of interest, not a guarantee.</p>
+    <p><strong>Structure.</strong> Persistent clusters of resting size at particular levels are worth noting, in the same qualified way as <a href="/journal/liquidation-heatmaps-what-they-show">a liquidation heatmap</a>: a zone of interest, not a guarantee.</p>
     <h2>The number to trust instead</h2>
     <p>What your last comparable order actually cost. Realised slippage on your own fills is the only depth measurement that cannot be withdrawn after the fact.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-cost-of-being-early.html"><span class="rk">Crypto Costs</span>Funding Is Rent, and Being Early Pays It</a></li><li><a href="/journal/what-a-crypto-greeks-panel-shows.html"><span class="rk">Crypto Options 101</span>Reading a Greeks Panel Without Over-Reading It</a></li><li><a href="/journal/why-crypto-spreads-widen-when-you-need-them.html"><span class="rk">Crypto Costs</span>Spreads Widen Exactly When You Need Them Tight</a></li><li><a href="/journal/correlation-blindness-in-crypto-portfolios.html"><span class="rk">Crypto Discipline</span>Ten Positions, One Bet</a></li><li><a href="/journal/ethereum-market-structure.html"><span class="rk">Per-Coin Structure</span>Ethereum: A Book, an ETF, and a Yield That Changes the Holder</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/the-cost-of-being-early"><span class="rk">Crypto Costs</span>Funding Is Rent, and Being Early Pays It</a></li><li><a href="/journal/what-a-crypto-greeks-panel-shows"><span class="rk">Crypto Options 101</span>Reading a Greeks Panel Without Over-Reading It</a></li><li><a href="/journal/why-crypto-spreads-widen-when-you-need-them"><span class="rk">Crypto Costs</span>Spreads Widen Exactly When You Need Them Tight</a></li><li><a href="/journal/correlation-blindness-in-crypto-portfolios"><span class="rk">Crypto Discipline</span>Ten Positions, One Bet</a></li><li><a href="/journal/ethereum-market-structure"><span class="rk">Per-Coin Structure</span>Ethereum: A Book, an ETF, and a Yield That Changes the Holder</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

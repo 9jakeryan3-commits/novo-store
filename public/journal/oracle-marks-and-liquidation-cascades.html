@@ -10,11 +10,11 @@
 <title>Oracle Marks: The Price That Liquidates You | NoVo Options Trading</title>
 <meta name="description" content="On-chain positions die at the oracle&rsquo;s number, not the market&rsquo;s &mdash; and the gap between them is where cascades start and manipulation pays.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades.html">
+<link rel="canonical" href="https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades.html">
+<meta property="og:url" content="https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades">
 <meta property="og:title" content="Oracle Marks: The Price That Liquidates You">
 <meta property="og:description" content="On-chain positions die at the oracle&rsquo;s number, not the market&rsquo;s &mdash; and the gap between them is where cascades start and manipulation pays.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Oracle Marks: The Price That Liquidates You", "description": "On-chain positions die at the oracle’s number, not the market’s — and the gap between them is where cascades start and manipulation pays.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades.html", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Oracle Marks: The Price That Liquidates You", "description": "On-chain positions die at the oracle’s number, not the market’s — and the gap between them is where cascades start and manipulation pays.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-31", "dateModified": "2026-08-31", "mainEntityOfPage": "https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades", "articleSection": "On-Chain Structure", "wordCount": 279, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Oracle Marks: The Price That Liquidates You", "item": "https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Oracle Marks: The Price That Liquidates You", "item": "https://novo-options.trade/journal/oracle-marks-and-liquidation-cascades"}]}
 </script>
 </head>
 <body>
@@ -59,14 +59,14 @@
 <h2>Two prices, one trigger</h2>
 <p>Every collateralized on-chain position &mdash; loans, perps, synths &mdash; is marked against an oracle feed, and liquidation fires on that mark. In calm tape the oracle tracks the market closely. In fast tape, update cadence, venue weighting and latency open a gap &mdash; and the gap is binding: you are liquidated at the oracle&rsquo;s number even when better prices exist everywhere.</p>
 <h2>Where cascades come from</h2>
-<p>Liquidations sell collateral, selling moves the venues the oracle reads, the next mark liquidates the next tier &mdash; the on-chain version of the <a href="/journal/crypto-liquidation-cascades.html">cascade mechanism</a>, with the oracle as the transmission belt. Thin venues in the feed&rsquo;s basket amplify it: pressure on one book can walk the mark down faster than the wide market falls.</p>
+<p>Liquidations sell collateral, selling moves the venues the oracle reads, the next mark liquidates the next tier &mdash; the on-chain version of the <a href="/journal/crypto-liquidation-cascades">cascade mechanism</a>, with the oracle as the transmission belt. Thin venues in the feed&rsquo;s basket amplify it: pressure on one book can walk the mark down faster than the wide market falls.</p>
 <h2>Why manipulation targets the mark</h2>
-<p>If moving a thin constituent venue moves the mark, an attacker can spend a little on the input to force a lot at the output &mdash; the classic oracle-manipulation exploit shape. Designs like <a href="/journal/pyth-market-structure.html">first-party feeds</a>, medianization and time-weighting exist precisely to make that spend uneconomical; a protocol&rsquo;s oracle choice is a solvency parameter, not a plumbing detail.</p>
+<p>If moving a thin constituent venue moves the mark, an attacker can spend a little on the input to force a lot at the output &mdash; the classic oracle-manipulation exploit shape. Designs like <a href="/journal/pyth-market-structure">first-party feeds</a>, medianization and time-weighting exist precisely to make that spend uneconomical; a protocol&rsquo;s oracle choice is a solvency parameter, not a plumbing detail.</p>
 <h2>Reading it</h2>
 <p>Know which feed marks any position you hold, its cadence, and its thinnest constituent. In fast tape, watch the mark, not the mid &mdash; the cascade starts where the trigger lives.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-liquidation-cascades.html"><span class="rk">Coins &amp; Chains</span>Liquidation Cascades: Forced Flow at Prices You Can Compute</a></li><li><a href="/journal/pyth-market-structure.html"><span class="rk">Coins &amp; Chains</span>PYTH: The Price Feed as an Asset</a></li><li><a href="/journal/thin-liquidity-and-volatility.html"><span class="rk">Coins &amp; Chains</span>Why a Thin Pool Behaves Like a Short-Gamma Regime</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-liquidation-cascades"><span class="rk">Coins &amp; Chains</span>Liquidation Cascades: Forced Flow at Prices You Can Compute</a></li><li><a href="/journal/pyth-market-structure"><span class="rk">Coins &amp; Chains</span>PYTH: The Price Feed as an Asset</a></li><li><a href="/journal/thin-liquidity-and-volatility"><span class="rk">Coins &amp; Chains</span>Why a Thin Pool Behaves Like a Short-Gamma Regime</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 
 </div>
 

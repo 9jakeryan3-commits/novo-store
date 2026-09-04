@@ -10,11 +10,11 @@
 <title>Where the Open Interest Actually Sits | NoVo Options Trading</title>
 <meta name="description" content="A market-wide open interest figure is a sum over venues that do not share a liquidation engine &mdash; and the engine is where the forced flow comes from.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/open-interest-by-venue.html">
+<link rel="canonical" href="https://novo-options.trade/journal/open-interest-by-venue">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/open-interest-by-venue.html">
+<meta property="og:url" content="https://novo-options.trade/journal/open-interest-by-venue">
 <meta property="og:title" content="Where the Open Interest Actually Sits">
 <meta property="og:description" content="A market-wide open interest figure is a sum over venues that do not share a liquidation engine &mdash; and the engine is where the forced flow comes from.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Where the Open Interest Actually Sits", "description": "Aggregate open interest hides which venue carries the leverage. The distribution matters because liquidations are a venue-level event.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/open-interest-by-venue.html", "articleSection": "Perps & Funding", "wordCount": 291, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Where the Open Interest Actually Sits", "description": "Aggregate open interest hides which venue carries the leverage. The distribution matters because liquidations are a venue-level event.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/open-interest-by-venue", "articleSection": "Perps & Funding", "wordCount": 291, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where the Open Interest Actually Sits", "item": "https://novo-options.trade/journal/open-interest-by-venue.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Where the Open Interest Actually Sits", "item": "https://novo-options.trade/journal/open-interest-by-venue"}]}
 </script>
 </head>
 <body>
@@ -56,20 +56,20 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Open interest is usually quoted as one number per coin. It is a sum across venues, each with its own book, its own margin rules and its own <a href="/journal/liquidation-price-and-leverage-math.html">liquidation engine</a>.</p>
+    <p>Open interest is usually quoted as one number per coin. It is a sum across venues, each with its own book, its own margin rules and its own <a href="/journal/liquidation-price-and-leverage-math">liquidation engine</a>.</p>
     <p>Those engines do not coordinate. A cascade is a venue-level event that spills into the wider market through price, so where the leverage sits changes what a given aggregate implies.</p>
     <h2>Why concentration matters</h2>
     <p>The same total spread evenly across venues and concentrated on one are different risks. Concentrated leverage on a single venue means one engine can fire a large volume of forced orders into that venue&rsquo;s book, and if that book is thinner than the market as a whole, the price impact is worse than the aggregate suggests.</p>
-    <p>It is the same argument as <a href="/journal/fragmented-liquidity-across-crypto-venues.html">fragmented liquidity</a>: the market in aggregate is not the market you trade in.</p>
+    <p>It is the same argument as <a href="/journal/fragmented-liquidity-across-crypto-venues">fragmented liquidity</a>: the market in aggregate is not the market you trade in.</p>
     <h2>Reading it beside funding</h2>
-    <p>Open interest by venue and <a href="/journal/why-funding-is-never-blended-across-venues.html">funding by venue</a> answer complementary questions: how much is on there, and which way it leans there. A venue carrying both a large share of open interest and an extreme funding rate is the one to watch, and neither figure alone identifies it.</p>
+    <p>Open interest by venue and <a href="/journal/why-funding-is-never-blended-across-venues">funding by venue</a> answer complementary questions: how much is on there, and which way it leans there. A venue carrying both a large share of open interest and an extreme funding rate is the one to watch, and neither figure alone identifies it.</p>
     <h2>The denomination trap, again</h2>
-    <p>Compare venues in the same units. Dollar-denominated open interest rises with price without any new contract being opened, so a cross-venue comparison in dollars during a rally partly measures the rally &mdash; the problem set out in <a href="/journal/open-interest-and-system-leverage.html">open interest as system leverage</a>.</p>
+    <p>Compare venues in the same units. Dollar-denominated open interest rises with price without any new contract being opened, so a cross-venue comparison in dollars during a rally partly measures the rally &mdash; the problem set out in <a href="/journal/open-interest-and-system-leverage">open interest as system leverage</a>.</p>
     <h2>The honest limit</h2>
     <p>Not every venue publishes cleanly, and definitions differ, so a cross-venue picture is an estimate assembled from sources that do not agree on terms. Useful as a distribution, not as a precise total &mdash; and worth saying so rather than presenting a sum as though it were measured.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/taker-flow-vs-open-interest-gamma.html"><span class="rk">Crypto Dealer Flow</span>Two Ways to Infer Dealer Positioning</a></li><li><a href="/journal/weekend-gamma-and-thin-books.html"><span class="rk">Crypto Dealer Flow</span>Weekend Gamma: The Book Is Open and the Desks Are Not</a></li><li><a href="/journal/why-crypto-drawdowns-feel-different.html"><span class="rk">Crypto Discipline</span>Why a Crypto Drawdown Feels Worse Than the Same Percentage Elsewhere</a></li><li><a href="/journal/charm-in-a-daily-expiry-market.html"><span class="rk">Crypto Dealer Flow</span>Charm When Something Expires Every Day</a></li><li><a href="/journal/dogecoin-market-structure.html"><span class="rk">Per-Coin Structure</span>Dogecoin: Major-Coin Size, No Options Book</a></li><li><a href="/journal/what-is-open-interest.html"><span class="rk">The Equity Twin</span>Open Interest, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/taker-flow-vs-open-interest-gamma"><span class="rk">Crypto Dealer Flow</span>Two Ways to Infer Dealer Positioning</a></li><li><a href="/journal/weekend-gamma-and-thin-books"><span class="rk">Crypto Dealer Flow</span>Weekend Gamma: The Book Is Open and the Desks Are Not</a></li><li><a href="/journal/why-crypto-drawdowns-feel-different"><span class="rk">Crypto Discipline</span>Why a Crypto Drawdown Feels Worse Than the Same Percentage Elsewhere</a></li><li><a href="/journal/charm-in-a-daily-expiry-market"><span class="rk">Crypto Dealer Flow</span>Charm When Something Expires Every Day</a></li><li><a href="/journal/dogecoin-market-structure"><span class="rk">Per-Coin Structure</span>Dogecoin: Major-Coin Size, No Options Book</a></li><li><a href="/journal/what-is-open-interest"><span class="rk">The Equity Twin</span>Open Interest, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

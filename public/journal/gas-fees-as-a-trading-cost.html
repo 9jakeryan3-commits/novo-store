@@ -10,11 +10,11 @@
 <title>Gas Fees Are a Trading Cost, Not a Technicality | NoVo Options Trading</title>
 <meta name="description" content="A fixed cost per transaction changes which strategies are viable and which position sizes make sense. It has no real equity analogue.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/gas-fees-as-a-trading-cost.html">
+<link rel="canonical" href="https://novo-options.trade/journal/gas-fees-as-a-trading-cost">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/gas-fees-as-a-trading-cost.html">
+<meta property="og:url" content="https://novo-options.trade/journal/gas-fees-as-a-trading-cost">
 <meta property="og:title" content="Gas Fees Are a Trading Cost, Not a Technicality">
 <meta property="og:description" content="A fixed cost per transaction changes which strategies are viable and which position sizes make sense. It has no real equity analogue.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Gas Fees Are a Trading Cost, Not a Technicality", "description": "A fixed cost per transaction changes which strategies are viable and which position sizes make sense. It has no real equity analogue.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/gas-fees-as-a-trading-cost.html", "articleSection": "On-Chain Structure", "wordCount": 366, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Gas Fees Are a Trading Cost, Not a Technicality", "description": "A fixed cost per transaction changes which strategies are viable and which position sizes make sense. It has no real equity analogue.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/gas-fees-as-a-trading-cost", "articleSection": "On-Chain Structure", "wordCount": 366, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Gas Fees Are a Trading Cost, Not a Technicality", "item": "https://novo-options.trade/journal/gas-fees-as-a-trading-cost.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Gas Fees Are a Trading Cost, Not a Technicality", "item": "https://novo-options.trade/journal/gas-fees-as-a-trading-cost"}]}
 </script>
 </head>
 <body>
@@ -57,19 +57,19 @@
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
     <p>Most trading costs are proportional. Spread, price impact and commission all scale with how much you trade, so the cost per dollar is roughly constant and size is broadly neutral.</p>
-    <p>A network fee is not proportional. It is charged for the transaction, largely irrespective of value, which means the cost <em>per dollar traded</em> falls as size rises &mdash; the exact opposite of <a href="/journal/slippage-and-price-impact-on-chain.html">price impact</a>, which rises with size.</p>
+    <p>A network fee is not proportional. It is charged for the transaction, largely irrespective of value, which means the cost <em>per dollar traded</em> falls as size rises &mdash; the exact opposite of <a href="/journal/slippage-and-price-impact-on-chain">price impact</a>, which rises with size.</p>
     <h2>The two costs pull in opposite directions</h2>
     <p>This is the genuinely useful consequence, and it is a real optimisation rather than a talking point. Trade too small and the fixed fee dominates: a modest position can lose a meaningful share of its value to two transactions before the market does anything. Trade too large and price impact dominates against the available depth.</p>
     <p>There is a size in between where the total is least bad, it depends on the specific pool&rsquo;s depth and the chain&rsquo;s current fee level, and it moves. Traders who think about impact but treat fees as a rounding error systematically trade too small on expensive chains.</p>
     <h2>Every leg is a transaction</h2>
-    <p>The round trip is at minimum two. Add an approval, a <a href="/journal/why-wrapped-assets-exist.html">wrap or unwrap</a>, a hop through an intermediate pair, or a failed attempt that reverted on slippage tolerance, and note that <strong>a reverted transaction still costs the fee</strong>. You paid to not trade.</p>
+    <p>The round trip is at minimum two. Add an approval, a <a href="/journal/why-wrapped-assets-exist">wrap or unwrap</a>, a hop through an intermediate pair, or a failed attempt that reverted on slippage tolerance, and note that <strong>a reverted transaction still costs the fee</strong>. You paid to not trade.</p>
     <p>That last point deserves weight, because it is the hidden cost of the tight tolerance recommended against sandwich attacks. Protection is bought with occasional reverts, and reverts are not free. It is a genuine trade-off rather than a free lunch, and the right setting depends on the token&rsquo;s volatility.</p>
     <h2>Why it shapes whole markets</h2>
-    <p>Fee levels determine which strategies exist at all on a chain. Where transactions are expensive, high-frequency approaches are uneconomic and activity concentrates in fewer, larger trades. Where they are cheap, the opposite, which is why transaction counts are not comparable across chains, one of the differences covered in <a href="/journal/solana-vs-evm-liquidity-structure.html">Solana versus EVM microstructure</a>.</p>
+    <p>Fee levels determine which strategies exist at all on a chain. Where transactions are expensive, high-frequency approaches are uneconomic and activity concentrates in fewer, larger trades. Where they are cheap, the opposite, which is why transaction counts are not comparable across chains, one of the differences covered in <a href="/journal/solana-vs-evm-liquidity-structure">Solana versus EVM microstructure</a>.</p>
     <p>So the fee is not a technicality sitting outside the market. It is part of the microstructure, and it is upstream of what the data even looks like.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/litecoin-market-structure.html"><span class="rk">Per-Coin Structure</span>Litecoin: Bitcoin&rsquo;s Mechanics Without Bitcoin&rsquo;s Book</a></li><li><a href="/journal/reduce-only-and-position-safety-settings.html"><span class="rk">Margin &amp; Liquidation</span>Reduce-Only: The Setting That Stops a Stop Reversing You</a></li><li><a href="/journal/token-unlocks-and-supply-cliffs.html"><span class="rk">On-Chain Structure</span>Token Unlocks: Supply You Can See Coming</a></li><li><a href="/journal/what-is-a-perpetual-swap.html"><span class="rk">Perps &amp; Funding</span>What Is a Perpetual Swap?</a></li><li><a href="/journal/bitcoin-gamma-exposure-explained.html"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/litecoin-market-structure"><span class="rk">Per-Coin Structure</span>Litecoin: Bitcoin&rsquo;s Mechanics Without Bitcoin&rsquo;s Book</a></li><li><a href="/journal/reduce-only-and-position-safety-settings"><span class="rk">Margin &amp; Liquidation</span>Reduce-Only: The Setting That Stops a Stop Reversing You</a></li><li><a href="/journal/token-unlocks-and-supply-cliffs"><span class="rk">On-Chain Structure</span>Token Unlocks: Supply You Can See Coming</a></li><li><a href="/journal/what-is-a-perpetual-swap"><span class="rk">Perps &amp; Funding</span>What Is a Perpetual Swap?</a></li><li><a href="/journal/bitcoin-gamma-exposure-explained"><span class="rk">Crypto Dealer Flow</span>Bitcoin Gamma Exposure (GEX), Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 </div>
 
 </main>

@@ -10,11 +10,11 @@
 <title>Moneyness When the Payout Is Denominated in the Coin | NoVo Options Trading</title>
 <meta name="description" content="In-the-money by a given amount does not mean what it usually means when the settlement currency is the asset itself.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/moneyness-in-an-inverse-contract.html">
+<link rel="canonical" href="https://novo-options.trade/journal/moneyness-in-an-inverse-contract">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/moneyness-in-an-inverse-contract.html">
+<meta property="og:url" content="https://novo-options.trade/journal/moneyness-in-an-inverse-contract">
 <meta property="og:title" content="Moneyness When the Payout Is Denominated in the Coin">
 <meta property="og:description" content="In-the-money by a given amount does not mean what it usually means when the settlement currency is the asset itself.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Moneyness When the Payout Is Denominated in the Coin", "description": "In-the-money by a given amount does not mean what it usually means when the settlement currency is the asset itself.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/moneyness-in-an-inverse-contract.html", "articleSection": "Crypto Options 101", "wordCount": 318, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Moneyness When the Payout Is Denominated in the Coin", "description": "In-the-money by a given amount does not mean what it usually means when the settlement currency is the asset itself.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/moneyness-in-an-inverse-contract", "articleSection": "Crypto Options 101", "wordCount": 318, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Moneyness When the Payout Is Denominated in the Coin", "item": "https://novo-options.trade/journal/moneyness-in-an-inverse-contract.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Moneyness When the Payout Is Denominated in the Coin", "item": "https://novo-options.trade/journal/moneyness-in-an-inverse-contract"}]}
 </script>
 </head>
 <body>
@@ -56,21 +56,21 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>Moneyness &mdash; whether an option is in, at or out of the money &mdash; is defined by the relationship between spot and strike, and that definition is identical everywhere. The general framing is in <a href="/journal/moneyness-itm-atm-otm.html">moneyness explained</a>.</p>
+    <p>Moneyness &mdash; whether an option is in, at or out of the money &mdash; is defined by the relationship between spot and strike, and that definition is identical everywhere. The general framing is in <a href="/journal/moneyness-itm-atm-otm">moneyness explained</a>.</p>
     <p>What changes on a coin-settled contract is what being in the money is <em>worth</em>.</p>
     <h2>The value of intrinsic value moves</h2>
     <p>On a coin-settled call, the intrinsic value is paid in coins. So the payout is the in-the-money amount converted at the coin price &mdash; and the coin price is the thing that put the option in the money in the first place.</p>
-    <p>The result is the curvature described in <a href="/journal/inverse-options-and-nonlinear-payoff.html">inverse options</a>: for a call, further gains are worth more than linearly; for a put, the coins received become less valuable as the thing you were right about falls.</p>
+    <p>The result is the curvature described in <a href="/journal/inverse-options-and-nonlinear-payoff">inverse options</a>: for a call, further gains are worth more than linearly; for a put, the coins received become less valuable as the thing you were right about falls.</p>
     <p>So &ldquo;10% in the money&rdquo; is a statement about the strike relationship and not a reliable statement about the dollars, which is the assumption an equity trader carries without noticing.</p>
     <h2>Delta reads differently too</h2>
     <p>Delta is quoted against the coin, so a 25-delta option on an inverse contract is a different dollar exposure from a 25-delta option on a linear one, at the same strike and expiry.</p>
-    <p>Which matters for anything built around delta conventions &mdash; strike selection by delta, and skew measured at a 25-delta comparison. A skew figure computed across a mixture of settlement types is comparing points that are not equivalent, the aggregation problem from <a href="/journal/usdc-settled-vs-coin-settled-options.html">settlement currency decides what the numbers mean</a>.</p>
+    <p>Which matters for anything built around delta conventions &mdash; strike selection by delta, and skew measured at a 25-delta comparison. A skew figure computed across a mixture of settlement types is comparing points that are not equivalent, the aggregation problem from <a href="/journal/usdc-settled-vs-coin-settled-options">settlement currency decides what the numbers mean</a>.</p>
     <h2>The habit</h2>
     <p>Decide in dollars if you think in dollars. Convert the payoff at a few candidate spot levels before entering, rather than relying on moneyness as a proxy for outcome.</p>
     <p>For a linear, stablecoin-settled contract none of this applies and the equity intuition transfers cleanly &mdash; which is a good reason to know which chain you are on before doing any of the arithmetic.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/stop-placement-in-thin-hours.html"><span class="rk">Crypto Discipline</span>Where to Put a Stop When Liquidity Is Thin</a></li><li><a href="/journal/volatility-of-volatility-in-crypto.html"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li><li><a href="/journal/why-a-distant-flip-is-still-an-answer.html"><span class="rk">Crypto Dealer Flow</span>A Level Far From Spot Is Not a Broken Calculation</a></li><li><a href="/journal/can-you-read-dealer-positioning-on-altcoins.html"><span class="rk">Crypto FAQ</span>Can You Read Dealer Positioning on Altcoins?</a></li><li><a href="/journal/deribit-dominance-one-venue-one-book.html"><span class="rk">Crypto Dealer Flow</span>One Venue Carries the Book, and That Changes the Read</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/stop-placement-in-thin-hours"><span class="rk">Crypto Discipline</span>Where to Put a Stop When Liquidity Is Thin</a></li><li><a href="/journal/volatility-of-volatility-in-crypto"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li><li><a href="/journal/why-a-distant-flip-is-still-an-answer"><span class="rk">Crypto Dealer Flow</span>A Level Far From Spot Is Not a Broken Calculation</a></li><li><a href="/journal/can-you-read-dealer-positioning-on-altcoins"><span class="rk">Crypto FAQ</span>Can You Read Dealer Positioning on Altcoins?</a></li><li><a href="/journal/deribit-dominance-one-venue-one-book"><span class="rk">Crypto Dealer Flow</span>One Venue Carries the Book, and That Changes the Read</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

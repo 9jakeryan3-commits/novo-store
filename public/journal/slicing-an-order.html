@@ -10,11 +10,11 @@
 <title>Slicing an Order: Trading Time Against Impact | NoVo Options Trading</title>
 <meta name="description" content="Breaking a large order into pieces reduces price impact and increases exposure to the market moving. There is no setting that avoids both.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/slicing-an-order.html">
+<link rel="canonical" href="https://novo-options.trade/journal/slicing-an-order">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/slicing-an-order.html">
+<meta property="og:url" content="https://novo-options.trade/journal/slicing-an-order">
 <meta property="og:title" content="Slicing an Order: Trading Time Against Impact">
 <meta property="og:description" content="Breaking a large order into pieces reduces price impact and increases exposure to the market moving. There is no setting that avoids both.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Slicing an Order: Trading Time Against Impact", "description": "Breaking a large order into pieces reduces price impact and increases exposure to the market moving. There is no setting that avoids both.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/slicing-an-order.html", "articleSection": "Crypto Costs", "wordCount": 313, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Slicing an Order: Trading Time Against Impact", "description": "Breaking a large order into pieces reduces price impact and increases exposure to the market moving. There is no setting that avoids both.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/slicing-an-order", "articleSection": "Crypto Costs", "wordCount": 313, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Slicing an Order: Trading Time Against Impact", "item": "https://novo-options.trade/journal/slicing-an-order.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Slicing an Order: Trading Time Against Impact", "item": "https://novo-options.trade/journal/slicing-an-order"}]}
 </script>
 </head>
 <body>
@@ -60,16 +60,16 @@
     <p>That is the whole of execution, and no algorithm removes it. The choices only decide which side of it you take.</p>
     <h2>The two common schedules</h2>
     <p>Time-weighted execution spreads pieces evenly across a window. Volume-weighted execution trades more when the market is busy and less when it is quiet, so your participation stays roughly proportional to activity.</p>
-    <p>Volume-weighting is usually the better default because it concentrates trading where the liquidity is. In crypto, though, the volume profile is far flatter than in equities: there is <a href="/journal/weekend-gamma-and-thin-books.html">no open and no close</a>, so the intraday shape that volume-weighting exploits is much weaker.</p>
+    <p>Volume-weighting is usually the better default because it concentrates trading where the liquidity is. In crypto, though, the volume profile is far flatter than in equities: there is <a href="/journal/weekend-gamma-and-thin-books">no open and no close</a>, so the intraday shape that volume-weighting exploits is much weaker.</p>
     <h2>What is specific to crypto</h2>
     <p><strong>Continuous markets remove the deadline.</strong> An equity order must complete inside the session; a crypto order can be worked across days if the position warrants it. That is a genuine freedom and it is also how a small execution problem becomes a large position risk.</p>
-    <p><strong>Multiple venues.</strong> Liquidity is fragmented, so working an order in one book while ignoring deeper liquidity elsewhere pays impact unnecessarily, and moving collateral between venues is neither instant nor free, the constraint from <a href="/journal/funding-arbitrage-and-its-real-risks.html">cross-venue arbitrage</a>.</p>
-    <p><strong>Your own footprint.</strong> A predictable schedule is readable. Trading a fixed size on a fixed interval in a thin book tells anyone watching what you will do next, which is the on-venue version of the visibility problem in <a href="/journal/mev-and-sandwich-attacks.html">MEV</a>.</p>
+    <p><strong>Multiple venues.</strong> Liquidity is fragmented, so working an order in one book while ignoring deeper liquidity elsewhere pays impact unnecessarily, and moving collateral between venues is neither instant nor free, the constraint from <a href="/journal/funding-arbitrage-and-its-real-risks">cross-venue arbitrage</a>.</p>
+    <p><strong>Your own footprint.</strong> A predictable schedule is readable. Trading a fixed size on a fixed interval in a thin book tells anyone watching what you will do next, which is the on-venue version of the visibility problem in <a href="/journal/mev-and-sandwich-attacks">MEV</a>.</p>
     <h2>The honest measure</h2>
     <p>Against the price when you decided, not against the average you achieved. An execution that beat its own benchmark while the market ran away from you was not a good execution &mdash; it was a slow one measured against a moving target.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/inverse-options-and-nonlinear-payoff.html"><span class="rk">Crypto Dealer Flow</span>Inverse Options: When the Payoff Is Not a Straight Line</a></li><li><a href="/journal/open-interest-migration-across-expiries.html"><span class="rk">Crypto Dealer Flow</span>The Roll: When Open Interest Moves Rather Than Leaves</a></li><li><a href="/journal/the-cash-and-carry-trade.html"><span class="rk">Perps &amp; Funding</span>The Cash-and-Carry Trade, and What It Really Costs</a></li><li><a href="/journal/what-a-crypto-fee-schedule-actually-says.html"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility.html"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/inverse-options-and-nonlinear-payoff"><span class="rk">Crypto Dealer Flow</span>Inverse Options: When the Payoff Is Not a Straight Line</a></li><li><a href="/journal/open-interest-migration-across-expiries"><span class="rk">Crypto Dealer Flow</span>The Roll: When Open Interest Moves Rather Than Leaves</a></li><li><a href="/journal/the-cash-and-carry-trade"><span class="rk">Perps &amp; Funding</span>The Cash-and-Carry Trade, and What It Really Costs</a></li><li><a href="/journal/what-a-crypto-fee-schedule-actually-says"><span class="rk">Crypto Costs</span>Reading a Fee Schedule Properly</a></li><li><a href="/journal/why-crypto-options-are-quoted-in-volatility"><span class="rk">Crypto Options 101</span>Why Crypto Options Are Quoted in Volatility</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

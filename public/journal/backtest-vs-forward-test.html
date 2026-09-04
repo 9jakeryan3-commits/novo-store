@@ -11,9 +11,9 @@
 <meta name="description" content="A backtest shows how a strategy would have done on past data; a forward-test shows how it does on new, live data.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/backtest-vs-forward-test.html">
+<link rel="canonical" href="https://novo-options.trade/journal/backtest-vs-forward-test">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/backtest-vs-forward-test.html">
+<meta property="og:url" content="https://novo-options.trade/journal/backtest-vs-forward-test">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Backtest vs Forward-Test">
 <meta property="og:description" content="Backtesting vs forward-testing explained: why past-data results flatter, how overfitting hides, and why live results rule.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Backtest vs Forward-Test", "description": "A backtest shows how a strategy would have done on past data; a forward-test shows how it does on new, live data. Here is why the gap between them exposes overfitting, and why forward results are the only ones that count.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-05", "dateModified": "2026-07-05", "mainEntityOfPage": "https://novo-options.trade/journal/backtest-vs-forward-test.html", "articleSection": "The System", "wordCount": 574, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Backtest vs Forward-Test", "description": "A backtest shows how a strategy would have done on past data; a forward-test shows how it does on new, live data. Here is why the gap between them exposes overfitting, and why forward results are the only ones that count.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-05", "dateModified": "2026-07-05", "mainEntityOfPage": "https://novo-options.trade/journal/backtest-vs-forward-test", "articleSection": "The System", "wordCount": 574, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Backtest vs Forward-Test", "item": "https://novo-options.trade/journal/backtest-vs-forward-test.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "Backtest vs Forward-Test", "item": "https://novo-options.trade/journal/backtest-vs-forward-test"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-05">Jul 5, 2026</time></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
     <p>Two ways to evaluate a strategy. A <strong>backtest</strong> runs it against historical data — how it <em>would have</em> performed. A <strong>forward-test</strong> (or paper/live run) applies it to new data as it arrives — how it <em>actually</em> performs going forward. The gap between the two is one of the most important and most ignored concepts in systematic trading.</p>
     <h2>Why backtests flatter</h2>
-    <p>A backtest is dangerously easy to make look great, because you can — consciously or not — tune the strategy to the exact history you're testing on. That's <strong>overfitting</strong>: the strategy has essentially memorized the past rather than learned a durable edge. It also tends to ignore real <a href="/journal/slippage-on-1dte-options.html">slippage</a> and fills, further flattering the numbers. A gorgeous backtest proves almost nothing on its own.</p>
+    <p>A backtest is dangerously easy to make look great, because you can — consciously or not — tune the strategy to the exact history you're testing on. That's <strong>overfitting</strong>: the strategy has essentially memorized the past rather than learned a durable edge. It also tends to ignore real <a href="/journal/slippage-on-1dte-options">slippage</a> and fills, further flattering the numbers. A gorgeous backtest proves almost nothing on its own.</p>
     <h2>Why forward results are the only real ones</h2>
     <p>A forward-test confronts the strategy with data it has never seen and couldn't have been tuned to. If the edge survives there — on new market conditions, with realistic execution — it's more likely to be real. If a stellar backtest falls apart in forward-testing, you just caught an overfit before it cost you live money. The forward result is the truth; the backtest is a hypothesis.</p>
     <p class="pull">Anyone can build a backtest that would have won. Only a forward-test tells you whether it will.</p>
     <h2>The disciplined loop</h2>
-    <p>The honest process: form the logic, backtest to reject the obviously broken, then <a href="/journal/paper-vs-live-divergence.html">forward-test</a> on unseen data with realistic costs before trusting it, and keep validating as conditions change. This test-forward-validate discipline — with no <a href="/journal/expected-value-in-trading.html">performance promises</a>, only ongoing verification — is exactly how a serious system should be developed and refined, and it's the mindset behind how <a href="/journal/how-novo-thinks-and-learns.html">NoVo</a> is evaluated over time.</p>
+    <p>The honest process: form the logic, backtest to reject the obviously broken, then <a href="/journal/paper-vs-live-divergence">forward-test</a> on unseen data with realistic costs before trusting it, and keep validating as conditions change. This test-forward-validate discipline — with no <a href="/journal/expected-value-in-trading">performance promises</a>, only ongoing verification — is exactly how a serious system should be developed and refined, and it's the mindset behind how <a href="/journal/how-novo-thinks-and-learns">NoVo</a> is evaluated over time.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/do-trading-bots-really-work.html"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission.html"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li><li><a href="/journal/monte-carlo-trading.html"><span class="rk">Quantitative Trading</span>Monte Carlo: Stress-Testing a System Before the Market Does</a></li><li><a href="/journal/survivorship-bias-backtesting.html"><span class="rk">The System</span>Survivorship Bias</a></li><li><a href="/journal/what-is-an-automated-trading-system.html"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/do-trading-bots-really-work"><span class="rk">Algo Trading 101</span>Do Trading Bots Really Work? The Honest Answer</a></li><li><a href="/journal/idempotency-order-submission"><span class="rk">Trading Infrastructure</span>Idempotency in Order Submission</a></li><li><a href="/journal/monte-carlo-trading"><span class="rk">Quantitative Trading</span>Monte Carlo: Stress-Testing a System Before the Market Does</a></li><li><a href="/journal/survivorship-bias-backtesting"><span class="rk">The System</span>Survivorship Bias</a></li><li><a href="/journal/what-is-an-automated-trading-system"><span class="rk">Algo Trading 101</span>What Is an Automated Trading System? (ATS Explained)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -10,11 +10,11 @@
 <title>The Round Trip Is the Only Cost That Matters | NoVo Options Trading</title>
 <meta name="description" content="Fees, spread, impact and funding are quoted separately and paid together. Adding them up is what tells you whether an edge survives.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip.html">
+<link rel="canonical" href="https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip.html">
+<meta property="og:url" content="https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip">
 <meta property="og:title" content="The Round Trip Is the Only Cost That Matters">
 <meta property="og:description" content="Fees, spread, impact and funding are quoted separately and paid together. Adding them up is what tells you whether an edge survives.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "The Round Trip Is the Only Cost That Matters", "description": "Fees, spread, impact and funding are quoted separately and paid together. Adding them up is what tells you whether an edge survives.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip.html", "articleSection": "Crypto Costs", "wordCount": 314, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "The Round Trip Is the Only Cost That Matters", "description": "Fees, spread, impact and funding are quoted separately and paid together. Adding them up is what tells you whether an edge survives.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip", "articleSection": "Crypto Costs", "wordCount": 314, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Round Trip Is the Only Cost That Matters", "item": "https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "The Round Trip Is the Only Cost That Matters", "item": "https://novo-options.trade/journal/the-true-cost-of-a-crypto-round-trip"}]}
 </script>
 </head>
 <body>
@@ -58,19 +58,19 @@
   <div class="article-body">
     <p>The costs are quoted separately because they are charged separately, and each one sounds negligible on its own. That framing is the problem: nobody pays one of them.</p>
     <h2>The full list for one round trip</h2>
-    <p><strong>Fees</strong>, twice, at whatever <a href="/journal/maker-taker-fees-and-what-they-buy.html">maker or taker tier</a> applies. <strong>Spread</strong>, twice, and on an options position quoted in volatility, that spread is <a href="/journal/what-a-crypto-options-quote-means.html">larger in premium terms than it looks</a>. <strong>Impact</strong>, twice, scaling with size against available depth.</p>
+    <p><strong>Fees</strong>, twice, at whatever <a href="/journal/maker-taker-fees-and-what-they-buy">maker or taker tier</a> applies. <strong>Spread</strong>, twice, and on an options position quoted in volatility, that spread is <a href="/journal/what-a-crypto-options-quote-means">larger in premium terms than it looks</a>. <strong>Impact</strong>, twice, scaling with size against available depth.</p>
     <p>For anything held on a perpetual, <strong>funding</strong> at every settlement interval, which is a cost of <em>time</em> rather than of trading and is the one most often left out entirely. On-chain, <strong>gas</strong> on every transaction including the ones that revert.</p>
     <h2>The asymmetry that ruins estimates</h2>
     <p>Entry and exit are not symmetric. You choose when to enter and can wait for a good fill. Exits are frequently forced &mdash; by a stop, by a thesis breaking, by margin &mdash; and a forced exit crosses the spread, in whatever depth exists at that moment.</p>
     <p>So estimating a round trip as twice the entry cost is systematically optimistic, and it is optimistic by the most in exactly the conditions where you will need the exit.</p>
     <h2>Where it bites hardest</h2>
-    <p>Cheap-looking instruments. A far out-of-the-money option with a low premium can carry a round-trip cost that is a large share of the premium itself, protected only partially by <a href="/journal/crypto-options-fee-caps.html">fee caps</a>. A thin on-chain token can cost more to leave than the move you were trading.</p>
+    <p>Cheap-looking instruments. A far out-of-the-money option with a low premium can carry a round-trip cost that is a large share of the premium itself, protected only partially by <a href="/journal/crypto-options-fee-caps">fee caps</a>. A thin on-chain token can cost more to leave than the move you were trading.</p>
     <p>In both cases the low absolute price reads as low risk, and the percentage cost is the highest on the board.</p>
     <h2>The habit</h2>
     <p>Compute the round trip at your size, at fills rather than mids, before deciding whether an idea is worth trading. An edge that survives on paper and not after costs is not a small problem &mdash; it is the strategy being wrong.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-happens-at-0800-utc.html"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure.html"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin.html"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li><li><a href="/journal/funding-arbitrage-and-its-real-risks.html"><span class="rk">Perps &amp; Funding</span>Funding Arbitrage Between Venues</a></li><li><a href="/journal/layer-1-tokens-as-a-structural-family.html"><span class="rk">Per-Coin Structure</span>Layer-1 Tokens: You Are Buying the Gas</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-happens-at-0800-utc"><span class="rk">Crypto Dealer Flow</span>What Actually Happens at 08:00 UTC</a></li><li><a href="/journal/avalanche-market-structure"><span class="rk">Per-Coin Structure</span>AVAX: A New Book, and What a New Book Cannot Tell You Yet</a></li><li><a href="/journal/crypto-max-pain-and-the-daily-pin"><span class="rk">Crypto Dealer Flow</span>Max Pain and the Daily Pin</a></li><li><a href="/journal/funding-arbitrage-and-its-real-risks"><span class="rk">Perps &amp; Funding</span>Funding Arbitrage Between Venues</a></li><li><a href="/journal/layer-1-tokens-as-a-structural-family"><span class="rk">Per-Coin Structure</span>Layer-1 Tokens: You Are Buying the Gas</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

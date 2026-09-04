@@ -10,11 +10,11 @@
 <title>What Is Slippage? Why Your Fill Differs From the Quote | NoVo Options Trading</title>
 <meta name="description" content="Slippage is the difference between the price you expected and the price you actually got — caused by the spread, fast markets, and thin liquidity. Here's what.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/what-is-slippage-in-options.html">
+<link rel="canonical" href="https://novo-options.trade/journal/what-is-slippage-in-options">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/what-is-slippage-in-options.html">
+<meta property="og:url" content="https://novo-options.trade/journal/what-is-slippage-in-options">
 <meta property="og:title" content="What Is Slippage? Why Your Fill Differs From the Quote">
 <meta property="og:description" content="Slippage is the gap between your expected and actual fill price — from the spread, fast markets, and thin liquidity. How to minimize it.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Slippage? Why Your Fill Differs From the Quote", "description": "Slippage is the gap between your expected and actual fill price — from the spread, fast markets, and thin liquidity. How to minimize it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-slippage-in-options.html", "articleSection": "Options 101", "wordCount": 489, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "What Is Slippage? Why Your Fill Differs From the Quote", "description": "Slippage is the gap between your expected and actual fill price — from the spread, fast markets, and thin liquidity. How to minimize it.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/what-is-slippage-in-options", "articleSection": "Options 101", "wordCount": 489, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Slippage? Why Your Fill Differs From the Quote", "item": "https://novo-options.trade/journal/what-is-slippage-in-options.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Options 101 & the Greeks", "item": "https://novo-options.trade/journal/options-101"}, {"@type": "ListItem", "position": 4, "name": "What Is Slippage? Why Your Fill Differs From the Quote", "item": "https://novo-options.trade/journal/what-is-slippage-in-options"}]}
 </script>
 </head>
 <body>
@@ -56,14 +56,14 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time></div>
   <div class="article-body">
-    <p><strong>Slippage</strong> is the difference between the price you expected and the price you actually got &mdash; caused by the <a href="/journal/bid-ask-spread-explained.html">spread</a>, fast markets, and thin liquidity. It&rsquo;s a real, recurring cost.</p>
+    <p><strong>Slippage</strong> is the difference between the price you expected and the price you actually got &mdash; caused by the <a href="/journal/bid-ask-spread-explained">spread</a>, fast markets, and thin liquidity. It&rsquo;s a real, recurring cost.</p>
     <h2>What causes it</h2>
-    <p>Three drivers: the <strong>spread</strong> (you buy at the ask, sell at the bid, so a market order &ldquo;slips&rdquo; from the mid), <strong>fast markets</strong> (price moves in the <a href="/journal/novo-latency-honesty.html">instant</a> your order travels), and <strong>thin liquidity</strong> (few orders to fill against, so you get worse prices). Stops especially slip in fast moves (<a href="/journal/what-is-a-stop-order.html">they become market orders</a>).</p>
+    <p>Three drivers: the <strong>spread</strong> (you buy at the ask, sell at the bid, so a market order &ldquo;slips&rdquo; from the mid), <strong>fast markets</strong> (price moves in the <a href="/journal/novo-latency-honesty">instant</a> your order travels), and <strong>thin liquidity</strong> (few orders to fill against, so you get worse prices). Stops especially slip in fast moves (<a href="/journal/what-is-a-stop-order">they become market orders</a>).</p>
     <h2>Why it matters</h2>
-    <p>For a <a href="/journal/guide-0dte-spy-options-scalping.html">frequent scalper</a>, slippage compounds across many trades and can quietly erode an edge &mdash; it&rsquo;s part of why <a href="/journal/cheapest-broker-for-0dte-scalping.html">total execution cost</a> matters more than commissions. It&rsquo;s the reason your <a href="/journal/why-fill-price-differ-from-quote.html">fill differs from the quote</a>, and why you <a href="/journal/slippage-in-position-sizing.html">factor it into your risk math</a>.</p>
+    <p>For a <a href="/journal/guide-0dte-spy-options-scalping">frequent scalper</a>, slippage compounds across many trades and can quietly erode an edge &mdash; it&rsquo;s part of why <a href="/journal/cheapest-broker-for-0dte-scalping">total execution cost</a> matters more than commissions. It&rsquo;s the reason your <a href="/journal/why-fill-price-differ-from-quote">fill differs from the quote</a>, and why you <a href="/journal/slippage-in-position-sizing">factor it into your risk math</a>.</p>
     <p class="pull">Slippage is the gap between the price you wanted and the price you got &mdash; small each time, meaningful over thousands of scalps.</p>
     <h2>How to minimize it</h2>
-    <p>Trade <a href="/journal/how-options-spreads-fill.html">liquid, tight-spread strikes</a>, <a href="/journal/getting-filled-at-the-mid.html">work toward the mid</a>, use <a href="/journal/what-is-a-marketable-limit-order.html">marketable limits</a> to cap it, and avoid <a href="/journal/0dte-spreads-widen-into-close.html">thin, widening markets</a>. Slippage is smallest where liquidity is deepest, which is usually at the levels the dealer map already marks.
+    <p>Trade <a href="/journal/how-options-spreads-fill">liquid, tight-spread strikes</a>, <a href="/journal/getting-filled-at-the-mid">work toward the mid</a>, use <a href="/journal/what-is-a-marketable-limit-order">marketable limits</a> to cap it, and avoid <a href="/journal/0dte-spreads-widen-into-close">thin, widening markets</a>. Slippage is smallest where liquidity is deepest, which is usually at the levels the dealer map already marks.
   </p></div>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -92,7 +92,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/assignment-on-long-0dte-option.html"><span class="rk">Options 101</span>Can You Get Assigned on a 0DTE SPY Option You're Long?</a></li><li><a href="/journal/early-assignment-explained.html"><span class="rk">Options 101</span>Early Assignment Explained: When Option Sellers Get Called Early</a></li><li><a href="/journal/iwm-0dte-options.html"><span class="rk">Basics</span>IWM 0DTE Options: Scalping Small-Cap Volatility</a></li><li><a href="/journal/risk-reversal-explained.html"><span class="rk">Options 101</span>The Risk Reversal, Explained</a></li><li><a href="/journal/weekly-vs-monthly-options.html"><span class="rk">Basics</span>Weekly vs Monthly Options: Which Expiration to Trade?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/assignment-on-long-0dte-option"><span class="rk">Options 101</span>Can You Get Assigned on a 0DTE SPY Option You're Long?</a></li><li><a href="/journal/early-assignment-explained"><span class="rk">Options 101</span>Early Assignment Explained: When Option Sellers Get Called Early</a></li><li><a href="/journal/iwm-0dte-options"><span class="rk">Basics</span>IWM 0DTE Options: Scalping Small-Cap Volatility</a></li><li><a href="/journal/risk-reversal-explained"><span class="rk">Options 101</span>The Risk Reversal, Explained</a></li><li><a href="/journal/weekly-vs-monthly-options"><span class="rk">Basics</span>Weekly vs Monthly Options: Which Expiration to Trade?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/options-101" style="color:var(--cyan);font-weight:700;">All Options 101 &amp; the Greeks articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

@@ -10,11 +10,11 @@
 <title>A Ticker Is Not a Token | NoVo Options Trading</title>
 <meta name="description" content="On-chain a symbol is a string anyone can write, and one ticker can cover many tokens. The contract address is the only thing identifying what you actually buy.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/a-ticker-is-not-a-token.html">
+<link rel="canonical" href="https://novo-options.trade/journal/a-ticker-is-not-a-token">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/a-ticker-is-not-a-token.html">
+<meta property="og:url" content="https://novo-options.trade/journal/a-ticker-is-not-a-token">
 <meta property="og:title" content="A Ticker Is Not a Token">
 <meta property="og:description" content="On-chain a symbol is a string anyone can write, and one ticker can cover many tokens. The contract address is the only thing identifying what you actually buy.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "A Ticker Is Not a Token", "description": "On-chain a symbol is a string anyone can write, and one ticker can cover many tokens. The contract address is the only thing identifying what you actually buy.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/a-ticker-is-not-a-token.html", "articleSection": "On-Chain Structure", "wordCount": 452, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "A Ticker Is Not a Token", "description": "On-chain a symbol is a string anyone can write, and one ticker can cover many tokens. The contract address is the only thing identifying what you actually buy.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/a-ticker-is-not-a-token", "articleSection": "On-Chain Structure", "wordCount": 452, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "A Ticker Is Not a Token", "item": "https://novo-options.trade/journal/a-ticker-is-not-a-token.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "A Ticker Is Not a Token", "item": "https://novo-options.trade/journal/a-ticker-is-not-a-token"}]}
 </script>
 </head>
 <body>
@@ -66,11 +66,11 @@
     <p>There is a second subtlety that catches people who have already learned the first. <strong>Addresses are only unique within a network.</strong> Key on the address alone while covering more than one chain and a Solana pool can collide with an EVM one, and you are back to two assets interleaving in one row, the same failure a level deeper. The identity is the pair: <em>network plus address</em>.</p>
     <h2>What to do about it</h2>
     <p>Before buying a token you found by name or by chart, take the contract address from the project&rsquo;s own published source and check it character by character against the one you are about to trade. A chart with the right ticker on top of it is not evidence you are looking at the right token, and a search result is not a source of truth for an address.</p>
-    <p>The same discipline applies to the pool the token trades in &mdash; see <a href="/journal/on-chain-liquidity-vs-order-book.html">on-chain liquidity versus an order book</a>.</p>
+    <p>The same discipline applies to the pool the token trades in &mdash; see <a href="/journal/on-chain-liquidity-vs-order-book">on-chain liquidity versus an order book</a>.</p>
     <p>This is also why the on-chain half of the <a href="/crypto">NoVo Crypto Market Map</a> is keyed on contract address and network rather than symbol. It is not a data-hygiene preference. Keying on the ticker would silently merge assets with nothing to do with each other, and the resulting chart would look completely normal.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-liquidation-cascades.html"><span class="rk">Crypto Positioning</span>Liquidation Cascades: Forced Flow at Prices You Can Compute</a></li><li><a href="/journal/fragmented-liquidity-across-crypto-venues.html"><span class="rk">Crypto Costs</span>One Asset, Many Books: What Fragmentation Costs</a></li><li><a href="/journal/isolated-vs-cross-margin.html"><span class="rk">Margin &amp; Liquidation</span>Isolated vs Cross Margin: Which Account Is at Risk</a></li><li><a href="/journal/overtrading-when-the-market-never-stops.html"><span class="rk">Crypto Discipline</span>Overtrading Is the Default in a 24/7 Market</a></li><li><a href="/journal/the-crypto-volatility-surface.html"><span class="rk">Crypto Volatility</span>The Volatility Surface, and What Its Shape Says</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/crypto-liquidation-cascades"><span class="rk">Crypto Positioning</span>Liquidation Cascades: Forced Flow at Prices You Can Compute</a></li><li><a href="/journal/fragmented-liquidity-across-crypto-venues"><span class="rk">Crypto Costs</span>One Asset, Many Books: What Fragmentation Costs</a></li><li><a href="/journal/isolated-vs-cross-margin"><span class="rk">Margin &amp; Liquidation</span>Isolated vs Cross Margin: Which Account Is at Risk</a></li><li><a href="/journal/overtrading-when-the-market-never-stops"><span class="rk">Crypto Discipline</span>Overtrading Is the Default in a 24/7 Market</a></li><li><a href="/journal/the-crypto-volatility-surface"><span class="rk">Crypto Volatility</span>The Volatility Surface, and What Its Shape Says</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 </div>
 
 </main>

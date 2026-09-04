@@ -10,11 +10,11 @@
 <title>Two Ways to Infer Dealer Positioning | NoVo Options Trading</title>
 <meta name="description" content="Open interest times gamma assumes who is short. Taker flow observes who lifted the offer. Crypto is one of the few markets where the second is possible.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma.html">
+<link rel="canonical" href="https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma.html">
+<meta property="og:url" content="https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma">
 <meta property="og:title" content="Two Ways to Infer Dealer Positioning">
 <meta property="og:description" content="Open interest times gamma assumes who is short. Taker flow observes who lifted the offer. Crypto is one of the few markets where the second is possible.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Two Ways to Infer Dealer Positioning", "description": "Open interest times gamma assumes who is short. Taker flow observes who lifted the offer. Crypto is one of the few markets where the second is possible.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma.html", "articleSection": "Crypto Dealer Flow", "wordCount": 351, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Two Ways to Infer Dealer Positioning", "description": "Open interest times gamma assumes who is short. Taker flow observes who lifted the offer. Crypto is one of the few markets where the second is possible.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma", "articleSection": "Crypto Dealer Flow", "wordCount": 351, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Two Ways to Infer Dealer Positioning", "item": "https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Two Ways to Infer Dealer Positioning", "item": "https://novo-options.trade/journal/taker-flow-vs-open-interest-gamma"}]}
 </script>
 </head>
 <body>
@@ -58,19 +58,19 @@
   <div class="article-body">
     <p>A dealer map needs to know not just how much open interest sits at a strike but <em>which side the market maker is on</em>. Open interest alone does not say. Someone is long and someone is short every contract.</p>
     <h2>The conventional assumption</h2>
-    <p>The standard approach assumes customers buy calls and buy puts, so dealers are short both, and signs the gamma accordingly. It is a reasonable prior in equity index options, where the dominant customer behaviour is well established, and it is what makes <a href="/journal/bitcoin-gamma-exposure-explained.html">the usual GEX calculation</a> work.</p>
+    <p>The standard approach assumes customers buy calls and buy puts, so dealers are short both, and signs the gamma accordingly. It is a reasonable prior in equity index options, where the dominant customer behaviour is well established, and it is what makes <a href="/journal/bitcoin-gamma-exposure-explained">the usual GEX calculation</a> work.</p>
     <p>It is an assumption nonetheless, and where customer behaviour differs from the prior, the sign can be wrong &mdash; which flips the entire interpretation of a strike from damping to amplifying.</p>
     <h2>What crypto venues expose</h2>
     <p>Crypto derivatives venues publish trade data that identifies the <strong>taker</strong> &mdash; the side that crossed the spread. The maker on the other side is typically a liquidity provider, so accumulating taker flow over time gives you dealer positioning as its mirror image, observed rather than assumed.</p>
     <p>This is a genuinely unusual disclosure. It is why some published crypto gamma measures are built from cumulative taker flow instead of from open interest, and the difference is methodological, not cosmetic.</p>
     <h2>Where they disagree, and why that matters</h2>
     <p>Both are estimates and each has a characteristic weakness. Open-interest gamma is wrong when the customer-buys prior is wrong. Taker-flow gamma is wrong when the taker is not a customer &mdash; a dealer aggressively hedging is also a taker, and gets counted as customer flow.</p>
-    <p>Taker flow also needs a complete history from the point positions were opened; miss a period and the inferred inventory is permanently off, in the same way <a href="/journal/liquidity-added-vs-pulled.html">on-chain depth history cannot be backfilled</a>.</p>
+    <p>Taker flow also needs a complete history from the point positions were opened; miss a period and the inferred inventory is permanently off, in the same way <a href="/journal/liquidity-added-vs-pulled">on-chain depth history cannot be backfilled</a>.</p>
     <h2>The honest position</h2>
     <p>Neither is ground truth, because dealer inventory is private. Where the two methods agree, confidence is higher than either alone justifies. Where they disagree, the useful response is to widen the uncertainty rather than to pick the one that supports the trade &mdash; and to remember that a map is a model of obligation, not a report of it.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/weekend-gamma-and-thin-books.html"><span class="rk">Crypto Dealer Flow</span>Weekend Gamma: The Book Is Open and the Desks Are Not</a></li><li><a href="/journal/why-crypto-drawdowns-feel-different.html"><span class="rk">Crypto Discipline</span>Why a Crypto Drawdown Feels Worse Than the Same Percentage Elsewhere</a></li><li><a href="/journal/charm-in-a-daily-expiry-market.html"><span class="rk">Crypto Dealer Flow</span>Charm When Something Expires Every Day</a></li><li><a href="/journal/dogecoin-market-structure.html"><span class="rk">Per-Coin Structure</span>Dogecoin: Major-Coin Size, No Options Book</a></li><li><a href="/journal/how-to-read-a-coin-you-have-never-traded.html"><span class="rk">Crypto FAQ</span>A Reading Order for a Coin You Have Never Traded</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/weekend-gamma-and-thin-books"><span class="rk">Crypto Dealer Flow</span>Weekend Gamma: The Book Is Open and the Desks Are Not</a></li><li><a href="/journal/why-crypto-drawdowns-feel-different"><span class="rk">Crypto Discipline</span>Why a Crypto Drawdown Feels Worse Than the Same Percentage Elsewhere</a></li><li><a href="/journal/charm-in-a-daily-expiry-market"><span class="rk">Crypto Dealer Flow</span>Charm When Something Expires Every Day</a></li><li><a href="/journal/dogecoin-market-structure"><span class="rk">Per-Coin Structure</span>Dogecoin: Major-Coin Size, No Options Book</a></li><li><a href="/journal/how-to-read-a-coin-you-have-never-traded"><span class="rk">Crypto FAQ</span>A Reading Order for a Coin You Have Never Traded</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

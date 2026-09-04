@@ -11,9 +11,9 @@
 <meta name="description" content="A fair coin gives eight heads in ten flips about 4% of the time. The same math means an edgeless strategy will hand you a 6-2 run this month.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/sample-size-trading.html">
+<link rel="canonical" href="https://novo-options.trade/journal/sample-size-trading">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/sample-size-trading.html">
+<meta property="og:url" content="https://novo-options.trade/journal/sample-size-trading">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="How Many Trades Before You Believe It?">
 <meta property="og:description" content="A fair coin gives eight heads in ten flips about 4% of the time. The same math means an edgeless strategy will hand you a 6-2 run this month.">
@@ -28,8 +28,8 @@
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How Many Trades Before You Believe It?", "description": "A fair coin gives eight heads in ten flips about 4% of the time. The same math means an edgeless strategy will hand you a 6-2 run this month.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/sample-size-trading.html", "articleSection": "Quantitative Trading", "wordCount": 872, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "How Many Trades Before You Believe It?", "item": "https://novo-options.trade/journal/sample-size-trading.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How Many Trades Before You Believe It?", "description": "A fair coin gives eight heads in ten flips about 4% of the time. The same math means an edgeless strategy will hand you a 6-2 run this month.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-16", "dateModified": "2026-07-16", "mainEntityOfPage": "https://novo-options.trade/journal/sample-size-trading", "articleSection": "Quantitative Trading", "wordCount": 872, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "AI, Algos & Systems", "item": "https://novo-options.trade/journal/ai-systems"}, {"@type": "ListItem", "position": 4, "name": "How Many Trades Before You Believe It?", "item": "https://novo-options.trade/journal/sample-size-trading"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -70,20 +70,20 @@
 
 <h2>The trap: slicing</h2>
 <p>Here's where good traders go wrong. You have 200 trades — a decent sample. Then you ask "how does this do on Tuesdays, in the morning, in high volatility?" and suddenly you're looking at 11 trades. You've cut a real sample into a dozen rumours, and one of those slices will look spectacular by pure chance.</p>
-<p>That's <a href="/journal/data-mining-bias.html">data mining bias</a>, and it's the reason a strategy that looked perfect in testing falls apart live. Every extra filter you add costs you sample size — the exact currency you need to know if the filter helps.</p>
+<p>That's <a href="/journal/data-mining-bias">data mining bias</a>, and it's the reason a strategy that looked perfect in testing falls apart live. Every extra filter you add costs you sample size — the exact currency you need to know if the filter helps.</p>
 
 <h2>What to do instead</h2>
 <p><strong>Write the question down first.</strong> Decide what you're testing and what result would change your mind, before you look. A hypothesis formed after seeing the data isn't a test, it's a description.</p>
 <p><strong>Change one thing at a time.</strong> Two changes at once and a hundred trades later, you know the pair did something. You don't know which one, and you never will.</p>
 <p><strong>Prefer deleting to adding.</strong> Removing a rule that never had evidence costs you nothing. Adding one on twelve trades costs you the next six months of confusion.</p>
-<p><strong>Let losing streaks be boring.</strong> A positive-expectancy system will hand you four losses in a row regularly. That's <a href="/journal/variance-vs-edge.html">variance</a>, not information. The plan should already have expected it.</p>
+<p><strong>Let losing streaks be boring.</strong> A positive-expectancy system will hand you four losses in a row regularly. That's <a href="/journal/variance-vs-edge">variance</a>, not information. The plan should already have expected it.</p>
 
 <h2>The discipline</h2>
 <p>The instinct to fix a system after a bad day is the single most expensive reflex in trading. It converts noise into permanent code. The counter-discipline is simple to say and hard to do: <strong>measure everything, change almost nothing, and only when the record — not the day — asks for it.</strong></p>
-<p>See also: <a href="/journal/overfitting-in-trading.html">overfitting</a>, <a href="/journal/backtesting-101.html">backtesting basics</a>, and <a href="/journal/expectancy.html">expectancy</a>.</p>
+<p>See also: <a href="/journal/overfitting-in-trading">overfitting</a>, <a href="/journal/backtesting-101">backtesting basics</a>, and <a href="/journal/expectancy">expectancy</a>.</p>
   </div>
 
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/how-many-0dte-trades-per-day.html">How Many 0DTE Trades Per Day? Fewer Than You Think</a> &middot; <a href="/journal/tick-size-and-liquidity.html">Tick Size &amp; Liquidity</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/how-many-0dte-trades-per-day">How Many 0DTE Trades Per Day? Fewer Than You Think</a> &middot; <a href="/journal/tick-size-and-liquidity">Tick Size &amp; Liquidity</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -111,7 +111,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-an-ai-market-analyst-does.html"><span class="rk">AI &amp; Market Analysis</span>What an AI Market Analyst Actually Does</a></li><li><a href="/journal/why-a-raw-llm-cant-trade.html"><span class="rk">AI in Trading</span>Why a Raw LLM Can't Trade For You</a></li><li><a href="/journal/algorithmic-trading-strategies.html"><span class="rk">Algo Trading 101</span>Algorithmic Trading Strategies</a></li><li><a href="/journal/conviction-based-position-sizing.html"><span class="rk">The System</span>Conviction-Based Sizing</a></li><li><a href="/journal/how-much-money-to-start-algo-trading.html"><span class="rk">Algo Trading 101</span>How Much Money Do You Need to Start Algo Trading?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-an-ai-market-analyst-does"><span class="rk">AI &amp; Market Analysis</span>What an AI Market Analyst Actually Does</a></li><li><a href="/journal/why-a-raw-llm-cant-trade"><span class="rk">AI in Trading</span>Why a Raw LLM Can't Trade For You</a></li><li><a href="/journal/algorithmic-trading-strategies"><span class="rk">Algo Trading 101</span>Algorithmic Trading Strategies</a></li><li><a href="/journal/conviction-based-position-sizing"><span class="rk">The System</span>Conviction-Based Sizing</a></li><li><a href="/journal/how-much-money-to-start-algo-trading"><span class="rk">Algo Trading 101</span>How Much Money Do You Need to Start Algo Trading?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/ai-systems" style="color:var(--cyan);font-weight:700;">All AI, Algos &amp; Systems articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

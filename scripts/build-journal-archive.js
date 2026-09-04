@@ -78,7 +78,7 @@ function main() {
   rows.sort((x, y) => x.title.localeCompare(y.title, 'en'));
 
   const lis = rows.map(r =>
-    `<li class="arch-x"><a href="/journal/${r.file}">${esc(r.title)}</a>` +
+    `<li class="arch-x"><a href="/journal/${r.file.replace(/\.html$/, '')}">${esc(r.title)}</a>` +
     (r.section ? ` <span class="arch-c">&middot; ${esc(r.section)}</span>` : '') +
     `</li>`).join('');
 

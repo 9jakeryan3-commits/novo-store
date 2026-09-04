@@ -10,11 +10,11 @@
 <title>The Real Expected Cost of Moving Your Stop | NoVo</title>
 <meta name="description" content="Saving one small loss against taking an open-ended one is an asymmetric payoff, which makes the habit negative expectancy before you count a single trade.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/cost-of-moving-your-stop.html">
+<link rel="canonical" href="https://novo-options.trade/journal/cost-of-moving-your-stop">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/cost-of-moving-your-stop.html">
+<meta property="og:url" content="https://novo-options.trade/journal/cost-of-moving-your-stop">
 <meta property="og:title" content="The Real Expected Cost of Moving Your Stop">
 <meta property="og:description" content="'It came back once' hides the truth: moving stops is negative expected value. The occasional save is dwarfed by the losses. The math.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -28,8 +28,8 @@
 <meta name="twitter:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "The Real Expected Cost of Moving Your Stop", "description": "'It came back once' hides the truth: moving stops is negative expected value. The occasional save is dwarfed by the losses. The math.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/cost-of-moving-your-stop.html", "articleSection": "Discipline", "wordCount": 615, "inLanguage": "en", "isAccessibleForFree": true}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "The Real Expected Cost of Moving Your Stop", "item": "https://novo-options.trade/journal/cost-of-moving-your-stop.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "The Real Expected Cost of Moving Your Stop", "description": "'It came back once' hides the truth: moving stops is negative expected value. The occasional save is dwarfed by the losses. The math.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/cost-of-moving-your-stop", "articleSection": "Discipline", "wordCount": 615, "inLanguage": "en", "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "The Real Expected Cost of Moving Your Stop", "item": "https://novo-options.trade/journal/cost-of-moving-your-stop"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -52,16 +52,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
   <div class="article-body">
-    <p>The reason <a href="/journal/not-overriding-your-stop.html">moving stops</a> is so hard to quit is a memory bias: you vividly remember the time price came back and saved you, and forget the times it kept going. Let's do the honest <strong>expected-value</strong> math, because it's decisive.</p>
+    <p>The reason <a href="/journal/not-overriding-your-stop">moving stops</a> is so hard to quit is a memory bias: you vividly remember the time price came back and saved you, and forget the times it kept going. Let's do the honest <strong>expected-value</strong> math, because it's decisive.</p>
     <h2>The asymmetry</h2>
     <p>When you move a stop, one of two things happens. <strong>It comes back</strong> &mdash; you save one stop's worth of loss, a bounded, small win. <strong>It keeps going</strong> &mdash; you now hold a trade that's already proven wrong, and the loss grows, sometimes to several times your intended stop. So the payoff is fundamentally asymmetric: <em>limited upside</em> (avoid one small loss) versus <em>open-ended downside</em> (an unbounded larger loss). That shape alone makes the habit negative-EV before you count a single trade.</p>
     <h2>The math over many trades</h2>
     <p>Say moving the stop &ldquo;works&rdquo; 60% of the time, saving 1 unit, and fails 40%, costing an extra 3 units (a modest estimate for a leveraged option that runs). EV per override = (0.60 &times; +1) + (0.40 &times; &minus;3) = 0.6 &minus; 1.2 = <strong>&minus;0.6 units every time you do it</strong>. Even at a 70% &ldquo;save&rdquo; rate, a large enough failure makes it negative. The occasional saves are real, and mathematically dwarfed by the failures they train you to keep risking.</p>
     <p class="pull">The save you remember is worth one unit. The blow-up you don't is worth many. Average them and moving stops loses money &mdash; reliably, not occasionally.</p>
     <h2>Why memory hides it</h2>
-    <p>The saves are frequent, immediate, and emotionally vivid (relief!); the failures are rarer but far larger and easy to rationalize as &ldquo;just a bad trade.&rdquo; So your gut tallies the wins and discounts the losses, and concludes the habit works &mdash; while your equity curve says otherwise. This is exactly the bias a hard <a href="/journal/automated-exit-removes-emotion.html">automated stop</a> defends against. Trust the EV, not the memory: leave the stop where you set it.</p>
+    <p>The saves are frequent, immediate, and emotionally vivid (relief!); the failures are rarer but far larger and easy to rationalize as &ldquo;just a bad trade.&rdquo; So your gut tallies the wins and discounts the losses, and concludes the habit works &mdash; while your equity curve says otherwise. This is exactly the bias a hard <a href="/journal/automated-exit-removes-emotion">automated stop</a> defends against. Trust the EV, not the memory: leave the stop where you set it.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/mental-cost-of-0dte-burnout.html">The Mental Cost of 0DTE: Recognizing and Preventing Burnout</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/mental-cost-of-0dte-burnout">The Mental Cost of 0DTE: Recognizing and Preventing Burnout</a></p>
 
   <div class="cta">
     <h3>Ready to put it to work?</h3>
@@ -90,7 +90,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/green-to-red-day.html"><span class="rk">Discipline</span>Anatomy of a Green-to-Red Day (And How to Stop It)</a></li><li><a href="/journal/managing-day-trade-count.html"><span class="rk">Risk</span>Managing the Pattern Day Trader Rule as a Scalper</a></li><li><a href="/journal/r-multiples-explained.html"><span class="rk">Discipline &amp; Risk</span>R-Multiples, Explained</a></li><li><a href="/journal/sortino-ratio.html"><span class="rk">Discipline &amp; Risk</span>The Sortino Ratio</a></li><li><a href="/journal/variance-vs-skill-small-sample.html"><span class="rk">Discipline</span>Variance vs. Skill: Why Small Samples Lie</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/green-to-red-day"><span class="rk">Discipline</span>Anatomy of a Green-to-Red Day (And How to Stop It)</a></li><li><a href="/journal/managing-day-trade-count"><span class="rk">Risk</span>Managing the Pattern Day Trader Rule as a Scalper</a></li><li><a href="/journal/r-multiples-explained"><span class="rk">Discipline &amp; Risk</span>R-Multiples, Explained</a></li><li><a href="/journal/sortino-ratio"><span class="rk">Discipline &amp; Risk</span>The Sortino Ratio</a></li><li><a href="/journal/variance-vs-skill-small-sample"><span class="rk">Discipline</span>Variance vs. Skill: Why Small Samples Lie</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

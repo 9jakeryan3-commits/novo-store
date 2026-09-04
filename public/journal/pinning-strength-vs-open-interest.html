@@ -10,11 +10,11 @@
 <title>Pinning Strength vs Open Interest: What Actually Holds Price | NoVo Options Trading</title>
 <meta name="description" content="A strike's raw open interest doesn't equal its pinning power. What holds price is gamma-weighted concentration plus time to expiration.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/pinning-strength-vs-open-interest.html">
+<link rel="canonical" href="https://novo-options.trade/journal/pinning-strength-vs-open-interest">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/pinning-strength-vs-open-interest.html">
+<meta property="og:url" content="https://novo-options.trade/journal/pinning-strength-vs-open-interest">
 <meta property="og:title" content="Pinning Strength vs Open Interest: What Actually Holds Price">
 <meta property="og:description" content="Big OI isn't a strong pin — pinning power is gamma-weighted and time-dependent. How to judge a strong pin from a weak one.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Pinning Strength vs Open Interest: What Actually Holds Price", "description": "Big OI isn't a strong pin — pinning power is gamma-weighted and time-dependent. How to judge a strong pin from a weak one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/pinning-strength-vs-open-interest.html", "articleSection": "Dealer Flow", "wordCount": 598, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Pinning Strength vs Open Interest: What Actually Holds Price", "description": "Big OI isn't a strong pin — pinning power is gamma-weighted and time-dependent. How to judge a strong pin from a weak one.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-07-18", "dateModified": "2026-07-18", "mainEntityOfPage": "https://novo-options.trade/journal/pinning-strength-vs-open-interest", "articleSection": "Dealer Flow", "wordCount": 598, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Pinning Strength vs Open Interest: What Actually Holds Price", "item": "https://novo-options.trade/journal/pinning-strength-vs-open-interest.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Dealer Flow & Positioning", "item": "https://novo-options.trade/journal/dealer-flow"}, {"@type": "ListItem", "position": 4, "name": "Pinning Strength vs Open Interest: What Actually Holds Price", "item": "https://novo-options.trade/journal/pinning-strength-vs-open-interest"}]}
 </script>
 </head>
 <body>
@@ -52,20 +52,20 @@
   <header class="article-head">
     <div class="kicker">Dealer Flow</div>
     <h1>Pinning Strength vs Open Interest: What Actually Holds Price</h1>
-    <p class="standfirst">Traders spot a big <a href="/journal/open-interest-builds-the-walls.html">open-interest</a> number and expect a strong pin. Sometimes it's strong; sometimes it barely holds. The difference is what the OI is <em>made of</em>.</p>
+    <p class="standfirst">Traders spot a big <a href="/journal/open-interest-builds-the-walls">open-interest</a> number and expect a strong pin. Sometimes it's strong; sometimes it barely holds. The difference is what the OI is <em>made of</em>.</p>
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-07-18">Jul 18, 2026</time> &middot; <a class="hub-link" href="/analyst">live dealer positioning map</a></div>
   <div class="article-body">
     <p>Open interest builds a pin, but the <em>strength</em> of a pin isn't the raw contract count. Two strikes with identical OI can pin very differently, because what actually holds price is <strong>gamma</strong>, and gamma depends on more than how many contracts sit at a strike.</p>
     <h2>What decides pinning strength</h2>
-    <p><strong>Gamma concentration, not contract count.</strong> As with <a href="/journal/biggest-oi-strike-not-the-wall.html">the walls</a>, a strike's pinning power is its open interest weighted by gamma. <strong>Distance from spot:</strong> gamma is highest at-the-money, so an OI pile far from price pins weakly even if it's large. <strong>Time to expiration:</strong> gamma spikes into expiry, so the <em>same</em> OI pins far harder on expiration afternoon than a week out (<a href="/journal/gamma-roll-off-into-expiration.html">the roll-off</a>). A strong pin is near-the-money, near-dated, and gamma-heavy, not just a big number.</p>
+    <p><strong>Gamma concentration, not contract count.</strong> As with <a href="/journal/biggest-oi-strike-not-the-wall">the walls</a>, a strike's pinning power is its open interest weighted by gamma. <strong>Distance from spot:</strong> gamma is highest at-the-money, so an OI pile far from price pins weakly even if it's large. <strong>Time to expiration:</strong> gamma spikes into expiry, so the <em>same</em> OI pins far harder on expiration afternoon than a week out (<a href="/journal/gamma-roll-off-into-expiration">the roll-off</a>). A strong pin is near-the-money, near-dated, and gamma-heavy, not just a big number.</p>
     <p class="pull">A giant OI far from spot is a weak magnet. A modest OI at-the-money on expiration day is a strong one. Gamma, distance, and time, not the headline count.</p>
     <h2>Reading a strong vs weak pin</h2>
     <p>Judge a potential pin by proximity and timing, not size alone. Price sitting near a heavy strike late on expiration day is a strong-pin setup &mdash; expect stickiness, fade the edges. A big OI strike that's $10 away, or days from expiry, will barely magnetize price and shouldn't anchor your plan. The tape confirms it: a real pin shows price repeatedly drawn back to the level; a weak one lets price wander.</p>
     <h2>Why it matters</h2>
-    <p>Misjudging pin strength is how traders get chopped &mdash; fading the edges of a &ldquo;pin&rdquo; that was never strong, or trusting a level that had the OI but not the gamma. A <a href="/journal/full-dealer-positioning-read.html">gamma-weighted map</a> shows pinning strength directly, so you're trading the force that actually holds price, not the contract count that merely suggests it.</p>
+    <p>Misjudging pin strength is how traders get chopped &mdash; fading the edges of a &ldquo;pin&rdquo; that was never strong, or trusting a level that had the OI but not the gamma. A <a href="/journal/full-dealer-positioning-read">gamma-weighted map</a> shows pinning strength directly, so you're trading the force that actually holds price, not the contract count that merely suggests it.</p>
   </div>
-  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-determines-an-options-price.html">What Actually Determines an Option&#x27;s Price: The Six Inputs</a></p>
+  <p class="more-reading" style="margin:22px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:14px;color:#8aacc8;"><strong style="color:#eaf3ff;">More on this:</strong> <a href="/journal/what-determines-an-options-price">What Actually Determines an Option&#x27;s Price: The Six Inputs</a></p>
   <div class="cta">
     <h3>Ready to put it to work?</h3>
     <p>NoVo reads the full tape and maps every dealer level live &mdash; the market intelligence no human can track by hand &mdash; then draws it on your chart as it moves, and tells you what it has seen this setup do before.</p>
@@ -93,7 +93,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/spoofing-and-layering.html"><span class="rk">Market Structure</span>Spoofing &amp; Layering</a></li><li><a href="/journal/walls-0dte-vs-monthly.html"><span class="rk">Dealer Flow</span>Call and Put Walls on 0DTE vs Monthly Expiration</a></li><li><a href="/journal/what-is-vanna-exposure.html"><span class="rk">Dealer Flow</span>What Is Vanna Exposure? Dealer Sensitivity to Volatility Shifts</a></li><li><a href="/journal/charm-flows-into-the-close.html"><span class="rk">Dealer Flow</span>Charm Flows Into the Close: The Daily Pinning Engine</a></li><li><a href="/journal/fair-value-gaps.html"><span class="rk">Market Structure</span>Fair Value Gaps, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/spoofing-and-layering"><span class="rk">Market Structure</span>Spoofing &amp; Layering</a></li><li><a href="/journal/walls-0dte-vs-monthly"><span class="rk">Dealer Flow</span>Call and Put Walls on 0DTE vs Monthly Expiration</a></li><li><a href="/journal/what-is-vanna-exposure"><span class="rk">Dealer Flow</span>What Is Vanna Exposure? Dealer Sensitivity to Volatility Shifts</a></li><li><a href="/journal/charm-flows-into-the-close"><span class="rk">Dealer Flow</span>Charm Flows Into the Close: The Daily Pinning Engine</a></li><li><a href="/journal/fair-value-gaps"><span class="rk">Market Structure</span>Fair Value Gaps, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/dealer-flow" style="color:var(--cyan);font-weight:700;">All Dealer Flow &amp; Positioning articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

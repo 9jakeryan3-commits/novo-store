@@ -10,11 +10,11 @@
 <title>When the Dollar in Your Margin Account Is Not a Dollar | NoVo Options Trading</title>
 <meta name="description" content="Stablecoin collateral is assumed to be worth one dollar. If it is not, margin across the entire venue reprices at once.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk.html">
+<link rel="canonical" href="https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk.html">
+<meta property="og:url" content="https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk">
 <meta property="og:title" content="When the Dollar in Your Margin Account Is Not a Dollar">
 <meta property="og:description" content="Stablecoin collateral is assumed to be worth one dollar. If it is not, margin across the entire venue reprices at once.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "When the Dollar in Your Margin Account Is Not a Dollar", "description": "Stablecoin collateral is assumed to be worth one dollar. If it is not, margin across the entire venue reprices at once.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk.html", "articleSection": "Margin & Liquidation", "wordCount": 350, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "When the Dollar in Your Margin Account Is Not a Dollar", "description": "Stablecoin collateral is assumed to be worth one dollar. If it is not, margin across the entire venue reprices at once.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk", "articleSection": "Margin & Liquidation", "wordCount": 350, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "When the Dollar in Your Margin Account Is Not a Dollar", "item": "https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "When the Dollar in Your Margin Account Is Not a Dollar", "item": "https://novo-options.trade/journal/stablecoin-depegs-and-collateral-risk"}]}
 </script>
 </head>
 <body>
@@ -56,22 +56,22 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>A stablecoin-margined position is described as safer than a <a href="/journal/coin-margined-vs-stablecoin-margined.html">coin-margined</a> one because the collateral does not move with the asset. That is true of ordinary market risk and it is not the whole risk.</p>
+    <p>A stablecoin-margined position is described as safer than a <a href="/journal/coin-margined-vs-stablecoin-margined">coin-margined</a> one because the collateral does not move with the asset. That is true of ordinary market risk and it is not the whole risk.</p>
     <p>The collateral is a token whose value depends on an issuer honouring redemption. Usually that holds. When it does not, the token trades below a dollar &mdash; a depeg &mdash; and everything denominated in it reprices.</p>
     <h2>Why it hits everything at once</h2>
     <p>A depeg is not a position-level problem. Margin across the venue is computed in the stablecoin, so a discount to par reduces every account&rsquo;s equity simultaneously.</p>
-    <p>That is a correlated shock of the worst kind: it arrives at every leveraged position on the venue in the same instant, in the same direction. The result is exactly the mechanism in <a href="/journal/crypto-liquidation-cascades.html">liquidation cascades</a>, triggered by the collateral rather than by the asset.</p>
+    <p>That is a correlated shock of the worst kind: it arrives at every leveraged position on the venue in the same instant, in the same direction. The result is exactly the mechanism in <a href="/journal/crypto-liquidation-cascades">liquidation cascades</a>, triggered by the collateral rather than by the asset.</p>
     <h2>The reflexive part</h2>
     <p>Holders of a suspect stablecoin try to exit into other assets, which can push those assets up in that stablecoin&rsquo;s terms, so prices quoted against it become unreliable at exactly the moment you need them.</p>
-    <p>Any figure quoted in that unit is now ambiguous: has the asset risen, or has the unit fallen? A <a href="/journal/mark-price-vs-last-price.html">mark price</a> built from an index of venues quoting in the same stablecoin inherits the problem rather than solving it.</p>
+    <p>Any figure quoted in that unit is now ambiguous: has the asset risen, or has the unit fallen? A <a href="/journal/mark-price-vs-last-price">mark price</a> built from an index of venues quoting in the same stablecoin inherits the problem rather than solving it.</p>
     <h2>The practical questions</h2>
-    <p>Which stablecoin is your margin actually in, and who issues it. Whether the venue accepts more than one as collateral, and at what haircut. And whether your <a href="/journal/what-the-quote-asset-tells-you.html">quote asset</a> and your collateral are the same token, which concentrates the exposure rather than spreading it.</p>
-    <p>A chain that quotes and settles in a stablecoin issued by the chain&rsquo;s own operator concentrates it further &mdash; the structure noted in <a href="/journal/what-is-robinhood-chain.html">Robinhood Chain</a>.</p>
+    <p>Which stablecoin is your margin actually in, and who issues it. Whether the venue accepts more than one as collateral, and at what haircut. And whether your <a href="/journal/what-the-quote-asset-tells-you">quote asset</a> and your collateral are the same token, which concentrates the exposure rather than spreading it.</p>
+    <p>A chain that quotes and settles in a stablecoin issued by the chain&rsquo;s own operator concentrates it further &mdash; the structure noted in <a href="/journal/what-is-robinhood-chain">Robinhood Chain</a>.</p>
     <h2>The framing</h2>
-    <p>This belongs with <a href="/journal/socialized-loss-and-exchange-risk.html">venue risk</a> rather than with market risk. It is not hedgeable with a stop and it is not solved by sizing. It is a question of what you are holding and who you are relying on, and the honest answer is to know rather than to assume.</p>
+    <p>This belongs with <a href="/journal/socialized-loss-and-exchange-risk">venue risk</a> rather than with market risk. It is not hedgeable with a stop and it is not solved by sizing. It is a question of what you are holding and who you are relying on, and the honest answer is to know rather than to assume.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/volatility-cones-for-crypto.html"><span class="rk">Crypto Volatility</span>Volatility Cones: Is This Level Actually Unusual?</a></li><li><a href="/journal/who-actually-earns-the-pool-fees.html"><span class="rk">On-Chain Structure</span>Who Actually Earns the Fees a Pool Charges</a></li><li><a href="/journal/call-heavy-books-in-crypto.html"><span class="rk">Crypto Dealer Flow</span>Why Crypto Options Books Lean Toward Calls</a></li><li><a href="/journal/delta-hedging-in-a-market-that-never-closes.html"><span class="rk">Crypto Dealer Flow</span>Continuous Hedging, and What That Removes</a></li><li><a href="/journal/honeypots-and-unsellable-tokens.html"><span class="rk">On-Chain Structure</span>When the Exit Does Not Exist: Honeypots and Unsellable Tokens</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/volatility-cones-for-crypto"><span class="rk">Crypto Volatility</span>Volatility Cones: Is This Level Actually Unusual?</a></li><li><a href="/journal/who-actually-earns-the-pool-fees"><span class="rk">On-Chain Structure</span>Who Actually Earns the Fees a Pool Charges</a></li><li><a href="/journal/call-heavy-books-in-crypto"><span class="rk">Crypto Dealer Flow</span>Why Crypto Options Books Lean Toward Calls</a></li><li><a href="/journal/delta-hedging-in-a-market-that-never-closes"><span class="rk">Crypto Dealer Flow</span>Continuous Hedging, and What That Removes</a></li><li><a href="/journal/honeypots-and-unsellable-tokens"><span class="rk">On-Chain Structure</span>When the Exit Does Not Exist: Honeypots and Unsellable Tokens</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

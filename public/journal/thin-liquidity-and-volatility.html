@@ -10,11 +10,11 @@
 <title>Why a Thin Pool Behaves Like a Short-Gamma Regime | NoVo Options Trading</title>
 <meta name="description" content="Shallow depth and negative dealer gamma are different mechanisms that produce the same behaviour: moves that feed themselves.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/thin-liquidity-and-volatility.html">
+<link rel="canonical" href="https://novo-options.trade/journal/thin-liquidity-and-volatility">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/thin-liquidity-and-volatility.html">
+<meta property="og:url" content="https://novo-options.trade/journal/thin-liquidity-and-volatility">
 <meta property="og:title" content="Why a Thin Pool Behaves Like a Short-Gamma Regime">
 <meta property="og:description" content="Shallow depth and negative dealer gamma are different mechanisms that produce the same behaviour: moves that feed themselves.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Why a Thin Pool Behaves Like a Short-Gamma Regime", "description": "Shallow depth and negative dealer gamma are different mechanisms that produce the same behaviour: moves that feed themselves.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/thin-liquidity-and-volatility.html", "articleSection": "On-Chain Structure", "wordCount": 402, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Why a Thin Pool Behaves Like a Short-Gamma Regime", "description": "Shallow depth and negative dealer gamma are different mechanisms that produce the same behaviour: moves that feed themselves.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/thin-liquidity-and-volatility", "articleSection": "On-Chain Structure", "wordCount": 402, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Why a Thin Pool Behaves Like a Short-Gamma Regime", "item": "https://novo-options.trade/journal/thin-liquidity-and-volatility.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Why a Thin Pool Behaves Like a Short-Gamma Regime", "item": "https://novo-options.trade/journal/thin-liquidity-and-volatility"}]}
 </script>
 </head>
 <body>
@@ -56,11 +56,11 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>In equities, the most useful intraday regime read is whether dealers are long or short gamma. Short gamma means hedging flows travel <em>with</em> price &mdash; selling into weakness, buying into strength &mdash; so moves extend rather than dampen. That is the mechanism behind <a href="/journal/dealer-long-gamma-vs-short-gamma.html">the long-gamma versus short-gamma regime</a>.</p>
-    <p>A thin pool has no dealer, no options and no hedging. It produces a similar signature anyway, and the parallel is worth drawing carefully, because a loose analogy here would be exactly the error warned against in <a href="/journal/on-chain-liquidity-vs-order-book.html">on-chain liquidity versus an order book</a>, where borrowing gamma vocabulary for a token with no hedger is the standard mistake.</p>
+    <p>In equities, the most useful intraday regime read is whether dealers are long or short gamma. Short gamma means hedging flows travel <em>with</em> price &mdash; selling into weakness, buying into strength &mdash; so moves extend rather than dampen. That is the mechanism behind <a href="/journal/dealer-long-gamma-vs-short-gamma">the long-gamma versus short-gamma regime</a>.</p>
+    <p>A thin pool has no dealer, no options and no hedging. It produces a similar signature anyway, and the parallel is worth drawing carefully, because a loose analogy here would be exactly the error warned against in <a href="/journal/on-chain-liquidity-vs-order-book">on-chain liquidity versus an order book</a>, where borrowing gamma vocabulary for a token with no hedger is the standard mistake.</p>
     <h2>Same shape, different cause</h2>
-    <p>In a shallow pool, a given order moves price further, because <a href="/journal/how-an-amm-prices-a-token.html">the curve is steeper when reserves are small</a>. A larger move triggers more reaction &mdash; stops, momentum, attention &mdash; which brings more orders into the same thin depth, which moves price further again.</p>
-    <p>And the depth itself is procyclical in the unhelpful direction. As a move extends, providers face the exposure described in <a href="/journal/impermanent-loss-and-why-liquidity-leaves.html">impermanent loss</a> and withdraw, so the pool gets thinner precisely while it is being tested hardest.</p>
+    <p>In a shallow pool, a given order moves price further, because <a href="/journal/how-an-amm-prices-a-token">the curve is steeper when reserves are small</a>. A larger move triggers more reaction &mdash; stops, momentum, attention &mdash; which brings more orders into the same thin depth, which moves price further again.</p>
+    <p>And the depth itself is procyclical in the unhelpful direction. As a move extends, providers face the exposure described in <a href="/journal/impermanent-loss-and-why-liquidity-leaves">impermanent loss</a> and withdraw, so the pool gets thinner precisely while it is being tested hardest.</p>
     <p>Short gamma amplifies through <em>obligation</em>: someone must hedge. A thin pool amplifies through <em>absence</em>: nobody is required to absorb. Opposite causes, same feedback.</p>
     <h2>Where the analogy breaks, and this is the important half</h2>
     <p>A gamma regime is <strong>measurable and forward-looking</strong>. The book is known, so you can say where the flip sits and what dealers must do at a given price before it happens.</p>
@@ -70,7 +70,7 @@
     <p>Size to the depth you will exit into rather than to your conviction, and assume that depth is smaller during the move than the reading you took before it. That is the practical difference between a market with a hedger and a market without one.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-having-no-options-book-costs-you.html"><span class="rk">Per-Coin Structure</span>What You Lose When a Coin Has No Options Book</a></li><li><a href="/journal/bitcoin-etf-flows-vs-price.html"><span class="rk">Crypto Macro</span>ETF Flows and Price: What Leads What</a></li><li><a href="/journal/crypto-option-contract-specs.html"><span class="rk">Crypto Options 101</span>Check the Contract Multiplier Before You Compute Anything</a></li><li><a href="/journal/funding-extremes-and-what-follows.html"><span class="rk">Perps &amp; Funding</span>Funding Extremes: What Actually Follows</a></li><li><a href="/journal/leverage-tiers-and-position-limits.html"><span class="rk">Margin &amp; Liquidation</span>Leverage Tiers: The Maximum Shrinks as You Grow</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/what-having-no-options-book-costs-you"><span class="rk">Per-Coin Structure</span>What You Lose When a Coin Has No Options Book</a></li><li><a href="/journal/bitcoin-etf-flows-vs-price"><span class="rk">Crypto Macro</span>ETF Flows and Price: What Leads What</a></li><li><a href="/journal/crypto-option-contract-specs"><span class="rk">Crypto Options 101</span>Check the Contract Multiplier Before You Compute Anything</a></li><li><a href="/journal/funding-extremes-and-what-follows"><span class="rk">Perps &amp; Funding</span>Funding Extremes: What Actually Follows</a></li><li><a href="/journal/leverage-tiers-and-position-limits"><span class="rk">Margin &amp; Liquidation</span>Leverage Tiers: The Maximum Shrinks as You Grow</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 </div>
 
 </main>

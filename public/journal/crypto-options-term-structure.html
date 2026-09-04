@@ -10,11 +10,11 @@
 <title>Term Structure in a Market That Never Closes | NoVo Options Trading</title>
 <meta name="description" content="The curve of implied volatility across expiries prices uncertainty over time. Continuous trading and daily expiries give crypto a shape of its own.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/crypto-options-term-structure.html">
+<link rel="canonical" href="https://novo-options.trade/journal/crypto-options-term-structure">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/crypto-options-term-structure.html">
+<meta property="og:url" content="https://novo-options.trade/journal/crypto-options-term-structure">
 <meta property="og:title" content="Term Structure in a Market That Never Closes">
 <meta property="og:description" content="The curve of implied volatility across expiries prices uncertainty over time. Continuous trading and daily expiries give crypto a shape of its own.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Term Structure in a Market That Never Closes", "description": "The curve of implied volatility across expiries prices uncertainty over time. Continuous trading and daily expiries give crypto a shape of its own.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-options-term-structure.html", "articleSection": "Crypto Volatility", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Term Structure in a Market That Never Closes", "description": "The curve of implied volatility across expiries prices uncertainty over time. Continuous trading and daily expiries give crypto a shape of its own.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/crypto-options-term-structure", "articleSection": "Crypto Volatility", "wordCount": 307, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Term Structure in a Market That Never Closes", "item": "https://novo-options.trade/journal/crypto-options-term-structure.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Crypto Market Structure", "item": "https://novo-options.trade/journal/crypto"}, {"@type": "ListItem", "position": 4, "name": "Term Structure in a Market That Never Closes", "item": "https://novo-options.trade/journal/crypto-options-term-structure"}]}
 </script>
 </head>
 <body>
@@ -58,17 +58,17 @@
   <div class="article-body">
     <p>Plot implied volatility against time to expiry and you get the term structure. Upward sloping is the ordinary state &mdash; more time, more uncertainty, higher implied volatility. Inversion, where the front is priced above the back, signals stress: the market expects the trouble to be soon.</p>
     <h2>What the front end looks like here</h2>
-    <p>Crypto has <a href="/journal/bitcoin-options-expiry-0800-utc.html">an expiry every day</a>, so the very front of the curve is populated in a way that a monthly-expiry market&rsquo;s is not. There is a continuously observable price for uncertainty over the next twenty-four hours.</p>
+    <p>Crypto has <a href="/journal/bitcoin-options-expiry-0800-utc">an expiry every day</a>, so the very front of the curve is populated in a way that a monthly-expiry market&rsquo;s is not. There is a continuously observable price for uncertainty over the next twenty-four hours.</p>
     <p>That short end is also the most volatile part of the curve, because it responds to whatever is happening right now with almost no time to average out. A single day&rsquo;s move can reshape it entirely, and reading a front-end spike as a regime change usually mistakes noise for structure.</p>
     <h2>No weekend hole</h2>
     <p>Equity term structure carries a persistent artefact: the market closes, so calendar time and trading time diverge, and a weekend is priced as less risky than the days on either side. Crypto has no closing bell, so there is no weekend adjustment to make.</p>
-    <p>That is genuinely simpler. It also removes an excuse &mdash; a crypto weekend that prices differently is expressing a real view about weekend risk, not an artefact of the calendar. Which is worth taking seriously, since weekends have their own liquidity character, covered in <a href="/journal/weekend-gamma-and-thin-books.html">weekend gamma</a>.</p>
+    <p>That is genuinely simpler. It also removes an excuse &mdash; a crypto weekend that prices differently is expressing a real view about weekend risk, not an artefact of the calendar. Which is worth taking seriously, since weekends have their own liquidity character, covered in <a href="/journal/weekend-gamma-and-thin-books">weekend gamma</a>.</p>
     <h2>Reading it beside the dealer map</h2>
     <p>Term structure and gamma answer different questions and are strongest together. Gamma says what dealers are obliged to do at today&rsquo;s prices. Term structure says how long the market thinks the current condition will last.</p>
     <p>An inverted curve with dealers short gamma is a market pricing near-term trouble into a structure that would amplify it. Neither number says that alone, and the combination is the read.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/gamma-by-strike-vs-aggregate-gex.html"><span class="rk">Crypto Dealer Flow</span>One Number Hides the Shape</a></li><li><a href="/journal/liquidity-added-vs-pulled.html"><span class="rk">On-Chain Structure</span>Liquidity Added or Pulled: Depth as a Flow</a></li><li><a href="/journal/protective-puts-and-collars-on-crypto.html"><span class="rk">Crypto Options 101</span>Collars: Paying for Protection With Your Own Upside</a></li><li><a href="/journal/theta-in-a-market-that-never-closes.html"><span class="rk">Crypto Options 101</span>Theta in a Market That Never Closes</a></li><li><a href="/journal/what-happens-when-funding-flips.html"><span class="rk">Perps &amp; Funding</span>When Funding Flips Sign</a></li><li><a href="/journal/vix-term-structure.html"><span class="rk">The Equity Twin</span>VIX Term Structure, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/gamma-by-strike-vs-aggregate-gex"><span class="rk">Crypto Dealer Flow</span>One Number Hides the Shape</a></li><li><a href="/journal/liquidity-added-vs-pulled"><span class="rk">On-Chain Structure</span>Liquidity Added or Pulled: Depth as a Flow</a></li><li><a href="/journal/protective-puts-and-collars-on-crypto"><span class="rk">Crypto Options 101</span>Collars: Paying for Protection With Your Own Upside</a></li><li><a href="/journal/theta-in-a-market-that-never-closes"><span class="rk">Crypto Options 101</span>Theta in a Market That Never Closes</a></li><li><a href="/journal/what-happens-when-funding-flips"><span class="rk">Perps &amp; Funding</span>When Funding Flips Sign</a></li><li><a href="/journal/vix-term-structure"><span class="rk">The Equity Twin</span>VIX Term Structure, Explained</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/crypto" style="color:var(--cyan);font-weight:700;">All Crypto Market Structure articles &rarr;</a></p></div>
 
 </div>
 

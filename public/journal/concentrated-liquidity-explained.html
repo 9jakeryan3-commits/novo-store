@@ -10,11 +10,11 @@
 <title>Concentrated Liquidity: Deep in a Band, Empty Outside It | NoVo Options Trading</title>
 <meta name="description" content="Newer pool designs let providers place depth in a chosen price range. That makes the pool far deeper near spot and far thinner once price leaves the band.">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/concentrated-liquidity-explained.html">
+<link rel="canonical" href="https://novo-options.trade/journal/concentrated-liquidity-explained">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="The NoVo Journal">
-<meta property="og:url" content="https://novo-options.trade/journal/concentrated-liquidity-explained.html">
+<meta property="og:url" content="https://novo-options.trade/journal/concentrated-liquidity-explained">
 <meta property="og:title" content="Concentrated Liquidity: Deep in a Band, Empty Outside It">
 <meta property="og:description" content="Newer pool designs let providers place depth in a chosen price range. That makes the pool far deeper near spot and far thinner once price leaves the band.">
 <meta property="og:image" content="https://novo-options.trade/journal/covers/novo-cover.png?v=4">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Concentrated Liquidity: Deep in a Band, Empty Outside It", "description": "Newer pool designs let providers place depth in a chosen price range. That makes the pool far deeper near spot and far thinner once price leaves the band.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/concentrated-liquidity-explained.html", "articleSection": "On-Chain Structure", "wordCount": 290, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Concentrated Liquidity: Deep in a Band, Empty Outside It", "description": "Newer pool designs let providers place depth in a chosen price range. That makes the pool far deeper near spot and far thinner once price leaves the band.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-08-29", "dateModified": "2026-08-29", "mainEntityOfPage": "https://novo-options.trade/journal/concentrated-liquidity-explained", "articleSection": "On-Chain Structure", "wordCount": 290, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Concentrated Liquidity: Deep in a Band, Empty Outside It", "item": "https://novo-options.trade/journal/concentrated-liquidity-explained.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Coins & Chains", "item": "https://novo-options.trade/journal/coins-and-chains"}, {"@type": "ListItem", "position": 4, "name": "Concentrated Liquidity: Deep in a Band, Empty Outside It", "item": "https://novo-options.trade/journal/concentrated-liquidity-explained"}]}
 </script>
 </head>
 <body>
@@ -56,20 +56,20 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-08-29">Aug 29, 2026</time> &middot; <a class="hub-link" href="/crypto">the live crypto map</a></div>
   <div class="article-body">
-    <p>The <a href="/journal/how-an-amm-prices-a-token.html">constant-product design</a> spreads depth across every possible price, including prices the asset will never reach. Most of the capital does nothing.</p>
+    <p>The <a href="/journal/how-an-amm-prices-a-token">constant-product design</a> spreads depth across every possible price, including prices the asset will never reach. Most of the capital does nothing.</p>
     <p>Concentrated designs let a provider commit capital only within a chosen band. Inside that band the pool is dramatically deeper for the same money; outside it, that provider contributes nothing at all.</p>
     <h2>What it changes for a trader</h2>
-    <p><strong>A single depth number stops being comparable.</strong> Two pools with identical totals can behave completely differently depending on where the liquidity sits. The only meaningful question becomes depth <em>at the price you will trade</em>, which is the framing already required in <a href="/journal/slippage-and-price-impact-on-chain.html">price impact</a>.</p>
+    <p><strong>A single depth number stops being comparable.</strong> Two pools with identical totals can behave completely differently depending on where the liquidity sits. The only meaningful question becomes depth <em>at the price you will trade</em>, which is the framing already required in <a href="/journal/slippage-and-price-impact-on-chain">price impact</a>.</p>
     <p><strong>Slippage becomes non-linear in a new way.</strong> Inside the band, execution can be excellent. Push price past the edge and depth falls off a cliff rather than tapering, so an order that was cheap can become expensive partway through.</p>
     <h2>The provider side, and why depth moves</h2>
-    <p>Concentration amplifies fee income and amplifies the exposure in <a href="/journal/impermanent-loss-and-why-liquidity-leaves.html">impermanent loss</a>. A provider whose band is left behind by price holds entirely the losing side and earns nothing, so they must actively re-position.</p>
+    <p>Concentration amplifies fee income and amplifies the exposure in <a href="/journal/impermanent-loss-and-why-liquidity-leaves">impermanent loss</a>. A provider whose band is left behind by price holds entirely the losing side and earns nothing, so they must actively re-position.</p>
     <p>Which produces a behaviour worth knowing: after a large move, liquidity does not simply thin &mdash; it is <em>stranded</em> outside the new price, and it stays stranded until providers act. The pool can be simultaneously well-capitalised and shallow where it matters.</p>
     <h2>Reading it honestly</h2>
-    <p>Ask where the depth is, not how much there is. And treat a total-liquidity ranking across pools of different designs as comparing quantities that are not the same measurement &mdash; the same discipline as <a href="/journal/pool-depth-is-not-volume.html">depth versus volume</a>.</p>
-    <p>It is also one of the differences that makes cross-chain comparison unreliable, since design mix varies by ecosystem &mdash; <a href="/journal/solana-vs-evm-liquidity-structure.html">Solana versus EVM</a>.</p>
+    <p>Ask where the depth is, not how much there is. And treat a total-liquidity ranking across pools of different designs as comparing quantities that are not the same measurement &mdash; the same discipline as <a href="/journal/pool-depth-is-not-volume">depth versus volume</a>.</p>
+    <p>It is also one of the differences that makes cross-chain comparison unreliable, since design mix varies by ecosystem &mdash; <a href="/journal/solana-vs-evm-liquidity-structure">Solana versus EVM</a>.</p>
   </div>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/etf-options-book-vs-coin-options-book.html"><span class="rk">Crypto Dealer Flow</span>IBIT Is Not Bitcoin: Two Books, Two Maps</a></li><li><a href="/journal/hype-market-structure.html"><span class="rk">Per-Coin Structure</span>HYPE: The Only Book Written on a Venue Rather Than an Asset</a></li><li><a href="/journal/moneyness-in-an-inverse-contract.html"><span class="rk">Crypto Options 101</span>Moneyness When the Payout Is Denominated in the Coin</a></li><li><a href="/journal/stop-placement-in-thin-hours.html"><span class="rk">Crypto Discipline</span>Where to Put a Stop When Liquidity Is Thin</a></li><li><a href="/journal/volatility-of-volatility-in-crypto.html"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/etf-options-book-vs-coin-options-book"><span class="rk">Crypto Dealer Flow</span>IBIT Is Not Bitcoin: Two Books, Two Maps</a></li><li><a href="/journal/hype-market-structure"><span class="rk">Per-Coin Structure</span>HYPE: The Only Book Written on a Venue Rather Than an Asset</a></li><li><a href="/journal/moneyness-in-an-inverse-contract"><span class="rk">Crypto Options 101</span>Moneyness When the Payout Is Denominated in the Coin</a></li><li><a href="/journal/stop-placement-in-thin-hours"><span class="rk">Crypto Discipline</span>Where to Put a Stop When Liquidity Is Thin</a></li><li><a href="/journal/volatility-of-volatility-in-crypto"><span class="rk">Crypto Volatility</span>Volatility of Volatility: How Stable Is the Regime?</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/coins-and-chains" style="color:var(--cyan);font-weight:700;">All Coins &amp; Chains articles &rarr;</a></p></div>
 
 </div>
 

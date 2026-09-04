@@ -11,9 +11,9 @@
 <meta name="description" content="Filling a 0DTE or 1DTE option cleanly is one of the hardest problems in retail trading.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/why-0dte-fills-are-hard.html">
+<link rel="canonical" href="https://novo-options.trade/journal/why-0dte-fills-are-hard">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/why-0dte-fills-are-hard.html">
+<meta property="og:url" content="https://novo-options.trade/journal/why-0dte-fills-are-hard">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="Why Short-Dated Fills Are Hard">
 <meta property="og:description" content="Why 0DTE/1DTE fills are hard: speed, spread, and gamma working against you, and what clean execution requires.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "Why Short-Dated Fills Are Hard", "description": "Filling a 0DTE or 1DTE option cleanly is one of the hardest problems in retail trading. Here is why speed, spread, and gamma conspire against you, and what it takes to get a fill you can actually trade on.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-09-19", "dateModified": "2025-09-19", "mainEntityOfPage": "https://novo-options.trade/journal/why-0dte-fills-are-hard.html", "articleSection": "Execution", "wordCount": 547, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "Why Short-Dated Fills Are Hard", "description": "Filling a 0DTE or 1DTE option cleanly is one of the hardest problems in retail trading. Here is why speed, spread, and gamma conspire against you, and what it takes to get a fill you can actually trade on.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2025-09-19", "dateModified": "2025-09-19", "mainEntityOfPage": "https://novo-options.trade/journal/why-0dte-fills-are-hard", "articleSection": "Execution", "wordCount": 547, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Why Short-Dated Fills Are Hard", "item": "https://novo-options.trade/journal/why-0dte-fills-are-hard.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Strategy & Execution", "item": "https://novo-options.trade/journal/strategy-execution"}, {"@type": "ListItem", "position": 4, "name": "Why Short-Dated Fills Are Hard", "item": "https://novo-options.trade/journal/why-0dte-fills-are-hard"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2025-09-19">Sep 19, 2025</time> &middot; <a class="hub-link" href="/0dte">0DTE options guide</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-0dte-spy-options-scalping" style="color:var(--cyan);text-decoration:none;font-weight:700;">0DTE SPY Options Scalping</a> guide &rarr;</div>
   <div class="article-body">
-    <p>The hardest part of trading <a href="/journal/what-is-0dte-options-trading.html">0DTE and 1DTE</a> options isn't finding the setup — it's the fill. A short-dated SPY option is a fast, twitchy, thinly-quoted instrument, and the gap between clicking and executing is where the trade is won or lost.</p>
+    <p>The hardest part of trading <a href="/journal/what-is-0dte-options-trading">0DTE and 1DTE</a> options isn't finding the setup — it's the fill. A short-dated SPY option is a fast, twitchy, thinly-quoted instrument, and the gap between clicking and executing is where the trade is won or lost.</p>
     <h2>Speed vs the spread</h2>
-    <p>You face a dilemma on every entry. A <a href="/journal/market-order-vs-limit-order.html">market order</a> guarantees a fill but pays the full <a href="/journal/bid-ask-spread-explained.html">spread</a> and can walk through a thin book. A limit order controls your price but may never fill as the option runs away from you. On short-dated contracts, both failure modes are expensive — overpay, or miss the move entirely.</p>
+    <p>You face a dilemma on every entry. A <a href="/journal/market-order-vs-limit-order">market order</a> guarantees a fill but pays the full <a href="/journal/bid-ask-spread-explained">spread</a> and can walk through a thin book. A limit order controls your price but may never fill as the option runs away from you. On short-dated contracts, both failure modes are expensive — overpay, or miss the move entirely.</p>
     <h2>Gamma makes it worse</h2>
-    <p>Near expiration, <a href="/journal/what-is-gamma-exposure-gex.html">gamma</a> is high: the option's <a href="/journal/what-is-delta-options.html">delta</a> — and therefore its price — moves fast as SPY moves. That means the "right" limit price is a moving target. By the time a slow, manual decision reaches the book, the quote has already changed. Human reaction time is a tax you pay on every short-dated entry.</p>
+    <p>Near expiration, <a href="/journal/what-is-gamma-exposure-gex">gamma</a> is high: the option's <a href="/journal/what-is-delta-options">delta</a> — and therefore its price — moves fast as SPY moves. That means the "right" limit price is a moving target. By the time a slow, manual decision reaches the book, the quote has already changed. Human reaction time is a tax you pay on every short-dated entry.</p>
     <p class="pull">On 0DTE, you're not just betting on direction. You're racing the spread and the clock to a fill that still makes the trade worth it.</p>
     <h2>What actually helps</h2>
-    <p>The human tax is smallest when the decision was already made: a level you chose in advance, a size you fixed before the session, and a price you are willing to walk away from. That is why the fill problem is really a preparation problem — and why a <a href="/journal/how-novo-builds-a-read.html">structural read made before the tape gets there</a> is worth more than a faster finger.</p>
+    <p>The human tax is smallest when the decision was already made: a level you chose in advance, a size you fixed before the session, and a price you are willing to walk away from. That is why the fill problem is really a preparation problem — and why a <a href="/journal/how-novo-builds-a-read">structural read made before the tape gets there</a> is worth more than a faster finger.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/credit-spreads-vs-debit-spreads.html"><span class="rk">Options Strategy</span>Credit Spreads vs Debit Spreads: The Core Difference</a></li><li><a href="/journal/iron-butterfly-0dte.html"><span class="rk">Strategy</span>The 0DTE Iron Butterfly: A Tighter, Higher-Premium Range Bet</a></li><li><a href="/journal/poor-mans-covered-call.html"><span class="rk">Options Strategy</span>Poor Man&amp;#x27;s Covered Call</a></li><li><a href="/journal/short-straddle-0dte.html"><span class="rk">Strategy</span>The 0DTE Short Straddle: Maximum Premium, Maximum Risk</a></li><li><a href="/journal/trailing-stop-explained.html"><span class="rk">Exits</span>What Is a Trailing Stop? Locking In Gains Without Guessing</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/credit-spreads-vs-debit-spreads"><span class="rk">Options Strategy</span>Credit Spreads vs Debit Spreads: The Core Difference</a></li><li><a href="/journal/iron-butterfly-0dte"><span class="rk">Strategy</span>The 0DTE Iron Butterfly: A Tighter, Higher-Premium Range Bet</a></li><li><a href="/journal/poor-mans-covered-call"><span class="rk">Options Strategy</span>Poor Man&amp;#x27;s Covered Call</a></li><li><a href="/journal/short-straddle-0dte"><span class="rk">Strategy</span>The 0DTE Short Straddle: Maximum Premium, Maximum Risk</a></li><li><a href="/journal/trailing-stop-explained"><span class="rk">Exits</span>What Is a Trailing Stop? Locking In Gains Without Guessing</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/strategy-execution" style="color:var(--cyan);font-weight:700;">All Strategy &amp; Execution articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

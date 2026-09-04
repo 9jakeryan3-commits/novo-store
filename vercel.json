@@ -2,52 +2,52 @@
   "redirects": [
     {
       "source": "/journal/how-novo-decides-executes-exits.html",
-      "destination": "/journal/how-novo-builds-a-read.html",
+      "destination": "/journal/how-novo-builds-a-read",
       "permanent": true
     },
     {
       "source": "/journal/how-novo-decides-executes-exits",
-      "destination": "/journal/how-novo-builds-a-read.html",
+      "destination": "/journal/how-novo-builds-a-read",
       "permanent": true
     },
     {
       "source": "/journal/why-spy-and-the-dte-dial.html",
-      "destination": "/journal/why-spy-qqq-iwm.html",
+      "destination": "/journal/why-spy-qqq-iwm",
       "permanent": true
     },
     {
       "source": "/journal/why-spy-and-the-dte-dial",
-      "destination": "/journal/why-spy-qqq-iwm.html",
+      "destination": "/journal/why-spy-qqq-iwm",
       "permanent": true
     },
     {
       "source": "/journal/buyers-checklist-0dte-execution-tools.html",
-      "destination": "/journal/buyers-checklist-0dte-trading-tools.html",
+      "destination": "/journal/buyers-checklist-0dte-trading-tools",
       "permanent": true
     },
     {
       "source": "/journal/buyers-checklist-0dte-execution-tools",
-      "destination": "/journal/buyers-checklist-0dte-trading-tools.html",
+      "destination": "/journal/buyers-checklist-0dte-trading-tools",
       "permanent": true
     },
     {
       "source": "/journal/execution-algos-and-slicing-an-order.html",
-      "destination": "/journal/slicing-an-order.html",
+      "destination": "/journal/slicing-an-order",
       "permanent": true
     },
     {
       "source": "/journal/execution-algos-and-slicing-an-order",
-      "destination": "/journal/slicing-an-order.html",
+      "destination": "/journal/slicing-an-order",
       "permanent": true
     },
     {
       "source": "/journal/your-money-your-keys.html",
-      "destination": "/journal/your-money-your-broker.html",
+      "destination": "/journal/your-money-your-broker",
       "permanent": true
     },
     {
       "source": "/journal/your-money-your-keys",
-      "destination": "/journal/your-money-your-broker.html",
+      "destination": "/journal/your-money-your-broker",
       "permanent": true
     },
     {
@@ -94,47 +94,47 @@
     },
     {
       "source": "/journal/guide-1dte-spy-options-scalping.html",
-      "destination": "/journal/guide-0dte-spy-options-scalping.html",
+      "destination": "/journal/guide-0dte-spy-options-scalping",
       "permanent": true
     },
     {
       "source": "/journal/when-to-turn-on-auto-entry.html",
-      "destination": "/journal/manual-first-vs-full-auto.html",
+      "destination": "/journal/manual-first-vs-full-auto",
       "permanent": true
     },
     {
       "source": "/journal/opt-in-autonomy-explained.html",
-      "destination": "/journal/manual-first-vs-full-auto.html",
+      "destination": "/journal/manual-first-vs-full-auto",
       "permanent": true
     },
     {
       "source": "/journal/stop-market-vs-stop-limit-options.html",
-      "destination": "/journal/stop-limit-vs-stop-market-options.html",
+      "destination": "/journal/stop-limit-vs-stop-market-options",
       "permanent": true
     },
     {
       "source": "/journal/what-is-skew-in-options.html",
-      "destination": "/journal/volatility-skew-explained.html",
+      "destination": "/journal/volatility-skew-explained",
       "permanent": true
     },
     {
       "source": "/journal/what-is-moneyness.html",
-      "destination": "/journal/moneyness-itm-atm-otm.html",
+      "destination": "/journal/moneyness-itm-atm-otm",
       "permanent": true
     },
     {
       "source": "/journal/what-is-a-volatility-smile.html",
-      "destination": "/journal/the-volatility-smile.html",
+      "destination": "/journal/the-volatility-smile",
       "permanent": true
     },
     {
       "source": "/journal/what-are-circuit-breakers.html",
-      "destination": "/journal/circuit-breakers-market-halts.html",
+      "destination": "/journal/circuit-breakers-market-halts",
       "permanent": true
     },
     {
       "source": "/journal/why-0dte-has-maximum-gamma.html",
-      "destination": "/journal/why-gamma-matters-for-0dte.html",
+      "destination": "/journal/why-gamma-matters-for-0dte",
       "permanent": true
     },
     {
@@ -149,107 +149,107 @@
     },
     {
       "source": "/journal/bollinger-bands.html",
-      "destination": "/journal/bollinger-bands-explained.html",
+      "destination": "/journal/bollinger-bands-explained",
       "permanent": true
     },
     {
       "source": "/journal/what-is-the-vix-term-structure.html",
-      "destination": "/journal/vix-term-structure.html",
+      "destination": "/journal/vix-term-structure",
       "permanent": true
     },
     {
       "source": "/journal/what-is-term-structure-of-vol.html",
-      "destination": "/journal/vix-term-structure.html",
+      "destination": "/journal/vix-term-structure",
       "permanent": true
     },
     {
       "source": "/journal/implied-volatility-explained.html",
-      "destination": "/journal/what-is-implied-volatility.html",
+      "destination": "/journal/what-is-implied-volatility",
       "permanent": true
     },
     {
       "source": "/journal/pin-risk-explained.html",
-      "destination": "/journal/what-is-pin-risk.html",
+      "destination": "/journal/what-is-pin-risk",
       "permanent": true
     },
     {
       "source": "/journal/put-call-parity.html",
-      "destination": "/journal/what-is-put-call-parity.html",
+      "destination": "/journal/what-is-put-call-parity",
       "permanent": true
     },
     {
       "source": "/journal/what-is-a-trailing-stop.html",
-      "destination": "/journal/trailing-stop-explained.html",
+      "destination": "/journal/trailing-stop-explained",
       "permanent": true
     },
     {
       "source": "/journal/options-contract-multiplier.html",
-      "destination": "/journal/the-options-contract-multiplier.html",
+      "destination": "/journal/the-options-contract-multiplier",
       "permanent": true
     },
     {
       "source": "/journal/what-is-pfof.html",
-      "destination": "/journal/what-is-payment-for-order-flow.html",
+      "destination": "/journal/what-is-payment-for-order-flow",
       "permanent": true
     },
     {
       "source": "/journal/marketable-limit-orders.html",
-      "destination": "/journal/what-is-a-marketable-limit-order.html",
+      "destination": "/journal/what-is-a-marketable-limit-order",
       "permanent": true
     },
     {
       "source": "/journal/synthetic-positions.html",
-      "destination": "/journal/what-is-a-synthetic-position.html",
+      "destination": "/journal/what-is-a-synthetic-position",
       "permanent": true
     },
     {
       "source": "/journal/what-is-a-roll.html",
-      "destination": "/journal/what-is-rolling-an-option.html",
+      "destination": "/journal/what-is-rolling-an-option",
       "permanent": true
     },
     {
       "source": "/journal/day-order-vs-gtc.html",
-      "destination": "/journal/day-vs-gtc-orders.html",
+      "destination": "/journal/day-vs-gtc-orders",
       "permanent": true
     },
     {
       "source": "/journal/european-vs-american-style-options.html",
-      "destination": "/journal/american-vs-european-options.html",
+      "destination": "/journal/american-vs-european-options",
       "permanent": true
     },
     {
       "source": "/journal/what-is-extrinsic-value.html",
-      "destination": "/journal/intrinsic-vs-extrinsic-value.html",
+      "destination": "/journal/intrinsic-vs-extrinsic-value",
       "permanent": true
     },
     {
       "source": "/journal/what-is-time-value.html",
-      "destination": "/journal/intrinsic-vs-extrinsic-value.html",
+      "destination": "/journal/intrinsic-vs-extrinsic-value",
       "permanent": true
     },
     {
       "source": "/journal/what-is-volume-in-options.html",
-      "destination": "/journal/volume-vs-open-interest.html",
+      "destination": "/journal/volume-vs-open-interest",
       "permanent": true
     },
     {
       "source": "/journal/what-is-a-cash-secured-put.html",
-      "destination": "/journal/cash-secured-puts.html",
+      "destination": "/journal/cash-secured-puts",
       "permanent": true
     },
     {
       "source": "/journal/what-is-a-covered-call.html",
-      "destination": "/journal/covered-calls.html",
+      "destination": "/journal/covered-calls",
       "permanent": true
     },
     {
       "source": "/journal/options-bid-ask-spread.html",
-      "destination": "/journal/bid-ask-spread-explained.html",
+      "destination": "/journal/bid-ask-spread-explained",
       "permanent": true
     },
     {
       "source": "/journal/what-is-implied-vs-realized-vol.html",
-      "destination": "/journal/realized-vs-implied-volatility.html",
+      "destination": "/journal/realized-vs-implied-volatility",
       "permanent": true
     },
     {
@@ -424,52 +424,57 @@
     },
     {
       "source": "/journal/novo-vs-spotgamma",
-      "destination": "/journal/spotgamma-alternative.html",
+      "destination": "/journal/spotgamma-alternative",
       "permanent": true
     },
     {
       "source": "/journal/novo-vs-spotgamma.html",
-      "destination": "/journal/spotgamma-alternative.html",
+      "destination": "/journal/spotgamma-alternative",
       "permanent": true
     },
     {
       "source": "/journal/novo-vs-menthorq",
-      "destination": "/journal/menthorq-alternative.html",
+      "destination": "/journal/menthorq-alternative",
       "permanent": true
     },
     {
       "source": "/journal/novo-vs-menthorq.html",
-      "destination": "/journal/menthorq-alternative.html",
+      "destination": "/journal/menthorq-alternative",
       "permanent": true
     },
     {
       "source": "/journal/novo-vs-unusual-whales",
-      "destination": "/journal/unusual-whales-alternative.html",
+      "destination": "/journal/unusual-whales-alternative",
       "permanent": true
     },
     {
       "source": "/journal/novo-vs-unusual-whales.html",
-      "destination": "/journal/unusual-whales-alternative.html",
+      "destination": "/journal/unusual-whales-alternative",
       "permanent": true
     },
     {
       "source": "/journal/does-novo-trade-spreads",
-      "destination": "/journal/does-novo-cover-spreads.html",
+      "destination": "/journal/does-novo-cover-spreads",
       "permanent": true
     },
     {
       "source": "/journal/does-novo-trade-spreads.html",
-      "destination": "/journal/does-novo-cover-spreads.html",
+      "destination": "/journal/does-novo-cover-spreads",
       "permanent": true
     },
     {
       "source": "/journal/novo-stop-on-option-or-spy",
-      "destination": "/journal/stop-on-option-or-spy.html",
+      "destination": "/journal/stop-on-option-or-spy",
       "permanent": true
     },
     {
       "source": "/journal/novo-stop-on-option-or-spy.html",
-      "destination": "/journal/stop-on-option-or-spy.html",
+      "destination": "/journal/stop-on-option-or-spy",
+      "permanent": true
+    },
+    {
+      "source": "/journal/:slug.html",
+      "destination": "/journal/:slug",
       "permanent": true
     }
   ],

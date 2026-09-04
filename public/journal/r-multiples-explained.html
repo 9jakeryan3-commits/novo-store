@@ -11,9 +11,9 @@
 <meta name="description" content="An R-multiple expresses a trade's outcome as a multiple of the risk you took. Here is how thinking in R changes everything, and why it's the cleanest way to judge.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#121316">
-<link rel="canonical" href="https://novo-options.trade/journal/r-multiples-explained.html">
+<link rel="canonical" href="https://novo-options.trade/journal/r-multiples-explained">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://novo-options.trade/journal/r-multiples-explained.html">
+<meta property="og:url" content="https://novo-options.trade/journal/r-multiples-explained">
 <meta property="og:site_name" content="The NoVo Journal">
 <meta property="og:title" content="R-Multiples, Explained">
 <meta property="og:description" content="R-multiples explained: measuring wins and losses in units of risk, and why it clarifies performance.">
@@ -29,10 +29,10 @@
 <link rel="icon" href="/icon-192.png?v=7">
 <link rel="stylesheet" href="/journal/blog.css?v=a0e4a4e9">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "Article", "headline": "R-Multiples, Explained", "description": "An R-multiple expresses a trade's outcome as a multiple of the risk you took. Here is how thinking in R changes everything, and why it's the cleanest way to judge performance.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-20", "dateModified": "2026-06-20", "mainEntityOfPage": "https://novo-options.trade/journal/r-multiples-explained.html", "articleSection": "Discipline & Risk", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
+{"@context": "https://schema.org", "@type": "Article", "headline": "R-Multiples, Explained", "description": "An R-multiple expresses a trade's outcome as a multiple of the risk you took. Here is how thinking in R changes everything, and why it's the cleanest way to judge performance.", "image": "https://novo-options.trade/journal/covers/novo-cover.png?v=4", "author": {"@type": "Organization", "name": "NoVo Options Trading"}, "publisher": {"@type": "Organization", "name": "NoVo Options Trading", "logo": {"@type": "ImageObject", "url": "https://novo-options.trade/novo-logo.png"}}, "datePublished": "2026-06-20", "dateModified": "2026-06-20", "mainEntityOfPage": "https://novo-options.trade/journal/r-multiples-explained", "articleSection": "Discipline & Risk", "wordCount": 525, "inLanguage": "en", "isAccessibleForFree": true}
 </script>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "R-Multiples, Explained", "item": "https://novo-options.trade/journal/r-multiples-explained.html"}]}
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://novo-options.trade/"}, {"@type": "ListItem", "position": 2, "name": "The Journal", "item": "https://novo-options.trade/journal/"}, {"@type": "ListItem", "position": 3, "name": "Risk, Discipline & Psychology", "item": "https://novo-options.trade/journal/risk-discipline"}, {"@type": "ListItem", "position": 4, "name": "R-Multiples, Explained", "item": "https://novo-options.trade/journal/r-multiples-explained"}]}
 </script>
 </head>
 <body>
@@ -56,16 +56,16 @@
   </header>
   <div class="article-meta">NoVo Options Trading &middot; <time datetime="2026-06-20">Jun 20, 2026</time> &middot; <a class="hub-link" href="/tools/position-size-calculator">position-size calculator</a></div>
 
-    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-trading-discipline-risk.html" style="color:var(--cyan);text-decoration:none;font-weight:700;">Trading Discipline &amp; Risk</a> guide &rarr;</div>
+    <div class="guide-crumb" style="margin:0 0 14px;font-size:12.5px;color:var(--txt3);">Part of the <a href="/journal/guide-trading-discipline-risk" style="color:var(--cyan);text-decoration:none;font-weight:700;">Trading Discipline &amp; Risk</a> guide &rarr;</div>
   <div class="article-body">
     <p>An <strong>R-multiple</strong> expresses a trade's result as a multiple of the amount you risked. If you risked $100 (that's "1R") and made $300, the trade was +3R. Lost $100? That's -1R. Instead of thinking in dollars, you think in units of risk - and suddenly every trade is comparable, regardless of size.</p>
     <h2>Why it changes everything</h2>
-    <p>Dollars are noisy - a $500 win on a huge position and a $500 win on a tiny one are not the same achievement. R normalizes them. It forces you to define your risk (your <a href="/journal/stop-loss-orders-explained.html">stop</a>) before you enter, because 1R is set at entry. No defined risk, no R - which means R-thinking enforces discipline by design.</p>
+    <p>Dollars are noisy - a $500 win on a huge position and a $500 win on a tiny one are not the same achievement. R normalizes them. It forces you to define your risk (your <a href="/journal/stop-loss-orders-explained">stop</a>) before you enter, because 1R is set at entry. No defined risk, no R - which means R-thinking enforces discipline by design.</p>
     <h2>Expectancy in R</h2>
-    <p>Once you track results in R, your <a href="/journal/expected-value-in-trading.html">expectancy</a> becomes clear: average R per trade. A system averaging +0.3R per trade makes money steadily over many trades regardless of dollar size. It connects directly to <a href="/journal/risk-reward-ratio.html">risk-reward</a> and <a href="/journal/win-rate-vs-profit-factor.html">win rate</a> - the three describe the same underlying edge.</p>
+    <p>Once you track results in R, your <a href="/journal/expected-value-in-trading">expectancy</a> becomes clear: average R per trade. A system averaging +0.3R per trade makes money steadily over many trades regardless of dollar size. It connects directly to <a href="/journal/risk-reward-ratio">risk-reward</a> and <a href="/journal/win-rate-vs-profit-factor">win rate</a> - the three describe the same underlying edge.</p>
     <p class="pull">A +3R winner and a -1R loss tell you more than any dollar figure ever will.</p>
     <h2>Why it scales</h2>
-    <p>Thinking in R lets you grow position size without changing your process - risk stays 1R whether that's $100 or $10,000. It's the language of <a href="/journal/position-sizing-risk.html">position sizing</a> and the reason systematic traders talk in R, not dollars: it makes performance legible and keeps <a href="/journal/risk-of-ruin.html">risk of ruin</a> under control as the account grows.</p>
+    <p>Thinking in R lets you grow position size without changing your process - risk stays 1R whether that's $100 or $10,000. It's the language of <a href="/journal/position-sizing-risk">position sizing</a> and the reason systematic traders talk in R, not dollars: it makes performance legible and keeps <a href="/journal/risk-of-ruin">risk of ruin</a> under control as the account grows.</p>
   </div>
 
   <div class="cta">
@@ -95,7 +95,7 @@
 
   <p class="nfa">NoVo is a software tool for market analysis, not financial advice. This article is general education, not investment advice. Options trading involves substantial risk of loss, up to and including your entire capital. NoVo makes no guarantee of profit, win rate, or performance, and past results do not predict future outcomes. You are responsible for your own broker account, configuration, and trading decisions.</p>
 </article>
-<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/sortino-ratio.html"><span class="rk">Discipline &amp; Risk</span>The Sortino Ratio</a></li><li><a href="/journal/variance-vs-skill-small-sample.html"><span class="rk">Discipline</span>Variance vs. Skill: Why Small Samples Lie</a></li><li><a href="/journal/anti-martingale-scalping.html"><span class="rk">Risk</span>The Anti-Martingale Approach for Scalpers</a></li><li><a href="/journal/cost-of-moving-your-stop.html"><span class="rk">Discipline</span>The Real Expected Cost of Moving Your Stop</a></li><li><a href="/journal/green-to-red-day.html"><span class="rk">Discipline</span>Anatomy of a Green-to-Red Day (And How to Stop It)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
+<div class="related"><h3>Related reading</h3><ul><li><a href="/journal/sortino-ratio"><span class="rk">Discipline &amp; Risk</span>The Sortino Ratio</a></li><li><a href="/journal/variance-vs-skill-small-sample"><span class="rk">Discipline</span>Variance vs. Skill: Why Small Samples Lie</a></li><li><a href="/journal/anti-martingale-scalping"><span class="rk">Risk</span>The Anti-Martingale Approach for Scalpers</a></li><li><a href="/journal/cost-of-moving-your-stop"><span class="rk">Discipline</span>The Real Expected Cost of Moving Your Stop</a></li><li><a href="/journal/green-to-red-day"><span class="rk">Discipline</span>Anatomy of a Green-to-Red Day (And How to Stop It)</a></li></ul><p style="margin:16px 0 0;font-size:13.5px;"><a href="/journal/risk-discipline" style="color:var(--cyan);font-weight:700;">All Risk, Discipline &amp; Psychology articles &rarr;</a></p></div>
 </main>
 
 <!-- FREE: Market Notes + Community (canonical, matches the main page) -->

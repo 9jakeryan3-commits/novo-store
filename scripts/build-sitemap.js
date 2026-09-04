@@ -86,8 +86,9 @@ for (const abs of walk(PUB)) {
   if (/<meta[^>]+noindex/i.test(html)) { skippedNoindex++; continue; }
 
   // The URL a visitor uses: the rewrite if one exists, else the path itself.
-  // index.html is the directory, and the journal keeps its .html extension
-  // because that is what its pages have always been served and indexed as.
+  // index.html is the directory. The journal went EXTENSIONLESS on 2026-09-04, and this
+  // needs no code change: the canonical block below already outranks the filename, and
+  // every journal canonical now omits .html. The .html form 301s to it.
   let url;
   if (routeFor.has(rel)) url = routeFor.get(rel);
   else if (rel === 'index.html') url = '/';
