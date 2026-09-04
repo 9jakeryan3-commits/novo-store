@@ -6,7 +6,6 @@ import webpush from 'web-push';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 const { isReservedEmail } = require('./_lib/reserved-email.js');
-const { kv } = require('./_kv');
 // The site's REAL header, footer and CSS, lifted out of a static page at deploy time by
 // scripts/build-site-chrome.js. A hand-built lookalike drifts the moment the site nav changes;
 // this is the same bytes. Soft-fails to empty so a missing build step degrades rather than 500s.
