@@ -71,11 +71,11 @@ async function one(name, sym) {
 }
 
 module.exports = async (req, res) => {
-  // The member portal lives on app.novo-aitrading.app, so it reads this cross-origin.
+  // The member portal is proxied at novo-options.trade/portal; same-origin, CORS kept for safety.
   // These are the same public quotes the marketing site prints on every page -- nothing
   // gated -- so a single explicit origin is the whole permission needed.
   const _o = String(req.headers.origin || "");
-  if (_o === "https://app.novo-aitrading.app" || _o === "https://novo-options.trade") {
+  if (_o === "https://novo-options.trade") {
     res.setHeader("Access-Control-Allow-Origin", _o);
     res.setHeader("Vary", "Origin");
   }

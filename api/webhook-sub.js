@@ -2,11 +2,11 @@ const Stripe = require('stripe');
 
 // SENDING DOMAIN, ONE KNOB (2026-09-04). Every customer-facing address used to be written out
 // long-hand here, five of them hardcoded on the Stripe order-confirmation path — the emails that
-// must never fail. Retiring novo-aitrading.app meant editing seven places across two repos and
+// must never fail. Retiring the old domain meant editing seven places across two repos and
 // hoping none was missed. MAIL_DOMAIN moves them together.
-// The DEFAULT stays novo-aitrading.app on purpose: it is the domain Resend has verified today, and
-// sending from an unverified domain fails outright. Flip this only once novo-options.trade shows
-// verified, then redeploy (Vercel bakes env at BUILD time).
+// novo-options.trade is verified in Resend (2026-09-04); sending from an unverified domain fails
+// outright, so any future domain move must verify FIRST, then flip, then redeploy (Vercel bakes
+// env at BUILD time).
 const MAIL_DOMAIN = process.env.MAIL_DOMAIN || 'novo-options.trade';
 const { Resend } = require('resend');
 const { claimOnce, releaseClaim } = require('./_kv');
@@ -497,7 +497,7 @@ function cryptoWelcomeHtml(connectUrl) {
     </table>
 
     <div style="background:rgba(245,158,11,0.08);border:1px solid #3a3c42;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#e8c48f;line-height:1.6;">
-      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
+      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://novo-options.trade/portal" style="color:#22d3ee;">novo-options.trade/portal</a>.
     </div>
 
     <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-options.trade" style="color:#22d3ee;">support@novo-options.trade</a>.</p>
@@ -521,7 +521,7 @@ function _bundleShell(kicker, inner) {
       <div style="margin-top:9px;font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#22d3ee;">${kicker}</div>
     </div>
     <div style="background:#1c1d21;border:1px solid #2e3036;border-top:0;border-radius:0 0 12px 12px;padding:30px 30px 26px;">${inner}
-      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss. Manage or cancel anytime at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.</p>
+      <p style="font-size:11.5px;color:#6f8bab;line-height:1.6;margin:20px 0 0;">Market analysis &amp; education only &mdash; not financial advice. Trading involves substantial risk of loss. Manage or cancel anytime at <a href="https://novo-options.trade/portal" style="color:#22d3ee;">novo-options.trade/portal</a>.</p>
     </div>
   </div>
 </div>`;
@@ -557,7 +557,7 @@ function bundleAllWelcomeHtml(connectUrl) {
       <div style="margin:18px 0 6px;border:1px solid #2e3036;border-left:3px solid #10b981;border-radius:8px;padding:16px 18px;background:rgba(16,185,129,0.07);">
         <div style="font-size:14px;color:#eaf3ff;font-weight:700;margin-bottom:4px;">Start at your portal</div>
         <div style="font-size:13.5px;color:#9fb6d1;line-height:1.55;margin-bottom:12px;">Your portal is where Trader lives &mdash; open it, sign in with this email, and the setup steps walk you through the rest.</div>
-        <a href="https://app.novo-aitrading.app/portal" style="display:inline-block;background:linear-gradient(180deg,#34d399,#10b981);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your portal &rarr;</a>
+        <a href="https://novo-options.trade/portal" style="display:inline-block;background:linear-gradient(180deg,#34d399,#10b981);color:#04121a;font-weight:800;font-size:13.5px;padding:11px 22px;border-radius:8px;text-decoration:none;">Open your portal &rarr;</a>
       </div>
       ${_bundleCryptoCard}
       ${_bundleDiscordCard(connectUrl)}`);
@@ -582,7 +582,7 @@ function welcomeEmailHtml(connectUrl) {
     <p style="color:#c2d2e6;font-size:15px;line-height:1.6;margin:0 0 22px;">Your subscription is active. Head to your portal to finish setup and open your dashboard &mdash; you'll be up and running in minutes.</p>
 
     <div style="text-align:center;margin:0 0 26px;">
-      <a href="https://app.novo-aitrading.app" style="display:inline-block;background:#10b981;color:#04121a;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:800;font-size:15px;">Open Your Portal</a>
+      <a href="https://novo-options.trade/portal" style="display:inline-block;background:#10b981;color:#04121a;text-decoration:none;padding:14px 34px;border-radius:8px;font-weight:800;font-size:15px;">Open Your Portal</a>
     </div>
 
     ${connectUrl ? `<div style="background:rgba(88,101,242,0.08);border:1px solid #3a3c42;border-left:3px solid #5865F2;border-radius:10px;padding:16px 18px;margin:0 0 24px;text-align:center;">
@@ -601,7 +601,7 @@ function welcomeEmailHtml(connectUrl) {
     <h2 style="color:#eaf3ff;font-size:16px;margin:0 0 14px;">Getting started</h2>
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;width:22px;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">1</div></td>
-          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Go to <strong style="color:#eaf3ff;">app.novo-aitrading.app</strong> and create your account using <strong style="color:#eaf3ff;">this email address</strong>.</td></tr>
+          <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Go to <strong style="color:#eaf3ff;">novo-options.trade/portal</strong> and create your account using <strong style="color:#eaf3ff;">this email address</strong>.</td></tr>
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">2</div></td>
           <td style="vertical-align:top;padding-bottom:14px;color:#c2d2e6;font-size:14px;line-height:1.55;">Open the dashboard from your portal &mdash; <strong style="color:#eaf3ff;">nothing to connect</strong>.</td></tr>
       <tr><td style="vertical-align:top;padding:0 12px 14px 0;"><div style="background:#10b981;color:#04121a;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:800;">3</div></td>
@@ -613,7 +613,7 @@ function welcomeEmailHtml(connectUrl) {
     <p style="color:#c2d2e6;font-size:14px;line-height:1.6;margin:22px 0 0;">Pick SPY, QQQ or IWM and the dealer map draws itself &mdash; switch between them whenever you want.</p>
 
     <div style="background:rgba(245,158,11,0.08);border:1px solid #3a3c42;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;margin:22px 0 0;font-size:13px;color:#e8c48f;line-height:1.6;">
-      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://app.novo-aitrading.app" style="color:#22d3ee;">app.novo-aitrading.app</a>.
+      <strong style="color:#f59e0b;">Auto-renewing:</strong> Your subscription renews automatically (monthly or yearly, whichever you chose). Manage billing or cancel any time from your portal at <a href="https://novo-options.trade/portal" style="color:#22d3ee;">novo-options.trade/portal</a>.
     </div>
 
     <p style="color:#c2d2e6;font-size:14px;margin:18px 0 0;">Questions? Just reply, or email <a href="mailto:support@novo-options.trade" style="color:#22d3ee;">support@novo-options.trade</a>.</p>

@@ -89,7 +89,7 @@ account instead. Signing up adds the free list; subscribing moves the contact to
 Still **delayed** data, same public feed the market-data pages read. The live map is the paid line.
 
 **Where the account is managed:** `/signup`, `/status` (settings, billing, delete account) —
-all on `app.novo-aitrading.app`, not the store.
+all at `novo-options.trade/portal` (control plane proxied through the product domain), not the store.
 
 ---
 

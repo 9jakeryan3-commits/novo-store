@@ -473,11 +473,11 @@ async function handleArchive(req, res) {
 }
 
 export default async function handler(req, res) {
-  // Recent desk notes as JSON, for the member portal on app.novo-aitrading.app. The archive itself is
+  // Recent desk notes as JSON, for the member portal at novo-options.trade/portal. The archive itself is
   // already public HTML, so this exposes nothing new -- it just saves the portal scraping a page.
   if (req.method === 'GET' && req.query && 'feed' in req.query) {
     const _o = String(req.headers.origin || '');
-    if (_o === 'https://app.novo-aitrading.app' || _o === 'https://novo-options.trade') {
+    if (_o === 'https://novo-options.trade') {
       res.setHeader('Access-Control-Allow-Origin', _o);
       res.setHeader('Vary', 'Origin');
     }

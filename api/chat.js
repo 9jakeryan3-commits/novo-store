@@ -68,7 +68,7 @@ WHAT NOVO IS
 - Non-custodial in the strongest sense: your money stays in your own brokerage account in your name, and NoVo has
   no connection through which it could reach it. You trade wherever you already trade, with any broker you like.
 - Hosted: nothing to download. You reach your dashboard from any browser or phone by signing in to the member
-  portal (app.novo-aitrading.app/portal).
+  portal (novo-options.trade/portal).
 - Pricing is price-for-life: the rate you subscribe at stays as long as your subscription is active.
 - Billing: monthly or yearly via Stripe. Manage or cancel anytime from the billing portal; access runs to the end
   of the paid period. 7-day money-back on your first payment, every plan, bundles included (email support). Analyst and Crypto
