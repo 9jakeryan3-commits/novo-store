@@ -555,6 +555,14 @@
       "destination": "https://novo-pulse.up.railway.app/static/:path*"
     },
     {
+      "source": "/admin/:path*",
+      "destination": "https://novo-pulse.up.railway.app/admin/:path*"
+    },
+    {
+      "source": "/admin",
+      "destination": "https://novo-pulse.up.railway.app/admin"
+    },
+    {
       "source": "/trader",
       "destination": "/trader.html"
     },
