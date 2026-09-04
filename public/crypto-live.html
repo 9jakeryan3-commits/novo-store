@@ -2029,10 +2029,45 @@ function _mapDegrade(msg){
     if(msg) console.warn('crypto map degraded:', msg);
   }catch(_){}
 }
+// THREE HOLES THE TRADER CHART ALREADY HAD, CLOSED HERE TOO (2026-09-03).
+// This was setInterval(load, 90000) calling a bare fetch(), which meant:
+//   * NO DEADLINE — fetch() resolves on HEADERS, so a body that stalls mid-stream hangs the
+//     promise forever. That is the exact bug fixed in trader-live.html on 2026-09-02, where a
+//     minimised tab's resumed connection froze the chart until a reload.
+//   * NO IN-FLIGHT GUARD — a load slower than 90s overlaps the next one.
+//   * NO GENERATION — overlapping loads finish in arbitrary order, so a slow response could
+//     render an OLDER map over a newer one and the subscriber would never know.
+// _cmSeq is the same idea as _novoGen on the chart: capture it, and refuse to paint if the
+// world moved on. The busy flag carries its own deadline so it can never latch.
+var _cmBusy = false, _cmBusyAt = 0, _cmSeq = 0;
+function _cmFetch(url, ms){
+  var ac = ('AbortController' in window) ? new AbortController() : null;
+  var tm = ac ? setTimeout(function(){ try{ ac.abort(); }catch(_){} }, ms || 20000) : null;
+  var o = { cache: 'no-store' };
+  if (ac) o.signal = ac.signal;
+  // The deadline must cover the BODY, not just the headers — clear it only once the JSON is
+  // actually in hand, which is the half the original trader-live bug got wrong.
+  return fetch(url, o).then(function(r){
+    return r.text().then(function(t){
+      if (tm) clearTimeout(tm);
+      return { ok: r.ok, status: r.status, _text: t,
+               json: function(){ return JSON.parse(t); } };
+    });
+  }, function(e){ if (tm) clearTimeout(tm); throw e; });
+}
 async function load(){
+  var _now = Date.now();
+  // 60s is well past any legitimate load and stops a single hung request wedging the loop.
+  if (_cmBusy && _now - _cmBusyAt < 60000) return;
+  _cmBusy = true; _cmBusyAt = _now;
+  var _mine = ++_cmSeq;
+  try { return await _loadInner(_mine); }
+  finally { _cmBusy = false; }
+}
+async function _loadInner(_mine){
   if(!TOKEN){ showLogin(); return; }
   let r;
-  try { r = await fetch('/api/crypto-map?t='+encodeURIComponent(TOKEN)); }
+  try { r = await _cmFetch('/api/crypto-map?t='+encodeURIComponent(TOKEN), 20000); }
   catch(_){
     if(!_mapShown) showLogin('Could not reach the map. Try again in a moment.');
     else _mapDegrade('network');
@@ -2070,7 +2105,10 @@ async function load(){
     else _mapDegrade(m);
     return;
   }
-  SNAP = await r.json();
+  // A newer load started while this one was in flight — its answer is fresher, so drop this one
+  // rather than painting an older map over it.
+  if(_mine !== _cmSeq) return;
+  SNAP = r.json();
   _mapShown = true;
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
   if(window.cxInstall) cxInstall.entered();   // subscriber is in - now offer the install
