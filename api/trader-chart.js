@@ -31,7 +31,22 @@ const zlib = require("zlib");
 const { kv } = require("./_kv");
 
 const TICKERS = new Set(["SPY", "QQQ", "IWM"]);
-const KEY = (t) => `trader:chart:${t}`;
+
+// The deep frames (1H / D / W) publish here too, as of 2026-09-04. They were the LAST chart
+// reach-back and the most expensive one: measured 264-578ms of cross-origin round trip per
+// timeframe click for 58-85KB, which is the "clicking through their charts" complaint almost
+// exactly. They live under their own keys so the live frame's key shape does not change.
+const DEEP_TFS = new Set(["1h", "1d", "1w"]);
+const KEY = (t, tf) => (tf ? `trader:chart:${t}:${tf}` : `trader:chart:${t}`);
+
+// Normalise the tf param once, for both verbs: "" / absent / "live" all mean the live 1-minute
+// frame. Anything else must be a known deep frame or the request is rejected rather than silently
+// answered with the live frame, which would paint 1-minute bars under a "W" caption.
+function normTf(v) {
+  const s = String(v == null ? "" : v).toLowerCase().trim();
+  if (!s || s === "live") return { ok: true, tf: "" };
+  return DEEP_TFS.has(s) ? { ok: true, tf: s } : { ok: false };
+}
 
 // Long enough that a redeploy, a restart, or an overnight gap never blanks the chart — the page
 // judges freshness from as_of and shows its own STALE treatment. Short enough that a store nobody
@@ -78,6 +93,8 @@ module.exports = async (req, res) => {
     const b = req.body || {};
     const ticker = String(b.ticker || "").toUpperCase().trim();
     if (!TICKERS.has(ticker)) return res.status(400).json({ error: "unknown ticker" });
+    const pf = normTf(b.tf);
+    if (!pf.ok) return res.status(400).json({ error: "unknown tf" });
     if (typeof b.gz !== "string" || !b.gz) return res.status(400).json({ error: "gz required" });
     if (b.gz.length > MAX_GZ_B64) return res.status(413).json({ error: "payload too large" });
     const asOf = Number(b.as_of);
@@ -98,13 +115,14 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "gz is not gzipped JSON" });
     }
 
-    await r.set(KEY(ticker), JSON.stringify({
+    await r.set(KEY(ticker, pf.tf), JSON.stringify({
       as_of: asOf,
       etag: String(b.etag || ""),
       gz: b.gz,
     }), { ex: TTL_SECONDS });
 
-    return res.status(200).json({ ok: true, ticker, raw_bytes: rawLen, gz_b64: b.gz.length });
+    return res.status(200).json({ ok: true, ticker, tf: pf.tf || "live",
+                                 raw_bytes: rawLen, gz_b64: b.gz.length });
   }
 
   // ---- read (the dashboard) -----------------------------------------------------------------
@@ -134,17 +152,19 @@ module.exports = async (req, res) => {
 
   const ticker = String((req.query && req.query.ticker) || "SPY").toUpperCase().trim();
   if (!TICKERS.has(ticker)) return res.status(400).json({ error: "unknown ticker" });
+  const gf = normTf(req.query && req.query.tf);
+  if (!gf.ok) return res.status(400).json({ error: "unknown tf" });
 
   let row = null;
   try {
-    const v = await r.get(KEY(ticker));
+    const v = await r.get(KEY(ticker, gf.tf));
     row = typeof v === "string" ? JSON.parse(v) : v;
   } catch (_) { row = null; }
 
   if (!row || !row.gz) {
     // 404 is meaningful to the page: "the store has nothing for this ticker", which is its cue to
     // fall back to the engine rather than to show an error.
-    return res.status(404).json({ error: "no published frame", ticker });
+    return res.status(404).json({ error: "no published frame", ticker, tf: gf.tf || "live" });
   }
 
   // The engine's own weak ETag rides through, so an unchanged payload costs a 304 and no body.

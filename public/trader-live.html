@@ -3293,7 +3293,7 @@ async function _loadHist(){
     // NOT plain caching: 'no-store' -> dropping the header entirely would let the browser serve up
     // to max-age=60 WITHOUT asking, compounding with this loader's own 60s TTL to ~2 minutes of
     // staleness on a forming hourly bar — the exact thing that TTL exists to prevent.
-    var r=await _tfetch(u+'&ticker='+encodeURIComponent(_selTkr())+'&tf='+_ctbTf, 15000, {cache:'no-cache'});
+    var r=await _histPull(_selTkr(), _ctbTf, u);
     if(!r.ok){ _reauth401(r); return (_histC.key===key)?_histC.candles:null; }
     var d=await r.json();
     if(d.ticker!==_selTkr()||d.tf!==_ctbTf) return null;   // stale response from before a switch
@@ -5070,8 +5070,44 @@ function _ncBail(where){
 // re-publishes an UNCHANGED payload every 60s: as_of therefore means "the engine was alive at T",
 // not "the price last moved at T". Without that heartbeat every overnight poll would look stale
 // and bounce to the engine, quietly restoring the architecture this replaces.
-const _NC_STORE_MAX_AGE_S = 150;   // 2.5 heartbeats — tolerates one missed publish
+const _NC_STORE_MAX_AGE_S = 150;   // 2.5 live heartbeats — tolerates one missed publish
+// Deep frames sweep every 45s and re-publish an unchanged frame every 60s, so a healthy one is at
+// most ~105s old. 240s leaves real margin without ever accepting a genuinely abandoned frame.
+const _HIST_STORE_MAX_AGE_S = 240;
 window._ncSrc = '';                // 'store' | 'engine' — visible in the console for diagnosis
+window._histSrc = '';              // same, for the 1H/D/W switch path
+
+// One store read, shared by the live frame and the deep frames. Returns the response only if the
+// store HAS a frame and it is fresh enough to trust; null means "fall back", for every reason —
+// no ticket yet, 404, 401, a stale frame, or a network throw. Callers treat null identically.
+async function _storeGet(su, maxAgeS){
+  if(!window.NOVO_TICKET) return null;
+  try{
+    const _sr = await _tfetch(su, 12000,
+                              {cache:'no-cache', headers:{'x-novo-ticket': window.NOVO_TICKET}});
+    if(_sr && _sr.ok){
+      const _as  = Number(_sr.headers.get('X-Novo-As-Of') || 0);
+      const _age = _as ? (Date.now()/1000 - _as) : 1e9;
+      window._ncStoreAge = Math.round(_age);
+      if(_age <= maxAgeS) return _sr;
+    } else if(_sr){ window._ncStoreMiss = _sr.status; }
+  }catch(_e){ window._ncStoreMiss = 'throw'; }
+  return null;
+}
+
+// The 1H/D/W switch path. This was the LAST chart reach-back and the most expensive one:
+// measured 264-578ms of cross-origin round trip per timeframe click for 58-85KB, against ~6ms
+// of JSON.parse plus aggregation for the entire live payload. The network was the cost, not the
+// parse -- so this is where "clicking through charts" actually got faster.
+async function _histPull(tkr, tf, engineUrl){
+  const _sr = await _storeGet('/api/trader-chart?ticker=' + encodeURIComponent(tkr)
+                              + '&tf=' + encodeURIComponent(tf), _HIST_STORE_MAX_AGE_S);
+  if(_sr){ window._histSrc = 'store'; return _sr; }
+  window._histSrc = 'engine';
+  return await _tfetch(engineUrl + '&ticker=' + encodeURIComponent(tkr) + '&tf=' + tf,
+                       15000, {cache:'no-cache'});
+}
+
 async function _ncPull(tkr, engineUrl){
   if(window.NOVO_TICKET){
     try{
