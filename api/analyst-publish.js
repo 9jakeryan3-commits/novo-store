@@ -6,6 +6,7 @@ import webpush from 'web-push';
 
 const _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 const { isReservedEmail } = require('./_lib/reserved-email.js');
+const { kv } = require('./_kv');
 // The site's REAL header, footer and CSS, lifted out of a static page at deploy time by
 // scripts/build-site-chrome.js. A hand-built lookalike drifts the moment the site nav changes;
 // this is the same bytes. Soft-fails to empty so a missing build step degrades rather than 500s.
@@ -310,6 +311,30 @@ async function _loadJson(prefix, token, opts) {
     clearTimeout(_tm);
   }
 }
+// THE ARCHIVE INDEX, KV-FIRST (2026-09-04, Jake: "handle it" on two routed findings).
+// #4: the cold /analyst/archive page took 45-55s because _loadJson's deadline only guards the
+//     blob FETCH - list() carries no signal and can hang unbounded on a cold store. KV is
+//     fast-warm and skips list() entirely; blob becomes the fallback that also backfills KV.
+// #5: a blob blip used to be laundered into a CACHEABLE empty feed ("no reads" for 5 minutes).
+//     Now: KV hit survives the blip; a genuine double-failure returns null and callers answer
+//     503 no-store - a blip is an error, never a confident empty.
+const _IDX_KV_KEY = 'analyst:archive:index';
+async function _loadIndex(token) {
+  const r = kv();
+  if (r) {
+    try {
+      const hit = await r.get(_IDX_KV_KEY);
+      const arr = typeof hit === 'string' ? JSON.parse(hit) : hit;
+      if (Array.isArray(arr)) return { idx: arr, src: 'kv' };
+    } catch (_) {}
+  }
+  const idx = await _loadJson('analyst-archive/index.json', token);
+  if (Array.isArray(idx)) {
+    if (r) { try { await r.set(_IDX_KV_KEY, JSON.stringify(idx), { ex: 86400 }); } catch (_) {} }
+    return { idx, src: 'blob' };
+  }
+  return null;   // unreadable everywhere - the caller must NOT render this as "empty archive"
+}
 // Fallback for the members live view when there's no fresh live read (weekends / between sessions): serve the
 // most recent archived desk note so "Today's read" is never a blank card. Cached ~5 min to avoid per-poll blob reads.
 let _latestReadCache = { at: 0, read: null };
@@ -399,8 +424,14 @@ async function handleArchive(req, res) {
     return res.status(200).send(_page(`${rd.title} — NoVo Analyst`, desc, `${SITE}/analyst/archive/${slug}`, inner,
       `<script type="application/ld+json">${ld}</script>`));
   }
-  let idx = await _loadJson('analyst-archive/index.json', token);
-  if (!Array.isArray(idx)) idx = [];
+  const _ld = await _loadIndex(token);
+  if (!_ld) {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(503).send(_page('NoVo Analyst — Archive', 'The archive is momentarily unavailable.',
+      `${SITE}/analyst/archive`, '<div class="kicker">The Archive</div><h1>One moment</h1><p class="lead">The archive index did not answer just now. Refresh in a few seconds — every read is still there.</p>'));
+  }
+  res.setHeader('x-novo-idx-src', _ld.src);
+  const idx = _ld.idx;
   const pub = idx.filter(e => !e.publishAfter || now >= e.publishAfter).sort((a, b) => (b.publishAfter || 0) - (a.publishAfter || 0));
 
   // Search the WHOLE index, not the rows on screen. Title, date label and slug all count, because
@@ -481,9 +512,16 @@ export default async function handler(req, res) {
       res.setHeader('Access-Control-Allow-Origin', _o);
       res.setHeader('Vary', 'Origin');
     }
+    const _ld = await _loadIndex(process.env.BLOB_READ_WRITE_TOKEN);
+    if (!_ld) {
+      // The index is unreadable, not empty. Caching an empty answer here told the portal "no
+      // reads published" for 5 minutes per blip (Einstein's F-2). An error must look like one.
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(503).json({ error: 'archive index unavailable, retry shortly' });
+    }
     res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
-    let idx = await _loadJson('analyst-archive/index.json', process.env.BLOB_READ_WRITE_TOKEN);
-    if (!Array.isArray(idx)) idx = [];
+    res.setHeader('x-novo-idx-src', _ld.src);
+    const idx = _ld.idx;
     const now = Date.now();
     const n = Math.min(Math.max(parseInt(req.query.n, 10) || 5, 1), 20);
     const out = idx
@@ -706,6 +744,7 @@ export default async function handler(req, res) {
           idx = idx.filter(e => e.slug !== slug);
           await put('analyst-archive/index.json', JSON.stringify(idx),
             { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+    try { const _r = kv(); if (_r) await _r.set(_IDX_KV_KEY, JSON.stringify(idx), { ex: 86400 }); } catch (_) {}
           const check = await _loadJson('analyst-archive/index.json', BT);
           if (!Array.isArray(check) || !check.some(e => e.slug === slug)) break;   // gone → done
           idx = check;   // a concurrent writer re-added it; loop and remove again
@@ -1211,6 +1250,7 @@ async function _promotePublicLevels(state) {
           idx = idx.slice(0, 400);
           await put('analyst-archive/index.json', JSON.stringify(idx),
             { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+    try { const _r = kv(); if (_r) await _r.set(_IDX_KV_KEY, JSON.stringify(idx), { ex: 86400 }); } catch (_) {}
           const check = await _loadJson('analyst-archive/index.json', BT);
           if (!Array.isArray(check) || check.some(e => e.slug === slug)) break;   // our entry survived → done
           idx = check;   // clobbered by a concurrent writer; loop and re-add

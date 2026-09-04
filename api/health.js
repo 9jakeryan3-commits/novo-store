@@ -23,7 +23,30 @@
 // Deliberately does not touch Stripe: a health check that costs an API call on every scrape is a
 // liability, and Stripe reachability is not what this is for.
 
-const { kvReady } = require('./_kv.js');
+const { kv, kvReady } = require('./_kv.js');
+
+// ACCOUNT-SIDE PRICE AUDIT, HOURLY BEHIND KV (Jake's go, 09-04). The header's "deliberately does
+// not touch Stripe" rule stands for the SCRAPE path: at most one prices.list per hour, cached; a
+// scrape never pays for Stripe and never depends on it (failure -> ok:null, not degraded).
+// Public payload carries counts + the scope sentence ONLY - drift ids go to server logs, per the
+// "never a price id" charter above.
+const ACCT_KV_KEY = 'health:acct-audit';
+const ACCT_SCOPE = 'every active billing-account price is classified or deliberately Trader-by-exclusion; does NOT prove a checkout handler uses the right id';
+async function acctAudit() {
+  const r = kv();
+  if (r) {
+    try {
+      const hit = await r.get(ACCT_KV_KEY);
+      const j = typeof hit === 'string' ? JSON.parse(hit) : hit;
+      if (j && j.checked_at && Date.now() - j.checked_at < 3600_000) return j;
+    } catch (_) {}
+  }
+  let out;
+  try { out = await require('./_lib/entitlements.js').auditAccountPrices(); }
+  catch (e) { out = { ok: null, error: String(e.message || e).slice(0, 120), checked_at: Date.now() }; }
+  if (r && out) { try { await r.set(ACCT_KV_KEY, JSON.stringify(out), { ex: 86400 }); } catch (_) {} }
+  return out;
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,7 +58,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
-  const kv = kvReady();
+  const kvUp = kvReady();
 
   // The drift checks. Both report rather than throw, and both are wrapped: a health endpoint that
   // 500s because a self-check threw is reporting on itself instead of on the system.
@@ -46,8 +69,11 @@ module.exports = async (req, res) => {
   let salesPaused = false;
   try { salesPaused = require('./_lib/sales-gate.js').salesPaused(); } catch (_) {}
 
+  const acct = await acctAudit();
+
   const degraded = [];
-  if (!kv) degraded.push('kv');
+  if (!kvUp) degraded.push('kv');
+  if (acct && acct.ok === false) degraded.push('account-prices');
   if (prices.ok === false) degraded.push('price-sets');
   if (tools.ok === false) degraded.push('tool-sets');
 
@@ -70,10 +96,10 @@ module.exports = async (req, res) => {
     // compiled-in const, so this is the only place the ACTUAL answer can be read.
     sales_paused: salesPaused,
     kv: {
-      configured: kv,
+      configured: kvUp,
       // Named so the consequence is readable without opening the source. These are the protections
       // that quietly stop protecting when `configured` is false — all by design, none by accident.
-      fails_open_without_it: kv ? [] : [
+      fails_open_without_it: kvUp ? [] : [
         'stripe-webhook-idempotency', 'distributed-rate-limits',
         'analyst-trial-gate', 'entitlement-caches', 'upsell-cooldown',
       ],
@@ -82,6 +108,10 @@ module.exports = async (req, res) => {
     drift: {
       price_sets: prices,
       tool_sets: tools,
+      account_prices: acct ? { ok: acct.ok, active: acct.active ?? null,
+                               drift_count: acct.drift_count ?? null,
+                               checked_at: acct.checked_at ?? null,
+                               error: acct.error ?? undefined, scope: ACCT_SCOPE } : null,
     },
     stripe_configured: !!process.env.STRIPE_SECRET_KEY,
   });

@@ -253,5 +253,47 @@ function auditPriceSets() {
   return { ok: unclassified.length === 0, unclassified };
 }
 
+/** ACCOUNT-SIDE PRICE AUDIT (Jake's go, 2026-09-04 — the register's merged item).
+ * Audits the BILLING ACCOUNT rather than env or handler source: every active Stripe price must be
+ * classified or deliberately Trader-by-exclusion. Intent evidence comes from the account itself —
+ * a price whose product/nickname says Analyst or Crypto but whose id is missing from that set is
+ * DRIFT (the failure this exists for: a literal-only price added to a handler, set forgotten →
+ * customer pays, entitlement lands wrong, console green).
+ * SCOPE BOUNDARY (Elix, written down so nobody inherits a bigger sentence than the check): this
+ * proves every live price is ACCOUNTED FOR. It does not prove a checkout handler will USE the
+ * right id — deployed-code-vs-env agreement died with the box-side source reader.
+ * Classifier is pure and exported for sabotage-testing; the Stripe fetch stays in the caller. */
+function classifyAccountPrices(prices) {
+  const drift = [];
+  for (const p of prices || []) {
+    if (!p || !p.active) continue;
+    const name = `${(p.product && p.product.name) || ''} ${p.nickname || ''}`.toLowerCase();
+    if (/analyst/.test(name) && !ANALYST_PRICE_IDS.has(p.id)) {
+      drift.push({ id: p.id, name: name.trim(), expected: 'analyst' });
+    } else if (/crypto/.test(name) && !CRYPTO_PRICE_IDS.has(p.id)) {
+      drift.push({ id: p.id, name: name.trim(), expected: 'crypto' });
+    }
+    // anything else (Trader, Pulse, licence, grandfathered Trader tiers) is entitlement-by-
+    // exclusion ON PURPOSE — see auditPriceSets' TRADER_VARS note.
+  }
+  return drift;
+}
+
+async function auditAccountPrices() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return { ok: null, error: 'stripe not configured' };
+  const Stripe = require('stripe');
+  const stripe = Stripe(key);
+  const out = await stripe.prices.list({ active: true, limit: 100, expand: ['data.product'] });
+  const drift = classifyAccountPrices(out.data);
+  if (drift.length) {
+    console.error('[entitlements] ACCOUNT PRICE DRIFT — active prices whose name claims a product their id is not classified for:',
+                  JSON.stringify(drift));
+  }
+  return { ok: drift.length === 0, active: out.data.length, drift_count: drift.length,
+           checked_at: Date.now() };
+}
+
 module.exports = { analystEntitlement, entitlements, subGrantsAnalyst, subGrantsCrypto,
-                   auditPriceSets, ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };
+                   auditPriceSets, classifyAccountPrices, auditAccountPrices,
+                   ANALYST_PRICE_IDS, CRYPTO_PRICE_IDS };
