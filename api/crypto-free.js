@@ -29,18 +29,26 @@ const { kv } = require("./_kv");
 const FREE_GAMMA = new Set(["BTC", "ETH"]);
 
 module.exports = async (req, res) => {
+  // The SUCCESS cache. Every 503 below explicitly overrides it with no-store: this header was
+  // being set before the error returns, so a transient failure was cached PUBLICLY for 60s and a
+  // visitor hitting refresh got served the same error back out of their own browser cache. An
+  // outage that outlives its own cause, and one the user cannot escape by retrying.
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  const _fail = (code, body) => {
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(code).json(body);
+  };
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   const r = kv();
-  if (!r) return res.status(503).json({ error: "store unavailable" });
+  if (!r) return _fail(503, { error: "store unavailable" });
 
   let raw = null;
   try { raw = await r.get("crypto:map:live"); } catch (_) { raw = null; }
-  if (!raw) return res.status(503).json({ error: "no live snapshot" });
+  if (!raw) return _fail(503, { error: "no live snapshot" });
   let snap = raw;
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch { snap = null; } }
-  if (!snap || !snap.coins) return res.status(503).json({ error: "snapshot unreadable" });
+  if (!snap || !snap.coins) return _fail(503, { error: "snapshot unreadable" });
 
   const wanted = String((req.query && req.query.coin) || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 

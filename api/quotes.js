@@ -27,7 +27,20 @@ async function one(name, sym) {
     // range=5d (not 1d): a 1d range mis-reports chartPreviousClose == regularMarketPrice for FUTURES
     // (GC=F / CL=F) → their change zeroed out. Derive the prior close from the daily-closes array instead.
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
-    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+    // BOUNDED (2026-09-03). This was a bare fetch with no deadline, and it runs for EVERY symbol
+    // in the ribbon on EVERY page of the site. A single Yahoo endpoint hanging — not erroring,
+    // hanging — held the invocation until the platform killed it, so one slow third party took
+    // the site-wide ticker to nothing. 6s is generous for a quote and well inside the function's
+    // own budget; a blown deadline lands in the catch below and that symbol simply reports null,
+    // which the caller already handles.
+    const _ac = new AbortController();
+    const _tm = setTimeout(() => { try { _ac.abort(); } catch (_) {} }, 6000);
+    let r;
+    try {
+      r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: _ac.signal });
+    } finally {
+      clearTimeout(_tm);
+    }
     if (!r.ok) return null;
     const j = await r.json();
     const res = j?.chart?.result?.[0];
