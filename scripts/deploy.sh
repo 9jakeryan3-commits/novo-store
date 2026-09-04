@@ -56,8 +56,28 @@ node scripts/build-site-chrome.js
 # api/_lib/site-chrome.js is generated the same way, from the static header/footer, and moves
 # whenever the site's chrome or its ?v= hashes do. Same reasoning as the sitemap: if the ONLY
 # dirty paths are generated ones, that is the pipeline's own lag, not an uncommitted change.
-GEN_DIRT="$(git status --porcelain | grep -vE '^([ M?][ M?]) (public/sitemap\.xml|api/_lib/site-chrome\.js|public/journal/search-index\.json)$' || true)"
-if [ -n "$(git status --porcelain)" ] && [ -z "$GEN_DIRT" ]; then
+#
+# THIS USED TO REQUIRE THE GENERATED FILES TO BE THE *ONLY* DIRTY PATHS, AND THAT DEADLOCKED
+# (fixed 2026-09-04). Two auto-commit gates guard this deploy: this one for generated files, and
+# the count-churn one below for content HTML whose figures moved. Each demanded that its own
+# category be the entire diff — so the moment BOTH were dirty at once, neither could fire:
+#
+#   gate 1  refused, because the compare-*.html pages are not on its whitelist
+#   gate 2  refused, because count-churn-only.js saw sitemap.xml, whose lastmod is a DATE and
+#           not one of the anchored count slots  ->  "!! not count-only: public/sitemap.xml"
+#
+# That happens on any day the track-record count moves AND the sitemap's date rolls over, which is
+# most days, and it stays stuck until someone commits by hand. Jake: "that is not anybody else, if
+# it is, its been there for days."
+#
+# The whitelist's own reasoning already answers it: these three are REGENERATED ON EVERY DEPLOY,
+# so a dirty one is always this pipeline's lag and never a human's half-finished edit — nobody
+# hand-writes sitemap.xml or search-index.json, and a hand edit would be overwritten above
+# regardless. So commit them whenever they are dirty, not only when they are alone. Every safety
+# property is kept: this stages ONLY those three paths, and anything else still has to satisfy the
+# count-churn gate below or halt the deploy.
+GEN_DIRTY="$(git status --porcelain -- public/sitemap.xml api/_lib/site-chrome.js public/journal/search-index.json)"
+if [ -n "$GEN_DIRTY" ]; then
   git add public/sitemap.xml api/_lib/site-chrome.js public/journal/search-index.json 2>/dev/null || true
   git commit -q -m "generated: sitemap lastmod, site chrome, search index"
   git push -q
