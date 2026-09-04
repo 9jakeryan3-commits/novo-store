@@ -1922,9 +1922,25 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         #c2-legend .dim { color: var(--txt3); }
         /* CANVAS SETTINGS (2026-08-31, Jake circled TradingView's scale menu): the price-scale
            modes lightweight-charts actually has — auto-fit, regular/log/percent/indexed, invert. */
+        /* The menu is appended INSIDE #novo-chart (see the ctb-scale handler), which is height-
+           bounded -- 56dvh, max 640px on tablet. Its 18 rows are taller than that box, so without
+           a max-height the tail ("Gravity halo", "Level trails", "Drift arrow", "Gamma heatmap")
+           was simply clipped by the chart frame with no way to reach it: Jake, 2026-09-04, "i cant
+           scroll in that settings panel or its stuck inside the chart frame cutting off the rest".
+           Bounding it to the container and letting it scroll fixes both halves -- on a tall chart
+           it still renders whole (max-height only bites when it must), on a short one it scrolls.
+           overscroll-behavior:contain stops a flick that reaches the end from continuing into the
+           chart underneath and panning it, and touch-action:pan-y claims the vertical drag for the
+           menu rather than letting the chart canvas treat it as a pan. */
         #scale-menu { position: absolute; top: 8px; right: 66px; z-index: 30; display: none;
           background: #17171a; border: 1px solid var(--bdr); border-radius: 10px; padding: 5px;
-          box-shadow: 0 18px 50px rgba(0,0,0,.6); min-width: 190px; font-family: var(--sans); }
+          box-shadow: 0 18px 50px rgba(0,0,0,.6); min-width: 190px; font-family: var(--sans);
+          max-height: calc(100% - 16px); overflow-y: auto; overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        /* Thin scrollbar so the panel does not look like a different widget when it does scroll. */
+        #scale-menu::-webkit-scrollbar { width: 7px; }
+        #scale-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 4px; }
+        #scale-menu::-webkit-scrollbar-track { background: transparent; }
         #scale-menu.open { display: block; }
         /* B8: bar-close countdown pinned to the price axis, and the back-to-live chip. */
         /* NOT translateY(-50%) (fixed 2026-09-02, Jake: "sitting on top of the current price
@@ -4794,7 +4810,20 @@ function _scaleMenuRender(){
     if(!m){ m=document.createElement('div'); m.id='scale-menu'; el.style.position='relative'; el.appendChild(m); }
     var open=!m.classList.contains('open');
     m.classList.toggle('open',open);
-    if(open) _scaleMenuRender();
+    if(open){
+      _scaleMenuRender();
+      // Bound the panel to the chart box IN PIXELS, measured at open time.
+      // The CSS carries max-height:calc(100% - 16px) as well, but a PERCENTAGE max-height
+      // resolves against the containing block's height and becomes `none` when that height is
+      // auto -- which is exactly the desktop case (#card-spy #novo-chart { height:auto !important }
+      // at the flex rule). So on desktop the CSS bound would silently not apply and the tail would
+      // still be clipped. clientHeight is always a real number, so this one always bites.
+      try{
+        var _av=el.clientHeight-16;
+        if(_av>140) m.style.maxHeight=_av+'px';
+      }catch(_e){}
+      m.scrollTop=0;
+    }
   });
   document.addEventListener('click',function(){
     var m=document.getElementById('scale-menu'); if(m) m.classList.remove('open');
