@@ -476,79 +476,83 @@
   "rewrites": [
     {
       "source": "/portal",
-      "destination": "https://app.novo-aitrading.app/portal"
+      "destination": "https://novo-pulse.up.railway.app/portal"
     },
     {
       "source": "/portal/:path*",
-      "destination": "https://app.novo-aitrading.app/portal/:path*"
+      "destination": "https://novo-pulse.up.railway.app/portal/:path*"
     },
     {
       "source": "/signup",
-      "destination": "https://app.novo-aitrading.app/signup"
+      "destination": "https://novo-pulse.up.railway.app/signup"
     },
     {
       "source": "/signup/:path*",
-      "destination": "https://app.novo-aitrading.app/signup/:path*"
+      "destination": "https://novo-pulse.up.railway.app/signup/:path*"
     },
     {
       "source": "/login",
-      "destination": "https://app.novo-aitrading.app/login"
+      "destination": "https://novo-pulse.up.railway.app/login"
     },
     {
       "source": "/login/:path*",
-      "destination": "https://app.novo-aitrading.app/login/:path*"
+      "destination": "https://novo-pulse.up.railway.app/login/:path*"
     },
     {
       "source": "/logout",
-      "destination": "https://app.novo-aitrading.app/logout"
+      "destination": "https://novo-pulse.up.railway.app/logout"
     },
     {
       "source": "/logout/:path*",
-      "destination": "https://app.novo-aitrading.app/logout/:path*"
+      "destination": "https://novo-pulse.up.railway.app/logout/:path*"
     },
     {
       "source": "/status",
-      "destination": "https://app.novo-aitrading.app/status"
+      "destination": "https://novo-pulse.up.railway.app/status"
     },
     {
       "source": "/status/:path*",
-      "destination": "https://app.novo-aitrading.app/status/:path*"
+      "destination": "https://novo-pulse.up.railway.app/status/:path*"
     },
     {
       "source": "/verify",
-      "destination": "https://app.novo-aitrading.app/verify"
+      "destination": "https://novo-pulse.up.railway.app/verify"
     },
     {
       "source": "/verify/:path*",
-      "destination": "https://app.novo-aitrading.app/verify/:path*"
+      "destination": "https://novo-pulse.up.railway.app/verify/:path*"
     },
     {
       "source": "/reset",
-      "destination": "https://app.novo-aitrading.app/reset"
+      "destination": "https://novo-pulse.up.railway.app/reset"
     },
     {
       "source": "/reset/:path*",
-      "destination": "https://app.novo-aitrading.app/reset/:path*"
+      "destination": "https://novo-pulse.up.railway.app/reset/:path*"
     },
     {
       "source": "/forgot",
-      "destination": "https://app.novo-aitrading.app/forgot"
+      "destination": "https://novo-pulse.up.railway.app/forgot"
     },
     {
       "source": "/forgot/:path*",
-      "destination": "https://app.novo-aitrading.app/forgot/:path*"
+      "destination": "https://novo-pulse.up.railway.app/forgot/:path*"
     },
     {
       "source": "/connect",
-      "destination": "https://app.novo-aitrading.app/connect"
+      "destination": "https://novo-pulse.up.railway.app/connect"
     },
     {
       "source": "/connect/:path*",
-      "destination": "https://app.novo-aitrading.app/connect/:path*"
+      "destination": "https://novo-pulse.up.railway.app/connect/:path*"
     },
     {
       "source": "/account/:path*",
-      "destination": "https://app.novo-aitrading.app/account/:path*"
+      "destination": "https://novo-pulse.up.railway.app/account/:path*"
+    },
+    {
+      "source": "/static/:path*",
+      "destination": "https://novo-pulse.up.railway.app/static/:path*"
     },
     {
       "source": "/trader",
