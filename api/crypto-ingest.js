@@ -36,9 +36,15 @@ module.exports = async (req, res) => {
     if (!b.coins || typeof b.coins !== "object") {
       return res.status(400).json({ error: "history needs {coins:{...}}" });
     }
+    // FOLLOW THE VALUE (third instance of the whitelist bug, 2026-09-04 — Einstein's F-7 review
+    // finding). This field-by-field rebuild silently DELETED rule_edges/rule_edges_note for a day
+    // while the engine faithfully published them: present-but-null downstream, engine blamed.
+    // A new field the engine ships must be carried here or it does not exist.
     const hp = JSON.stringify({
       coins: b.coins, base_rates: b.base_rates || null, coverage: b.coverage || null,
-      open_claims: b.open_claims ?? null, received: Date.now(),
+      open_claims: b.open_claims ?? null,
+      rule_edges: b.rule_edges || null, rule_edges_note: b.rule_edges_note || null,
+      received: Date.now(),
     });
     if (hp.length > MAX_BYTES) {
       return res.status(413).json({ error: `history ${hp.length}b exceeds ${MAX_BYTES}b` });
