@@ -37,6 +37,11 @@ const TICKERS = new Set(["SPY", "QQQ", "IWM"]);
 // timeframe click for 58-85KB, which is the "clicking through their charts" complaint almost
 // exactly. They live under their own keys so the live frame's key shape does not change.
 const DEEP_TFS = new Set(["1h", "1d", "1w"]);
+// "tail" is not a timeframe — it is the live frame trimmed to its last ~90 bars, published beside
+// the full one so the dashboard's 4-second poll stops re-downloading 56KB of bars it already has
+// (~50MB an hour on a tablet). It rides the same key shape and the same gzip passthrough, so the
+// store does no work to serve it.
+const VARIANTS = new Set(["tail"]);
 const KEY = (t, tf) => (tf ? `trader:chart:${t}:${tf}` : `trader:chart:${t}`);
 
 // Normalise the tf param once, for both verbs: "" / absent / "live" all mean the live 1-minute
@@ -45,6 +50,7 @@ const KEY = (t, tf) => (tf ? `trader:chart:${t}:${tf}` : `trader:chart:${t}`);
 function normTf(v) {
   const s = String(v == null ? "" : v).toLowerCase().trim();
   if (!s || s === "live") return { ok: true, tf: "" };
+  if (VARIANTS.has(s)) return { ok: true, tf: s };
   return DEEP_TFS.has(s) ? { ok: true, tf: s } : { ok: false };
 }
 
