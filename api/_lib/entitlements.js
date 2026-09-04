@@ -45,6 +45,11 @@ const CRYPTO_PRICE_IDS = new Set([
   process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL, process.env.STRIPE_PRICE_CRYPTO_BUNDLE_ALL_YEARLY,
   "price_1UB0ZhB1Bq29OALa8iLZSSL5", "price_1UB0ZhB1Bq29OALamNjyA6Y9",   // $40/$400 beside Analyst
   "price_1UB0ZhB1Bq29OALaOw2hUHWS", "price_1UB0ZhB1Bq29OALaWQPTPOs7",   // $30/$300 beside Trader
+  // Bundle v2 ($50/$590 beside Trader): ACTIVE on the account but referenced by no handler - the
+  // account audit's first real catch (09-04). Classified here so a purchase through any future
+  // wiring (or a payment link) grants the crypto companion instead of falling to Trader-by-
+  // exclusion. If v2 is truly abandoned, deactivate it in Stripe and drop these two lines.
+  "price_1UB4bHB1Bq29OALamUSMTww0", "price_1UB4bIB1Bq29OALaf4aeeBnj",   // $50/$590 bundle v2
 ].filter(Boolean));
 
 const LIVE = ["active", "trialing", "past_due"];
@@ -268,10 +273,17 @@ function classifyAccountPrices(prices) {
   for (const p of prices || []) {
     if (!p || !p.active) continue;
     const name = `${(p.product && p.product.name) || ''} ${p.nickname || ''}`.toLowerCase();
-    if (/analyst/.test(name) && !ANALYST_PRICE_IDS.has(p.id)) {
-      drift.push({ id: p.id, name: name.trim(), expected: 'analyst' });
-    } else if (/crypto/.test(name) && !CRYPTO_PRICE_IDS.has(p.id)) {
-      drift.push({ id: p.id, name: name.trim(), expected: 'crypto' });
+    // A bundle name claims BOTH products ("analyst+crypto bundle"); membership in EITHER claimed
+    // set is classified. First live run flagged two correctly-crypto bundle ids as analyst-drift
+    // because the analyst branch won and the crypto set was never consulted.
+    const claims = [];
+    if (/analyst/.test(name)) claims.push('analyst');
+    if (/crypto/.test(name)) claims.push('crypto');
+    if (!claims.length) continue;   // Trader/licence/etc - entitlement-by-exclusion on purpose
+    const classified = (claims.includes('analyst') && ANALYST_PRICE_IDS.has(p.id))
+                    || (claims.includes('crypto') && CRYPTO_PRICE_IDS.has(p.id));
+    if (!classified) {
+      drift.push({ id: p.id, name: name.trim(), expected: claims.join('|') });
     }
     // anything else (Trader, Pulse, licence, grandfathered Trader tiers) is entitlement-by-
     // exclusion ON PURPOSE — see auditPriceSets' TRADER_VARS note.
