@@ -2655,7 +2655,7 @@ function connectTelemetry(){
           // the old chart. Same reset as _setTkr, engine-driven.
           if(_novoSelTkr===null){
             _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
-            _novoOvSig=''; _novoLvlSig='__engine_switch__'; _novoTipLive=false; _novoLastCandle=null;
+            _novoOvSig=''; _novoLvlSig='__engine_switch__'; _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null;
             try{ _reloadDrawings(); }catch(_e){}
             try{ _showVeil(); }catch(_e){}
             try{ loadNovoChart(); }catch(_e){}
@@ -2939,7 +2939,7 @@ function _novoMinSpan(){
   catch(_e){ return _NOVO_MIN_SPAN_DESK; }
 }
 let _novoConeHi=null,_novoConeLo=null;   // B14 EM decay cone
-let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoVolSeries=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoOvSig='';
+let _novoChart=null, _novoSeries=null, _novoVwap=null, _novoEma9=null, _novoEma21=null, _novoVolSeries=null, _novoLines={}, _novoLvlSeries={}, _novoLvlSig='', _novoLevelVals=[], _novoHasData=false, _novoBarCount=0, _novoRanged=false, _novoFirstT=null, _novoLastCandle=null, _novoTipLive=false, _novoBarForming=false, _novoOvSig='';
 // ── Ticker switcher state (2026-08-30) ─────────────────────────────────────────────────────────────
 // null = follow the engine's ticker (the pre-switcher behaviour, and what a first-time viewer gets).
 // A click pins the choice and persists it. The WS fast-price lane carries the ENGINE ticker's tick,
@@ -3002,7 +3002,7 @@ function _setTkr(tk){
     // mistaken for a degraded response and skipped. Level/overlay sigs are content-derived and change
     // on their own, but clearing them makes the rebuild immediate rather than eventual.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
-    _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoLastCandle=null;
+    _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null;
     try{ _reloadDrawings(); }catch(_e){}   // drawings are per-ticker
     try{ _showVeil(); }catch(_e){}
     var pe=document.getElementById('t-spy'); if(pe) pe.textContent='—';
@@ -3427,7 +3427,7 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     // Same reset as a ticker switch: bucket times share epoch anchors across TFs, so the
     // glitch-guard could mistake the switch for a degraded response and skip it.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
-    _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoLastCandle=null;
+    _novoOvSig=''; _novoLvlSig='__tf__'; _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null;
     window._lvlAnc={};   // anchors are snapped to the FRAME's grid — force a re-snap on the new one
     try{ if(_novoChart) _novoChart.timeScale().applyOptions({timeVisible:!(tf==='1d'||tf==='1w')}); }catch(_e){}
     try{ _showVeil(); _paintWm(); }catch(_e){}
@@ -3448,7 +3448,7 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
     // HA off→on is glide-safe (the glide gates on !_ctbTog.ha), but on→off re-enabled the glide
     // INSTANTLY, painting a raw bar over the still-displayed HA last bar until the repaint landed.
     // Drop the tip state; the next poll re-establishes it against the freshly-drawn series.
-    if(k==='ha'){ _novoTipLive=false; _novoLastCandle=null; }
+    if(k==='ha'){ _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null; }
     if(k==='ha'||k==='vp'||k==='gex'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language (and profile)
   });
 });
@@ -3783,7 +3783,7 @@ function _cdTick(){
   var pill=document.getElementById('chart-countdown'); if(!pill) return;
   try{
     var lc=_novoLastCandle;
-    if(_isDeepTf() || !lc || !lc.time || !_novoSeries || !_novoTipLive){ pill.style.display='none'; return; }
+    if(_isDeepTf() || !lc || !lc.time || !_novoSeries || !_novoBarForming){ pill.style.display='none'; return; }
     var step=_ctbTf*60;
     // The forming bar's start is lc.time (ET-shifted). Its close is lc.time+step. Seconds remaining =
     // that minus 'now' in the SAME ET-shifted basis. lc.time already carries this bar's ET offset, so
@@ -5333,6 +5333,13 @@ async function loadNovoChart(){
       const _tipFrame = !_isDeepTf();
       _novoLastCandle = _tipFrame ? Object.assign({}, _view.candles[_view.candles.length-1]) : null;
       _novoTipLive = (d.tip_live === true && _tipFrame);   // server owns "is the tip live" (04:00-16:00 + fresh bar); the WS glide honors it so it never stretches a frozen post-close bar
+      // BAR_FORMING IS NOT TIP_LIVE (2026-09-04, Jake: "the countdown clock was left off both QQQ
+      // and IWM charts"). tip_live is exec-ticker-only by necessity — the WS fast-price lane carries
+      // one tick (live_spy_tick), so gliding QQQ's candle off it would stretch QQQ to SPY's price.
+      // The countdown never needed that: it is a CLOCK, and QQQ's 5m bar closes at the same instant
+      // SPY's does. Gating it on tip_live gave SPY a chip and the other two nothing.
+      // Falls back to tip_live so an older payload (or a cached one mid-deploy) still behaves.
+      _novoBarForming = (d.bar_forming === undefined ? _novoTipLive : (d.bar_forming === true && _tipFrame));
       // Opening window — per-frame maps _tfOpen/_tfOpenM below (widened 2026-08-31).
       // Initial view ONLY: _novoRanged latches after the first successful set, so panning and zooming
       // afterwards are never fought.
