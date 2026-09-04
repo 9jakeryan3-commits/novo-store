@@ -174,16 +174,33 @@ module.exports = async (req, res) => {
   res.setHeader("X-Novo-As-Of", String(row.as_of || 0));
   if (etag && req.headers["if-none-match"] === etag) return res.status(304).end();
 
-  let raw;
+  // SERVE THE STORED BYTES AS GZIP, DO NOT ROUND-TRIP THEM (2026-09-04).
+  //
+  // The first version gunzipped here and returned plain JSON, letting the platform re-compress it
+  // on the way out. For the deep frames that is 391KB decompressed and then recompressed on every
+  // single read, and it measurably cost more than it saved: the pull path came out 58ms SLOWER
+  // than reaching back to the engine for tf=1h, which defeats the entire point of moving it.
+  // The stored bytes are already gzipped JSON -- and POST proved that by decompressing and parsing
+  // them before storing -- so hand them straight to the browser, which decompresses natively.
+  let body;
   try {
-    raw = zlib.gunzipSync(Buffer.from(row.gz, "base64"));
+    body = Buffer.from(row.gz, "base64");
   } catch (_) {
-    // Stored bytes are unreadable. Say so as a 503 rather than a 200 with a broken body, so the
-    // page falls back to the engine instead of trying to render nothing.
     return res.status(503).json({ error: "stored frame unreadable", ticker });
   }
 
+  const accepts = String(req.headers["accept-encoding"] || "").toLowerCase().includes("gzip");
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   if (req.method === "HEAD") return res.status(200).end();
-  return res.status(200).send(raw);
+  if (accepts) {
+    res.setHeader("Content-Encoding", "gzip");
+    return res.status(200).send(body);
+  }
+  // No gzip support claimed (probes, curl without the header). Correctness over speed: decompress
+  // rather than send bytes the caller told us it cannot read.
+  try {
+    return res.status(200).send(zlib.gunzipSync(body));
+  } catch (_) {
+    return res.status(503).json({ error: "stored frame unreadable", ticker });
+  }
 };
