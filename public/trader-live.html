@@ -5746,6 +5746,11 @@ async function loadNovoChart(){
                          msg:String((e&&e.message)||e), stack:String((e&&e.stack)||'')};
       console.error('novo chart:',_selTkr(),_ctbTf,'#'+window._ncErrN,e);
     }catch(_e2){ console.error('novo chart:',e); }
+    // A thrown fetch on a ticketed lane is how a CORS-less 401 presents (the engine middleware
+    // used to mint its 401 inside the CORS decorator - fixed server-side 2026-09-04) and how any
+    // future network-shaped auth failure will present. novoReauth debounces itself 20s, so firing
+    // it on every throw is safe, and it converts "throws forever" into "heals in one poll".
+    try{ if(window.novoReauth) window.novoReauth(); }catch(_e3){}
   }
   // _applyTogVis() is NOT called here any more (2026-08-31 audit): visibility is set at series
   // creation now, and re-applying ~20 applyOptions per tick forced a wasted repaint each cycle.
