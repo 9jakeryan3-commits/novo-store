@@ -45,6 +45,23 @@ const header = slice('<nav>', '<nav class="crumbs"', 'header');
 let footer = slice('<div class="disclaimer">', '</body>', 'footer')
   .replace(/<script[\s\S]*?<\/script>/g, '');
 
+// THE HEADER'S OWN HANDLERS ARE CHROME, NOT PAGE JS (2026-09-04, routed S2: the strip above
+// removed the only definitions of novoNavToggle/novoMoreToggle while shipping buttons that call
+// them - on mobile the menu IS the navigation, so archive readers were stranded). Lift exactly
+// the inline blocks that define the header's handlers and re-emit them as SCRIPT; everything
+// else stays stripped, which keeps the comment above true.
+const CHROME_FNS = ['novoNavToggle', 'novoMoreToggle'];
+const script = (html.match(/<script>[\s\S]*?<\/script>/g) || [])
+  .filter((b) => CHROME_FNS.some((f) => b.includes('function ' + f)))
+  .join('\n');
+// Generation-time proof the shipped header cannot call an undefined handler again: every on*
+// handler the HEADER names must be defined in what we emit.
+for (const m of header.matchAll(/on[a-z]+="(\w+)\(/g)) {
+  if (!script.includes('function ' + m[1])) {
+    throw new Error(`build-site-chrome: header calls ${m[1]}() but no emitted script defines it`);
+  }
+}
+
 const sanity = [
   [header, 'nav-inner', 'header is missing the nav'],
   [header, 'class="ticker"', 'header is missing the market ticker'],
@@ -71,6 +88,7 @@ module.exports = {
   HEAD: ${JSON.stringify(links + styleM[0])},
   HEADER: ${JSON.stringify(header)},
   FOOTER: ${JSON.stringify(footer)},
+  SCRIPT: ${JSON.stringify(script)},
 };
 `;
 const prev = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';

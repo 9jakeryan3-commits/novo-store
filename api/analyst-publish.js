@@ -9,7 +9,7 @@ const { isReservedEmail } = require('./_lib/reserved-email.js');
 // The site's REAL header, footer and CSS, lifted out of a static page at deploy time by
 // scripts/build-site-chrome.js. A hand-built lookalike drifts the moment the site nav changes;
 // this is the same bytes. Soft-fails to empty so a missing build step degrades rather than 500s.
-let _CHROME = { HEAD: '', HEADER: '', FOOTER: '' };
+let _CHROME = { HEAD: '', HEADER: '', FOOTER: '', SCRIPT: '' };
 try { _CHROME = require('./_lib/site-chrome.js'); } catch (_) {}
 const { kv } = require('./_kv.js');
 
@@ -383,7 +383,7 @@ ${crumbs || ''}
 <div class="wrap">
 ${inner}
 </div>
-${_CHROME.FOOTER}
+${_CHROME.FOOTER}${_CHROME.SCRIPT || ''}
 </body></html>`;
 }
 async function handleArchive(req, res) {
