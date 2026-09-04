@@ -3850,6 +3850,13 @@ function _staleChip(){
     if(!pa || age<45000){ if(el.__on){ el.__on=false; el.classList.remove('on'); } return; }
     var m=Math.floor(age/60000);
     var txt='bars '+(m>=1?(m+'m'):(Math.floor(age/1000)+'s'))+' old';
+    // Name the exit the lane is dying through, so a screenshot of the chip IS the diagnosis.
+    try{
+      var _lb=window._ncLastBail, _le=window._ncLastErr, _why='';
+      if(_le && (!_lb || _le.at>_lb.at)) _why='threw '+String(_le.msg||'').slice(0,32);
+      else if(_lb && _lb.at>new Date(pa).toISOString()) _why=_lb.where+'×'+_lb.n;
+      if(_why) txt+=' · '+_why;
+    }catch(_e){}
     if(el.__h!==txt){ el.__h=txt; el.textContent=txt; }
     if(!el.__on){ el.__on=true; el.classList.add('on'); }
   }catch(_e){}
@@ -5774,6 +5781,23 @@ _ncRun();
 // a watchdog interval re-checks EVERY lane while the page is visible, and the resume events just
 // run the same check immediately. setInterval survives background throttling (it fires late, but
 // it fires), so even a resume where Android drops every lifecycle event still heals in <=8s.
+// THE AUTOMATED F5 (2026-09-04, Jake: chart sat 57m stale with a live price until a manual
+// refresh). The supervisor could only re-kick loadNovoChart, and a lane dying through the SAME
+// exit every cycle makes that kick a no-op forever. This does programmatically what the refresh
+// did: fresh handshake (an expired ticket is the leading suspect and costs nothing to re-mint),
+// purge the tail cache, drop _novoHasData so the next paint takes the full setData path (past
+// the degraded-shrink guard), and pull NOW. Gated on 2 minutes of no-paint so it can never fire
+// during normal operation; re-fires each minute while the lane stays dead.
+async function _wakeHeal(){
+  if(Date.now()-(window._paintAt||0) < 120000) return;
+  if(window._whBusy && Date.now()-(window._whBusyAt||0) < 15000) return;
+  window._whBusy=1; window._whBusyAt=Date.now(); window._whAt=Date.now();
+  try{ await window.novoHandshake(); }catch(_e){}
+  try{ for(var _k in _ncFullCache) delete _ncFullCache[_k]; }catch(_e){}
+  try{ _novoHasData=false; }catch(_e){}
+  window._whBusy=0; window._ncBusy=0;
+  try{ _ncRun(); }catch(_e){}
+}
 function _laneCheck(kick){
   if(document.hidden) return;
   var now=Date.now();
@@ -5810,6 +5834,9 @@ function _laneCheck(kick){
     // the exact hole that let an 18-minute freeze look healthy. Cheap: _ncRun's own busy guard
     // collapses this into the in-flight load when one is genuinely running.
     if(now-(window._paintAt||0)>45000) _ncRun();
+    // ESCALATION: two minutes of kicks without a single paint means the kick itself is the no-op
+    // (same bail every cycle). Stop kicking and reset the lane the way a manual refresh would.
+    if(now-(window._paintAt||0)>120000 && now-(window._whAt||0)>60000){ window._whAt=now; _wakeHeal(); }
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
     if(_splitOn()){ _wireSync(); if(kick || now-(window._c2TickAt||0)>30000) _c2Run(); }
   }catch(_e){}
