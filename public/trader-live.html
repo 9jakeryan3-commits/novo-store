@@ -2602,7 +2602,17 @@ function connectTelemetry(){
       // session is open (main.py), and the hash has no TTL — so overnight/weekends, or on any Resonance/Intuition
       // API outage, the LAST read persists and would show a frozen "RISK-ON / FOMO" as if live. Gate on
       // snapshot_ts (>30min = stale), matching the engine's own consumer (mab_router: UNKNOWN when age>1800s).
-      const _cogStale = c.snapshot_ts ? (Date.now()/1000 - parseFloat(c.snapshot_ts)) > 1800 : false;
+      // A MISSING TIMESTAMP IS STALE, NOT FRESH (fixed 2026-09-04, Jake: "we did lose the market
+      // intelligence data blankets for off hours somehow, they say unknown and blank, used to say
+      // off hours"). The old `c.snapshot_ts ? ... : false` failed OPEN: with no snapshot_ts at all
+      // the gate said "not stale" and the line below printed the raw value, which is 'UNKNOWN'.
+      // That branch never ran on the owner box because its Redis persisted, so the key always
+      // existed and simply aged into staleness overnight. The container's Redis is deliberately
+      // non-persistent, and global_cognitive_state is written ONLY during the cash session, so
+      // after any redeploy there is no key at all and the gate was reached with nothing to judge.
+      // Absent evidence of freshness is not evidence of freshness.
+      const _cogTs = parseFloat(c.snapshot_ts);
+      const _cogStale = !isFinite(_cogTs) || (Date.now()/1000 - _cogTs) > 1800;
       const _rg=document.getElementById('t-regime'), _rt=document.getElementById('t-retail');
       if(_rg){ _rg.textContent=_cogStale?_staleLbl():(c.regime_state||'UNKNOWN').replace(/_/g,' '); _rg.style.color=_cogStale?'var(--txt3)':''; }
       if(_rt){ _rt.textContent=_cogStale?_staleLbl():(c.retail_state||'UNKNOWN').replace(/_/g,' '); _rt.style.color=_cogStale?'var(--txt3)':''; }
@@ -2616,7 +2626,11 @@ function connectTelemetry(){
       // live_telemetry hash has no TTL, so they FREEZE at 16:00 (and on any mid-session scan stall) — showing
       // stale order-flow as if live. The squeeze tile beside them already goes "Off-hrs" at ts>180s; match it.
       // (spy_price/net_gex/flip/VIX are intentionally kept live/last-good by the server override above.)
-      const _telemStale = lt.ts ? (Date.now()/1000 - parseFloat(lt.ts)) > 180 : false;
+      // Same fail-open bug as the cognitive gate above, same fix: no ts means we cannot show these
+      // as live. Left as-is it printed RVOL "0.00x (0/3)", TAPE IMBALANCE "0.0%" and Analyst Score
+      // "0/100" overnight — zeros presented as measurements, which is worse than saying nothing.
+      const _ltTs = parseFloat(lt.ts);
+      const _telemStale = !isFinite(_ltTs) || (Date.now()/1000 - _ltTs) > 180;
       // A dash says "nothing here" and stops. Outside RTH these fields are not missing, they are not
       // COMPUTED — the scan loop only runs 09:30-16:00 — and that is a different thing to see at 09:45
       // than at 20:45. Say which: "Off-hrs" when the session explains it, "—" only when the value is
