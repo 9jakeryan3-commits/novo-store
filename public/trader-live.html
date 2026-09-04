@@ -3178,29 +3178,6 @@ function _renderBoard(){
       if(sE) sE.textContent=rd.ts?String(rd.ts).slice(0,16):'';
     } else if(bE&&bE.textContent==='—'){ bE.textContent='No published read yet this session.'; }
   }catch(_e){}
-  // THE ANALYSIS FEED — the three overnight ES futures reads and the hourly audits (2026-09-04).
-  // It used to arrive ONLY as intel_text over the socket, off redis c2_intel_stream, which is a
-  // single slot: each write overwrote the last, so the hourly audit erased the overnight reads,
-  // and a restart of the non-persistent redis emptied it entirely. The engine now serves them from
-  // syndicate_memory.db on the board poll. A RUN command still owns the panel once fired — this
-  // only fills the idle default, never something the operator asked for.
-  try{
-    var fd=_abData.feed;
-    if(fd&&fd.length&&intelDisplay){
-      var _cur=intelDisplay.textContent||'';
-      if(_cur==='Awaiting command...'||intelDisplay.dataset.fromFeed==='1'){
-        intelDisplay.dataset.fromFeed='1';
-        // Newlines via String.fromCharCode rather than escapes: this file is written by patch
-        // scripts, and a backslash escape has already been mangled into a literal line break here
-        // once. fromCharCode(10) cannot be misread by anything in that chain.
-        var _NL=String.fromCharCode(10);
-        var _SEP=_NL+_NL+'----------'+_NL+_NL;
-        intelDisplay.textContent=fd.map(function(e){
-          return (e.kind==='futures'?'ES FUTURES · ':'HOURLY AUDIT · ')+e.ts+_NL+e.text;
-        }).join(_SEP);
-      }
-    }
-  }catch(_e){}
   try{ _renderChip(); }catch(_e){}
   var st=document.getElementById('board-stamp');
   if(st){
