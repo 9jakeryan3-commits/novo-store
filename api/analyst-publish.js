@@ -1178,7 +1178,7 @@ async function _promotePublicLevels(state) {
         if (sup) fields.push({ name: '🟢 Support', value: sup, inline: true });
       }
       const embeds = [{
-        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-options.trade/novo-icon.png?v=6' },
+        author: { name: label || 'NoVo Analyst', icon_url: 'https://novo-options.trade/novo-icon.png?v=7' },
         title, description: _cap(_bold(_prose)), color, fields,
         footer: { text: 'NoVo — market analysis & education.' },
         timestamp: new Date().toISOString(),
@@ -1187,7 +1187,7 @@ async function _promotePublicLevels(state) {
       if (_data) embeds.push({ description: _cap(_bold(_data)), color: 0x22d3ee, footer: { text: 'NoVo — analysis & education, not signals.' } });
       await fetch(discordWebhook, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-options.trade/novo-icon.png?v=6', embeds }),
+        body: JSON.stringify({ username: 'NoVo Analyst', avatar_url: 'https://novo-options.trade/novo-icon.png?v=7', embeds }),
       });
     } catch (e) { console.error('[analyst-publish] discord post failed:', e.message); }
   }

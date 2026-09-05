@@ -12,7 +12,7 @@ self.addEventListener('push', function (e) {
   let d = {}; try { d = e.data.json(); } catch (_) { d = { title: 'NoVo Crypto', body: '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'NoVo Crypto', {
     body: d.body || '', tag: d.tag || 'novo-crypto', renotify: true,
-    icon: '/icon-192.png?v=7', badge: '/icon-192.png?v=7', data: { url: d.url || '/crypto/live' }
+    icon: '/icon-192.png?v=8', badge: '/icon-192.png?v=8', data: { url: d.url || '/crypto/live' }
   }));
 });
 self.addEventListener('notificationclick', function (e) {
