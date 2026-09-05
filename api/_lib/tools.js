@@ -386,8 +386,11 @@ const declarations = [
       "version. Word map: coin-flip/slight lean=55, likely/should=65, probably=75, strong/very " +
       "likely=85, near-certain=95. RESOLVABLE BY CONSTRUCTION: only SPY/QQQ/IWM, only " +
       "spot-vs-level at a horizon (spot_above means spot AT the horizon sits at or above the " +
-      "level; spot_below the reverse), horizon 30-390 minutes inside the session. Direction " +
-      "calls, touch claims and multi-day claims are NOT loggable here and not sayable either.",
+      "level; spot_below the reverse), horizon 30-390 minutes measured FROM RIGHT NOW, inside " +
+      "the current session. A claim resolving in a FUTURE session ('an hour into Tuesday', 'by " +
+      "tomorrow's open') is NOT loggable in this version - do not shoehorn it in with a from-now " +
+      "horizon, because it would grade against a closed market; voice such claims more carefully " +
+      "instead. Direction calls, touch claims and multi-day claims are NOT loggable either.",
     parameters: {
       type: "object",
       properties: {
