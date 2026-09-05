@@ -95,14 +95,21 @@ const CARD = {
   cta: { label: "Add the equity map", href: "/plans?plan=bundle-ac" },
 };
 
-// What the model is told when the pitch is armed. Deliberately narrow: it may acknowledge the
-// boundary in ONE sentence and must still answer the question in full. No number, no link, no
-// pitch paragraph — the card underneath carries all of that.
+// What the model is told when the pitch is armed. Deliberately narrow: ONE closing sentence,
+// and the full answer first. No number, no link, no pitch paragraph — the card underneath
+// carries all of that. Jake's sell-first order (2026-09-05) reshaped the closing sentence:
+// it used to close on the BOUNDARY ("sits on the Analyst side rather than their plan"), which
+// made a can't-do the last thing the reader heard in the moment that sells. Same facts now
+// arrive delivery-first — the reader still learns the map is not on their plan, because "what
+// adds it" only means anything if they lack it, and the card below says so plainly.
+// "State no price and no link" is NOT a caveat and must survive any future rewording: a price
+// recited by a language model drifts the day it changes; the card's price is server-rendered.
 const PROMPT_LINE =
   "ONE MORE THING, AND ONLY IF THIS ANSWER TOUCHED EQUITIES: this reader's plan is the crypto map, " +
   "not the equity one. Answer their question completely and normally — withhold nothing. Then close " +
-  "with a single short sentence, in your own voice, noting that the live equity dealer map itself " +
-  "sits on the Analyst side rather than their plan. State no price and no link; a card below your " +
+  "with a single short sentence, in your own voice, naming what the live equity dealer map gives " +
+  "them — the flip, the walls, the Open and Close reads — and that Analyst + Crypto is what adds " +
+  "it. State no price and no link; a card below your " +
   "answer carries both. Do not apologise and do not repeat this if the conversation already covered it.\n\n";
 
 /**
