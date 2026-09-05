@@ -2103,6 +2103,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            figure is big or ordinary, and the 0DTE row says how much of it dies at the close. -->
       <div class="dr trial-lock"><span class="dk" data-short="RANK">GEX rank</span><span id="t-gexrank" class="dv">—</span></div>
       <div class="dr trial-lock"><span class="dk" data-short="0DTE">0DTE book</span><span id="t-0dte" class="dv">—</span></div>
+      <!-- The two second-order greeks the gamma map leaves out. HIDDEN until the engine's
+           values actually arrive (style="display:none") rather than sitting as permanent em
+           dashes — a row that has never once had data is clutter, not honesty. -->
+      <div class="dr trial-lock" id="dr-vanna" style="display:none"><span class="dk" data-short="VANNA">Vanna</span><span id="t-vanna" class="dv">—</span></div>
+      <div class="dr trial-lock" id="dr-charm" style="display:none"><span class="dk" data-short="CHARM">Charm /day</span><span id="t-charm" class="dv">—</span></div>
       <!-- Gamma-squeeze meter (2026-07-24): short-gamma break intensity + direction, colored by state, with a
            driver line under it. Fed by novo_state:squeeze (scan loop, RTH) — the Trader mirror of the Analyst hero. -->
       <!-- Row break for narrow desktops. Inert above 1850px, where all eight readouts fit on one line.
@@ -3077,6 +3082,9 @@ function _setTkr(tk){
     // after a switch it marked the ticker you had just LEFT for up to a minute. Cosmetic next
     // to wrong price levels, identical in kind, and one call to close it.
     try{ _gexAgree(); }catch(_e){ _ncSwallow('tkr-ga', _e); }
+    // Ticker-scoped like the rest — the sweep that found three of these taught me to wire the
+    // switch at the same time as the render, not after someone notices the stale value.
+    try{ _renderVannaCharm(); }catch(_e){ _ncSwallow('tkr-vc', _e); }
     // Same shape, milder: these two tiles asserted the previous ticker's book until the new
     // payload landed. A few seconds of a confidently wrong number is still a wrong number.
     try{
@@ -3301,7 +3309,7 @@ async function _loadAnalysisBoard(){
     var u=NOVO_URL('/api/analysis-board'); if(!u) return;
     var r=await _tfetch(u); if(!r.ok){ _reauth401(r); return; }
     _abData=await r.json();
-    _renderBoard(); _renderLine(); try{ _gexAgree(); }catch(_e){}
+    _renderBoard(); _renderLine(); try{ _gexAgree(); }catch(_e){} try{ _renderVannaCharm(); }catch(_e){}
     if(_ctbTog.heat){ try{ _loadHeat(); }catch(_e){} }   // B16: field refresh rides this supervised lane
   }catch(_e){}
 }
@@ -4176,6 +4184,51 @@ function _renderRankExpiry(d){
       }
     }
   }catch(_e){ _ncSwallow('rankexpiry', _e); }
+}
+/* ── VANNA AND CHARM (2026-09-05) ─────────────────────────────────────────────────────
+   The gamma map answers "where do dealers hedge against PRICE". These are the two it leaves
+   out: VANNA is how their delta moves when IV moves, CHARM is how it moves as time passes.
+   On a 0DTE afternoon charm drains delta out of the book into the close and vanna reprices the
+   whole hedge the moment vol shifts — which is why the same map reads differently at 15:30
+   than it did at 10:00.
+
+   Engine-side these are closed-form Black-Scholes (skills/gex_calculator.vanna_charm_exposure),
+   aggregated on the SAME dealer sign convention as net GEX (+calls, -puts, x OI x 100 x spot),
+   deliberately so the sign reads against net GEX instead of inventing a second convention.
+
+   NO PER-1% RESCALE HERE, and that is deliberate. _fmtGex multiplies by spot x 0.01 because
+   that is the NET GEX display convention. Vanna is delta-per-vol-point and charm is
+   delta-per-day; pushing a price rescale onto either would invent a unit neither number has.
+   Magnitude formatting only, on the engine's own aggregate.
+
+   NOTHING HERE INTERPRETS. The engine's docstring says what each measures; the chart shows the
+   number and its sign. What a trader should DO with it is not the chart's sentence to write. */
+function _fmtRaw(v){
+  var a = Math.abs(v);
+  var s = a >= 1e9 ? (v/1e9).toFixed(2) + 'B'
+        : a >= 1e6 ? (v/1e6).toFixed(1) + 'M'
+        : a >= 1e3 ? (v/1e3).toFixed(1) + 'K'
+        : v.toFixed(0);
+  return (v >= 0 ? '+' : '') + s;
+}
+function _renderVannaCharm(){
+  try{
+    var B = (_abData && _abData.board) ? _abData.board[_selTkr()] : null;
+    [['dr-vanna','t-vanna','net_vanna'], ['dr-charm','t-charm','net_charm_1d']].forEach(function(r){
+      var row = document.getElementById(r[0]), val = document.getElementById(r[1]);
+      if(!row || !val) return;
+      var v = B ? B[r[2]] : null;
+      // typeof, NOT truthiness: a genuine ZERO exposure is a real reading and must not be
+      // treated as missing. Absent stays absent; zero prints as zero.
+      if(typeof v === 'number' && isFinite(v)){
+        val.textContent = _fmtRaw(v);
+        val.style.color = v >= 0 ? 'var(--pos,#34d399)' : 'var(--neg,#f43f5e)';
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }catch(_e){ _ncSwallow('vannacharm', _e); }
 }
 function _staleChip(){
   try{
