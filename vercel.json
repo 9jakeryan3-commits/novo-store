@@ -1229,6 +1229,9 @@
     },
     "api/analyst-ask.js": {
       "maxDuration": 90
+    },
+    "api/novo-broadcast.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
