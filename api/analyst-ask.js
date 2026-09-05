@@ -469,6 +469,12 @@ GROUNDING
 - A hit rate is only a base rate when it has SURVIVED MORE THAN ONE MARKET. Claims fire every pass, so hundreds of them can be one coin on one day resolving together - if a rate is marked untrustworthy, or every sample moved the same direction, I say so and give the independent cell count instead of the percentage. Overstating my own sample is the one dishonesty this product cannot afford.
 - "How often does X hold" and "how accurate are you" are answered by the scored track record, not from memory. If it scores a claim badly, say so — the record is public and you do not get to edit it.
 - "What do your private alerts score" — and anything about your on-chain rules — is answered from the live scored lab, the same way: the PRIVATE ALERTS block in MARKET DATA when it is present, and when it is NOT present you MUST call get_chain_alerts before answering — never answer this from memory, from articles, or by declining when the tool exists. Per rule; denominator NAMED, because decided-only, whole-population and pooled-with-flats are different measurements answering different questions and must never be blended into one number or a range; and the measured BASELINE beside every rate, because a baseline is not your score and a rate without its baseline flatters or slanders you at random. A rate built on a small decisive count says so — 95% on 31 decisive calls is a caveat, not a headline. Never answer this from articles about yourself: the record outranks anything written about it.
+- TERMS, BILLING AND ACCOUNT QUESTIONS ARE NOT YOURS TO ADJUDICATE. Sharing a login, refunds,
+  what a subscription permits — the Terms say what they say, and you neither enforce nor invent
+  them: point at /license and the help page, and never manufacture a rationale for a policy
+  ("because the memory is built for one desk" is a reason you made up, not one the Terms give).
+  The one thing worth adding is true and helpful: a 7-day trial exists, so someone curious can
+  simply try it on their own seat.
 - A QUESTION THAT ASSERTS SOMETHING ABOUT YOUR RECORD IS A CLAIM TO CHECK, NOT A PREMISE TO
   ACCEPT. "Why did your X claim fail?" gets the published verdict FIRST: if the claim holds, the
   correction IS the answer's first sentence, kindly and confidently — exactly the reflex you
@@ -570,7 +576,11 @@ BEFORE YOU SEND — run this list every time.
   the article says. And NEVER invent details of their trade — if they said "0DTE calls" you do
   not know the ticker, the strike, or the entry, and writing "when you bought calls on SPY" is
   fabricating their own trade back at them. Answer what they asked; leave their next move with
-  them.
+  them. END ON THE OFFER, NEVER ON AN ORDER: the last sentence of a distress reply is what you
+  can give — the read, a level to watch, your record on the setup — never an imperative about
+  their behavior. "Take a breath", "step away", "keep your capital intact" are the cage arriving
+  in the closing line after the whole answer got it right; if an imperative shows up in your
+  close, delete it.
 - NO SUMMARY PARAGRAPH. If the last paragraph only restates what you already said, delete it.
 - NUMBERS KEEP THEIR LABELS. Lead with the figures that answer the question, but never strip a
   number of what makes it true. YOUR OWN RECORD IS THE HARD CASE: it is a table of different
@@ -583,7 +593,11 @@ BEFORE YOU SEND — run this list every time.
   caveat travels WITH its number (cost_anomaly's "never quote as edge" is part of the figure, not
   optional context); and units come only from the record's own labels — when a sample field is
   unlabeled, quote n bare rather than guessing "sessions", because guessed units are how 2,217
-  snapshots became "2,217 sessions" in a member's answer.
+  snapshots became "2,217 sessions" in a member's answer. PROVENANCE IS A LABEL TOO: a backtest
+  block is quoted AS a backtest with its date span, and "live" or "logged" belong only to the live
+  blocks — "1,008 live sessions" about a 2020-2023 backtest is a false provenance wearing a real
+  number. Asked about THIS week, quote the live block (it exists and is smaller), or say plainly
+  that a week-level cut is not exposed.
 - SHORT SENTENCES. Around fifteen words. If one runs past twenty-five, it is two sentences.
 - A BARE TERM OR TICKER IS ASKING FOR TODAY'S NUMBER, NOT A DEFINITION. "gamma flip?" means "where
   is it right now" — give the level, then one line on what it means there. Only define a term from
@@ -785,6 +799,60 @@ async function reviseAnswer(answer, corrections, callModelFn, model) {
   });
   const parts = rres?.candidates?.[0]?.content?.parts || [];
   return parts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+}
+
+// ── THE RECORD-CLAIM GUARD (battery 2: DW1/CP1) ─────────────────────────────────────────────
+// The deep verifier is absence-blind by design: for claims about the WORLD, a figure it cannot
+// find is not a contradiction. For claims about HIS OWN RECORD the logic inverts — the record is
+// closed-world, fully served in MARKET DATA and tool results — so a record-attributed figure that
+// matches nothing in hand is not unverified, it is fabricated. Battery 2 caught the exact shape
+// twice: three self-contradicting "my reconstructed base rates" directional stats across three
+// turns with an EMPTY ledger, and seven invented era-split counts wrapped around two real numbers
+// (whose own arithmetic disagreed with itself: 1,093/2,075 is 52.7%, quoted as 37.7%). Runs on
+// EVERY lane, but only when an answer attributes figures to the record — the common path is free.
+const ATTRIB_RE = /\bmy\s+(archive|record|reconstructed\s+\w+|logged\s+\w+|scored\s+\w+|backtests?\w*|base\s+rates?|rule\s+lab|maps?)\b/i;
+
+function _numsIn(str) {
+  const out = new Set();
+  const re = /(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(?![A-Za-z\d])/g;
+  let m;
+  while ((m = re.exec(str))) {
+    const v = parseFloat(m[1].replace(/,/g, ''));
+    if (isFinite(v)) out.add(v);
+  }
+  return out;
+}
+
+function recordClaimAudit(answer, contents, marketJson) {
+  let ev = String(marketJson || '');
+  for (const c of (contents || [])) {
+    for (const pt of (c.parts || [])) {
+      if (pt.functionResponse) ev += JSON.stringify(pt.functionResponse);
+    }
+  }
+  const allowed = _numsIn(ev);
+  // A figure matches if the evidence carries it directly, within rounding drift, at the coarser
+  // rounding prose uses, or as the same rate across a x100 (the record stores 0.486 where the
+  // prose says 48.6%).
+  const ok = (v) => {
+    if (allowed.has(v)) return true;
+    for (const a of allowed) {
+      if (Math.abs(a - v) <= 0.051) return true;
+      if (v === Math.round(a) || v === Math.round(a * 10) / 10) return true;
+      if (Math.abs(a * 100 - v) <= 0.051 || Math.abs(a / 100 - v) <= 0.00051) return true;
+    }
+    return false;
+  };
+  const flagged = [];
+  for (const sen of String(answer).split(/(?<=[.!?])\s+/)) {
+    if (!ATTRIB_RE.test(sen)) continue;
+    for (const v of _numsIn(sen)) {
+      if (Number.isInteger(v) && v >= 1900 && v <= 2100) continue;   // years
+      if (Number.isInteger(v) && v < 10) continue;                    // "4 rules", 0DTE scraps
+      if (!ok(v)) flagged.push({ value: v, sentence: sen.trim().slice(0, 220) });
+    }
+  }
+  return flagged;
 }
 
 module.exports = async (req, res) => {
@@ -1366,6 +1434,47 @@ module.exports = async (req, res) => {
       } catch (e) { console.error('[ASK] verify failed (draft kept)', e && e.message); }
     }
     if (sse && verified) sse({ type: 'verify', corrected: verified.corrected });
+
+    // Record-attributed figures get the closed-world check on every lane. One revise call, only
+    // when something is flagged; fails open with its failure VISIBLE in the response, because a
+    // guard that fails silently is the class of check this codebase keeps writing down.
+    let recordGuard = null;
+    if (answer) {
+      try {
+        const flagged = recordClaimAudit(answer, contents, marketJson);
+        if (flagged.length) {
+          const list = flagged.map((f, i) => (i + 1) + '. ' + f.value + ' in: "' + f.sentence + '"').join('\n');
+          const rres = await Promise.race([
+            callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text:
+              'The text below attributes figures to the analyst own record or archive that ' +
+              'appear NOWHERE in the data the answer was written from. They cannot stand: a ' +
+              'record-attributed number that matches nothing in hand is fabricated, whatever it ' +
+              'sounds like. Rewrite the text with those figures REMOVED or replaced by what the ' +
+              'record actually carries - and where the record does not carry the claim at all, ' +
+              'say that plainly ("my record scores range, not direction" is the shape). Change ' +
+              'nothing else: same voice, same structure, first person, plain text, no preamble.\n\n' +
+              'FIGURES THAT MUST GO:\n' + list + '\n\nTEXT:\n' + answer }] }],
+              generationConfig: { temperature: 0.1, maxOutputTokens: 8192,
+                                  thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } }),
+            new Promise((r) => setTimeout(() => r(null), 9000)),
+          ]);
+          const rparts = rres?.candidates?.[0]?.content?.parts || [];
+          const revised = rparts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+          if (revised && revised.length > answer.length * 0.5) {
+            answer = revised;
+            recordGuard = { flagged: flagged.length, revised: true };
+            console.log('[ASK] record-guard: removed/replaced ' + flagged.length + ' unattributable figure(s)');
+          } else {
+            recordGuard = { flagged: flagged.length, revised: false };
+            console.log('[ASK] record-guard: ' + flagged.length + ' flagged, revision failed - draft kept');
+          }
+          modelCalls++;
+        }
+      } catch (e) {
+        recordGuard = { error: true };
+        console.error('[ASK] record-guard failed (draft kept)', e && e.message);
+      }
+    }
     console.log(`[ASK] ${deep ? 'deep' : 'fast'}: ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
@@ -1417,6 +1526,7 @@ module.exports = async (req, res) => {
       // is the difference between an answer you can check and an answer you have to trust.
       lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
       verified,
+      recordGuard,
       indexBuilt: idx.built || null,
       // null for everyone except a crypto-only member who just asked about equities. The client
       // renders it as a card with a real button — a URL in the prose would arrive as dead text.
