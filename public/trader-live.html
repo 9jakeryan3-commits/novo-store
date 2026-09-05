@@ -3063,6 +3063,22 @@ function _setTkr(tk){
     // on their own, but clearing them makes the rebuild immediate rather than eventual.
     _novoHasData=false; _novoRanged=false; _novoFirstT=null; _novoBarCount=0;
     _novoOvSig=''; _novoLvlSig='__switching__'; _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null;
+    // ANYTHING KEYED TO THE TICKER WE ARE LEAVING GOES NOW (2026-09-05, my own bug from this
+    // morning). The pin/void lines were only ever cleared inside _pinVoid, and _pinVoid only
+    // runs after a successful heat fetch — which is the 60s board poll. So SPY's PIN and VOID
+    // stayed drawn on the QQQ chart for up to a minute, and INDEFINITELY if heat never landed
+    // for the new ticker: real price levels, drawn confidently, belonging to a different
+    // instrument, with nothing anywhere indicating a problem. The exact house failure shape.
+    // _pinVoid clears first and then finds no heat data for the new ticker, so this both
+    // removes the old lines and redraws immediately when the new ticker's field is cached.
+    try{ _pinVoid(); }catch(_e){ _ncSwallow('tkr-pv', _e); }
+    // Same shape, milder: these two tiles asserted the previous ticker's book until the new
+    // payload landed. A few seconds of a confidently wrong number is still a wrong number.
+    try{
+      var _gr0=document.getElementById('t-gexrank'), _z0=document.getElementById('t-0dte');
+      if(_gr0){ _gr0.textContent='\u2014'; _gr0.style.color=''; }
+      if(_z0){ _z0.textContent='\u2014'; _z0.style.color=''; }
+    }catch(_e){ _ncSwallow('tkr-tiles', _e); }
     try{ _reloadDrawings(); }catch(_e){}   // drawings are per-ticker
     try{ _showVeil(); }catch(_e){}
     var pe=document.getElementById('t-spy'); if(pe) pe.textContent='—';
@@ -4008,6 +4024,11 @@ function _pinVoid(){
     if(!_ctbTog.heat || !_novoSeries || _isDeepTf()) return;
     var d = _heatData[_selTkr()];
     if(!d || !d.cells || !d.cells.length || !d.strikes || !d.strikes.length) return;
+    // The cache is keyed by ticker, so this should never fire — which is exactly why it is
+    // here. Drawing price levels from the wrong instrument is the failure worth being
+    // paranoid about, and the payload states its own ticker, so ask it rather than trust
+    // the key. Cheap, and it can only ever prevent a wrong drawing.
+    if(d.ticker && d.ticker !== _selTkr()) return;
     var last = d.cols.length - 1;
     if(last < 0) return;
 
