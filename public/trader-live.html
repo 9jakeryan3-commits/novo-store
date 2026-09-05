@@ -505,6 +505,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
 /* ── Chart toolbar ─────────────────────────────────────────────────────────────────────────── */
 #ctb-more { display: none; }   /* phone-only; the 768px block turns it on */
+/* The VIX change-since-open. Deliberately quieter than the number it sits beside: it is the
+   line's caption, not a headline of its own. */
+.vix-d { font-family: var(--mono, var(--font)); font-size: 10px; font-weight: 700;
+  letter-spacing: .3px; opacity: .85; margin-right: 7px; font-variant-numeric: tabular-nums; }
 #chart-toolbar { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; justify-content: center;
   flex-wrap: wrap; padding: 0 12px; min-width: 0; }
 .spy-hero { flex-wrap: wrap; row-gap: 6px; }
@@ -2004,6 +2008,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         #gex-agree i { font-style: normal; margin-right: 7px; }
         #gex-agree i:last-child { margin-right: 0; }
         #gex-agree i b { font-weight: 700; opacity: .72; margin-right: 2px; }
+        #gex-agree i.sel { text-decoration: underline; text-underline-offset: 3px;
+          text-decoration-thickness: 1px; }
+        #gex-agree i.sel b { opacity: 1; }
         #gex-agree .pos { color: #34d399; }
         #gex-agree .neg { color: #f43f5e; }
         #gex-agree.all { border-color: rgba(245,158,11,.45); }
@@ -2117,7 +2124,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <!-- VIX rides far right, beside the score, above the price (Jake 2026-08-30). -->
 </div>
       <!-- VIX: last in DOM for the desktop strip (far right); order:-1 puts it first on the mobile panel. -->
-      <div class="dr dr-vix"><span class="dk">VIX</span><span id="t-vix" class="dv">—</span></div>
+      <div class="dr dr-vix"><span class="dk">VIX</span><span id="t-vix-d" class="vix-d"></span><span id="t-vix" class="dv">—</span></div>
     </div>
 
     <!-- Chart Levels — the SPY chart's level legend lives here now (2026-07-17), as a readable 2-col
@@ -3159,6 +3166,21 @@ function _vixSpark(){
     // digits and the line can never disagree.
     var _ve=document.getElementById('t-vix');
     if(_ve && !(parseFloat(_ve.textContent) > 0)) _vixPaint(last);
+    // SAY WHY THE LINE IS THAT COLOUR (2026-09-05, Jake asked whether it was coloured right).
+    // It is — but the digits and the line answer DIFFERENT questions and nothing said so.
+    // The number is coloured by LEVEL (<18 calm, 18-25 amber, 25+ red); the line by DIRECTION
+    // against the session open. So a green 14.52 beside a red curve is "calm, but firming",
+    // which is real information and reads as a contradiction without this delta. Both rules
+    // stay — dropping either would lose a fact — and the change figure resolves the ambiguity
+    // by making the line's colour self-evident. Coloured with the LINE, never with the number,
+    // because it is the line it explains.
+    var _vd=document.getElementById('t-vix-d');
+    if(_vd){
+      var _dv=last-open;
+      _vd.textContent=(_dv>=0?'+':'\u2212')+Math.abs(_dv).toFixed(2);
+      _vd.style.color=(last>open)?'#f43f5e':'#34d399';
+      _vd.title='change since today\u2019s open \u2014 what the line is drawing';
+    }
   }catch(_e){}
 }
 function _renderBoard(){
@@ -4050,7 +4072,13 @@ function _gexAgree(){
       var g = arr[arr.length - 1][1];
       var pos = g >= 0;
       signs.push(pos ? 1 : -1); any = true;
-      out.push('<i class="' + (pos ? 'pos' : 'neg') + '"><b>' + tks[i] + '</b>' + (pos ? '+' : '\u2212') + '</i>');
+      // MARK THE ONE ON SCREEN (2026-09-05, Jake). The order never changes — it matches the
+      // ticker tabs and the board table, and a strip that re-sorted itself would be harder to
+      // read at a glance, not easier. What was missing was knowing WHICH of the three is the
+      // chart you are looking at; on QQQ the strip was three symbols with no anchor.
+      var _sel = (tks[i] === _selTkr());
+      out.push('<i class="' + (pos ? 'pos' : 'neg') + (_sel ? ' sel' : '') + '"><b>' +
+               tks[i] + '</b>' + (pos ? '+' : '\u2212') + '</i>');
     }
     if(!any){ el.classList.remove('on'); return; }
     // "all three" only counts when all three actually reported — a missing ticker is not agreement.
