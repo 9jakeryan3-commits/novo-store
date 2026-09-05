@@ -62,13 +62,17 @@ function main() {
 
   // Keep the featured entries verbatim — they are a hand-made selection, not generated output.
   const featured = inner.match(/<li style="break-inside:avoid;margin:0 0 11px;">[\s\S]*?<\/li>/g) || [];
+  // Compare hrefs with any .html stripped on BOTH sides. The featured entries went
+  // extensionless in the URL migration while this matched on `/journal/<file>.html`, so the
+  // dedupe silently stopped firing and every featured article was listed a second time below.
+  const bare = h => String(h).replace(/\.html$/, '');
   const featuredHrefs = new Set(
-    featured.map(li => (li.match(/href="([^"]+)"/) || [])[1]).filter(Boolean));
+    featured.map(li => (li.match(/href="([^"]+)"/) || [])[1]).filter(Boolean).map(bare));
 
   const skipped = [];
   const rows = [];
   for (const f of files) {
-    const href = '/journal/' + f;
+    const href = bare('/journal/' + f);
     if (featuredHrefs.has(href)) continue;
     let a;
     try { a = readArticle(f); } catch (_) { a = null; }
@@ -86,7 +90,14 @@ function main() {
   hub = hub.slice(0, open) + rebuilt + hub.slice(end);
   fs.writeFileSync(HUB, hub);
 
-  console.log(`.. journal archive: ${featured.length} featured + ${rows.length} listed = ${featured.length + rows.length} of ${files.length} articles`);
+  const total = featured.length + rows.length;
+  console.log(`.. journal archive: ${featured.length} featured + ${rows.length} listed = ${total} of ${files.length} articles`);
+  // Every article appears exactly once: featured OR listed, never both. If the href shapes drift
+  // apart again this fails loudly instead of quietly duplicating the featured set.
+  if (total > files.length) {
+    console.error(`!! journal archive: ${total - files.length} duplicate entries -- featured hrefs are not matching the generated ones`);
+    process.exit(1);
+  }
   if (skipped.length) console.log(`.. skipped (no readable title): ${skipped.join(', ')}`);
 }
 

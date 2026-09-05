@@ -214,7 +214,7 @@ if (gone.length) console.log('           dropped ' + gone.length + ': ' + gone.s
 
 // ── RSS feed for the journal ──────────────────────────────────────────────────
 // /journal/feed.xml: the 40 most recently touched articles, titles and deks from
-// search-index.json, dates from the same git lastmod map the sitemap uses. Rebuilt
+// search-index.json, dates from each article's own datePublished. Rebuilt
 // on every deploy alongside the sitemap, so it can never drift from the corpus.
 // Aggregators and AI crawlers get a machine door into 1,200+ articles that until
 // now only existed as HTML.
@@ -232,13 +232,31 @@ try {
     }
     return [];
   }));
+  // pubDate must be the date the piece was PUBLISHED, not the last time its file was touched.
+  // Using lastmod meant any mechanical site-wide commit -- a cache restamp, a copy sweep --
+  // re-dated all 1,287 articles and every subscriber saw the same 40 arrive as new. Each article
+  // states its own date in JSON-LD; 1,275 of 1,288 carry it, and the handful that do not are
+  // section hubs, which fall back to lastmod.
+  // Returns null for anything that does not state a publication date. The 13 pages in that
+  // position are all category hubs ("Dealer Flow & Positioning", "Options 101 & the Greeks"),
+  // not articles, so they are dropped from the feed rather than given an invented date -- which
+  // is also what stops them re-dating to today on every mechanical commit.
+  const published = (slug) => {
+    try {
+      const html = fs.readFileSync(path.join(ROOT, 'public/journal/' + slug + '.html'), 'utf8');
+      const m = html.match(/"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})/);
+      return m ? m[1] : null;
+    } catch (_) { return null; }
+  };
   const items = [];
   for (const [file, date] of lastmod.entries()) {
     const m = file.match(/^public\/journal\/([a-z0-9-]+)\.html$/);
     if (!m || m[1] === 'index') continue;
     const e = byslug.get(m[1]);
     if (!e) continue;
-    items.push({ slug: m[1], date, title: e.t, dek: e.d || '' });
+    const pub = published(m[1]);
+    if (!pub) continue;
+    items.push({ slug: m[1], date: pub, title: e.t, dek: e.d || '' });
   }
   items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.slug < b.slug ? -1 : 1));
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -252,8 +270,8 @@ try {
     '<atom:link href="' + ORIGIN + '/journal/feed.xml" rel="self" type="application/rss+xml"/>\n' +
     items.slice(0, 40).map((it) =>
       '<item><title>' + esc(it.title) + '</title>' +
-      '<link>' + ORIGIN + '/journal/' + it.slug + '.html</link>' +
-      '<guid isPermaLink="true">' + ORIGIN + '/journal/' + it.slug + '.html</guid>' +
+      '<link>' + ORIGIN + '/journal/' + it.slug + '</link>' +
+      '<guid isPermaLink="true">' + ORIGIN + '/journal/' + it.slug + '</guid>' +
       '<pubDate>' + new Date(it.date + 'T12:00:00Z').toUTCString() + '</pubDate>' +
       '<description>' + esc(it.dek) + '</description></item>'
     ).join('\n') +
