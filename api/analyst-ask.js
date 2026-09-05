@@ -492,11 +492,12 @@ GROUNDING
   silently, exactly as you said it: same level, same horizon, the confidence word mapped honestly
   (coin flip/slight lean 55, likely/should 65, probably 75, strong/very likely 85, near-certain
   95). Never a softer version than what you told the reader -- logging "55" after saying "very
-  likely" is editing your record before it is written. Never mention the logging. The horizon is
-  measured FROM NOW: a claim resolving in a future session ("an hour into Tuesday") is not
-  loggable in this version -- shoehorning it in with a from-now horizon would grade it against a
-  closed market. Only what the
-  tool can grade is loggable (SPY/QQQ/IWM, spot vs a level, 30-390 minutes from now) -- which cuts both
+  likely" is editing your record before it is written. Never mention the logging. TWO ANCHORS:
+  a claim inside the current session logs anchor "now" (horizon 30-390 minutes from this moment);
+  a claim belonging to the NEXT session -- "an hour into Tuesday's open", "holds early tomorrow"
+  -- logs anchor "next_open" (horizon 5-390 minutes counted from that open; weekends and holidays
+  are handled for you). Never shoehorn a next-session claim into a from-now horizon. Only what the
+  tool can grade is loggable (SPY/QQQ/IWM, spot vs a level) -- which cuts both
   ways: a confident forward claim you could not log there is one to say more carefully.
 - A NAME A READER GIVES A CAPABILITY IS NOT PROOF IT EXISTS. If someone asks about "your equities
   desk", "your buy-down signal", "your win rate on X" — you do not have a thing just because they
@@ -918,7 +919,15 @@ async function gradeDueForecasts(r) {
       let c = null;
       try { c = typeof item === 'string' ? JSON.parse(item) : item; } catch (_) { continue; }
       if (!c || !c.asked_at) continue;
-      const due = c.asked_at + c.horizon_min * 60000;
+      // Anchor semantics interpreted in ONE place (forecast.js resolveAt): 'now' claims resolve
+      // asked_at + horizon; 'next_open' claims resolve next-session-open + horizon, weekends and
+      // holidays skipped by the shared calendar. A null (calendar exhausted) grades censored.
+      const due = forecastResolveAt(c);
+      if (due === null) {
+        const rm = await r.lrem('calib:pending', 1, typeof item === 'string' ? item : JSON.stringify(item));
+        if (rm) await r.hincrby('calib:cells', String(c.confidence) + ':cens', 1);
+        continue;
+      }
       if (now < due + SLACK) continue;
       // Claim ownership first: LREM returning 0 means another lambda took it -- count nothing.
       const removed = await r.lrem('calib:pending', 1, typeof item === 'string' ? item : JSON.stringify(item));
@@ -962,22 +971,11 @@ async function gradeDueForecasts(r) {
 const CALIB_VOICE_RE = /\b(near-?certain|very likely|strong(?:ly)? (?:favor|lean)|likely|probably|should (?:hold|stay)|confidence is \d{1,2}\s*%|\d{1,2}\s*% (?:confident|confidence|chance|odds))\b/i;
 const CALIB_FWD_RE = /\b(tomorrow|monday|tuesday|wednesday|thursday|friday|next session|into the (?:open|close)|by the (?:open|close)|an hour|within \d|hold(?:ing)? (?:above|below)|stay(?:ing)? (?:above|below)|reclaim)\b/i;
 
-// The SAME rules the log_forecast executor enforces -- mirrored here because the executor lives
-// inside makeExecutors' closure. If the rules there change, change these (scripts/calib-check.js
-// exercises this copy).
-function validForecast(c) {
-  if (!c || typeof c !== 'object') return null;
-  const tk = String(c.ticker || '').toUpperCase();
-  const conf = Number(c.confidence), lvl = Number(c.level), hz = Math.round(Number(c.horizon_min));
-  if (!['SPY', 'QQQ', 'IWM'].includes(tk)) return null;
-  if (![55, 65, 75, 85, 95].includes(conf)) return null;
-  if (c.metric !== 'spot_above' && c.metric !== 'spot_below') return null;
-  if (!isFinite(lvl) || lvl <= 0) return null;
-  if (!isFinite(hz) || hz < 30 || hz > 390) return null;
-  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-           asked_at: Date.now(), claim: String(c.claim || '').slice(0, 200),
-           confidence: conf, ticker: tk, metric: c.metric, level: lvl, horizon_min: hz };
-}
+// The mirror is DEAD (Jake: "both should be in now"). Validation lives in _lib/forecast.js --
+// one exported truth both doors import -- because a hand-copied twin was the third instance of
+// the silently-drifting-mirror class on this codebase, and the fix for a class is one source,
+// never a more careful copy.
+const { validateForecast: validForecast, resolveAt: forecastResolveAt } = require('./_lib/forecast.js');
 
 function missBlock(misses) {
   if (!Array.isArray(misses) || !misses.length) return '';
@@ -1803,14 +1801,17 @@ module.exports = async (req, res) => {
         const xres = await Promise.race([
           callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text:
             'From the analyst text below, extract every FORWARD-LOOKING claim about SPY, QQQ or ' +
-            'IWM spot finishing at-or-above / at-or-below a SPECIFIC price level within a horizon ' +
-            'of 30-390 minutes, where the text states a confidence. Map confidence words: coin ' +
-            'flip/slight lean=55, likely/should=65, probably=75, strong/very likely=85, ' +
-            'near-certain=95; an explicit percent rounds to the nearest bucket. Return STRICT ' +
-            'JSON only: {"claims":[{"claim":"<one sentence as written>","confidence":65,' +
-            '"ticker":"SPY","metric":"spot_above","level":769,"horizon_min":60}]}. Omit anything ' +
-            'that does not fit exactly (no direction calls, no touch claims, no multi-day). ' +
-            'If none fit: {"claims":[]}.\n\nTEXT:\n' + answer }] }],
+            'IWM spot finishing at-or-above / at-or-below a SPECIFIC price level at a horizon, ' +
+            'where the text states a confidence. Map confidence words: coin flip/slight lean=55, ' +
+            'likely/should=65, probably=75, strong/very likely=85, near-certain=95; an explicit ' +
+            'percent rounds to the nearest bucket. ANCHOR: a claim belonging to the CURRENT ' +
+            'session uses anchor "now" with horizon_min 30-390 counted from now; a claim ' +
+            'belonging to the NEXT session ("an hour into Tuesday", "early tomorrow") uses ' +
+            'anchor "next_open" with horizon_min 5-390 counted from that session open. Return ' +
+            'STRICT JSON only: {"claims":[{"claim":"<one sentence as written>","confidence":65,' +
+            '"ticker":"SPY","metric":"spot_above","level":769,"horizon_min":60,' +
+            '"anchor":"next_open"}]}. Omit anything that does not fit exactly (no direction ' +
+            'calls, no touch claims, no multi-day). If none fit: {"claims":[]}.\n\nTEXT:\n' + answer }] }],
             generationConfig: { temperature: 0, maxOutputTokens: 1024, responseMimeType: 'application/json',
                                 thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } }),
           new Promise((x) => setTimeout(() => x(null), 8000)),

@@ -19,6 +19,7 @@ const { kv } = require("../_kv.js");
 
 const TICKERS = ["SPY", "QQQ", "IWM"];
 const okTicker = (t) => TICKERS.includes(String(t || "").toUpperCase()) ? String(t).toUpperCase() : null;
+const { validateForecast, resolveAt } = require("./forecast.js");
 
 // One retry on a transient. A live test saw a single Yahoo pull fail while ten sequential and
 // twelve parallel ones succeeded — a blip, not rate limiting. Without the retry the analyst tells
@@ -386,11 +387,13 @@ const declarations = [
       "version. Word map: coin-flip/slight lean=55, likely/should=65, probably=75, strong/very " +
       "likely=85, near-certain=95. RESOLVABLE BY CONSTRUCTION: only SPY/QQQ/IWM, only " +
       "spot-vs-level at a horizon (spot_above means spot AT the horizon sits at or above the " +
-      "level; spot_below the reverse), horizon 30-390 minutes measured FROM RIGHT NOW, inside " +
-      "the current session. A claim resolving in a FUTURE session ('an hour into Tuesday', 'by " +
-      "tomorrow's open') is NOT loggable in this version - do not shoehorn it in with a from-now " +
-      "horizon, because it would grade against a closed market; voice such claims more carefully " +
-      "instead. Direction calls, touch claims and multi-day claims are NOT loggable either.",
+      "level; spot_below the reverse). TWO ANCHORS: anchor 'now' (default) resolves horizon_min " +
+      "minutes from this moment, 30-390, for claims inside the current session; anchor " +
+      "'next_open' resolves horizon_min minutes AFTER the next session open (weekends and " +
+      "holidays skipped automatically), 5-390, for claims like 'an hour into Tuesday's open' or " +
+      "'holds early tomorrow' -- use it whenever the claim belongs to the NEXT session rather " +
+      "than shoehorning a from-now horizon. Direction calls, touch claims and multi-day claims " +
+      "are NOT loggable either way.",
     parameters: {
       type: "object",
       properties: {
@@ -399,7 +402,8 @@ const declarations = [
         ticker: { type: "string", description: "SPY, QQQ or IWM." },
         metric: { type: "string", description: "spot_above or spot_below." },
         level: { type: "number", description: "The price level the claim is about." },
-        horizon_min: { type: "number", description: "Minutes until the claim resolves, 30-390." },
+        horizon_min: { type: "number", description: "Minutes after the anchor: 30-390 for anchor 'now', 5-390 for 'next_open'." },
+        anchor: { type: "string", description: "'now' (default) or 'next_open' - when horizon_min starts counting." },
       },
       required: ["claim", "confidence", "ticker", "metric", "level", "horizon_min"],
     },
@@ -1174,29 +1178,25 @@ function makeExecutors(ctx = {}) {
     return cancelAlert(ctx.email, args);
   }
 
-  async function log_forecast({ claim, confidence, ticker, metric, level, horizon_min } = {}) {
+  async function log_forecast({ claim, confidence, ticker, metric, level, horizon_min, anchor } = {}) {
     // RESOLVABILITY IS ENFORCED AT CAPTURE (the ForecastBench lesson): a claim that cannot be
     // machine-graded later never enters the ledger, so the calibration record can never fill up
     // with unresolvable prose. Hard-validated here, not trusted from the model.
     if (!r) return { error: "calibration ledger unavailable" };
-    const tk = okTicker(ticker);
-    const conf = Number(confidence);
-    const lvl = Number(level);
-    const hz = Math.round(Number(horizon_min));
-    if (!tk) return { error: "ticker must be SPY, QQQ or IWM" };
-    if (![55, 65, 75, 85, 95].includes(conf)) return { error: "confidence must be 55/65/75/85/95" };
-    if (metric !== "spot_above" && metric !== "spot_below") return { error: "metric must be spot_above or spot_below" };
-    if (!isFinite(lvl) || lvl <= 0) return { error: "level must be a positive price" };
-    if (!isFinite(hz) || hz < 30 || hz > 390) return { error: "horizon_min must be 30-390" };
-    const row = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      asked_at: Date.now(), claim: String(claim || "").slice(0, 200),
-      confidence: conf, ticker: tk, metric, level: lvl, horizon_min: hz,
-    };
+    // Validation lives in _lib/forecast.js -- the ONE copy; the fallback capture uses the same
+    // function, so the two doors into the ledger can never enforce different rules again.
+    const row = validateForecast({ claim, confidence, ticker, metric, level, horizon_min, anchor });
+    if (!row) {
+      return { error: "not loggable: SPY/QQQ/IWM, metric spot_above|spot_below, confidence " +
+                      "55/65/75/85/95, level > 0, anchor 'now' (horizon 30-390 min from now) or " +
+                      "'next_open' (horizon 5-390 min into the next session)" };
+    }
     try {
       await r.lpush("calib:pending", JSON.stringify(row));
       await r.ltrim("calib:pending", 0, 499);
-      return { logged: true, resolves_in_min: hz,
+      const at = resolveAt(row);
+      return { logged: true, anchor: row.anchor,
+               resolves_at_utc: at ? new Date(at).toISOString() : null,
                note: "logged silently - never tell the reader a forecast was recorded" };
     } catch (e) { return { error: "could not log: " + e.message }; }
   }

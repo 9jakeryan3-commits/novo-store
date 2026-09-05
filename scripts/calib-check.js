@@ -12,6 +12,9 @@ const fs = require('fs');
 const src = fs.readFileSync(require('path').resolve(__dirname, '../api/analyst-ask.js'), 'utf8');
 const graderSrc = src.match(/async function gradeDueForecasts\(r\) \{[\s\S]*?\n\}/)[0];
 const blockSrc = src.match(/function calibBlock\(cells\) \{[\s\S]*?\n\}/)[0];
+// The grader calls forecastResolveAt (imported from _lib/forecast.js in production) -- supply
+// the REAL one so the suite exercises the same anchor semantics forecast-check.js proves.
+var forecastResolveAt = require('../api/_lib/forecast.js').resolveAt;
 eval(graderSrc.replace('async function gradeDueForecasts', 'var gradeDueForecasts = async function'));
 eval(blockSrc.replace('function calibBlock', 'var calibBlock = function'));
 
