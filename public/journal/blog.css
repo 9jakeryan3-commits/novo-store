@@ -565,3 +565,36 @@ nav { position: relative; }
 @media (min-width: 700px) and (max-width: 1100px) {
   .ss-fan { transform: scale(0.93); transform-origin: center top; }
 }
+
+
+/* ---- Header "Plans" button: spacing on desktop + hollow glow (Jake, 2026-09-05) ---- */
+
+/* It was touching the portal button. .nav-actions is display:contents on desktop so its
+   gap:14px no longer applies; put the space on the button itself and leave row 2 alone. */
+@media (min-width: 1025px) {
+  .nav-buy { margin-right: 12px; }
+}
+
+/* Hollow + glowing, like the Analyst/Trader/Crypto CTAs. !important is required on the
+   paint properties because 1,426 pages carry a solid gradient in a style="" attribute.
+   box-shadow is deliberately NOT !important: an animation outranks a normal inline
+   declaration but loses to !important, so this is what lets the pulse both win and run. */
+.nav-buy {
+  background: rgba(34, 211, 238, 0.07) !important;
+  color: #22d3ee !important;
+  border: 1px solid rgba(34, 211, 238, 0.42) !important;
+  box-sizing: border-box;
+  animation: navBuyGlow 2.6s ease-in-out infinite;
+}
+.nav-buy:hover {
+  background: rgba(34, 211, 238, 0.16) !important;
+  border-color: #22d3ee !important;
+  color: #22d3ee !important;
+}
+@keyframes navBuyGlow {
+  0%, 100% { box-shadow: 0 0 14px rgba(34, 211, 238, 0.22); }
+  50%      { box-shadow: 0 0 30px rgba(34, 211, 238, 0.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-buy { animation: none; box-shadow: 0 0 22px rgba(34, 211, 238, 0.42) !important; }
+}
