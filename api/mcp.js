@@ -184,11 +184,22 @@ async function askNovo(question, res, id) {
   const [levels, vol, pulse, record] = await Promise.all([
     grab("/api/levels"), grab("/api/vol"), grab("/api/market-pulse"), grab("/api/track-record"),
   ]);
+  // ORDER AND BUDGET, both learned the hard way. The record went in LAST behind /api/vol, whose
+  // `series` field alone is ~97KB of raw history — so the single most valuable thing in this
+  // grounding was truncated away, and the first live probe had NoVo saying he had no record to
+  // quote. Same defect I fixed in analyst-ask this morning (private_alerts rides FIRST because
+  // the slice takes the head), reproduced in a new file hours later. So the RECORD leads, and
+  // every source gets its own budget instead of sharing one where the biggest payload starves
+  // the rest.
+  const cap = (o, n) => { const t = JSON.stringify(o); return t && t.length > n ? t.slice(0, n) + '...[truncated]' : t; };
+  // `series` is dropped, not capped: the RANKINGS answer "is vol actually high", the raw history
+  // only fills the window.
+  const volSlim = vol ? Object.fromEntries(Object.entries(vol).filter(([k]) => k !== 'series')) : null;
   const free = {
-    dealer_levels_DELAYED: levels,
-    volatility_record: vol,
-    market_pulse: pulse,
-    my_scored_track_record: record,
+    my_scored_track_record: cap(record, 22000),
+    dealer_levels_DELAYED: cap(levels, 3000),
+    market_pulse: cap(pulse, 3000),
+    volatility_record: cap(volSlim, 12000),
     _note: "This is the complete free tier. The live map, crypto map and private desks are paid " +
            "and are not present here.",
   };
@@ -197,7 +208,7 @@ async function askNovo(question, res, id) {
     const j = await vertex(`${MODEL}:generateContent`, {
       contents: [{ role: "user", parts: [{ text:
         ASK_SYSTEM + "\n\nFREE DATA (everything you can see):\n" +
-        JSON.stringify(free).slice(0, 60000) + "\n\nQUESTION: " + q }] }],
+        JSON.stringify(free) + "\n\nQUESTION: " + q }] }],
       generationConfig: { temperature: 0.4, maxOutputTokens: 1400,
                           thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
     });
