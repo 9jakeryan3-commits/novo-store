@@ -2693,6 +2693,24 @@ window.addEventListener('hashchange', function(){
   // transcript it belongs to. It enters the log as an ordinary NoVo turn, which means it persists,
   // scrolls and clears exactly like an answer he gave -- and travels back as context on the next ask,
   // so "what did you mean by that?" works without any special case.
+  // THE FEED THE RENDERER NEVER HAD. novoChatDrop below shipped complete two weeks ago -- dedup,
+  // chat injection, the unread badge -- and nothing on this page ever called it: the drop rode
+  // only the analyst dashboard's payload. Polled at 5 minutes because the note changes once a
+  // trading day; 402 means this member's token has no Analyst entitlement (crypto-only) and the
+  // note is a paid-Analyst artifact, so silence is the correct rendering of it.
+  function pollChatDrop(){
+    try {
+      var t = localStorage.getItem('novo_live_t') || '';
+      if (!t) return;
+      _cmFetch('/api/analyst-publish?drop=1&t=' + encodeURIComponent(t), 8000)
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){ if (j && j.chat_drop && window.novoChatDrop) window.novoChatDrop(j.chat_drop); })
+        .catch(function(){});
+    } catch(_){}
+  }
+  setInterval(pollChatDrop, 300000);
+  setTimeout(pollChatDrop, 4000);
+
   window.novoChatDrop = function(cd){
     if (!cd || !cd.id || !cd.text) return;
     var seen = null; try { seen = localStorage.getItem('novo_drop_seen_crypto'); } catch(_){}

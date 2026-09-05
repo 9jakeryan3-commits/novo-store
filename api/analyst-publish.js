@@ -566,6 +566,21 @@ export default async function handler(req, res) {
     }
     return res.status(200).json(state);
   }
+  // NoVo's unprompted lunch note, alone — so a chat surface can poll for it without pulling the
+  // whole dealer state. Same token + entitlement gate as ?live: the note quotes dealer levels, so
+  // it is a paid-Analyst artifact and a crypto-only token correctly gets 402 (the client treats
+  // that as "no note for you", silently). Found because the feature ran flawlessly for two weeks
+  // into the ONE dashboard Jake does not use: analyst-live rendered it, crypto-live had the
+  // renderer built but nothing ever fed it, and the trader chart had neither.
+  if (req.method === 'GET' && req.query && 'drop' in req.query) {
+    const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    if (!(await _analystEnt(email))) return res.status(402).json({ error: 'NoVo Analyst is a separate subscription.' });
+    res.setHeader('Cache-Control', 'no-store');
+    let state = null;
+    try { state = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN); } catch (_) { state = null; }
+    return res.status(200).json({ chat_drop: (state && state.chat_drop) || null });
+  }
   // Gamma-by-strike history for the heatmap. Same token + entitlement gate as ?live — paid dealer data.
   if (req.method === 'GET' && req.query && 'hist' in req.query) {
     const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
