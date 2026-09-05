@@ -252,7 +252,15 @@ echo "OK  smoke: 7/7 surfaces answering with real bodies"
 KEYFILE=$(ls public/*.txt 2>/dev/null | grep -E "[0-9a-f]{32}\.txt$" | head -1 || true)
 if [ -n "$KEYFILE" ] && git cat-file -e "${PREV}^{commit}" 2>/dev/null; then
   KEY=$(basename "$KEYFILE" .txt)
-  URLS=$(git diff --name-only "$PREV" "$LOCAL" -- "public/*.html" 2>/dev/null     | sed -e "s|^public/||" -e "s|\.html$||" -e "s|^index$||"     | grep -vx "404"     | sed "s|^|https://novo-options.trade/|" || true)
+  # The sitemap IS the indexing policy -- build-sitemap.js:86 drops every noindex page -- so
+  # intersect with it rather than keeping a second exclusion list here. The old list knew about
+  # 404 and none of the other seven noindex pages, including the PAID gated dashboards and the
+  # post-checkout confirmations. It also drops any non-canonical url the sed chain invents,
+  # e.g. journal/index.html -> /journal/index when the canonical is /journal/.
+  ALLOW=$(mktemp 2>/dev/null || echo "")
+  if [ -n "$ALLOW" ]; then grep -o "<loc>[^<]*</loc>" public/sitemap.xml 2>/dev/null | sed -e "s|<loc>||" -e "s|</loc>||" > "$ALLOW" || true; fi
+  URLS=$(git diff --name-only "$PREV" "$LOCAL" -- "public/*.html" 2>/dev/null | sed -e "s|^public/||" -e "s|\.html$||" -e "s|^index$||" | sed "s|^|https://novo-options.trade/|" | { if [ -s "$ALLOW" ]; then grep -Fxf "$ALLOW" || true; else cat; fi; } || true)
+  [ -n "$ALLOW" ] && rm -f "$ALLOW" || true
   N=$(printf "%s\n" "$URLS" | grep -c . || true)
   if [ "${N:-0}" -gt 0 ] && [ "${N:-0}" -le 9000 ]; then
     CODE=$(printf "%s" "$URLS" | python -c "
