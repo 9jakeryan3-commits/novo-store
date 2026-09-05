@@ -927,6 +927,13 @@ module.exports = async (req, res) => {
     const hits = deep ? search(idx, qv, 9, 3) : search(idx, qv, 6);
 
     const r = kv();
+    // THE STANDING COMMAND (Jake, 2026-09-05): "Show me the NoVo Alerts" — any phrasing carrying
+    // "novo alerts" — from the OWNER'S seat is a deterministic order for the full private-desk
+    // readout, not a question to interpret. Detected server-side on the VERIFIED email, so the
+    // phrase is inert social engineering from any other seat: no command block, no unslimming,
+    // and the tickets were never in that reader's grounding to begin with.
+    const alertsCmd = _isComp(email) && /\bnovo\s+alerts\b/i.test(String(question || ''));
+
     let live = null, ctx = null, trackRec = null, liveSrc = 'none';
     // What NoVo remembers about THIS reader — market interests and preferences they stated,
     // loaded on every question so continuity is real rather than performed.
@@ -1044,8 +1051,8 @@ module.exports = async (req, res) => {
             };
           }
           privateAlerts = {
-            open: (cs.alerts.open || []).slice(0, 12).map(slimO),
-            recent_resolved: (cs.alerts.recent || []).slice(0, 8).map(slimR),
+            open: (cs.alerts.open || []).slice(0, alertsCmd ? 25 : 12).map(slimO),
+            recent_resolved: (cs.alerts.recent || []).slice(0, alertsCmd ? 25 : 8).map(slimR),
             scored: Object.values(_pj),
             quoting: "each rule's eras and its OWN baselines are pre-joined in `scored`; never " +
                      "pair a rate with another rule's baseline, never blend eras, and a rate " +
@@ -1297,6 +1304,20 @@ module.exports = async (req, res) => {
       convo +
       `MARKET DATA (every number you may state is here):\n${marketJson}\n\n` +
       `REFERENCE (explain mechanics from these; cite the titles you use):\n${reference}\n\n` +
+      // The standing-command directive sits HERE, last before the question, because recency is
+      // what makes it deterministic — the same reason the voice trailer lives at the end.
+      (alertsCmd
+        ? 'THE READER JUST GAVE THE STANDING COMMAND — "NoVo Alerts". This is the owner\'s seat, ' +
+          'verified server-side, ordering the FULL private-desk readout. Completeness IS the ' +
+          'command: render BOTH desks from MARKET DATA — private_alerts (the on-chain desk) and ' +
+          'equity_signals (the equities desk) — as a desk report. Every open ticket with its ' +
+          'kind, symbol, action, entry, target, stop and deadline. The recent resolutions with ' +
+          'their outcomes. Then each desk\'s scored record: per rule, era named, denominator ' +
+          'named, its own baseline beside every rate. Nothing trimmed, no "ask me if you want ' +
+          'more", no summarising rows away. An empty desk or an n=0 record is reported as ' +
+          'exactly that — an honest empty is part of the readout. Group by desk, short lines, ' +
+          'plain chat text.\n\n'
+        : '') +
       `QUESTION: ${question}\n\n` +
       // THE VOICE CONTRACT, REPEATED WHERE IT ACTUALLY LANDS. It lives at the end of SYSTEM, which
       // is the right place in a bare prompt — but production appends the regime blocks, the reader
