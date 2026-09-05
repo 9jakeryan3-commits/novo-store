@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      metadata: { tier: 'analyst', plan },
+      metadata: { tier: 'analyst', plan, ...require('./_lib/internal-tag.js').internalTag(req) },
       // 7-day free trial — card collected upfront so it auto-converts (highest-converting trial in this category).
       subscription_data: { metadata: { tier: 'analyst', plan }, trial_period_days: 7 },
       // Site success page first — GA4 purchase fires where the _ga cookie lives; see checkout-sub.js.

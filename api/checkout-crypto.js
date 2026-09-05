@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      metadata: { tier: 'crypto', plan },
+      metadata: { tier: 'crypto', plan, ...require('./_lib/internal-tag.js').internalTag(req) },
       // 7-day free trial, card collected up front — same as Analyst. Card-upfront converts
       // far better than the no-card trials the crypto tools run.
       subscription_data: { metadata: { tier: 'crypto', plan }, trial_period_days: 7 },

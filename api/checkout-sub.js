@@ -45,6 +45,9 @@ module.exports = async (req, res) => {
       success_url: `${SITE}/success?tier=trader&plan=monthly&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
+      // No tier tag here on purpose - the webhook routes Trader by metadata ABSENCE; this
+      // spread is {} for buyers and {internal:'fleet'} for secret-gated fleet checks.
+      metadata: { ...require('./_lib/internal-tag.js').internalTag(req) },
     });
     res.status(200).json({ url: session.url });
   } catch (err) {

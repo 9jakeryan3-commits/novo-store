@@ -39,6 +39,7 @@ module.exports = async (req, res) => {
       success_url: `${SITE}/success?tier=trader&plan=yearly&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE}/#pricing`,
       billing_address_collection: 'auto',
+      metadata: { ...require('./_lib/internal-tag.js').internalTag(req) },
     });
     res.status(200).json({ url: session.url });
   } catch (err) {

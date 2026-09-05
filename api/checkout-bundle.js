@@ -95,7 +95,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: items,
       mode: 'subscription',
-      metadata: { tier, plan },
+      metadata: { tier, plan, ...require('./_lib/internal-tag.js').internalTag(req) },
       subscription_data: {
         metadata: { tier, plan },
         // 7-day card-upfront trial on the AC bundle only — see the header note on 'all'.
