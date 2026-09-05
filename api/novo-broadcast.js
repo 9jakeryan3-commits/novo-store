@@ -8,10 +8,13 @@
 // guards, and the calibration/miss awareness all import from _lib/analyst-brain.js — one
 // source, shared with analyst-ask.js, never a copy.
 //
-// PRIVACY BY CONSTRUCTION. This endpoint reads ONLY public groundings. It never touches
-// COMP_EMAILS, never reads private_alerts or equity:signals:live (chat-pull only, Jake's
-// ruling), and grounds prices in the same keys the public site serves — so a paid dealer
-// figure or a private ticket cannot leak into a StockTwits post by any code path here.
+// PRIVACY BY CONSTRUCTION, and the claim is kept honest by the READS, not by the prompt.
+// It never touches COMP_EMAILS, never reads private_alerts or equity:signals:live (chat-pull
+// only, Jake's ruling), and takes dealer levels from `public:levels` — the same 15-30min
+// delayed slot the anonymous site serves, which the publisher already strips of net GEX,
+// gravity and ATM IV. It does NOT read analyst:live_levels: a public post is a free reader,
+// and undelayed dealer figures are the paid product. If that boundary ever moves, it moves
+// HERE in the read list, where the next engineer will see it.
 // The grounding reads mirror analyst-ask.js's public branches (see its :1164-1245); if you
 // change the KV contract there, change it here in the same commit.
 //
@@ -51,7 +54,9 @@ const POST_FLOOR =
   'THIS IS A PUBLIC POST under my own name. Hard floor: analysis/education, NOT a signal — ' +
   'never say buy/sell a strike or ticker, never promise or imply a return, no imperative ' +
   'advice of any kind. Net GEX, the gamma-flip level, VWAP, walls and the expected move are ' +
-  'public stats I may cite WHEN the grounding below carries them; NEVER print proprietary ' +
+  'public stats I may cite ONLY WHEN the grounding below carries them (it is the DELAYED ' +
+  'public slot — it does not carry net GEX, gravity or ATM IV at all, and a level from it is ' +
+  '15-30 minutes old; say so if I quote one); NEVER print proprietary ' +
   'internals (apex/conviction scores, tape-imbalance, RVOL, floors, thresholds) and invent ' +
   'NO numbers — a figure I state must be in MARKET DATA below, exactly. My private desks and ' +
   'tickets do not exist in public. SELL-FIRST (the owner\'s standing order): lead with what ' +
@@ -166,14 +171,21 @@ async function publicGrounding() {
   // calib:misses is a LIST (lpush/ltrim -> lrange). Every read isolated so one bad key
   // degrades one block instead of 500ing the endpoint.
   const g = (p) => p.catch(() => null);
-  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
-    g(r.get('analyst:live_levels')), g(r.get('public:levels')), g(r.get('analyst:context')),
+  // PUBLIC SLOT ONLY — analyst:live_levels is DELIBERATELY NOT READ HERE (Einstein's B-3,
+  // 2026-09-05). This endpoint used to prefer the paid live mirror and fall back to the public
+  // slot, while the file header promised "only public groundings" — a structural guarantee
+  // asserted where only a prompt instruction existed, on a surface whose output is PUBLIC.
+  // Jake's standing rule decides it: the public page SELLS the moat, it isn't the moat, and
+  // the store's own publisher delays the public slot 15-30min and strips net GEX / gravity /
+  // ATM IV precisely so undelayed dealer figures never reach a free reader. A StockTwits post
+  // is a free reader. The header's claim is now true by construction, not by instruction.
+  const [rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
+    g(r.get('public:levels')), g(r.get('analyst:context')),
     g(r.get('crypto:map:live')), g(r.get('novo:track_record')),
     g(r.hgetall('calib:cells')), g(r.lrange('calib:misses', 0, 4)),
   ]);
   const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
-  let live = J(rawLive), liveSrc = 'live';
-  if (!live) { live = J(rawPub); liveSrc = live ? 'delayed-public' : 'none'; }
+  const live = J(rawPub), liveSrc = live ? 'delayed-public' : 'none';
   const ctx = J(rawCtx);
   const cs = J(rawCs);
   let cryptoInv = null;
