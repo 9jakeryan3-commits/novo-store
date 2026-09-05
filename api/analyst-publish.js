@@ -842,8 +842,8 @@ async function _publishLiveLevels(state) {
       skewPts: num(i && i.skew_pts),
       // Item 2 (Jake's go 2026-09-05, validation-gated and validated): second-order dealer
       // exposures, PAID mirror only — _publicLevels is an allow-list and deliberately does
-      // not carry these. charm is per trading day, calendar-decay sign (see the engine's
-      // gex_calculator sign note; corpus rows before 09-05 carry the old sign).
+      // not carry these. charm is per trading day, calendar-decay sign (the engine's original
+      // convention, confirmed E2E after a 10-minute wrong-sign detour; no corpus sign era).
       netVanna: num(i && i.vanna_ex),
       netCharm1d: num(i && i.charm_ex),
       // Guard the ABSENT case explicitly. This used num(), and num() coerces with Number() — where
