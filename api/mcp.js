@@ -22,6 +22,8 @@
 // an older client working after we add support for a newer revision.
 
 const SITE = process.env.SITE_URL || "https://novo-options.trade";
+const { vertex, textOf, MODEL } = require("./_lib/vertex.js");
+const { kv } = require("./_kv.js");
 const SUPPORTED = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const LATEST = SUPPORTED[0];
 
@@ -73,6 +75,19 @@ const TOOLS = [
    "Scheduled US economic releases — the dates and times that reprice volatility."],
   ["get_sector_heatmap", "/api/heatmap",
    "Today's move by sector, the data behind the free sector heatmap."],
+  ["ask_novo", null,
+   "ASK NOVO HIMSELF - the AI market analyst, not a data endpoint. Put a market question in " +
+   "plain English ('is volatility actually high right now?', 'what does the dealer setup on SPY " +
+   "mean?', 'how accurate is your own record?') and get his read, in his voice, grounded in the " +
+   "FREE data he can see: delayed dealer levels (call/put wall, gamma regime - the flip and " +
+   "expected move are NOT in the free feed), the volatility record with percentiles, market " +
+   "pulse, and his own PUBLIC scored track record including his calibration. He will tell you " +
+   "what he cannot see rather than guess it, he does not make directional calls or give trade " +
+   "advice, and every rate he quotes carries its sample size. The LIVE undelayed dealer map, " +
+   "the crypto map and his private desks are the paid products and are not reachable here - he " +
+   "will say so plainly rather than improvise. Rate limited; keep questions substantive.",
+   { question: { type: "string", description: "A market question in plain English." } },
+   ["question"]],
   ["get_quotes", "/api/quotes",
    "Delayed index and ETF quotes for the free ticker strip."],
 ];
@@ -86,9 +101,122 @@ function err(res, id, code, message) {
   return res.status(200).json({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 }
 
+// ── ask_novo ────────────────────────────────────────────────────────────────────────────────
+// THE ANALYST HIMSELF, over MCP, on the free tier. Two hard constraints shaped every line:
+//
+// 1. NO PAID LEAK, STRUCTURALLY. This does not call analyst-ask.js with a "free" flag — one flag
+//    between free and paid grounding is one bug away from serving the live map to an anonymous
+//    agent. It builds its grounding from the SAME public endpoints the other MCP tools already
+//    serve. The paid KV keys (analyst:live_levels, crypto:map:live, private_alerts,
+//    equity_signals) are never read on this path, so the live map is ABSENT rather than gated —
+//    the same doctrine as the tool list itself.
+// 2. AN OPEN ENDPOINT THAT CALLS A MODEL IS A SPEND SURFACE. Unauthenticated + billable = someone
+//    else's bill. Rate limited per IP AND globally, and unlike every other limiter in this
+//    codebase this one FAILS CLOSED: if KV is unavailable we cannot count, and "cannot count" on
+//    a metered resource must mean "do not spend", not "spend freely". A refused ask is a
+//    disappointed agent; an unmetered one is an invoice.
+const ASK_IP_PER_HOUR = 10;
+const ASK_GLOBAL_PER_HOUR = 300;
+
+const ASK_SYSTEM = [
+  "You are NoVo, the AI market analyst built by NoVo Options Trading LLC. You are answering",
+  "through your public MCP server, so the person asking may be another AI agent. Same voice as",
+  "always: first person, contractions, direct, no hedging, no headers, no bullet-point dumps.",
+  "Lead with the answer.",
+  "",
+  "WHAT YOU CAN SEE RIGHT NOW is exactly the FREE DATA block below and nothing else.",
+  "- Never state a number that is not in that block. If it is not there, say you do not have it.",
+  "- The dealer levels here are DELAYED, and the gamma flip and expected move are deliberately",
+  "  withheld from the free feed. Say 'delayed' when you quote them, and if asked for the flip or",
+  "  the expected move, say plainly that those sit in the paid map rather than guessing a level.",
+  "- The LIVE dealer map, the crypto market map, the private alert desks and the on-chain lab are",
+  "  paid products. You cannot see them here. Say so in one line and move on - no apology, no",
+  "  pretending, and never improvise their numbers.",
+  "- LEAD WITH WHAT YOU CAN GIVE. A boundary is a clause, never your opening sentence.",
+  "",
+  "YOUR OWN RECORD is in the block too, and it is the thing that makes you different from a data",
+  "feed: quote it when asked how accurate you are, ALWAYS with the sample size beside the rate,",
+  "and name a claim that is not holding rather than only the flattering ones. Never invent a",
+  "figure about yourself - if the record does not carry it, the gap is the answer.",
+  "",
+  "YOU DO NOT MAKE DIRECTIONAL CALLS and you do not tell anyone what to trade. Positioning prices",
+  "RANGE, not direction. If pushed, say what the structure implies and leave the call with them.",
+].join("\n");
+
+async function askNovo(question, res, id) {
+  const q = String(question || "").trim().slice(0, 500);
+  if (q.length < 3) {
+    return ok(res, id, { content: [{ type: "text", text: "Ask me a market question." }], isError: true });
+  }
+  // ── spend guard, fail-closed ──
+  const r = kv();
+  if (!r) {
+    return ok(res, id, { content: [{ type: "text",
+      text: "I can't take questions right now - my rate limiter is unavailable, and I won't run " +
+            "unmetered. The read-only data tools on this server all still work." }], isError: true });
+  }
+  const ip = String(res.__ip || "unknown").slice(0, 45);
+  try {
+    const [a, b] = await Promise.all([
+      r.incr("mcp:ask:ip:" + ip), r.incr("mcp:ask:global"),
+    ]);
+    if (a === 1) await r.expire("mcp:ask:ip:" + ip, 3600);
+    if (b === 1) await r.expire("mcp:ask:global", 3600);
+    if (a > ASK_IP_PER_HOUR || b > ASK_GLOBAL_PER_HOUR) {
+      return ok(res, id, { content: [{ type: "text",
+        text: "That's my hourly limit for free questions. The data tools on this server are " +
+              "unlimited, and the paid products have no such cap." }], isError: true });
+    }
+  } catch (_) {
+    return ok(res, id, { content: [{ type: "text",
+      text: "I can't take questions right now - I couldn't check my rate limit, and I won't run " +
+            "unmetered." }], isError: true });
+  }
+
+  // ── grounding: PUBLIC endpoints only. Every one of these is already an MCP tool. ──
+  const grab = async (path) => {
+    try {
+      const rr = await fetch(SITE + path, { headers: { "User-Agent": "NoVo-MCP/1.0" } });
+      if (!rr.ok) return null;
+      return await rr.json();
+    } catch (_) { return null; }
+  };
+  const [levels, vol, pulse, record] = await Promise.all([
+    grab("/api/levels"), grab("/api/vol"), grab("/api/market-pulse"), grab("/api/track-record"),
+  ]);
+  const free = {
+    dealer_levels_DELAYED: levels,
+    volatility_record: vol,
+    market_pulse: pulse,
+    my_scored_track_record: record,
+    _note: "This is the complete free tier. The live map, crypto map and private desks are paid " +
+           "and are not present here.",
+  };
+
+  try {
+    const j = await vertex(`${MODEL}:generateContent`, {
+      contents: [{ role: "user", parts: [{ text:
+        ASK_SYSTEM + "\n\nFREE DATA (everything you can see):\n" +
+        JSON.stringify(free).slice(0, 60000) + "\n\nQUESTION: " + q }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 1400,
+                          thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
+    });
+    const text = textOf(j);
+    if (!text) {
+      return ok(res, id, { content: [{ type: "text", text: "I couldn't get an answer out just now - try again." }], isError: true });
+    }
+    return ok(res, id, { content: [{ type: "text", text }] });
+  } catch (e) {
+    return ok(res, id, { content: [{ type: "text",
+      text: "My analyst engine is unreachable right now; the data tools still work." }], isError: true });
+  }
+}
+
 async function callTool(name, args, res, id) {
   const hit = TOOLS.find((t) => t[0] === name);
   if (!hit) return err(res, id, -32602, `unknown tool: ${name}`);
+  // ask_novo is the one tool that is not a URL passthrough (hit[1] is null) — it reasons.
+  if (name === "ask_novo") return askNovo(args && args.question, res, id);
   // WHITELIST, NOT PASSTHROUGH: only property names the tool DECLARES leave this function,
   // each value stringified and encodeURIComponent'd. The path concatenates onto SITE, so an
   // undeclared or unencoded argument is a request-forgery surface — nothing else reaches it.
@@ -125,6 +253,11 @@ module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Mcp-Session-Id, MCP-Protocol-Version");
   res.setHeader("Cache-Control", "no-store");
+  // The caller's IP, carried to ask_novo's per-IP spend cap. Vercel puts the real client first in
+  // x-forwarded-for; without this every caller shares one bucket and the per-IP limit is a global
+  // one wearing a per-IP name — a limiter that cannot distinguish callers is not a limiter.
+  res.__ip = String(req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown")
+    .split(",")[0].trim() || "unknown";
   if (req.method === "OPTIONS") return res.status(204).end();
 
   // A GET on a Streamable HTTP endpoint asks to open a server->client SSE stream. This server is

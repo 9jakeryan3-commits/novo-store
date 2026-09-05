@@ -9,14 +9,18 @@
 // took must count NOTHING. Run after touching gradeDueForecasts or the cells shape.
 
 const fs = require('fs');
+// The guards moved to _lib/analyst-brain.js (2026-09-05, shared with the broadcast endpoint).
+// The GRADER still lives in the handler; the BLOCKS are exported, so import what is exported
+// and eval only what is not -- an eval-harness that silently matches nothing is its own
+// check-that-cannot-fail, which is exactly how this suite broke.
 const src = fs.readFileSync(require('path').resolve(__dirname, '../api/analyst-ask.js'), 'utf8');
+const BRAIN = require('../api/_lib/analyst-brain.js');
 const graderSrc = src.match(/async function gradeDueForecasts\(r\) \{[\s\S]*?\n\}/)[0];
-const blockSrc = src.match(/function calibBlock\(cells\) \{[\s\S]*?\n\}/)[0];
 // The grader calls forecastResolveAt (imported from _lib/forecast.js in production) -- supply
 // the REAL one so the suite exercises the same anchor semantics forecast-check.js proves.
 var forecastResolveAt = require('../api/_lib/forecast.js').resolveAt;
 eval(graderSrc.replace('async function gradeDueForecasts', 'var gradeDueForecasts = async function'));
-eval(blockSrc.replace('function calibBlock', 'var calibBlock = function'));
+var calibBlock = BRAIN.calibBlock;
 
 // A fake KV with the ops the grader uses.
 function fakeKv(pending, hist, opts = {}) {
@@ -93,8 +97,7 @@ const t = async (label, pending, hist, expect, opts) => {
     console.log((clean ? 'ok  ' : 'FAIL') + ' hit leaves no scar');
   }
   {
-    const blockSrc2 = src.match(/function missBlock\(misses\) \{[\s\S]*?\n\}/)[0];
-    eval(blockSrc2.replace('function missBlock', 'var missBlock = function'));
+    const missBlock = BRAIN.missBlock;
     const mb = missBlock([{ claim: 'SPY holds 769 into the close', confidence: 65, level: 769, spot_at_horizon: 768.1, graded_at: Date.now() }]);
     const ok1 = /RECENT MISSES/.test(mb) && /768.1 vs your 769/.test(mb);
     const ok2 = missBlock([]) === '' && missBlock(null) === '';

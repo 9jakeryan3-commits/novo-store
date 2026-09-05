@@ -1,11 +1,11 @@
 // Sabotage suite for provenanceAudit: catch the battery-3 mislabels, leave true labels alone.
 const fs = require('fs');
-const src = fs.readFileSync('api/analyst-ask.js', 'utf8');
-const attrib = src.match(/const ATTRIB_RE = .*;/)[0];
-const numsIn = src.match(/function _numsIn\(str\) \{[\s\S]*?\n\}/)[0];
-const walk = src.match(/function _walkProvenance\([\s\S]*?\n\}/)[0];
-const audit = src.match(/function provenanceAudit\(answer, trackRec, contents\) \{[\s\S]*?\n\}/)[0];
-eval(attrib + '\n' + numsIn + '\n' + walk + '\n' + audit);
+// Guards moved to _lib/analyst-brain.js; import what is exported rather than regex-matching a
+// file that no longer holds them.
+const B = require('../api/_lib/analyst-brain.js');
+// provenanceAudit is exported, so the suite exercises the REAL function rather than an eval'd
+// copy — no regex to rot the next time the brain is refactored.
+const provenanceAudit = B.provenanceAudit;
 
 // A trackRec shaped like the real payload: backtest cell (session-counted, dated) + intraday
 // gravity/flip (units:snapshot) + archive cell (session-counted, NO snapshot units).

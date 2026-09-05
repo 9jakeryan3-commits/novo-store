@@ -141,33 +141,16 @@ function decodeHalf(h) {
 }
 
 // ---- Vertex (service account, same path the CRMs use) ----
-let _tok = null, _tokExp = 0;
-async function accessToken() {
-  if (_tok && Date.now() < _tokExp - 60000) return _tok;
-  const raw = process.env.GOOGLE_VERTEX_SA_JSON;
-  if (!raw) return null;
-  const sa = JSON.parse(raw);
-  const crypto = require('crypto');
-  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
-  const now = Math.floor(Date.now() / 1000);
-  const claim = `${b64({ alg: 'RS256', typ: 'JWT' })}.${b64({
-    iss: sa.client_email, scope: 'https://www.googleapis.com/auth/cloud-platform',
-    aud: 'https://oauth2.googleapis.com/token', exp: now + 3600, iat: now })}`;
-  const sig = crypto.createSign('RSA-SHA256').update(claim).sign(sa.private_key, 'base64url');
-  const r = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${claim}.${sig}` }),
-  });
-  const j = await r.json();
-  if (!j.access_token) return null;
-  _tok = j.access_token; _tokExp = Date.now() + 3500 * 1000;
-  return _tok;
-}
+// The Vertex client lives in _lib/vertex.js -- ONE copy, shared with the MCP server's
+// ask_novo. A hand-copied service-account client would have been this week's fourth
+// mirrored twin, and the one holding AUTH is the worst kind: a token-cache fix applied to
+// one copy reads as a credential problem, not a duplication problem.
+const { accessToken, vertex: _vertexCall } = require('./_lib/vertex.js');
 
 // Vertex only. The AI Studio key it used to fall back to is retired, so the fallback could
 // never succeed — all it did was turn a clear Vertex auth failure into a vague one.
 async function callModel(path, body) {
-  return vertex(path, body);
+  return _vertexCall(path, body);
 }
 
 // The streaming lane: same model, same body, but the tokens arrive as they are written.
@@ -205,25 +188,16 @@ async function vertexStream(path, body, onDelta) {
   return full;
 }
 
+// The local copy is GONE -- this is the shared _lib/vertex.js client with the same contract it
+// always had: it THROWS on a bad status (never null) so the caller can tell a dead upstream from
+// a model that produced no text, and it logs here where the handler's context is.
 async function vertex(path, body) {
-  const sa = JSON.parse(process.env.GOOGLE_VERTEX_SA_JSON || '{}');
-  const tok = await accessToken();
-  if (!tok || !sa.project_id) return null;
-  const host = LOCATION === 'global' ? 'aiplatform.googleapis.com' : `${LOCATION}-aiplatform.googleapis.com`;
-  const r = await fetch(`https://${host}/v1/projects/${sa.project_id}/locations/${LOCATION}/publishers/google/models/${path}`,
-    { method: 'POST', headers: { authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) {
-    const body = (await r.text()).slice(0, 200);
-    console.error('[analyst-ask] vertex', r.status, body);
-    // NOT null. Returning null made a dead upstream indistinguishable from a model that simply
-    // produced no text, and both landed on a bare "no answer" with nothing logged for the user and
-    // no way for the caller to tell a 429 from an empty candidate. The caller decides what to say.
-    const e = new Error('vertex ' + r.status);
-    e.status = r.status;
-    e.body = body;
+  try {
+    return await _vertexCall(path, body);
+  } catch (e) {
+    console.error('[analyst-ask] vertex', e.status || '?', e.body || e.message);
     throw e;
   }
-  return r.json();
 }
 
 async function embed(text) {
