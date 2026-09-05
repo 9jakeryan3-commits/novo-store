@@ -305,10 +305,16 @@ module.exports = async (req, res) => {
     }
     text = text.replace(/^["'`]+|["'`]+$/g, '').trim();
 
-    const L = g.live || {};
+    // live_levels is row-shaped ({indices:[{ticker,spot,regime,...}]} or a bare rows array,
+    // analyst-publish.js _publishLiveLevels) — the chip reads the SPY row, else the first.
+    const rows = Array.isArray(g.live) ? g.live
+      : Array.isArray(g.live && g.live.indices) ? g.live.indices
+      : Array.isArray(g.live && g.live.rows) ? g.live.rows : [];
+    const L = rows.find((x) => x && String(x.ticker).toUpperCase() === 'SPY') || rows[0] || g.live || {};
     return res.status(200).json({
       ok: true, kind, text, sentiment, category, platform, angle,
-      grounding: { ticker: L.ticker || 'SPY', spot: L.spot ?? null, regime: L.regime || null,
+      grounding: { ticker: L.ticker || 'SPY', spot: L.spot ?? null,
+                   regime: L.regime || (Number.isFinite(L.netGex) ? (L.netGex < 0 ? 'short gamma' : 'long gamma') : null),
                    src: g.liveSrc },
       guard,
     });
