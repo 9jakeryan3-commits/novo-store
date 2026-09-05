@@ -2193,11 +2193,13 @@ window.addEventListener('hashchange', function(){
     if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
-  // Summoned like a tool: "n" or "/" when you are not already typing, Esc to dismiss. Both are
-  // bound in js/novo-keys.js, which owns the keys that mean the same thing on every surface; the
-  // "/" branch below is kept as a fallback so the binding stays true if that file fails to load.
-  // Cmd/Ctrl-K USED to open this panel and now opens the command palette instead — one chord, one
-  // meaning, across the store and all three dashboards. The badge on the bubble teaches the new key.
+  // Summoned with "n" when you are not already typing, or "/ask" from the palette. Esc dismisses.
+  // Both live in js/novo-keys.js, which owns every key that means the same thing on all surfaces.
+  // Cmd/Ctrl-K and "/" USED to open this panel; they now open the command palette in search and
+  // command mode respectively. Only the Escape branch below is still ours — the "/" fallback that
+  // sat here was DELETED rather than left dormant: novo-keys consumes "/" in capture so it could
+  // never fire, and a handler that only wakes up when the layer fails to load would resurrect the
+  // old meaning at exactly the moment nothing else was there to contradict it.
   function novoAskTyping(el){
     return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
@@ -2230,7 +2232,6 @@ window.addEventListener('hashchange', function(){
 
     if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
     // "/" is a shortcut only when it is not a character someone is trying to type.
-    if (e.key === '/' && !open && !novoAskTyping(document.activeElement)) { e.preventDefault(); window.novoAskOpen(1); }
   });
   // Every message carries WHEN it was said. This is not decoration: NoVo's lunch drop sits in the
   // log for the rest of the session quoting levels from 12:30, and without a time on it a member
@@ -3066,7 +3067,7 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
 
 <!-- The shared keyboard layer. It owns the keys that mean the same thing on every NoVo surface —
      the command palette, the go-to chords, "/" and "n" and "?" — and knows nothing about this page. -->
-<script src="/js/novo-keys.js?v=c6331f50" defer></script>
+<script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
 <script>
 /* NINETY COINS, TYPE-AHEAD, WHICH THIS MAP HAS NEVER HAD. The rail is grouped by band and sorted by
    open interest, so there is no A-Z order to scan and the only way to reach a coin was to know where
@@ -3091,18 +3092,44 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
 
   function q(s) { return '"' + String(s).replace(/"/g, '\\"') + '"'; }
 
+  /* THE DOMAIN IS SNAP.coins, NOT THE MOUNTED RAIL. The rail is filtered by its own search box, so
+     enumerating rows meant that typing "BT" into that box silently shrank the palette's entire coin
+     list to BTC — the palette would agree with the filter instead of overriding it, which is the
+     opposite of what a command palette is for. SNAP.coins is the unfiltered set the rail is drawn
+     from; pick() redraws the rail unfiltered before clicking, so a coin the rail is hiding right
+     now is still reachable. The rail is kept only as a fallback for the window before the feed lands. */
+  function coinNames() {
+    var names = [];
+    try { if (SNAP && SNAP.coins) names = Object.keys(SNAP.coins); } catch (_e) { names = []; }
+    if (!names.length) {
+      var r = rows('.coin[data-c]');
+      for (var j = 0; j < r.length; j++) { var s = r[j].getAttribute('data-c'); if (s) names.push(s); }
+    }
+    return names;
+  }
+
   K.register(function () {
-    var out = [], r = rows('.coin[data-c]'), seen = {};
-    for (var i = 0; i < r.length; i++) {
-      var sym = r[i].getAttribute('data-c');
-      if (!sym || seen[sym]) continue;
-      seen[sym] = 1;
-      out.push({ label: sym, group: 'Coin', run: (function (s) {
+    var out = [], names = coinNames();
+    for (var i = 0; i < names.length; i++) {
+      out.push({ label: names[i], group: 'Coin', run: (function (s) {
         return function () { pick('.coin[data-c=' + q(s) + ']'); };
-      })(sym) });
+      })(names[i]) });
     }
     return out;
   });
+
+  K.register([{
+    token: '/coin', args: '<SYMBOL>', label: 'Open a coin', group: 'Coin', needsArg: true,
+    desc: 'any coin on the map',
+    run: function (arg) {
+      var want = String(arg || '').trim().toUpperCase();
+      if (!want) return;
+      var names = coinNames(), i;
+      for (i = 0; i < names.length; i++) {
+        if (String(names[i]).toUpperCase() === want) { pick('.coin[data-c=' + q(names[i]) + ']'); return; }
+      }
+    }
+  }]);
 
   K.register([
     { label: 'Screener — every coin, sortable', group: 'View',
@@ -3130,8 +3157,8 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
   });
 
   K.addHelp([
-    ['Ask NoVo', '<kbd>n</kbd> or <kbd>/</kbd>'],
-    ['Find a coin', 'palette → <kbd>' + K.mod + '</kbd><kbd>K</kbd>']
+    ['Ask NoVo', '<kbd>n</kbd>'],
+    ['Find a coin', '<kbd>/</kbd> then <kbd>coin</kbd>']
   ]);
 });
 </script>

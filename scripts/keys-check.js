@@ -71,10 +71,55 @@ const SABOTAGES = [
 
   { name: 'no-focus', page: 'store',
     file: '/js/novo-keys.js',
-    at: "    render('');\n    input.focus();",
-    to: "    render('');",
+    at: "    render(input.value);\n    input.focus();",
+    to: "    render(input.value);",
     breaks: 'store: the palette takes focus',
     why: 'a palette that opens without the caret in it makes the user reach for the mouse' },
+
+  { name: 'no-mode-derive', page: 'store',
+    file: '/js/novo-keys.js',
+    at: "if (s.charAt(0) !== '/') return { mode: 'search'",
+    to: "if (true) return { mode: 'search'",
+    breaks: 'store: "/" opens the palette in command mode',
+    why: 'the mode is derived from the leading slash; force search mode and the second door is gone' },
+
+  { name: 'no-tab-complete', page: 'store',
+    file: '/js/novo-keys.js',
+    at: "if (k === 'Tab') { complete(); e.preventDefault();",
+    to: "if (k === 'Tab') { e.preventDefault();",
+    breaks: 'store: Tab completes a unique command token',
+    why: 'restores the old unconditional Tab swallow, which is what the footer now advertises against' },
+
+  { name: 'no-badges', page: 'store',
+    file: '/site-search.js',
+    at: "'<div class=\"nvs-ss-keys\" aria-hidden=\"true\">' +",
+    to: "'<div class=\"nvs-ss-keys-off\" aria-hidden=\"true\">' +",
+    breaks: 'store: the header box advertises both chords',
+    why: 'without the badges the whole layer is invisible again — this is the discoverability fix itself' },
+
+  /* THE ONE THAT REPRODUCES THE PREDICTED DEFECT — and it needs TWO edits, which is itself the
+     finding. The undismissable-palette loop the recon predicted requires both halves: the box
+     opening on FOCUS, and close() RESTORING focus to whatever opened it. Ship either guard alone
+     and there is no loop, so a single mutation leaves the suite green and proves nothing. Removing
+     both reproduces it exactly: Escape -> close -> refocus the box -> focus fires -> re-open. */
+  { name: 'box-focus-loop', page: 'store',
+    edits: [
+      { file: '/site-search.js',
+        at: "input.addEventListener('mousedown', function (e) {",
+        to: "input.addEventListener('focus', function (e) {" },
+      { file: '/js/novo-keys.js',
+        at: "if (!boxOpened && lastFocus && lastFocus.focus)",
+        to: "if (lastFocus && lastFocus.focus)" }
+    ],
+    breaks: 'store: Escape out of a box-opened palette does not re-open it',
+    why: 'focus-bound opening plus focus-restore-on-close makes the palette undismissable' },
+
+  { name: 'coin-from-rail', page: 'crypto',
+    file: '/crypto-live.html',
+    at: "try { if (SNAP && SNAP.coins) names = Object.keys(SNAP.coins); } catch (_e) { names = []; }",
+    to: "try { names = []; } catch (_e) { names = []; }",
+    breaks: 'crypto: the coin domain comes from the feed, not the filtered rail',
+    why: 'falls back to enumerating mounted rail rows, which the rail filter can silently shrink' },
 
   { name: 'stale-kbd-hint', page: 'analyst',
     file: '/analyst-live.html',
@@ -104,15 +149,24 @@ function serve() {
         return;
       }
       const type = MIME[path.extname(file)] || 'application/octet-stream';
-      if (MUTATE && p === MUTATE.file) {
-        const src = fs.readFileSync(file, 'utf8');
-        if (src.indexOf(MUTATE.at) < 0) {
-          // A sabotage that does not apply produces a green run that means nothing.
-          console.error(`SABOTAGE "${MUTATE.name}" does not match ${MUTATE.file} — anchor not found.`);
-          process.exit(1);
+      // A sabotage may carry several edits, across several files: some defects are only reachable
+      // when two guards are removed together, and a single-edit model would leave those checks
+      // unproven while looking proven.
+      const edits = MUTATE ? (MUTATE.edits || [{ file: MUTATE.file, at: MUTATE.at, to: MUTATE.to }])
+                           : [];
+      const mine = edits.filter((ed) => ed.file === p);
+      if (mine.length) {
+        let src = fs.readFileSync(file, 'utf8');
+        for (const ed of mine) {
+          if (src.indexOf(ed.at) < 0) {
+            // A sabotage that does not apply produces a green run that means nothing.
+            console.error(`SABOTAGE "${MUTATE.name}" does not match ${ed.file} — anchor not found.`);
+            process.exit(1);
+          }
+          src = src.replace(ed.at, ed.to);
         }
         res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' });
-        res.end(src.replace(MUTATE.at, MUTATE.to));
+        res.end(src);
         return;
       }
       res.writeHead(200, { 'content-type': type });
@@ -249,17 +303,112 @@ SECTIONS.store = async function (cdp, base) {
     await cdp.eval('!!document.querySelector("#nvk.on")'), false,
     'Escape is the universal dismiss; without it the palette traps the user');
 
+  // ---- the header badges: the reason anyone discovers any of this ------------------------------
+  check('store: the header box advertises both chords',
+    await cdp.eval(`(function(){
+      var k=document.querySelector('.nvs-ss-keys'); if(!k) return 'missing';
+      return Array.from(k.querySelectorAll('kbd')).map(function(x){return x.textContent;}).join('|');
+    })()`),
+    'Ctrl K|/',
+    'THE DISCOVERABILITY FIX. Without the badges the palette is invisible and nobody opens it. ' +
+    'Ctrl on this headless Linux/Windows profile; the mac glyph is chosen off navigator.platform');
+
+  check('store: the placeholder does not run under the badges',
+    await cdp.eval(`(function(){
+      var i=document.getElementById('site-search-input'), k=document.querySelector('.nvs-ss-keys');
+      if(!i||!k) return 'missing';
+      var cs=getComputedStyle(i);
+      var c=document.createElement('canvas').getContext('2d');
+      c.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+      var room=i.getBoundingClientRect().width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)
+               -k.getBoundingClientRect().width-12;
+      return c.measureText(i.placeholder).width <= room;
+    })()`),
+    true,
+    'THE MEASUREMENT. The badges steal room the placeholder was already sized against, so the two ' +
+    'are chosen together — a constant would over-reserve on one font family and clip on the other');
+
+  /* ---- the box is the door, and Escape out of it must not loop --------------------------------
+     A REAL browser click, not a synthetic MouseEvent. This is the difference between a check that
+     discriminates and one that cannot: a dispatched DOM event does not move focus, so against a
+     focus-bound implementation the palette would simply never open and "not open" would pass as
+     "no loop". Input.dispatchMouseEvent goes through the browser's own input path and focuses the
+     field exactly as a person would, which is what makes the loop reproducible at all. */
+  const box = await cdp.eval(`(function(){
+    var r=document.getElementById('site-search-input').getBoundingClientRect();
+    return {x: Math.round(r.left + r.width/2), y: Math.round(r.top + r.height/2)};
+  })()`);
+  for (const type of ['mousePressed', 'mouseReleased']) {
+    await cdp.send('Input.dispatchMouseEvent',
+      { type, x: box.x, y: box.y, button: 'left', clickCount: 1 });
+  }
+  await new Promise((r) => setTimeout(r, 250));
+  const opened = await cdp.eval('!!document.querySelector("#nvk.on")');
+  check('store: clicking the header box opens the palette',
+    opened, true,
+    'the UW shape: the visible field is the door, so there is ONE search surface over the one index');
+
+  await press(cdp, 'Escape');
+  await new Promise((r) => setTimeout(r, 400));
+  // Asserted as a PAIR so "it never opened" can never masquerade as "it closed cleanly".
+  check('store: Escape out of a box-opened palette does not re-open it',
+    [opened, await cdp.eval('!!document.querySelector("#nvk.on")')], [true, false],
+    'THE FOCUS LOOP. close() restores focus to whatever opened it, so binding the box to focus ' +
+    'rather than mousedown re-opens the palette forever. Checked 400ms later, because a loop ' +
+    'needs a tick to show, and paired with the open so a no-op cannot pass for a clean close');
+
+  // ---- the two modes -------------------------------------------------------------------------
   await press(cdp, '/');
-  check('store: "/" focuses the site search box',
-    await cdp.eval('document.activeElement && document.activeElement.id'), 'site-search-input',
-    '"/" is the search convention every big desk uses');
+  check('store: "/" opens the palette in command mode',
+    await cdp.eval('[!!document.querySelector("#nvk.on"), document.getElementById("nvk-q").value, (document.querySelector("#nvk-scope b")||{}).textContent]'),
+    [true, '/', 'Commands'],
+    '"/" is the second door into the one panel; the scope chip must say which mode it opened in');
+
+  check('store: command mode lists only tokened commands',
+    await cdp.eval('Array.from(document.querySelectorAll("#nvk-list li")).every(li=>!!li.querySelector(".tok"))'), true,
+    'command mode that leaks prose rows is just search with a slash in the box');
+
+  // Tab completion. `/g` is unique to /go, so Tab must complete it; nothing else may change.
+  await press(cdp, 'g');
+  await press(cdp, 'Tab');
+  check('store: Tab completes a unique command token',
+    await cdp.eval('document.getElementById("nvk-q").value'), '/go ',
+    'THE TAB CONTRACT. Tab was previously swallowed with "nothing behind it to reach"; completing ' +
+    'the token is the useful meaning and the footer now advertises it');
+
+  await cdp.eval('var q=document.getElementById("nvk-q"); q.value="/"; q.dispatchEvent(new Event("input",{bubbles:true}));');
+  await press(cdp, 'Tab');
+  check('store: Tab with no unique match leaves the query alone',
+    await cdp.eval('document.getElementById("nvk-q").value'), '/',
+    'a Tab that rewrites your query to something you did not choose is worse than a Tab that does nothing');
+
+  // Clearing the slash must drop back to search, or the chip and the results disagree.
+  await cdp.eval('var q=document.getElementById("nvk-q"); q.value=""; q.dispatchEvent(new Event("input",{bubbles:true}));');
+  check('store: clearing the slash returns to search mode',
+    await cdp.eval('(document.querySelector("#nvk-scope b")||{}).textContent'), 'Global',
+    'the mode is DERIVED from the text so the chip cannot drift from what is actually being matched');
+
+  await press(cdp, 'Escape');
+
+  /* THE TYPING GUARD, tested against a real text field that is NOT the palette. Testing it with the
+     caret in #nvk-q proves nothing: the palette's own isOpen() early-return would swallow the key
+     before the guard was ever consulted, so the check would pass green while testing nothing. The
+     store's chat widget input is a genuine field on all 1,431 chrome pages. */
+  await cdp.eval('(document.querySelector(".nvc-btn")||{click(){}}).click()');
+  await new Promise((r) => setTimeout(r, 250));
+  await cdp.eval('var t=document.querySelector(".nvc-in"); if(t) t.focus();');
+  check('store: a real text field is focused for the guard test',
+    await cdp.eval('!!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("nvc-in"))'),
+    true,
+    'if this fails the guard check below is testing nothing — the setup, asserted rather than assumed');
 
   await press(cdp, 'g');
   check('store: a chord started inside a text field is ignored',
     await cdp.eval('!!document.querySelector("#nvk-chip.on")'), false,
-    'THE TYPING GUARD. Typing the letter g into the search box must never arm a navigation chord');
+    'THE TYPING GUARD. Typing the letter g into a chat box must never arm a navigation chord');
 
-  await cdp.eval('document.activeElement.blur()');
+  await press(cdp, 'Escape');
+  await cdp.eval('if(document.activeElement && document.activeElement.blur) document.activeElement.blur();');
   await press(cdp, 'g');
   check('store: "g" arms the chord and shows the hint',
     await cdp.eval('!!document.querySelector("#nvk-chip.on")'), true,
@@ -271,9 +420,16 @@ SECTIONS.store = async function (cdp, base) {
     await cdp.eval('location.pathname'), '/analyst',
     'the go-to chords are the second half of the feature');
 
-  /* index.html is one page out of 1,435. The layer reaches the other 1,426 by riding site-search.js,
-     which is the only script tag they all share — so the claim "throughout the entire store" rests
-     on a journal article and a coin page behaving like the home page, not on the home page alone. */
+  /* index.html is one page. The layer reaches the rest by riding site-search.js, the only script tag
+     they all share — so "throughout the store" rests on a journal article and a coin page behaving
+     like the home page, not on the home page alone.
+
+     THE HONEST COVERAGE NUMBER is 1,427 of 1,435 static files, and 1,427 of 1,510 published URLs.
+     The eight files without it are 404, the three live dashboards (which carry their own tag),
+     embed-pulse, subscribe-success, subscriber and success. The other 83 URLs are the
+     server-rendered read archive, which is built from api/_lib/site-chrome.js — and that build
+     strips external script tags, so the archive has no keyboard layer, no header search box and no
+     chat widget at all. Any copy that says "every page" is wrong on 83 of them. */
   for (const [url, what] of [['/journal/0dte-scalping.html', 'a journal article'],
                              ['/crypto/btc.html', 'a coin page']]) {
     await load(cdp, base + url);
@@ -324,6 +480,31 @@ SECTIONS.crypto = async function (cdp, base) {
     await cdp.eval('window.__picked||null'), 'SOLTEST',
     'the row handler carries the full reset (TOK/FEED/SCREEN/BOOK, remember, close rail); ' +
     'setting CUR directly would skip all of it');
+
+  /* THE COIN DOMAIN MUST COME FROM SNAP.coins, NOT THE MOUNTED RAIL. Enumerating rows meant the
+     rail's own filter silently shrank the palette's coin list — the palette agreeing with the
+     filter instead of overriding it, which is backwards.
+
+     Discriminating setup: put a coin in SNAP that has NO rail row at all. If the palette lists it,
+     the domain is SNAP.coins. If it does not, the domain is still the DOM. Simulating the filter
+     instead would prove nothing here — drawRail throws before it touches innerHTML when SNAP is
+     null, so the row would survive the filter and the check would pass without discriminating. */
+  const snapOk = await cdp.eval(`(function(){
+    try { SNAP = { coins: { GHOSTCOIN: { band: 'A' } } }; return typeof SNAP === 'object'; }
+    catch (e) { return 'unassignable: ' + e.message; }
+  })()`);
+  check('crypto: the harness can seed SNAP (setup, asserted not assumed)',
+    snapOk, true,
+    'SNAP is a script-global let; if this fails the domain check below is not testing what it claims');
+
+  await press(cdp, 'k', CTRL);
+  for (const ch of 'ghost') await press(cdp, ch);
+  check('crypto: the coin domain comes from the feed, not the filtered rail',
+    await cdp.eval('Array.from(document.querySelectorAll("#nvk-list li .l")).map(function(n){return n.textContent;}).indexOf("GHOSTCOIN") > -1'),
+    true,
+    'GHOSTCOIN exists only in SNAP.coins and has no rail row, so listing it proves the enumeration ' +
+    'reads the unfiltered feed set rather than whatever the rail happens to have mounted');
+  await press(cdp, 'Escape');
 };
 
 SECTIONS.trader = async function (cdp, base) {
@@ -437,7 +618,13 @@ async function run(cdp, base, only) {
         await run(cdp, base, s.page);
         const hit = fails.some((f) => f.startsWith(s.breaks));
         console.log(`  ${hit ? 'x' : '!'} ${s.name.padEnd(20)} ${hit ? 'broke' : 'DID NOT BREAK'} "${s.breaks}"`);
-        if (!hit) bad.push(`${s.name}: expected "${s.breaks}" to fail — ${s.why}`);
+        if (!hit) {
+          // Say what DID go red. A sabotage that reddens a different check than the one it names is
+          // a different failure from one that reddens nothing, and the fix differs.
+          const others = fails.map((f) => f.split('\n')[0]);
+          console.log(`      red instead: ${others.length ? others.join('; ') : '(nothing — the mutation had no effect)'}`);
+          bad.push(`${s.name}: expected "${s.breaks}" to fail — ${s.why}`);
+        }
         else if (fails.length > 1) {
           console.log(`      (also red: ${fails.filter((f) => !f.startsWith(s.breaks))
             .map((f) => f.split('\n')[0]).join('; ')})`);

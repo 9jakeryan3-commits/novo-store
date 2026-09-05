@@ -16,6 +16,24 @@
    The index is fetched LAZILY - on first focus or first keystroke, never on page load. It is
    ~390KB, and charging every visitor to every page for a box most will not open is a real cost
    for an occasional feature. */
+/* THE KEYBOARD LAYER LOADS FIRST, and the order is deliberate.
+
+   One script tag per page is the whole budget, and this file already spends it, so the layer rides
+   along here rather than in a second tag swept across 1,427 files. But it must not be HOSTAGE to
+   the search widget: an uncaught error anywhere in the widget below aborts the rest of this script,
+   and if the loader sat at the bottom a cosmetic failure in a header box would silently remove
+   every keyboard shortcut on the page. Loading first makes those two failures independent. */
+(function () {
+  if (window.NovoKeys || document.getElementById('nvk-src')) return;
+  var s = document.createElement('script');
+  s.id = 'nvk-src';
+  // ?v= is rewritten to a content hash by scripts/stamp-assets.js on every deploy. Without it this
+  // file is served `immutable` for a year and no future fix would ever reach a returning visitor.
+  s.src = '/js/novo-keys.js?v=dad9ecaf';
+  s.defer = true;
+  document.head.appendChild(s);
+})();
+
 (function () {
   // ITS OWN ROW, UNDER THE LINKS. Inline in .nav-actions it competed with nine nav links for
   // one row and pushed them onto two lines. As a sibling AFTER .nav-inner it is a second header
@@ -51,6 +69,21 @@
     '.nvs-ss-k{color:var(--txt3,#7d97b8);font-size:11px;font-weight:700;letter-spacing:.09em;',
     'text-transform:uppercase;}',
     '.nvs-ss-none{padding:12px;color:var(--txt3,#7d97b8);font-size:13px;}',
+    /* THE KEY BADGES. The whole feature was invisible without them: a palette you have to already
+       know about is a palette nobody opens. Pinned inside the field on the right, vertically
+       centred with translateY rather than a fixed top — the two header markup families ship input
+       heights that differ by 2px, and a fixed top sits a pixel off on one of them.
+       Hidden on coarse pointers because the palette itself is (js/novo-keys.js), and a badge that
+       advertises a key you have no keyboard for is worse than no badge. */
+    '.nvs-ss-keys{position:absolute;right:10px;top:50%;transform:translateY(-50%);',
+    'display:flex;align-items:center;gap:7px;pointer-events:none;user-select:none;}',
+    '.nvs-ss-keys i{display:flex;align-items:center;gap:4px;font-style:normal;}',
+    '.nvs-ss-keys kbd{background:rgba(255,255,255,.06);border:1px solid var(--bdr,#2e3036);',
+    'border-radius:4px;padding:1px 5px;color:var(--txt2,#b3c2d6);',
+    'font:600 10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}',
+    '.nvs-ss-keys em{font-style:normal;color:var(--txt3,#7d97b8);font-size:10.5px;}',
+    '.nvs-ss-keys.caps em{display:none;}',
+    '@media(pointer:coarse){.nvs-ss-keys{display:none;}}',
     // Narrower gutters on phones, where 22px each side is a real bite out of the field.
     // DESKTOP: the box rides in ROW 1 beside the brand, the Unusual Whales shape - logo,
     // search, then the account buttons, with the nav links spread across row 2. It is a flex
@@ -73,6 +106,10 @@
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
     'role="combobox" aria-expanded="false" aria-controls="site-search-results" ' +
     'aria-autocomplete="list" aria-label="Search the site">' +
+    '<div class="nvs-ss-keys" aria-hidden="true">' +
+    '<i><kbd>' + (/Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '')
+                  ? '⌘K' : 'Ctrl K') + '</kbd><em>search</em></i>' +
+    '<i><kbd>/</kbd><em>cmds</em></i></div>' +
     '<div class="nvs-ss-panel" id="site-search-results" role="listbox" ' +
     'aria-label="Search results"></div>';
   // INSIDE .nav-inner, not after it. As a sibling it could never join row 1 - a flex
@@ -83,6 +120,7 @@
   inner.appendChild(wrap);
 
   var input = wrap.querySelector('#site-search-input');
+  var keys = wrap.querySelector('.nvs-ss-keys');
 
   // The placeholder has to FIT, or it truncates mid-word - the long one cut off at
   // "the read archiv" on a phone. MEASURED, not guessed from breakpoints: breakpoints were
@@ -95,18 +133,51 @@
     'Search NoVo — guides, coins…',
     'Search NoVo…'
   ];
+  /* THE BADGES STEAL THE PLACEHOLDER'S ROOM, so the two are chosen TOGETHER — longest label with
+     the longest placeholder that still fits, then the short badge form, rather than picking a
+     placeholder against a width the badges have already taken.
+
+     MEASURED, never constant. The same badge string renders 13% wider on the marketing pages than
+     on the journal pages (different body font stacks) and ~18px wider again on a Mac, so a constant
+     tuned on one page over-reserves on every other. And it must run AFTER the badges are in the
+     DOM or their width reads 0.
+
+     Full-label badges do not fit everywhere: between 1025 and ~1078px the box's clamp has bottomed
+     out at 260px, and on phones under ~374px, so those widths get the caps-only form instead of a
+     placeholder that runs underneath the keys. */
   function setPlaceholder() {
     var cs = getComputedStyle(input);
-    var room = input.getBoundingClientRect().width
-             - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
-             - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
-    if (!room || room <= 0) return;
+    var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+            + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+    var full = input.getBoundingClientRect().width - pad;
+    if (!full || full <= 0) return;
     var ctx = setPlaceholder._c || (setPlaceholder._c = document.createElement('canvas').getContext('2d'));
     ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
-    for (var i = 0; i < PLACEHOLDERS.length; i++) {
-      // 6px of slack so a rounding difference cannot clip the last glyph
-      if (ctx.measureText(PLACEHOLDERS[i]).width <= room - 6) { input.placeholder = PLACEHOLDERS[i]; return; }
+
+    function roomWith(caps) {
+      // Null-safe on purpose: a missing badge node must degrade to "no badges, full width", never
+      // throw. An uncaught error here aborts the whole script, and the keyboard layer's loader
+      // lives further down this same file — so a cosmetic failure could take the palette with it.
+      if (!keys) return full;
+      keys.classList.toggle('caps', caps);
+      var kw = keys.getBoundingClientRect().width;
+      if (!kw) return full;                     // badges hidden (touch): the whole field is free
+      // right inset (10px) + a 12px gap so text never crowds the keys
+      return full - kw - 22 + parseFloat(cs.paddingRight);
     }
+
+    var forms = [false, true];                  // labelled first, caps-only as the fallback
+    for (var f = 0; f < forms.length; f++) {
+      var room = roomWith(forms[f]);
+      for (var i = 0; i < PLACEHOLDERS.length; i++) {
+        // 6px of slack so a rounding difference cannot clip the last glyph
+        if (ctx.measureText(PLACEHOLDERS[i]).width <= room - 6) {
+          input.placeholder = PLACEHOLDERS[i];
+          return;
+        }
+      }
+    }
+    // Nothing fits even caps-only: keep the short badges and the shortest string.
     input.placeholder = PLACEHOLDERS[PLACEHOLDERS.length - 1];
   }
   setPlaceholder();
@@ -119,7 +190,16 @@
     loading = true;
     fetch('/journal/search-index.json?v=11')
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { data = j || []; loading = false; if (lastQ) run(lastQ); })
+      .then(function (j) {
+        data = j || [];
+        loading = false;
+        if (lastQ) run(lastQ);
+        /* THE PALETTE NEEDS TELLING. It calls query() directly, which never sets lastQ, so the
+           repaint above cannot reach it — without this event a palette opened before the index
+           landed would show zero page hits and never recover, because the only other load trigger
+           was this box's own focus event and the box no longer takes focus. */
+        try { document.dispatchEvent(new CustomEvent('novo-search-ready')); } catch (_e) {}
+      })
       .catch(function () {
         loading = false;
         panel.innerHTML = '<div class="nvs-ss-none">Search is unavailable right now.</div>';
@@ -233,6 +313,27 @@
 
   input.addEventListener('focus', load);
   input.addEventListener('input', function () { run(input.value); });
+
+  /* THE BOX IS THE DOOR TO THE PALETTE — this is the Unusual Whales shape Jake asked for, where the
+     visible field is what teaches the shortcut and clicking it opens the real surface.
+
+     ON CLICK, NOT ON FOCUS, and that is not a style choice. The palette restores focus to whatever
+     opened it when it closes; bound to focus, Escape would hand focus back to this box, which would
+     re-open the palette, forever. Click has no such loop.
+
+     TOUCH KEEPS THE INLINE PANEL. The palette is display:none on coarse pointers, so routing this
+     box through it there would delete site search from every phone. The guard is explicit rather
+     than implied by the CSS, because a silently-swallowed tap is indistinguishable from a dead box. */
+  function coarse() {
+    try { return !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches); }
+    catch (_e) { return false; }
+  }
+  input.addEventListener('mousedown', function (e) {
+    if (coarse() || !window.NovoKeys) return;
+    e.preventDefault();               // don't take focus; the palette wants it
+    load();                           // start the index fetch this click would have triggered
+    window.NovoKeys.open('search', true);
+  });
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { input.value = ''; run(''); input.blur(); return; }
     if (e.key === 'ArrowDown') { move(1); e.preventDefault(); return; }
@@ -255,24 +356,10 @@
   };
 })();
 
-/* The keyboard layer, on every page that carries the standard header.
-
-   ONE SCRIPT TAG PER PAGE IS THE BUDGET, and this file already spends it — the header is
-   copy-pasted furniture across 1,427 pages, so adding a second <script> tag would be a sweep of
-   1,427 files that can half-fail and then drift. Loading it from here costs nothing extra and
-   reaches exactly the pages that have a header to navigate. The three live dashboards carry their
-   own tag: they have no .nav-inner, they never load this file, and their commands have to be
-   registered from inside their own script scope anyway. */
-(function () {
-  if (window.NovoKeys || document.getElementById('nvk-src')) return;
-  var s = document.createElement('script');
-  s.id = 'nvk-src';
-  // ?v= is rewritten to a content hash by scripts/stamp-assets.js on every deploy. Without it this
-  // file is served `immutable` for a year and no future fix would ever reach a returning visitor.
-  s.src = '/js/novo-keys.js?v=c6331f50';
-  s.defer = true;
-  document.head.appendChild(s);
-})();
+/* The keyboard-layer loader used to sit HERE, at the bottom. It moved to the top of this file after
+   a sabotage run proved the hazard: a thrown error anywhere in the search widget above aborts the
+   rest of the script, so a cosmetic failure in the header box silently removed every keyboard
+   shortcut on the page. Same one-tag budget, independent failure modes. */
 
 /* Prose-cap centering. The shared sheets cap running text (~78ch) inside the 1560 shell;
    a capped box whose TEXT is centered must center its BOX too. The alignment arrives by

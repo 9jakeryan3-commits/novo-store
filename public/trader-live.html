@@ -5323,6 +5323,7 @@ function _kbHelpToggle(force){
     var _kbMod=/Mac|iPhone|iPad|iPod/.test(navigator.platform||navigator.userAgent||'')?'⌘':'Ctrl';
     h.innerHTML='<h4>Keyboard</h4>'+
       '<div class="kb-row"><span>Command palette</span><span><kbd>'+_kbMod+'</kbd>+<kbd>K</kbd></span></div>'+
+      '<div class="kb-row"><span>Commands</span><span><kbd>/</kbd></span></div>'+
       '<div class="kb-row"><span>Go to a page</span><span><kbd>g</kbd> then <kbd>h</kbd> <kbd>a</kbd> <kbd>t</kbd> <kbd>c</kbd> <kbd>m</kbd> <kbd>j</kbd> <kbd>p</kbd></span></div>'+
       '<div class="kb-row"><span>Timeframe</span><span><kbd>1</kbd>…<kbd>6</kbd></span></div>'+
       '<div class="kb-row"><span>Pan</span><span><kbd>←</kbd> <kbd>→</kbd></span></div>'+
@@ -6691,7 +6692,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <!-- The shared keyboard layer: the command palette, the go-to chords, "?" deferred to the sheet
      this page already owns. It does NOT touch the chart keys above — 1-6, arrows, +/-, L, Alt+H,
      Del, Ctrl+Z keep working exactly as they did. -->
-<script src="/js/novo-keys.js?v=c6331f50" defer></script>
+<script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
 <script>
 /* EVERY COMMAND HERE CLICKS A REAL BUTTON. The toolbar's own handlers carry behaviour that is
    invisible from the outside and easy to lose in a reimplementation: the timeframe path preserves
@@ -6723,6 +6724,21 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
   K.register(fromButtons('#ctb-tf .ctb-btn[data-tf]', 'data-tf', 'Timeframe', ''));
   K.register(fromButtons('#ctb-tog .ctb-btn[data-tog]', 'data-tog', 'Overlay', 'Toggle '));
   K.register(fromButtons('#ctb-tools .ctb-btn[data-tool]', 'data-tool', 'Draw', ''));
+
+  /* /tf — the argument domain is the toolbar's own data-tf values, read from the DOM at run time
+     rather than listed here. The keyboard map's _KB_TF and the buttons' data-tf are two hand-kept
+     copies of the same six tokens; reading the buttons means this command cannot be the third copy
+     that drifts. Clicking is deliberate too — that path preserves the visible range across a switch. */
+  K.register([{
+    token: '/tf', args: '<1|5|15|1h|1d|1w>', label: 'Timeframe', group: 'Chart', needsArg: true,
+    desc: 'switch the chart timeframe',
+    run: function (arg) {
+      var want = String(arg || '').trim().toLowerCase();
+      if (!want) return;
+      var b = document.querySelector('#ctb-tf .ctb-btn[data-tf="' + want.replace(/"/g, '') + '"]');
+      if (b) b.click();
+    }
+  }]);
 
   K.register([
     { label: 'Run analysis', group: 'Chart',

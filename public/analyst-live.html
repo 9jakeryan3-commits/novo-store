@@ -1569,11 +1569,13 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
-  // Summoned like a tool: "n" or "/" when you are not already typing, Esc to dismiss. Both are
-  // bound in js/novo-keys.js, which owns the keys that mean the same thing on every surface; the
-  // "/" branch below is kept as a fallback so the binding stays true if that file fails to load.
-  // Cmd/Ctrl-K USED to open this panel and now opens the command palette instead — one chord, one
-  // meaning, across the store and all three dashboards. The badge on the bubble teaches the new key.
+  // Summoned with "n" when you are not already typing, or "/ask" from the palette. Esc dismisses.
+  // Both live in js/novo-keys.js, which owns every key that means the same thing on all surfaces.
+  // Cmd/Ctrl-K and "/" USED to open this panel; they now open the command palette in search and
+  // command mode respectively. Only the Escape branch below is still ours — the "/" fallback that
+  // sat here was DELETED rather than left dormant: novo-keys consumes "/" in capture so it could
+  // never fire, and a handler that only wakes up when the layer fails to load would resurrect the
+  // old meaning at exactly the moment nothing else was there to contradict it.
   function novoAskTyping(el){
     return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
@@ -1605,8 +1607,6 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var open = panel.classList.contains('on');
 
     if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
-    // "/" is a shortcut only when it is not a character someone is trying to type.
-    if (e.key === '/' && !open && !novoAskTyping(document.activeElement)) { e.preventDefault(); window.novoAskOpen(1); }
   });
   // Every message carries WHEN it was said. This is not decoration: NoVo's lunch drop sits in the
   // log for the rest of the session quoting levels from 12:30, and without a time on it a member
@@ -2141,7 +2141,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <!-- The shared keyboard layer. It owns the keys that mean the same thing on every NoVo surface —
      the command palette, the go-to chords, "/" and "n" and "?" — and knows nothing about this page.
      What this page is for lives in the registration below. -->
-<script src="/js/novo-keys.js?v=c6331f50" defer></script>
+<script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
 <script>
 /* WHY THESE COMMANDS AND NOT THE OBVIOUS ONES. This dashboard is one scrolling page, not a set of
    views, so most of what a reader wants is "put me on that card" rather than "switch to that tab".
@@ -2199,9 +2199,27 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     return out;
   });
 
+  /* /ticker — the argument domain is the strip, which deliberately renders only the two indices you
+     are NOT on, so the valid values change as you switch. Resolved at RUN time against the live
+     strip rather than captured, and a ticker you are already on is a no-op rather than an error. */
+  K.register([{
+    token: '/ticker', args: '<SPY|QQQ|IWM>', label: 'Switch ticker', group: 'Ticker',
+    desc: 'the other two indices', needsArg: true,
+    run: function (arg) {
+      var want = String(arg || '').trim().toUpperCase();
+      if (!want) return;
+      var pills = document.querySelectorAll('#strip .lv-mini');
+      for (var i = 0; i < pills.length; i++) {
+        var t = pills[i].querySelector('.t');
+        var sym = t ? (t.textContent || '').trim().split(/\s+/)[0].toUpperCase() : '';
+        if (sym === want) { pills[i].click(); return; }
+      }
+    }
+  }]);
+
   K.addHelp([
-    ['Ask NoVo', '<kbd>n</kbd> or <kbd>/</kbd>'],
-    ['Switch ticker', 'palette → <kbd>' + K.mod + '</kbd><kbd>K</kbd>']
+    ['Ask NoVo', '<kbd>n</kbd>'],
+    ['Switch ticker', '<kbd>/</kbd> then <kbd>ticker</kbd>']
   ]);
 });
 </script>
