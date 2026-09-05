@@ -313,6 +313,21 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* Two cards now (the strip drops the ticker already expanded above), so split the full width 50/50
      instead of leaving an empty 3rd column. */
   .lv-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin: 16px 0; }
+  /* The strip now lives INSIDE a grid cell beside the bias card, so its own vertical margin would
+     push it out of line with the card it sits next to. */
+  .lv-grid-top { margin: 16px 0; align-items: start; }
+  .lv-grid-top .lv-strip { margin: 0; height: 100%; align-content: start; }
+  .lv-bias .bias-row { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:10px 0; border-top:1px solid var(--bdr); }
+  .lv-bias .bias-row:first-child { border-top:0; padding-top:2px; }
+  .lv-bias .bk { font-size:11px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;
+    color:var(--txt3); flex:0 0 auto; min-width:78px; }
+  .lv-bias .bpill { display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.1em;
+    text-transform:uppercase; padding:4px 11px; border-radius:999px; }
+  .lv-bias .bage { font-size:11px; color:var(--txt3); }
+  .lv-bias .bsc { flex-basis:100%; font-size:12px; color:var(--txt2); line-height:1.5; }
+  .lv-bias .bsc b { color:var(--txt1); }
+  .lv-bias .bnone { font-size:12.5px; color:var(--txt3); line-height:1.55; }
   /* bottom block: desktop = gamma | The Line on top row, index strip full-width below.
      mobile reflow = gamma → strip (3 ticker boxes) → The Line, so The Line sits UNDER the boxes. */
   .lv-bottom { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-top: 16px; align-items: stretch; }
@@ -443,7 +458,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- market ribbon -->
     <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt3);margin:2px 0 9px;">Futures &middot; <span style="color:#34d399;">Live 24/5</span></div>
     <div class="lv-ribbon" id="mkt-ribbon"></div>
-    <div class="lv-strip" id="strip"></div>
+
+    <!-- Ticker switcher | NoVo's bias. Deliberately the SAME .lv-grid columns as the hero row
+         below, so the two ticker cards sit over the chart and the bias card sits over the dealer
+         map rather than forming a third, unrelated rhythm. Collapses to one column at 900px with
+         the tickers first, which is the order they are used in. -->
+    <div class="lv-grid lv-grid-top">
+      <div class="lv-strip" id="strip"></div>
+      <div class="lv-card lv-bias" id="bias-card">
+        <h2>NoVo&rsquo;s bias</h2>
+        <div id="bias-rows"></div>
+      </div>
+    </div>
 
     <!-- HERO: chart | dealer positioning (balanced two-up) -->
     <div class="lv-grid">
@@ -1193,13 +1219,74 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     row.insertBefore(b, row.firstChild);
   }
 
+  /* NoVo's bias — the premarket lean and the hourly structural call, each sitting on top of the
+     record that grades IT.
+
+     THE RULE JAKE SET: "they must show the same thing the track record grades." The engine sends
+     only rows that pass the graders' own filters, so anything that arrives here is scoreable. What
+     this function must not do is dress it up:
+       - a bias with no row is ABSENT, never a dash pretending to be a reading;
+       - the age travels with the value, because the hourly is re-stamped only on a CONFIRMED vision
+         read and can be hours old after an outage — and a stale structural call rendered as current
+         is the exact failure this dashboard keeps relearning;
+       - the score prints its DENOMINATOR every time. A rate without an n is the thing the whole
+         track-record page exists to refuse, and it would be absurd for this panel to do it.
+     Colours are lifted from the email and archive pills (api/analyst-publish.js) rather than
+     invented, so one bias reads the same in all three places. */
+  var _BIAS_C = {
+    BULLISH: ['rgba(16,185,129,.12)', '#34d399', 'rgba(16,185,129,.45)'],
+    BEARISH: ['rgba(239,68,68,.12)',  '#f87171', 'rgba(239,68,68,.45)'],
+    NEUTRAL: ['rgba(148,163,184,.12)','#b3c2d6', 'rgba(148,163,184,.4)']
+  };
+
+  function _biasAge(min){
+    if (!(min >= 0)) return '';
+    if (min < 90) return Math.round(min) + 'm ago';
+    var h = min / 60;
+    if (h < 36) return Math.round(h) + 'h ago';
+    return Math.round(h / 24) + 'd ago';
+  }
+
+  function _biasRow(key, label, val, rec, horizon){
+    if (!val || !val.bias) {
+      return '<div class="bias-row"><span class="bk">' + label + '</span>' +
+             '<span class="bnone">No ' + key + ' call on the current build.</span></div>';
+    }
+    var c = _BIAS_C[val.bias] || _BIAS_C.NEUTRAL;
+    var h = '<div class="bias-row"><span class="bk">' + label + '</span>' +
+            '<span class="bpill" style="background:' + c[0] + ';color:' + c[1] +
+            ';border:1px solid ' + c[2] + ';">' + _escH(val.bias) + '</span>' +
+            '<span class="bage">' + _escH(_biasAge(val.age_min)) + '</span>';
+    if (rec && rec.enough && rec.correct_rate != null) {
+      h += '<span class="bsc">Right <b>' + rec.correct_rate + '%</b> of the time over ' +
+           '<b>' + rec.n + '</b> ' + horizon + '.' +
+           (rec.strength === 'inconclusive' ? ' Not yet a significant edge.' : '') + '</span>';
+    } else {
+      h += '<span class="bsc">Record accruing&nbsp;&mdash; not enough scored calls to publish a rate yet.</span>';
+    }
+    return h + '</div>';
+  }
+
+  function renderBias(){
+    var el = document.getElementById('bias-rows');
+    if (!el) return;
+    var b = STATE && STATE.bias;
+    if (!b) {
+      el.innerHTML = '<div class="bnone">No graded bias published yet.</div>';
+      return;
+    }
+    el.innerHTML =
+      _biasRow('premarket', 'Premarket', b.premarket, b.lean_record, 'sessions, open to close') +
+      _biasRow('hourly', 'Hourly', b.hourly, b.audit_record, 'hours');
+  }
+
   function render(){
     if(!STATE) return;
     // The restored ticker is only good if the payload actually carries it.
     var _tk = (STATE.indices||[]).map(function(d){ return d.ticker; });
     if (_tk.length && _tk.indexOf(CUR) < 0) CUR = _tk.indexOf('SPY') >= 0 ? 'SPY' : _tk[0];
     if (_tk.length) rememberTick(CUR);
-    renderDealer(); renderStrip(); renderMeta(); renderAnalogues();
+    renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); renderBias();
     if (STATE.chat_drop && window.novoChatDrop) window.novoChatDrop(STATE.chat_drop);
     liveChip();
     // First real payload has landed: drop the skeleton. From here a "—" means the value is genuinely

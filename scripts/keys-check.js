@@ -114,6 +114,34 @@ const SABOTAGES = [
     breaks: 'store: Escape out of a box-opened palette does not re-open it',
     why: 'focus-bound opening plus focus-restore-on-close makes the palette undismissable' },
 
+  { name: 'bias-layout-stacked', page: 'analyst',
+    file: '/analyst-live.html',
+    at: '<div class="lv-grid lv-grid-top">',
+    to: '<div class="lv-grid-top">',
+    breaks: 'analyst: the bias card sits beside the ticker strip, not above it',
+    why: 'without the shared grid the card stacks under the strip instead of taking the right slot' },
+
+  { name: 'bias-dash-not-absent', page: 'analyst',
+    file: '/analyst-live.html',
+    at: "'<span class=\"bnone\">No ' + key + ' call on the current build.</span></div>'",
+    to: "'<span class=\"bage\">&mdash;</span></div>'",
+    breaks: 'analyst: an absent hourly bias says so instead of showing a dash',
+    why: 'a dash reads as a reading that came back empty rather than a call never made' },
+
+  { name: 'bias-no-age', page: 'analyst',
+    file: '/analyst-live.html',
+    at: "'<span class=\"bage\">' + _escH(_biasAge(val.age_min)) + '</span>'",
+    to: "''",
+    breaks: 'analyst: a stale bias carries its age',
+    why: 'strips the freshness stamp, letting an hours-old structural call render as current' },
+
+  { name: 'bias-rate-without-n', page: 'analyst',
+    file: '/analyst-live.html',
+    at: "'<b>' + rec.n + '</b> ' + horizon",
+    to: "horizon",
+    breaks: 'analyst: the premarket bias renders with its own graded record',
+    why: 'publishes an accuracy rate with no denominator — the one thing the track record refuses' },
+
   { name: 'coin-from-rail', page: 'crypto',
     file: '/crypto-live.html',
     at: "try { if (SNAP && SNAP.coins) names = Object.keys(SNAP.coins); } catch (_e) { names = []; }",
@@ -141,6 +169,34 @@ function serve() {
   return new Promise((resolve) => {
     const s = http.createServer((req, res) => {
       let p = decodeURIComponent(req.url.split('?')[0]);
+
+      /* A CANNED LIVE PAYLOAD, so the dashboard's real render path can be exercised offline.
+         Without it analyst-live sits on its login screen and every panel is untestable — which is
+         how a panel ships that renders correctly only in someone's head. The fixture deliberately
+         carries a PRESENT premarket bias and an ABSENT hourly one, so one render covers both the
+         value branch and the honest-absence branch. */
+      if (p === '/api/analyst-publish') {
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(JSON.stringify({
+          updated_at: Date.now(), session: 'closed', stale: false,
+          indices: [
+            { ticker: 'SPY', spot: 769.48, net_gex: -149400000, em_daily_pct: 0.4, skew_pts: 1.2 },
+            { ticker: 'QQQ', spot: 717.52, net_gex: 424700000, em_daily_pct: 0.6, skew_pts: 1.9 },
+            { ticker: 'IWM', spot: 295.53, net_gex: 71800000, em_daily_pct: 0.5, skew_pts: 1.2 }
+          ],
+          read: { title: 'NoVo · Pre-Market Primer', text: 'fixture read', bias: 'BULLISH',
+                  bias_label: "NoVo's lean", date: '2026-09-05' },
+          bias: {
+            premarket: { bias: 'BULLISH', ts: Date.now() / 1000 - 1800, age_min: 30 },
+            hourly: null,
+            lean_record: { enough: true, n: 7, correct_rate: 42.9, holds: false },
+            audit_record: { enough: true, n: 20, correct_rate: 45.0, holds: false, strength: 'inconclusive' }
+          },
+          line_feed: [], line_feeds: {}, analogues: [], analogues_by: {}
+        }));
+        return;
+      }
+
       if (p.endsWith('/')) p += 'index.html';
       const file = path.join(ROOT, p);
       if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
@@ -553,7 +609,55 @@ SECTIONS.trader = async function (cdp, base) {
 };
 
 SECTIONS.analyst = async function (cdp, base) {
+  // A token, planted before the page's own scripts run, so the dashboard polls instead of showing
+  // its login screen. Value is irrelevant — the fixture route answers 200 regardless.
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: "try{localStorage.setItem('novo_live_t','keys-check');}catch(e){}"
+  });
   await load(cdp, base + '/analyst-live.html');
+  await new Promise((r) => setTimeout(r, 900));
+
+  // ---- NoVo's bias panel -----------------------------------------------------------------------
+  check('analyst: the bias card sits beside the ticker strip, not above it',
+    await cdp.eval(`(function(){
+      var s=document.getElementById('strip'), b=document.getElementById('bias-card');
+      if(!s||!b) return 'missing';
+      var rs=s.getBoundingClientRect(), rb=b.getBoundingClientRect();
+      if(rs.width===0||rb.width===0) return 'not laid out';
+      // side by side: vertical overlap AND bias to the right of the strip
+      return (rb.left >= rs.right - 2) && (Math.min(rs.bottom,rb.bottom) - Math.max(rs.top,rb.top) > 20);
+    })()`),
+    true,
+    "Jake's layout: the two unselected tickers move together above the chart and the bias card " +
+    'takes the right slot beside them, on the same columns as the hero row below');
+
+  check('analyst: the premarket bias renders with its own graded record',
+    await cdp.eval(`(function(){
+      var r=document.querySelectorAll('#bias-rows .bias-row')[0];
+      if(!r) return 'no row';
+      return [(r.querySelector('.bpill')||{}).textContent,
+              /42\\.9%/.test(r.textContent),
+              /\\b7\\b/.test(r.textContent)];
+    })()`),
+    ['BULLISH', true, true],
+    'THE CONTRACT: the pill and the rate under it must come from the same graded row. The rate ' +
+    'prints its denominator because a rate without an n is what the track-record page exists to refuse');
+
+  check('analyst: an absent hourly bias says so instead of showing a dash',
+    await cdp.eval(`(function(){
+      var r=document.querySelectorAll('#bias-rows .bias-row')[1];
+      if(!r) return 'no row';
+      return [!!r.querySelector('.bnone'), !r.querySelector('.bpill'), /—|--/.test(r.textContent)];
+    })()`),
+    [true, true, false],
+    'ABSENT IS HONEST, a dash is not: a dash reads as a reading that came back empty rather than ' +
+    'a call that was never made on the current build');
+
+  check('analyst: a stale bias carries its age',
+    await cdp.eval(`(document.querySelector('#bias-rows .bage')||{}).textContent||''`), '30m ago',
+    'the hourly is re-stamped only on a CONFIRMED vision read, so it can be hours old after an ' +
+    'outage — an age travelling with the value is what stops a stale call reading as current');
+
   await press(cdp, 'k', CTRL);
   check('analyst: Cmd-K opens the palette, not the chat',
     await cdp.eval('[!!document.querySelector("#nvk.on"), !!document.querySelector("#novo-ask.on")]'),
