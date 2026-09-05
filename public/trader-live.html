@@ -1970,6 +1970,24 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           background: rgba(58,42,14,.92); color: #f5c77f; border: 1px solid rgba(245,158,11,.45);
           box-shadow: 0 4px 14px rgba(0,0,0,.4); }
         #chart-stale.on { display: inline-block; }
+        /* Three-ticker gamma agreement. Bottom-RIGHT: the stale chip owns bottom-left, the
+           countdown the price axis, the legend top-left. Reads the net-GEX sign of SPY/QQQ/IWM
+           at a glance — when all three sit the same way the regime is broad, when they split
+           it is one index doing its own thing, and that distinction is invisible on a chart
+           showing one symbol. */
+        #gex-agree { position: absolute; bottom: 30px; right: 74px; z-index: 14; display: none;
+          font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: .3px;
+          padding: 3px 7px; border-radius: 6px; pointer-events: none; white-space: nowrap;
+          background: rgba(12,14,18,.90); border: 1px solid rgba(255,255,255,.10);
+          box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+        #gex-agree.on { display: inline-block; }
+        #gex-agree .ga-t { color: var(--txt3); margin-right: 5px; }
+        #gex-agree i { font-style: normal; margin-right: 7px; }
+        #gex-agree i:last-child { margin-right: 0; }
+        #gex-agree i b { font-weight: 700; opacity: .72; margin-right: 2px; }
+        #gex-agree .pos { color: #34d399; }
+        #gex-agree .neg { color: #f43f5e; }
+        #gex-agree.all { border-color: rgba(245,158,11,.45); }
         #scale-menu .sm-i { display: flex; align-items: center; gap: 9px; padding: 8px 11px;
           border-radius: 7px; font-size: 11.5px; font-weight: 600; color: var(--txt2); cursor: pointer; }
         #scale-menu .sm-i:hover { background: rgba(255,255,255,.06); color: var(--txt1); }
@@ -3216,7 +3234,7 @@ async function _loadAnalysisBoard(){
     var u=NOVO_URL('/api/analysis-board'); if(!u) return;
     var r=await _tfetch(u); if(!r.ok){ _reauth401(r); return; }
     _abData=await r.json();
-    _renderBoard(); _renderLine();
+    _renderBoard(); _renderLine(); try{ _gexAgree(); }catch(_e){}
     if(_ctbTog.heat){ try{ _loadHeat(); }catch(_e){} }   // B16: field refresh rides this supervised lane
   }catch(_e){}
 }
@@ -3230,7 +3248,7 @@ async function _loadHeat(){
     try{
       var r=await _tfetch(u+'&ticker='+encodeURIComponent(tk)); if(!r.ok){ _reauth401(r); return; }
       var d=await r.json();
-      if(d&&d.ticker===tk&&d.cols&&d.cols.length){ _heatData[tk]=d; try{ _novoChart.timeScale().applyOptions({}); }catch(_e){} }
+      if(d&&d.ticker===tk&&d.cols&&d.cols.length){ _heatData[tk]=d; try{ _novoChart.timeScale().applyOptions({}); }catch(_e){} try{ _pinVoid(); }catch(_e){} }
     } finally { window._heatBusy=0; }
   }catch(_e){ window._heatBusy=0; }
 }
@@ -3894,6 +3912,109 @@ window.novoHealth = function(){
     return H;
   }catch(e){ console.log('novoHealth unavailable:', e && e.message); return null; }
 };
+/* ── ITEM 4: NAME THE PINS AND THE VOIDS (2026-09-05) ─────────────────────────────────
+   The strike x time heatmap already draws the field; what it never did was SAY anything about
+   it. The reader had to infer from colour alone which strike was heavy enough to stall price
+   and which band had nothing holding it up. Competitors sell exactly that labelling on top of
+   the same picture.
+
+   Computed from the NEWEST column of the field the page already has — no request, no engine
+   change, no new data. A PIN is the strike carrying the largest positive gamma in that column
+   (dealers hedge against movement there, so price tends to stall). A VOID is the widest run of
+   adjacent strikes with negative gamma (nothing damping movement, so price can travel).
+
+   Both are drawn with the same createPriceLine idiom as every other level, so they inherit the
+   chart's existing look rather than introducing a second visual language. A floor of 25% of the
+   column's peak keeps a flat field from being labelled — an empty field should say nothing at
+   all rather than confidently naming noise. */
+var _pvLines = {};
+function _pvClear(){
+  try{
+    for(var k in _pvLines){ try{ _novoSeries.removePriceLine(_pvLines[k]); }catch(_e){} }
+    _pvLines = {};
+  }catch(_e){}
+}
+function _pinVoid(){
+  try{
+    _pvClear();
+    if(!_ctbTog.heat || !_novoSeries || _isDeepTf()) return;
+    var d = _heatData[_selTkr()];
+    if(!d || !d.cells || !d.cells.length || !d.strikes || !d.strikes.length) return;
+    var last = d.cols.length - 1;
+    if(last < 0) return;
+
+    // one value per strike, newest column
+    var col = [], peak = 0, i;
+    for(i = 0; i < d.strikes.length; i++){
+      var v = (d.cells[i] && typeof d.cells[i][last] === 'number') ? d.cells[i][last] : 0;
+      col.push(v);
+      if(Math.abs(v) > peak) peak = Math.abs(v);
+    }
+    if(!(peak > 0)) return;              // flat field: say nothing
+    var floor = peak * 0.25;
+
+    // PIN — heaviest positive strike
+    var pinI = -1, pinV = 0;
+    for(i = 0; i < col.length; i++){ if(col[i] > pinV){ pinV = col[i]; pinI = i; } }
+    if(pinI >= 0 && pinV >= floor){
+      _pvLines.pin = _novoSeries.createPriceLine({
+        price: d.strikes[pinI], color: 'rgba(52,211,153,0.85)', lineWidth: 1, lineStyle: 0,
+        axisLabelVisible: true, title: 'PIN' });
+    }
+
+    // VOID — widest contiguous run of negative strikes, at least two wide
+    var bi = -1, bl = 0, ci = -1, cl = 0;
+    for(i = 0; i < col.length; i++){
+      if(col[i] < 0 && Math.abs(col[i]) >= floor * 0.4){
+        if(ci < 0) ci = i;
+        cl++;
+        if(cl > bl){ bl = cl; bi = ci; }
+      } else { ci = -1; cl = 0; }
+    }
+    if(bi >= 0 && bl >= 2){
+      _pvLines.vlo = _novoSeries.createPriceLine({
+        price: d.strikes[bi], color: 'rgba(244,63,94,0.55)', lineWidth: 1, lineStyle: 3,
+        axisLabelVisible: false, title: 'VOID' });
+      _pvLines.vhi = _novoSeries.createPriceLine({
+        price: d.strikes[bi + bl - 1], color: 'rgba(244,63,94,0.55)', lineWidth: 1, lineStyle: 3,
+        axisLabelVisible: false, title: '' });
+    }
+  }catch(_e){ _ncSwallow('pinvoid', _e); }
+}
+
+/* ── ITEM 5: DO THE THREE TICKERS AGREE? (2026-09-05) ─────────────────────────────────
+   The chart shows one symbol at a time, so a trader cannot see whether SPY, QQQ and IWM are in
+   the same gamma regime. All three negative is a broad, fragile tape; one negative on its own
+   is that index doing something of its own. That distinction changes how much a level is worth
+   trusting and it was simply not available on this screen.
+
+   FREE, and that is why it is worth doing: /api/analysis-board already returns gexpath per
+   ticker for all three (chart_service.py builds it for SPY/QQQ/IWM in one query), on a poll the
+   client already runs every 60s. Nothing new is fetched — the data was arriving and only the
+   execution ticker's row was ever read. */
+function _gexAgree(){
+  try{
+    var el = document.getElementById('gex-agree'); if(!el) return;
+    var gp = _abData && _abData.gexpath;
+    if(!gp){ el.classList.remove('on'); return; }
+    var tks = ['SPY','QQQ','IWM'], out = [], signs = [], any = false;
+    for(var i = 0; i < tks.length; i++){
+      var arr = gp[tks[i]];
+      if(!arr || !arr.length){ out.push('<i><b>' + tks[i] + '</b>·</i>'); signs.push(0); continue; }
+      var g = arr[arr.length - 1][1];
+      var pos = g >= 0;
+      signs.push(pos ? 1 : -1); any = true;
+      out.push('<i class="' + (pos ? 'pos' : 'neg') + '"><b>' + tks[i] + '</b>' + (pos ? '+' : '\u2212') + '</i>');
+    }
+    if(!any){ el.classList.remove('on'); return; }
+    // "all three" only counts when all three actually reported — a missing ticker is not agreement.
+    var known = signs.filter(function(x){ return x !== 0; });
+    var all = known.length === 3 && (known[0] === known[1] && known[1] === known[2]);
+    el.classList.toggle('all', all);
+    el.innerHTML = '<span class="ga-t">' + (all ? 'ALL' : 'GEX') + '</span>' + out.join('');
+    el.classList.add('on');
+  }catch(_e){ _ncSwallow('gexagree', _e); }
+}
 function _staleChip(){
   try{
     var el=document.getElementById('chart-stale'); if(!el) return;
@@ -5128,7 +5249,7 @@ function _initNovoChart(){
   // markup stays untouched and they exist exactly as long as the chart does.
   try{
     el.style.position='relative';
-    ['chart-wm','chart-legend2','novo-chip','chart-veil','chart-countdown','chart-live','chart-stale'].forEach(function(id){
+    ['chart-wm','chart-legend2','novo-chip','chart-veil','chart-countdown','chart-live','chart-stale','gex-agree'].forEach(function(id){
       if(!document.getElementById(id)){ var d=document.createElement('div'); d.id=id; el.appendChild(d); }
     });
     var _cl=document.getElementById('chart-live');
