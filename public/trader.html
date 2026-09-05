@@ -1445,7 +1445,12 @@ function closeSetupGuide() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeSetupGuide();
+  // Only act when this overlay is actually open. Unconditional, it cleared
+  // document.body.style.overflow on every Escape -- including while the terms
+  // modal was open, which unlocked scroll behind a modal it could not close.
+  // index.html carries the same handler and was fixed; this copy was missed.
+  const o = document.getElementById('setup-guide-overlay');
+  if (e.key === 'Escape' && o && o.classList.contains('open')) closeSetupGuide();
 });
 </script>
 
@@ -1554,5 +1559,5 @@ document.addEventListener('keydown',function(ev){
 });
 </script>
   <script defer src="/polish.js?v=a8cd8f59"></script>
-<script src="/site-search.js?v=b3d60c89" defer></script></body>
+<script src="/site-search.js?v=9c295304" defer></script></body>
 </html>

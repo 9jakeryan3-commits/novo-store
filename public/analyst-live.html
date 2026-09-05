@@ -1497,7 +1497,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 
-<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this tape&hellip; <kbd aria-hidden="true">&#8984;K</kbd></button>
+<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this tape&hellip; <kbd aria-hidden="true">N</kbd></button>
 
 <div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
   <header>
@@ -1569,14 +1569,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
-  // Summoned like a tool: Cmd/Ctrl-K from anywhere, "/" when you are not already typing, Esc to
-  // dismiss. The badge prints the modifier THIS machine actually uses — a mac glyph on a Windows box
-  // reads as someone else's product.
-  var NOVO_MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '');
-  (function(){
-    var k = document.querySelector('#novo-ask-bubble kbd');
-    if (k) k.textContent = NOVO_MAC ? '⌘K' : 'Ctrl K';
-  })();
+  // Summoned like a tool: "n" or "/" when you are not already typing, Esc to dismiss. Both are
+  // bound in js/novo-keys.js, which owns the keys that mean the same thing on every surface; the
+  // "/" branch below is kept as a fallback so the binding stays true if that file fails to load.
+  // Cmd/Ctrl-K USED to open this panel and now opens the command palette instead — one chord, one
+  // meaning, across the store and all three dashboards. The badge on the bubble teaches the new key.
   function novoAskTyping(el){
     return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
@@ -1607,7 +1604,6 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (!panel) return;
     var open = panel.classList.contains('on');
 
-    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); window.novoAskOpen(!open); return; }
     if (e.key === 'Escape' && open) { window.novoAskOpen(0); return; }
     // "/" is a shortcut only when it is not a character someone is trying to type.
     if (e.key === '/' && !open && !novoAskTyping(document.activeElement)) { e.preventDefault(); window.novoAskOpen(1); }
@@ -2140,6 +2136,74 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     busy = false; document.getElementById('novo-ask-go').disabled = false;
   };
 })();
+</script>
+
+<!-- The shared keyboard layer. It owns the keys that mean the same thing on every NoVo surface —
+     the command palette, the go-to chords, "/" and "n" and "?" — and knows nothing about this page.
+     What this page is for lives in the registration below. -->
+<script src="/js/novo-keys.js?v=c6331f50" defer></script>
+<script>
+/* WHY THESE COMMANDS AND NOT THE OBVIOUS ONES. This dashboard is one scrolling page, not a set of
+   views, so most of what a reader wants is "put me on that card" rather than "switch to that tab".
+   Ticker switching goes through the strip's OWN click handler rather than reproducing its five-call
+   repaint sequence — the strip deliberately renders only the two tickers you are not on, so the
+   list is generated fresh on every keystroke instead of captured once. */
+(window.NovoKeysQueue = window.NovoKeysQueue || []).push(function (K) {
+  function jump(sel, label) {
+    return { label: label, group: 'Jump to', run: function () {
+      var el = document.querySelector(sel);
+      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } };
+  }
+
+  K.register(function () {
+    var out = [], pills = document.querySelectorAll('#strip .lv-mini');
+    for (var i = 0; i < pills.length; i++) {
+      var t = pills[i].querySelector('.t');
+      var sym = t ? (t.textContent || '').trim().split(/\s+/)[0] : '';
+      if (!sym) continue;
+      out.push({ label: 'Switch to ' + sym, group: 'Ticker', run: (function (el) {
+        return function () { el.click(); };
+      })(pills[i]) });
+    }
+    return out;
+  });
+
+  K.register([
+    jump('.lv-read', 'Today’s read'),
+    jump('#feed', 'The Line — level breaks'),
+    jump('#d-map', 'Dealer level ladder'),
+    jump('.gh-card', 'Gamma heat'),
+    jump('#prof-wrap', 'Volume profile'),
+    jump('#flow-card', 'Options flow'),
+    jump('#anlg-card', 'Analogues'),
+    jump('#mkt-ribbon', 'Market ribbon'),
+    { label: 'Settings', group: 'Page', run: function () { window.lvSettings(1); } },
+    { label: 'Clear the conversation', group: 'NoVo',
+      run: function () { window.novoAskClear(); } },
+    { label: 'Expand NoVo to full screen', group: 'NoVo',
+      run: function () { window.novoAskOpen(1); window.novoAskMax(); } },
+    { label: 'Plain English — define the jargon as I go', group: 'NoVo',
+      run: function () { window.novoAskLevel(); } }
+  ]);
+
+  /* The ten canned questions are already in the panel as buttons. Reading data-q off them makes
+     every one of them a palette command for free, and keeps the two lists from disagreeing when
+     the questions are reworded — which they are, often. */
+  K.register(function () {
+    var out = [], b = document.querySelectorAll('#novo-ask-quick button[data-q]');
+    for (var i = 0; i < b.length; i++) {
+      out.push({ label: 'Ask: ' + (b[i].dataset.q || ''), group: 'NoVo',
+        run: (function (el) { return function () { el.click(); }; })(b[i]) });
+    }
+    return out;
+  });
+
+  K.addHelp([
+    ['Ask NoVo', '<kbd>n</kbd> or <kbd>/</kbd>'],
+    ['Switch ticker', 'palette → <kbd>' + K.mod + '</kbd><kbd>K</kbd>']
+  ]);
+});
 </script>
 
 </body>

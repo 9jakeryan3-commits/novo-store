@@ -71,8 +71,10 @@
   wrap.className = 'nvs-ss-wrap';
   wrap.innerHTML =
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
-    'aria-label="Search the site">' +
-    '<div class="nvs-ss-panel" id="site-search-results" role="listbox"></div>';
+    'role="combobox" aria-expanded="false" aria-controls="site-search-results" ' +
+    'aria-autocomplete="list" aria-label="Search the site">' +
+    '<div class="nvs-ss-panel" id="site-search-results" role="listbox" ' +
+    'aria-label="Search results"></div>';
   // INSIDE .nav-inner, not after it. As a sibling it could never join row 1 - a flex
   // parent can only order its own children - so the desktop layout Jake asked for (logo,
   // search, account on row 1; nav links spread across row 2) needs it in the flex context.
@@ -131,11 +133,16 @@
     });
   }
 
-  function run(q) {
-    lastQ = q;
+  /* THE RANKING, SPLIT OUT AND EXPORTED. The command palette (js/novo-keys.js) shows page hits
+     beside its commands, and it calls this rather than fetching and scoring the index a second
+     time. One index was the whole point of this file; one RANKING is the same argument one layer
+     down — two scorers drift into disagreeing about what the best match is, and the reader gets a
+     different answer depending on which box they typed into. Returns index entries, most relevant
+     first, or [] when there is nothing loaded yet (and starts the load). */
+  function query(q) {
     q = (q || '').trim().toLowerCase();
-    if (q.length < 2) { panel.classList.remove('show'); panel.innerHTML = ''; return; }
-    if (!data) { load(); return; }
+    if (q.length < 2) return [];
+    if (!data) { load(); return []; }
 
     q = q.replace(/[^a-z0-9]+/g, ' ').trim();
     var toks = q.split(/\s+/).filter(Boolean), res = [];
@@ -163,32 +170,108 @@
       res.push({ a: a, s: score });
     }
     res.sort(function (x, y) { return y.s - x.s || x.a.t.length - y.a.t.length; });
+    return res.map(function (r) { return r.a; });
+  }
 
+  // Which result the keyboard is on. -1 means "none yet", so a bare Enter still takes the top hit
+  // the way it always has.
+  var sel = -1;
+
+  function run(qRaw) {
+    lastQ = qRaw;
+    var q = (qRaw || '').trim().toLowerCase();
+    if (q.length < 2) { panel.classList.remove('show'); panel.innerHTML = ''; mark(); return; }
+    if (!data) { load(); return; }
+
+    var res = query(qRaw);
+    sel = -1;
     if (!res.length) {
       panel.innerHTML = '<div class="nvs-ss-none">No matches for &ldquo;' + esc(q) + '&rdquo;.</div>';
       panel.classList.add('show');
+      mark();
       return;
     }
-    panel.innerHTML = res.slice(0, 10).map(function (r) {
-      return '<a class="nvs-ss-item" href="' + esc(r.a.u) + '">' +
-             '<span class="nvs-ss-t">' + esc(r.a.t) + '</span>' +
-             (r.a.k ? '<span class="nvs-ss-k">' + esc(r.a.k) + '</span>' : '') + '</a>';
+    panel.innerHTML = res.slice(0, 10).map(function (a, i) {
+      // role="option" is not decoration. The panel has declared role="listbox" since it shipped
+      // while its children were plain links with no option role, no aria-activedescendant and no
+      // arrow keys — a listbox in name only, which tells a screen-reader user to expect a
+      // navigable list and then hands them nothing to navigate.
+      return '<a class="nvs-ss-item" id="nvs-ss-o' + i + '" role="option" aria-selected="false" ' +
+             'href="' + esc(a.u) + '">' +
+             '<span class="nvs-ss-t">' + esc(a.t) + '</span>' +
+             (a.k ? '<span class="nvs-ss-k">' + esc(a.k) + '</span>' : '') + '</a>';
     }).join('');
     panel.classList.add('show');
+    mark();
+  }
+
+  function items() { return panel.querySelectorAll('.nvs-ss-item'); }
+
+  function mark() {
+    var its = items();
+    for (var i = 0; i < its.length; i++) {
+      its[i].setAttribute('aria-selected', i === sel ? 'true' : 'false');
+      its[i].style.background = i === sel ? 'rgba(255,255,255,.07)' : '';
+    }
+    if (sel > -1 && its[sel]) {
+      input.setAttribute('aria-activedescendant', its[sel].id);
+      if (its[sel].scrollIntoView) its[sel].scrollIntoView({ block: 'nearest' });
+    } else {
+      input.removeAttribute('aria-activedescendant');
+    }
+    input.setAttribute('aria-expanded', panel.classList.contains('show') ? 'true' : 'false');
+  }
+
+  function move(d) {
+    var n = items().length;
+    if (!n) return;
+    sel += d;
+    if (sel < 0) sel = n - 1;
+    if (sel > n - 1) sel = 0;
+    mark();
   }
 
   input.addEventListener('focus', load);
   input.addEventListener('input', function () { run(input.value); });
   input.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { input.value = ''; run(''); input.blur(); }
+    if (e.key === 'Escape') { input.value = ''; run(''); input.blur(); return; }
+    if (e.key === 'ArrowDown') { move(1); e.preventDefault(); return; }
+    if (e.key === 'ArrowUp') { move(-1); e.preventDefault(); return; }
     if (e.key === 'Enter') {
-      var first = panel.querySelector('.nvs-ss-item');
-      if (first) { location.href = first.getAttribute('href'); }
+      var its = items();
+      var pick = its[sel > -1 ? sel : 0];
+      if (pick) { e.preventDefault(); location.href = pick.getAttribute('href'); }
     }
   });
   document.addEventListener('click', function (e) {
-    if (!wrap.contains(e.target)) panel.classList.remove('show');
+    if (!wrap.contains(e.target)) { panel.classList.remove('show'); mark(); }
   });
+
+  // The command palette ranks page hits through this, and "/" focuses this box from anywhere.
+  window.NovoSiteSearch = {
+    load: load,
+    query: query,
+    focus: function () { input.focus(); input.select(); }
+  };
+})();
+
+/* The keyboard layer, on every page that carries the standard header.
+
+   ONE SCRIPT TAG PER PAGE IS THE BUDGET, and this file already spends it — the header is
+   copy-pasted furniture across 1,427 pages, so adding a second <script> tag would be a sweep of
+   1,427 files that can half-fail and then drift. Loading it from here costs nothing extra and
+   reaches exactly the pages that have a header to navigate. The three live dashboards carry their
+   own tag: they have no .nav-inner, they never load this file, and their commands have to be
+   registered from inside their own script scope anyway. */
+(function () {
+  if (window.NovoKeys || document.getElementById('nvk-src')) return;
+  var s = document.createElement('script');
+  s.id = 'nvk-src';
+  // ?v= is rewritten to a content hash by scripts/stamp-assets.js on every deploy. Without it this
+  // file is served `immutable` for a year and no future fix would ever reach a returning visitor.
+  s.src = '/js/novo-keys.js?v=c6331f50';
+  s.defer = true;
+  document.head.appendChild(s);
 })();
 
 /* Prose-cap centering. The shared sheets cap running text (~78ch) inside the 1560 shell;
