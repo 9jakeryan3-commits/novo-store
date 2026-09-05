@@ -32,6 +32,9 @@ function fakeKv(pending, hist, opts = {}) {
       pending.splice(i, 1); return 1;
     },
     async hincrby(k, f, v) { cells[f] = (cells[f] || 0) + v; return cells[f]; },
+    misses: [],
+    async lpush(k, v) { if (k === 'calib:misses') this.misses.unshift(v); },
+    async ltrim() {},
   };
 }
 
@@ -70,6 +73,31 @@ const t = async (label, pending, hist, expect, opts) => {
   // two claims, one due one not: only the due one graded
   await t('mixed due/undue', [claim(), claim({ asked_at: NOW - 5 * 60000, confidence: 85 })],
           { SPY: [hp(58, 770.2)] }, { '65:n': 1, '65:hit': 1 });
+
+  // ERROR MEMORY: a miss is kept verbatim, a hit is not
+  {
+    const kv = fakeKv([claim()], { SPY: [hp(58, 768.1)] });   // miss (spot below level)
+    await gradeDueForecasts(kv);
+    const missKept = kv.misses.length === 1 && JSON.parse(kv.misses[0]).spot_at_horizon === 768.1;
+    if (!missKept) fails++;
+    console.log((missKept ? 'ok  ' : 'FAIL') + ' miss remembered verbatim with spot_at_horizon');
+  }
+  {
+    const kv = fakeKv([claim()], { SPY: [hp(58, 770.2)] });   // hit
+    await gradeDueForecasts(kv);
+    const clean = kv.misses.length === 0;
+    if (!clean) fails++;
+    console.log((clean ? 'ok  ' : 'FAIL') + ' hit leaves no scar');
+  }
+  {
+    const blockSrc2 = src.match(/function missBlock\(misses\) \{[\s\S]*?\n\}/)[0];
+    eval(blockSrc2.replace('function missBlock', 'var missBlock = function'));
+    const mb = missBlock([{ claim: 'SPY holds 769 into the close', confidence: 65, level: 769, spot_at_horizon: 768.1, graded_at: Date.now() }]);
+    const ok1 = /RECENT MISSES/.test(mb) && /768.1 vs your 769/.test(mb);
+    const ok2 = missBlock([]) === '' && missBlock(null) === '';
+    if (!(ok1 && ok2)) fails++;
+    console.log(((ok1 && ok2) ? 'ok  ' : 'FAIL') + ' missBlock renders + silent when empty');
+  }
 
   // calibBlock: floor of 10, honest phrasing, silent when thin
   const b1 = calibBlock({ '65:n': 23, '65:hit': 13, '65:cens': 2 });

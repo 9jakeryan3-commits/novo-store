@@ -928,6 +928,18 @@ async function gradeDueForecasts(r) {
       const hit = c.metric === 'spot_above' ? best.s >= c.level : best.s <= c.level;
       await r.hincrby('calib:cells', bucket + ':n', 1);
       if (hit) await r.hincrby('calib:cells', bucket + ':hit', 1);
+      else {
+        // ERROR MEMORY: the miss is kept VERBATIM, not just ticked into a bucket. Calibration
+        // measures whether his confidence is honest; this is what makes being wrong memorable --
+        // the difference between an analyst who has a record and one who remembers.
+        try {
+          await r.lpush('calib:misses', JSON.stringify({
+            claim: c.claim, confidence: c.confidence, ticker: c.ticker, metric: c.metric,
+            level: c.level, horizon_min: c.horizon_min, asked_at: c.asked_at,
+            graded_at: now, spot_at_horizon: best.s }));
+          await r.ltrim('calib:misses', 0, 49);
+        } catch (_) { /* the tick already counted; memory is best-effort */ }
+      }
     }
   } catch (_) { /* grading is best-effort; never cost an answer */ }
 }
@@ -952,6 +964,23 @@ function validForecast(c) {
   return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
            asked_at: Date.now(), claim: String(c.claim || '').slice(0, 200),
            confidence: conf, ticker: tk, metric: c.metric, level: lvl, horizon_min: hz };
+}
+
+function missBlock(misses) {
+  if (!Array.isArray(misses) || !misses.length) return '';
+  const lines = [];
+  for (const m of misses.slice(0, 5)) {
+    if (!m || !m.claim) continue;
+    const when = m.graded_at ? new Date(m.graded_at).toISOString().slice(0, 10) : '';
+    lines.push('- ' + (when ? when + ': ' : '') + '"' + String(m.claim).slice(0, 140) + '" (said ~' +
+               m.confidence + '%; spot was ' + m.spot_at_horizon + ' vs your ' + m.level + ')');
+  }
+  if (!lines.length) return '';
+  return ['YOUR RECENT MISSES -- forward reads you voiced with confidence that did not land. They',
+          'are part of your record: never pretend they did not happen, and when a similar setup',
+          'comes up, remember these before you reach for the same confidence word. If a reader',
+          'asks what you have gotten wrong lately, THESE are the honest answer.',
+          ...lines, '', ''].join('\n');
 }
 
 function calibBlock(cells) {
@@ -1105,7 +1134,7 @@ module.exports = async (req, res) => {
     // and the tickets were never in that reader's grounding to begin with.
     const alertsCmd = _isComp(email) && /\bnovo\s+alerts\b/i.test(String(question || ''));
 
-    let live = null, ctx = null, trackRec = null, liveSrc = 'none', calibCells = null;
+    let live = null, ctx = null, trackRec = null, liveSrc = 'none', calibCells = null, calibMisses = [];
     // What NoVo remembers about THIS reader — market interests and preferences they stated,
     // loaded on every question so continuity is real rather than performed.
     let readerMem = null;
@@ -1130,6 +1159,10 @@ module.exports = async (req, res) => {
         r.get('novo:track_record'),
         r.hgetall('calib:cells').catch(() => null)]);
       calibCells = cal || null;
+      try {
+        const mraw = await r.lrange('calib:misses', 0, 4);
+        calibMisses = (mraw || []).map((x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } }).filter(Boolean);
+      } catch (_) { calibMisses = []; }
       // Grade whatever came due, piggybacked: a few KV ops, never blocks on failure, and every
       // ask on any surface advances the calibration clock for free.
       gradeDueForecasts(r).catch(() => {});
@@ -1470,6 +1503,7 @@ module.exports = async (req, res) => {
       sinceBlock(sinceLines, sinceAge) +
       lessonsBlock(trackRec) +
       calibBlock(calibCells) +
+      missBlock(calibMisses) +
       levelBlock +
       privBlock +
       equityBlock +
