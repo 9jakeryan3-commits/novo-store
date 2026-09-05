@@ -3850,13 +3850,18 @@ function _staleChip(){
     if(!pa || age<45000){ if(el.__on){ el.__on=false; el.classList.remove('on'); } return; }
     var m=Math.floor(age/60000);
     var txt='bars '+(m>=1?(m+'m'):(Math.floor(age/1000)+'s'))+' old';
-    // Name the exit the lane is dying through, so a screenshot of the chip IS the diagnosis.
+    // Name the exit the lane is dying through — but in the tooltip, not the visible text.
+    // The chip's job (bars are N old, said out loud) never softens; the raw internals
+    // ("threw TypeError…", "5014×7") read as software falling apart to a paying member and
+    // are meaningless to them. Hover/long-press still surfaces the exit, so a screenshot
+    // plus one hover IS still the diagnosis. (Tony's sell-first sweep, 2026-09-05.)
+    var tip='';
     try{
-      var _lb=window._ncLastBail, _le=window._ncLastErr, _why='';
-      if(_le && (!_lb || _le.at>_lb.at)) _why='threw '+String(_le.msg||'').slice(0,32);
-      else if(_lb && _lb.at>new Date(pa).toISOString()) _why=_lb.where+'×'+_lb.n;
-      if(_why) txt+=' · '+_why;
+      var _lb=window._ncLastBail, _le=window._ncLastErr;
+      if(_le && (!_lb || _le.at>_lb.at)) tip='threw '+String(_le.msg||'').slice(0,64);
+      else if(_lb && _lb.at>new Date(pa).toISOString()) tip=_lb.where+'×'+_lb.n;
     }catch(_e){}
+    if(el.__t!==tip){ el.__t=tip; if(tip) el.setAttribute('title',tip); else el.removeAttribute('title'); }
     if(el.__h!==txt){ el.__h=txt; el.textContent=txt; }
     if(!el.__on){ el.__on=true; el.classList.add('on'); }
   }catch(_e){}
@@ -6137,7 +6142,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
       ev.slice(0,4).forEach(function(e){
         t+=_brw((e.title||'').slice(0,34), ((e.meta&&e.meta.timeET)||'') || '&mdash;','b-mute'); });
     } else {
-      t+='<div class="brain-note">No major prints today.</div>';
+      t+='<div class="brain-note">Tape is quiet — no blocks above threshold today.</div>';
     }
     el=document.getElementById('brain-today'); if(el) el.innerHTML=t;
   }
