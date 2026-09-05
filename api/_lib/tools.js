@@ -582,6 +582,26 @@ function makeExecutors(ctx = {}) {
     const a = snap && snap.alerts;
     if (!a) return { error: "no alerts published yet - the crypto collector is not reporting" };
 
+    // PRE-JOIN RATES TO THEIR OWN BASELINES. `record` (per kind x era hit rates) and `levels`
+    // (per kind baselines) ship as separate structures, which leaves the model to join them by
+    // proximity -- and it did: a live answer paired chain_pump_sellers' 48.6% with another rule's
+    // 38.0% baseline (F-8). A rate next to the wrong baseline flatters or slanders a rule at
+    // random, so the join happens HERE, where it cannot be done wrong.
+    const _scored = {};
+    for (const row of (a.record || [])) {
+      (_scored[row.kind] = _scored[row.kind] || { kind: row.kind, eras: [] }).eras.push(row);
+    }
+    for (const [k, lv] of Object.entries(a.levels || {})) {
+      const s = (_scored[k] = _scored[k] || { kind: k, eras: [] });
+      s.own_baselines = {
+        trig_target: lv.trig_target, base_target: lv.base_target,
+        trig_target_decided: lv.trig_target_dec, base_target_decided: lv.base_target_dec,
+        censored_pct: lv.censored_pct, edge_floor_pp: lv.edge_floor_pp,
+        oos_trig_target: lv.oos_trig_target, oos_base_target: lv.oos_base_target,
+      };
+    }
+    const scored = Object.values(_scored);
+
     const pick = (rows) => (kind ? (rows || []).filter((x) => x.kind === kind) : (rows || []));
 
     // THE RESEARCH IS SHAREABLE; THE TICKETS ARE NOT. The tickets are direct buy/sell
@@ -593,10 +613,13 @@ function makeExecutors(ctx = {}) {
       return {
         as_of: snap.as_of,
         research_only: true,
+        scored,
         record: a.record,
         levels: a.levels,
         min_samples: a.min_samples,
-        note: "Aggregate research from my on-chain rule lab: measured forward-move distributions " +
+        note: "USE `scored`: each rule's eras and its OWN baselines are pre-joined there -- never " +
+              "pair a rate with another rule's baseline. " +
+              "Aggregate research from my on-chain rule lab: measured forward-move distributions " +
               "per rule and the scored record. Use these as READOUTS — 'tokens in this state have " +
               "historically moved X% of the time, n=...' — and always with the sample. Never turn " +
               "a rate into an instruction to buy, sell or avoid anything, and do not describe " +
@@ -614,6 +637,7 @@ function makeExecutors(ctx = {}) {
       // The record travels WITH the calls on purpose. An alert shown without the base rate it beat
       // is a tip, and 'meaningful' stays false until a rule has enough resolved claims to mean
       // anything - state the count, never dress a hit rate on nine samples as evidence.
+      scored,
       record: a.record,
       // The measured rule table: per-kind target/stop levels plus the triggered-vs-untriggered
       // rates each verdict rests on. The feed ships `levels` + `min_samples` — the earlier
@@ -622,7 +646,9 @@ function makeExecutors(ctx = {}) {
       min_samples: a.min_samples,
       // Same quoting contract as the research branch, and for the same reason: this note sits
       // NEXT TO the numbers in context, where a prompt rule thousands of tokens upstream loses.
-      note: "QUOTING THE RECORD: per rule, denominator NAMED — decided-only, whole-population " +
+      note: "USE `scored`: each rule's eras and its OWN baselines are pre-joined there — never " +
+            "pair a rate with another rule's baseline. " +
+            "QUOTING THE RECORD: per rule, denominator NAMED — decided-only, whole-population " +
             "and pooled-with-flats are different measurements and must never blend into one " +
             "number or a range — with each rule's baseline beside its rate (the baseline is the " +
             "no-signal rate, not your score), and a small decisive count stated outright.",

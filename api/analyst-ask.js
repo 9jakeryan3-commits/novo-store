@@ -919,10 +919,28 @@ module.exports = async (req, res) => {
             deadline: t.deadline, samples: t.samples });
           const slimR = (t) => ({ kind: t.kind, symbol: t.symbol, action: t.action,
             result: t.result, outcome: t.outcome, correct: t.correct });
+          // Rates ride WITH their own rule's baselines, pre-joined -- the inline record used to
+          // ship rates alone, and the model paired them with baselines from elsewhere in context
+          // (F-8: sellers' 48.6% against another rule's 38.0%). Same join as get_chain_alerts.
+          const _pj = {};
+          for (const row of (cs.alerts.record || [])) {
+            (_pj[row.kind] = _pj[row.kind] || { kind: row.kind, eras: [] }).eras.push(row);
+          }
+          for (const [k, lv] of Object.entries(cs.alerts.levels || {})) {
+            const s = (_pj[k] = _pj[k] || { kind: k, eras: [] });
+            s.own_baselines = {
+              trig_target: lv.trig_target, base_target: lv.base_target,
+              trig_target_decided: lv.trig_target_dec, base_target_decided: lv.base_target_dec,
+              censored_pct: lv.censored_pct, edge_floor_pp: lv.edge_floor_pp,
+            };
+          }
           privateAlerts = {
             open: (cs.alerts.open || []).slice(0, 12).map(slimO),
             recent_resolved: (cs.alerts.recent || []).slice(0, 8).map(slimR),
-            record: cs.alerts.record || null,
+            scored: Object.values(_pj),
+            quoting: "each rule's eras and its OWN baselines are pre-joined in `scored`; never " +
+                     "pair a rate with another rule's baseline, never blend eras, and a rate " +
+                     "with few decisive cases says so",
           };
         }
       }
