@@ -3842,12 +3842,67 @@ function _cdTick(){
 // candles actually reach the screen. Note it does NOT appear overnight or at weekends: the poll
 // keeps succeeding when the market is shut, so paints keep landing and the chip stays hidden. It
 // means "this lane has stopped delivering", never "the market is closed".
+/* ── A WEEK OF EVIDENCE INSTEAD OF AN IMPRESSION (2026-09-05) ─────────────────────────
+   After the 09-03 freeze we could not answer "is the chart dependable now?" with anything
+   but recent silence. Every "it's fixed" this week was certified within hours of the fix
+   that produced it, which is a good sign and not a measurement.
+
+   So the page keeps its own daily tally: how many times the bars went stale (>45s), the
+   worst staleness reached that day, and how many errors the load/paint path swallowed.
+   Read it with novoHealth() in the console.
+
+   It lives in the VIEWER'S OWN localStorage — nothing is transmitted, no endpoint, no
+   telemetry, and it never leaves the browser. 14 days are kept and older ones are pruned.
+   Every path is try-wrapped and localStorage can legitimately be unavailable (private
+   windows, blocked site data), in which case this records nothing and the chart is
+   unaffected — a measurement that can break the thing it measures is not worth having.
+
+   WHY EPISODES ARE COUNTED AT THE START, and the age re-written every 30s: Jake's habit
+   when it freezes is to REFRESH, so the recovery transition frequently never fires. An
+   episode recorded only on its clean end would systematically miss exactly the freezes
+   that matter most. */
+var _NC_HEALTH_KEY = 'novo_chart_health';
+function _ncHealth(kind, secs){
+  try{
+    var d = new Date().toISOString().slice(0,10), H = {};
+    try{ H = JSON.parse(localStorage.getItem(_NC_HEALTH_KEY) || '{}') || {}; }catch(_e){}
+    var r = H[d] || (H[d] = { ep:0, maxS:0, sw:0 });
+    if(kind === 'episode') r.ep++;
+    else if(kind === 'age' && secs > r.maxS) r.maxS = Math.round(secs);
+    try{ r.sw = (window._ncSwallows && window._ncSwallows.n) || r.sw || 0; }catch(_e){}
+    var ks = Object.keys(H).sort();
+    while(ks.length > 14){ delete H[ks.shift()]; }
+    localStorage.setItem(_NC_HEALTH_KEY, JSON.stringify(H));
+  }catch(_e){}
+}
+window.novoHealth = function(){
+  try{
+    var H = JSON.parse(localStorage.getItem(_NC_HEALTH_KEY) || '{}') || {};
+    var ks = Object.keys(H).sort();
+    if(!ks.length){ console.log('novoHealth: no days recorded yet on this browser.'); return H; }
+    console.log('day          stale episodes   worst stale   swallowed errors');
+    ks.forEach(function(d){
+      var r = H[d];
+      console.log(d + '   ' + String(r.ep).padStart(8) + '   ' +
+                  String(r.maxS + 's').padStart(11) + '   ' + String(r.sw).padStart(16));
+    });
+    var clean = ks.filter(function(d){ return !H[d].ep; }).length;
+    console.log('\n' + clean + ' of ' + ks.length + ' recorded days had ZERO stale episodes.');
+    if(window._ncSwallows && window._ncSwallows.n){
+      console.log('this session swallowed ' + window._ncSwallows.n + ':', window._ncSwallows.sites);
+    }
+    return H;
+  }catch(e){ console.log('novoHealth unavailable:', e && e.message); return null; }
+};
 function _staleChip(){
   try{
     var el=document.getElementById('chart-stale'); if(!el) return;
     var pa=window._paintAt||0;
     var age=Date.now()-pa;
-    if(!pa || age<45000){ if(el.__on){ el.__on=false; el.classList.remove('on'); } return; }
+    if(!pa || age<45000){
+      if(el.__on){ el.__on=false; el.classList.remove('on'); _ncHealth('age',(el.__peak||0)/1000); }
+      return;
+    }
     var m=Math.floor(age/60000);
     var txt='bars '+(m>=1?(m+'m'):(Math.floor(age/1000)+'s'))+' old';
     // Name the exit the lane is dying through — but in the tooltip, not the visible text.
@@ -3863,7 +3918,12 @@ function _staleChip(){
     }catch(_e){}
     if(el.__t!==tip){ el.__t=tip; if(tip) el.setAttribute('title',tip); else el.removeAttribute('title'); }
     if(el.__h!==txt){ el.__h=txt; el.textContent=txt; }
-    if(!el.__on){ el.__on=true; el.classList.add('on'); }
+    if(!el.__on){ el.__on=true; el.classList.add('on'); el.__wrote=0; _ncHealth('episode',0); }
+    // Track the DEEPEST staleness of this episode. At the recovery transition `age` has already
+    // collapsed to a few seconds, so reading it there would record the recovery, not the freeze.
+    el.__peak = age;
+    // Re-write every 30s as well: a freeze ended by a REFRESH never reaches the recovery branch.
+    if(Date.now()-(el.__wrote||0) > 30000){ el.__wrote=Date.now(); _ncHealth('age', age/1000); }
   }catch(_e){}
 }
 function _cdStart(){
