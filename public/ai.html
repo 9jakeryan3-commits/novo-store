@@ -704,7 +704,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="dp-band" style="display:none;max-width:860px;margin:0 auto 34px;text-align:center;padding:26px 20px;border:1px solid rgba(34,211,238,0.22);border-radius:14px;background:linear-gradient(180deg,rgba(34,211,238,0.05),rgba(0,0,0,0.2));">
       <div id="dp-count" style="font-family:'Space Grotesk','Inter',sans-serif;font-size:clamp(30px,5vw,52px);font-weight:900;letter-spacing:-1px;color:var(--txt1);font-variant-numeric:tabular-nums;">&mdash;</div>
       <div style="font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:#22d3ee;margin-top:4px;">data points &mdash; and counting</div>
-      <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin:10px auto 0;max-width:560px;">Every SPY, QQQ and IWM options chain back to 2008, and the crypto book beside it — seven options venues and the on-chain market, still being written every pass.<span id="dp-crypto"></span></p>
+      <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin:10px auto 0;max-width:560px;">Every SPY, QQQ and IWM options chain back to 2008, and the crypto book beside it — seven options venues and the on-chain market.<span id="dp-crypto"></span></p>
     </div>
     
 <script>
@@ -727,7 +727,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(!d||!d.ok||!d.total) return;
       anchor={total:d.total, per_sec:d.per_sec||0, ts:d.ts||Date.now()/1000};
       band.style.display='block';
-      if(cr) cr.textContent=(d.crypto_per_hr&&d.crypto_per_hr>500)?(' The crypto book alone added '+fmt(d.crypto_per_hr)+' in the last hour.'):'';
+      if(cr) cr.textContent=(d.crypto_per_hr&&d.crypto_per_hr>500)?(' Crypto alone added '+fmt(d.crypto_per_hr)+' rows in the last hour.'):'';
       tick();
     }).catch(function(){});
   }
