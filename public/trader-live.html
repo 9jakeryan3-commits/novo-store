@@ -5266,6 +5266,32 @@ _ncPullFull = async function(tkr, engineUrl){
   return r;
 };
 
+/* ── THE PAGE STOPS THROWING AWAY ITS OWN EVIDENCE (2026-09-05) ───────────────────────
+   The 2026-09-03 freeze cost two days and four fixes to the WRONG SYSTEM because this file
+   carries ~175 bare `catch(_e){}` blocks: the page knew exactly what was failing and
+   discarded it every time. Jake's one sentence — "if i hit refresh it load up the bars" —
+   is what finally located it, not any of our instrumentation.
+
+   So every swallowed error on the LOAD and PAINT path now lands here. Deliberately NOT a
+   behaviour change: nothing is re-thrown, nothing retries differently, the chart does
+   exactly what it did before. It just remembers.
+
+   Bounded (last 12 + per-site counts) so a long outage cannot grow it without limit, and
+   the whole body sits inside its own try because AN ERROR RECORDER THAT CAN THROW ON A HOT
+   PATH IS A NEW WAY TO KILL THE CHART. Read it in the console as window._ncSwallows —
+   .sites names which catch sites fired and how often, .last carries the messages. */
+function _ncSwallow(where, e){
+  try{
+    var S = window._ncSwallows || (window._ncSwallows = { n:0, sites:{}, last:[] });
+    S.n++;
+    S.sites[where] = (S.sites[where] || 0) + 1;
+    S.last.push({ at:new Date().toISOString(), where:where, tkr:(window._novoSelTkr||''),
+                  tf:String(window._ctbTf===undefined?'':window._ctbTf),
+                  msg:String((e && (e.message || e)) || '').slice(0,140) });
+    if(S.last.length > 12) S.last.shift();
+  }catch(_x){}
+}
+
 async function loadNovoChart(){
   try{
     // The chart object is not built. _laneCheck re-injects the library for exactly this case,
@@ -5398,15 +5424,15 @@ async function loadNovoChart(){
       _novoViewMap = new Map(_view.candles.map(function(c){ return [c.time, c]; }));
       _novoHaC = _ctbTog.ha ? _drawC : null;
       _novoHaMap = _ctbTog.ha ? new Map(_drawC.map(function(c){ return [c.time, c]; })) : null;
-      try{ _svpCalc(); }catch(_e){}
+      try{ _svpCalc(); }catch(_e){ _ncSwallow('ld01', _e); }
       window._paintAt=Date.now();   // last time real candles reached the screen — the supervisor's proof the chart is alive
       window._paintKey=_reqTkr+':'+_ctbTf;   // WHOSE candles those were (B4) — the veil backstop must not credit a stale selection's paint
       // Remount drawings once per (ticker, tf), AFTER the new frame's candles exist (B5) — the
       // deep-frame snap binary-searches the freshly painted array. Key-gated: never per poll.
-      if(window._drawTfKey!==window._paintKey){ window._drawTfKey=window._paintKey; try{ _reloadDrawings(); }catch(_e){} }
+      if(window._drawTfKey!==window._paintKey){ window._drawTfKey=window._paintKey; try{ _reloadDrawings(); }catch(_e){ _ncSwallow('ld02', _e); } }
       _veilOff();
       _renderLegend2(null);   // no hover → the legend tracks the newest bar
-      try{ _renderChip(); }catch(_e){}
+      try{ _renderChip(); }catch(_e){ _ncSwallow('ld03', _e); }
       // LIVE-TIP HANDOFF (2026-07-17): keep a copy of the forming (last) candle so the WS telemetry frame
       // can glide its close between the 2s polls (see the ws.onmessage tip-update). The 2s poll still OWNS
       // bar structure — adding a new minute, correcting O/H/L — this only lets the CURRENT bar's close track
@@ -5496,7 +5522,7 @@ async function loadNovoChart(){
             _novoChart.timeScale().applyOptions({rightOffset:_rightPad});
             _novoChart.timeScale().setVisibleLogicalRange({from:Math.max(0,_n-_openBars),to:_n+_rightPad});
             _novoRanged=true;
-          }catch(_e){} });
+          }catch(_e){ _ncSwallow('ld04', _e); } });
         }
       }
     }
@@ -5553,15 +5579,15 @@ async function loadNovoChart(){
           // 09:30/09:45/10:00 buckets; switching to 1H hid it and KEPT those times, injecting
           // 15-minute slots into the hourly axis across the intraday window and spreading the
           // hourly candles into the thin, sparse bars Jake screenshotted. Clear, don't just hide.
-          try{ _novoConeHi.setData([]); _novoConeLo.setData([]); }catch(_e){}
+          try{ _novoConeHi.setData([]); _novoConeLo.setData([]); }catch(_e){ _ncSwallow('ld05', _e); }
           _novoConeHi.applyOptions({visible:false}); _novoConeLo.applyOptions({visible:false});
         }
-      }catch(_e){}
+      }catch(_e){ _ncSwallow('ld06', _e); }
     } else {
       try{   // tip-only move: same length, same penultimate → last point time matches, update() replaces in place
         if(_novoEma9&&_view.ema9&&_view.ema9.length) _novoEma9.update(_view.ema9[_view.ema9.length-1]);
         if(_novoEma21&&_view.ema21&&_view.ema21.length) _novoEma21.update(_view.ema21[_view.ema21.length-1]);
-      }catch(_e){}
+      }catch(_e){ _ncSwallow('ld07', _e); }
     }
     // B12: The Line's lost/reclaimed events pinned to their bars — the feed list finally lands ON
     // the chart. Times are server-shifted to the bar basis; snapped to this frame's bucket and
@@ -5579,7 +5605,7 @@ async function loadNovoChart(){
             text:(up2?'↩ ':'✕ ')+(ev2.lbl||'').replace('Pre-Market','PM').replace('Opening-Range','OR').replace('Prior-Day','PD')});
         });
       }
-    }catch(_e){}
+    }catch(_e){ _ncSwallow('ld08', _e); }
     const _allMk=(d.markers||[]).concat(_evm);
     const _mlast=(_allMk&&_allMk.length)?_allMk[_allMk.length-1]:null;
     const _mkSig=(_allMk?_allMk.length:0)+':'+(_mlast?(_mlast.time+':'+(_mlast.price||_mlast.position||'')+':'+(_mlast.shape||'')+':'+(_mlast.text||'')):'-');
@@ -5676,8 +5702,8 @@ async function loadNovoChart(){
     const _sig = _drawn.map(function(r){ return r[0]; }).join(',')+'@'+_firstT
       +'@'+Object.keys(window._lvlMerged).map(function(k){ return k+':'+window._lvlMerged[k].join('+'); }).join('|');
     if(_sig !== _novoLvlSig){
-      for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){} }
-      for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){} }
+      for(const k in _novoLines){ try{_novoSeries.removePriceLine(_novoLines[k]);}catch(_e){ _ncSwallow('ld09', _e); } }
+      for(const k in _novoLvlSeries){ try{_novoChart.removeSeries(_novoLvlSeries[k]);}catch(_e){ _ncSwallow('ld10', _e); } }
       _novoLines={}; _novoLvlSeries={}; window._lvlPx={}; window._lvlAnc={};
       _drawn.forEach(function(row){
         const lbl=row[0], v=row[1], c=lc[lbl]||'#94a3b8';
@@ -5719,14 +5745,14 @@ async function loadNovoChart(){
           } else {
             s.update({time:_lastT, value:v});   // unchanged → just extend onto the newest bar
           }
-        }catch(_e){}
+        }catch(_e){ _ncSwallow('ld11', _e); }
       });
     }
-    try{ _lvlSyncPLs(); }catch(_e){}   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
-    try{ _lvlCollide(); }catch(_e){}   // B11: hide lower-priority axis tags that overprint at confluence
-    try{ _lvlStrengthApply(); }catch(_e){}   // B12: width/alpha from gamma share × session decay, change-gated
-    try{ _ghostWalls(); }catch(_e){}         // B13: faint dashed structural walls when the long book disagrees
-    try{ _trailsApply(); }catch(_e){}        // B15: today's wall paths, sig-gated
+    try{ _lvlSyncPLs(); }catch(_e){ _ncSwallow('ld12', _e); }   // % modes: the price-line ladder tracks the freshly diffed prices (B6)
+    try{ _lvlCollide(); }catch(_e){ _ncSwallow('ld13', _e); }   // B11: hide lower-priority axis tags that overprint at confluence
+    try{ _lvlStrengthApply(); }catch(_e){ _ncSwallow('ld14', _e); }   // B12: width/alpha from gamma share × session decay, change-gated
+    try{ _ghostWalls(); }catch(_e){ _ncSwallow('ld15', _e); }         // B13: faint dashed structural walls when the long book disagrees
+    try{ _trailsApply(); }catch(_e){ _ncSwallow('ld16', _e); }        // B15: today's wall paths, sig-gated
     // Marker key — a footer under a hairline so it reads as a legend key, not another level row.
     leg.push('<div style="display:flex;flex-wrap:wrap;gap:14px;margin:7px 12px 0;padding-top:9px;border-top:1px solid var(--bdr2);font-size:10px;color:var(--txt3)">'
       + '<span style="color:#34d399">&#9650; call</span><span style="color:#f43f5e">&#9660; put</span>'
@@ -5755,7 +5781,7 @@ async function loadNovoChart(){
     // used to mint its 401 inside the CORS decorator - fixed server-side 2026-09-04) and how any
     // future network-shaped auth failure will present. novoReauth debounces itself 20s, so firing
     // it on every throw is safe, and it converts "throws forever" into "heals in one poll".
-    try{ if(window.novoReauth) window.novoReauth(); }catch(_e3){}
+    try{ if(window.novoReauth) window.novoReauth(); }catch(_e3){ _ncSwallow('ld17', _e3); }
   }
   // _applyTogVis() is NOT called here any more (2026-08-31 audit): visibility is set at series
   // creation now, and re-applying ~20 applyOptions per tick forced a wasted repaint each cycle.
@@ -5821,7 +5847,7 @@ function _laneCheck(kick){
       var old=document.getElementById('lw-retry'); if(old) old.remove();
       var sc=document.createElement('script'); sc.id='lw-retry'; sc.src='/js/lightweight-charts-4.2.3.js'; document.head.appendChild(sc);
     }
-  }catch(_e){}
+  }catch(_e){ _ncSwallow('lc01', _e); }
   try{
     // 2) The HTTP poll chains. Ticks stamp _ncTickAt/_abTickAt; a chain that hasn't ticked in 30s
     //    is dead (thrown outside its try, killed by a frozen renderer, anything) — re-arm it.
@@ -5836,7 +5862,7 @@ function _laneCheck(kick){
       var _v2=document.getElementById('chart-veil');
       if(_v2&&_v2.classList.contains('on')) _veilOff();
     }
-    if(kick || now-(window._cdTickAt||0)>5000){ try{ _cdStart(); }catch(_e){} }   // B8: countdown timer died (bg-throttle/error) — re-arm
+    if(kick || now-(window._cdTickAt||0)>5000){ try{ _cdStart(); }catch(_e){ _ncSwallow('lc02', _e); } }   // B8: countdown timer died (bg-throttle/error) — re-arm
     if(kick || now-(window._ncTickAt||0)>30000) _ncRun();
     // THE INVARIANT (2026-09-02): a lane that has not DELIVERED in 45s is dead, whatever its
     // attempt stamp says. _paintAt is only ever written when candles actually reach the screen, so
@@ -5849,7 +5875,7 @@ function _laneCheck(kick){
     if(now-(window._paintAt||0)>120000 && now-(window._whAt||0)>60000){ window._whAt=now; _wakeHeal(); }
     if(kick || now-(window._abTickAt||0)>90000) _abRun();
     if(_splitOn()){ _wireSync(); if(kick || now-(window._c2TickAt||0)>30000) _c2Run(); }
-  }catch(_e){}
+  }catch(_e){ _ncSwallow('lc03', _e); }
   try{
     // 3) The WS. CLOSED/missing -> full re-handshake + reconnect (the old ticket is suspect by
     //    definition). OPEN but silent >30s during a session that streams at 2-10Hz -> zombie
@@ -5861,7 +5887,7 @@ function _laneCheck(kick){
     if((_st>=2 || _zombie) && now-(window._reconAt||0)>10000){
       window._reconAt=now; window.novoReconnect();
     }
-  }catch(_e){}
+  }catch(_e){ _ncSwallow('lc04', _e); }
 }
 setInterval(function(){ _laneCheck(false); }, 8000);
 // Resume events all run the full check NOW, with kick=true so chart+board repaint immediately —
