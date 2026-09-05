@@ -504,6 +504,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
 /* ── Chart toolbar ─────────────────────────────────────────────────────────────────────────── */
+#ctb-more { display: none; }   /* phone-only; the 768px block turns it on */
 #chart-toolbar { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; justify-content: center;
   flex-wrap: wrap; padding: 0 12px; min-width: 0; }
 .spy-hero { flex-wrap: wrap; row-gap: 6px; }
@@ -516,6 +517,17 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   #chart-toolbar .ctb-group { gap: 3px; }
   .b3 td, .b3 th { font-size: 10px; padding: 3px 4px; }
   .b3 .b3-d { font-size: 8.5px; }
+  /* Two of the three toolbar rows fold away behind TOOLS. The chart is the product on a
+     phone; a control you use twice a session should not permanently cost it a row. */
+  #ctb-more { display: inline-flex; align-items: center; gap: 4px; }
+  #ctb-more::after { content: '\25BE'; font-size: 8px; opacity: .65; }
+  #chart-toolbar.tools-open #ctb-more::after { content: '\25B4'; }
+  #chart-toolbar.tools-open #ctb-more { color: var(--txt1); border-color: var(--bdr); }
+  #chart-toolbar #ctb-tools, #chart-toolbar #ctb-tog, #chart-toolbar .ctb-sep { display: none; }
+  #chart-toolbar.tools-open #ctb-tools,
+  #chart-toolbar.tools-open #ctb-tog { display: flex; flex-basis: 100%; flex-wrap: wrap; row-gap: 5px; }
+  /* The agreement strip is informative, not primary — give the phone its corner back. */
+  #gex-agree { font-size: 9px; padding: 2px 5px; right: 58px; bottom: 26px; }
 }
 .ctb-group { display: flex; gap: 2px; }
 .ctb-sep { width: 1px; height: 16px; background: var(--bdr); margin: 0 4px; }
@@ -1866,6 +1878,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tf="1d">D</button>
             <button type="button" class="ctb-btn" data-tf="1w">W</button>
           </div>
+          <div class="ctb-sep"></div>
+          <!-- PHONE ONLY (2026-09-05, Jake: "the chart tools and stuff needs to go under a menu
+               on mobile its taking up all the chart view"). Timeframes deliberately stay OUT of
+               this menu — switching frame is the one control that gets used constantly, and
+               burying it would cost a tap on every use to save a row that is already paid for. -->
+          <button type="button" class="ctb-btn" id="ctb-more" aria-expanded="false"
+                  aria-controls="ctb-tools ctb-tog" title="Drawing tools and overlays">TOOLS</button>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tools" aria-label="Drawing tools">
             <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;<span class="ctb-l">&nbsp;LEVEL</span></button>
@@ -3447,7 +3466,29 @@ function _paintCtb(){
     :_ctbTool==='f'?(_pendPt?'now click the swing low':'click the swing high, then the low')
     :_ctbTool==='m'?(_pendPt?'click the second point':'click two points')
     :_ctbTool==='a'?'click a price to set an alert':'';
-}
+}/* TOOLS sheet (phone). Two deliberate asymmetries:
+   - picking a DRAWING tool CLOSES the sheet, because you picked it to use it on the chart and
+     the sheet is sitting on top of the chart;
+   - an OVERLAY toggle does NOT close it, because turning on three overlays should not cost
+     three extra taps to reopen.
+   The chart is told to re-measure after the fold changes, so it fills the row it just got
+   back instead of waiting for the next resize event. */
+(function(){
+  var tb=document.getElementById('chart-toolbar'), mb=document.getElementById('ctb-more');
+  if(!tb||!mb) return;
+  function setOpen(on){
+    tb.classList.toggle('tools-open', on);
+    mb.setAttribute('aria-expanded', on?'true':'false');
+    try{ if(window._novoChart) _novoChart.timeScale().applyOptions({}); }catch(_e){}
+    try{ window.dispatchEvent(new Event('resize')); }catch(_e){}
+  }
+  mb.addEventListener('click', function(){ setOpen(!tb.classList.contains('tools-open')); });
+  var tools=document.getElementById('ctb-tools');
+  if(tools) tools.addEventListener('click', function(ev){
+    try{ if(ev.target && ev.target.closest && ev.target.closest('.ctb-btn')) setOpen(false); }catch(_e){}
+  });
+})();
+
 document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
   b.addEventListener('click',function(){
     var tf=b.getAttribute('data-tf'); if(/^\d+$/.test(tf)) tf=+tf;
