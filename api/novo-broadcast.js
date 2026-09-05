@@ -330,13 +330,21 @@ module.exports = async (req, res) => {
 
     // live_levels is row-shaped ({indices:[{ticker,spot,regime,...}]} or a bare rows array,
     // analyst-publish.js _publishLiveLevels) — the chip reads the SPY row, else the first.
+    // `tickers` FIRST — it is the key both writers actually use (analyst-publish.js writes
+    // {asof, session, tickers:[...]} to public:levels AND analyst:live_levels). Elix's F3: this
+    // list checked indices/rows/array and never `tickers`, so the chip fell through to the
+    // envelope object, read spot/regime off it, found neither, and rendered "SPY —" while the
+    // post itself quoted real figures. Genuinely-absent grounding rendered identically — on the
+    // one pre-publish cue the operator has before a post goes to a public channel.
     const rows = Array.isArray(g.live) ? g.live
+      : Array.isArray(g.live && g.live.tickers) ? g.live.tickers
       : Array.isArray(g.live && g.live.indices) ? g.live.indices
       : Array.isArray(g.live && g.live.rows) ? g.live.rows : [];
     const L = rows.find((x) => x && String(x.ticker).toUpperCase() === 'SPY') || rows[0] || g.live || {};
     return res.status(200).json({
       ok: true, kind, text, sentiment, category, platform, angle,
       grounding: { ticker: L.ticker || 'SPY', spot: L.spot ?? null,
+                   asof: (g.live && g.live.asof) || null,
                    regime: L.regime || (Number.isFinite(L.netGex) ? (L.netGex < 0 ? 'short gamma' : 'long gamma') : null),
                    src: g.liveSrc },
       guard,
