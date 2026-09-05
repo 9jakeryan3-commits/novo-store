@@ -840,6 +840,12 @@ async function _publishLiveLevels(state) {
       expectedMovePct: num(i && i.em_daily_pct),
       atmIv: num(i && i.atm_iv),
       skewPts: num(i && i.skew_pts),
+      // Item 2 (Jake's go 2026-09-05, validation-gated and validated): second-order dealer
+      // exposures, PAID mirror only — _publicLevels is an allow-list and deliberately does
+      // not carry these. charm is per trading day, calendar-decay sign (see the engine's
+      // gex_calculator sign note; corpus rows before 09-05 carry the old sign).
+      netVanna: num(i && i.vanna_ex),
+      netCharm1d: num(i && i.charm_ex),
       // Guard the ABSENT case explicitly. This used num(), and num() coerces with Number() — where
       // Number(null) and Number('') are both 0, and 0 is finite. A missing net_gex therefore came back
       // as 0, failed the `< 0` test, and asserted "long gamma": a confident "dealers dampen moves" call
