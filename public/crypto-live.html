@@ -1530,11 +1530,11 @@ function drawChainToken(){
         <div class="v" style="font-size:15px">${t.cg_id||'unresolved'}</div>
         <div class="s">${t.is_listed_asset?'address matches the listed asset':(t.cg_id?'a known token, but not the one that owns this ticker':'address not in any registry')}</div></div>
     </div></div>`;
-  h+=`<div class="panel"><div class="ph"><h2>Why this is not a dealer map</h2></div>
+  h+=`<div class="panel"><div class="ph"><h2>How an on-chain token is mapped</h2></div>
     <div class="pb" style="padding:14px 16px;line-height:1.6;font-size:13px;opacity:.85">
-      ${t.symbol||'This token'} has no options book and no major-venue perp, so there is no gamma to
-      compute, no flip zone and no walls. Its dominant risk is getting out, not getting hedged — so
-      the map is depth, who is trading it, and whether that depth is real.
+      The dominant risk on ${t.symbol||'this token'} is getting out, not getting hedged — so the map
+      reads depth, who is trading it, and whether that depth is real. It has no options book or
+      major-venue perp, so there is no gamma, flip zone or walls to draw.
       ${t.depth_suspect?'<br><br><b>Depth here is unconfirmed.</b> This token reports '+money(t.liquidity_usd)+
       ' of reserve against '+money(t.vol_h24)+' of daily volume. A reserve is a number the pool states about itself; '+
       'volume is one the market produced. Shown rather than hidden — but ranked on turnover so it cannot lead '+
