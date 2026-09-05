@@ -162,10 +162,14 @@ const pick = (xs) => xs[Math.floor(Math.random() * xs.length)];
 async function publicGrounding() {
   const r = kv();
   if (!r) return null;
-  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, rawCells, rawMisses] = await Promise.all([
-    r.get('analyst:live_levels'), r.get('public:levels'), r.get('analyst:context'),
-    r.get('crypto:map:live'), r.get('novo:track_record'), r.get('calib:cells'),
-    r.get('calib:misses'),
+  // Key TYPES mirror the chat's reads (analyst-ask.js): calib:cells is a HASH (hgetall),
+  // calib:misses is a LIST (lpush/ltrim -> lrange). Every read isolated so one bad key
+  // degrades one block instead of 500ing the endpoint.
+  const g = (p) => p.catch(() => null);
+  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
+    g(r.get('analyst:live_levels')), g(r.get('public:levels')), g(r.get('analyst:context')),
+    g(r.get('crypto:map:live')), g(r.get('novo:track_record')),
+    g(r.hgetall('calib:cells')), g(r.lrange('calib:misses', 0, 4)),
   ]);
   const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
   let live = J(rawLive), liveSrc = 'live';
@@ -179,8 +183,8 @@ async function publicGrounding() {
                   gamma_books: codes.filter((k) => cs.coins[k] && cs.coins[k].gamma).length,
                   chain_tokens: (cs.chain || []).length, breadth: cs.breadth };
   }
-  return { live, liveSrc, ctx, cryptoInv, trackRec: J(rawTrack), cells: J(rawCells),
-           misses: J(rawMisses) };
+  const misses = Array.isArray(rawMisses) ? rawMisses.map(J).filter(Boolean) : null;
+  return { live, liveSrc, ctx, cryptoInv, trackRec: J(rawTrack), cells, misses };
 }
 
 async function generate(prompt, temp, maxTok) {
