@@ -14,8 +14,10 @@ const { claimOnce, releaseClaim } = require('./_kv');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const LICENSE_SERVER = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
-const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
+// LICENSE LAYER DECOMMISSIONED (Jake: "delete", 2026-09-05). The license server, its admin
+// calls (activate/suspend/cancel per sub) and the two env vars are gone. subHasLicense and
+// subIdHasLicense SURVIVE below — they classify Trader-item entitlement (Trader grants
+// Analyst, audience routing), which was always a second job the name obscured.
 const SITE = process.env.SITE_URL || 'https://novo-options.trade';
 
 // Stripe moved the invoice's subscription id to invoice.parent.subscription_details.subscription
@@ -23,28 +25,6 @@ const SITE = process.env.SITE_URL || 'https://novo-options.trade';
 // is present so suspend-on-failure / reactivate-on-payment always fire regardless of API version.
 function invoiceSubId(inv) {
   return inv?.subscription || inv?.parent?.subscription_details?.subscription || null;
-}
-
-async function licensePost(path, body) {
-  const res = await fetch(`${LICENSE_SERVER}${path}`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': ADMIN_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`License server ${path} → ${res.status}`);
-  return res.json();
-}
-
-async function activateSub(subscriptionId) {
-  return licensePost(`/admin/subscription/${subscriptionId}/activate`, {});
-}
-
-async function suspendSub(subscriptionId) {
-  return licensePost(`/admin/subscription/${subscriptionId}/suspend`, {});
-}
-
-async function cancelSub(subscriptionId) {
-  return licensePost(`/admin/subscription/${subscriptionId}/cancel`, {});
 }
 
 // Refund the just-captured invoice of a subscription (used when we cancel a duplicate the customer was charged
@@ -1022,41 +1002,15 @@ const handler = async (req, res) => {
     const subscriptionId = invoiceSubId(obj);
     // Reactivate on ANY successful invoice payment (not just billing_reason ===
     // 'subscription_cycle') — a recovered past-due payment can carry a different
-    // reason, and gating on it could leave a paying customer suspended forever.
-    // activateSub is idempotent: a no-op on the initial create / already-active keys,
-    // and the license row may not exist yet on the very first invoice (404, swallowed).
-    if (subscriptionId && (await subIdHasLicense(subscriptionId))) {  // Analyst AND Crypto subs have no license to activate
-      try {
-        await activateSub(subscriptionId);
-      } catch (err) {
-        // A 404 is the benign first-invoice case (license row not provisioned yet — nothing to reactivate): ack
-        // and move on. But a TRANSIENT failure (5xx / network) must NOT be swallowed, or a paying customer who
-        // recovered a past-due payment stays suspended until the next monthly invoice — reconcile-subs.js has no
-        // reactivate path. Release the claim + 500 so Stripe retries, exactly like the suspend path below.
-        const _benign404 = /→\s*404$/.test(err.message || '');
-        console.error(`[webhook-sub] Activate failed — sub:${subscriptionId} error:${err.message}${_benign404 ? ' (404 benign first-invoice, acking)' : ' (transient, will retry)'}`);
-        if (!_benign404) {
-          if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
-          return res.status(500).json({ error: 'activate failed, will retry' });
-        }
-      }
-    }
+    // (License activate call removed 2026-09-05 — the layer is decommissioned. Payment
+    // recovery needs no action here now; access was never license-gated for Analyst/Crypto,
+    // and Trader keys no longer exist to reactivate.)
   }
 
   // ── Payment failed → suspend access ──────────────────────────────────────
   else if (event.type === 'invoice.payment_failed') {
-    const subscriptionId = invoiceSubId(obj);
-    if (subscriptionId && (await subIdHasLicense(subscriptionId))) {  // Analyst AND Crypto subs have no license to suspend
-      try {
-        await suspendSub(subscriptionId);
-      } catch (err) {
-        console.error(`[webhook-sub] Suspend failed — sub:${subscriptionId} error:${err.message}`);
-        // Release the idempotency claim + return 500 so Stripe RETRIES — else this suspend is permanently lost
-        // (the event was claimed above) and a delinquent keeps access until the daily reconcile. Idempotent.
-        if (event.id) await releaseClaim('stripe_evt:sub:' + event.id);
-        return res.status(500).json({ error: 'suspend failed, will retry' });
-      }
-    }
+    // (License suspend call removed 2026-09-05 — layer decommissioned. Delinquency
+    // enforcement for the hosted product is entitlement-side, not license-side.)
   }
 
   // ── Subscription cancelled → revoke access ────────────────────────────────
@@ -1069,22 +1023,10 @@ const handler = async (req, res) => {
   else if (event.type === 'customer.subscription.deleted') {
     const subscriptionId = obj?.id;
     if (subscriptionId) {
-      const isA = subIsAnalyst(obj), isC = subIsCrypto(obj), isL = subHasLicense(obj);
+      const isA = subIsAnalyst(obj), isC = subIsCrypto(obj);
       try {
-        // License teardown first — the control plane must never keep an engine running on a
-        // dead subscription, whatever else this sub also carried. A 404 from the license
-        // server is BENIGN (no license row was ever provisioned for this sub — true for
-        // every sub today); treating it as fatal made the whole cascade 500-loop for ~3
-        // days and then never run at all (verify 2026-09-01) — the same _benign404 rule the
-        // invoice activate path has always used.
-        if (isL) {
-          try { await cancelSub(subscriptionId); }
-          catch (err) {
-            if (!/→\s*404$/.test(err.message || '')) throw err;
-            console.log(`[webhook-sub] license cancel 404 (no row — benign) — sub:${subscriptionId}`);
-          }
-        }
-
+        // (License cancel removed 2026-09-05 — layer decommissioned; the cascade below is
+        // the whole teardown now: Discord revoke + audience removal.)
         const cust = obj.customer ? await stripe.customers.retrieve(obj.customer) : null;
         // Crypto audience: removed only when NO remaining live sub still grants the map
         // (a member cancelling a standalone Crypto sub while holding a bundle stays).

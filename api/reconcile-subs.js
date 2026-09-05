@@ -1,9 +1,11 @@
 // reconcile-subs.js — daily safety net for a MISSED Stripe webhook.
-// Lists active subscription licenses, checks each against Stripe's REAL status, and suspends/cancels
-// ONLY the ones Stripe confirms are dead. FAILS SAFE: any error fetching a subscription -> skip it
-// (never wrongly suspends a paying customer). This closes the "non-paying sub stays active forever on a
-// missed invoice.payment_failed webhook" leak WITHOUT the payer-lockout risk of an enforced expiry column.
-// Auth: Vercel Cron (Authorization: Bearer ${CRON_SECRET}) or a manual admin trigger (X-Admin-Key).
+// Reconciles the paid Resend audiences (Analyst + Crypto) against Stripe's REAL subscription
+// status. FAILS SAFE: any error fetching a subscription -> skip it (never wrongly removes a
+// paying customer). The LICENSE pass that used to lead this file is GONE — the license layer
+// was decommissioned 2026-09-05 (Jake: "delete"); the audience passes, which used to run as
+// its afterthought inside the same try, are now the whole job.
+// Auth: Vercel Cron (Authorization: Bearer ${CRON_SECRET}) or x-analyst-secret (the house
+// server-to-server pattern, same as daily-digest) for a manual trigger.
 
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -12,8 +14,6 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 const { isReservedEmail } = require('./_lib/reserved-email.js');
 const ANALYST_AUD = process.env.RESEND_ANALYST_AUDIENCE_ID;
 const FREE_AUD = process.env.RESEND_AUDIENCE_ID;
-const LS = (process.env.NOVO_LICENSE_SERVER_URL || '').replace(/\/$/, '');
-const ADMIN_KEY = process.env.LICENSE_ADMIN_KEY;
 
 // Analyst subs carry NO license/instance, so the license-key reconcile below never sees them — a MISSED
 // customer.subscription.deleted webhook would leave a canceller on the paid Analyst audience forever (paid
@@ -94,61 +94,17 @@ const reconcileAnalyst = () => reconcileAudience(ANALYST_AUD, 'analyst', subGran
 const reconcileCrypto = () =>
   reconcileAudience(process.env.RESEND_CRYPTO_AUDIENCE_ID, 'crypto', subGrantsCrypto);
 
-async function lsGet(path) {
-  const r = await fetch(`${LS}${path}`, { headers: { 'X-Admin-Key': ADMIN_KEY } });
-  if (!r.ok) throw new Error(`license server ${path} -> ${r.status}`);
-  return r.json();
-}
-async function lsPost(path) {
-  const r = await fetch(`${LS}${path}`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': ADMIN_KEY, 'Content-Type': 'application/json' },
-    body: '{}',
-  });
-  return r.ok;
-}
-
 module.exports = async (req, res) => {
   const auth = req.headers['authorization'] || '';
   const okCron = process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`;
-  const okAdmin = ADMIN_KEY && (req.headers['x-admin-key'] || '') === ADMIN_KEY;
-  if (!okCron && !okAdmin) return res.status(403).json({ error: 'Forbidden' });
-  if (!LS || !ADMIN_KEY || !process.env.STRIPE_SECRET_KEY) {
+  const okS2S = process.env.ANALYST_PUBLISH_SECRET &&
+    (req.headers['x-analyst-secret'] || '') === process.env.ANALYST_PUBLISH_SECRET;
+  if (!okCron && !okS2S) return res.status(403).json({ error: 'Forbidden' });
+  if (!process.env.STRIPE_SECRET_KEY) {
     return res.status(500).json({ error: 'Not configured' });
   }
 
   try {
-    const keys = await lsGet('/admin/keys');
-    const subs = (Array.isArray(keys) ? keys : []).filter(k =>
-      String(k.type || '').toLowerCase().startsWith('sub') &&
-      k.status === 'active' && k.stripe_subscription_id &&
-      // Only reconcile REAL Stripe subscriptions. Manually-issued/admin/comp keys carry a synthetic
-      // `manual-…` (or other non-`sub_`) id that will always be resource_missing in Stripe — they are
-      // NOT Stripe-billed and must never be reconciled against it. (This is the admin-key incident guard.)
-      String(k.stripe_subscription_id).startsWith('sub_'));
-
-    let checked = 0, suspended = 0, cancelled = 0, skipped = 0;
-    for (const k of subs) {
-      checked++;
-      let sub;
-      try {
-        sub = await stripe.subscriptions.retrieve(k.stripe_subscription_id);
-      } catch (e) {
-        // Can't confirm with Stripe -> leave it alone (FAIL SAFE), including resource_missing on a
-        // deleted/purged sub. A GENUINE customer cancellation comes back as status 'canceled' below
-        // (handled) — not as a deleted subscription. Deleting a Stripe sub is a manual/test action, so
-        // cancelling a license off resource_missing revoked the owner's own dev key (2026-07-08 incident).
-        // Never cancel on an ambiguous retrieve error; the recurring Stripe-health noise is cosmetic.
-        skipped++; continue;
-      }
-      const s = sub.status;  // active | trialing | past_due | unpaid | canceled | incomplete | incomplete_expired
-      if (s === 'canceled' || s === 'incomplete_expired') {
-        if (await lsPost(`/admin/subscription/${k.stripe_subscription_id}/cancel`)) cancelled++;
-      } else if (s === 'unpaid' || s === 'past_due') {
-        if (await lsPost(`/admin/subscription/${k.stripe_subscription_id}/suspend`)) suspended++;
-      }
-      // active / trialing / incomplete -> healthy or pending: leave alone
-    }
 
     // `ran: false` is the default, so a pass that THREW is reported as not-run rather than as a
     // clean zero. Same reason the unconfigured branch says so out loud: every zero on this
@@ -159,8 +115,8 @@ module.exports = async (req, res) => {
     try { cryptoAud = await reconcileCrypto(); } catch (e) { console.error('[reconcile-subs] crypto pass error:', e.message); }
 
     const fmt = (n, a) => `${n} ${a.ran ? `checked=${a.checked} removed=${a.removed} kept=${a.kept} skipped=${a.skipped}` : `NOT RUN (${a.reason})`}`;
-    console.log(`[reconcile-subs] licenses checked=${checked} suspended=${suspended} cancelled=${cancelled} skipped=${skipped} | ${fmt('analyst', analyst)} | ${fmt('crypto', cryptoAud)}`);
-    return res.status(200).json({ checked, suspended, cancelled, skipped, analyst, crypto: cryptoAud });
+    console.log(`[reconcile-subs] ${fmt('analyst', analyst)} | ${fmt('crypto', cryptoAud)} (license pass retired 2026-09-05)`);
+    return res.status(200).json({ analyst, crypto: cryptoAud, license_pass: 'retired 2026-09-05' });
   } catch (err) {
     console.error('[reconcile-subs] error:', err.message);
     return res.status(500).json({ error: 'Reconcile failed' });
