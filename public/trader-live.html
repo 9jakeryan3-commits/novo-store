@@ -3072,6 +3072,11 @@ function _setTkr(tk){
     // _pinVoid clears first and then finds no heat data for the new ticker, so this both
     // removes the old lines and redraws immediately when the new ticker's field is cached.
     try{ _pinVoid(); }catch(_e){ _ncSwallow('tkr-pv', _e); }
+    // Third instance of the same shape, swept after fixing the first two: the agreement strip
+    // underlines the ticker you are viewing, but it only redrew on the 60s board poll — so
+    // after a switch it marked the ticker you had just LEFT for up to a minute. Cosmetic next
+    // to wrong price levels, identical in kind, and one call to close it.
+    try{ _gexAgree(); }catch(_e){ _ncSwallow('tkr-ga', _e); }
     // Same shape, milder: these two tiles asserted the previous ticker's book until the new
     // payload landed. A few seconds of a confidently wrong number is still a wrong number.
     try{
