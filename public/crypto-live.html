@@ -987,7 +987,13 @@ function exposures(g){
   if(g.charm_exp!=null)  h+=row('Charm', money(g.charm_exp), 'delta drift per day', g.charm_exp>=0?'up':'dn');
   if(g.pc_oi_ratio!=null){
     const pc=g.pc_oi_ratio;
-    h+=row('Put / call OI', pc.toFixed(2), pc>1?'puts outnumber calls':'calls outnumber puts', pc>1?'dn':'up');
+    // NEUTRAL BY RULE (Xavier's find, 2026-09-05): the sub-label states the fact; the COLOUR
+    // used to add a direction the ratio cannot carry — red for put-heavy, green for call-heavy.
+    // Put OI commonly accompanies LONG spot being hedged (this panel is explicitly 'dealer
+    // sign'), and the contrarian reading calls put-heavy bullish. When the two conventional
+    // readings point opposite ways, any colour is an assertion. Same rule the equity side
+    // already follows for short volume: one-sidedness, never bearishness.
+    h+=row('Put / call OI', pc.toFixed(2), pc>1?'puts outnumber calls':'calls outnumber puts', 'nu');
   }
   return h+`</div></div>`;
 }

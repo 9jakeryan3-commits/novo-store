@@ -216,7 +216,13 @@ module.exports = async (req, res) => {
     }
     // The identical bundle doctrine as the chat: figures the model may state live HERE, and the
     // guards below audit against THIS string — checked equals prompted.
-    const marketJson = JSON.stringify({ live: g.live, history: g.ctx, crypto: g.cryptoInv });
+    // The RECORD rides in the evidence bundle (Einstein's B-1, 2026-09-05): recordClaimAudit
+    // is closed-world over marketJson alone, so with the track record outside it every TRUE
+    // scored figure in a post read as fabricated and the revise pass stripped exactly the
+    // citations that make a NoVo post different from any other market take. Reproduced
+    // (z=23.9 / 2,109 sessions -> 2 flags), fixed by one key.
+    const marketJson = JSON.stringify({ live: g.live, history: g.ctx, crypto: g.cryptoInv,
+                                        record: g.trackRec });
 
     const stale = g.liveSrc === 'delayed-public'
       ? 'THE DEALER NUMBERS BELOW ARE THE DELAYED PUBLIC SLOT — they run 15-30 minutes behind ' +
@@ -288,11 +294,16 @@ module.exports = async (req, res) => {
           `\n\nRewrite the post with those figures removed or corrected. Everything else stays — same ` +
           `register, same read, same format rules.\n\nMARKET DATA:\n${marketJson}\n\nDRAFT:\n${text}\n\n` +
           'OUTPUT ONLY THE CORRECTED POST TEXT.', 0.1, maxTok);
+        // BOTH audits on both sides of the comparison (Einstein's B-2): `still` and `remaining`
+        // counted recordClaimAudit ALONE against a `flags` total that included provenance, so a
+        // draft with a provenance mislabel and no fabrication reported flagged:1 remaining:0 —
+        // the caller reading CLEAN while the mislabel shipped. Apples to apples now.
+        const auditAll = (t) => [...recordClaimAudit(t, [], marketJson),
+                                 ...provenanceAudit(t, g.trackRec, [])];
         if (fix && fix.length > text.length * 0.4) {
-          const still = recordClaimAudit(fix, [], marketJson);
-          if (still.length < flags.length) { text = fix; guard.revised = true; }
+          if (auditAll(fix).length < flags.length) { text = fix; guard.revised = true; }
         }
-        guard.remaining = recordClaimAudit(text, [], marketJson).length;
+        guard.remaining = auditAll(text).length;
       }
     } catch (e) { guard.error = String(e && e.message || e).slice(0, 120); }
 
