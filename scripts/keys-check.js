@@ -26,6 +26,7 @@ const os = require('os');
 
 const ROOT = path.join(__dirname, '..', 'public');
 const SABOTAGE = process.argv.includes('--sabotage');
+let HIST_EMPTY = false;   // flipped mid-run by the /__fixture control route
 const PORT = 8731;
 const CDP_PORT = 9333;
 
@@ -114,6 +115,15 @@ const SABOTAGES = [
     breaks: 'store: Escape out of a box-opened palette does not re-open it',
     why: 'focus-bound opening plus focus-restore-on-close makes the palette undismissable' },
 
+  /* Restores the exact line that caused Jake's SPY-1H blanking: cache the answer unconditionally,
+     empty or not, with a fresh TTL. */
+  { name: 'empty-hist-evicts-bars', page: 'trader',
+    file: '/trader-live.html',
+    at: "    if (_c.length || !_haveBars) {\n      _histC={key:key,ts:Date.now(),candles:_c,inflight:false};\n    }",
+    to: "    _histC={key:key,ts:Date.now(),candles:_c,inflight:false};",
+    breaks: 'trader: an empty history answer does not destroy the bars already loaded',
+    why: 'one upstream hiccup discards 40 days of bars and the chart stays blank for a full TTL' },
+
   { name: 'bias-layout-stacked', page: 'analyst',
     file: '/analyst-live.html',
     at: '<div class="lv-grid lv-grid-top">',
@@ -169,6 +179,38 @@ function serve() {
   return new Promise((resolve) => {
     const s = http.createServer((req, res) => {
       let p = decodeURIComponent(req.url.split('?')[0]);
+
+      /* THE CHART-HISTORY FIXTURE, switchable mid-run. It exists to reproduce the SPY-1H blanking
+         Jake hit: an EMPTY history answer used to be cached with a fresh 60s TTL, so every poll for
+         the next minute short-circuited on the cache, returned [], and the caller bailed BEFORE
+         drawing — discarding 40 days of good bars. Switching ticker changed the cache key, which is
+         why his workaround worked and why it came back a minute later. */
+      if (p === '/__fixture') {
+        HIST_EMPTY = /empty/.test(req.url);
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(JSON.stringify({ histEmpty: HIST_EMPTY }));
+        return;
+      }
+      if (p === '/api/trader-chart' || p === '/api/chart-history') {
+        const q = new URL(req.url, 'http://x').searchParams;
+        const bars = [];
+        if (!HIST_EMPTY) {
+          // 40 hourly bars, ascending — lightweight-charts requires sorted time.
+          let t = 1788000000;
+          for (let i = 0; i < 40; i++, t += 3600) {
+            bars.push({ time: t, open: 770, high: 771, low: 769, close: 770.5, volume: 1000 });
+          }
+        }
+        res.writeHead(200, {
+          'content-type': 'application/json',
+          'cache-control': 'no-store',
+          // _storeGet drops any store answer older than _HIST_STORE_MAX_AGE_S (240s), so the
+          // fixture has to look fresh or it silently falls through to the engine path.
+          'X-Novo-As-Of': String(Math.floor(Date.now() / 1000))
+        });
+        res.end(JSON.stringify({ ticker: q.get('ticker') || 'SPY', tf: q.get('tf') || '1h', candles: bars }));
+        return;
+      }
 
       /* A CANNED LIVE PAYLOAD, so the dashboard's real render path can be exercised offline.
          Without it analyst-live sits on its login screen and every panel is untestable — which is
@@ -606,6 +648,45 @@ SECTIONS.trader = async function (cdp, base) {
     tf4, '5',
     'REGRESSION GUARD. The whole point of extending rather than replacing is that Tony\'s ' +
     'twenty bindings keep working; if this fails the feature broke the chart');
+
+  /* ---- THE SPY-1H BLANKING BUG ---------------------------------------------------------------
+     Jake's repro: "spy disappears if I switch tickers and switch back the candle show up on the
+     1hr." That is the signature of a POISONED CACHE, not missing data — switching ticker changes
+     the cache key, which is the only thing that dislodged it.
+
+     Driving _loadHist() directly rather than through the UI, because the bug is entirely in the
+     cache and a UI-level test would depend on poll timing to catch it. */
+  await cdp.eval(`fetch('/__fixture?full=1').then(function(r){return r.json();})`);
+  const hist = await cdp.eval(`(async function(){
+    _ctbTf = '1h';
+    // _storeGet bails without a ticket; the value is never checked by the fixture.
+    window.NOVO_TICKET = 'keys-check';
+    // Point the engine URL at the harness too, so the fallback path also lands on the fixture.
+    window.NOVO_URL = function(p){ return location.origin + p + '?x=1'; };
+    _histC = { key:null, ts:0, candles:null, inflight:false };
+    var good = await _loadHist();
+    var goodN = (good||[]).length;
+
+    // Now the upstream hiccups: a successful 200 carrying no bars.
+    await fetch('/__fixture?empty=1');
+    _histC.ts = 0;                         // expire the TTL so the next call really refetches
+    var after = await _loadHist();
+
+    return { goodN: goodN, afterN: (after||[]).length, cachedN: (_histC.candles||[]).length,
+             stampedFresh: (Date.now() - _histC.ts) < 5000 };
+  })()`);
+
+  check('trader: an empty history answer does not destroy the bars already loaded',
+    [hist.goodN > 0, hist.afterN], [true, hist.goodN],
+    'THE SPY-1H BLANKING BUG. An empty answer was cached with a fresh 60s TTL, so every poll for ' +
+    'the next minute returned [] and the caller bailed before drawing — 40 days of good bars ' +
+    'discarded for a full minute by one hiccup. Switching ticker changed the key, which is exactly ' +
+    'the workaround Jake found');
+
+  check('trader: an empty answer does not refresh the cache TTL',
+    hist.stampedFresh, false,
+    'if the empty answer restamps the TTL the chart cannot retry for a full minute; not restamping ' +
+    'is what makes the next poll a second later recover it');
 };
 
 SECTIONS.analyst = async function (cdp, base) {

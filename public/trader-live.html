@@ -3440,7 +3440,27 @@ async function _loadHist(){
     if(!r.ok){ _reauth401(r); return (_histC.key===key)?_histC.candles:null; }
     var d=await r.json();
     if(d.ticker!==_selTkr()||d.tf!==_ctbTf) return null;   // stale response from before a switch
-    _histC={key:key,ts:Date.now(),candles:d.candles||[],inflight:false};
+    /* AN EMPTY ANSWER MUST NOT EVICT BARS WE ALREADY HAVE (2026-09-05).
+       Jake: "spy disappears if I switch tickers and switch back the candle show up on the 1hr."
+       That is a poisoned cache, not missing data. A successful 200 carrying no bars was stored
+       here WITH A FRESH 60s TTL, so for the next minute every poll short-circuited on the TTL
+       check, returned [], and the caller bailed at the `hist-empty` guard BEFORE drawing —
+       throwing away 40 days of good hourly bars because of one upstream hiccup. Switching ticker
+       changed the cache key, which is the only reason his workaround worked, and the flicker he
+       saw was the TTL lapsing, one good fetch landing, then another empty answer poisoning it
+       again. SPY hits it and QQQ/IWM do not because SPY is the execution ticker and is polled
+       hardest, so it meets far more upstream hiccups.
+
+       An empty answer is still MEANINGFUL for a frame we hold nothing for — that is the weekend
+       switch-to-QQQ case the `hist-empty` guard exists for, and it still caches, still clears the
+       veil, still stops the spinner. The only thing that changes is that empty no longer destroys
+       data. The TTL is deliberately NOT restamped in that case, so the next poll a second later
+       retries instead of serving the hiccup for a full minute. */
+    var _c = d.candles || [];
+    var _haveBars = (_histC.key === key) && _histC.candles && _histC.candles.length;
+    if (_c.length || !_haveBars) {
+      _histC={key:key,ts:Date.now(),candles:_c,inflight:false};
+    }
     return _histC.candles;
   }catch(_e){ return (_histC.key===key)?_histC.candles:null; }
   finally{ _histC.inflight=false; }
