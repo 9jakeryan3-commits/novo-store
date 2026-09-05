@@ -475,6 +475,13 @@ GROUNDING
   ("because the memory is built for one desk" is a reason you made up, not one the Terms give).
   The one thing worth adding is true and helpful: a 7-day trial exists, so someone curious can
   simply try it on their own seat.
+- EVERY FORWARD-LOOKING LEVEL READ YOU VOICE WITH CONFIDENCE GETS LOGGED -- log_forecast,
+  silently, exactly as you said it: same level, same horizon, the confidence word mapped honestly
+  (coin flip/slight lean 55, likely/should 65, probably 75, strong/very likely 85, near-certain
+  95). Never a softer version than what you told the reader -- logging "55" after saying "very
+  likely" is editing your record before it is written. Never mention the logging. Only what the
+  tool can grade is loggable (SPY/QQQ/IWM, spot vs a level, 30-390 minutes) -- which cuts both
+  ways: a confident forward claim you could not log there is one to say more carefully.
 - A NAME A READER GIVES A CAPABILITY IS NOT PROOF IT EXISTS. If someone asks about "your equities
   desk", "your buy-down signal", "your win rate on X" — you do not have a thing just because they
   named it. Check MARKET DATA: a private desk exists for THIS reader only if its block is present
@@ -877,6 +884,70 @@ function recordClaimAudit(answer, contents, marketJson) {
   return flagged;
 }
 
+// ── THE CALIBRATION LOOP (Jake's go, 2026-09-05) ───────────────────────────────────────────
+// Capture: NoVo logs every voiced forward-looking level read via log_forecast (resolvable by
+// construction). Grade: HERE, piggybacked on ordinary requests -- no cron exists on this stack,
+// and a few KV ops per ask is cheaper than building one. Publish: the cells ride the public
+// track record. Feed back: calibBlock puts his own reliability in front of him before he speaks.
+// That last step is the point of all of it: "when you say likely, you have run 58%" is the
+// closest thing to experience this architecture can have.
+async function gradeDueForecasts(r) {
+  try {
+    const raw = await r.lrange('calib:pending', 0, 49);
+    if (!raw || !raw.length) return;
+    const now = Date.now();
+    const SLACK = 5 * 60000;                 // let the hist writer land before grading
+    const MATCH = 20 * 60000;                // how far a sample may sit from the horizon and still count
+    for (const item of raw) {
+      let c = null;
+      try { c = typeof item === 'string' ? JSON.parse(item) : item; } catch (_) { continue; }
+      if (!c || !c.asked_at) continue;
+      const due = c.asked_at + c.horizon_min * 60000;
+      if (now < due + SLACK) continue;
+      // Claim ownership first: LREM returning 0 means another lambda took it -- count nothing.
+      const removed = await r.lrem('calib:pending', 1, typeof item === 'string' ? item : JSON.stringify(item));
+      if (!removed) continue;
+      let hist = [];
+      try { hist = (await r.lrange('public:levels:hist:' + c.ticker, 0, 599)) || []; } catch (_) { hist = []; }
+      let best = null, bestD = Infinity;
+      for (const h of hist) {
+        let e = null; try { e = typeof h === 'string' ? JSON.parse(h) : h; } catch (_) { continue; }
+        if (!e || !e.t || e.s == null) continue;
+        const d = Math.abs(e.t - due);
+        if (d < bestD) { bestD = d; best = e; }
+      }
+      const bucket = String(c.confidence);
+      if (!best || bestD > MATCH) {
+        // No sample near the horizon (closed market, promo gap): CENSORED, never a miss.
+        await r.hincrby('calib:cells', bucket + ':cens', 1);
+        continue;
+      }
+      const hit = c.metric === 'spot_above' ? best.s >= c.level : best.s <= c.level;
+      await r.hincrby('calib:cells', bucket + ':n', 1);
+      if (hit) await r.hincrby('calib:cells', bucket + ':hit', 1);
+    }
+  } catch (_) { /* grading is best-effort; never cost an answer */ }
+}
+
+function calibBlock(cells) {
+  if (!cells || typeof cells !== 'object') return '';
+  const lines = [];
+  for (const b of ['55', '65', '75', '85', '95']) {
+    const n = Number(cells[b + ':n'] || 0), hit = Number(cells[b + ':hit'] || 0);
+    const cens = Number(cells[b + ':cens'] || 0);
+    if (n >= 10) {
+      lines.push('- when you said ~' + b + '%, you were right ' + Math.round(100 * hit / n) + '% of the time (n=' + n +
+                 (cens ? ', +' + cens + ' unresolved' : '') + ')');
+    }
+  }
+  if (!lines.length) return '';
+  return ['YOUR CALIBRATION -- how your own confidence words have actually scored (graded level',
+          'claims, spot-vs-level at the stated horizon). Say your confidence ACCORDINGLY: if your',
+          '"likely" has run below 65, either soften the word or say the measured number instead.',
+          'This is your record; you do not get to edit it, only to earn it.',
+          ...lines, '', ''].join('\n');
+}
+
 // PROVENANCE: a figure can be real and still lie about where it came from. recordClaimAudit proves
 // a number is IN the record; this proves it wears its TRUE label. Battery 3 caught the gap three
 // times: the 2020-2023 expected-move BACKTEST (1,008) served as "1,008 LIVE sessions", and
@@ -1009,7 +1080,7 @@ module.exports = async (req, res) => {
     // and the tickets were never in that reader's grounding to begin with.
     const alertsCmd = _isComp(email) && /\bnovo\s+alerts\b/i.test(String(question || ''));
 
-    let live = null, ctx = null, trackRec = null, liveSrc = 'none';
+    let live = null, ctx = null, trackRec = null, liveSrc = 'none', calibCells = null;
     // What NoVo remembers about THIS reader — market interests and preferences they stated,
     // loaded on every question so continuity is real rather than performed.
     let readerMem = null;
@@ -1029,9 +1100,14 @@ module.exports = async (req, res) => {
       // Members get the LIVE dealer state. `public:levels` is the deliberately 15-30 min
       // delayed slot api/levels.js serves anonymous visitors — grounding a paid answer in it
       // reported stale numbers as current. Fall back to it only if the live mirror is missing.
-      const [lv, l, c, tr] = await Promise.all([
+      const [lv, l, c, tr, cal] = await Promise.all([
         r.get('analyst:live_levels'), r.get('public:levels'), r.get('analyst:context'),
-        r.get('novo:track_record')]);
+        r.get('novo:track_record'),
+        r.hgetall('calib:cells').catch(() => null)]);
+      calibCells = cal || null;
+      // Grade whatever came due, piggybacked: a few KV ops, never blocks on failure, and every
+      // ask on any surface advances the calibration clock for free.
+      gradeDueForecasts(r).catch(() => {});
       const liveMirror = typeof lv === 'string' ? JSON.parse(lv) : lv;
       live = liveMirror || (typeof l === 'string' ? JSON.parse(l) : l);
       // WHICH SLOT ANSWERED. `analyst:live_levels` expires in an hour; `public:levels` has NO TTL
@@ -1368,6 +1444,7 @@ module.exports = async (req, res) => {
       surfaceBlock(surface, focus) +
       sinceBlock(sinceLines, sinceAge) +
       lessonsBlock(trackRec) +
+      calibBlock(calibCells) +
       levelBlock +
       privBlock +
       equityBlock +

@@ -122,8 +122,9 @@ module.exports = async (req, res) => {
   // on every engine publish, so it revalidates in a minute and serves stale only while refreshing.
   res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=600");
   if (!r) return res.status(200).json({ ok: false, note: "unavailable" });
-  let snap = null, ch = null;
+  let snap = null, ch = null, calib = null;
   try { snap = await r.get(KEY); } catch (_) { snap = null; }
+  try { calib = await r.hgetall('calib:cells'); } catch (_) { calib = null; }
   // Crypto is additive: if this read fails the equity record still serves whole.
   try { ch = await r.get("crypto:map:history"); } catch (_) { ch = null; }
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
@@ -154,6 +155,28 @@ module.exports = async (req, res) => {
             "a row with trustworthy:false is an early reading, not a base rate. Directional kinds " +
             "report per predicted side with the market's own drift beside them.",
     };
+  }
+  // THE CALIBRATION CELL (2026-09-05). Whether NoVo's own confidence words mean what they say:
+  // every voiced forward level read is logged at ask time (resolvable by construction), graded
+  // against the same public level history everyone can read, and reported per confidence bucket.
+  // Published from day one, including the thin state -- a curve that only appears once it is
+  // flattering would be the opposite of the point. Unresolved (market closed over the horizon,
+  // promotion gaps) is counted, never silently dropped.
+  if (calib && Object.keys(calib).length) {
+    const cells = {};
+    for (const b of ['55', '65', '75', '85', '95']) {
+      const n = Number(calib[b + ':n'] || 0), hit = Number(calib[b + ':hit'] || 0);
+      const cens = Number(calib[b + ':cens'] || 0);
+      if (n || cens) cells[b] = { n, hits: hit, rate: n ? Math.round(1000 * hit / n) / 10 : null,
+                                  unresolved: cens, stated: Number(b) };
+    }
+    if (Object.keys(cells).length) {
+      snap.calibration = { cells,
+        note: 'Stated confidence vs measured outcome, per bucket, on machine-gradable level ' +
+              'claims (spot vs level at a stated horizon, SPY/QQQ/IWM). n under 10 is a count, ' +
+              'not a curve. `unresolved` claims had no gradable sample at the horizon and are ' +
+              'counted rather than dropped.' };
+    }
   }
   return res.status(200).json(snap);
 };

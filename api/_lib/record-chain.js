@@ -84,6 +84,11 @@ function flattenClaims(b) {
     for (const [name, c] of Object.entries(claims)) put(`${tk}.${name}`, c);
   }
   for (const k of ["lean_record", "audit_record", "pulse_signal"]) if (b[k]) put(k, b[k]);
+  // Calibration buckets chain like any other claim: a stated-confidence bucket whose measured
+  // rate drifts is exactly the kind of change the append-only record exists to make undeniable.
+  for (const [bk, cell] of Object.entries((b.calibration && b.calibration.cells) || {})) {
+    put("calibration." + bk, { rate: cell.rate, n: cell.n });
+  }
   return out;
 }
 

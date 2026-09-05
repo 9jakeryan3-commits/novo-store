@@ -377,6 +377,31 @@ const declarations = [
     },
   },
   {
+    name: "log_forecast",
+    description:
+      "Log a forward-looking claim you just STATED, with the confidence you gave it - silently, " +
+      "never mentioned to the reader. This builds your calibration record: whether your 'likely' " +
+      "actually means 65%. Log EVERY forward-looking level read you voice with confidence, and " +
+      "log EXACTLY what you said - same level, same horizon, same confidence, never a softer " +
+      "version. Word map: coin-flip/slight lean=55, likely/should=65, probably=75, strong/very " +
+      "likely=85, near-certain=95. RESOLVABLE BY CONSTRUCTION: only SPY/QQQ/IWM, only " +
+      "spot-vs-level at a horizon (spot_above means spot AT the horizon sits at or above the " +
+      "level; spot_below the reverse), horizon 30-390 minutes inside the session. Direction " +
+      "calls, touch claims and multi-day claims are NOT loggable here and not sayable either.",
+    parameters: {
+      type: "object",
+      properties: {
+        claim: { type: "string", description: "The claim as you said it, one short sentence." },
+        confidence: { type: "number", description: "55, 65, 75, 85 or 95 - the confidence you STATED, per the word map." },
+        ticker: { type: "string", description: "SPY, QQQ or IWM." },
+        metric: { type: "string", description: "spot_above or spot_below." },
+        level: { type: "number", description: "The price level the claim is about." },
+        horizon_min: { type: "number", description: "Minutes until the claim resolves, 30-390." },
+      },
+      required: ["claim", "confidence", "ticker", "metric", "level", "horizon_min"],
+    },
+  },
+  {
     name: "update_reader_memory",
     description:
       "Remember or forget something THIS reader told you about their market interests and " +
@@ -1146,6 +1171,33 @@ function makeExecutors(ctx = {}) {
     return cancelAlert(ctx.email, args);
   }
 
+  async function log_forecast({ claim, confidence, ticker, metric, level, horizon_min } = {}) {
+    // RESOLVABILITY IS ENFORCED AT CAPTURE (the ForecastBench lesson): a claim that cannot be
+    // machine-graded later never enters the ledger, so the calibration record can never fill up
+    // with unresolvable prose. Hard-validated here, not trusted from the model.
+    if (!r) return { error: "calibration ledger unavailable" };
+    const tk = okTicker(ticker);
+    const conf = Number(confidence);
+    const lvl = Number(level);
+    const hz = Math.round(Number(horizon_min));
+    if (!tk) return { error: "ticker must be SPY, QQQ or IWM" };
+    if (![55, 65, 75, 85, 95].includes(conf)) return { error: "confidence must be 55/65/75/85/95" };
+    if (metric !== "spot_above" && metric !== "spot_below") return { error: "metric must be spot_above or spot_below" };
+    if (!isFinite(lvl) || lvl <= 0) return { error: "level must be a positive price" };
+    if (!isFinite(hz) || hz < 30 || hz > 390) return { error: "horizon_min must be 30-390" };
+    const row = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      asked_at: Date.now(), claim: String(claim || "").slice(0, 200),
+      confidence: conf, ticker: tk, metric, level: lvl, horizon_min: hz,
+    };
+    try {
+      await r.lpush("calib:pending", JSON.stringify(row));
+      await r.ltrim("calib:pending", 0, 499);
+      return { logged: true, resolves_in_min: hz,
+               note: "logged silently - never tell the reader a forecast was recorded" };
+    } catch (e) { return { error: "could not log: " + e.message }; }
+  }
+
   async function update_reader_memory(args = {}) {
     const { updateMemory, indexMember } = require("./member-memory.js");
     if (!ctx.email) return { error: "no signed-in reader" };
@@ -1503,7 +1555,7 @@ function makeExecutors(ctx = {}) {
     get_base_rates, get_recent_reads, get_market_internals,
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
-    describe_archive, query_archive, update_reader_memory,
+    describe_archive, query_archive, update_reader_memory, log_forecast,
     set_alert, list_alerts, cancel_alert, get_live_chain,
   };
 }
