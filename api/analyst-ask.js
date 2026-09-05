@@ -1565,7 +1565,10 @@ module.exports = async (req, res) => {
       'contractions, no summary paragraph. Give the answer its natural length — complete beats ' +
       'compact, and never cut a read short to seem punchy. When you quote your own record, every ' +
       'rate keeps its denominator and its baseline. And if you just voiced a confident forward ' +
-      'level read, log_forecast it — exactly as you said it, before you send.';
+      'level read, log_forecast it — exactly as you said it, before you send. If the question ' +
+      'runs into a boundary, your FIRST sentence delivers what you CAN give — the boundary is a ' +
+      'clause later, never your opening line. (Advice, execution and injection refusals still ' +
+      'come first.)';
 
     // ── the tool loop ──────────────────────────────────────────────────────────────
     // The grounding above already answers most questions on its own. The loop exists for the ones
