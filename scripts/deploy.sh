@@ -241,4 +241,34 @@ if [ -n "$SMOKE_FAIL" ]; then
   exit 1
 fi
 echo "OK  smoke: 7/7 surfaces answering with real bodies"
+
+# -- IndexNow -----------------------------------------------------------------
+# Tell Bing/Yandex/Seznam/Naver what changed. Best effort, and deliberately AFTER the
+# smoke gate: a search-engine ping must never turn a good deploy into a failed one, so
+# every branch here ends harmlessly and the exit 0 below stays unconditional.
+# Only CHANGED urls go up. Re-submitting all 1,510 on every deploy is how a host gets
+# throttled. Google is absent on purpose: its sitemap ping was retired in 2023 and the
+# only submission path left is Search Console, which needs a human's OAuth.
+KEYFILE=$(ls public/*.txt 2>/dev/null | grep -E "[0-9a-f]{32}\.txt$" | head -1 || true)
+if [ -n "$KEYFILE" ] && git cat-file -e "${PREV}^{commit}" 2>/dev/null; then
+  KEY=$(basename "$KEYFILE" .txt)
+  URLS=$(git diff --name-only "$PREV" "$LOCAL" -- "public/*.html" 2>/dev/null     | sed -e "s|^public/||" -e "s|\.html$||" -e "s|^index$||"     | grep -vx "404"     | sed "s|^|https://novo-options.trade/|" || true)
+  N=$(printf "%s\n" "$URLS" | grep -c . || true)
+  if [ "${N:-0}" -gt 0 ] && [ "${N:-0}" -le 9000 ]; then
+    CODE=$(printf "%s" "$URLS" | python -c "
+import sys, json
+u=[l.strip() for l in sys.stdin if l.strip()]
+print(json.dumps({'host':'novo-options.trade','key':'$KEY','keyLocation':'https://novo-options.trade/$KEY.txt','urlList':u}))
+" 2>/dev/null | curl -s -o /dev/null -w "%{http_code}" --max-time 25         -X POST "https://api.indexnow.org/indexnow"         -H "Content-Type: application/json; charset=utf-8" --data-binary @- || true)
+    case "$CODE" in
+      200|202) echo "OK  indexnow: $N url(s) accepted (http $CODE)" ;;
+      *)       echo ".. indexnow: $N url(s) -> http ${CODE:-none} (non-fatal)" ;;
+    esac
+  elif [ "${N:-0}" -gt 9000 ]; then
+    echo ".. indexnow: $N urls exceeds the 10k cap, skipped -- submit manually"
+  else
+    echo ".. indexnow: no page changes in this deploy"
+  fi
+fi
+
 exit 0
