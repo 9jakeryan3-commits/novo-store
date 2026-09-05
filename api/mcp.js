@@ -55,8 +55,8 @@ const TOOLS = [
    "long/short liquidations, and the free BTC/ETH gamma summary where the coin has one. The " +
    "response's `paid` key names what the $79 Crypto Market Map withholds from this feed — " +
    "gamma by strike, the flip and walls, the block tape, the on-chain map — so never report a " +
-   "gated field as zero or missing; it is withheld, not absent. Unknown coins return an empty " +
-   "read, not an error.",
+   "gated field as zero or missing; it is withheld, not absent. A coin outside the mapped set " +
+   "returns HTTP 404 — report it as not covered by the free sweep, never as a market answer.",
    { coin: { type: "string", description: "Asset code, e.g. BTC, ETH, SOL, DOGE." } },
    ["coin"]],
   ["get_track_record", "/api/track-record",
