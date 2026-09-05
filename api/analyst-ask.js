@@ -810,7 +810,11 @@ async function reviseAnswer(answer, corrections, callModelFn, model) {
 // turns with an EMPTY ledger, and seven invented era-split counts wrapped around two real numbers
 // (whose own arithmetic disagreed with itself: 1,093/2,075 is 52.7%, quoted as 37.7%). Runs on
 // EVERY lane, but only when an answer attributes figures to the record — the common path is free.
-const ATTRIB_RE = /\bmy\s+(archive|record|reconstructed\s+\w+|logged\s+\w+|scored\s+\w+|backtests?\w*|base\s+rates?|rule\s+lab|maps?)\b/i;
+// `desks?` carries a negative lookahead for 'note(s)': 'my desk note said the flip was X' is a
+// member quoting a real PUBLISHED desk note, whose figures live in retrieval - OUTSIDE this
+// guard's evidence set - so bare 'desk' would strip true quotes of his own notes. The desk
+// vocabulary itself ('my equities desk', 'my signals desk') is the equity_signals stream.
+const ATTRIB_RE = /\bmy\s+(?:\w+\s+)?(archive|record|reconstructed\s+\w+|logged\s+\w+|scored\s+\w+|backtests?\w*|base\s+rates?|rule\s+lab|maps?|desks?(?!\s*notes?)|signals?)\b/i;
 
 function _numsIn(str) {
   const out = new Set();
