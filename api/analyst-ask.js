@@ -991,7 +991,7 @@ module.exports = async (req, res) => {
     // every question to answer none of them better; the per-coin detail is what the tools are for.
     // What belongs here is the INVENTORY -- what I hold, how much of it, how fresh -- because that
     // is what a coverage question asks and it must not depend on a tool call landing.
-    let cryptoInv = null, cryptoLead = null, privateAlerts = null;
+    let cryptoInv = null, cryptoLead = null, privateAlerts = null, equitySignals = null;
     try {
       let cs = await r.get('crypto:map:live');
       if (typeof cs === 'string') cs = JSON.parse(cs);
@@ -1048,6 +1048,20 @@ module.exports = async (req, res) => {
                      "with few decisive cases says so",
           };
         }
+      }
+    } catch (_) {}
+
+    // THE OWNER'S EQUITIES SIGNAL DESK (Jake's go, 2026-09-04) — the flip-cross stream's
+    // feed, published by NoVo-Pulse skills/equity_signals.py via /api/equity-ingest. Same
+    // comp gate, same doctrine as private_alerts above: the engine already pre-joins every
+    // rate to its own baseline with both denominators named, so the feed rides whole. For
+    // any other reader this stream does not exist. Chat-pull is the ONLY surface (Jake's
+    // ruling) — nothing else may read this key.
+    try {
+      if (_isComp(email)) {
+        let es = await r.get('equity:signals:live');
+        if (typeof es === 'string') es = JSON.parse(es);
+        if (es && (es.record || es.open)) equitySignals = es;
       }
     } catch (_) {}
 
@@ -1111,6 +1125,36 @@ module.exports = async (req, res) => {
        'his own system. Raise a ticket unprompted when it bears on the question, quote its levels',
        'and deadline exactly, and fold the record into any analysis. For every other reader these',
        'tickets do not exist and are never mentioned.',
+       '', ''].join('\n')
+    : '';
+
+  // The equities twin of the block above — same server-side gate, same secrecy contract.
+  // Jake's go 2026-09-04; chat-pull is the ONLY surface, so this block IS the product.
+  const equityBlock = equitySignals
+    ? ['PRIVATE EQUITIES DESK — THIS READER IS THE OWNER (comp seat, verified server-side). My',
+       'equities signal desk rides in MARKET DATA under equity_signals: open flip-cross fires,',
+       'recent per-horizon grades, and the record. Answer questions about it from that block.',
+       'Quote a hit rate only as the block states it — hit_rate_all keeps flats in the',
+       'denominator, decisive_rate does not, and every rate travels with own_baseline and both',
+       "n's; say which you are quoting. Fires are hypotheses under test, not calls I endorse —",
+       'until a cell says meaningful, say the record is still accruing and give the n. For every',
+       'other reader this desk does not exist and is never mentioned.',
+       '', ''].join('\n')
+    : '';
+
+  // LAB MODE (Jake's ruling, 2026-09-04): the comp seat runs the analyst at full potential so
+  // everything can be tested and tuned privately before any of it goes public. It relaxes
+  // exactly ONE rule for exactly one reader; the fabrication guards run everywhere including
+  // here — a lab that relaxed honesty would poison the very records it exists to build.
+  const labBlock = (privateAlerts || equitySignals)
+    ? ['LAB MODE — for THIS reader only (the owner seat, verified server-side), the no-direction',
+       'boundary is relaxed: you may reason about direction as a HYPOTHESIS, grounded in the',
+       'private desks\' records in MARKET DATA (private_alerts, equity_signals), always with the',
+       'baseline and denominator beside any rate. What does NOT relax, even here: every figure',
+       'still comes from MARKET DATA or a tool result — an invented statistic is fabrication in',
+       'any mode; no imperative instructions (no "buy now" / "sell now" — hypotheses and levels,',
+       'not orders); and where the record has no cell, the gap is still the answer. For every',
+       'other reader the public boundary stands unchanged and this mode is never mentioned.',
        '', ''].join('\n')
     : '';
 
@@ -1206,7 +1250,10 @@ module.exports = async (req, res) => {
   // private_alerts rides FIRST, not last: the verify pass slices this bundle to its head, and a
   // field serialized last is the one that silently truncates out of the verifier's view -- which
   // for the alert record meant the one set of figures most worth checking was the least checkable.
-  const marketJson = JSON.stringify({ private_alerts: privateAlerts, live, history: ctx,
+  // equity_signals rides SECOND for the same reason: both private records stay ahead of the bulky
+  // crypto inventory so a deep read can always check the owner's own numbers.
+  const marketJson = JSON.stringify({ private_alerts: privateAlerts, equity_signals: equitySignals,
+                                      live, history: ctx,
                                       crypto: cryptoInv, crypto_live: cryptoLead });
 
   // IS THIS READER ON CRYPTO ALONE, AND DID THEY JUST ASK ABOUT EQUITIES? Asked BEFORE the model
@@ -1237,6 +1284,8 @@ module.exports = async (req, res) => {
       lessonsBlock(trackRec) +
       levelBlock +
       privBlock +
+      equityBlock +
+      labBlock +
       depthBlock +
       webBlock +
       memBlock +
