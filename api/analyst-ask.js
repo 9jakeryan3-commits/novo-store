@@ -929,6 +929,28 @@ async function gradeDueForecasts(r) {
   } catch (_) { /* grading is best-effort; never cost an answer */ }
 }
 
+// Layer-2 capture trigger: does the ANSWER voice a confident forward level read? Deliberately a
+// loose trigger -- the extraction call is the judge; this only decides whether to spend it.
+const CALIB_VOICE_RE = /\b(near-?certain|very likely|strong(?:ly)? (?:favor|lean)|likely|probably|should (?:hold|stay)|confidence is \d{1,2}\s*%|\d{1,2}\s*% (?:confident|confidence|chance|odds))\b/i;
+const CALIB_FWD_RE = /\b(tomorrow|monday|tuesday|wednesday|thursday|friday|next session|into the (?:open|close)|by the (?:open|close)|an hour|within \d|hold(?:ing)? (?:above|below)|stay(?:ing)? (?:above|below)|reclaim)\b/i;
+
+// The SAME rules the log_forecast executor enforces -- mirrored here because the executor lives
+// inside makeExecutors' closure. If the rules there change, change these (scripts/calib-check.js
+// exercises this copy).
+function validForecast(c) {
+  if (!c || typeof c !== 'object') return null;
+  const tk = String(c.ticker || '').toUpperCase();
+  const conf = Number(c.confidence), lvl = Number(c.level), hz = Math.round(Number(c.horizon_min));
+  if (!['SPY', 'QQQ', 'IWM'].includes(tk)) return null;
+  if (![55, 65, 75, 85, 95].includes(conf)) return null;
+  if (c.metric !== 'spot_above' && c.metric !== 'spot_below') return null;
+  if (!isFinite(lvl) || lvl <= 0) return null;
+  if (!isFinite(hz) || hz < 30 || hz > 390) return null;
+  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+           asked_at: Date.now(), claim: String(c.claim || '').slice(0, 200),
+           confidence: conf, ticker: tk, metric: c.metric, level: lvl, horizon_min: hz };
+}
+
 function calibBlock(cells) {
   if (!cells || typeof cells !== 'object') return '';
   const lines = [];
@@ -1492,7 +1514,8 @@ module.exports = async (req, res) => {
       'ANSWER AS YOURSELF: first sentence answers the question, say "I" at least once, use ' +
       'contractions, no summary paragraph. Give the answer its natural length — complete beats ' +
       'compact, and never cut a read short to seem punchy. When you quote your own record, every ' +
-      'rate keeps its denominator and its baseline.';
+      'rate keeps its denominator and its baseline. And if you just voiced a confident forward ' +
+      'level read, log_forecast it — exactly as you said it, before you send.';
 
     // ── the tool loop ──────────────────────────────────────────────────────────────
     // The grounding above already answers most questions on its own. The loop exists for the ones
@@ -1714,6 +1737,50 @@ module.exports = async (req, res) => {
         console.error('[ASK] record-guard failed (draft kept)', e && e.message);
       }
     }
+    // STRUCTURAL CAPTURE (calibration layer 2). The live probe caught the model voicing
+    // "near-certain, 95%" with an EMPTY ledger -- the silent side-effect tool is exactly the kind
+    // a model skips, and a calibration record built only from remembered logs is a biased record.
+    // So the ANSWER is the source of truth: voiced-confidence forward claims get extracted by one
+    // cheap call, pass the SAME validation the tool enforces, and enter the ledger. Reported in
+    // the response (calibCapture) so the batteries grade the capture rate itself.
+    let calibCapture = null;
+    try {
+      const logged = ledger.some((l) => l.tool === 'log_forecast' && l.ok);
+      if (!logged && answer && r && CALIB_VOICE_RE.test(answer) && CALIB_FWD_RE.test(answer)) {
+        const xres = await Promise.race([
+          callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text:
+            'From the analyst text below, extract every FORWARD-LOOKING claim about SPY, QQQ or ' +
+            'IWM spot finishing at-or-above / at-or-below a SPECIFIC price level within a horizon ' +
+            'of 30-390 minutes, where the text states a confidence. Map confidence words: coin ' +
+            'flip/slight lean=55, likely/should=65, probably=75, strong/very likely=85, ' +
+            'near-certain=95; an explicit percent rounds to the nearest bucket. Return STRICT ' +
+            'JSON only: {"claims":[{"claim":"<one sentence as written>","confidence":65,' +
+            '"ticker":"SPY","metric":"spot_above","level":769,"horizon_min":60}]}. Omit anything ' +
+            'that does not fit exactly (no direction calls, no touch claims, no multi-day). ' +
+            'If none fit: {"claims":[]}.\n\nTEXT:\n' + answer }] }],
+            generationConfig: { temperature: 0, maxOutputTokens: 1024, responseMimeType: 'application/json',
+                                thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } }),
+          new Promise((x) => setTimeout(() => x(null), 8000)),
+        ]);
+        const xtxt = (xres?.candidates?.[0]?.content?.parts || [])
+          .filter((p) => p && p.text).map((p) => p.text).join('').trim();
+        let claims = [];
+        try { claims = (JSON.parse(xtxt).claims || []).slice(0, 3); } catch (_) { claims = []; }
+        let pushed = 0;
+        for (const c of claims) {
+          const row = validForecast(c);
+          if (!row) continue;
+          try { await r.lpush('calib:pending', JSON.stringify(row)); pushed++; } catch (_) {}
+        }
+        if (pushed) { try { await r.ltrim('calib:pending', 0, 499); } catch (_) {} }
+        calibCapture = { via: 'fallback', captured: pushed, considered: claims.length };
+        if (pushed) console.log('[ASK] calib: fallback captured ' + pushed + ' voiced forecast(s)');
+        modelCalls++;
+      } else if (logged) {
+        calibCapture = { via: 'model', captured: ledger.filter((l) => l.tool === 'log_forecast' && l.ok).length };
+      }
+    } catch (_) { /* capture is best-effort; never cost an answer */ }
+
     console.log(`[ASK] ${deep ? 'deep' : 'fast'}: ${modelCalls} model call(s), ${toolCalls} tool call(s), ${question.length} chars in`);
 
     // Belt and braces: the panel renders text, not HTML, so any markdown the model still emits
@@ -1766,6 +1833,7 @@ module.exports = async (req, res) => {
       lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })),
       verified,
       recordGuard,
+      calibCapture,
       indexBuilt: idx.built || null,
       // null for everyone except a crypto-only member who just asked about equities. The client
       // renders it as a card with a real button — a URL in the prose would arrive as dead text.
