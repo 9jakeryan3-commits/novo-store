@@ -91,7 +91,16 @@ module.exports = async (req, res) => {
 
   if (wanted) {
     const c = snap.coins[wanted];
-    if (!c) return res.status(404).json({ error: `${wanted} is not one of the coins Robinhood trades` });
+    // 200 with covered:false, NOT 404 (Xavier's spec, Jake's yes, 2026-09-05): a 404 made
+    // "we don't cover this coin" indistinguishable from "your request broke", and an agent
+    // reading the second as the first would announce false negatives about our own coverage —
+    // the exact wrong direction under sell-first. Non-200 now means transport, nothing else.
+    if (!c) {
+      return res.status(200).json({
+        coin: wanted, covered: false,
+        note: `${wanted} is not in the free sweep's mapped set. The paid Crypto Market Map covers ~350 assets; this free feed covers the Robinhood-traded coins.`,
+      });
+    }
     return res.status(200).json({
       as_of: snap.as_of, ...pub(wanted, c),
       paid: paidTeaser(wanted, c),
