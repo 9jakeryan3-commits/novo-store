@@ -71,7 +71,10 @@ const declarations = [
       "the coin half of the map: these have no options book, no perp and therefore no gamma. Returns the calls I " +
       "currently have open, how the resolved ones actually went, and the measured rule levels - each rule's " +
       "target/stop and its triggered-vs-baseline rates - that every verdict rests on. Use " +
-      "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain. " +
+      "this for any question about memecoins, new launches, chain tokens, or what I am watching on-chain — " +
+      "and for ANY question about what my own private alerts, chain rules or alert record SCORE: this tool " +
+      "IS that record, and that question must never be answered without it (or the same block already in " +
+      "MARKET DATA). " +
       "The rules are MEASURED, never intuited, and the flow side decides the read: a pump with BUYERS " +
       "dominating the hour has historically run on, a pump with SELLERS into strength has leaned the other " +
       "way - quote each rule's own record and sample, never a hunch. TWO ACCESS LEVELS, decided server-side: " +
@@ -597,7 +600,11 @@ function makeExecutors(ctx = {}) {
               "per rule and the scored record. Use these as READOUTS — 'tokens in this state have " +
               "historically moved X% of the time, n=...' — and always with the sample. Never turn " +
               "a rate into an instruction to buy, sell or avoid anything, and do not describe " +
-              "this as an alert service.",
+              "this as an alert service. QUOTING THE RECORD: per rule, denominator NAMED — " +
+              "decided-only, whole-population and pooled-with-flats are different measurements " +
+              "and must never blend into one number or a range — with each rule's baseline " +
+              "beside its rate (the baseline is the no-signal rate, not your score), and a " +
+              "small decisive count stated outright.",
       };
     }
     return {
@@ -613,6 +620,12 @@ function makeExecutors(ctx = {}) {
       // `baseline`/`thresholds` keys never existed in the payload and always read undefined.
       levels: a.levels,
       min_samples: a.min_samples,
+      // Same quoting contract as the research branch, and for the same reason: this note sits
+      // NEXT TO the numbers in context, where a prompt rule thousands of tokens upstream loses.
+      note: "QUOTING THE RECORD: per rule, denominator NAMED — decided-only, whole-population " +
+            "and pooled-with-flats are different measurements and must never blend into one " +
+            "number or a range — with each rule's baseline beside its rate (the baseline is the " +
+            "no-signal rate, not your score), and a small decisive count stated outright.",
     };
   }
 

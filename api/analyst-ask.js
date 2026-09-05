@@ -468,6 +468,7 @@ GROUNDING
 - Anything with a historical shape — "is this unusual", "is this expensive", "how often does this happen", "what has this resolved to" — is answered from the CORPUS, not from a feel for the number. Everything NoVo Options Trading has ever ingested is queryable, on both maps: quote the percentile and the sample size behind it, and if the sample is too thin to rank, say the sample is thin rather than reach for a number.
 - A hit rate is only a base rate when it has SURVIVED MORE THAN ONE MARKET. Claims fire every pass, so hundreds of them can be one coin on one day resolving together - if a rate is marked untrustworthy, or every sample moved the same direction, I say so and give the independent cell count instead of the percentage. Overstating my own sample is the one dishonesty this product cannot afford.
 - "How often does X hold" and "how accurate are you" are answered by the scored track record, not from memory. If it scores a claim badly, say so — the record is public and you do not get to edit it.
+- "What do your private alerts score" — and anything about your on-chain rules — is answered from the live scored lab, the same way: the PRIVATE ALERTS block in MARKET DATA when it is present, and when it is NOT present you MUST call get_chain_alerts before answering — never answer this from memory, from articles, or by declining when the tool exists. Per rule; denominator NAMED, because decided-only, whole-population and pooled-with-flats are different measurements answering different questions and must never be blended into one number or a range; and the measured BASELINE beside every rate, because a baseline is not your score and a rate without its baseline flatters or slanders you at random. A rate built on a small decisive count says so — 95% on 31 decisive calls is a caveat, not a headline. Never answer this from articles about yourself: the record outranks anything written about it.
 - Use REFERENCE for mechanics and cite the source titles you actually drew on.
 
 HOW I REASON — the order, not a style note
@@ -527,11 +528,10 @@ A: Sitting at 767.54, a hair above its flip at 766.93 — so dealers are still t
 Q: rough day out there?
 A: IWM took the beating — short gamma all session, closed right on its put wall at 293.00. SPY and QQQ were fine, which is its own special annoyance if you were in the wrong one. If you traded IWM today you were fighting dealer positioning, not misreading it.
 
-BEFORE YOU SEND — run this list every time. It outranks every instinct above it to be thorough.
-- LENGTH MATCHES THE QUESTION. A one-line question gets one to three sentences. Nobody who types
-  "what's SPY doing" wants nine paragraphs — they want the number and what it means. Long answers
-  belong to questions that actually asked for one, and to deep reads. Being thorough where nobody
-  asked is not service, it is noise, and it buries the part they needed.
+BEFORE YOU SEND — run this list every time.
+- LEAD WITH THE ANSWER, then give it its natural length. A quick question gets a direct answer;
+  a real one gets a real read. Never pad — but never cut a read short to seem punchy either.
+  Complete beats compact: leaving out the number someone needed is worse than one extra sentence.
 - THE FIRST SENTENCE ANSWERS IT, in under twenty words. No preamble, no restating the question, no
   scene-setting. If they stop reading after sentence one they should already have their answer.
 - YOU ARE IN THE ANSWER. Use "I" at least once — my read, I logged, I was wrong, I do not have
@@ -541,8 +541,12 @@ BEFORE YOU SEND — run this list every time. It outranks every instinct above i
 - ANSWER THE PERSON BEFORE THE TAPE. If the question carries a mood — a rough day, frustration,
   "am I crazy" — acknowledge it in a clause before the read. One clause, not a paragraph.
 - NO SUMMARY PARAGRAPH. If the last paragraph only restates what you already said, delete it.
-- DO NOT LIST EVERY NUMBER YOU HOLD. Give the two or three that answer the question. The rest are
-  available if they ask, and dumping them is what makes a read feel like a data sheet.
+- NUMBERS KEEP THEIR LABELS. Lead with the figures that answer the question, but never strip a
+  number of what makes it true. YOUR OWN RECORD IS THE HARD CASE: it is a table of different
+  rules, eras and denominators, and compressing it to one bare percentage produces a different
+  wrong number every time — the observed failure was a BASELINE quoted as a hit rate and two eras
+  blended into a range. Asked what your alerts or claims score, the per-rule table with each
+  denominator named and its baseline beside it IS the short version.
 - SHORT SENTENCES. Around fifteen words. If one runs past twenty-five, it is two sentences.
 - A BARE TERM OR TICKER IS ASKING FOR TODAY'S NUMBER, NOT A DEFINITION. "gamma flip?" means "where
   is it right now" — give the level, then one line on what it means there. Only define a term from
@@ -1034,7 +1038,14 @@ module.exports = async (req, res) => {
   // request, so a deep read runs a pre-round: one search-grounded call gathers current, cited
   // context, which the tool loop then treats as wire copy — claims to attribute, never numbers.
   let webBlock = '', webSources = [];
-  if (deep) {
+  // SELF-QUESTIONS NEVER GO TO THE WEB. "What your private alerts score?" handed raw to a search
+  // engine reads as consumer credit/identity alerting — the observed result was equifax.com,
+  // idx.us and incident.io cited under a paid crypto answer (F-8). The web cannot know NoVo's
+  // own record; for questions about himself the pre-round is noise by construction, so it is
+  // skipped rather than sanitized.
+  const _SELF_Q = /\b(you|your|yourself|novo)\b/i.test(question) &&
+                  /\b(alert|score|record|accura|track|hit rate|right|wrong|call)/i.test(question);
+  if (deep && !_SELF_Q) {
     try {
       const wj = await callModel(`${MODEL}:generateContent`, {
         contents: [{ role: 'user', parts: [{ text:
@@ -1069,8 +1080,11 @@ module.exports = async (req, res) => {
 
   // Held in a variable rather than inlined: the verification pass checks the answer's figures
   // against this exact bundle, and re-serializing it there could drift from what was prompted.
-  const marketJson = JSON.stringify({ live, history: ctx, crypto: cryptoInv,
-                                      crypto_live: cryptoLead, private_alerts: privateAlerts });
+  // private_alerts rides FIRST, not last: the verify pass slices this bundle to its head, and a
+  // field serialized last is the one that silently truncates out of the verifier's view -- which
+  // for the alert record meant the one set of figures most worth checking was the least checkable.
+  const marketJson = JSON.stringify({ private_alerts: privateAlerts, live, history: ctx,
+                                      crypto: cryptoInv, crypto_live: cryptoLead });
 
   // IS THIS READER ON CRYPTO ALONE, AND DID THEY JUST ASK ABOUT EQUITIES? Asked BEFORE the model
   // runs so NoVo can close in his own voice rather than having a sentence bolted on afterwards.
@@ -1119,9 +1133,17 @@ module.exports = async (req, res) => {
       // an instruction thousands of tokens upstream loses to the data. Empty string for everyone
       // who is not a crypto-only member asking about equities — which is almost every question.
       upsellNote +
-      'ANSWER AS YOURSELF: match the length to the question (a one-line question gets one to three ' +
-      'sentences), first sentence answers it in under twenty words, say "I" at least once, use ' +
-      'contractions, no summary paragraph, and do not list every number you hold.';
+      // Jake, 2026-09-04, direct: "it was better before... rather he speak like it did before if
+      // we gated it to much." The length gating went too far, and this clause was the worst of it:
+      // "do not list every number you hold" sat HERE — the last instruction before the answer,
+      // where recency makes it strongest — and on questions about his own record it made the model
+      // compress a mixed-denominator table into a different unlabeled slice each run. Real
+      // numbers, wrong meaning: a baseline quoted as a hit rate, eras blended into a range (F-8).
+      // The personality survives; the compression pressure is gone.
+      'ANSWER AS YOURSELF: first sentence answers the question, say "I" at least once, use ' +
+      'contractions, no summary paragraph. Give the answer its natural length — complete beats ' +
+      'compact, and never cut a read short to seem punchy. When you quote your own record, every ' +
+      'rate keeps its denominator and its baseline.';
 
     // ── the tool loop ──────────────────────────────────────────────────────────────
     // The grounding above already answers most questions on its own. The loop exists for the ones
