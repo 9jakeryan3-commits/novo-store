@@ -101,8 +101,11 @@ const declarations = [
       "six coins with real options books - BTC, ETH, SOL, XRP, AVAX, HYPE - plus every book's headline with max " +
       "pain and put/call OI ratio, DVOL (the crypto VIX, BTC and ETH, with its implied daily move), near-the-money " +
       "put/call skew, leverage positioning (funding and open interest PER VENUE, never blended) and Robinhood's own " +
-      "disclosed buy/sell markup. Use for any 'where is BTC positioned', 'what is funding on X', 'how volatile is " +
-      "it priced', or 'what does it cost to trade X' question. Coins outside the 89 Robinhood trades are not covered.",
+      "disclosed buy/sell markup. FIELD CONVENTIONS the numbers arrive in: vanna_exp = dealer delta change per vol " +
+      "point; charm_exp = dealer delta drift per CALENDAR day as time passes (positive = delta accrues toward the " +
+      "close, negative = it drains) - the textbook calendar-decay sign, validated 2026-09-05. Use for any 'where is " +
+      "BTC positioned', 'what is funding on X', 'how volatile is it priced', or 'what does it cost to trade X' " +
+      "question. Coins outside the 89 Robinhood trades are not covered.",
     parameters: {
       type: "object",
       properties: { coin: { type: "string", description: "Asset code, e.g. BTC, ETH, SOL, DOGE, HYPE." } },
