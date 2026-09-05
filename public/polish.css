@@ -381,3 +381,13 @@ nav.is-scrolled {
 @media (prefers-reduced-motion: reduce) {
   .nav-buy { animation: none; box-shadow: 0 0 22px rgba(34, 211, 238, 0.42) !important; }
 }
+
+/* Stacked comparison cards on /crypto: the cards stay full-width and stacked, but their lists run
+   in TWO columns so the text fills the card instead of leaving the right half empty. Scoped to
+   .split2 -- the same .for-card component carries 3-4 item lists on /index and /trader, and two
+   columns of three items reads as broken rather than full. break-inside is load-bearing: several
+   of these items run to four lines and would otherwise be cut across the column boundary. */
+@media (min-width: 900px) {
+  .for-card.split2 ul { column-count: 2; column-gap: 40px; }
+  .for-card.split2 li { break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
+}
