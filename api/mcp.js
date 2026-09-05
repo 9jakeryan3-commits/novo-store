@@ -46,6 +46,19 @@ const TOOLS = [
    "The free crypto sweep across the mapped coins: price, 24-hour change and a sparkline. The " +
    "paid Crypto Market Map adds dealer gamma by strike, per-venue funding, the block tape and " +
    "the on-chain liquidity map; none of that is in this response."],
+  // Entries may carry two optional slots: [3] = inputSchema properties, [4] = required names.
+  // callTool builds the querystring from the DECLARED property names only (whitelist, never
+  // passthrough) — the path concatenates onto SITE, so undeclared args must never reach the URL.
+  ["get_crypto_coin", "/api/crypto-free",
+   "One coin's FREE crypto read, the same data the free coin page serves: per-venue funding " +
+   "(rate + annualized, never blended), per-venue open interest and 24h volume, total OI, 24h " +
+   "long/short liquidations, and the free BTC/ETH gamma summary where the coin has one. The " +
+   "response's `paid` key names what the $79 Crypto Market Map withholds from this feed — " +
+   "gamma by strike, the flip and walls, the block tape, the on-chain map — so never report a " +
+   "gated field as zero or missing; it is withheld, not absent. Unknown coins return an empty " +
+   "read, not an error.",
+   { coin: { type: "string", description: "Asset code, e.g. BTC, ETH, SOL, DOGE." } },
+   ["coin"]],
   ["get_track_record", "/api/track-record",
    "NoVo's PUBLIC scored record: every claim kind with its hit rate, its sample size and the " +
    "window it was measured over, for both equities and crypto. Sample sizes are published " +
@@ -72,11 +85,22 @@ function err(res, id, code, message) {
   return res.status(200).json({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 }
 
-async function callTool(name, res, id) {
+async function callTool(name, args, res, id) {
   const hit = TOOLS.find((t) => t[0] === name);
   if (!hit) return err(res, id, -32602, `unknown tool: ${name}`);
+  // WHITELIST, NOT PASSTHROUGH: only property names the tool DECLARES leave this function,
+  // each value stringified and encodeURIComponent'd. The path concatenates onto SITE, so an
+  // undeclared or unencoded argument is a request-forgery surface — nothing else reaches it.
+  let qs = "";
+  const props = hit[3] || {};
+  for (const k of Object.keys(props)) {
+    const v = args && args[k];
+    if (v === undefined || v === null) continue;
+    if (typeof v !== "string" && typeof v !== "number") continue;
+    qs += (qs ? "&" : "?") + encodeURIComponent(k) + "=" + encodeURIComponent(String(v).slice(0, 64));
+  }
   try {
-    const r = await fetch(SITE + hit[1], { headers: { "User-Agent": "NoVo-MCP/1.0" } });
+    const r = await fetch(SITE + hit[1] + qs, { headers: { "User-Agent": "NoVo-MCP/1.0" } });
     const body = await r.text();
     if (!r.ok) {
       // isError lets the AGENT see and explain the failure instead of a protocol-level error
@@ -154,13 +178,14 @@ module.exports = async (req, res) => {
         return ok(r, id, {});
       case "tools/list":
         return ok(r, id, {
-          tools: TOOLS.map(([name, , description]) => ({
+          tools: TOOLS.map(([name, , description, props, required]) => ({
             name, description,
-            inputSchema: { type: "object", properties: {}, additionalProperties: false },
+            inputSchema: { type: "object", properties: props || {},
+                           required: required || [], additionalProperties: false },
           })),
         });
       case "tools/call":
-        return callTool(msg.params && msg.params.name, r, id);
+        return callTool(msg.params && msg.params.name, (msg.params && msg.params.arguments) || {}, r, id);
       case "resources/list":
         return ok(r, id, { resources: [] });
       case "prompts/list":
