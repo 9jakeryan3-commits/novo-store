@@ -877,6 +877,63 @@ function recordClaimAudit(answer, contents, marketJson) {
   return flagged;
 }
 
+// PROVENANCE: a figure can be real and still lie about where it came from. recordClaimAudit proves
+// a number is IN the record; this proves it wears its TRUE label. Battery 3 caught the gap three
+// times: the 2020-2023 expected-move BACKTEST (1,008) served as "1,008 LIVE sessions", and
+// gravity's ~60-second SNAPSHOT counts (2,217) served as "sessions". Real number, false label.
+// Walked from the STRUCTURED record (and any tool response), so a backtest key or a units:snapshot
+// field is known by its place, not guessed. Relabels rather than removes -- which also fixes the
+// over-caution the prompt-only fix left, where NoVo declined a real z rather than risk mislabeling.
+function _walkProvenance(obj, keyPath, backtest, snapshot) {
+  if (!obj || typeof obj !== 'object') return;
+  if (Array.isArray(obj)) { for (const x of obj) _walkProvenance(x, keyPath, backtest, snapshot); return; }
+  const snapUnits = typeof obj.units === 'string' && /snapshot/i.test(obj.units);
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === 'number' && isFinite(v) && v >= 100) {
+      // A count only; rates/prices are not the thing that gets mislabeled "sessions"/"live".
+      if (/backtest/i.test(keyPath) && /^(sessions?|n|sample|inside|outside)$/i.test(k)) backtest.add(v);
+      if (snapUnits && /^(sample|n|near_n|far_n|positive_n|negative_n)$/i.test(k)) snapshot.add(v);
+    } else if (v && typeof v === 'object') {
+      _walkProvenance(v, keyPath + '.' + k, backtest, snapshot);
+    }
+  }
+}
+
+function provenanceAudit(answer, trackRec, contents) {
+  const backtest = new Set(), snapshot = new Set();
+  const roots = [trackRec];
+  for (const c of (contents || [])) {
+    for (const pt of (c.parts || [])) {
+      if (pt && pt.functionResponse) roots.push(pt.functionResponse.response || pt.functionResponse);
+    }
+  }
+  for (const root of roots) { try { _walkProvenance(root, '', backtest, snapshot); } catch (_) {} }
+  if (!backtest.size && !snapshot.size) return [];
+  const near = (set, v) => { for (const a of set) if (Math.abs(a - v) <= Math.max(0.5, a * 0.003)) return true; return false; };
+  const flags = [];
+  // A looser gate than ATTRIB_RE: the battery's real miss was header-style ("IWM Gravity Pull ...
+  // n=2,217 sessions") with no "my" at all, so requiring "my record" was too strict -- but a bare
+  // number match is too loose (a coincidental "1,008 points live" in market prose is not a record
+  // claim). This gate is any STAT CONTEXT: the sentence has to be talking about his own figures.
+  const STAT_CTX = /\b(my|i|z-?score|z ?=|n ?=|hit\s*rate|record|archive|backtest|baseline|regime|gravity|expected\s*move|flip|containment|scored?)\b/i;
+  for (const sen of String(answer).split(/(?<=[.!?])\s+/)) {
+    if (!STAT_CTX.test(sen)) continue;
+    // A sentence that ALSO carries the TRUE label is correctly contrasting, not mislabeling:
+    // "2,217 snapshots, not sessions" and "my backtest is not live" must pass untouched.
+    const saysLive = /\b(live|logged)\b/i.test(sen) && !/backtest/i.test(sen);
+    const saysSession = /\b(sessions?|trading\s+days?|days?)\b/i.test(sen) && !/snapshot/i.test(sen);
+    if (!saysLive && !saysSession) continue;
+    for (const v of _numsIn(sen)) {
+      if (Number.isInteger(v) && v >= 1900 && v <= 2100) continue;   // years
+      if (saysLive && near(backtest, v))
+        flags.push({ value: v, wrong: '"live"/"logged"', right: 'a 2020-2023 BACKTEST, never live', sentence: sen.trim().slice(0, 200) });
+      if (saysSession && near(snapshot, v))
+        flags.push({ value: v, wrong: '"sessions"/"days"', right: '~60-second SNAPSHOTS, not sessions', sentence: sen.trim().slice(0, 200) });
+    }
+  }
+  return flags;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const email = verifyToken((req.body && req.body.t) || (req.query && req.query.t));
@@ -1533,19 +1590,32 @@ module.exports = async (req, res) => {
     let recordGuard = null;
     if (answer) {
       try {
-        const flagged = recordClaimAudit(answer, contents, marketJson);
-        if (flagged.length) {
-          const list = flagged.map((f, i) => (i + 1) + '. ' + f.value + ' in: "' + f.sentence + '"').join('\n');
+        const fabricated = recordClaimAudit(answer, contents, marketJson);
+        const mislabeled = provenanceAudit(answer, trackRec, contents);
+        if (fabricated.length || mislabeled.length) {
+          // Two failure modes, two instructions in one revise. FABRICATED figures come out (they
+          // are in no record). MISLABELED figures STAY -- they are real -- but their provenance is
+          // corrected, which is the fix the remove-only guard could not make and the reason it
+          // over-stripped real numbers into "my record scores range".
+          const fabList = fabricated.map((f, i) => (i + 1) + '. ' + f.value + ' in: "' + f.sentence + '"').join('\n');
+          const misList = mislabeled.map((f, i) => (i + 1) + '. ' + f.value + ' is ' + f.right +
+            ' -- the text wrongly calls it ' + f.wrong + ': "' + f.sentence + '"').join('\n');
+          const parts = [
+            'Rewrite the analyst text below, fixing ONLY the listed problems. Keep everything else ' +
+            'byte-for-byte in spirit: same voice, same structure, first person, plain text, no ' +
+            'preamble, no commentary about the edits.'];
+          if (fabList) parts.push(
+            'FIGURES TO REMOVE OR REPLACE (they appear in NO record the answer was written from, so ' +
+            'they are fabricated whatever they sound like -- cut them, or replace with what the ' +
+            'record actually carries; where the record has no such claim, say so plainly, e.g. ' +
+            '"my record scores range, not direction"):\n' + fabList);
+          if (misList) parts.push(
+            'FIGURES THAT ARE REAL BUT MISLABELED (keep the NUMBER, fix only the provenance word so ' +
+            'it tells the truth about where it came from -- a backtest is never "live", a snapshot ' +
+            'count is never "sessions"):\n' + misList);
+          parts.push('TEXT:\n' + answer);
           const rres = await Promise.race([
-            callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text:
-              'The text below attributes figures to the analyst own record or archive that ' +
-              'appear NOWHERE in the data the answer was written from. They cannot stand: a ' +
-              'record-attributed number that matches nothing in hand is fabricated, whatever it ' +
-              'sounds like. Rewrite the text with those figures REMOVED or replaced by what the ' +
-              'record actually carries - and where the record does not carry the claim at all, ' +
-              'say that plainly ("my record scores range, not direction" is the shape). Change ' +
-              'nothing else: same voice, same structure, first person, plain text, no preamble.\n\n' +
-              'FIGURES THAT MUST GO:\n' + list + '\n\nTEXT:\n' + answer }] }],
+            callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text: parts.join('\n\n') }] }],
               generationConfig: { temperature: 0.1, maxOutputTokens: 8192,
                                   thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } }),
             new Promise((r) => setTimeout(() => r(null), 9000)),
@@ -1554,11 +1624,11 @@ module.exports = async (req, res) => {
           const revised = rparts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
           if (revised && revised.length > answer.length * 0.5) {
             answer = revised;
-            recordGuard = { flagged: flagged.length, revised: true };
-            console.log('[ASK] record-guard: removed/replaced ' + flagged.length + ' unattributable figure(s)');
+            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, revised: true };
+            console.log('[ASK] record-guard: ' + fabricated.length + ' fabricated removed, ' + mislabeled.length + ' relabeled');
           } else {
-            recordGuard = { flagged: flagged.length, revised: false };
-            console.log('[ASK] record-guard: ' + flagged.length + ' flagged, revision failed - draft kept');
+            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, revised: false };
+            console.log('[ASK] record-guard: ' + (fabricated.length + mislabeled.length) + ' flagged, revision failed - draft kept');
           }
           modelCalls++;
         }
