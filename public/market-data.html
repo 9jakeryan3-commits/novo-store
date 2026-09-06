@@ -139,7 +139,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      also stays centred -- it is shared furniture on 34 pages and centring it here alone is what
      would create a real inconsistency. */
 
-  .card { background:var(--navy2); border-radius:14px; padding:22px; }
+  .card { border-radius:14px; padding:22px; }
   .muted { color:var(--txt3); font-size:12px; }
 
   /* HERO / pulse */
@@ -162,7 +162,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .pf { text-align:left; }
   .pf .pfk { font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:var(--txt3); display:flex; justify-content:space-between; gap:8px; }
   .pf .pfv { font-weight:800; text-transform:capitalize; }
-  .pf .pfbar { height:5px; border-radius:3px; background:var(--navy); border:1px solid var(--bdr); margin-top:4px; overflow:hidden; }
+  .pf .pfbar {height:5px; border-radius:3px; background:var(--navy); border:1px solid var(--bdr); margin-top:4px; overflow:hidden;}
   .pf .pfbar i { display:block; height:100%; border-radius:3px; }
   .hero-copy h1 { font-size:clamp(26px,4vw,38px); font-weight:900; color:var(--txt1); letter-spacing:-1px; line-height:1.12; margin:0 0 12px; }
   .hero-copy h1 span { color:var(--cyan); }
@@ -188,7 +188,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* history */
   .hist { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
   @media(max-width:600px){ .hist{ grid-template-columns:repeat(2,1fr); } }
-  .hist .hc { background:var(--navy); border:1px solid var(--bdr); border-radius:10px; padding:14px; text-align:center; }
+  .hist .hc { border-radius:10px; padding:14px; text-align:center; }
   .hist .hk { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; }
   .hist .hv { font-size:24px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
 
@@ -196,7 +196,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .fut { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
   @media(max-width:900px){ .fut{ grid-template-columns:repeat(3,1fr); } }
   @media(max-width:520px){ .fut{ grid-template-columns:repeat(2,1fr); } }
-  .fut .fc { background:var(--navy2); border-radius:10px; padding:14px; }
+  .fut .fc { border-radius:10px; padding:14px; }
   .fut .fn { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
   .fut .fp { font-size:20px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
   .fut .fg { font-size:12.5px; font-weight:700; }
@@ -289,7 +289,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ---- sector heatmap ---- */
   .hm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:12px; }
-  .hm-sec { background:var(--navy2); border-radius:11px; padding:11px 12px 12px; }
+  .hm-sec { border-radius:11px; padding:11px 12px 12px; }
   .hm-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:9px; }
   .hm-name { font-size:12.5px; font-weight:800; color:var(--txt1); letter-spacing:.2px; }
   .hm-pct { font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; }
@@ -473,17 +473,17 @@ nav { position: relative; }
   <h2 style="font-size:clamp(22px,3.4vw,32px);font-weight:800;letter-spacing:-.02em;margin:6px 0 8px;">Gamma and the expected move, one ticker at a time.</h2>
   <p style="color:var(--txt2);font-size:15px;max-width:70ch;margin:0 0 20px;">Net GEX, the gamma flip, the call and put walls and today's expected move &mdash; per index, updated through the session.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
-    <a href="/market-data/spy" style="text-decoration:none;border:1px solid var(--bdr);border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
+    <a href="/market-data/spy" style="text-decoration:none;border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
       <div style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#22d3ee;">SPY &middot; S&amp;P 500</div>
       <div style="font-size:19px;font-weight:800;color:var(--txt1);margin:7px 0 5px;">SPY gamma today</div>
       <div style="font-size:13.5px;color:var(--txt2);line-height:1.6;">The 0DTE dealer map for the most-traded index ETF on the board &mdash; gamma flip, walls and expected move.</div><div class="mini-lv" data-tk="SPY" style="display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin:12px 0 2px;padding-top:11px;border-top:1px solid var(--bdr);"><div><div class="mlv-k">Gamma flip</div><div class="mlv-v" data-f="flip">&mdash;</div></div><div><div class="mlv-k">Expected move</div><div class="mlv-v" data-f="em">&mdash;</div></div><div><div class="mlv-k">Call wall</div><div class="mlv-v" data-f="cw">&mdash;</div></div><div><div class="mlv-k">Put wall</div><div class="mlv-v" data-f="pw">&mdash;</div></div></div>
     </a>
-    <a href="/market-data/qqq" style="text-decoration:none;border:1px solid var(--bdr);border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
+    <a href="/market-data/qqq" style="text-decoration:none;border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
       <div style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#22d3ee;">QQQ &middot; Nasdaq 100</div>
       <div style="font-size:19px;font-weight:800;color:var(--txt1);margin:7px 0 5px;">QQQ gamma today</div>
       <div style="font-size:13.5px;color:var(--txt2);line-height:1.6;">Where the tech tape's dealer positioning sits, and the range the options market is pricing.</div><div class="mini-lv" data-tk="QQQ" style="display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin:12px 0 2px;padding-top:11px;border-top:1px solid var(--bdr);"><div><div class="mlv-k">Gamma flip</div><div class="mlv-v" data-f="flip">&mdash;</div></div><div><div class="mlv-k">Expected move</div><div class="mlv-v" data-f="em">&mdash;</div></div><div><div class="mlv-k">Call wall</div><div class="mlv-v" data-f="cw">&mdash;</div></div><div><div class="mlv-k">Put wall</div><div class="mlv-v" data-f="pw">&mdash;</div></div></div>
     </a>
-    <a href="/market-data/iwm" style="text-decoration:none;border:1px solid var(--bdr);border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
+    <a href="/market-data/iwm" style="text-decoration:none;border-radius:12px;padding:20px 22px;background:var(--navy2,rgba(255,255,255,.02));display:block;">
       <div style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#22d3ee;">IWM &middot; Russell 2000</div>
       <div style="font-size:19px;font-weight:800;color:var(--txt1);margin:7px 0 5px;">IWM gamma today</div>
       <div style="font-size:13.5px;color:var(--txt2);line-height:1.6;">Small-cap dealer gamma, where the moves extend furthest when positioning flips.</div><div class="mini-lv" data-tk="IWM" style="display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin:12px 0 2px;padding-top:11px;border-top:1px solid var(--bdr);"><div><div class="mlv-k">Gamma flip</div><div class="mlv-v" data-f="flip">&mdash;</div></div><div><div class="mlv-k">Expected move</div><div class="mlv-v" data-f="em">&mdash;</div></div><div><div class="mlv-k">Call wall</div><div class="mlv-v" data-f="cw">&mdash;</div></div><div><div class="mlv-k">Put wall</div><div class="mlv-v" data-f="pw">&mdash;</div></div></div>
