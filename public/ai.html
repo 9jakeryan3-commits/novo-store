@@ -206,9 +206,20 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .stat-label { font-size: 12px; color: var(--txt3); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
 
   /* ── Section headings ── */
-  .section-label { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
-  .section-title { font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: var(--txt1); letter-spacing: -1px; margin-bottom: 16px; }
-  .section-sub { font-size: 16px; color: var(--txt2); max-width: 560px; margin-bottom: 48px; }
+  /* CENTRED (2026-09-06, Jake: "youve done one thing on one page and not the other
+     its honestly a mess"). /crypto is the approved reference and is internally
+     consistent: eyebrow, heading and the intro line under it are all centred, while
+     grids and card rows are left alone to fill the shell. This page had eight section
+     headings left-aligned and two centred -- inconsistent WITHIN the page. Set on the
+     three shared classes rather than per element so it cannot drift apart again; every
+     .section-label / .section-title / .section-sub on this page is a section-level
+     heading, eyebrow or intro, never in-card text.
+     margin-left/right, NOT the `margin` shorthand: .section-sub's 48px bottom margin is
+     the gap down to the grid that follows it, and the shorthand would delete it. The
+     560px cap, the shell width and every other margin are untouched. */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .section-title { font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: var(--txt1); letter-spacing: -1px; margin-bottom: 16px; text-align: center; }
+  .section-sub { font-size: 16px; color: var(--txt2); max-width: 560px; margin-bottom: 48px; text-align: center; margin-left: auto; margin-right: auto; }
 
   /* ── How it works ── */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -697,7 +708,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container">
     <div class="section-label">Ask him anything about the tape</div>
     <h2 class="section-title">He answers off today's map, not a general impression of markets.</h2>
-    <div style="max-width:1180px;margin:26px 0 0;">
+    <div style="max-width:1180px;margin:26px auto 0;">
       <div style="display:flex;align-items:center;gap:11px;background:var(--navy2);border:1px solid var(--bdr);border-radius:12px;padding:15px 17px;box-shadow:0 0 0 1px rgba(34,211,238,.10), 0 0 26px rgba(34,211,238,.07);">
         <span style="color:#22d3ee;font-weight:800;" aria-hidden="true">&rsaquo;</span>
         <span id="ai-rotate" style="color:var(--txt2);font-size:15px;">Where is price against the flip right now?</span>
@@ -738,7 +749,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section-label">Point your own agent at it</div>
     <h2 class="section-title">NoVo is an MCP server.</h2>
     <p class="section-sub">Nine read-only tools &mdash; the dealer map, the volatility record, the crypto sweep, the scored track record and more. No key.</p>
-    <div style="max-width:760px;margin:22px 0 0;">
+    <div style="max-width:760px;margin:22px auto 0;">
       <pre style="background:var(--navy2);border:1px solid var(--bdr);border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:13.5px;color:var(--txt1);margin:0;"><code>claude mcp add --transport http novo https://novo-options.trade/api/mcp</code></pre>
       <p style="margin-top:14px;"><a href="/developers">The full reference &rarr;</a></p>
     </div>
@@ -816,7 +827,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="proof-s">The read he answers from is recomputed every minute all session &mdash; every five seconds on Trader.</div>
       </div>
     </div>
-    <p style="font-size:15px;color:var(--txt3);margin-top:22px;">
+    <p style="font-size:15px;color:var(--txt3);margin-top:22px;margin-left:auto;margin-right:auto;">
       When his own record contradicts a claim, he says so. <a href="/track-record" style="color:#22d3ee;font-weight:700;">The record is public</a> and he does not get to edit it.
     </p>
   </div>

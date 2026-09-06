@@ -165,6 +165,14 @@ nav.is-scrolled {
 
 .container, .wrap { max-width: 1560px; }
 
+/* Chrome shares the page shell. The nav and ticker were capped at 1200px while
+   .container/.wrap run to 1560px, so the header and ribbon sat in a column
+   360px narrower than everything beneath them. border-box means max-width
+   covers the 22px padding, so the wordmark lands on the same x as the page's
+   first line of text. */
+.nav-inner, .ticker-row { max-width: 1560px; }
+.ticker-row { padding: 0 22px; }
+
 /* Prose keeps its measure inside the wider frame. Only elements that are ACTUALLY
    running text - not grid cells, not cards, not table wrappers. */
 .container > p,

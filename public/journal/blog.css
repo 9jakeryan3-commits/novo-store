@@ -394,6 +394,12 @@ nav { position: relative; }
 
 .container, .wrap { max-width: 1560px; }
 
+/* Chrome shares the page shell - same fix as polish.css. The journal carries
+   three more bars of its own (.secnav-inner, .brandline, .jhead) that were
+   capped at 1200px alongside the nav and ticker while .wrap runs to 1560px. */
+.nav-inner, .ticker-row, .secnav-inner, .brandline, .jhead { max-width: 1560px; }
+.ticker-row { padding: 0 22px; }
+
 /* Prose keeps its measure inside the wider frame. Only elements that are ACTUALLY
    running text - not grid cells, not cards, not table wrappers. */
 .container > p,
