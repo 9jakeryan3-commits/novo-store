@@ -85,25 +85,57 @@ async function mentionVolume(symbol, free) {
   const r = await call(url);
   if (!r.ok) return { error: r.error, status: r.status };
   const rows = (r.json && r.json.data) || [];
-  const buckets = rows.map((x) => Number(x.tweet_count) || 0);
-  if (!buckets.length) return { error: "no buckets returned", status: 200 };
-  const latest = buckets[buckets.length - 1];
-  const below = buckets.filter((n) => n < latest).length;
-  const sorted = buckets.slice().sort((a, b) => a - b);
+  if (rows.length < 2) return { error: "not enough buckets to rank", status: 200 };
+
+  /* ⚠ THE LAST BUCKET IS THE HOUR IN PROGRESS, and X ends it at request time. Measured live: a
+     43-MINUTE window arriving alongside 168 sixty-minute ones. Ranking it against them is not a
+     rounding error, it INVERTS on exactly the names that matter — the partial-hour shortfall is a
+     bigger fraction of a busy ticker's baseline, so TSLA (23.5k posts/week, the busiest name we
+     cover) ranked at the 0.6th percentile while IWM (1,577) ranked higher. NoVo would have told a
+     subscriber that the loudest name on the board was having its quietest hour of the week.
+
+     The tell was in my own first output and I explained it away: SPY and IWM landed on an IDENTICAL
+     3.6%. Two tickers a factor of ten apart in volume cannot honestly share a rank, and a collision
+     like that is a thing to investigate, not to rationalise. Caught by Einstein, one layer below the
+     page-size defect this file was written to fix — the count got corrected and the denominator's
+     WINDOW did not. Same class, one layer down.
+
+     So: rank the last COMPLETE hour against the prior complete hours. The in-progress hour is
+     returned separately, with its elapsed minutes, and is NEVER ranked. */
+  const mins = (b) => {
+    try {
+      return (new Date(b.end) - new Date(b.start)) / 60000;
+    } catch (_) { return null; }
+  };
+  const counts = rows.map((x) => Number(x.tweet_count) || 0);
+  const complete = counts.slice(0, -1);              // every bucket but the one still filling
+  const lastComplete = complete[complete.length - 1];
+  const below = complete.filter((n) => n < lastComplete).length;
+  const sorted = complete.slice().sort((a, b) => a - b);
+  const partialMins = mins(rows[rows.length - 1]);
+
   return {
     window: "last 7 days, hourly buckets (X counts/recent)",
-    latest_hour: latest,
+    // The headline measurement, and it is a COMPLETE hour so the comparison is like-for-like.
+    last_complete_hour: lastComplete,
+    percentile_of_own_history: Math.round((below / complete.length) * 1000) / 10,
+    observations: complete.length,
     busiest_hour: sorted[sorted.length - 1],
     median_hour: sorted[Math.floor(sorted.length / 2)],
     total: (r.json.meta && r.json.meta.total_tweet_count) != null
       ? r.json.meta.total_tweet_count
-      : buckets.reduce((a, b) => a + b, 0),
-    observations: buckets.length,
-    // The denominator is right here in the same object, on purpose. A rate without its n is the
-    // thing the track-record page exists to refuse, and that rule does not stop at the page.
-    percentile_of_own_history: Math.round((below / buckets.length) * 1000) / 10,
-    note: "percentile of this hour's mention count against this ticker's own last ~7 days of hourly " +
-          "counts, n=" + buckets.length + " buckets - a measurement of ATTENTION, never a direction",
+      : counts.reduce((a, b) => a + b, 0),
+    // Reported, never ranked. Its own field name says it is partial and carries how partial.
+    in_progress_hour: {
+      count: counts[counts.length - 1],
+      elapsed_minutes: partialMins === null ? null : Math.round(partialMins * 10) / 10,
+      note: "the hour still filling - NOT comparable to the ranked figure above, and must not be " +
+            "quoted as a percentile",
+    },
+    // The denominator rides with the number. A rate without its n is the thing the track-record
+    // page exists to refuse, and that rule does not stop at the page.
+    note: "percentile of the LAST COMPLETE hour against this ticker's own prior complete hours, " +
+          "n=" + complete.length + " buckets - a measurement of ATTENTION, never a direction",
   };
 }
 
