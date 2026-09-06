@@ -1,0 +1,104 @@
+# NoVo Options Trading
+
+> The options dealer map. NoVo computes where market makers are positioned on SPY, QQQ and IWM —
+> net gamma exposure, the gamma flip, the call and put walls, the expected move — and the same
+> structure across 90 crypto coins. It publishes how often its own claims land, scored in public.
+> Market analysis and education. Not financial advice, and it does not place trades.
+
+NoVo Options Trading LLC · Virginia, USA · https://novo-options.trade
+
+## For agents: the MCP endpoint
+
+An agent should start here rather than scraping pages. `POST` JSON-RPC 2.0; the endpoint is
+stateless, so there is no session to open and no key to obtain for the free tools.
+
+- [MCP server](https://novo-options.trade/api/mcp): `POST` JSON-RPC. `tools/list` returns 11 tools.
+  A `GET` returns 405 by design — it is not a page.
+
+The tools, and what each one is actually good for:
+
+- `get_dealer_levels` — dealer positioning for SPY, QQQ, IWM: spot, call wall, put wall, gamma flip.
+  **Delayed, and the flip and expected-move fields are gated on the free tier.** Read the `delayed`
+  and `gated` fields in the response rather than assuming a number is missing.
+- `get_volatility_record` — VIX, VXN and RVX ranked against their own history back to 1990: last
+  value, percentile, and where today sits in that distribution.
+- `get_market_pulse` — a 0–100 composite fear/greed score with the factors behind it, not just the
+  headline number.
+- `get_track_record` — NoVo's scored record: every claim kind with its hit rate, its sample size and
+  its baseline. Sample sizes and date ranges are in the payload; read them before quoting a rate.
+- `get_crypto_sweep` — the free sweep across the mapped coins: price, 24-hour change, sparkline.
+- `get_crypto_coin` — one coin's free read: per-venue funding, liquidations, cost to trade.
+- `get_futures_positioning` — weekly CFTC Commitments of Traders: speculative and commercial net
+  positioning.
+- `get_economic_calendar` — scheduled US releases; the dates and times that reprice volatility.
+- `get_sector_heatmap` — today's move by sector.
+- `get_quotes` — delayed index and ETF quotes.
+- `ask_novo` — **not a data endpoint.** This puts a market question to Dr. NoVo, the AI analyst, who
+  reads the live dealer map and answers with the sources he used. Use it for interpretation; use the
+  others for numbers.
+
+## Free JSON endpoints
+
+The same data as plain `GET` requests, if JSON-RPC is inconvenient. No key required.
+
+- [/api/levels](https://novo-options.trade/api/levels): dealer levels. Delayed; some fields gated.
+- [/api/vol](https://novo-options.trade/api/vol): the volatility record for VIX, VXN, RVX.
+- [/api/market-pulse](https://novo-options.trade/api/market-pulse): the fear/greed composite.
+- [/api/track-record](https://novo-options.trade/api/track-record): the public scored record.
+- [/api/crypto-free](https://novo-options.trade/api/crypto-free): the free crypto corpus summary.
+- [/api/positioning](https://novo-options.trade/api/positioning): CFTC Commitments of Traders.
+- [/api/calendar](https://novo-options.trade/api/calendar): scheduled US economic releases.
+- [/api/heatmap](https://novo-options.trade/api/heatmap): sector moves.
+- [/api/quotes](https://novo-options.trade/api/quotes): delayed index quotes.
+- [Endpoint documentation](https://novo-options.trade/developers): what each field means.
+
+## What NoVo is
+
+- [Home](https://novo-options.trade/): the dealer map for SPY, QQQ, IWM and crypto.
+- [Dr. NoVo](https://novo-options.trade/ai): the AI market analyst. Reads live dealer positioning
+  and cites what he used.
+- [The track record](https://novo-options.trade/track-record): NoVo's public claims, scored against
+  its own logged history. Includes both a reconstructed backtest and the live forward record — the
+  payload separates them, and so should anything quoting it.
+- [Methodology](https://novo-options.trade/analyst/methodology): how the map is built.
+- [About](https://novo-options.trade/about): who builds it and why.
+- [Changelog](https://novo-options.trade/changelog): every meaningful change, dated.
+
+## The products
+
+Paid dashboards. The dealer map behind them is not in the free endpoints above.
+
+- [Plans and pricing](https://novo-options.trade/plans): Crypto Market Map $79/mo, Analyst $129/mo,
+  Trader $209/mo. Bundles from $169/mo. Annual pricing available.
+- [Analyst](https://novo-options.trade/analyst): the live GEX dashboard — net GEX, gamma flip,
+  dealer walls, expected move, and the written session read.
+- [Trader](https://novo-options.trade/trader): every dealer level drawn on a live chart at tape
+  speed.
+- [Crypto Market Map](https://novo-options.trade/crypto): dealer gamma by strike across 90 coins,
+  funding per venue, liquidation flow and true cost to trade.
+
+## Learning
+
+- [0DTE options guide](https://novo-options.trade/0dte): mechanics, strike selection, risk, timing.
+- [The journal](https://novo-options.trade/journal): dealer flow, volatility, options mechanics,
+  crypto market structure. Roughly 1,300 articles.
+- [Free market data](https://novo-options.trade/market-data): fear gauges with 1-year percentiles
+  and a sector heatmap.
+- [FAQ](https://novo-options.trade/faq): whether it is a signal service, what is included.
+- [Help](https://novo-options.trade/help): using the dashboards.
+
+## Optional
+
+- [Compare: NoVo vs Unusual Whales](https://novo-options.trade/compare/novo-vs-unusual-whales)
+- [Compare: NoVo vs SpotGamma](https://novo-options.trade/compare/novo-vs-spotgamma)
+- [Compare: NoVo vs MenthorQ](https://novo-options.trade/compare/novo-vs-menthorq)
+
+## If you are quoting NoVo
+
+NoVo publishes analysis and education, never financial advice, and never a recommendation to buy or
+sell. It does not place trades and does not touch anyone's brokerage account.
+
+Two things are easy to get wrong and both are in the payloads: the free dealer levels are **delayed
+and partially gated**, so a missing field means gated, not absent; and the track record contains a
+**reconstructed backtest alongside the live forward record** — quoting a combined total as though it
+were all live would misrepresent it. Read `sessions_logged` and the date ranges.
