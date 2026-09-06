@@ -70,7 +70,17 @@
   }
   /* Anchored to the BOTTOM and wide, not floated in the corner: a centred overlay would cover the
      map you are asking about, and the answer is worth more read against the chart than over it. */
-  #novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
+  /* ⚠ THE CHAT SETS ITS OWN FACE, AND ITS CONTROLS SET IT AGAIN. A <button> or <input> does not
+   inherit font-family -- it takes the browser's default, which is Arial. The chat carried exactly
+   ONE font declaration in its whole stylesheet, so its send button, its input and its chip buttons
+   had been rendering in Arial on every dashboard while the text beside them rendered in the house
+   face. Measured: the chat BUTTON came out 132.98px on analyst and crypto against 134.06px on the
+   trader, which is what exposed it.
+   var(--sans) rather than inherit: the trader's body is Geist Mono, and the chat is prose you read
+   rather than a tape you scan, so it should be Inter on all three -- the same face the answer would
+   have on the site. */
+#novo-ask, #novo-ask button, #novo-ask input, #novo-ask textarea, #novo-ask-bubble{font-family:var(--sans)}
+#novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
     width:min(calc(100vw - 36px),980px);
     height:min(calc(100dvh - 36px),560px);display:none;flex-direction:column;border-radius:14px;overflow:hidden;
     background:var(--navy,#0b1220);border:1px solid var(--bdr,#22303f);box-shadow:0 18px 50px rgba(0,0,0,.6)}

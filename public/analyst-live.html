@@ -47,11 +47,36 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <link rel="icon" href="/icon-192.png?v=8">
 <link rel="apple-touch-icon" href="/icon-192.png?v=8">
 <link rel="manifest" href="/analyst-live.webmanifest">
+<!-- ⚠ THE DASHBOARD DELIVERS ITS OWN TYPE. Before this line existed, analyst-live.html carried
+     ZERO font links and ZERO @font-face, while declaring 'Space Grotesk','Inter' in nine places --
+     the login h1, every big value (.lv-tile .v, .dm-regime .rg-v, .dm-row .dm-v, .lv-spot,
+     .fear-vix), the read title and the wordmark. All nine fell through both named faces to the
+     visitor's OS default: Segoe UI on Windows, SF on a Mac. The design was already correct; only
+     the delivery was missing.
+     It is invisible on a machine with those fonts installed locally, which is why it survived --
+     and document.fonts.check() reports them as available even when they are not, so the obvious
+     verification agrees with the bug. Measured instead by glyph width against a font name that
+     cannot exist. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="/journal/blog.css?v=788be6da">
 <style>
   /* Match the Trader dashboard's palette — neutral near-black (was navy). Card SHAPE/spacing unchanged
      (rounded + spaced, as-is). Only the hue moves: page/tile/card shades + text go neutral gray. */
+  /* Self-hosted, same file the trader uses. Declared here because this file now defines a --mono
+     token, and a token naming a face the page cannot deliver is the exact defect being fixed. An
+     unused @font-face costs nothing: browsers fetch it only if a rule actually uses it. */
+  @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
   :root {
+    /* ⚠ THE DASHBOARD OWNS ITS OWN TYPE TOKENS. This file previously defined none, so --sans came
+       from journal/blog.css -- the '-apple-system, BlinkMacSystemFont, Segoe UI' stack. A dashboard
+       inheriting its typeface from the journal's stylesheet is how the analyst ended up on a
+       different face from every other surface in the product. Same three names and values on all
+       three dashboards; change them together. */
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --display: 'Space Grotesk', 'Inter', sans-serif;
+    --mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
     --navy:  #0e0e10;   /* nested tile / inset bg */
     --navy2: #17171a;   /* raised chrome: inputs, rings, the ask bar -- NOT cards any more */
     /* CARD SURFACES (2026-08-31, Jake: "darken the analyst dashboard cards like the crypto, they
@@ -67,14 +92,23 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     --txt2:  #a8a8a8;   /* body text */
     --txt3:  #6e6e6e;   /* muted labels */
   }
-  body { background: #09090b; }
+  body {
+  /* ⚠ TABULAR FIGURES ARE THE DEFAULT ON A DATA DASHBOARD, and this became load-bearing the
+     moment the webfonts started arriving. Inter and Space Grotesk both ship PROPORTIONAL figures:
+     measured at 40px, ten digits span 89.6px (Inter) and 84px (Space Grotesk) depending on which
+     digits they are -- "1111111111" renders ~90px narrower than "0000000000". Every number on
+     these pages ticks, so without this the columns jitter on each update. With it the spread is
+     exactly 0. It inherits, so one declaration covers every readout instead of chasing the five
+     big values and whatever gets added next. */
+  font-variant-numeric: tabular-nums;
+ background: #09090b; }
   .lv-wrap { max-width: 1560px; margin: 0 auto; padding: 14px 16px 60px; }
   /* 1200px was leaving ~700px of dead margin on a 1080p desktop, which is the single loudest
      thing about the old layout. Cap high enough to use the screen, but still cap: past ~1600px
      the chart stops gaining and the tile rows just stretch into letterboxes. */
   /* login */
   .lv-login { max-width: 440px; margin: 8vh auto; text-align: center; }
-  .lv-login h1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 30px; color: var(--txt1); letter-spacing: -1px; margin: 0 0 8px; }
+  .lv-login h1 { font-family: var(--display); font-size: 30px; color: var(--txt1); letter-spacing: -1px; margin: 0 0 8px; }
   .lv-login h1 .accent { color: #22d3ee; }
   .lv-login p { color: var(--txt2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
   .lv-login form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -218,14 +252,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      channel here, not the border. Do not "finish the job" by removing the border too. */
   .lv-tile { border: 1px solid var(--bdr); border-radius: 10px; padding: 12px 14px; }
   .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
-  .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; margin-top: 3px; }
+  .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: var(--display); margin-top: 3px; }
   .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
   /* DEALER MAP — call wall / flip / spot / gravity / put wall are POSITIONS ON A PRICE AXIS, not five
      equal boxes. Rendering them as a rail in true price order, with spot in its real place, makes
      "where am I and what is above/below me" one glance instead of five separate reads. */
   .dm-regime { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:11px 14px; margin:0 0 12px;
                border:1px solid var(--bdr); border-radius:10px; background:var(--navy); }
-  .dm-regime .rg-v { font-size:24px; font-weight:900; font-family:'Space Grotesk','Inter',sans-serif; letter-spacing:-.5px; }
+  .dm-regime .rg-v { font-size:24px; font-weight:900; font-family: var(--display); letter-spacing:-.5px; }
   .dm-regime .rg-k { font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--txt3); }
   /* The sentence will never share a line with a 24px value inside a ~500px column, so it stops
      pretending: margin-left:auto right-aligned it and then let it wrap, which reads as a broken
@@ -244,7 +278,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
                    border-radius:50%; background:var(--txt3); box-shadow:0 0 0 3px var(--navy2); }
   .dm-row .dm-k { font-size:10.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--txt3); }
   .dm-row .dm-s { font-size:11px; color:var(--txt2); margin-top:1px; }
-  .dm-row .dm-v { font-size:17px; font-weight:800; font-family:'Space Grotesk','Inter',sans-serif; color:var(--txt1);
+  .dm-row .dm-v { font-size:17px; font-weight:800; font-family: var(--display); color:var(--txt1);
                   font-variant-numeric:tabular-nums; }
   .dm-row .dm-d { font-size:11.5px; color:var(--txt3); min-width:56px; text-align:right; font-variant-numeric:tabular-nums; }
   .dm-row.k-cw:before   { background:#10b981; }
@@ -323,7 +357,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .sqz-hero.firing-up { border-color: rgba(34,197,94,.65); background: rgba(34,197,94,.12); }
   .sqz-hero.firing-down { border-color: rgba(239,68,68,.65); background: rgba(239,68,68,.12); }
   .grn { color: #10b981 !important; } .red { color: #f43f5e !important; } .cyn { color: #22d3ee !important; } .amb { color: #f59e0b !important; }
-  .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
+  .lv-spot { font-size: 26px; font-weight: 900; color: var(--txt1); font-family: var(--display); }
   /* Two cards now (the strip drops the ticker already expanded above), so split the full width 50/50
      instead of leaving an empty 3rd column. */
   .lv-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin: 16px 0; }
@@ -415,7 +449,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .nf-btn.on { background: #22d3ee; color: #04121a; border-color: #22d3ee; }
   .nf-btn.on:hover { color: #04121a; }
   .nf-note { font-size: 11px; color: var(--txt3); margin-top: 10px; line-height: 1.5; }
-  .lv-read .rt { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 16px; font-weight: 800; color: var(--txt1); }
+  .lv-read .rt { font-family: var(--display); font-size: 16px; font-weight: 800; color: var(--txt1); }
   /* The read is prose in a very wide card. Capping the line at 78ch fixed the measure but stranded
      ~900px of empty card beside it, which looked worse than the long lines did. Multi-column is the
      answer newspapers reached long ago: each column sits at a readable measure AND the width is used.
@@ -438,7 +472,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
          gap: 8px; white-space: nowrap; }
   .rib + .rib:before { content: ''; position: absolute; left: 0; top: 22%; bottom: 22%; width: 1px; background: var(--bdr); }
   .rib-n { font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
-  .rib-p { font-size: 14px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif;
+  .rib-p { font-size: 14px; font-weight: 800; color: var(--txt1); font-family: var(--display);
            margin-left: auto; font-variant-numeric: tabular-nums; }
   .rib-c { font-size: 11px; font-weight: 700; }
   /* VIX fear gauge */
@@ -447,7 +481,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .fear-lbl { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .fear-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--txt2); }
   .fear-row { display: flex; align-items: baseline; gap: 8px; margin: 4px 0 9px; }
-  .fear-vix { font-size: 21px; font-weight: 800; color: var(--txt1); font-family: 'Space Grotesk','Inter',sans-serif; }
+  .fear-vix { font-size: 21px; font-weight: 800; color: var(--txt1); font-family: var(--display); }
   .fear-pct { font-size: 11.5px; color: var(--txt3); }
   .fear-meter { position: relative; height: 8px; border-radius: 999px; background: linear-gradient(90deg,#10b981 0%,#f59e0b 58%,#f43f5e 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
   .fear-marker { position: absolute; top: -3px; width: 3px; height: 14px; border-radius: 2px; background: #f0f0ee; box-shadow: 0 0 0 2px rgba(0,0,0,.55); transform: translateX(-50%); transition: left .5s ease; }
@@ -458,7 +492,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .nav-logo a, a.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
   .nav-logo img { height: 44px; width: auto; display: block; }
   .wm { display: flex; flex-direction: column; line-height: 1; }
-  .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 27px; font-weight: 800;
+  .wm-1 { font-family: var(--display); font-size: 27px; font-weight: 800;
     color: var(--txt1, #eaf3ff); letter-spacing: -0.6px; }
   .wm-2 { font-size: 9.5px; font-weight: 700; letter-spacing: 3.1px; text-transform: uppercase;
     color: var(--txt3, #7d97b8); margin-top: 4px; white-space: nowrap; }
@@ -1512,7 +1546,17 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   }
   /* Anchored to the BOTTOM and wide, not floated in the corner: a centred overlay would cover the
      map you are asking about, and the answer is worth more read against the chart than over it. */
-  #novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
+  /* ⚠ THE CHAT SETS ITS OWN FACE, AND ITS CONTROLS SET IT AGAIN. A <button> or <input> does not
+   inherit font-family -- it takes the browser's default, which is Arial. The chat carried exactly
+   ONE font declaration in its whole stylesheet, so its send button, its input and its chip buttons
+   had been rendering in Arial on every dashboard while the text beside them rendered in the house
+   face. Measured: the chat BUTTON came out 132.98px on analyst and crypto against 134.06px on the
+   trader, which is what exposed it.
+   var(--sans) rather than inherit: the trader's body is Geist Mono, and the chat is prose you read
+   rather than a tape you scan, so it should be Inter on all three -- the same face the answer would
+   have on the site. */
+#novo-ask, #novo-ask button, #novo-ask input, #novo-ask textarea, #novo-ask-bubble{font-family:var(--sans)}
+#novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
     width:min(calc(100vw - 36px),980px);
     height:min(calc(100dvh - 36px),560px);display:none;flex-direction:column;border-radius:14px;overflow:hidden;
     background:var(--navy,#0b1220);border:1px solid var(--bdr,#22303f);box-shadow:0 18px 50px rgba(0,0,0,.6)}

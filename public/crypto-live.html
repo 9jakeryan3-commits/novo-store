@@ -20,7 +20,10 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+<!-- Space Grotesk added: this dashboard had Inter and Geist Mono but not the display face, so
+     its headings and big values rendered in Inter while the site's rendered in Space Grotesk.
+     Weights matched to the marketing pages so the same text renders identically on both. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 :root{
   --navy:#0e0e10; --navy2:#17171a; --panel:#111113; --sunk:#0b0b0d;
@@ -29,7 +32,9 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
   --green:#10b981; --green2:#34d399; --red:#f43f5e; --amber:#f59e0b; --cyan:#22d3ee;
   /* purple is this product's accent. --amber stays semantic (medium confidence / warn). */
   --cx:#a78bfa; --cx-deep:#7c3aed; --cx-line:rgba(167,139,250,.30);
-  --mono:'Geist Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  /* Same three names and values as the other two dashboards. */
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --display:'Space Grotesk','Inter',sans-serif;
   /* Motion. Two durations only: --dur-1 for a state a finger is holding (press, hover),
      --dur-2 for something that travels (a drawer, a panel arriving). One easing curve, so
      everything on the page decelerates the same way. */
@@ -67,7 +72,16 @@ html,body{margin:0;height:100%}
    above the page, so they get MORE distinct, not less.
    It also rescues the chat: #novo-ask fills with --navy, so on the old ground it sat at exactly
    1.000:1 -- its border was the only thing making it a panel at all. */
-body{background:#09090b;color:var(--txt1);font-family:var(--sans);font-size:13px}
+body{
+  /* ⚠ TABULAR FIGURES ARE THE DEFAULT ON A DATA DASHBOARD, and this became load-bearing the
+     moment the webfonts started arriving. Inter and Space Grotesk both ship PROPORTIONAL figures:
+     measured at 40px, ten digits span 89.6px (Inter) and 84px (Space Grotesk) depending on which
+     digits they are -- "1111111111" renders ~90px narrower than "0000000000". Every number on
+     these pages ticks, so without this the columns jitter on each update. With it the spread is
+     exactly 0. It inherits, so one declaration covers every readout instead of chasing the five
+     big values and whatever gets added next. */
+  font-variant-numeric: tabular-nums;
+background:#09090b;color:var(--txt1);font-family:var(--sans);font-size:13px}
 .hidden{display:none!important}
 a{color:var(--cyan)}
 
@@ -263,7 +277,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
   #readstrip .rs-line + .rs-line{display:none}
   #readstrip{padding:8px 11px;gap:8px}
 }
-#sym{font-family:'Space Grotesk','Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
+#sym{font-family: var(--display);font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
 #px{font-family:var(--mono);font-size:19px;color:var(--txt2);line-height:1}
 #headmeta{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
 .bookbtn{font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--bdr);
@@ -475,7 +489,17 @@ tr:last-child td{border-bottom:none}
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
     background:#a78bfa;box-shadow:0 0 9px rgba(167,139,250,.9)}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
-  #novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
+  /* ⚠ THE CHAT SETS ITS OWN FACE, AND ITS CONTROLS SET IT AGAIN. A <button> or <input> does not
+   inherit font-family -- it takes the browser's default, which is Arial. The chat carried exactly
+   ONE font declaration in its whole stylesheet, so its send button, its input and its chip buttons
+   had been rendering in Arial on every dashboard while the text beside them rendered in the house
+   face. Measured: the chat BUTTON came out 132.98px on analyst and crypto against 134.06px on the
+   trader, which is what exposed it.
+   var(--sans) rather than inherit: the trader's body is Geist Mono, and the chat is prose you read
+   rather than a tape you scan, so it should be Inter on all three -- the same face the answer would
+   have on the site. */
+#novo-ask, #novo-ask button, #novo-ask input, #novo-ask textarea, #novo-ask-bubble{font-family:var(--sans)}
+#novo-ask{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;
     width:min(calc(100vw - 36px),980px);
     height:min(calc(100dvh - 36px),560px);display:none;flex-direction:column;border-radius:14px;overflow:hidden;
     background:var(--navy,#0b1220);border:1px solid var(--bdr,var(--bdr));box-shadow:0 18px 50px rgba(0,0,0,.6)}

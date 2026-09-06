@@ -7,6 +7,12 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/trader-live.webmanifest">
+<!-- Inter and Space Grotesk, the same link the marketing pages use. Geist Mono stays SELF-HOSTED
+     below: it is this dashboard's body face and a third-party round trip for the text a trader
+     reads every tick is a cost worth avoiding. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
 
 <script>
 /* ── /trader/live bootstrap ──────────────────────────────────────────────────────────────────────
@@ -225,7 +231,7 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
 .tb-brand { display: flex; align-items: center; gap: 10px; letter-spacing: normal; }
 .tb-brand img { height: 26px; width: auto; }
 .tb-brand .wm { display: flex; flex-direction: column; line-height: 1; }
-.tb-brand .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 21px; font-weight: 800;
+.tb-brand .wm-1 { font-family: var(--display); font-size: 21px; font-weight: 800;
   color: var(--txt1); letter-spacing: .2px; }
 .tb-brand .wm-2 { font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
   color: var(--txt3); margin-top: 3px; }
@@ -252,8 +258,15 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
   --red-d: rgba(244,63,94,.12);
   --pur-d: rgba(167,139,250,.12);
   --amb-d: rgba(245,158,11,.10);
-  --font:  'Geist Mono','JetBrains Mono','Consolas',monospace;
-  --sans:  system-ui,-apple-system,'Segoe UI',sans-serif;
+  /* ⚠ --font IS THE MONO BODY AND IT STAYS. Jake, explicitly: "dont change traders mono body."
+     A trading terminal reading in a monospace face is this product's identity, not drift. It is
+     expressed through the shared --mono token so the three dashboards name the same face. */
+  --mono:  'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+  --font:  var(--mono);
+  /* --sans was system-ui, i.e. whatever the operating system supplies -- Segoe UI on Windows, SF on
+     a Mac. That is why this dashboard's UI text never matched the site's. */
+  --sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --display: 'Space Grotesk', 'Inter', sans-serif;
   --blue:  #3b82f6;
   --radius: 0px;
 }
@@ -263,6 +276,15 @@ html { height: 100%; }
 body { min-height: 100%; }
 
 body {
+
+  /* ⚠ TABULAR FIGURES ARE THE DEFAULT ON A DATA DASHBOARD, and this became load-bearing the
+     moment the webfonts started arriving. Inter and Space Grotesk both ship PROPORTIONAL figures:
+     measured at 40px, ten digits span 89.6px (Inter) and 84px (Space Grotesk) depending on which
+     digits they are -- "1111111111" renders ~90px narrower than "0000000000". Every number on
+     these pages ticks, so without this the columns jitter on each update. With it the spread is
+     exactly 0. It inherits, so one declaration covers every readout instead of chasing the five
+     big values and whatever gets added next. */
+  font-variant-numeric: tabular-nums;
   background: var(--bg);
   color: var(--txt1);
   font-family: var(--font);
