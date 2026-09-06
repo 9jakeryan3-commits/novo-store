@@ -131,6 +131,7 @@ const PROBE = (html, sel) => `(() => {
 
   /* ── ANALYST: fill dropped, hairline kept ──────────────────────────────────────────────── */
   await load('analyst-live.html');
+  const bodyBg = await ev("getComputedStyle(document.body).backgroundColor");
   const an = await ev(PROBE(
     '<div class="lv-card"><div class="lv-tile">t</div><div class="d-br">d</div>' +
     '<div class="lv-fear">f</div></div>',
@@ -141,8 +142,18 @@ const PROBE = (html, sel) => `(() => {
     ok('analyst: ...and KEPT the hairline that carries the signal',
       an[s] && parseFloat(an[s].bt) >= 1, JSON.stringify(an[s]));
   });
-  ok('analyst: the card it sits in still has its own fill (the tiles are not floating on nothing)',
-    an['.lv-card'] && an['.lv-card'].bg !== 'rgba(0, 0, 0, 0)', JSON.stringify(an['.lv-card']));
+  /* ⚠ THIS ASSERTION WAS INVERTED ON PURPOSE, 2026-09-06. It used to read "the card still has its
+     own fill (the tiles are not floating on nothing)" and it PASSED after the card fill was changed
+     to the page colour -- because #09090b is a real colour and the test only asked whether one was
+     set. The label described a protection that no longer existed. Jake asked for exactly that
+     change: "card lift make it match the page so they disapear ... keeping the framing." So the
+     requirement is now the opposite, and the check says so: the fill MATCHES the page, and the
+     border is what remains to mark the panel. */
+  ok('analyst: the card fill matches the page, so the panel has no lift',
+    an['.lv-card'] && an['.lv-card'].bg === bodyBg,
+    'card=' + (an['.lv-card'] && an['.lv-card'].bg) + ' page=' + bodyBg);
+  ok('analyst: ...and it KEEPS its frame — the border is the only thing marking the panel now',
+    an['.lv-card'] && parseFloat(an['.lv-card'].bt) >= 1, JSON.stringify(an['.lv-card']));
 
   /* ── CRYPTO: the ground ────────────────────────────────────────────────────────────────── */
   await load('crypto-live.html');

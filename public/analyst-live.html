@@ -242,7 +242,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .lv-tile { padding: 14px 16px; }
     .lv-tile .v { font-size: 22px; }
   }
-  .lv-card { background: var(--panel); border: 1px solid var(--bdr2); border-radius: 14px; padding: 16px 18px; }
+  /* ⚠ FILL MATCHES THE PAGE ON PURPOSE. Jake: "card lift make it match the page so they disapear
+and data looks like it sits on the page" -- KEEPING THE FRAME. The border and radius stay; only
+the lift goes, so the panel reads as a hairline outline around data sitting on the page rather
+than a raised slab. Not var(--panel): that token still fills .lv-ribbon, the futures strip,
+which Jake explicitly carved out. */
+  .lv-card { background: #09090b; border: 1px solid var(--bdr2); border-radius: 14px; padding: 16px 18px; }
   .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
   .lv-card img.chart { width: 100%; border-radius: 8px; border: 1px solid var(--bdr); display: block; }
   /* dealer tiles */
@@ -421,7 +426,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     .lv-bottom .b-strip { grid-column: 1; grid-row: auto; order: 2; }
     .lv-bottom .b-line  { grid-column: 1; grid-row: auto; order: 3; }
   }
-  .lv-mini { background: var(--panel); border: 1px solid var(--bdr2); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
+  .lv-mini { background: #09090b; border: 1px solid var(--bdr2); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
   .lv-mini.on { border-color: rgba(34,211,238,.5); }
   .lv-mini:hover { border-color: rgba(34,211,238,.45); background: rgba(34,211,238,.05); }
   .strip-hd { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: 2px;
