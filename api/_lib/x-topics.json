@@ -1,0 +1,29 @@
+{
+  "_doc": "Symbol -> TOPIC CLAUSE for the X allowlist path. A wire writes PROSE, not cashtags: measured 2026-09-06, the shipped '($SPY) AND from:<wires>' query returns 0 posts for SPY, QQQ and IWM every time, and collapses TSLA/NVDA onto a single account (@DeItaone, one of the very few wires that prefixes cashtags). Expressing the topic the way a wire writes it returns 8/25/1/25/25 posts across 2/3/1/6/7 distinct vetted sources. Keep the cashtag as an OR term so trader-style posts still match. This map governs the ALLOWLIST path only; the unfiltered volume query must keep using the cashtag, because that is what measures trader attention.",
+  "_measured": {
+    "SPY":  { "cashtag_only": { "posts": 0,  "sources": 0 }, "with_topic": { "posts": 8,  "sources": 2 } },
+    "QQQ":  { "cashtag_only": { "posts": 0,  "sources": 0 }, "with_topic": { "posts": 25, "sources": 3 } },
+    "IWM":  { "cashtag_only": { "posts": 0,  "sources": 0 }, "with_topic": { "posts": 1,  "sources": 1 } },
+    "TSLA": { "cashtag_only": { "posts": 2,  "sources": 1 }, "with_topic": { "posts": 25, "sources": 6 } },
+    "NVDA": { "cashtag_only": { "posts": 4,  "sources": 1 }, "with_topic": { "posts": 25, "sources": 7 } }
+  },
+  "_unmapped_behaviour": "A symbol with no entry falls back to the cashtag alone. That is a WEAK query against wire accounts, so the payload must say so: absence under a cashtag-only topic is NOT evidence the wires were silent. Report topic_expressed_as: 'cashtag_only' and let the caller state the limit.",
+  "_false_positive_warning": "A keyword clause matches the COMPANY, not the STOCK. Measured example: 'Tesla' returned a WSJ piece on SpaceX and Tesla directors funding academic research - real, from a vetted wire, and not a market catalyst. A post is therefore a CANDIDATE catalyst only. NoVo may report that a vetted wire published X, and may never assert that X caused a move.",
+  "topics": {
+    "SPY":   { "clause": "\"S&P 500\" OR \"S&P500\" OR $SPY",              "note": "index, not the ETF - wires write the index name" },
+    "QQQ":   { "clause": "\"Nasdaq 100\" OR \"Nasdaq\" OR $QQQ",           "note": "bare Nasdaq is broad but wires rarely write 'Nasdaq 100'" },
+    "IWM":   { "clause": "\"Russell 2000\" OR \"small-cap\" OR $IWM",      "note": "genuinely thin - 1 post in the probe. Honest, not broken" },
+    "DIA":   { "clause": "\"Dow Jones\" OR \"the Dow\" OR $DIA",           "note": "" },
+    "TSLA":  { "clause": "Tesla OR $TSLA",                                  "note": "high false-positive rate via SpaceX/Musk coverage" },
+    "NVDA":  { "clause": "Nvidia OR $NVDA",                                 "note": "" },
+    "AAPL":  { "clause": "Apple OR $AAPL",                                  "note": "'Apple' also matches product coverage" },
+    "MSFT":  { "clause": "Microsoft OR $MSFT",                              "note": "" },
+    "AMZN":  { "clause": "Amazon OR $AMZN",                                 "note": "" },
+    "GOOGL": { "clause": "Google OR Alphabet OR $GOOGL",                    "note": "" },
+    "META":  { "clause": "Meta OR Facebook OR $META",                       "note": "'Meta' is a common word - wire tier keeps this usable" },
+    "AMD":   { "clause": "AMD OR $AMD",                                     "note": "" },
+    "NFLX":  { "clause": "Netflix OR $NFLX",                                "note": "" },
+    "BTC":   { "clause": "Bitcoin OR $BTC",                                 "note": "crypto tier; Xavier's identity rule still binds" },
+    "ETH":   { "clause": "Ethereum OR $ETH",                                "note": "crypto tier; Xavier's identity rule still binds" }
+  }
+}

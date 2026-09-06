@@ -172,6 +172,94 @@ async function posts(payload, symbol, opts) {
       r.posts.length === 4 && !r.allowlist, JSON.stringify(r.posts.length));
   }
 
+  /* ── 7. THE TOPIC IS WRITTEN THE WAY A WIRE WRITES IT ────────────────────────────────────────
+   * The defect these catch shipped once already: `($SPY) (from:Reuters OR ...)` returned ZERO
+   * posts for SPY, QQQ and IWM — 100% of the analyst's covered universe — and returned them
+   * silently, with sources_queried 23 and dropped_unlisted 0. Measured live by Einstein.
+   * The checks assert the QUERY, not the result, because the result depends on what X happens to
+   * be carrying that hour; the query is the thing that was wrong. */
+  {
+    await posts({ data: [], includes: {} }, 'SPY', { allowlistOnly: true, tiers: ['wire'] });
+    const q = decodeURIComponent(lastUrl);
+    ok('SPY asks for the INDEX the way a wire writes it, not just the cashtag',
+      q.indexOf('S&P 500') !== -1, q.slice(0, 160));
+    ok('...and keeps the cashtag as an OR term so trader posts still match',
+      q.indexOf('$SPY') !== -1 && q.indexOf('OR $SPY') !== -1, q.slice(0, 160));
+    ok('the topic is ANDed with the sources, not substituted for them',
+      q.indexOf('from:Reuters') !== -1, q.slice(0, 160));
+  }
+
+  /* ── 8. VOLUME MUST NOT INHERIT THE TOPIC MAP ────────────────────────────────────────────────
+   * counts/recent measures TRADER attention. Swapping $SPY for "S&P 500" would measure a
+   * different population under the same label — a new denominator wearing the old name, which is
+   * the failure this whole file's history is made of. */
+  {
+    const { client, restore } = loadClient({ data: [
+      { start: '2026-09-05T00:00:00Z', end: '2026-09-05T01:00:00Z', tweet_count: 50 },
+      { start: '2026-09-05T01:00:00Z', end: '2026-09-05T02:00:00Z', tweet_count: 50 },
+    ], meta: { total_tweet_count: 100 } });
+    try { await client.mentionVolume('SPY'); } finally { restore(); }
+    const q = decodeURIComponent(lastUrl);
+    // ⚠ THESE TWO ARE A PAIR AND THE SECOND IS THE ONE THAT DISCRIMINATES. The SPY topic clause
+    // CONTAINS "$SPY" as an OR term, so the cashtag check passes even if volume wrongly inherited
+    // the map. Do not delete the second one as redundant — it is the whole test.
+    ok('the VOLUME query still uses the cashtag',
+      q.indexOf('$SPY') !== -1, q.slice(0, 160));
+    ok('...and never the wire-prose topic clause',
+      q.indexOf('S&P 500') === -1, q.slice(0, 160));
+  }
+
+  /* ── 8b. THE ASSEMBLED QUERY FITS X'S CAP ────────────────────────────────────────────────────
+   * QUERY_BUDGET bounds the from: clause alone; the topic, the operators and the parentheses ride
+   * on top of it. A budget that only counts part of the string is a limit that does not limit. */
+  {
+    let worst = 0;
+    for (const sym of ['SPY', 'NVDA', null]) {
+      await posts({ data: [], includes: {} }, sym, { allowlistOnly: true });
+      const u = new URL(lastUrl);
+      worst = Math.max(worst, decodeURIComponent(u.searchParams.get('query')).length);
+    }
+    ok('the longest assembled query stays under X\'s 512-character cap',
+      worst <= 512, 'longest=' + worst);
+  }
+
+  /* ── 9. AN EMPTY RESULT SAYS WHICH KIND OF EMPTY IT IS ───────────────────────────────────────
+   * posts: [] meant three different things and only one was visible. "We asked and they were
+   * silent" is a finding; "we asked in a language they do not speak" is a broken query. NoVo will
+   * narrate that difference away if the payload does not carry it. */
+  {
+    const mapped = await posts({ data: [], includes: {} }, 'SPY', { allowlistOnly: true, tiers: ['wire'] });
+    ok('a mapped symbol returning nothing reports the sources as SILENT',
+      mapped.allowlist.topic_expressed_as === 'topic_clause' &&
+      mapped.allowlist.no_posts_reason === 'sources_silent',
+      JSON.stringify(mapped.allowlist));
+
+    // An unmapped symbol falls back to the cashtag, which we now know is a weak query against
+    // wires — so its emptiness is NOT evidence of silence and must not be reported as such.
+    const unmapped = await posts({ data: [], includes: {} }, 'XLE', { allowlistOnly: true, tiers: ['wire'] });
+    ok('an UNMAPPED symbol admits its query was weak rather than claiming silence',
+      unmapped.allowlist.topic_expressed_as === 'cashtag_only' &&
+      unmapped.allowlist.no_posts_reason === 'weak_topic_query',
+      JSON.stringify(unmapped.allowlist));
+
+    const found = await posts(impersonationPayload(), 'SPY', { allowlistOnly: true, tiers: ['wire'] });
+    ok('and when posts DO come back there is no reason attached',
+      found.posts.length > 0 && found.allowlist.no_posts_reason === null,
+      JSON.stringify(found.allowlist.no_posts_reason));
+  }
+
+  /* ── 10. BUDGET OVERFLOW AND A FAILED CALL ARE DIFFERENT FACTS ───────────────────────────────
+   * Folding them into one list makes "we ran out of room" indistinguishable from "the wire call
+   * errored" — the same conflation section 9 exists to undo, one level down. */
+  {
+    const r = await posts(impersonationPayload(), null, { allowlistOnly: true });
+    ok('sources_omitted and source_groups_failed are separate fields',
+      Array.isArray(r.allowlist.sources_omitted) && Array.isArray(r.allowlist.source_groups_failed),
+      JSON.stringify({ omitted: r.allowlist.sources_omitted, failed: r.allowlist.source_groups_failed }));
+    ok('a clean run reports no failed groups',
+      r.allowlist.source_groups_failed.length === 0, JSON.stringify(r.allowlist.source_groups_failed));
+  }
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })();

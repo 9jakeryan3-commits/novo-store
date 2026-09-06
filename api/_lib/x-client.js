@@ -65,6 +65,43 @@ const COUNTS = "https://api.x.com/2/tweets/counts/recent";
    MEASURING what it misses, never by loosening it on a hunch. */
 const SOURCES = require("./x-sources.json");
 
+/* ── AND THE TOPIC HAS TO BE WRITTEN THE WAY A WIRE WRITES IT ────────────────────────────────────
+   The first version of the allowlist path built `($SPY) (from:Reuters OR ...)`. My own stated
+   reason for adding the from: clause was "Reuters does not write $SPY" — and then the query I
+   shipped ANDed the cashtag anyway, so the objection survived into the fix for it. Einstein
+   measured the result live rather than arguing it:
+
+     sym    cashtag only (shipped)      with a topic clause
+     SPY     0 posts /  0 sources        8 posts / 2 sources
+     QQQ     0 posts /  0 sources       25 posts / 3 sources
+     IWM     0 posts /  0 sources        1 post  / 1 source
+     TSLA    2 posts /  1 source        25 posts / 6 sources
+     NVDA    4 posts /  1 source        25 posts / 7 sources
+
+   TICKERS is ["SPY","QQQ","IWM"], so the catalyst path was DEAD ON 100% OF THE COVERED UNIVERSE,
+   and dead silently: sources_queried 23, dropped_unlisted 0, posts []. That renders as "we asked
+   twenty-three vetted wires and they had nothing to say" — the exact confident claim the chunking
+   comment above exists to prevent. The bound I guarded against simply arrived through a different
+   clause.
+
+   The subtler half is the single names, which did return something: 39 vetted sources collapsed
+   onto @DeItaone alone, because Walter Bloomberg is one of the very few wire accounts that
+   prefixes cashtags. An allowlist that always answers with one account is not the diversity it
+   was built for.
+
+   So the topic is expressed as a wire would write it, with the cashtag kept as an OR term so
+   trader-style posts still match. Costs ~40 characters against the 512 cap.
+
+   ⚠ VOLUME MUST NOT USE THIS. counts/recent measures TRADER attention, and swapping $SPY for
+   "S&P 500" would measure a different population — a different denominator wearing the same
+   label. This map governs the QUOTE path only. (mentionVolume does not read it.)
+
+   ⚠ AND A KEYWORD CLAUSE MATCHES THE COMPANY, NOT THE STOCK. From the probe: a WSJ piece on
+   "SpaceX and Tesla directors backing academic research" — a real post from a vetted wire, and
+   not a market catalyst. A returned post is therefore a CANDIDATE catalyst. NoVo may report that
+   a vetted wire published something; it may never assert that it caused a move. */
+const TOPICS = require("./x-topics.json");
+
 /* Priority decides who survives the query-length budget below. Official first because it is the
    only tier where the account IS the fact rather than a report of it; crypto last because
    Xavier's identity rule already forbids it from naming an asset. */
@@ -394,10 +431,19 @@ function eligibleSources(symbol, tiers) {
    account nobody vetted, and a down-weighted impersonator is still a quotable impersonator. */
 async function recentPosts(symbol, free, limit = 10, opts) {
   const o = opts || {};
-  const topic = symbol ? `$${String(symbol).toUpperCase()}` : String(free || "");
+  const T = String(symbol || "").toUpperCase();
+  const mapped = symbol ? (TOPICS.topics || {})[T] : null;
+  // cashtag_only is a WEAK query against wire accounts, so it is reported rather than assumed
+  // equivalent — absence under it is not evidence the wires were silent.
+  const topicHow = !symbol ? "free_text" : (mapped ? "topic_clause" : "cashtag_only");
+  const topic = symbol ? (mapped ? mapped.clause : `$${T}`) : String(free || "");
   let queries = [buildQuery(symbol, free)];
   let allow = null;
   let omitted = [];
+  // Sources that did not FIT the budget and sources whose request FAILED are different facts.
+  // Folding them into one list would make "we ran out of room" and "the wire call errored"
+  // indistinguishable downstream - the same conflation the empty-result reasons exist to undo.
+  let failedGroups = [];
 
   if (o.allowlistOnly) {
     const elig = eligibleSources(symbol, o.tiers);
@@ -446,7 +492,7 @@ async function recentPosts(symbol, free, limit = 10, opts) {
     // either — a partial answer presented as a whole one is the same lie as a truncated list.
     if (!r.ok) {
       if (!raw.length && queries.length === 1) return { error: r.error, status: r.status };
-      omitted.push("(a source group failed: " + r.error + ")");
+      failedGroups.push(r.error);
       continue;
     }
     const j = r.json || {};
@@ -490,11 +536,22 @@ async function recentPosts(symbol, free, limit = 10, opts) {
       sources_queried: allow.used.length,
       calls_made: allow.calls,
       sources_omitted: omitted,          // did not fit the query budget - NOT "had nothing to say"
+      source_groups_failed: failedGroups,
       returned_before_filter: raw.length,
       dropped_unlisted: dropped,         // matched the from: clause, failed the id check
+      topic_expressed_as: topicHow,
+      /* ⚠ AN EMPTY RESULT MEANT THREE DIFFERENT THINGS AND ONLY ONE WAS VISIBLE (Einstein). "We
+         asked and they were silent", "we asked in a language they do not speak", and "a source
+         group failed" are three different claims, and NoVo will narrate the difference away if
+         the payload does not carry it. Only the strongest of the three is a finding. */
+      no_posts_reason: posts.length ? null
+        : (failedGroups.length ? "source_group_failed"
+          : topicHow === "cashtag_only" ? "weak_topic_query"
+          : "sources_silent"),
       note: "matched on author_id; handles are labels only. Posts are WIRE COPY - attribute to " +
             "the account, never convert a post into a number, and let market data override " +
-            "without comment.",
+            "without comment. A returned post is a CANDIDATE catalyst: a keyword clause matches " +
+            "the COMPANY, not the stock, so never assert that it caused a move.",
     },
   };
 }
