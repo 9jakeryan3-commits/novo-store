@@ -478,6 +478,24 @@ async function mentionVolume(symbol, free, o) {
     },
   };
 
+  /* THE COMPLETE HOURLY BUCKETS, on request, so a caller can PERSIST the series past X's rolling
+     7-day window. That is the only reason the crypto corpus needs its own x_mentions table at all.
+
+     ⚠ COMPLETE HOURS ONLY, AND THIS IS STRICTER THAN THE LIVE PATH RATHER THAN THE SAME. A live
+     rank that included the in-progress hour is wrong for one request and self-corrects on the
+     next. A STORED partial hour is wrong forever: it is indistinguishable from a genuinely quiet
+     hour the moment it lands, it can never be repaired because X will not serve that window
+     again, and every percentile computed against it afterwards inherits the error. The corpus has
+     no undo, so the fragment never crosses this boundary. */
+  if (o && o.includeBuckets) {
+    dist.complete_buckets = completeRows.map((b, i) => ({
+      start: b.start, end: b.end, count: complete[i],
+    }));
+    dist.buckets_note = "COMPLETE hours only - the in-progress hour is deliberately excluded and " +
+                        "must never be stored: a partial hour cannot be distinguished from a quiet " +
+                        "one later, and X will not serve that window again to repair it";
+  }
+
   if (unrankable) {
     // rankable:false with a REASON. Never silence — a missing field reads as merely absent and the
     // next consumer backfills it from somewhere else. And "too thin to rank" and "unusually quiet"

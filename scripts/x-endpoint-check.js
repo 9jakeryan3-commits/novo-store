@@ -169,6 +169,39 @@ async function call(query, headers, store, payload) {
       second.body.cached === false && xCalls > 0, 'cached=' + second.body.cached + ' xCalls=' + xCalls);
   }
 
+  /* ── 5b. THE PERSISTABLE SERIES NEVER CONTAINS A PARTIAL HOUR ───────────────────────────────
+   * This is stricter than the live path on purpose. A live rank that included the in-progress
+   * hour is wrong for one request and self-corrects on the next. A STORED partial hour is wrong
+   * FOREVER — indistinguishable from a genuinely quiet hour the moment it lands, unrepairable
+   * because X will not serve that window again, and inherited by every percentile computed
+   * against it afterwards. The corpus has no undo, so this is the boundary that has to hold. */
+  {
+    const payload = counts();
+    const inProgress = payload.data[payload.data.length - 1];
+    const res = await call({ symbol: 'BTC', buckets: '1' }, { 'x-novo-key': SECRET }, makeStore(), payload);
+    const b = res.body.volume.complete_buckets;
+    ok('buckets=1 returns the hourly series', Array.isArray(b) && b.length === 168, 'n=' + (b && b.length));
+    ok('and the IN-PROGRESS hour is not among them',
+      !b.some((x) => x.start === inProgress.start),
+      'in-progress start=' + inProgress.start);
+    ok('every returned bucket is a full hour',
+      b.every((x) => (new Date(x.end) - new Date(x.start)) === 3600000),
+      JSON.stringify(b.filter((x) => (new Date(x.end) - new Date(x.start)) !== 3600000).slice(0, 2)));
+    ok('the series carries the reason it excludes the fragment',
+      /never be stored/.test(res.body.volume.buckets_note || ''), res.body.volume.buckets_note);
+
+    // A bucket request must not be served a cached summary that has no buckets in it — the
+    // collector would then store nothing and log a success.
+    const store = makeStore();
+    await call({ symbol: 'BTC' }, { 'x-novo-key': SECRET }, store, payload);       // warm summary
+    const second = await call({ symbol: 'BTC', buckets: '1' }, { 'x-novo-key': SECRET }, store, payload);
+    ok('a buckets request is never served from the summary cache',
+      Array.isArray(second.body.volume.complete_buckets) &&
+      second.body.volume.complete_buckets.length === 168 && second.body.cached === false,
+      'cached=' + second.body.cached + ' buckets=' +
+      (second.body.volume.complete_buckets && second.body.volume.complete_buckets.length));
+  }
+
   /* ── 6. A MISSING CREDENTIAL IS NOT A QUIET TAPE ────────────────────────────────────────────
    * Xavier's billing point generalised: a configuration state must never render as low chatter. */
   {

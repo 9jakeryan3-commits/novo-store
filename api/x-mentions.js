@@ -63,11 +63,18 @@ module.exports = async (req, res) => {
   }
 
   const wantPosts = String((req.query && req.query.posts) || '') === '1';
+  /* buckets=1 returns the COMPLETE hourly series so a caller can PERSIST it past X's rolling
+     7-day window. Declared here, beside wantPosts and BEFORE the cache read below, because the
+     cache decision consults it — the first version declared it further down next to the fetch and
+     the cache block threw a temporal-dead-zone ReferenceError on every request. Never served from
+     the summary cache: a caller that asked for buckets and got a cached summary would store
+     nothing and log a success. */
+  const wantBuckets = String((req.query && req.query.buckets) || '') === '1';
   const tiers = String((req.query && req.query.tiers) || '').split(',').map((s) => s.trim()).filter(Boolean);
   const key = `x:vol:${symbol || 'q:' + free}`;
 
   const r = kv();
-  if (!wantPosts && r) {
+  if (!wantPosts && !wantBuckets && r) {
     try {
       const hit = await r.get(key);
       const parsed = typeof hit === 'string' ? JSON.parse(hit) : hit;
@@ -75,7 +82,8 @@ module.exports = async (req, res) => {
     } catch (_) { /* a cold or broken cache costs a call, never an error */ }
   }
 
-  const volume = await x.mentionVolume(symbol || null, free || null);
+  const volume = await x.mentionVolume(symbol || null, free || null,
+    wantBuckets ? { includeBuckets: true } : undefined);
   const out = { symbol: symbol || null, query: free || null, volume: volume };
 
   if (wantPosts) {
@@ -88,7 +96,7 @@ module.exports = async (req, res) => {
 
   // Only the volume answer is cached. Posts are not: they are what a reader SEES, and serving a
   // five-minute-old catalyst as current is the staleness failure the whole product argues against.
-  if (!wantPosts && r && volume && !volume.error) {
+  if (!wantPosts && !wantBuckets && r && volume && !volume.error) {
     try { await r.set(key, JSON.stringify(out), { ex: CACHE_TTL_S }); } catch (_) {}
   }
 
