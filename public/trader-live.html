@@ -1495,7 +1495,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
 #act-last, #act-caret { display: none; }
 .strip-break { display: none; }
-#saas-nav    { display: none; }
+#saas-nav, #saas-nav-l { display: none; }   /* the 769px block turns both on */
 
 @media (min-width: 769px) {
   /* FIXED HEADER STACK — the command strip + KPI row are CHROME, not content. They sit
@@ -1778,6 +1778,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      height and takes its spacing from the readouts beside it rather than from the brand. */
   #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; align-self: center;
     margin-left: 0; margin-right: 14px; }
+  /* Same control styling, anchored to the brand instead of the readouts. */
+  #saas-nav-l { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; margin-left: 18px; }
   /* An action, not a view. Cyan hairline so it reads as "do something" next to two toggles, without
      shouting -- this page has exactly one button and it should not look like a trade control. */
   /* NoVo: the one green control on a cyan dashboard, because it is the one that is not about the
@@ -1959,25 +1961,28 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <img src="/novo-coin.png?v=2" alt="" width="160" height="160" decoding="async">
     <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Trading Dashboard</span></span>
   </div>
+  <!-- LEFT cluster: the analyst and the keyboard, beside the wordmark (Jake, 2026-09-06, explicit
+       and second time of asking). These two are not views of the tape — Dr. NoVo is who you ask,
+       and the keyboard hint is how you drive the whole page — so they belong with the identity,
+       not with the Chart/Analysis pair that switches what the middle of the screen shows. -->
+  <div id="saas-nav-l">
+    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
+    <div id="novo-keys-hint"></div>
+  </div>
   <span class="tb-sep"></span>
   <!-- The PAPER/LIVE badge and the broker name are gone: both describe how the owner's
        account is set up, which is not a subscriber's business and was never theirs to see. -->
 
 
   <div class="tb-right">
-      <!-- The view switchers live on the RIGHT now, where the Studying pill was (Jake,
-           2026-09-06). Moved as ONE GROUP rather than just Chart and Analysis: Dr. NoVo is a view
-           like the other two and the keyboard hint belongs with the controls it describes, so
-           splitting them would leave two halves of one cluster at opposite ends of the bar. -->
+      <!-- Chart / Analysis sit against the session readouts, where the Studying pill was. What
+           this pair does is change what the MIDDLE of the screen shows, so it reads with the market
+           state beside it. Dr. NoVo and the keyboard hint went the other way, to the brand — see
+           #saas-nav-l. Splitting them was Jake's call, twice, and it is the better one: this is two
+           clusters doing two jobs, not one cluster cut in half. -->
     <div id="saas-nav">
       <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
       <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
-      <!-- NoVo chat, a VIEW like the other two (Jake, 2026-09-06). It replaces Run Analysis, which
-           was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
-           tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
-           slot in the nav. -->
-      <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
-      <div id="novo-keys-hint"></div>
     </div>
     <!-- ARMED / LIVE / HALTED row, RELOCATED into the topbar-right (2026-07-14).
          Pre-placed on purpose: every creator in the JS does
