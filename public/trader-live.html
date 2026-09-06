@@ -544,7 +544,23 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
 /* ── Chart toolbar ─────────────────────────────────────────────────────────────────────────── */
-#ctb-more { display: none; }   /* phone-only; the 768px block turns it on */
+/* Hidden by default; the 768px block turns it on for phones, and .ctb-compact turns it on for any
+   desktop where the toolbar would otherwise wrap. */
+#ctb-more { display: none; }
+/* ⚠ THE DESKTOP FOLD IS MEASURED, NOT A BREAKPOINT. A width threshold is the same stale fact that
+   just clipped the market-intel strip: it is derived from today's button set, and the toolbar grows
+   (Volume Profile and GEX Profile are recent). Worse, the width at which it wraps depends on the
+   FONT — measured here it survives to ~1760px, and on Jake's machine it was wrapping at 1920.
+   So the page measures its own toolbar and folds when it does not fit. Nothing to re-derive when a
+   button is added, and no monitor size to guess at. */
+#chart-toolbar.ctb-compact #ctb-more { display: inline-flex; align-items: center; gap: 4px; }
+#chart-toolbar.ctb-compact #ctb-more::after { content: '\25BE'; font-size: 8px; opacity: .65; }
+#chart-toolbar.ctb-compact.tools-open #ctb-more::after { content: '\25B4'; }
+#chart-toolbar.ctb-compact.tools-open #ctb-more { color: var(--txt1); border-color: var(--bdr); }
+#chart-toolbar.ctb-compact #ctb-tools,
+#chart-toolbar.ctb-compact #ctb-tog { display: none; }
+#chart-toolbar.ctb-compact.tools-open #ctb-tools,
+#chart-toolbar.ctb-compact.tools-open #ctb-tog { display: flex; flex-basis: 100%; flex-wrap: wrap; row-gap: 5px; }
 /* The VIX change-since-open. Deliberately quieter than the number it sits beside: it is the
    line's caption, not a headline of its own. */
 .vix-d { font-family: var(--mono, var(--font)); font-size: 10px; font-weight: 700;
@@ -1521,8 +1537,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      readouts stretch as equal tiles across it and the labels use their full words -- the
      abbreviation machinery below is retired rather than deleted, in case the bar ever has to
      share again (Jake, 2026-08-30: "full words and stretch the length of its bar"). */
+  /* ⚠ max-width IS WHAT STOPS A WRAPPED ROW LOOKING BROKEN. flex:1 1 0 makes the tiles share a
+     line equally, which is right for a full row and absurd for a partial one: when the strip wraps,
+     whatever lands alone on the last line stretches to the WHOLE bar. Measured at 1152px — one
+     readout at 98% of the strip, its label pinned far left and its value far right with a third of
+     a metre of nothing between them. That is the "bugged on smaller screens" Jake photographed.
+     34% is above the 20% a tile reaches on the tightest full row, so a complete row is untouched,
+     and a lone tile now keeps a sane width and centres (see justify-content above). */
   #saas-header #card-mktintel .dr,
-  #saas-header #card-mktintel .bar-row { flex: 1 1 0 !important; justify-content: center !important; }
+  #saas-header #card-mktintel .bar-row { flex: 1 1 0 !important; justify-content: center !important;
+    max-width: 34%; }
   /* Active by default, switched off at 1850px+. A full-width zero-height flex item forces the wrap to
      happen HERE rather than wherever the values ran out of room -- so the two rows are 6 + 2 every
      time, instead of moving as "Quiet" becomes "Building - 43/100". */
@@ -3727,6 +3751,79 @@ function _paintCtb(){
   if(tools) tools.addEventListener('click', function(ev){
     try{ if(ev.target && ev.target.closest && ev.target.closest('.ctb-btn')) setOpen(false); }catch(_e){}
   });
+})();
+
+/* Does the toolbar fit on ONE row? Fold it into TOOLS if not.
+   ⚠ This is measured rather than a media query on purpose. The width at which the bar wraps is a
+   function of the button set (which grows — Volume Profile and GEX Profile are recent) and of the
+   FONT: measured headless it survives to ~1760px, and Jake's 1920px screenshot was already wrapping
+   to two rows. Any number written here would be wrong on somebody's machine the day it was typed,
+   and wrong on every machine the next time a button lands. So the page asks its own layout.
+
+   The natural width is CACHED from an uncompacted measurement, because once folded #ctb-tools and
+   #ctb-tog are display:none and measure zero — re-measuring while compact would report that the bar
+   fits, un-fold it, and oscillate. Cached once, the comparison is monotone in the available width,
+   so it settles. */
+(function(){
+  var tb = document.getElementById('chart-toolbar');
+  if (!tb || !window.ResizeObserver) return;
+  var NAT = 0, lastW = -1, busy = false;
+
+  function natural(){
+    // Sum the GROUPS, not tb.scrollWidth: the bar is flex-wrap, so once it wraps its scrollWidth is
+    // its client width and reports no overflow at all. That is the trap that made the toolbar look
+    // innocent in the first probe — "scroll 1736/1736" on a bar that was visibly two rows deep.
+    var cs = getComputedStyle(tb);
+    var gap = parseFloat(cs.columnGap) || 0;
+    var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var n = 0, w = 0;
+    Array.prototype.forEach.call(tb.children, function(c){
+      if (c.id === 'ctb-more') return;                 // only exists in the folded state
+      var r = c.getBoundingClientRect();
+      if (r.width > 0) { w += r.width; n++; }
+    });
+    return n ? w + gap * (n - 1) + pad : 0;
+  }
+
+  function fit(){
+    if (busy) return;
+    var avail = tb.clientWidth;
+    if (!avail) return;                                // chart view not on screen yet; RO will call back
+    if (matchMedia('(max-width:768px)').matches) {      // phones already fold via the media query
+      tb.classList.remove('ctb-compact'); lastW = avail; return;
+    }
+    /* ⚠ MEASURE LIVE WHILE UNFOLDED; only the folded state may use a cached number.
+       A single cached measurement is wrong, and the probe says exactly where: the labels collapse
+       at ~1450px, so the same toolbar needs 1736px above that line and 1256px below it. Cache it at
+       1440 and the bar claims to fit at 1600, where it visibly does not. Measuring live whenever
+       everything is on screen costs one layout read per resize and is never stale.
+       The cache exists only for the folded state, where #ctb-tools measures zero and a live read
+       would report that it fits, unfold, re-fold, and flicker. */
+    if (!tb.classList.contains('ctb-compact')) {
+      var m = natural();
+      // A partly-painted bar measures small and would set a NAT that never folds. Require the
+      // overlay group to be real before trusting it.
+      var tools = document.getElementById('ctb-tools');
+      if (!m || !tools || !tools.getBoundingClientRect().width) return;
+      NAT = m;
+    }
+    if (!NAT) return;
+    busy = true;
+    // 2px of slack: sub-pixel widths sum to a hair over the container and would fold a bar that fits.
+    tb.classList.toggle('ctb-compact', NAT > avail + 2);
+    lastW = avail;
+    busy = false;
+  }
+
+  new ResizeObserver(function(){
+    // Width only. Folding changes the bar's HEIGHT, which would re-enter this observer forever.
+    if (tb.clientWidth === lastW) return;
+    fit();
+  }).observe(tb);
+
+  fit();
+  // Fonts change every button's width, so the first measurement is only provisional.
+  try { document.fonts.ready.then(function(){ NAT = 0; fit(); }); } catch (_e) {}
 })();
 
 document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
