@@ -1193,6 +1193,27 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     padding-bottom: 72px;
   }
   .col.mob-active { display: flex !important; }
+  /* #col-novo carries an id-level `display:none` so it stays hidden in the desktop views it does
+     not belong to. An id beats `.col.mob-active`, so the mobile rule has to be id-level too or the
+     NOVO tab opens onto nothing. */
+  /* height + overflow, same reason as the desktop rule: without them the chat's flex:1 log has
+     nothing to grow into and the composer floats mid-screen. padding-bottom is zeroed because the
+     panel owns its own bottom spacing and the tab bar is outside the column. */
+  /* ⚠ THE PADDING IS THE TAB BAR, AND ZEROING IT PUT THE COMPOSER UNDERNEATH IT. #mobile-tabs is
+     FIXED, so it does not take space in the flow: every other column reserves room for it with
+     `padding-bottom: 72px` on .col, and this rule set it to 0 because the chat "owns its own
+     spacing". Measured result — form 836..900, bar 848..900: the input rendered, reported a
+     perfectly good bounding box, and was covered by the tab bar with 12px showing.
+     box-sizing keeps the padding INSIDE the height so the flex child shrinks instead of
+     overflowing. */
+  #col-novo.mob-active { display: flex !important; flex-direction: column; box-sizing: border-box;
+                         padding-bottom: 52px; height: 100%; min-height: 0; overflow: hidden; }
+  /* The mobile twin of the desktop rule in the min-width:769px block. The PWA install pill is
+     `position:fixed` bottom-right and lands on the Ask button once the composer is pinned to the
+     bottom of the view. Both elements report perfectly good bounding boxes; they simply occupy the
+     same pixels, which no visibility check would ever catch. */
+  body[data-mtab="4"] #novoInstall { display: none !important; }
+  #col-novo.mob-active #col-novo-body { flex: 1 1 0; min-height: 0; }
 
   /* col-feed (ANALYSIS tab): no column-level scroll. Analysis Feed is
      sized to its own content (never clipped, never scrolls) and Execution
@@ -1320,6 +1341,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     -webkit-tap-highlight-color: transparent;
   }
   .mob-tab.mob-active { color: var(--blu); border-top-color: var(--blu); }
+  /* Green on the phone too, and it keeps its colour when active — the other tabs turn blue, this
+     one is the analyst and stays itself. */
+  .mob-tab-novo { color: #34d399; }
+  .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(52,211,153,.85); }
+  .mob-tab-novo.mob-active { color: #6ee7b7; border-top-color: #34d399; }
   .mob-tab-icon { font-size: 17px; line-height: 1; }
   /* Pinned quick-trade bar — visible only on the SIGNAL (chart) tab, pinned directly above the tab bar */
   body[data-mtab="2"] #mob-fire-bar {
@@ -1589,6 +1615,33 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   body.v-overview #col-perf,
   body.v-overview #journal-divider { display: none !important; }
   body.v-feeds    #journal-divider { display: none !important; }
+
+  /* ── NOVO VIEW ────────────────────────────────────────────────────────────────
+     Its own view, reached from the nav exactly like Chart and Analysis. Everything else in the
+     workspace steps aside: a chat is read and typed into, and half a screen of dealer cards beside
+     it would make the panel the smaller half of its own view. */
+  /* The PWA install prompt is a fixed bottom-right pill. On every other tab it sits over dead
+     space; on this one it lands squarely on the Ask button, because the composer is pinned to the
+     bottom of the view. Hidden while the chat is open rather than moved — it is a one-tap prompt
+     the member sees on every other tab, and the send button is not negotiable. */
+  /* ⚠ This block is inside @media (min-width: 769px), so this rule is DESKTOP ONLY — the mobile
+     twin lives beside #col-novo.mob-active. Written down because the first version put only this
+     one in and the prompt went on covering the Ask button on the phone, which is the surface it
+     actually mattered on. */
+  body.v-novo #novoInstall { display: none !important; }
+
+  #col-novo { display: none !important; }
+  /* Height is EXPLICIT, not inherited. Without it the column is content-sized, the chat's
+     flex:1 log has nothing to grow into, and the composer floats in the middle of the screen with
+     dead space beneath it — the panel renders, measures "visible", and still looks broken. 48px is
+     the topbar, the same figure #col-feed pins itself to. */
+  body.v-novo #col-novo { display: flex !important; flex-direction: column; min-height: 0;
+                          height: calc(100vh - 48px); height: calc(100dvh - 48px);
+                          border-right: none; padding: 0; overflow: hidden; }
+  #col-novo-body { flex: 1 1 0; min-height: 0; display: flex; }
+  body.v-novo #col-intel, body.v-novo #col-feed, body.v-novo #col-perf,
+  body.v-novo #col-capital, body.v-novo #journal-divider,
+  body.v-novo #saas-header { display: none !important; }
   body.v-journal  #journal-divider { display: flex !important; }
 
   /* Was "activity feed" side by side, which gave half the view to eleven boot lines that never
@@ -1646,6 +1699,20 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; margin-left: 18px; align-self: center; }
   /* An action, not a view. Cyan hairline so it reads as "do something" next to two toggles, without
      shouting -- this page has exactly one button and it should not look like a trade control. */
+  /* NoVo: the one green control on a cyan dashboard, because it is the one that is not about the
+     tape — it is the analyst. The glow is a slow breathe rather than a pulse; a fast blink beside a
+     live chart reads as an alert, and this is an invitation. */
+  .navbtn-novo { border-color: rgba(52,211,153,.5) !important; color: #34d399 !important;
+    box-shadow: 0 0 13px -3px rgba(52,211,153,.55); animation: novoGlowBtn 2.8s ease-in-out infinite; }
+  .navbtn-novo:hover, .navbtn-novo.on { border-color: #34d399 !important; color: #eaf3ff !important;
+    background: rgba(52,211,153,.10) !important; box-shadow: 0 0 20px -2px rgba(52,211,153,.85); }
+  @keyframes novoGlowBtn {
+    0%,100% { box-shadow: 0 0 11px -4px rgba(52,211,153,.45); }
+    50%     { box-shadow: 0 0 19px -2px rgba(52,211,153,.8); }
+  }
+  /* Motion is decoration here: the border colour already carries the meaning. */
+  @media (prefers-reduced-motion: reduce) { .navbtn-novo { animation: none !important; } }
+
   .navbtn-run { border-color: rgba(34,211,238,.45) !important; color: var(--cyn) !important; }
   /* the same action, in the bottom bar */
   .mob-tab-run { color: var(--cyn); }
@@ -1791,9 +1858,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <div id="saas-nav">
     <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
     <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
-    <!-- Not a view switch, so it never carries the `on` state: it is an action that asks NoVo to
-         re-read the map right now. Placed beside the views because that is where the hand already is. -->
-    <button class="navbtn navbtn-run" id="btn-run" data-run-btn onclick="runAnalysis()" title="Ask NoVo to re-read the map now">Run Analysis</button>
+    <!-- NoVo chat, a VIEW like the other two (Jake, 2026-09-06). It replaces Run Analysis, which
+         was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
+         tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
+         slot in the nav. -->
+    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask NoVo about this tape">NoVo</button>
   </div>
 
   <div class="tb-right">
@@ -2149,6 +2218,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
 
   <!-- ── COL 3: INTEL + TERMINAL + CHART ───────────────────────────── -->
+  <!-- NoVo chat lives in its own column so it is a TAB on mobile and a VIEW on desktop through
+       exactly the machinery the other columns already use — no second mechanism to keep in step.
+       The panel is injected by js/novo-chat.js rather than written here, because the markup is
+       shared with the analyst dashboard and a hand-copy is how the two chats drifted in the first
+       place. -->
+  <div id="col-novo" class="col"><div id="col-novo-body"></div></div>
+
   <div id="col-feed" class="col" style="display:grid;grid-template-columns:1fr;grid-template-rows:minmax(180px,1fr) auto 2fr;height:calc(100vh - 48px);">
 
 
@@ -2225,10 +2301,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <span class="mob-tab-icon">&#9707;</span>
     <span>ANALYSIS</span>
   </button>
-  <!-- An ACTION, not a view: no data-tab, so switchMobileTab can never mark it active. -->
-  <button class="mob-tab mob-tab-run" data-run-btn onclick="runAnalysis()">
-    <span class="mob-tab-icon">&#8635;</span>
-    <span>RUN</span>
+  <!-- Now a REAL VIEW, where RUN was an action. It carries data-tab so switchMobileTab marks it
+       active like the other two; the index is 4 because 0-3 are already spoken for and the CSS and
+       the Analysis poll both gate on data-mtab, so reusing a number would break them silently. -->
+  <button class="mob-tab mob-tab-novo" data-tab="4" onclick="switchMobileTab(4)">
+    <span class="mob-tab-icon">&#9670;</span>
+    <span>NOVO</span>
   </button>
 </nav>
 
@@ -2974,13 +3052,15 @@ function switchMobileTab(idx) {
     document.getElementById('col-perf'),     // 0 JOURNAL
     document.getElementById('col-capital'),  // 1 TRADE
     document.getElementById('col-intel'),    // 2 SIGNAL (chart)
-    document.getElementById('col-feed')      // 3 ANALYSIS
+    document.getElementById('col-feed'),     // 3 ANALYSIS
+    document.getElementById('col-novo')      // 4 NOVO  (chat)
   ];
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
   document.body.setAttribute('data-mtab', String(idx));   // drives the pinned quick-trade bar on the SIGNAL tab
   if (idx === 2) setTimeout(loadNovoChart, 60);   // SIGNAL tab (col-intel) shown → refresh now that it finally has a width, so the zoom/view applies
   if (idx === 3) setTimeout(function(){ try{ window.brainTick(); }catch(e){} }, 60);
+  if (idx === 4) setTimeout(function(){ try{ window._novoChatReveal(); }catch(e){} }, 60);
 }
 if (window.matchMedia('(max-width: 768px)').matches) switchMobileTab(2);   // open on the TRADE (chart) tab
 
@@ -6489,13 +6569,16 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
   window.setView=function(v){
     try{
       var b=document.body;
-      b.classList.remove('v-overview','v-feeds','v-journal');
+      b.classList.remove('v-overview','v-feeds','v-journal','v-novo');
       b.classList.add('v-'+v);
       var btns=document.querySelectorAll('.navbtn');
       for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on', btns[i].getAttribute('data-v')===v);
       setTimeout(function(){
         try{ if(typeof loadNovoChart==='function') loadNovoChart(); }catch(_e){}
         try{ if(v==='feeds' && typeof window.brainTick==='function') window.brainTick(); }catch(_e){}
+        // Mount on first reveal, not at load: the panel measures zero while its column is
+        // display:none, and the log can only be scrolled to the bottom once it has a height.
+        try{ if(v==='novo') window._novoChatReveal(); }catch(_e){}
       }, 60);
     }catch(e){}
   };
@@ -6712,6 +6795,23 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <!-- The shared keyboard layer: the command palette, the go-to chords, "?" deferred to the sheet
      this page already owns. It does NOT touch the chart keys above — 1-6, arrows, +/-, L, Alt+H,
      Del, Ctrl+Z keep working exactly as they did. -->
+<!-- NoVo chat. Loaded BEFORE novo-keys.js so window.novoAsk exists when the keyboard layer binds
+     "n" and registers /ask — the same shortcut that opens the chat on every other surface. -->
+<script src="/js/novo-chat.js"></script>
+<script>
+  // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
+  // at load would build it inside a display:none column, where every measurement reads zero.
+  window._novoChatReveal = function () {
+    try {
+      if (typeof window.novoChatMount !== 'function') return;
+      window.novoChatMount('#col-novo-body');
+      var q = document.getElementById('novo-ask-q');
+      // Focus only where there is a keyboard to focus into: on a phone this would throw the
+      // on-screen keyboard up over the answer the moment the tab opens.
+      if (q && window.matchMedia && window.matchMedia('(min-width: 769px)').matches) q.focus();
+    } catch (_e) {}
+  };
+</script>
 <script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
 <script>
 /* EVERY COMMAND HERE CLICKS A REAL BUTTON. The toolbar's own handlers carry behaviour that is
@@ -6761,8 +6861,9 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
   }]);
 
   K.register([
-    { label: 'Run analysis', group: 'Chart',
-      run: function () { try { window.runAnalysis(); } catch (_e) {} } },
+    { label: 'Ask NoVo', group: 'Chart',
+      run: function () { try { window.setView('novo'); } catch (_e) {}
+                         try { switchMobileTab(4); } catch (_e) {} } },
     { label: 'Back to live', group: 'Chart', keys: '<kbd>L</kbd>',
       run: function () { try { window._goLive(); } catch (_e) {} } },
     { label: 'Screenshot the chart', group: 'Chart', run: click('#ctb-shot') },
