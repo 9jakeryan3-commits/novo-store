@@ -91,6 +91,39 @@ for (const abs of walk(PUB, ['.js', '.css'])) {
 hashes.clear();
 for (const abs of walk(PUB, ['.html'])) stamp(abs, null);
 
+/* ⚠ A BARE REF IS INVISIBLE TO THE STAMPER, AND ITS SILENCE LOOKS LIKE SUCCESS. The REF regex
+   above requires `?v=...`, so it only ever RE-stamps something already versioned. A newly added
+   `<script src="/js/thing.js">` is never matched, never reported — and every .js here is served
+   `immutable` for a YEAR, so the file ships correctly once and then no edit to it ever reaches a
+   returning visitor again.
+   That is exactly what happened the day js/novo-chat.js was added: the deploy printed
+   "assets: 0 refs restamped" and read as clean. The absence of a match is now CHECKED rather than
+   assumed. Two legitimate exemptions, both narrow:
+     - hosts we do not serve (/_vercel/... is Vercel's own script and is not in public/);
+     - filenames that already carry their version (lightweight-charts-4.2.3.js). */
+const BARE = /(?:src|href)="(\/(?:[a-zA-Z0-9._-]+\/)*[a-zA-Z0-9._-]+\.(?:js|css))"/g;
+const bare = new Set();
+for (const abs of walk(PUB, ['.html'])) {
+  const html = fs.readFileSync(abs, 'utf8');
+  let m;
+  while ((m = BARE.exec(html))) {
+    const ref = m[1];
+    if (ref.startsWith('/_vercel/')) continue;                              // not ours to serve
+    if (/-\d+(?:\.\d+)+\.(?:js|css)$/.test(ref)) continue;                  // version in the filename
+    if (!fs.existsSync(path.join(PUB, ref.replace(/^\//, '')))) continue;   // not a local asset
+    bare.add(ref);
+  }
+}
+if (bare.size) {
+  console.error('');
+  console.error('!! UNVERSIONED ASSET REFERENCE(S). These are cached immutable for a year, so no');
+  console.error('   future edit to them will ever reach a returning visitor. Add ?v=1 and the');
+  console.error('   stamper maintains the content hash from then on:');
+  for (const r of bare) console.error('     ' + r);
+  console.error('');
+  process.exit(1);
+}
+
 console.log('  assets: ' + rewrites + ' refs restamped across ' + files + ' files');
 for (const [a, d] of changed) console.log('          ' + a.padEnd(20) + d);
 if (missing.size) console.log('          ! referenced but not on disk: ' + [...missing].join(', '));
