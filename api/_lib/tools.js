@@ -922,86 +922,43 @@ function makeExecutors(ctx = {}) {
   // its own history, state the n) -- and it is more useful to a trader anyway, because it comes
   // with a denominator.
   //
-  // The baseline ACCRUES: each call records this hour's count, and the percentile appears only
-  // once there are enough hours to mean anything. Thin state says so rather than rendering a
-  // confident percentile off three samples.
+  // VOLUME AND POSTS COME FROM DIFFERENT ENDPOINTS, and that is the whole correction.
+  //
+  // This used to derive its "mention count" from `(response.data || []).length` on recent-search
+  // with max_results=25 — THE PAGE SIZE, not a population. For any liquid ticker that is 25 every
+  // hour, forever, so the percentile compared 25 against a stored history of 25s (`h.n < count` is
+  // never true) and reported 0.0 permanently. A number that looked like a measurement, updated on
+  // schedule, and carried no information.
+  //
+  // Worse than a rounding error, because of WHERE it failed: a saturating counter cannot see an
+  // extreme. A busy hour and a genuine mania both read 25, so it flattened exactly where chatter is
+  // supposed to be worth something and discriminated only on quiet tickers. It worked where it
+  // mattered least and blinded where it mattered most. Found independently by three sessions.
+  //
+  // counts/recent returns true hourly volume, uncapped, ~169 buckets in ONE call — so the baseline
+  // arrives WITH the data and the percentile is right on the first call, with no warm-up and no
+  // accrued per-symbol history to keep or lose. Verified live: SPY 16,503 posts over 7d against
+  // IWM's 1,577; TSLA's busiest hour 1,277 against IWM's 45. That discriminates.
   async function search_x({ symbol, query } = {}) {
-    const tok = (process.env.X_BEARER_TOKEN || "").trim();
-    if (!tok) return { error: "X is not configured" };
+    const X = require("./x-client.js");
+    if (!X.hasToken()) return { error: "X is not configured" };
     const sym = String(symbol || "").trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, "").slice(0, 10);
     const free = String(query || "").trim().slice(0, 80);
     if (!sym && !free) return { error: "give me a symbol or a query" };
-    // Cashtag for tickers (what traders actually use), plain terms otherwise. Retweets excluded so
-    // one viral post does not read as broad chatter -- a retweet is amplification, not a mention.
-    // -is:reply as well as -is:retweet: the first live probe came back led by a zero-engagement
-    // reply argument with profanity in it. A "catalyst" that is two strangers bickering is worse
-    // than no catalyst on a paid surface, and raw recent-search is mostly that.
-    const q = (sym ? `$${sym}` : free) + " -is:retweet -is:reply lang:en";
-    const url = "https://api.x.com/2/tweets/search/recent?query=" + encodeURIComponent(q) +
-      "&max_results=25&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,public_metrics";
-    let j = null, status = 0;
-    try {
-      const resp = await get(url, { Authorization: "Bearer " + tok, "User-Agent": "NoVo/1.0" });
-      status = resp ? resp.status : 0;
-      if (status === 402) {
-        // AN HONEST GAP, NAMED. Pay-per-use with no credits is not "no news" -- reporting it as
-        // empty would be the analyst inventing a quiet tape out of an unpaid invoice.
-        return { error: "X search is not funded right now (pay-per-use credits are empty), so I " +
-                        "cannot see what is being said. This is a billing state, NOT a quiet tape - " +
-                        "do not describe chatter as low. Say the source is unavailable." };
-      }
-      if (status === 429) return { error: "X rate limit reached; try again shortly" };
-      if (!resp || !resp.ok) return { error: "X search unavailable (HTTP " + status + ")" };
-      j = await resp.json();
-    } catch (_) { return { error: "X search unreachable" }; }
 
-    const users = {};
-    for (const u of (j?.includes?.users || [])) users[u.id] = u;
-    // SIGNAL BEFORE RECENCY. Recent-search returns newest-first, which on a busy cashtag is a
-    // wall of noise. What matters for a catalyst is what is being AMPLIFIED, so posts are ranked
-    // by engagement and reach. The raw COUNT still uses everything returned -- the volume
-    // measurement must not inherit the quotable filter, or the percentile would silently become
-    // "percentile of posts I liked the look of".
-    const all = (j?.data || []).map((t) => {
-      const u = users[t.author_id] || {};
-      const pm = t.public_metrics || {};
-      return { handle: u.username ? "@" + u.username : null,
-               followers: u.public_metrics?.followers_count ?? null,
-               at: t.created_at, likes: pm.like_count ?? 0, reposts: pm.retweet_count ?? 0,
-               text: String(t.text || "").replace(/\s+/g, " ").slice(0, 220) };
-    });
-    const score = (p) => (p.likes || 0) + 3 * (p.reposts || 0) + Math.log10(1 + (p.followers || 0));
-    const posts = all.slice().sort((a, b) => score(b) - score(a)).slice(0, 10);
-    const count = (j?.data || []).length;
-    const key = "x:mentions:" + (sym || free.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20));
-
-    // Baseline, accrued honestly: this hour's count is appended, the percentile is reported ONLY
-    // once there are >= 24 hourly observations. Below that it says how many it has.
-    let volume = { window: "last 7 days (X recent-search)", posts_returned: count };
-    try {
-      if (r) {
-        await r.lpush(key, JSON.stringify({ t: Date.now(), n: count }));
-        await r.ltrim(key, 0, 719);
-        await r.expire(key, 40 * 24 * 3600);
-        const raw = await r.lrange(key, 0, 719);
-        const hist = (raw || []).map((x) => { try { return typeof x === "string" ? JSON.parse(x) : x; } catch (_) { return null; } })
-          .filter((x) => x && typeof x.n === "number");
-        if (hist.length >= 24) {
-          const below = hist.filter((h) => h.n < count).length;
-          volume.percentile_of_own_history = Math.round(1000 * below / hist.length) / 10;
-          volume.observations = hist.length;
-          volume.note = "percentile of this ticker's own recorded mention counts, n=" + hist.length +
-                        " observations - a measurement of ATTENTION, never a direction";
-        } else {
-          volume.observations = hist.length;
-          volume.note = "only " + hist.length + " observations recorded so far, so there is no " +
-                        "baseline to rank against yet - quote the raw count, never a percentile";
-        }
-      }
-    } catch (_) { /* baseline is best-effort; the posts are the answer */ }
+    const [p, v] = await Promise.all([
+      X.recentPosts(sym, free, 10),
+      X.mentionVolume(sym, free),
+    ]);
+    // The posts ARE the answer; volume is context. A volume failure must not blank the catalyst,
+    // and a posts failure must be said out loud rather than rendered as a quiet tape.
+    if (p.error && v.error) return { error: "X unavailable: " + p.error };
 
     return {
-      query: q, posts, volume,
+      query: X.buildQuery(sym, free),
+      posts: p.posts || [],
+      posts_error: p.error || undefined,
+      volume: v.error ? { error: v.error } : v,
       quoting: "Attribute every claim to its handle and say it is an X post, never a verified " +
                "fact. No sentiment score exists here and none may be invented. High mention " +
                "volume means ATTENTION, which is a positioning signal, not a direction.",
