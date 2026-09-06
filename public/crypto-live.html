@@ -111,10 +111,21 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
    already says LIVE, so 'updated ... ago' is 140px saying what 'ago' says. */
 .lv-sess .sm{display:none}
 .lv-sess b{color:var(--txt2);font-weight:700}
-.lv-gear{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;
+/* ⚠ THE AUTO MARGIN MOVES TO THE HINT, it does not get added to it. .lv-gear carried
+   margin-left:auto, which pushes the GEAR to the far right and leaves every earlier item — the
+   keyboard hint included — parked where the content ended. That is the gap Jake drew an arrow
+   across on both dashboards. Putting auto on the hint instead makes the hint the thing that gets
+   pushed, and the gear rides along directly beside it.
+   Two autos would NOT work: flexbox splits free space equally between them and the hint would
+   land mid-header. And when there is no keyboard the hint is display:none and pushes nothing, so
+   the coarse-pointer rule hands the auto margin back to the gear. The <=560px rule stays LAST:
+   on a phone the header wraps and neither should be pushed anywhere. */
+#novo-keys-hint { margin-left: auto; }
+.lv-gear{margin-left:0;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;
   border:1px solid var(--bdr);color:var(--txt2);font:inherit;font-size:12px;font-weight:700;
   padding:7px 12px;border-radius:var(--r-2);cursor:pointer}
 .lv-gear:hover{border-color:var(--cx);color:var(--txt1);background:rgba(167,139,250,.07)}
+@media (pointer:coarse){.lv-gear{margin-left:auto}}
 /* Settings drawer */
 .lv-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;
   transition:opacity .2s ease;z-index:9990}

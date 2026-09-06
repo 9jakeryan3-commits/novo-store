@@ -1530,23 +1530,39 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      24px is the strip's own padding, not slack — and the sabotage run proved it: reverting to
      flex-start changed nothing. Kept anyway, because it costs nothing and states the intent for the
      day a tile stops growing; but it is a safety net, not the reason the strip looks centred. */
+  /* ⚠ nowrap + overflow-x IS THE FIX; do not restore flex-wrap. A wrapping strip has no good
+     narrow state: whatever lands on the short last line either stretches across the whole bar (one
+     readout at 98% of it, measured at 1152px — what Jake photographed) or sits in a ragged stub.
+     Jake's read was the right one — every other market strip on the web scrolls — and scrolling has
+     no bad width at all, because there is never a second line to look wrong.
+     `safe center` rather than `center`: a plain centred flex line that overflows spills equally off
+     BOTH ends, and the left spill sits at negative scroll offset where no scrollbar can reach it.
+     `safe` falls back to flex-start the moment it overflows, so everything stays reachable. */
   #saas-header #card-mktintel { flex: 1 1 auto; min-width: 0; order: 2;
-    display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
-    gap: 2px 0; background: none; border: none; padding: 5px 12px; overflow: hidden; }
+    display: flex; align-items: center; justify-content: safe center; flex-wrap: nowrap;
+    gap: 2px 0; background: none; border: none; padding: 5px 12px;
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+    scrollbar-width: none; }
+  #saas-header #card-mktintel::-webkit-scrollbar { display: none; }
+  /* Only when it actually overflows: fade the cut edge so the strip reads as continuing rather than
+     as ending in a chopped-off number. Applied by class, not unconditionally — a permanent mask
+     would dim the first and last readout on a wide screen where nothing is hidden. */
+  #saas-header #card-mktintel.can-scroll { cursor: grab; }
+  #saas-header #card-mktintel.can-scroll.at-start { mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); }
+  #saas-header #card-mktintel.can-scroll.at-end   { mask-image: linear-gradient(to left,  #000 calc(100% - 34px), transparent); }
+  #saas-header #card-mktintel.can-scroll.at-mid   { mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent); }
   /* The strip owns the WHOLE bar now (the action buttons left with the execution build), so the
      readouts stretch as equal tiles across it and the labels use their full words -- the
      abbreviation machinery below is retired rather than deleted, in case the bar ever has to
      share again (Jake, 2026-08-30: "full words and stretch the length of its bar"). */
-  /* ⚠ max-width IS WHAT STOPS A WRAPPED ROW LOOKING BROKEN. flex:1 1 0 makes the tiles share a
-     line equally, which is right for a full row and absurd for a partial one: when the strip wraps,
-     whatever lands alone on the last line stretches to the WHOLE bar. Measured at 1152px — one
-     readout at 98% of the strip, its label pinned far left and its value far right with a third of
-     a metre of nothing between them. That is the "bugged on smaller screens" Jake photographed.
-     34% is above the 20% a tile reaches on the tightest full row, so a complete row is untouched,
-     and a lone tile now keeps a sane width and centres (see justify-content above). */
+  /* ⚠ 1 0 auto, NOT 1 1 0. Grow to fill a bar with room to spare — that is Jake's "stretch the
+     length of its bar" and it is unchanged on a wide screen. But refuse to SHRINK: a shrinkable
+     tile squeezes its own value into an ellipsis long before the strip ever scrolls, which is how
+     the VIX price got clipped in the first place. Refusing to shrink is what converts "too narrow"
+     from a squashed readout into a scroll. */
   #saas-header #card-mktintel .dr,
-  #saas-header #card-mktintel .bar-row { flex: 1 1 0 !important; justify-content: center !important;
-    max-width: 34%; }
+  #saas-header #card-mktintel .bar-row { flex: 1 0 auto !important; justify-content: center !important;
+    white-space: nowrap; }
   /* Active by default, switched off at 1850px+. A full-width zero-height flex item forces the wrap to
      happen HERE rather than wherever the values ran out of room -- so the two rows are 6 + 2 every
      time, instead of moving as "Quiet" becomes "Building - 43/100". */
@@ -6755,6 +6771,89 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
       }
     }catch(e){}
   }
+
+  /* The strip scrolls, so it has to SAY it scrolls and be drivable without a scrollbar (the bar is
+     one line tall; a scrollbar under it would be most of its height). Three jobs:
+       - mark whether it overflows at all, and which end is cut, so the CSS fades the right edge;
+       - turn a plain wheel into horizontal travel, because a trackpad flick over a one-line strip
+         is vertical and would otherwise scroll the page out from under the pointer;
+       - drag to pan, which is how everyone already expects a ticker to behave.
+     ⚠ scrollWidth vs clientWidth is read on a rAF, never inline after a write: the readouts are
+     repainted by the poller and a measurement taken in the same frame as a text change reports the
+     PREVIOUS layout, which would leave the fade on a strip that no longer overflows. */
+  (function(){
+    var mi = null, raf = 0;
+    function mark(){
+      raf = 0;
+      if (!mi) return;
+      var over = mi.scrollWidth - mi.clientWidth;
+      mi.classList.toggle('can-scroll', over > 2);
+      if (over <= 2) { mi.classList.remove('at-start','at-mid','at-end'); return; }
+      var x = mi.scrollLeft;
+      mi.classList.toggle('at-start', x <= 2);
+      mi.classList.toggle('at-end',   x >= over - 2);
+      mi.classList.toggle('at-mid',   x > 2 && x < over - 2);
+    }
+    function schedule(){ if (!raf) raf = requestAnimationFrame(mark); }
+    function attach(){
+      var el = document.getElementById('card-mktintel');
+      if (!el || el === mi) { schedule(); return; }
+      mi = el;
+      mi.addEventListener('scroll', schedule, { passive: true });
+      mi.addEventListener('wheel', function(e){
+        if (mi.scrollWidth <= mi.clientWidth) return;         // nothing to pan; let the page have it
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;  // already a horizontal gesture
+        var d = e.deltaY;
+        // Only swallow the event when this strip can actually move that way, so a wheel at either
+        // end still scrolls the page instead of dying against a wall.
+        var room = d > 0 ? (mi.scrollWidth - mi.clientWidth - mi.scrollLeft) : mi.scrollLeft;
+        if (room <= 0) return;
+        e.preventDefault(); mi.scrollLeft += d;
+      }, { passive: false });
+      var down = false, x0 = 0, s0 = 0, moved = 0;
+      mi.addEventListener('pointerdown', function(e){
+        if (mi.scrollWidth <= mi.clientWidth || e.button) return;
+        down = true; moved = 0; x0 = e.clientX; s0 = mi.scrollLeft; mi.style.cursor = 'grabbing';
+      });
+      mi.addEventListener('pointermove', function(e){
+        if (!down) return;
+        var dx = e.clientX - x0; moved = Math.max(moved, Math.abs(dx));
+        // Capture only once it is clearly a drag; grabbing the pointer on the first pixel would eat
+        // the click on a readout that has one.
+        if (moved > 4) { try { mi.setPointerCapture(e.pointerId); } catch (_e) {} mi.scrollLeft = s0 - dx; }
+      });
+      ['pointerup','pointercancel'].forEach(function(k){
+        mi.addEventListener(k, function(e){
+          if (!down) return;
+          down = false; mi.style.cursor = '';
+          try { mi.releasePointerCapture(e.pointerId); } catch (_e) {}
+        });
+      });
+      schedule();
+    }
+    addEventListener('resize', function(){ attach(); }, { passive: true });
+    // The strip is MOVED between #saas-header and #col-intel on every layout flip, and repainted by
+    // the poller; both change whether it overflows, and neither fires an event this code owns.
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(schedule);
+      var seen = null;
+      setInterval(function(){
+        var el = document.getElementById('card-mktintel');
+        if (el && el !== seen) { seen = el; try { ro.observe(el); } catch (_e) {} attach(); }
+        // ⚠ RE-MEASURE EVERY TICK, not only when the element changes. Whether the strip overflows
+        // is a function of its TEXT, and the poller rewrites the values in place: "Off-hrs" becomes
+        // "98% of book · pin 768.00" without the element resizing, so neither the ResizeObserver
+        // nor the identity check above fires and the fade never appears on a strip that is now
+        // cut off. Caught by measuring a strip with realistic values in it rather than the
+        // em-dash placeholders it loads with — the empty strip fits at every width and proves
+        // nothing. One rAF and one scrollWidth read per second.
+        else schedule();
+      }, 1000);
+    }
+    if (document.readyState !== 'loading') attach();
+    else addEventListener('DOMContentLoaded', attach);
+  })();
+
   // View switcher. Charts are measured on layout, so a chart revealed by a view change
   // must be nudged — same reason the mobile switchTab() re-calls loadNovoChart().
   window.setView=function(v){
