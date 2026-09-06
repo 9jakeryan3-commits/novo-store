@@ -328,6 +328,29 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-bias .bsc { flex-basis:100%; font-size:12px; color:var(--txt2); line-height:1.5; }
   .lv-bias .bsc b { color:var(--txt1); }
   .lv-bias .bnone { font-size:12.5px; color:var(--txt3); line-height:1.55; }
+  /* ⚠ DESKTOP ONLY, AND THAT IS THE WHOLE POINT (Jake, 2026-09-06: "that works on mobile but not
+     desktop"). Stacked, the strip and the bias card each take their own height and nothing is
+     wrong. SIDE BY SIDE, the bias card ran 191px against the ticker strip's 88px, so the left
+     column ended 121px above the chart with nothing in it — measured at 1600 and 1200 in
+     scripts/bias-layout-check.js, which reproduces it from this stylesheet.
+
+     Two fixes, because either alone leaves a hole:
+       1. the two bias rows sit SIDE BY SIDE rather than stacked, which is what actually shortens
+          the card — the score sentence is a flex-basis:100% line, so stacking cost two full text
+          rows plus two lots of padding;
+       2. the ticker cards then STRETCH to whatever height remains and centre their content, so the
+          residual difference (the bias card carries an h2 the strip does not) reads as two evenly
+          filled cards instead of a void. Without this the gap merely shrinks. */
+  @media (min-width: 901px) {
+    .lv-grid-top #bias-rows { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
+    .lv-grid-top .lv-bias .bias-row { border-top:0; padding:2px 0; align-content:start; }
+    .lv-grid-top .lv-bias .bias-row + .bias-row {
+      border-left:1px solid var(--bdr); padding-left:18px; }
+    /* A single message ("No graded bias published yet.") is not a column of a pair. */
+    .lv-grid-top #bias-rows > .bnone { grid-column:1 / -1; }
+    .lv-grid-top .lv-strip { align-content:stretch; }
+    .lv-grid-top .lv-tick { display:flex; flex-direction:column; justify-content:center; }
+  }
   /* bottom block: desktop = gamma | The Line on top row, index strip full-width below.
      mobile reflow = gamma → strip (3 ticker boxes) → The Line, so The Line sits UNDER the boxes. */
   .lv-bottom { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-top: 16px; align-items: stretch; }
