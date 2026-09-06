@@ -34,6 +34,65 @@
 const RECENT = "https://api.x.com/2/tweets/search/recent";
 const COUNTS = "https://api.x.com/2/tweets/counts/recent";
 
+/* ── THE SOURCE ALLOWLIST, AND WHY IT IS KEYED ON author_id ──────────────────────────────────────
+   Curated and verified live by Einstein, 2026-09-06: 39 accounts in six tiers. The one engineering
+   requirement, and it is not hygiene — it is live, on the single account we would most want to
+   quote:
+
+     @DeItaone          1,918,688  blue   "*Walter Bloomberg"   <- THE REAL ONE (capital I)
+     @deltaone              2,056  none   "deltaone"            <- homoglyph twin (lowercase l)
+     @WalterBloomberg      11,494  none   "Walter Bloomberg"    <- display-NAME twin
+     @business_ft               2  none   "FT Business"         <- brand-in-handle twin
+
+   Three spoof vectors on one target. A STRING-matched allowlist hands an impersonator NoVo's voice
+   on a paid surface, and the homoglyph is invisible in code review because @DeItaone and @deltaone
+   render nearly identically in most fonts. author_id is assigned by X and cannot be re-registered,
+   so matching is on id and the handle is a LABEL ONLY.
+
+   ⚠ AND THE LABEL WE RENDER IS OURS, NOT THE RESPONSE'S. Posts are attributed from our own vetted
+   record for the matched id, never from the payload's username/name fields. Otherwise a display
+   name is still an attack surface even after the id check passes.
+
+   Einstein's own verification killed three handles he was confident about — @BLSgov does not exist
+   (it is @BLS_gov), @gregip is a 39-follower account that is not Greg Ip, @arkhamintel has 0
+   followers against the real @arkham's 1.5M. A fabricated-handle rate of 3 in 52 from a list
+   someone knew. Nothing goes in this file that was not checked against the live API.
+
+   HONEST LIMIT, because it decides whether this is the right trade: an allowlist CANNOT see a
+   genuine catalyst from an unlisted account — a CEO outside the company tier, a regional Fed
+   president, a first-hand witness. It trades recall for precision. On a paid surface a fabricated
+   catalyst is worse than a missed one, so that is the right direction — but revisit it by
+   MEASURING what it misses, never by loosening it on a hunch. */
+const SOURCES = require("./x-sources.json");
+
+/* Priority decides who survives the query-length budget below. Official first because it is the
+   only tier where the account IS the fact rather than a report of it; crypto last because
+   Xavier's identity rule already forbids it from naming an asset. */
+const TIER_PRIORITY = ["official", "wire", "macro_reporter", "major", "company", "crypto"];
+
+/* X's recent-search query cap is 512 characters on this tier. The topic, the operators and the
+   parentheses all live in the same budget, so the from: clause gets less than the whole of it. */
+const QUERY_BUDGET = 400;
+
+/* How many chunked requests one allowlisted lookup may cost. Three covers the full 39-source list
+   with headroom; the rate budget is real (Xavier), so this is a bound rather than a loop. */
+const MAX_CALLS = 3;
+
+let _index = null;
+function sourceIndex() {
+  if (_index) return _index;
+  _index = new Map();
+  for (const tier of Object.keys(SOURCES.tiers || {})) {
+    for (const s of SOURCES.tiers[tier].sources || []) {
+      _index.set(String(s.id), {
+        id: String(s.id), handle: s.handle, name: s.name, tier: tier,
+        ticker: s.ticker || null, followers: s.followers,
+      });
+    }
+  }
+  return _index;
+}
+
 /* Below this median hourly count the series is too coarse to rank — see mentionVolume for the
    measured resolution table and why the floor is on the MEDIAN rather than the weekly total. */
 const MEDIAN_FLOOR = 10;
@@ -298,31 +357,146 @@ async function mentionVolume(symbol, free) {
   });
 }
 
+/* Which vetted sources are eligible for THIS request, in priority order.
+
+   The company tier's rule ("Apple is a source on AAPL and is not a source on the market";
+   elonmusk is a TSLA source and nothing else) is enforced here rather than left to the caller —
+   a rule stated in prose beside a general-purpose list is a rule that gets forgotten by the
+   third consumer. */
+function eligibleSources(symbol, tiers) {
+  const want = tiers && tiers.length ? tiers.slice() : TIER_PRIORITY.slice();
+  const T = String(symbol || "").toUpperCase();
+  const out = [];
+  for (const tier of TIER_PRIORITY) {
+    if (want.indexOf(tier) === -1) continue;
+    for (const s of (SOURCES.tiers[tier] || {}).sources || []) {
+      if (tier === "company" && (!T || String(s.ticker || "").toUpperCase() !== T)) continue;
+      out.push(Object.assign({ tier: tier }, s));
+    }
+  }
+  return out;
+}
+
 /* The posts themselves, ranked by amplification rather than recency — an unranked recent-search is
-   mostly noise, and the top of it is what a reader would actually call a catalyst. */
-async function recentPosts(symbol, free, limit = 10) {
-  const url = RECENT + "?query=" + encodeURIComponent(buildQuery(symbol, free)) +
-    "&max_results=25&tweet.fields=created_at,public_metrics" +
-    "&expansions=author_id&user.fields=username,public_metrics";
-  const r = await call(url);
-  if (!r.ok) return { error: r.error, status: r.status };
-  const j = r.json || {};
+   mostly noise, and the top of it is what a reader would actually call a catalyst.
+
+   opts.allowlistOnly restricts the result to the vetted sources above. TWO LAYERS, DELIBERATELY:
+
+     · the QUERY carries `from:` clauses, which is what makes the call return anything useful at
+       all. Post-filtering a generic `$SPY` search against 39 accounts returns [] almost every
+       time — Reuters does not write "$SPY" — so a filter-only implementation would look like a
+       quiet market instead of a query that cannot work.
+     · the RESULT is filtered on author_id anyway. `from:` matches HANDLES, so it is exactly the
+       layer the homoglyph defeats; the id check is what actually holds. Belt and braces, and the
+       braces are the ones load-bearing.
+
+   Non-allowlisted posts are DROPPED, never down-weighted: the point is that NoVo never quotes an
+   account nobody vetted, and a down-weighted impersonator is still a quotable impersonator. */
+async function recentPosts(symbol, free, limit = 10, opts) {
+  const o = opts || {};
+  const topic = symbol ? `$${String(symbol).toUpperCase()}` : String(free || "");
+  let queries = [buildQuery(symbol, free)];
+  let allow = null;
+  let omitted = [];
+
+  if (o.allowlistOnly) {
+    const elig = eligibleSources(symbol, o.tiers);
+    if (!elig.length) {
+      return { posts: [], allowlist: { mode: "allowlist_only", sources_queried: 0,
+        note: "no vetted source is admissible for this request - the company tier is restricted " +
+              "to an account's own ticker, so an unlisted symbol has no eligible source" } };
+    }
+    /* ⚠ THE WHOLE LIST DOES NOT FIT IN ONE QUERY, AND TRUNCATING IT IS NOT ACCEPTABLE. Measured:
+       31 eligible sources need ~620 characters of from: clauses against a 512-character cap, so a
+       single call reaches 23 of them. Eight vetted wires going unasked reads downstream as "the
+       wires had nothing to say" — a completely different and far more confident claim than "we
+       did not ask them", and it is the failure mode that would make a real catalyst look like a
+       quiet tape.
+
+       So the sources are CHUNKED across up to MAX_CALLS requests in priority order and the
+       results merged, rather than the tail being dropped. Most callers ask for one or two tiers
+       and never leave a single call; only an all-tiers request pays for more. Anything past the
+       cap is still named in sources_omitted, because a bound that is never reported is the same
+       silent truncation wearing a limit. */
+    const chunks = [];
+    let cur = [], curLen = 0;
+    for (const s of elig) {
+      const cost = ("from:" + s.handle).length + (cur.length ? 4 : 0);
+      if (curLen + cost > QUERY_BUDGET && cur.length) { chunks.push(cur); cur = []; curLen = 0; }
+      cur.push(s); curLen += ("from:" + s.handle).length + (cur.length > 1 ? 4 : 0);
+    }
+    if (cur.length) chunks.push(cur);
+    for (const c of chunks.slice(MAX_CALLS)) for (const s of c) omitted.push(s.handle);
+    const run = chunks.slice(0, MAX_CALLS);
+    const used = [].concat.apply([], run);
+    allow = { used: used, ids: new Set(used.map((s) => String(s.id))), calls: run.length };
+    queries = run.map((c) => (topic ? "(" + topic + ") " : "") +
+      "(" + c.map((s) => "from:" + s.handle).join(" OR ") + ") -is:retweet lang:en");
+  }
+
+  const raw = [];
   const users = {};
-  for (const u of (j.includes && j.includes.users) || []) users[u.id] = u;
-  const all = ((j.data) || []).map((t) => {
-    const u = users[t.author_id] || {};
+  const seen = new Set();
+  for (const q of queries) {
+    const url = RECENT + "?query=" + encodeURIComponent(q) +
+      "&max_results=25&tweet.fields=created_at,public_metrics" +
+      "&expansions=author_id&user.fields=username,public_metrics";
+    const r = await call(url);
+    // One failed chunk must not discard the chunks that worked, but it must not be invisible
+    // either — a partial answer presented as a whole one is the same lie as a truncated list.
+    if (!r.ok) {
+      if (!raw.length && queries.length === 1) return { error: r.error, status: r.status };
+      omitted.push("(a source group failed: " + r.error + ")");
+      continue;
+    }
+    const j = r.json || {};
+    for (const u of (j.includes && j.includes.users) || []) users[u.id] = u;
+    for (const t of (j.data) || []) {
+      if (t.id && seen.has(t.id)) continue;      // chunks are disjoint by author, but be certain
+      if (t.id) seen.add(t.id);
+      raw.push(t);
+    }
+  }
+  let dropped = 0;
+  const all = [];
+  for (const t of raw) {
     const m = t.public_metrics || {};
-    return {
-      author: u.username ? "@" + u.username : "unknown",
-      followers: (u.public_metrics && u.public_metrics.followers_count) || 0,
-      at: t.created_at,
-      text: t.text,
-      likes: m.like_count || 0,
-      reposts: m.retweet_count || 0,
-    };
-  });
+    const aid = String(t.author_id || "");
+    let author, followers, tier = null;
+    if (allow) {
+      if (!allow.ids.has(aid)) { dropped++; continue; }
+      // Attributed from OUR vetted record, never from the response's own username/name.
+      const vetted = sourceIndex().get(aid);
+      author = "@" + vetted.handle;
+      followers = vetted.followers;
+      tier = vetted.tier;
+    } else {
+      const u = users[aid] || {};
+      author = u.username ? "@" + u.username : "unknown";
+      followers = (u.public_metrics && u.public_metrics.followers_count) || 0;
+    }
+    all.push({ author, followers, tier, at: t.created_at, text: t.text,
+               likes: m.like_count || 0, reposts: m.retweet_count || 0 });
+  }
+
   const score = (p) => (p.likes || 0) + 3 * (p.reposts || 0) + Math.log10(1 + (p.followers || 0));
-  return { posts: all.slice().sort((a, b) => score(b) - score(a)).slice(0, limit) };
+  const posts = all.slice().sort((a, b) => score(b) - score(a)).slice(0, limit);
+  if (!allow) return { posts: posts };
+  return {
+    posts: posts,
+    allowlist: {
+      mode: "allowlist_only",
+      tiers_used: Array.from(new Set(allow.used.map((s) => s.tier))),
+      sources_queried: allow.used.length,
+      calls_made: allow.calls,
+      sources_omitted: omitted,          // did not fit the query budget - NOT "had nothing to say"
+      returned_before_filter: raw.length,
+      dropped_unlisted: dropped,         // matched the from: clause, failed the id check
+      note: "matched on author_id; handles are labels only. Posts are WIRE COPY - attribute to " +
+            "the account, never convert a post into a number, and let market data override " +
+            "without comment.",
+    },
+  };
 }
 
 module.exports = { buildQuery, mentionVolume, recentPosts, hasToken: () => !!token() };

@@ -1,0 +1,317 @@
+{
+  "_doc": "NoVo X source allowlist. KEYED ON author_id, which X assigns and cannot be re-registered. Handles are LABELS ONLY and must never be used for matching: @DeItaone (1.9M, the real Walter Bloomberg) has a live homoglyph twin @deltaone (2k) and a live display-name twin @WalterBloomberg (11k). Verified 2026-09-06.",
+  "tiers": {
+    "wire": {
+      "rule": "Breaking wires. Fastest, factual, headline-shaped. Quote as a headline with the outlet named; still never as verified fact until market data agrees.",
+      "sources": [
+        {
+          "id": "1652541",
+          "handle": "Reuters",
+          "name": "Reuters",
+          "followers": 26347141,
+          "verified_type": "business"
+        },
+        {
+          "id": "15110357",
+          "handle": "ReutersBiz",
+          "name": "Reuters Business",
+          "followers": 3377307,
+          "verified_type": "blue"
+        },
+        {
+          "id": "51241574",
+          "handle": "AP",
+          "name": "The Associated Press",
+          "followers": 16462036,
+          "verified_type": "business"
+        },
+        {
+          "id": "34713362",
+          "handle": "business",
+          "name": "Bloomberg",
+          "followers": 10436417,
+          "verified_type": "business"
+        },
+        {
+          "id": "69620713",
+          "handle": "markets",
+          "name": "Bloomberg Markets",
+          "followers": 2036876,
+          "verified_type": "business"
+        },
+        {
+          "id": "2704294333",
+          "handle": "DeItaone",
+          "name": "*Walter Bloomberg",
+          "followers": 1918688,
+          "verified_type": "blue"
+        },
+        {
+          "id": "3295423333",
+          "handle": "FirstSquawk",
+          "name": "First Squawk",
+          "followers": 560481,
+          "verified_type": "blue"
+        },
+        {
+          "id": "59393368",
+          "handle": "LiveSquawk",
+          "name": "LiveSquawk",
+          "followers": 502163,
+          "verified_type": "blue"
+        },
+        {
+          "id": "42589787",
+          "handle": "Newsquawk",
+          "name": "Newsquawk",
+          "followers": 138018,
+          "verified_type": "blue"
+        }
+      ]
+    },
+    "major": {
+      "rule": "Established financial press. Slower than the wires, more context.",
+      "sources": [
+        {
+          "id": "3108351",
+          "handle": "WSJ",
+          "name": "The Wall Street Journal",
+          "followers": 22184811,
+          "verified_type": "business"
+        },
+        {
+          "id": "28164923",
+          "handle": "WSJmarkets",
+          "name": "WSJ Markets",
+          "followers": 1435534,
+          "verified_type": "business"
+        },
+        {
+          "id": "20402945",
+          "handle": "CNBC",
+          "name": "CNBC",
+          "followers": 6199847,
+          "verified_type": "business"
+        },
+        {
+          "id": "26574283",
+          "handle": "CNBCnow",
+          "name": "CNBC Now",
+          "followers": 754863,
+          "verified_type": "business"
+        },
+        {
+          "id": "18949452",
+          "handle": "FT",
+          "name": "Financial Times",
+          "followers": 7043225,
+          "verified_type": "blue"
+        },
+        {
+          "id": "624413",
+          "handle": "MarketWatch",
+          "name": "MarketWatch",
+          "followers": 4640568,
+          "verified_type": "business"
+        },
+        {
+          "id": "19546277",
+          "handle": "YahooFinance",
+          "name": "Yahoo Finance",
+          "followers": 2061891,
+          "verified_type": "business"
+        },
+        {
+          "id": "404422077",
+          "handle": "SquawkCNBC",
+          "name": "Squawk Box",
+          "followers": 1152551,
+          "verified_type": "business"
+        }
+      ]
+    },
+    "official": {
+      "rule": "PRIMARY SOURCE for their own data - the highest trust tier in the list, and the only one where the account IS the fact rather than a report of it.",
+      "sources": [
+        {
+          "id": "26538229",
+          "handle": "federalreserve",
+          "name": "Federal Reserve",
+          "followers": 1584197,
+          "verified_type": "government"
+        },
+        {
+          "id": "120176950",
+          "handle": "USTreasury",
+          "name": "Treasury Department",
+          "followers": 1153561,
+          "verified_type": "government"
+        },
+        {
+          "id": "612896910",
+          "handle": "BLS_gov",
+          "name": "BLS-Labor Statistics",
+          "followers": 111252,
+          "verified_type": "blue"
+        },
+        {
+          "id": "18481050",
+          "handle": "SECGov",
+          "name": "U.S. Securities and Exchange Commission",
+          "followers": 805752,
+          "verified_type": "government"
+        },
+        {
+          "id": "23092890",
+          "handle": "uscensusbureau",
+          "name": "U.S. Census Bureau",
+          "followers": 130569,
+          "verified_type": "government"
+        }
+      ]
+    },
+    "macro_reporter": {
+      "rule": "Fed-adjacent reporters whose posts genuinely move rates expectations. Individuals, so attribute to the person AND the outlet.",
+      "sources": [
+        {
+          "id": "59603406",
+          "handle": "NickTimiraos",
+          "name": "Nick Timiraos",
+          "followers": 488579,
+          "verified_type": "blue"
+        },
+        {
+          "id": "384445331",
+          "handle": "steveliesman",
+          "name": "Steve Liesman",
+          "followers": 168551,
+          "verified_type": "none"
+        },
+        {
+          "id": "1176918506",
+          "handle": "colbyLsmith",
+          "name": "Colby Smith",
+          "followers": 18911,
+          "verified_type": "blue"
+        }
+      ]
+    },
+    "company": {
+      "rule": "Official company accounts. Admissible ONLY for their own ticker - Apple is a source on AAPL and is not a source on the market.",
+      "sources": [
+        {
+          "id": "13298072",
+          "handle": "Tesla",
+          "name": "Tesla",
+          "followers": 24774533,
+          "verified_type": "business",
+          "ticker": "TSLA"
+        },
+        {
+          "id": "61559439",
+          "handle": "nvidia",
+          "name": "NVIDIA",
+          "followers": 2657331,
+          "verified_type": "business",
+          "ticker": "NVDA"
+        },
+        {
+          "id": "380749300",
+          "handle": "Apple",
+          "name": "Apple",
+          "followers": 9955672,
+          "verified_type": "business",
+          "ticker": "AAPL"
+        },
+        {
+          "id": "74286565",
+          "handle": "Microsoft",
+          "name": "Microsoft",
+          "followers": 13077975,
+          "verified_type": "business",
+          "ticker": "MSFT"
+        },
+        {
+          "id": "20793816",
+          "handle": "amazon",
+          "name": "Amazon",
+          "followers": 5892392,
+          "verified_type": "business",
+          "ticker": "AMZN"
+        },
+        {
+          "id": "2425151",
+          "handle": "Meta",
+          "name": "Meta",
+          "followers": 9871047,
+          "verified_type": "business",
+          "ticker": "META"
+        },
+        {
+          "id": "14861876",
+          "handle": "AMD",
+          "name": "AMD",
+          "followers": 1283949,
+          "verified_type": "business",
+          "ticker": "AMD"
+        },
+        {
+          "id": "44196397",
+          "handle": "elonmusk",
+          "name": "Elon Musk",
+          "followers": 241581824,
+          "verified_type": "blue",
+          "ticker": "TSLA"
+        }
+      ]
+    },
+    "crypto": {
+      "rule": "Crypto desk. Subject to Xavier's identity rule: a ticker is not an asset, so these may source a NARRATIVE and may never identify a token.",
+      "sources": [
+        {
+          "id": "2207129125",
+          "handle": "Cointelegraph",
+          "name": "Cointelegraph",
+          "followers": 2934368,
+          "verified_type": "business"
+        },
+        {
+          "id": "1333467482",
+          "handle": "CoinDesk",
+          "name": "CoinDesk",
+          "followers": 4034296,
+          "verified_type": "business"
+        },
+        {
+          "id": "1387497871751196672",
+          "handle": "WatcherGuru",
+          "name": "Watcher.Guru",
+          "followers": 4808571,
+          "verified_type": "business"
+        },
+        {
+          "id": "1039833297751302144",
+          "handle": "whale_alert",
+          "name": "Whale Alert",
+          "followers": 2852518,
+          "verified_type": "blue"
+        },
+        {
+          "id": "1462727797135216641",
+          "handle": "lookonchain",
+          "name": "Lookonchain",
+          "followers": 707082,
+          "verified_type": "blue"
+        },
+        {
+          "id": "1123403704323805184",
+          "handle": "arkham",
+          "name": "Arkham",
+          "followers": 1495328,
+          "verified_type": "business"
+        }
+      ]
+    }
+  },
+  "_ticker_note": "company.sources[].ticker binds Einstein's rule 'Apple is a source on AAPL and is not a source on the market'. elonmusk -> TSLA and nothing else. Added by Overwatch; every other field is Einstein's, verified live 2026-09-06."
+}
