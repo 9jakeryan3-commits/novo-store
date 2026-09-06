@@ -294,9 +294,48 @@ async function mentionVolume(symbol, free, o) {
       return (new Date(b.end) - new Date(b.start)) / 60000;
     } catch (_) { return null; }
   };
+  /* ⚠ THE FIRST BUCKET IS PARTIAL TOO, AND ONLY A LIVE CALL SHOWED IT. Everything about this
+     file so far assumed the fragment was the LAST bucket — the hour still filling. It is not the
+     only one: counts/recent starts its window exactly 7 days before the request, so the FIRST
+     bucket runs from that instant to the next hour boundary. Measured live on BTC:
+
+       start 2026-08-30T03:27:55Z  end 04:00:00Z   ->  a THIRTY-TWO MINUTE bucket, counted as an hour
+
+     It had been sitting in the ranking pool since the original fix, and every synthetic test in
+     this repo missed it because the generators emit clean hour boundaries at both ends. The live
+     leg of the collector probe is what found it. Third instance tonight of the same family, and
+     the first one that a unit test could not have caught.
+
+     So completeness is decided by DURATION, not by position. A bucket is comparable only if it is
+     a full 60 minutes; anything else is excluded at either end, and the count is reported. That is
+     also robust to X changing its windowing, which a slice(0, -1) is not. */
+  const FULL_MS = 3600000;
+  const dur = (b) => {
+    try {
+      const d = new Date(b.end) - new Date(b.start);
+      return Number.isFinite(d) ? d : null;
+    } catch (_) { return null; }
+  };
   const counts = rows.map((x) => Number(x.tweet_count) || 0);
-  const completeRows = rows.slice(0, -1);            // every bucket but the one still filling
-  const complete = counts.slice(0, -1);
+  const lastIdx = rows.length - 1;
+  const keepIdx = [];
+  let unverifiable = 0;
+  for (let i = 0; i < rows.length; i++) {
+    if (i === lastIdx) continue;                     // the hour still filling
+    const d = dur(rows[i]);
+    /* UNREADABLE is not the same as PROVEN PARTIAL. A null duration means we cannot check, and
+       deleting every bucket on that basis throws away the whole distribution — including the raw
+       counts, which Pete's rule says must ship regardless. So an unverifiable bucket is KEPT and
+       COUNTED; a bucket measured to be short is dropped. The pool-naming logic further down
+       already refuses to split when timestamps are unreadable, so nothing is ranked like-for-like
+       on data we could not parse. */
+    if (d === null) { unverifiable++; keepIdx.push(i); continue; }
+    if (d !== FULL_MS) continue;                     // measured short: either end of the window
+    keepIdx.push(i);
+  }
+  const partialsDropped = (rows.length - 1) - keepIdx.length;
+  const completeRows = keepIdx.map((i) => rows[i]);
+  const complete = keepIdx.map((i) => counts[i]);
   const lastComplete = complete[complete.length - 1];
   const sorted = complete.slice().sort((a, b) => a - b);
   const partialMins = mins(rows[rows.length - 1]);
@@ -456,6 +495,13 @@ async function mentionVolume(symbol, free, o) {
     zero_hour_share_pct: Math.round(zeroShare * 1000) / 10,
     total: total,
     observations: complete.length,
+    // Buckets excluded for not being a full 60 minutes (the window's leading fragment, and any
+    // other short bucket). Reported rather than silently dropped: a shrinking denominator that
+    // nobody announced is how a percentile ends up computed over a population no one described.
+    partial_buckets_dropped: partialsDropped,
+    // Buckets whose duration could not be parsed at all: kept (we cannot prove them short) but
+    // surfaced, because a silently unverifiable denominator is its own problem.
+    unverifiable_buckets: unverifiable,
     // WHICH HOURS THE RANK IS AGAINST. Named rather than implied: "62nd percentile" means two
     // different things depending on the pool, and a consumer that cannot see the denominator will
     // eventually compare a weekend reading to a weekday one as though they shared a scale.

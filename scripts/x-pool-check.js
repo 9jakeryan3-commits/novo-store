@@ -299,6 +299,40 @@ async function volume(payload) {
       'typical value as the quietest hour on record');
   }
 
+  /* ── 8. THE WINDOW HAS TWO FRAGMENTS, NOT ONE ────────────────────────────────────────────────
+   * Everything above assumed the only partial bucket was the LAST one — the hour still filling.
+   * It is not. counts/recent starts its window exactly 7 days before the request, so the FIRST
+   * bucket runs from that instant to the next hour boundary. Measured live on BTC:
+   *
+   *   start 2026-08-30T03:27:55Z  end 04:00:00Z   ->  a 32-MINUTE bucket, counted as an hour
+   *
+   * It had been in the ranking pool since the original fix. EVERY synthetic generator in this file
+   * missed it, because they all emit clean hour boundaries at both ends — the defect was only
+   * reachable through a real API response, and it was the live leg of the crypto collector's probe
+   * that surfaced it. This check exists so it is reachable offline from now on.
+   */
+  {
+    const p = series({ weekdayMedian: 77, weekendMedian: 41, lastHourCount: 77,
+      endsUTC: '2026-09-03T18:00:00Z' });
+    // Reshape the FIRST bucket the way X actually returns it: a late start, an on-the-hour end.
+    const first = p.data[0];
+    first.start = new Date(new Date(first.end).getTime() - 32 * 60000).toISOString();
+    first.tweet_count = 12;                      // low, because it covers half the time
+
+    const { client, restore } = loadClient(p);
+    let v; try { v = await client.mentionVolume('SPY'); } finally { restore(); }
+
+    ok('the LEADING fragment is dropped, not counted as an hour',
+      v.partial_buckets_dropped === 1, 'dropped=' + v.partial_buckets_dropped);
+    ok('the window reports one fewer usable observation',
+      v.observations === 167, 'observations=' + v.observations);
+    ok('and the drop is REPORTED rather than a quietly smaller denominator',
+      typeof v.partial_buckets_dropped === 'number' && typeof v.unverifiable_buckets === 'number',
+      JSON.stringify({ dropped: v.partial_buckets_dropped, unverifiable: v.unverifiable_buckets }));
+    ok('the fragment\'s low count is not in the ranked pool',
+      v.ranked_against.n <= 167, 'n=' + v.ranked_against.n);
+  }
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })();
