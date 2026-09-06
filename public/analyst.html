@@ -96,22 +96,26 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   :root {
     --navy:  #121316;
-    /* ── ONE SEPARATOR PER SURFACE (2026-09-06) ────────────────────────
-       The cards below no longer carry a containment outline, so the FILL has to
-       do the separating on its own. #1c1d21 sat at only DeltaL* 4.92 above the
-       page -- under the floor of Material 3's dark card ramp (+6.4 -> +11.2), and
-       the first step ambient light and cheap-panel black-crush eat. #232428 is
-       DeltaL* 8.35 and keeps navy2's exact channel shape (R, R+1, R+5), so there
-       is no hue drift across the three accent families that sit on it.
-       --rule is for dividers INSIDE a lifted card: against #232428 --bdr collapses
-       from DeltaL* 9.07 to 5.60, which would quietly mute exactly the borders that
-       are doing real typographic work. --bdr still reads at DeltaL* 14.00 on the
-       page itself, so section bands and flat surfaces keep it.
-       --blue moves with the lift: #3b82f6 on #232428 is 4.22:1, under AA for the
-       small-caps labels that use it; #4a8ef7 is 4.80:1. */
-    --navy2: #232428;
+    /* ── NO SURFACE AT ALL (2026-09-06, reversal of the lift shipped hours earlier) ──
+       Jake: "every piece of info or text does not need a box or border or
+       background lift. most dont."
+       The previous pass had the treatment backwards. It removed the containment
+       outlines and LIFTED the fill (#1c1d21 -> #232428) to compensate -- which
+       keeps the box and only changes how it is drawn. A lifted panel is still a
+       panel. The data containers now carry NO fill and NO border at all: padding,
+       margin, gap and radius stay, and spacing and type do the separating. With
+       nothing lifted there is nothing left to compensate for, so:
+         --navy2 is back at #1c1d21. It now paints only full-bleed section BANDS,
+         pills and the chat bubbles in the Dr. NoVo demo -- never a card.
+         --rule is DELETED. It existed solely to stop --bdr collapsing against the
+         lifted #232428 fill (DeltaL* 5.60); on #1c1d21 --bdr is back to DeltaL*
+         9.07, so every divider it carried -- table rules, the price-feature list,
+         the FAQ answer rule, the stats column rule -- is on --bdr again.
+       --blue stays #4a8ef7. It was raised for the lift but it is a straight
+       contrast gain that does not depend on it, and it still has to clear AA on
+       the tinted bands and price cards, which keep their surfaces. */
+    --navy2: #1c1d21;
     --bdr:   #2e3036;
-    --rule:  #34363c;
     --blue:  #4a8ef7;
     --amber: #f59e0b;
     --green: #10b981;
@@ -167,12 +171,13 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
   .hero::before { content: ''; position: absolute; top: -160px; left: 50%; transform: translateX(-50%); width: 1050px; height: 580px; background: radial-gradient(ellipse at center, rgba(59,130,246,0.22), rgba(34,211,238,0.08) 42%, transparent 72%); pointer-events: none; z-index: 0; }
   .hero .container { position: relative; z-index: 1; }
-  /* CARVE-OUT: these two do NOT sit on --navy. .hero::before paints a radial
-     rgba(59,130,246,.22) under them, so at the glow centre the effective ground
-     composites to ~#1b2b47 -- LIGHTER than the chip. The fill relationship is
-     already inverted there and the --navy2 lift only shrinks it further. So they
-     hold the pre-lift fill literally and keep the hairline: on a gradient ground
-     the border IS the affordance. */
+  /* CARVE-OUT from the flattening: these two do NOT sit on --navy. .hero::before
+     paints a radial rgba(59,130,246,.22) under them, so at the glow centre the
+     effective ground composites to ~#1b2b47 -- LIGHTER than the chip. Nothing
+     else on that gradient separates a chip from its neighbour, and a 999px pill
+     is a tag, not one of the squares Jake is describing. They keep the literal
+     #1c1d21 fill and the hairline: on a gradient ground the border IS the shape.
+     .hero-badge additionally carries a 3px blue accent bar on one side. */
   .hero-badge { display: inline-block; background: #1c1d21; border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 24px; }
   .hero h1 { font-size: clamp(40px, 6.4vw, 70px); font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1.03; margin-bottom: 14px; }
   .hero h1 span { background: linear-gradient(92deg, #22d3ee, #3b82f6 65%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
@@ -208,7 +213,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .pain-intro { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
   .pain h2 { font-size: clamp(22px, 3.5vw, 30px); font-weight: 800; color: var(--txt1); letter-spacing: -0.5px; margin-bottom: 32px; }
   .pain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .pain-item { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border: 1px solid var(--bdr); border-left: 3px solid var(--red); border-radius: 6px; padding: 16px; }
+  /* the 4-side box goes, the one-sided red accent bar stays -- it is the device,
+     not the containment. border-left is a full longhand (3px solid) so it does
+     not depend on the deleted shorthand for its style. */
+  .pain-item { display: flex; gap: 12px; align-items: flex-start; border-left: 3px solid var(--red); border-radius: 6px; padding: 16px; }
   .pain-x { color: var(--red); font-weight: 900; font-size: 15px; flex-shrink: 0; line-height: 1.5; }
   .pain-item p { font-size: 14px; color: var(--txt2); line-height: 1.55; }
   .pain-item p strong { color: var(--txt1); }
@@ -218,12 +226,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Who this is for ── */
   .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .for-card { background: var(--navy2); border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
+  .for-card { border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
   .for-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .for-card h3.green { color: var(--green); }
   .for-card h3.red { color: var(--red); }
   .for-card ul { list-style: none; }
-  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--rule); line-height: 1.5; }
+  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--bdr); line-height: 1.5; }
   .for-card li:last-child { border-bottom: none; }
   .for-card li .mark { font-weight: 700; margin-right: 9px; }
   .for-card.yes .mark { color: var(--green); }
@@ -232,9 +240,9 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── Stats bar ── */
   .stats { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 28px 0; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
-  /* The column rule sits INSIDE the .stats band, not against the page, so it takes
-     --rule: after the lift --bdr reads only DeltaL* 5.60 on #232428 (was 9.07 on #1c1d21). */
-  .stat { text-align: center; padding: 0 16px; border-right: 1px solid var(--rule); }
+  /* A column rule between cells, not a box -- typographic work, it stays. Back on
+     --bdr now that the band is #1c1d21 again and --bdr reads DeltaL* 9.07 on it. */
+  .stat { text-align: center; padding: 0 16px; }
   .stat:last-child { border-right: none; }
   .stat-val { font-size: 26px; font-weight: 900; color: var(--txt1); }
   .stat-val.blue { color: var(--blue); }
@@ -250,7 +258,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── How it works ── */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .how-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .how-card { background: var(--navy2); border-radius: 8px; padding: 28px; }
+  .how-card { border-radius: 8px; padding: 28px; }
   .how-num { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 2px; margin-bottom: 12px; }
   .how-card h3 { font-size: 16px; font-weight: 700; color: var(--txt1); margin-bottom: 10px; }
   .how-card p { font-size: 14px; color: var(--txt2); line-height: 1.6; }
@@ -312,7 +320,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .ai-headline span { color: var(--blue); }
   .ai-sub { font-size: 16px; color: var(--txt2); max-width: 600px; margin-bottom: 48px; line-height: 1.7; }
   .ai-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .ai-card { background: var(--navy); border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
+  /* STATE CARRIER -- do not delete this border-top. .amber-top / .green-top below
+     set border-top-COLOR only; with no base border-top they would compute to
+     width 0 and render nothing. It is also a one-sided coloured accent, not a
+     box, so it survives the flattening on its own merits. The fill is gone. */
+  .ai-card { border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
   .ai-card.amber-top { border-top-color: var(--amber); }
   .ai-card.green-top { border-top-color: var(--green); }
   .ai-card-label { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
@@ -325,7 +337,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .feature { display: flex; gap: 14px; background: var(--navy2); border-radius: 8px; padding: 20px; }
+  .feature { display: flex; gap: 14px; border-radius: 8px; padding: 20px; }
   /* Ask Dr. NoVo showcase — a paragraph describing an analyst sells worse than the analyst answering.
      Styled to look like the real panel on the dashboard, so what is promised here is recognisably
      what arrives after signup. */
@@ -349,7 +361,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .included-item { display: flex; align-items: center; gap: 10px; background: var(--navy2); border-radius: 6px; padding: 14px 16px; }
+  .included-item { display: flex; align-items: center; gap: 10px; border-radius: 6px; padding: 14px 16px; }
   .check { color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .included-item span { font-size: 14px; color: var(--txt2); }
 
@@ -358,18 +370,18 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Cost breakdown ── */
   .cost-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
-  .cost-card { background: var(--navy2); border-radius: 8px; padding: 24px; }
+  .cost-card { border-radius: 8px; padding: 24px; }
   .cost-card h3 { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .cost-card ul { list-style: none; }
-  .cost-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .cost-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--bdr); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
   .cost-card li:last-child { border-bottom: none; }
   .cost-val { color: var(--txt3); font-size: 13px; }
-  .cost-compare { background: var(--navy2); border: 1px solid var(--bdr); border-radius: 8px; overflow: hidden; }
-  .cost-compare-title { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: 2px; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid var(--rule); }
+  .cost-compare { border-radius: 8px; overflow: hidden; }
+  .cost-compare-title { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: 2px; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid var(--bdr); }
   .cost-compare table { width: 100%; border-collapse: collapse; }
-  .cost-compare th { font-size: 12px; color: var(--txt3); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--rule); font-weight: 600; }
+  .cost-compare th { font-size: 12px; color: var(--txt3); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--bdr); font-weight: 600; }
   .cost-compare th:not(:first-child) { text-align: center; }
-  .cost-compare td { font-size: 14px; color: var(--txt2); padding: 10px 20px; border-bottom: 1px solid var(--rule); }
+  .cost-compare td { font-size: 14px; color: var(--txt2); padding: 10px 20px; border-bottom: 1px solid var(--bdr); }
   .cost-compare td:not(:first-child) { text-align: center; }
   .cost-compare tr:last-child td { border-bottom: none; }
   .cost-novo { color: var(--green); font-weight: 700; }
@@ -390,14 +402,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      lead-in, the trailing text, and the <span> in the track-record row -- so a feature that reads
      as one sentence laid out as three narrow columns and shredded on a normal-width phone.
      Block flow puts it back to a wrapped sentence with a hanging check. */
-  .price-features li { display: block; position: relative; padding: 8px 0 8px 24px; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--txt2); line-height: 1.5; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
+  .price-features li { display: block; position: relative; padding: 8px 0 8px 24px; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); line-height: 1.5; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
   .price-features li:last-child { border-bottom: none; }
   .price-features li::before { content: '✓'; position: absolute; left: 0; top: 8px; color: var(--green); font-weight: 700; }
   .price-btn { width: 100%; background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px; box-shadow: 0 8px 26px rgba(16,185,129,0.32); }
   .price-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(16,185,129,0.48); }
   .price-btn-secondary { width: 100%; background: transparent; color: var(--amber); border: 1px solid var(--amber); padding: 15px; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .15s, transform .15s; margin-top: 10px; margin-bottom: 22px; }
   .price-btn-secondary:hover { background: rgba(245,158,11,0.08); transform: translateY(-2px); }
-  .price-next-steps { background: var(--navy); border: 1px solid var(--bdr); border-radius: 6px; padding: 14px 16px; text-align: left; margin-bottom: 12px; }
+  .price-next-steps { border-radius: 6px; padding: 14px 16px; text-align: left; margin-bottom: 12px; }
   .price-next-steps p { font-size: 12px; color: var(--txt3); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
   .price-next-steps ol { list-style: none; }
   .price-next-steps li { font-size: 13px; color: var(--txt2); padding: 3px 0 3px 22px; position: relative; line-height: 1.55; }
@@ -408,12 +420,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── FAQ ── */
   .faq-list { max-width: 700px; }
-  details.faq-item { border-radius: 8px; margin-bottom: 8px; background: var(--navy2); }
+  /* [open] toggles the +/- glyph only -- no border-color state to protect here.
+     The question padding, the 8px gap and .faq-a's rule do the separating. */
+  details.faq-item { border-radius: 8px; margin-bottom: 8px; }
   summary.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; font-size: 15px; font-weight: 600; color: var(--txt1); cursor: pointer; list-style: none; gap: 16px; }
   summary.faq-q::-webkit-details-marker { display: none; }
   summary.faq-q::after { content: '+'; color: var(--blue); font-size: 20px; font-weight: 300; flex-shrink: 0; line-height: 1; }
   details[open] summary.faq-q::after { content: '−'; }
-  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--rule); }
+  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--bdr); }
   .faq-a strong { color: var(--txt1); }
 
   /* ── Disclaimer ── */
@@ -422,7 +436,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Compounding Edge section ── */
   .loop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 840px; margin: 0 auto 32px; }
-  .loop-card { background: var(--navy2); border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
+  /* STATE CARRIER -- .amber-top / .green-top below set border-top-COLOR only. */
+  .loop-card { border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
   .loop-card.amber-top { border-top-color: var(--amber); }
   .loop-card.green-top { border-top-color: var(--green); }
   .loop-freq { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; color: var(--blue); }
@@ -462,22 +477,26 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
 
   /* ── Premium depth pass (placed last so it wins the cascade) ── */
+  /* The radius survives -- it is rhythm, and it still shapes the two blocks below
+     that keep a coloured surface. The drop shadow does NOT: a shadow is the lift
+     under another name, and on an element with no fill it draws a dark halo
+     around geometry that is not there. It stays only where a surface remains. */
   .for-card, .how-card, .ai-card, .feature, .cost-card, .cost-compare, .loop-card,
   details.faq-item, .pain-resolve, .compound-callout {
     border-radius: 14px;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.28);
   }
+  .pain-resolve, .compound-callout { box-shadow: 0 6px 24px rgba(0,0,0,0.28); }
   .pain-item, .included-item, .price-next-steps, .price-guarantee, .nav-portal {
     border-radius: 10px;
   }
   .for-card, .how-card, .ai-card, .feature, .cost-card, .loop-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
-  /* The lift and the shadow ARE the hover now. This rule used to tint the
-     containment border, which is gone -- and on .ai-card / .loop-card it also
-     overrode the 3px accent top, so an amber-top or green-top card turned blue
-     the moment the pointer touched it. */
+  /* The nudge IS the hover now. This rule used to tint the containment border,
+     which is gone -- and on .ai-card / .loop-card it also overrode the 3px accent
+     top, so an amber-top or green-top card turned blue the moment the pointer
+     touched it. The hover shadow went with the base shadow: these cards have no
+     fill to raise, so a shadow on hover would materialise a box that is not there. */
   .for-card:hover, .how-card:hover, .ai-card:hover, .feature:hover, .loop-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 40px rgba(0,0,0,0.4);
   }
 
   /* ── Scroll-in reveal (only active when JS adds .reveal-ready; no-JS + reduced-motion stay fully visible) ── */
@@ -658,7 +677,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="section-title" style="text-align:center;">Built for one kind of trader.</h2>
     <p class="section-sub" style="text-align:center;">If you trade SPY, QQQ or IWM intraday &mdash; especially 0DTE &mdash; this was built for your session. If you swing single names for weeks, it wasn&rsquo;t.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;max-width:1180px;margin:26px auto 0;">
-      <div style="background:var(--navy);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;">
+      <div style="border-radius:12px;padding:18px 20px;">
         <div style="font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#34d399;margin-bottom:9px;">You&rsquo;ll get it in a session</div>
         <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.85;">
           <li>0DTE and intraday on the index ETFs</li>
@@ -667,7 +686,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li>One or two tickers, traded properly</li>
         </ul>
       </div>
-      <div style="background:var(--navy);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;">
+      <div style="border-radius:12px;padding:18px 20px;">
         <div style="font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px;">Look elsewhere if</div>
         <ul style="margin:0;padding-left:18px;color:var(--txt2);font-size:14.5px;line-height:1.85;">
           <li>You need dealer gamma on thousands of single names</li>
@@ -749,7 +768,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section-label" style="color:#22d3ee;">Not raw data &mdash; the read</div>
     <h2 class="ai-headline">You get the <span style="color:#22d3ee;">interpretation</span>, written like a desk note.</h2>
     <p class="ai-sub">Twice a session &mdash; the Open and the Close, plus a Sunday Week-Ahead &mdash; Dr. NoVo writes a cold, institutional read of the tape and the positioning. No hype, no calls to trade. And the moment a major level breaks, <b style="color:var(--txt1);">&lsquo;The Line&rsquo;</b> lands a hold-or-break playbook live on your dashboard, for the ticker you&rsquo;re watching.</p>
-    <div style="background:var(--navy);border:1px solid var(--bdr);border-left:3px solid #22d3ee;border-radius:12px;padding:26px 28px;box-shadow:0 6px 24px rgba(0,0,0,0.28);">
+    <div style="border-left:3px solid #22d3ee;border-radius:12px;padding:26px 28px;">
       <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#22d3ee;font-weight:700;margin-bottom:10px;">Sample &middot; The Open</div>
       <p style="font-size:14.5px;color:var(--txt1);line-height:1.7;font-weight:600;margin-bottom:10px;">SPY opens pinned inside a positive-gamma regime &mdash; dealers long, moves dampened.</p>
       <p style="font-size:14px;color:var(--txt2);line-height:1.75;">Net GEX sits at <b style="color:var(--txt1);">+$2.0B</b> with the flip down at <b style="color:var(--txt1);">752.48</b>, so expect a grind between the <b style="color:var(--green);">759 call wall</b> and the <b style="color:#f43f5e;">740 put wall</b> rather than a clean trend. The weekly expected move is <b style="color:var(--txt1);">&plusmn;1%</b>. While positive gamma holds, the band edges tend to get pulled back toward the middle; a decisive break below the flip is what turns chop into trend &mdash; that's the level that changes the map.</p>
@@ -765,7 +784,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="section-title">The only question that<br>actually matters.</h2>
     <p class="section-sub">Every dealer map tells you where the walls are. None of them tell you what happened the <em>last time</em> the dealers were positioned exactly like this, so you are left reading a chart and guessing. NoVo scores today&rsquo;s SPY dealer configuration against every session it has logged, and shows you the closest matches with what price actually did afterwards.</p>
 
-    <div style="max-width:760px;margin:26px auto 0;background:var(--navy2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;">
+    <div style="max-width:760px;margin:26px auto 0;border-radius:12px;overflow:hidden;">
       <div style="padding:13px 18px;border-bottom:1px solid var(--bdr);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--txt2);">
         Closest historical SPY dealer setups &amp; how they resolved
       </div>

@@ -111,23 +111,26 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   :root {
     --navy:  #121316;
-    /* ── ONE SEPARATOR PER SURFACE (2026-09-06) ──────────────────────────────
-       The cards below no longer carry a containment outline, so the FILL has to
-       do the separating on its own. #1c1d21 sat at only DeltaL* 4.92 above the
-       page -- under the floor of Material 3's dark card ramp (+6.4 -> +11.2), and
-       the first step ambient light and cheap-panel black-crush eat. #232428 is
-       DeltaL* 8.35 and keeps navy2's exact channel shape (R, R+1, R+5), so there
-       is no hue drift across the accent families that sit on it.
-       --rule is for dividers INSIDE a lifted card: against #232428 --bdr collapses
-       from DeltaL* 9.07 to 5.60, which would quietly mute exactly the borders that
-       are doing real typographic work. --bdr still reads at DeltaL* 14.00 on the
-       page itself, so section bands and flat surfaces keep it.
-       --blue moves with the lift: #3b82f6 on #232428 is 4.22:1, under AA for the
-       11px/3px-tracked .section-label inside .setup-modal (a --navy2 surface);
-       #4a8ef7 is 4.80:1. Matches /crypto so the shared nav reads identically. */
-    --navy2: #232428;
+    /* ── THE LIFT IS REVERTED (2026-09-06, after /market-data) ────────────────
+       An earlier pass took the containment BORDER off the cards and LIFTED the
+       fill (#1c1d21 -> #232428) to compensate. That was backwards: it kept the
+       box and only changed how it was drawn, and a lifted panel is still a
+       panel. Jake: "having a square box wether its a border or the 'lift' it
+       looks like a kid did it. every piece of info or text does not need a box
+       or border or background lift. most dont."
+       So the fill comes off the data containers entirely -- padding, margin, gap
+       and radius stay, and spacing and type do the separating -- and --navy2
+       goes back to #1c1d21, where it is now only a full-bleed SECTION BAND tint
+       (.pain, .stats, .ai-section, .disclaimer) and a floating-panel fill (the
+       modal, the nav dropdowns). Not a card surface anywhere on this page.
+       --rule is gone with the lift. It existed only because --bdr collapsed from
+       DeltaL* 9.07 to 5.60 against #232428; against #1c1d21 and against the page
+       itself --bdr reads fine, so every divider that used --rule now uses --bdr.
+       --blue stays at #4a8ef7. It is not a lift compensation any more -- it is
+       simply the value /crypto uses, so the shared nav reads identically across
+       the two, and it is MORE contrast on the unlifted ground, not less. */
+    --navy2: #1c1d21;
     --bdr:   #2e3036;
-    --rule:  #34363c;
     --blue:  #4a8ef7;
     --amber: #f59e0b;
     --green: #10b981;
@@ -182,13 +185,15 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
   .hero::before { content: ''; position: absolute; top: -160px; left: 50%; transform: translateX(-50%); width: 1050px; height: 580px; background: radial-gradient(ellipse at center, rgba(59,130,246,0.22), rgba(34,211,238,0.08) 42%, transparent 72%); pointer-events: none; z-index: 0; }
   .hero .container { position: relative; z-index: 1; }
-  /* CARVE-OUT: these two do NOT sit on --navy. .hero::before paints a radial
+  /* NOT FLATTENED, and not containers. Both are PILLS -- a badge and a row of
+     chips -- and neither sits on --navy: .hero::before paints a radial
      rgba(59,130,246,.22) under them, so at the glow centre the effective ground
-     composites to ~#1b2b47 -- LIGHTER than the chip. The fill relationship is
-     already inverted there (DeltaL* -6.72) and the --navy2 lift shrinks it to
-     -3.25. So they hold the pre-lift fill literally and keep the hairline: on a
-     gradient ground the border IS the affordance. (.hero-chip also carries an
-     inline border-color variant in the markup -- the crypto chip.) */
+     composites to ~#1b2b47, LIGHTER than the pill. On a gradient ground the
+     hairline IS what holds the shape.
+     STATE CARRIERS, both of them: .hero-badge's 3px border-left is a coloured
+     accent bar, not a box side, and .hero-chip carries an inline
+     border-color-only variant in the markup (the crypto chip) that renders
+     NOTHING if the base border goes -- border-style's initial value is 'none'. */
   .hero-badge { display: inline-block; background: #1c1d21; border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 24px; }
   /* The feature pills. Markup shipped without these and rendered as one run-on line. */
   .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 680px; margin: 0 auto 30px; }
@@ -228,12 +233,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Who this is for ── */
   .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .for-card { background: var(--navy2); border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
+  /* FLAT. No fill, no border -- the heading colour and the row rules separate the
+     two lists. Padding and radius stay so the rhythm survives. */
+  .for-card { border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
   .for-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .for-card h3.green { color: var(--green); }
   .for-card h3.red { color: var(--red); }
   .for-card ul { list-style: none; }
-  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--rule); line-height: 1.5; }
+  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--bdr); line-height: 1.5; }
   .for-card li:last-child { border-bottom: none; }
   .for-card li .mark { font-weight: 700; margin-right: 9px; }
   .for-card.yes .mark { color: var(--green); }
@@ -241,7 +248,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Stats bar ── */
   .stats { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 28px 0; }
-  .stat { text-align: center; padding: 0 16px; border-right: 1px solid var(--rule); }
+  .stat { text-align: center; padding: 0 16px; }
   .stats > .container > div:last-child .stat { border-right: none; }
   /* 150px tracks give 3 columns in this band, orphaning the 4th tile. */
   @media (min-width: 536px) and (max-width: 712px) {
@@ -296,7 +303,9 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .included-item { display: flex; align-items: center; gap: 10px; background: var(--navy2); border-radius: 6px; padding: 14px 16px; }
+  /* FLAT. Thirteen of these in a two-column grid was the worst box wall on the
+     page. The green check and the bold lead-in are the separators now. */
+  .included-item { display: flex; align-items: center; gap: 10px; border-radius: 6px; padding: 14px 16px; }
   .check { color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .included-item span { font-size: 14px; color: var(--txt2); }
 
@@ -317,18 +326,20 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      lead-in, the trailing text, and the <span> in the track-record row -- so a feature that reads
      as one sentence laid out as three narrow columns and shredded on a normal-width phone.
      Block flow puts it back to a wrapped sentence with a hanging check. */
-  .price-features li { display: block; position: relative; padding: 8px 0 8px 24px; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--txt2); line-height: 1.5; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
+  .price-features li { display: block; position: relative; padding: 8px 0 8px 24px; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); line-height: 1.5; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
   .price-features li:last-child { border-bottom: none; }
   .price-features li::before { content: '✓'; position: absolute; left: 0; top: 8px; color: var(--green); font-weight: 700; }
   .price-btn { width: 100%; background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px; box-shadow: 0 8px 26px rgba(16,185,129,0.32); }
   .price-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(16,185,129,0.48); }
   .price-btn-secondary { width: 100%; background: transparent; color: var(--amber); border: 1px solid var(--amber); padding: 15px; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .15s, transform .15s; margin-top: 10px; margin-bottom: 22px; }
   .price-btn-secondary:hover { background: rgba(245,158,11,0.08); transform: translateY(-2px); }
-  /* Keeps its --navy fill: this box sits INSIDE .price-card, whose gradient is solid
-     --navy2 by the time it reaches here, so --navy is a recessed well at DeltaL* 8.35
-     and does the separating on its own. (/crypto rewrote this fill to --navy2, but
-     /crypto has no .price-next-steps in its markup -- there the rule is dead. Here it
-     is live, and --navy2 would paint it exactly the colour of the card behind it.) */
+  /* RECESSED PANEL -- keeps its --navy fill. This sits INSIDE .price-card, whose
+     gradient has resolved to solid --navy2 by the time it reaches here, so --navy
+     is DARKER than its ground: it reads as an inset well, not a raised box, and a
+     well is not what Jake is objecting to. (/crypto rewrote this fill to --navy2,
+     but /crypto has no .price-next-steps in its markup -- there the rule is dead.
+     Here it is live, and --navy2 would paint it exactly the colour of the card
+     behind it.) */
   .price-next-steps { background: var(--navy); border-radius: 6px; padding: 14px 16px; text-align: left; margin-bottom: 12px; }
   .price-next-steps p { font-size: 12px; color: var(--txt3); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
   .price-next-steps ol { list-style: none; }
@@ -337,14 +348,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .price-secure { font-size: 12px; color: var(--txt3); margin-top: 4px; }
 
   /* ── FAQ ── */
-  /* Safe to strip here: unlike /crypto, this page has no :hover / [open] border-color
-     rule on .faq-item -- the open state is the ::after glyph swap, which is untouched. */
-  details.faq-item { border-radius: 8px; margin-bottom: 8px; background: var(--navy2); }
+  /* FLAT. Safe here in a way it is not on /crypto: this page has no :hover and no
+     [open] border-color rule on .faq-item -- the open state is the ::after glyph
+     swap (+ / −), which is untouched, so nothing was depending on a base border.
+     The hairline under the question (.faq-a border-top) is the only edge left. */
+  details.faq-item { border-radius: 8px; margin-bottom: 8px; }
   summary.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; font-size: 15px; font-weight: 600; color: var(--txt1); cursor: pointer; list-style: none; gap: 16px; }
   summary.faq-q::-webkit-details-marker { display: none; }
   summary.faq-q::after { content: '+'; color: var(--blue); font-size: 20px; font-weight: 300; flex-shrink: 0; line-height: 1; }
   details[open] summary.faq-q::after { content: '−'; }
-  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--rule); }
+  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--bdr); }
   .faq-a strong { color: var(--txt1); }
 
   /* ── Disclaimer ── */
@@ -396,7 +409,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     background: var(--navy); border: 1px solid var(--bdr); border-radius: 4px;
     padding: 1px 6px; font-size: 12.5px; color: var(--txt1);
   }
-  .setup-modal-cta { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule); text-align: center; }
+  .setup-modal-cta { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--bdr); text-align: center; }
   .setup-modal-cta p { color: var(--txt3); font-size: 13px; margin-bottom: 14px; }
   @media (max-width: 600px) {
     .setup-modal { padding: 26px 20px 28px; margin: 16px auto; }
@@ -404,21 +417,28 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   }
 
   /* ── Premium depth pass (placed last so it wins the cascade) ── */
-  .for-card, .how-card, .ai-card, .feature, .cost-card, .cost-compare,
-  details.faq-item, .pain-resolve {
+  /* A drop shadow paints the element's box even when the element has no fill and
+     no border -- so leaving .for-card and details.faq-item in this rule after
+     flattening them would have left a dark rounded rectangle hanging in the air:
+     the same box, drawn a third way. They keep the radius and lose the elevation.
+     .ai-card and .feature still have a surface to raise, so they stay. */
+  .how-card, .ai-card, .feature, .cost-card, .cost-compare, .pain-resolve {
     border-radius: 14px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.28);
   }
+  .for-card, details.faq-item { border-radius: 14px; }
   .pain-item, .included-item, .price-next-steps, .price-guarantee, .nav-portal {
     border-radius: 10px;
   }
-  .for-card, .how-card, .ai-card, .feature, .cost-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
-  /* The lift and the shadow ARE the hover now. This rule used to tint the
-     containment border, which is gone from .for-card and .ai-card -- and on
-     .ai-card it also overrode the 3px accent top, so an amber-top or green-top
-     card turned blue the moment the pointer touched it. .feature keeps its
-     border and its own a.feature:hover ring, which outranks this rule anyway. */
-  .for-card:hover, .how-card:hover, .ai-card:hover, .feature:hover {
+  .how-card, .ai-card, .feature, .cost-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
+  /* The lift and the shadow ARE the hover now -- this rule used to tint a
+     containment border that no longer exists, and on .ai-card it also overrode
+     the 3px accent top, so an amber-top or green-top card turned blue the moment
+     the pointer touched it. .for-card is out of it entirely: it is flat, it is
+     not a link, and lifting text off nothing just makes the copy jump.
+     .feature keeps its border and its own a.feature:hover ring, which outranks
+     this rule anyway. */
+  .how-card:hover, .ai-card:hover, .feature:hover {
     transform: translateY(-3px);
     box-shadow: 0 14px 40px rgba(0,0,0,0.4);
   }

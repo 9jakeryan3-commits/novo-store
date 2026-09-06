@@ -52,23 +52,24 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    /* -- ONE SEPARATOR PER SURFACE (2026-09-06) -----------------------------
-       Same palette as shipped on /crypto. A surface that already carries its
-       own fill does not also need a containment outline, so the FILL has to do
-       the separating. --navy2 #1c1d21 sat at only DeltaL* 4.92 above the page --
-       under the floor of Material 3's dark card ramp (+6.4 -> +11.2), the first
-       step ambient light and cheap-panel black-crush eat. #232428 is DeltaL*
-       8.35 and keeps navy2's exact channel shape (R, R+1, R+5), so there is no
-       hue drift across the four accent families (cyan / green / amber / purple)
-       that sit on it.
-       --rule is for dividers INSIDE a lifted card: against #232428 --bdr
-       collapses from DeltaL* 9.07 to 5.60, which would quietly mute exactly the
-       borders doing real typographic work. --bdr still reads at DeltaL* 14.00
-       against the page, so section bands, the .helper rule, the footer rule and
-       the dropdown panels' outer hairlines keep it.
-       --blue moves with the lift: #3b82f6 on #232428 is 4.17:1 -- under AA for
-       the 11px small-caps .head .badge label that uses it; #4a8ef7 is 4.75:1. */
-    --navy:#121316; --navy2:#232428; --bdr:#2e3036; --rule:#34363c;
+    /* -- THE LIFT IS REVERTED (2026-09-06) ----------------------------------
+       An earlier pass took borders off and raised --navy2 from #1c1d21 to
+       #232428 to compensate. That was backwards: a lifted panel is still a
+       panel, so all it did was redraw the box. Jake: "having a square box
+       whether its a border or the 'lift' it looks like a kid did it."
+       --navy2 goes back to #1c1d21. It survives here only on things that are
+       not data containers -- the two dropdown panels (floating over arbitrary
+       ground), the email input (an affordance) and the six plan cards, which
+       are purchasable products carrying tier accents, not text in squares.
+       --rule existed purely to keep dividers legible against the lift. With no
+       lift there is nothing to compensate for, and no rule on this page ever
+       referenced it, so the token is gone. --bdr is the one hairline: section
+       bands, the .helper rule, the footer rule and the panels' outer edges.
+       --blue stays #4a8ef7. It was raised for AA against the lift, but it is
+       also the colour of every link on the page and it reads 5.83:1 on the
+       flat page ground -- reverting it would be a contrast change nobody asked
+       for, not a lift revert. */
+    --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036;
     --blue:#4a8ef7; --cyan:#22d3ee;
     --green:#10b981; --red:#f43f5e; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#7d97b8;
   }
@@ -103,13 +104,14 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* Header */
   .head { text-align: center; padding: 64px 0 28px; }
-  /* The neutral 4-side box is gone -- the badge carries its own var(--navy2)
-     fill, which now separates on its own. The 3px left accent is NOT a box: it
-     is typographic work and stays. Nothing sets border-color on this selector,
-     so there is no state to carry. (/crypto's .hero-badge keeps its hairline
-     only because .hero::before paints a gradient under it; .head here has no
-     background at all, so the badge sits on flat var(--navy).) */
-  .head .badge { display: inline-block; background: var(--navy2); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 20px; }
+  /* An eyebrow label, not a container -- so it gets no surface at all now. The
+     earlier pass dropped the 4-side hairline and left a var(--navy2) fill doing
+     exactly the same containment job; that fill is the lift Jake called out, so
+     it goes too. What stays is the 3px left accent: ONE side is an accent bar,
+     not a box, and it is now the only thing marking the label off from the h1
+     under it. Padding and radius are untouched so the rhythm survives. Nothing
+     sets border-color on this selector, so there is no state edge to carry. */
+  .head .badge { display: inline-block; border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 20px; }
   .head h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; margin-bottom: 14px; }
   .head h1 .g { color: var(--green); }
   .head p { max-width: 620px; margin: 0 auto; color: var(--txt2); font-size: 16.5px; }
@@ -125,6 +127,20 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .bhead p { color: var(--txt2); font-size: 14.5px; margin: 0; }
   .bgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 18px 0 30px; align-items: start; max-width: 980px; margin: 0 auto; }
   @media (max-width: 940px) { .bgrid { grid-template-columns: 1fr; max-width: 460px; } }
+  /* .card KEEPS its surface. Three reasons, worst breakage first:
+     (1) STATE CARRIER. Four rules -- .feat-cyan / .feat-green / .feat-amber below and
+         .feat-purple in the last <style> block -- set border-color and NOTHING else.
+         Delete this shorthand and border-style falls back to its initial `none`, so
+         all four accents compute to width 0 and render nothing, silently. Every one
+         of the six cards on this page carries one of those four modifiers, so the
+         entire tier colour-coding would vanish with no diff to point at.
+     (2) They ARE the accent Jake exempted: "some have accent and those are
+         different". Cyan is the Most-popular marker, purple is the Crypto product's
+         identity. That is a device, not containment -- and a plan card is a product
+         you buy, not a piece of text someone put in a square.
+     (3) .tag is position:absolute; top:-12px -- the pill straddles this card's top
+         edge. With no edge it hangs over nothing.
+     The lift revert above still de-lifts all six: #232428 -> #1c1d21. */
   .card { position: relative; display: flex; flex-direction: column; background: var(--navy2); border: 1px solid var(--bdr); border-radius: 14px; padding: 26px 24px; }
   .card.feat-cyan { border-color: rgba(34,211,238,0.55); box-shadow: 0 18px 50px rgba(34,211,238,0.10); }
   .card.feat-green { border-color: rgba(16,185,129,0.6); box-shadow: 0 18px 54px rgba(16,185,129,0.14); }
@@ -298,11 +314,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p>Read the market free, get the desk&rsquo;s read, or trade the levels off the live chart. Pick your lane &mdash; upgrade or cancel any time.</p>
     <p style="max-width:640px;margin:14px auto 0;color:var(--txt2);font-size:15px;line-height:1.7;">One tool, not five. The dealer map on both books, its hourly audit and the knowledge base in one place &mdash; instead of a gamma subscription, a chart platform, a vol dashboard and a signal Discord you alt-tab between.</p>
     <div style="max-width:900px;margin:18px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:13px;">
-      <span style="border:1px solid var(--bdr);border-radius:999px;padding:8px 14px;color:var(--txt2);">7-day free trial on Analyst and Crypto &middot; card required, cancel before it ends and you pay nothing</span>
-      <span style="border:1px solid var(--bdr);border-radius:999px;padding:8px 14px;color:var(--txt2);">Cancel any time in one click &mdash; <a href="/refund-policy" style="color:#22d3ee;">refund policy</a></span>
-      <span style="border:1px solid var(--bdr);border-radius:999px;padding:8px 14px;color:var(--txt2);">Your broker is never connected &mdash; there is nothing to link</span>
-      <span style="border:1px solid var(--bdr);border-radius:999px;padding:8px 14px;color:var(--txt2);">Every decision stays yours &mdash; <a href="/security" style="color:#22d3ee;">how it is secured</a></span>
-      <span style="border:1px solid var(--bdr);border-radius:999px;padding:8px 14px;color:var(--txt2);">Check it before you pay &mdash; <a href="/track-record" style="color:#22d3ee;">the scored track record</a></span>
+      <span style="border-radius:999px;padding:8px 14px;color:var(--txt2);">7-day free trial on Analyst and Crypto &middot; card required, cancel before it ends and you pay nothing</span>
+      <span style="border-radius:999px;padding:8px 14px;color:var(--txt2);">Cancel any time in one click &mdash; <a href="/refund-policy" style="color:#22d3ee;">refund policy</a></span>
+      <span style="border-radius:999px;padding:8px 14px;color:var(--txt2);">Your broker is never connected &mdash; there is nothing to link</span>
+      <span style="border-radius:999px;padding:8px 14px;color:var(--txt2);">Every decision stays yours &mdash; <a href="/security" style="color:#22d3ee;">how it is secured</a></span>
+      <span style="border-radius:999px;padding:8px 14px;color:var(--txt2);">Check it before you pay &mdash; <a href="/track-record" style="color:#22d3ee;">the scored track record</a></span>
     </div>
   </div>
 

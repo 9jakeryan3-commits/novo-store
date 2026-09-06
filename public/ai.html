@@ -55,23 +55,24 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   :root {
     --navy:  #121316;
-    /* ── ONE SEPARATOR PER SURFACE (2026-09-06) ─────────────────────────
-       The cards below no longer carry a containment outline, so the FILL has to
-       do the separating on its own. #1c1d21 sat at only DeltaL* 4.92 above the
-       page -- under the floor of Material 3's dark card ramp (+6.4 -> +11.2), and
-       the first step ambient light and cheap-panel black-crush eat. #232428 is
-       DeltaL* 8.35 and keeps navy2's exact channel shape (R, R+1, R+5), so there
-       is no hue drift across the three accent families that sit on it.
-       --rule is for dividers INSIDE a lifted card: against #232428 --bdr collapses
-       from DeltaL* 9.07 to 5.60, which would quietly mute exactly the borders that
-       are doing real typographic work. --bdr still reads at DeltaL* 14.00 on the
-       page itself, so section bands and flat surfaces keep it.
-       --blue moves with the lift: #3b82f6 on #232428 is 4.19:1, under AA for the
-       small-caps labels that use it (.section-label, .how-num, .cost-card h3,
-       .loop-freq, .price-name); #4a8ef7 is 4.82:1. */
-    --navy2: #232428;
+    /* ── NO LIFT, NO RULE (2026-09-06 — reverting the block this replaced) ──
+       The lift was compensation. An earlier pass pulled the containment outlines
+       off the cards and raised the fill to #232428 so each panel still read as a
+       panel -- which keeps the box and only changes how it is drawn. Jake's call
+       is that the panel IS the problem: "every piece of info or text does not need
+       a box or border or background lift. most dont." So the fill goes with the
+       border, and spacing and type do the separating.
+       --navy2 is back at #1c1d21. What still uses it is not data in squares: the
+       full-width section BANDS (.pain, .stats, .ai-section, .disclaimer), the chat
+       bubble in the demo, and the nav popovers.
+       --rule is deleted. It existed only to hold dividers legible against the
+       lifted #232428; with no lift, --bdr reads at DeltaL* 14.00 on the page and
+       does that job itself. All nine references now point at --bdr instead.
+       --blue stays at #4a8ef7. It was raised for AA on the lifted card and it is
+       still 5.9:1 on the page ground -- reverting it is a brand-colour change the
+       flattening pass does not need to make. */
+    --navy2: #1c1d21;
     --bdr:   #2e3036;
-    --rule:  #34363c;
     --blue:  #4a8ef7;
     --amber: #f59e0b;
     --green: #10b981;
@@ -130,10 +131,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* CARVE-OUT: these two do NOT sit on --navy. .hero::before paints a radial
      rgba(59,130,246,.22) under them, so at the glow centre the effective ground
      composites to ~#1b2b47 -- LIGHTER than the chip. The fill relationship is
-     already inverted there (DeltaL* -6.72) and the --navy2 lift shrinks it to
-     -3.25. So they hold the pre-lift fill literally and keep the hairline: on a
-     gradient ground the border IS the affordance. .hero-badge also carries a
-     3px blue left accent, which is sided work, not containment. */
+     inverted there (DeltaL* -6.72): each chip is a WELL in the glow, not a panel
+     raised off the page, and on a gradient ground the hairline is what keeps its
+     edge readable. Both are pills (999px / 4px), not squares. .hero-badge also
+     carries a 3px blue left accent, which is sided work, not containment. */
   .hero-badge { display: inline-block; background: #1c1d21; border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 24px; }
   .hero h1 { font-size: clamp(40px, 6.4vw, 70px); font-weight: 900; color: var(--txt1); letter-spacing: -2px; line-height: 1.03; margin-bottom: 14px; }
   .hero h1 span { background: linear-gradient(92deg, #22d3ee, #3b82f6 65%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
@@ -169,7 +170,10 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .pain-intro { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
   .pain h2 { font-size: clamp(22px, 3.5vw, 30px); font-weight: 800; color: var(--txt1); letter-spacing: -0.5px; margin-bottom: 32px; }
   .pain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .pain-item { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border: 1px solid var(--bdr); border-left: 3px solid var(--red); border-radius: 6px; padding: 16px; }
+  /* The 1px var(--bdr) box is gone; border-left is a 3px RED accent bar -- sided
+     work -- and stays. Fill stays too: var(--navy) inside the var(--navy2) .pain
+     band is DARKER than its ground, so it is an inset well, not a raised card. */
+  .pain-item { display: flex; gap: 12px; align-items: flex-start; background: var(--navy); border-left: 3px solid var(--red); border-radius: 6px; padding: 16px; }
   .pain-x { color: var(--red); font-weight: 900; font-size: 15px; flex-shrink: 0; line-height: 1.5; }
   .pain-item p { font-size: 14px; color: var(--txt2); line-height: 1.55; }
   .pain-item p strong { color: var(--txt1); }
@@ -179,12 +183,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Who this is for ── */
   .for-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .for-card { background: var(--navy2); border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
+  .for-card { border-radius: 8px; padding: 24px; min-width: 0; box-sizing: border-box; }
   .for-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .for-card h3.green { color: var(--green); }
   .for-card h3.red { color: var(--red); }
   .for-card ul { list-style: none; }
-  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--rule); line-height: 1.5; }
+  .for-card li { font-size: 14px; color: var(--txt2); padding: 7px 0; border-bottom: 1px solid var(--bdr); line-height: 1.5; }
   .for-card li:last-child { border-bottom: none; }
   .for-card li .mark { font-weight: 700; margin-right: 9px; }
   .for-card.yes .mark { color: var(--green); }
@@ -193,7 +197,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── Stats bar ── */
   .stats { background: var(--navy2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 28px 0; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
-  .stat { text-align: center; padding: 0 16px; border-right: 1px solid var(--rule); }
+  .stat { text-align: center; padding: 0 16px; }
   .stat:last-child { border-right: none; }
   .stat-val { font-size: 26px; font-weight: 900; color: var(--txt1); }
   .stat-val.blue { color: var(--blue); }
@@ -209,7 +213,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── How it works ── */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .how-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .how-card { background: var(--navy2); border-radius: 8px; padding: 28px; }
+  .how-card { border-radius: 8px; padding: 28px; }
   .how-num { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 2px; margin-bottom: 12px; }
   .how-card h3 { font-size: 16px; font-weight: 700; color: var(--txt1); margin-bottom: 10px; }
   .how-card p { font-size: 14px; color: var(--txt2); line-height: 1.6; }
@@ -269,10 +273,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .ai-headline span { color: var(--blue); }
   .ai-sub { font-size: 16px; color: var(--txt2); max-width: 600px; margin-bottom: 48px; line-height: 1.7; }
   .ai-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  /* Fill is var(--navy) but the GROUND is .ai-section's var(--navy2): the card is
-     a well, not a match, and the lift deepens it (DeltaL* 5.21 -> 8.35). The 3px
-     top stays -- .amber-top / .green-top set only border-top-color, so it is a
-     STATE CARRIER, not containment. */
+  /* KEPT, both halves. Fill is var(--navy) against .ai-section's var(--navy2)
+     ground -- DARKER than what it sits on, so it reads as an inset well, not a
+     raised box. The 3px top stays as well: .amber-top / .green-top set only
+     border-top-color, so it is a STATE CARRIER, and border-style's initial value
+     is none -- delete the base border and both modifiers render nothing. */
   .ai-card { background: var(--navy); border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
   .ai-card.amber-top { border-top-color: var(--amber); }
   .ai-card.green-top { border-top-color: var(--green); }
@@ -286,7 +291,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .feature { display: flex; gap: 14px; background: var(--navy2); border-radius: 8px; padding: 20px; }
+  .feature { display: flex; gap: 14px; border-radius: 8px; padding: 20px; }
   /* Ask Dr. NoVo showcase — a paragraph describing an analyst sells worse than the analyst answering.
      Styled to look like the real panel on the dashboard, so what is promised here is recognisably
      what arrives after signup. */
@@ -310,7 +315,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── What's included ── */
   .included-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .included-item { display: flex; align-items: center; gap: 10px; background: var(--navy2); border-radius: 6px; padding: 14px 16px; }
+  .included-item { display: flex; align-items: center; gap: 10px; border-radius: 6px; padding: 14px 16px; }
   .check { color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .included-item span { font-size: 14px; color: var(--txt2); }
 
@@ -319,18 +324,18 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Cost breakdown ── */
   .cost-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
-  .cost-card { background: var(--navy2); border-radius: 8px; padding: 24px; }
+  .cost-card { border-radius: 8px; padding: 24px; }
   .cost-card h3 { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
   .cost-card ul { list-style: none; }
-  .cost-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .cost-card li { font-size: 14px; color: var(--txt2); padding: 5px 0; border-bottom: 1px solid var(--bdr); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
   .cost-card li:last-child { border-bottom: none; }
   .cost-val { color: var(--txt3); font-size: 13px; }
-  .cost-compare { background: var(--navy2); border-radius: 8px; overflow: hidden; }
-  .cost-compare-title { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: 2px; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid var(--rule); }
+  .cost-compare { border-radius: 8px; overflow: hidden; }
+  .cost-compare-title { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: 2px; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid var(--bdr); }
   .cost-compare table { width: 100%; border-collapse: collapse; }
-  .cost-compare th { font-size: 12px; color: var(--txt3); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--rule); font-weight: 600; }
+  .cost-compare th { font-size: 12px; color: var(--txt3); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--bdr); font-weight: 600; }
   .cost-compare th:not(:first-child) { text-align: center; }
-  .cost-compare td { font-size: 14px; color: var(--txt2); padding: 10px 20px; border-bottom: 1px solid var(--rule); }
+  .cost-compare td { font-size: 14px; color: var(--txt2); padding: 10px 20px; border-bottom: 1px solid var(--bdr); }
   .cost-compare td:not(:first-child) { text-align: center; }
   .cost-compare tr:last-child td { border-bottom: none; }
   .cost-novo { color: var(--green); font-weight: 700; }
@@ -347,17 +352,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .price-once { font-size: 14px; color: var(--txt3); margin: 8px 0 6px; }
   .price-roi { font-size: 13px; color: var(--green); font-weight: 600; margin-bottom: 24px; }
   .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
-  .price-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--txt2); break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
+  .price-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bdr); font-size: 14px; color: var(--txt2); break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
   .price-features li:last-child { border-bottom: none; }
   .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
   .price-btn { width: 100%; background: linear-gradient(180deg, #34d399, #10b981); color: #0b0f18; border: none; padding: 16px; border-radius: 11px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px; box-shadow: 0 8px 26px rgba(16,185,129,0.32); }
   .price-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(16,185,129,0.48); }
   .price-btn-secondary { width: 100%; background: transparent; color: var(--amber); border: 1px solid var(--amber); padding: 15px; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .15s, transform .15s; margin-top: 10px; margin-bottom: 22px; }
   .price-btn-secondary:hover { background: rgba(245,158,11,0.08); transform: translateY(-2px); }
-  /* Fill kept at var(--navy): this block's ground is .price-card, which is
-     var(--navy2) below 42%. As a well against the LIFTED card it now separates on
-     fill alone (DeltaL* 8.35). Repainting it var(--navy2) would have matched its
-     own parent exactly -- 1.000:1, no surface at all. Same shape as .ai-card. */
+  /* KEPT. Fill is var(--navy); its ground is .price-card, which is var(--navy2)
+     below 42% -- darker than what it sits on, so an inset well rather than a
+     raised box. Same shape as .ai-card. */
   .price-next-steps { background: var(--navy); border-radius: 6px; padding: 14px 16px; text-align: left; margin-bottom: 12px; }
   .price-next-steps p { font-size: 12px; color: var(--txt3); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
   .price-next-steps ol { list-style: none; }
@@ -369,14 +373,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── FAQ ── */
   .faq-list { max-width: 700px; }
-  /* No :hover / [open] rule on this page sets border-color, so this base border
-     carries no state -- unlike /crypto, where it does and therefore stays. */
-  details.faq-item { border-radius: 8px; margin-bottom: 8px; background: var(--navy2); }
+  /* No :hover / [open] rule on this page sets border-color, so nothing here was a
+     state carrier -- unlike /crypto, where it is and therefore stays. The outline
+     went in the pass before this one; the fill goes now. .faq-a keeps its border-top:
+     that is the divider between question and answer, typographic work. */
+  details.faq-item { border-radius: 8px; margin-bottom: 8px; }
   summary.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; font-size: 15px; font-weight: 600; color: var(--txt1); cursor: pointer; list-style: none; gap: 16px; }
   summary.faq-q::-webkit-details-marker { display: none; }
   summary.faq-q::after { content: '+'; color: var(--blue); font-size: 20px; font-weight: 300; flex-shrink: 0; line-height: 1; }
   details[open] summary.faq-q::after { content: '−'; }
-  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--rule); }
+  .faq-a { padding: 14px 20px 18px; font-size: 14px; color: var(--txt2); line-height: 1.7; border-top: 1px solid var(--bdr); }
   .faq-a strong { color: var(--txt1); }
 
   /* ── Disclaimer ── */
@@ -385,7 +391,11 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Compounding Edge section ── */
   .loop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 840px; margin: 0 auto 32px; }
-  .loop-card { background: var(--navy2); border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
+  /* Fill gone. The 3px top stays: .amber-top / .green-top set only
+     border-top-color, so it is a STATE CARRIER as well as a sided accent --
+     delete the base border and both modifiers compute to width 0 and paint
+     nothing at all. */
+  .loop-card { border-top: 3px solid var(--blue); border-radius: 8px; padding: 28px; }
   .loop-card.amber-top { border-top-color: var(--amber); }
   .loop-card.green-top { border-top-color: var(--green); }
   .loop-freq { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; color: var(--blue); }
@@ -428,17 +438,25 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .for-card, .how-card, .ai-card, .feature, .cost-card, .cost-compare, .loop-card,
   details.faq-item, .pain-resolve, .compound-callout {
     border-radius: 14px;
+  }
+  /* The drop shadow only belongs to the surfaces that survived the flattening.
+     An outer box-shadow paints OUTSIDE the border box whether or not the element
+     has a fill, so leaving it on a flattened card draws a dark halo in the exact
+     shape of the box that was just deleted -- the lift again, under another name. */
+  .ai-card, .pain-resolve, .compound-callout {
     box-shadow: 0 6px 24px rgba(0,0,0,0.28);
   }
   .pain-item, .included-item, .price-next-steps, .price-guarantee, .nav-portal {
     border-radius: 10px;
   }
-  .for-card, .how-card, .ai-card, .feature, .cost-card, .loop-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
-  /* The lift and the shadow ARE the hover now. This rule used to tint the
-     containment border, which is gone -- and on .ai-card / .loop-card it also
-     overrode the 3px accent top, so an amber-top or green-top card turned blue
-     the moment the pointer touched it. */
-  .for-card:hover, .how-card:hover, .ai-card:hover, .feature:hover, .loop-card:hover {
+  /* Only .ai-card still has a surface to lift. The flattened cards dropped out of
+     both rules: a translateY on text with no fill is a jitter, and the hover shadow
+     would paint the deleted box back in on pointer-over. This rule also used to tint
+     the containment border, which is gone -- and on .ai-card / .loop-card it
+     overrode the 3px accent top, so an amber-top or green-top card turned blue the
+     moment the pointer touched it. */
+  .ai-card { transition: transform .18s, box-shadow .18s; }
+  .ai-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 14px 40px rgba(0,0,0,0.4);
   }
@@ -546,14 +564,14 @@ nav { position: relative; }
   .ask-chip{display:inline-block;font-size:13px;color:var(--txt2);background:rgba(255,255,255,.03);
     border:1px solid var(--bdr);border-radius:999px;padding:7px 13px}
   .proof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px;margin-top:28px}
-  .proof{background:var(--navy2);border-radius:13px;padding:20px 19px}
+  .proof{border-radius:13px;padding:20px 19px}
   .proof-n{font-size:33px;font-weight:900;color:#22d3ee;letter-spacing:-1px;line-height:1;
     font-variant-numeric:tabular-nums}
   .proof-k{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;
     color:var(--txt3);margin:9px 0 10px}
   .proof-s{font-size:13.5px;line-height:1.6;color:var(--txt2)}
   .read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:16px;margin-top:28px}
-  .read-card{background:var(--navy2);border-radius:13px;padding:21px 20px}
+  .read-card{border-radius:13px;padding:21px 20px}
   .read-card h3{font-size:16px;font-weight:800;color:var(--txt1);margin:0 0 9px;letter-spacing:-.2px}
   .read-card p{font-size:14px;line-height:1.65;color:var(--txt2);margin:0}
   .when-list{display:flex;flex-direction:column;gap:2px;margin-top:26px;
@@ -564,11 +582,11 @@ nav { position: relative; }
   .when-b{flex:1;min-width:230px;font-size:14.5px;line-height:1.65;color:var(--txt2)}
   .when-b b{color:var(--txt1)}
   .cmp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:26px}
-  .cmp{background:var(--navy2);border-radius:13px;padding:22px 21px}
+  .cmp{border-radius:13px;padding:22px 21px}
   .cmp-q{font-size:16px;font-weight:800;color:#22d3ee;line-height:1.45;margin-bottom:11px}
   .cmp p{font-size:14px;line-height:1.68;color:var(--txt2);margin:0}
   .rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;margin-top:26px}
-  .rule{background:var(--navy2);border-left:2px solid var(--rule);
+  .rule{border-left:2px solid var(--bdr);
     border-radius:10px;padding:16px 17px;font-size:13.8px;line-height:1.62;color:var(--txt2)}
   .rule b{color:var(--txt1);display:block;margin-bottom:4px}
   @media (max-width:640px){ .when-t{flex-basis:100%} }
