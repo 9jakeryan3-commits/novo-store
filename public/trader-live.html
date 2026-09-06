@@ -1748,21 +1748,61 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   }
   body.v-feeds #card-brain { display: flex; }
   body.v-feeds #row-unique { display: grid; grid-area: unique !important; }
-  /* SHORT DESKTOP (2026-08-31, Jake's smaller-screen shot): the brain row is `auto`, so What NoVo
-     Knows always took its FULL content height — on a ~900px viewport that starved everything above
-     it: the audit clipped mid-sentence at ~230px and the Three Books lost its bottom four rows.
-     Under 1010px of height every row gets a bounded share instead, with floors so nothing becomes
-     a letterbox, and the brain card scrolls internally like the feed cards already do. On a window
-     shorter than the floors sum (~750px) #workspace's own overflow-y takes over — scroll, not clip. */
-  @media (max-height: 1010px) {
-    body.v-feeds #workspace {
-      grid-template-rows: auto minmax(250px, 1.15fr) minmax(210px, 1fr) minmax(180px, 0.95fr);
-    }
-    body.v-feeds #card-brain { flex-direction: column; overflow: hidden; min-height: 0; }
-    body.v-feeds #card-brain .brain-grid { flex: 1 1 0; min-height: 0; overflow-y: auto; align-content: start; }
+  /* ⚠ NO HEIGHT THRESHOLD. This was written on 2026-08-31 for exactly the failure Jake photographed
+     again on 09-06 -- "the audit clipped mid-sentence and the Three Books lost its bottom four
+     rows" -- and gated behind @media (max-height:1010px). His window is 1080 tall, which is a
+     ~1040px viewport once Chrome's own chrome is taken off, so the rule sat 30px above the machine
+     it was written for and never fired. Measured at 1040: .brain-grid had NO inner scroll, so
+     What Dr. NoVo Knows was clipped with no way to reach the rest.
+     A bounded row is the right layout at every height, not a small-screen concession: `auto` on the
+     brain row means that panel takes its full content height and starves the three above it, which
+     is worse on a tall screen, not better. So the threshold is deleted rather than raised -- there
+     is no number here to be wrong on the next machine. */
+  body.v-feeds #workspace {
+    grid-template-rows: auto minmax(250px, 1.15fr) minmax(210px, 1fr) minmax(180px, 0.95fr);
   }
+  body.v-feeds #card-brain { flex-direction: column; overflow: hidden; min-height: 0; }
+  body.v-feeds #card-brain .brain-grid { flex: 1 1 0; min-height: 0; overflow-y: auto; align-content: start; }
+  /* ⚠ THE SAFETY NET NOW EXISTS. The deleted comment claimed "on a window shorter than the floors
+     sum #workspace's own overflow-y takes over -- scroll, not clip". It did not: #workspace is
+     overflow:hidden, so below the floors sum (~640px plus the activity strip) the bottom panel was
+     simply cut off with nothing able to reach it. Measured at 800px: zero scrollable overflow on
+     #workspace while card-brain was hiding content. A promise in a comment is not a mechanism. */
+  body.v-feeds #workspace { overflow-y: auto; }
   /* The Books table sat flush against the window edge — give the numbers shoulder room. */
   body.v-feeds #card-board .b3-wrap { padding-right: 16px; }
+  /* ⚠ A PANEL THAT SCROLLS HAS TO LOOK LIKE IT SCROLLS. The global bar is 4px of #1e3255 on a
+     near-black panel, which is invisible in practice -- so the Analysis Feed hiding 539px and the
+     synopsis hiding 270px (measured, 1920x1040) read as content that had been CUT, not content
+     that had been parked. That is what Jake meant by "missing scrollers": they were present and
+     unseeable. Wider, lighter, and only on this tab's scroll areas, so the chart view's chrome is
+     untouched. scrollbar-gutter keeps the text from reflowing as a panel crosses into overflow. */
+  body.v-feeds #card-intel .log-area,
+  body.v-feeds #card-read .read2-body,
+  body.v-feeds #card-line .lf-area,
+  body.v-feeds #card-board .b3-wrap,
+  body.v-feeds #card-brain .brain-grid,
+  body.v-feeds #workspace { scrollbar-gutter: stable; }
+  body.v-feeds #card-intel .log-area::-webkit-scrollbar,
+  body.v-feeds #card-read .read2-body::-webkit-scrollbar,
+  body.v-feeds #card-line .lf-area::-webkit-scrollbar,
+  body.v-feeds #card-board .b3-wrap::-webkit-scrollbar,
+  body.v-feeds #card-brain .brain-grid::-webkit-scrollbar,
+  body.v-feeds #workspace::-webkit-scrollbar { width: 9px; height: 9px; }
+  body.v-feeds #card-intel .log-area::-webkit-scrollbar-thumb,
+  body.v-feeds #card-read .read2-body::-webkit-scrollbar-thumb,
+  body.v-feeds #card-line .lf-area::-webkit-scrollbar-thumb,
+  body.v-feeds #card-board .b3-wrap::-webkit-scrollbar-thumb,
+  body.v-feeds #card-brain .brain-grid::-webkit-scrollbar-thumb,
+  body.v-feeds #workspace::-webkit-scrollbar-thumb {
+    background: rgba(140,160,190,.34); border-radius: 99px;
+    border: 2px solid transparent; background-clip: padding-box; }
+  body.v-feeds #card-intel .log-area::-webkit-scrollbar-thumb:hover,
+  body.v-feeds #card-read .read2-body::-webkit-scrollbar-thumb:hover,
+  body.v-feeds #card-line .lf-area::-webkit-scrollbar-thumb:hover,
+  body.v-feeds #card-board .b3-wrap::-webkit-scrollbar-thumb:hover,
+  body.v-feeds #card-brain .brain-grid::-webkit-scrollbar-thumb:hover,
+  body.v-feeds #workspace::-webkit-scrollbar-thumb:hover { background: rgba(170,190,220,.55); }
   body.v-feeds #card-read  { display: flex; grid-area: read !important; border-left: 1px solid var(--bdr); }
   body.v-feeds #card-read .read2-body { max-height: none; }
   /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
