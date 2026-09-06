@@ -34,6 +34,10 @@
 const RECENT = "https://api.x.com/2/tweets/search/recent";
 const COUNTS = "https://api.x.com/2/tweets/counts/recent";
 
+/* Below this median hourly count the series is too coarse to rank — see mentionVolume for the
+   measured resolution table and why the floor is on the MEDIAN rather than the weekly total. */
+const MEDIAN_FLOOR = 10;
+
 /* -is:reply as well as -is:retweet: the first live probe came back led by a zero-engagement reply
    argument with profanity in it. A "catalyst" that is two strangers bickering is worse than no
    catalyst on a paid surface, and raw recent-search is mostly that. Kept verbatim from the original
@@ -113,30 +117,96 @@ async function mentionVolume(symbol, free) {
   const below = complete.filter((n) => n < lastComplete).length;
   const sorted = complete.slice().sort((a, b) => a - b);
   const partialMins = mins(rows[rows.length - 1]);
+  const median = sorted[Math.floor(sorted.length / 2)];
 
-  return {
+  /* ⚠ A PERCENTILE IS ONLY AS GOOD AS THE SERIES' RESOLUTION, and volume is the wrong thing to
+     check. The right question is how many DISTINCT values the series has, because tied hours rank
+     arbitrarily among themselves. Measured across 168 complete buckets:
+
+       tkr    7d total  median/hr  distinct  ONE extra post moves the rank by
+       SPY      16,501     57        109              1.8 pts
+       QQQ       9,702     36         96              2.4 pts
+       TSLA     23,555     85        116              1.2 pts
+       NVDA     23,130     94.5      121              1.2 pts
+       IWM       1,577      6         33              7.1 pts   <- and 3.6% of hours are literal zero
+
+     IWM resolves to 33 values across a week and a SINGLE POST swings its rank seven points. That is
+     not a measurement, it is a coin flip with decimals.
+
+     The floor is on the MEDIAN, not the weekly total: a total hides shape, and one viral 900-post
+     hour among 167 dead ones would pass a total test while ranking nothing. Ten sits above the
+     coarse case and far below every name that works. Of the five, IWM alone suppresses — which is
+     what the resolution column says rather than what anyone's intuition said first.
+
+     SUPPRESSED MEANS A STATED REASON, NEVER SILENCE. A missing field reads as merely absent and the
+     next consumer backfills it from somewhere else. And it does NOT fall back to the weekly total:
+     a total with no baseline is a number under an unstated denominator, which is the thing we just
+     decided not to trust. Found by Tony, endorsed by Einstein, verified here. */
+  const zeroShare = complete.filter((n) => n === 0).length / complete.length;
+  const total = (r.json.meta && r.json.meta.total_tweet_count) != null
+    ? r.json.meta.total_tweet_count
+    : counts.reduce((a, b) => a + b, 0);
+
+  /* ⚠ GATE THE RANKING, NEVER THE RAW COUNT. A percentile on a coarse series is meaningless, but a
+     COUNT of zero on a coarse series is often the entire finding — NoVo's own brand returns 0
+     mentions across 169 consecutive hours while the category it sells into runs ~883/week, which is
+     the first hard demand-side evidence the company has. A floor that suppressed thin series
+     wholesale would have hidden exactly that: a saturating counter turned upside down, blind at the
+     BOTTOM instead of the top. So refuse to NARRATE, never refuse to COUNT — the whole distribution
+     ships either way, because the shape IS the denominator. (Pete's catch.)
+
+     ⚠ AND THE GATE READS THE HISTORY'S MEDIAN, NEVER THE CURRENT BUCKET. Gating on the current
+     count would delete the low readings and keep the busy ones — censoring the exact tail the
+     percentile exists to detect. Stated here so nobody "optimises" it into the current hour later.
+     (Timmy's catch.) */
+  let unrankable = null;
+  if (median < MEDIAN_FLOOR) {
+    unrankable = "median " + median + " posts/hr over " + complete.length + " complete hours - at " +
+                 "this resolution a single post moves the rank several points";
+  } else if (zeroShare >= 0.05) {
+    unrankable = Math.round(zeroShare * 1000) / 10 + "% of hours are literally zero, so a " +
+                 "percentile would rank 'nobody posted, and that is normal here' as a quiet extreme";
+  } else if (total < 500) {
+    unrankable = "only " + total + " posts across the whole window";
+  }
+
+  const dist = {
     window: "last 7 days, hourly buckets (X counts/recent)",
-    // The headline measurement, and it is a COMPLETE hour so the comparison is like-for-like.
     last_complete_hour: lastComplete,
-    percentile_of_own_history: Math.round((below / complete.length) * 1000) / 10,
-    observations: complete.length,
     busiest_hour: sorted[sorted.length - 1],
-    median_hour: sorted[Math.floor(sorted.length / 2)],
-    total: (r.json.meta && r.json.meta.total_tweet_count) != null
-      ? r.json.meta.total_tweet_count
-      : counts.reduce((a, b) => a + b, 0),
-    // Reported, never ranked. Its own field name says it is partial and carries how partial.
+    median_hour: median,
+    zero_hour_share_pct: Math.round(zeroShare * 1000) / 10,
+    total: total,
+    observations: complete.length,
+    // Reported, never ranked. Its own field name says it is partial and carries how partial, so a
+    // reader can see what the ranked figure left out rather than being handed a quiet truncation.
     in_progress_hour: {
       count: counts[counts.length - 1],
       elapsed_minutes: partialMins === null ? null : Math.round(partialMins * 10) / 10,
-      note: "the hour still filling - NOT comparable to the ranked figure above, and must not be " +
-            "quoted as a percentile",
+      note: "the hour still filling - NOT comparable to the ranked figure, never quote as a percentile",
     },
-    // The denominator rides with the number. A rate without its n is the thing the track-record
-    // page exists to refuse, and that rule does not stop at the page.
+  };
+
+  if (unrankable) {
+    // rankable:false with a REASON. Never silence — a missing field reads as merely absent and the
+    // next consumer backfills it from somewhere else. And "too thin to rank" and "unusually quiet"
+    // are OPPOSITE claims that must not collapse into the same rendering downstream.
+    return Object.assign(dist, {
+      rankable: false,
+      percentile_of_own_history: null,
+      unrankable_because: unrankable,
+    });
+  }
+
+  return Object.assign(dist, {
+    rankable: true,
+    // The headline measurement, over a COMPLETE hour so the comparison is like-for-like. The
+    // denominator rides with it: a rate without its n is the thing the track-record page exists to
+    // refuse, and that rule does not stop at the page.
+    percentile_of_own_history: Math.round((below / complete.length) * 1000) / 10,
     note: "percentile of the LAST COMPLETE hour against this ticker's own prior complete hours, " +
           "n=" + complete.length + " buckets - a measurement of ATTENTION, never a direction",
-  };
+  });
 }
 
 /* The posts themselves, ranked by amplification rather than recency — an unranked recent-search is

@@ -79,14 +79,55 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, ticker: wantIv, atmIv: days.length ? days[days.length - 1][1] : null,
         ivRank: null, ivPercentile: null, days: days.length, note: 'building the window' });
     }
-    const vals = days.map(([, v]) => v);
+    /* ⚠ A BUCKET IS NOT COMPARABLE TO ITS HISTORY UNTIL IT IS COMPLETE — and this ranked whatever
+       the engine last wrote, against everything it had ever written.
+
+       _recordAtmIv keys by UTC DATE and runs on EVERY publish, so a Saturday gets a bucket exactly
+       like a Tuesday does. Ranking the newest one then compares a closed-market reading against
+       sessions. Found live by Timmy on 2026-09-06, on three PUBLIC pages at once: SPY, QQQ and IWM
+       all returned ivRank 0 / ivPercentile 0 with atmIv EXACTLY equal to the window low, and
+       market-data-spy.html was telling every visitor "0% of the last 21 sessions were lower". Three
+       independent tickers at their precise 21-day minimum simultaneously is not a market condition,
+       it is the artifact announcing itself — the value that appears when the input is broken is the
+       same value that appears now.
+
+       Same defect as the X mention percentile shipped an hour earlier, on a different clock: that
+       one was partial by minutes, this one is partial by "not a trading day at all".
+
+       TWO FILTERS, and both are needed. Weekend buckets are dropped from the HISTORY as well as the
+       current value, because they are not session readings and they drag the window low down — SPY's
+       6.1 against a 16.2 high is a closed-market number setting the floor for every future session's
+       rank. And today's bucket is excluded whatever day it is, because mid-session it is still
+       moving. The writer now only records during RTH, so this reader filter is what cleans the rows
+       already stored. */
+    const todayUTC = new Date().toISOString().slice(0, 10);
+    const isWeekend = (d) => {
+      const g = new Date(d + 'T00:00:00Z').getUTCDay();
+      return g === 0 || g === 6;
+    };
+    const sessions = days.filter(([d]) => d !== todayUTC && !isWeekend(d));
+    if (sessions.length < 2) {
+      return res.status(200).json({ ok: true, ticker: wantIv,
+        atmIv: days.length ? days[days.length - 1][1] : null,
+        ivRank: null, ivPercentile: null, days: sessions.length,
+        note: 'not enough completed sessions to rank yet' });
+    }
+    const vals = sessions.map(([, v]) => v);
     const cur = vals[vals.length - 1];
     const lo = Math.min(...vals), hi = Math.max(...vals);
     const rank = hi > lo ? Math.round(((cur - lo) / (hi - lo)) * 1000) / 10 : null;
     const below = vals.filter((v) => v < cur).length;
     const pct = Math.round((below / vals.length) * 1000) / 10;
+    // The in-progress/non-session reading still ships, in its own field, never ranked — absence
+    // gets its own rendering and "no session yet today" must not look like "IV is at its low".
+    const latest = days[days.length - 1];
     return res.status(200).json({ ok: true, ticker: wantIv, atmIv: cur, ivRank: rank, ivPercentile: pct,
-      low: lo, high: hi, days: vals.length });
+      low: lo, high: hi, days: vals.length,
+      asOf: sessions[sessions.length - 1][0],
+      current: (latest && latest[0] !== sessions[sessions.length - 1][0])
+        ? { day: latest[0], atmIv: latest[1], ranked: false,
+            note: 'not a completed session - reported, never ranked' }
+        : undefined });
   }
 
   let snap = null;

@@ -812,6 +812,13 @@ async function _recordAtmIv(state) {
   try {
     const r = kv();
     if (!r) return;
+    /* ⚠ ONLY RECORD DURING A LIVE SESSION. This ran on every publish, so weekends and after-hours
+       wrote buckets indistinguishable from trading days — and levels.js then ranked the newest one
+       as though it were a session. It also poisoned the WINDOW: a closed-market ATM IV of 6.1
+       became the 21-day low that every future session's rank was measured against. Three public
+       pages were reporting "0% of the last 21 sessions were lower" off exactly that.
+       state.session comes from the engine as closed|premarket|open|afterhours. */
+    if (String((state && state.session) || '') !== 'open') return;
     const day = new Date().toISOString().slice(0, 10);
     for (const i of (Array.isArray(state && state.indices) ? state.indices : [])) {
       const iv = Number(i && i.atm_iv);
