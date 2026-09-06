@@ -102,9 +102,16 @@ const FILL = `(() => {
         if (over > worst) { worst = over; offender = (r.textContent||'').replace(/\\s+/g,' ').trim().slice(0,26); }
       });
       const contentW = rows.reduce((a, r) => a + r.getBoundingClientRect().width, 0);
+      const vis = rows.filter(r => r.getBoundingClientRect().width > 0);
+      const cs2 = getComputedStyle(mi);
+      const padL = parseFloat(cs2.paddingLeft) || 0, padR = parseFloat(cs2.paddingRight) || 0;
+      const first = vis.length ? vis[0].getBoundingClientRect() : box;
+      const lastR = vis.length ? vis[vis.length - 1].getBoundingClientRect() : box;
       return { vw: window.innerWidth, rows: rows.length,
                stripW: Math.round(box.width), contentW: Math.round(contentW),
                clippedBy: worst, offender: offender,
+               gapLeft: Math.round(first.left - (box.left + padL)),
+               gapRight: Math.round((box.right - padR) - lastR.right),
                scrollOverflow: mi.scrollWidth - mi.clientWidth,
                wrap: getComputedStyle(mi).flexWrap,
                visibleLabels: rows.filter(r => r.getBoundingClientRect().width > 0)
@@ -113,12 +120,26 @@ const FILL = `(() => {
     console.log('  .. ' + w + 'px  rows=' + m.rows + ' filled=' + filled +
       ' clippedBy=' + m.clippedBy + ' scrollOverflow=' + m.scrollOverflow +
       ' wrap=' + m.wrap + ' stripW=' + m.stripW + ' contentW=' + m.contentW +
+      ' gapL=' + m.gapLeft + ' gapR=' + m.gapRight + ' visible=' + m.visibleLabels.length +
       (m.offender ? ' offender="' + m.offender + '"' : ''));
     // The two parked readouts must be gone from the Trader strip — and still present on the
     // Analyst dashboard, which is asserted separately below.
     ok(w + 'px: Gamma Squeeze and Analyst Score are parked',
       m.visibleLabels.indexOf('Gamma Squeeze') === -1 && m.visibleLabels.indexOf('Analyst Score') === -1,
       m.visibleLabels.join(' | '));
+    /* ⚠ SYMMETRY ALONE CANNOT FAIL HERE, so it is asserted alongside the reason it cannot. The
+       readouts stretch (flex:1 1 0) and fill the bar exactly, so both gaps are ZERO under
+       justify-content:center AND under flex-start — the sabotage run confirmed it. Asserting only
+       symmetry would be a green light that means nothing.
+       So the real property is asserted too: the tiles SPAN the bar. That is what makes the row
+       read as centred, and if it ever stops being true the symmetry check beside it starts to
+       matter. Two checks, one of them currently inert, and the inert one is labelled. */
+    ok(w + 'px: the readouts span the bar, leaving no side to be biased toward',
+      m.gapLeft <= 1 && m.gapRight <= 1 && (m.contentW + 24) >= m.stripW - 2,
+      'left=' + m.gapLeft + ' right=' + m.gapRight + ' content=' + m.contentW + ' strip=' + m.stripW);
+    ok(w + 'px: ...and the leading and trailing gaps match (inert while they stretch)',
+      Math.abs(m.gapLeft - m.gapRight) <= 2,
+      'left=' + m.gapLeft + ' right=' + m.gapRight);
     ok(w + 'px: no readout is clipped off the right edge (filled with real values)',
       m.clippedBy <= 1 && m.scrollOverflow <= 1,
       JSON.stringify(m) + '  filledTiles=' + filled);
@@ -156,6 +177,23 @@ const FILL = `(() => {
     html: /gamma squeeze/i.test(document.documentElement.innerHTML) }))()`);
   ok('the Analyst dashboard still carries Gamma Squeeze',
     an.squeeze && an.html, JSON.stringify(an));
+
+  /* SHOT=1 renders the strip. Every number above says it fills the bar evenly; only a picture says
+     whether it READS as centred, which is what Jake actually asked about. */
+  if (process.env.SHOT) {
+    await load(1920);
+    await evalIn(FILL);
+    await new Promise((r) => setTimeout(r, 300));
+    const clip = await evalIn(`(() => {
+      const b = document.getElementById('card-mktintel').getBoundingClientRect();
+      return { x: 0, y: Math.max(0, Math.round(b.top - 12)), width: 1920,
+               height: Math.round(b.height + 24) }; })()`);
+    const png = (await send('Page.captureScreenshot',
+      { format: 'png', clip: Object.assign({ scale: 1 }, clip) }, sid)).result;
+    fs.writeFileSync(path.join(process.env.SHOT_DIR || os.tmpdir(), 'strip-1920.png'),
+      Buffer.from(png.data, 'base64'));
+    console.log('  .. shot -> strip-1920.png');
+  }
 
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   ws.close(); proc.kill(); server.close();

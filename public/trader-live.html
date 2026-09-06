@@ -1482,11 +1482,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      nowrap makes a second row impossible rather than unlikely -- and left-aligned, the strip fills the
      empty half of the header beside the action buttons, which is what it was moved here to do. */
   /* justify-content: center (Jake, 2026-09-06 — "make sure the strip info is centered not left or
-     right"). The tiles are flex:1 1 0 so they usually absorb the whole bar and centring is a no-op
-     — but they cannot shrink below their own nowrap text, so whenever the content does not divide
-     evenly the leftover sat entirely on the RIGHT under the default flex-start. Measured at 1920:
-     1880px of content in a 1904px strip, so 24px of slack all on one side. Centring splits it, and
-     it matters more now that two readouts are parked and there is more slack to place. */
+     right").
+     ⚠ IT IS A NO-OP TODAY AND THE HONEST NOTE MATTERS MORE THAN THE RULE. Measured at 1920, 1800,
+     1600 and 1440: the leading and trailing gaps are BOTH ZERO. The readouts are flex:1 1 0, so
+     they stretch to fill the bar exactly (1880px of tiles + 24px of padding = the 1904px strip) and
+     there is no leftover space for any alignment to place. Each tile then centres its own label and
+     value, which is what makes the row read as centred rather than ranged left.
+     I first wrote this comment claiming it split 24px of right-hand slack. That was wrong — the
+     24px is the strip's own padding, not slack — and the sabotage run proved it: reverting to
+     flex-start changed nothing. Kept anyway, because it costs nothing and states the intent for the
+     day a tile stops growing; but it is a safety net, not the reason the strip looks centred. */
   #saas-header #card-mktintel { flex: 1 1 auto; min-width: 0; order: 2;
     display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
     gap: 2px 0; background: none; border: none; padding: 5px 12px; overflow: hidden; }
