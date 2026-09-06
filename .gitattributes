@@ -1,0 +1,50 @@
+# Line endings belong to the REPO, not to each machine's git config.
+#
+# WHY THIS EXISTS, stated precisely, because the obvious reason turned out to be wrong.
+#
+# Every text blob in this repo is already stored as pure LF — 1,551 of 1,551 verified, zero CRLF.
+# `core.autocrlf=true` on the Windows box hands you CRLF on checkout and converts back to LF on
+# commit, which is exactly what it is for. So:
+#
+#   * scripts/deploy.sh is LF IN THE INDEX. A Linux or container checkout gets LF and runs fine.
+#     The `bad interpreter: /usr/bin/env bash^M` failure is real as a mechanism but cannot happen
+#     from this repo's committed state — the CRLF exists only in the Windows working copy.
+#   * the ~3,000-line phantom diff is likewise already prevented on this box, by the same setting.
+#
+# THE ACTUAL RISK IS THAT core.autocrlf IS A PER-MACHINE SETTING AND NOTHING ENFORCES IT. A clone
+# on a machine where it is unset — another Windows box, a CI runner, a container, a new session —
+# would commit CRLF the first time someone edits a file there. THEN the shebang breaks on Linux and
+# a 60-line change reports as 3,000. Today the convention is a property of one laptop's config;
+# this file makes it a property of the repository, which is the difference between "it happens to
+# be right" and "it cannot go wrong".
+#
+# ⚠ ADDING THIS CHANGES NO STORED BYTES. Verified before committing, in a throwaway clone with
+# `git add --renormalize .`: ZERO blobs differ. That check matters — on a repo that HAD stored
+# CRLF, this same file would rewrite every one of them at once and produce exactly the unreviewable
+# diff it is meant to prevent. Run that check before adding a .gitattributes anywhere else.
+
+# Normalise to LF in the index; check out in the platform's own convention.
+* text=auto
+
+# Executables where the line ending is not cosmetic: a trailing \r joins the interpreter's NAME.
+*.sh   text eol=lf
+*.bash text eol=lf
+
+# Declared rather than left to git's NUL-byte heuristic. A file that is mostly text with one
+# embedded NUL is guessed as binary; a file with none is guessed as text and gets rewritten.
+# Guessing is fine until the guess is wrong, and a corrupted font or image is not obvious in review.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.zip  binary
+*.db   binary
+*.sqlite binary
+*.sqlite3 binary
