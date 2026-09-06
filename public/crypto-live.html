@@ -59,7 +59,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--navy);color:var(--txt1);font-family:var(--sans);font-size:13px}
+/* ⚠ THE GROUND IS A LITERAL, NOT --navy, ON PURPOSE. Crypto's page painted --navy #0e0e10 while
+   its .panel paints --panel #111113 -- a separation of 1.022:1, which is nothing. Dropping the
+   ground to #09090b (the same ground the analyst and trader dashboards paint) takes it to 1.055
+   without touching the --navy TOKEN, which still has three other jobs: .lv-drawer, that drawer's
+   sticky header, and the full-bleed #rail overlay. All three are overlays that are supposed to sit
+   above the page, so they get MORE distinct, not less.
+   It also rescues the chat: #novo-ask fills with --navy, so on the old ground it sat at exactly
+   1.000:1 -- its border was the only thing making it a panel at all. */
+body{background:#09090b;color:var(--txt1);font-family:var(--sans);font-size:13px}
 .hidden{display:none!important}
 a{color:var(--cyan)}
 
