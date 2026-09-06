@@ -213,9 +213,16 @@
      ADDITIVE class rather than edits to the base rules, so the floating shell is untouched and both
      hosts read from one stylesheet. */
   var CSS_DOCKED = `
+  /* ⚠ PAINTED EXPLICITLY, NOT LEFT TRANSPARENT. Docked, the panel sits over #workspace, which
+     paints rgb(44,44,48) — so the chat read as a grey card on a black dashboard while every other
+     surface reads black. Transparent does not mean "no colour", it means "whatever is behind me",
+     and what was behind it was the one grey box on the page. Same trap as an artifact body with no
+     background borrowing its host's. */
   #novo-ask.docked{position:static;transform:none;left:auto;right:auto;bottom:auto;width:100%;
     height:100%;max-height:none;max-width:none;display:flex;border-radius:0;border:0;box-shadow:none;
-    background:transparent;z-index:auto}
+    background:var(--bg,#09090b);z-index:auto}
+  /* The column behind it too, or a seam of workspace grey shows at the edges. */
+  #col-novo{background:var(--bg,#09090b)}
   #novo-ask.docked header{border-radius:0}
   /* The floating shell hides itself until opened. Docked, the tab owns visibility, so the panel is
      always laid out — otherwise it would measure zero and the log could never scroll to bottom. */

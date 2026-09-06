@@ -158,6 +158,27 @@ const PRELUDE = `
              mob: m && m.textContent.replace(/[\\s\\u00a0]+/g, ' ').trim() }; })()`);
   ok('the desktop button reads the AI mark then "Dr. NoVo"',
     named.desk === '✦ Dr. NoVo', JSON.stringify(named));
+  /* ⚠ THE CHAT MUST PAINT ITS OWN BACKGROUND. Left transparent it showed #workspace's rgb(44,44,48)
+     and read as a grey card on a black dashboard (Jake spotted it on desktop). "Transparent" is not
+     "no colour", it is "whatever is behind me" — and what was behind it was the one grey box on the
+     page. Asserted as a COMPUTED colour, because the rule can exist and still lose to specificity. */
+  const paint = await evalIn(`(() => {
+    const p = document.getElementById('novo-ask'), c = document.getElementById('col-novo');
+    const body = getComputedStyle(document.body).backgroundColor;
+    return { panel: getComputedStyle(p).backgroundColor,
+             col: getComputedStyle(c).backgroundColor, body: body }; })()`);
+  ok('the docked chat paints the page background, not the workspace grey',
+    paint.panel === paint.body && paint.col === paint.body &&
+    paint.panel !== 'rgba(0, 0, 0, 0)', JSON.stringify(paint));
+
+  /* letter-spacing is applied to the SPACE too, so "DR." + space rendered as a double gap. */
+  const spacing = await evalIn(`(() => { const b = document.querySelector('.navbtn-novo');
+    const c = getComputedStyle(b);
+    return { ls: c.letterSpacing, ws: c.wordSpacing }; })()`);
+  ok('the space after "Dr." is not double-width',
+    parseFloat(spacing.ws) < 0 && Math.abs(parseFloat(spacing.ws) + parseFloat(spacing.ls)) < 0.05,
+    JSON.stringify(spacing) + '  (word-spacing must cancel letter-spacing exactly)');
+
   ok('...and the mobile tab carries the same mark and name',
     (named.mob || '').indexOf('✦') >= 0 && /DR\. NOVO/.test(named.mob || ''),
     JSON.stringify(named));

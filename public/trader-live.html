@@ -1343,7 +1343,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   .mob-tab.mob-active { color: var(--blu); border-top-color: var(--blu); }
   /* Green on the phone too, and it keeps its colour when active — the other tabs turn blue, this
      one is the analyst and stays itself. */
+  /* Same correction as the desktop button: the tab label is uppercase and letter-spaced, so the
+     space after "DR." inherits it. */
   .mob-tab-novo { color: #34d399; }
+  .mob-tab-novo span:last-child { word-spacing: -0.8px; }
   .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(52,211,153,.85); }
   .mob-tab-novo.mob-active { color: #6ee7b7; border-top-color: #34d399; }
   .mob-tab-icon { font-size: 17px; line-height: 1; }
@@ -1702,7 +1705,13 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* NoVo: the one green control on a cyan dashboard, because it is the one that is not about the
      tape — it is the analyst. The glow is a slow breathe rather than a pulse; a fast blink beside a
      live chart reads as an alert, and this is an invitation. */
-  .navbtn-novo { border-color: rgba(52,211,153,.5) !important; color: #34d399 !important;
+  /* ⚠ word-spacing CANCELS the letter-spacing applied to the SPACE. .navbtn sets letter-spacing
+     0.8px and text-transform uppercase; letter-spacing is added after EVERY character including the
+     space, so "DR." + space carries the period's own side bearing plus 0.8px and reads as a double
+     gap — "DR.  NOVO". CHART and ANALYSIS never showed it because neither contains a space.
+     -0.8px removes exactly what letter-spacing added, no more. */
+  .navbtn-novo { word-spacing: -0.8px;
+    border-color: rgba(52,211,153,.5) !important; color: #34d399 !important;
     box-shadow: 0 0 13px -3px rgba(52,211,153,.55); animation: novoGlowBtn 2.8s ease-in-out infinite; }
   .navbtn-novo:hover, .navbtn-novo.on { border-color: #34d399 !important; color: #eaf3ff !important;
     background: rgba(52,211,153,.10) !important; box-shadow: 0 0 20px -2px rgba(52,211,153,.85); }
@@ -6797,7 +6806,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
      Del, Ctrl+Z keep working exactly as they did. -->
 <!-- NoVo chat. Loaded BEFORE novo-keys.js so window.novoAsk exists when the keyboard layer binds
      "n" and registers /ask — the same shortcut that opens the chat on every other surface. -->
-<script src="/js/novo-chat.js?v=c284d974"></script>
+<script src="/js/novo-chat.js?v=9cb1ea02"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.
