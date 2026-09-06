@@ -72,15 +72,47 @@ module.exports = async (req, res) => {
     // The latest CLOSED-MARKET reading, kept beside the series and never inside it. This is what
     // the Sunday Week Ahead is about — where IV sits going into the week — and it ships labelled
     // so a report can quote it against a named session close instead of a mixed-population rank.
+    /* ⚠ ABSENCE HAD TO BE MADE READABLE, and it is worth writing down why this is a bug rather than
+       a nicety. The first version returned `undefined` when there was no stored reading — and
+       JSON.stringify DROPS an undefined value, so the field vanished from the payload entirely.
+       That made four different states pixel-identical from outside:
+
+         · nothing written yet (first publish since deploy hasn't run)   <- benign, self-resolving
+         · the engine is publishing but emits no usable ATM IV           <- the feature can NEVER fire
+         · the stored value is corrupt                                   <- silent data loss
+         · this endpoint doesn't have the feature at all                 <- wrong mental model
+
+       Timmy found the field missing on all three tickers and could name two candidate causes but
+       could not separate them from outside, because there was nothing in the payload to separate
+       them WITH. The first and second are opposite conclusions — "wait a few minutes" versus "the
+       Sunday Week Ahead reading is structurally unable to fire in the exact window it exists for" —
+       and an absent key argues for neither.
+
+       So the field is ALWAYS present and always carries a reason when it is empty. Same rule the X
+       client already follows: `rankable:false` never travels silently, because a missing field
+       reads as merely absent and the next consumer backfills it from somewhere else. This does not
+       just report the state, it DIAGNOSES it — the next request settles the question that needed
+       KV access to answer. */
     let closed = null;
+    let closedWhy = null;
     try {
       const raw = await r.get(`iv:closed:${wantIv}`);
       closed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    } catch (_) { closed = null; }
-    const closedOut = (closed && Number.isFinite(Number(closed.atmIv)))
+      if (!closed) {
+        closedWhy = 'no out-of-hours reading stored yet - the engine writes this on its first ' +
+                    'publish outside regular hours; if it is still absent after one has run, the ' +
+                    'chain is yielding no usable ATM IV rather than the write being late';
+      } else if (!Number.isFinite(Number(closed.atmIv))) {
+        closedWhy = 'a reading is stored but its atmIv is not a finite number - stored value is bad';
+      }
+    } catch (_) {
+      closed = null;
+      closedWhy = 'the stored out-of-hours reading could not be read or parsed';
+    }
+    const closedOut = closedWhy === null
       ? { atmIv: Number(closed.atmIv), at: closed.at, session: closed.session, ranked: false,
           note: 'latest quote outside regular hours - reported, never ranked against sessions' }
-      : undefined;
+      : { atmIv: null, at: null, session: null, ranked: false, why: closedWhy };
     const days = Object.entries(h || {})
       .map(([d, v]) => [d, Number(v)])
       .filter(([, v]) => Number.isFinite(v) && v > 0)

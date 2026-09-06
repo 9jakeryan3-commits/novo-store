@@ -38,6 +38,52 @@ const COUNTS = "https://api.x.com/2/tweets/counts/recent";
    measured resolution table and why the floor is on the MEDIAN rather than the weekly total. */
 const MEDIAN_FLOOR = 10;
 
+/* The old absolute floor was `total < 500` over a 168-hour window. Once an hour is ranked against a
+   POOL rather than the whole window (see WEEKEND vs WEEKDAY below) that constant silently changes
+   meaning: 500 across 48 weekend hours is a three-times stricter test than 500 across 168. So the
+   floor is expressed per hour — 500/168 — and multiplied back up by whatever pool is actually the
+   denominator. Same test, stated in units that survive a change of window. */
+const MIN_TOTAL_PER_HOUR = 500 / 168;
+
+/* A pool below this is too short to percentile at all, whatever its median: 24 buckets can only
+   resolve the rank in ~4-point steps. A full weekend is 48, so this bites only on a truncated
+   window, which is exactly when it should. */
+const MIN_POOL_N = 24;
+
+/* WEEKEND HOURS ARE A DIFFERENT POPULATION, and ranking one against the other is the partial-bucket
+   defect wearing a calendar instead of a clock — like against unlike. Einstein measured it over 168
+   complete hours (median weekday/weekend, ET):
+
+     SPY   77 / 41      TSLA  100 / 72      NVDA  95 / 83
+
+   TSLA and NVDA barely care. SPY does, and SPY is what the Sunday Week Ahead is mostly about: at
+   roughly half the weekday median, SPY's BUSIEST weekend hour of the week ranks at the 69.0th
+   percentile against the mixed pool. There is no level of genuine Sunday activity that can rank
+   above 69 — the scale is capped and does not say so, so the Week Ahead would report "quiet" or
+   "middling" every single Sunday regardless of what actually happened.
+
+   ⚠ AND IT IS NOT ONLY A WEEKEND PROBLEM, which is the half worth stating because it runs five days
+   a week: the same mixing INFLATES weekday hours. Those 48 quiet weekend buckets sit at the bottom
+   of the mixed pool, so an ordinary SPY weekday hour is ranked partly against hours it was never
+   competing with. The cap is the visible symptom; the inflation is the common case.
+
+   So each hour is ranked against hours OF ITS OWN KIND, the pool is named in the payload, and the
+   gate below is computed on THAT POOL rather than the whole window — a gate describing a different
+   denominator from the percentile it guards is the same class of mislabel all over again.
+
+   ET, not UTC: "weekend" here means the market's weekend, and a Friday 20:00 ET bucket is 00:00Z
+   Saturday. Bucketing on UTC would file six weekday evening hours a week as weekend. */
+function isWeekendET(iso) {
+  try {
+    const wd = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York", weekday: "short",
+    }).format(new Date(iso));
+    return wd === "Sat" || wd === "Sun";
+  } catch (_) {
+    return null;            // unknown -> caller falls back to the undivided window, never guesses
+  }
+}
+
 /* -is:reply as well as -is:retweet: the first live probe came back led by a zero-engagement reply
    argument with profanity in it. A "catalyst" that is two strangers bickering is worse than no
    catalyst on a paid surface, and raw recent-search is mostly that. Kept verbatim from the original
@@ -112,12 +158,37 @@ async function mentionVolume(symbol, free) {
     } catch (_) { return null; }
   };
   const counts = rows.map((x) => Number(x.tweet_count) || 0);
-  const complete = counts.slice(0, -1);              // every bucket but the one still filling
+  const completeRows = rows.slice(0, -1);            // every bucket but the one still filling
+  const complete = counts.slice(0, -1);
   const lastComplete = complete[complete.length - 1];
-  const below = complete.filter((n) => n < lastComplete).length;
   const sorted = complete.slice().sort((a, b) => a - b);
   const partialMins = mins(rows[rows.length - 1]);
-  const median = sorted[Math.floor(sorted.length / 2)];
+
+  /* THE RANKING POOL: hours of the same kind as the hour being ranked. If the calendar cannot be
+     resolved for any bucket, or the like-pool is too short to be worth splitting, fall back to the
+     whole window and SAY SO in the payload — a silent fallback would leave a caller unable to tell
+     a like-for-like rank from a mixed one, which is the ambiguity this whole change exists to remove. */
+  const kinds = completeRows.map((b) => isWeekendET(b && b.start));
+  const lastKind = kinds[kinds.length - 1];
+  let pool = complete;
+  let poolName = "all complete hours";
+  if (lastKind !== null && !kinds.some((k) => k === null)) {
+    const like = complete.filter((_n, i) => kinds[i] === lastKind);
+    if (like.length >= MIN_POOL_N) {
+      pool = like;
+      poolName = lastKind ? "weekend hours only (ET)" : "weekday hours only (ET)";
+    } else {
+      poolName = "all complete hours - too few " +
+                 (lastKind ? "weekend" : "weekday") + " hours (" + like.length + ") to rank like-for-like";
+    }
+  } else if (lastKind === null) {
+    poolName = "all complete hours - bucket timestamps unreadable, could not split weekday/weekend";
+  }
+
+  const below = pool.filter((n) => n < lastComplete).length;
+  const poolSorted = pool.slice().sort((a, b) => a - b);
+  const median = poolSorted[Math.floor(poolSorted.length / 2)];
+  const poolTotal = pool.reduce((a, b) => a + b, 0);
 
   /* ⚠ A PERCENTILE IS ONLY AS GOOD AS THE SERIES' RESOLUTION, and volume is the wrong thing to
      check. The right question is how many DISTINCT values the series has, because tied hours rank
@@ -142,10 +213,15 @@ async function mentionVolume(symbol, free) {
      next consumer backfills it from somewhere else. And it does NOT fall back to the weekly total:
      a total with no baseline is a number under an unstated denominator, which is the thing we just
      decided not to trust. Found by Tony, endorsed by Einstein, verified here. */
-  const zeroShare = complete.filter((n) => n === 0).length / complete.length;
+  /* Both of these are computed on the POOL, not the window, because the pool is the denominator the
+     percentile actually uses. A gate that clears on the full week while the rank is taken against 48
+     weekend hours is a check measuring something other than the thing it guards. `total` below stays
+     window-wide because it is DESCRIPTION, not a gate — the whole distribution ships either way. */
+  const zeroShare = pool.filter((n) => n === 0).length / pool.length;
   const total = (r.json.meta && r.json.meta.total_tweet_count) != null
     ? r.json.meta.total_tweet_count
     : counts.reduce((a, b) => a + b, 0);
+  const totalFloor = Math.round(MIN_TOTAL_PER_HOUR * pool.length);
 
   /* ⚠ GATE THE RANKING, NEVER THE RAW COUNT. A percentile on a coarse series is meaningless, but a
      COUNT of zero on a coarse series is often the entire finding — NoVo's own brand returns 0
@@ -160,14 +236,18 @@ async function mentionVolume(symbol, free) {
      percentile exists to detect. Stated here so nobody "optimises" it into the current hour later.
      (Timmy's catch.) */
   let unrankable = null;
-  if (median < MEDIAN_FLOOR) {
-    unrankable = "median " + median + " posts/hr over " + complete.length + " complete hours - at " +
+  if (pool.length < MIN_POOL_N) {
+    unrankable = "only " + pool.length + " comparable hours (" + poolName + ") - too short to " +
+                 "percentile at all";
+  } else if (median < MEDIAN_FLOOR) {
+    unrankable = "median " + median + " posts/hr over " + pool.length + " " + poolName + " - at " +
                  "this resolution a single post moves the rank several points";
   } else if (zeroShare >= 0.05) {
-    unrankable = Math.round(zeroShare * 1000) / 10 + "% of hours are literally zero, so a " +
-                 "percentile would rank 'nobody posted, and that is normal here' as a quiet extreme";
-  } else if (total < 500) {
-    unrankable = "only " + total + " posts across the whole window";
+    unrankable = Math.round(zeroShare * 1000) / 10 + "% of the " + poolName + " are literally zero, " +
+                 "so a percentile would rank 'nobody posted, and that is normal here' as a quiet extreme";
+  } else if (poolTotal < totalFloor) {
+    unrankable = "only " + poolTotal + " posts across the " + pool.length + " comparable hours " +
+                 "(" + poolName + "), under the " + totalFloor + " this window size needs";
   }
 
   const dist = {
@@ -178,6 +258,15 @@ async function mentionVolume(symbol, free) {
     zero_hour_share_pct: Math.round(zeroShare * 1000) / 10,
     total: total,
     observations: complete.length,
+    // WHICH HOURS THE RANK IS AGAINST. Named rather than implied: "62nd percentile" means two
+    // different things depending on the pool, and a consumer that cannot see the denominator will
+    // eventually compare a weekend reading to a weekday one as though they shared a scale.
+    ranked_against: {
+      pool: poolName,
+      n: pool.length,
+      median_hour: median,
+      hour_kind: lastKind === null ? "unknown" : (lastKind ? "weekend" : "weekday"),
+    },
     // Reported, never ranked. Its own field name says it is partial and carries how partial, so a
     // reader can see what the ranked figure left out rather than being handed a quiet truncation.
     in_progress_hour: {
@@ -203,9 +292,9 @@ async function mentionVolume(symbol, free) {
     // The headline measurement, over a COMPLETE hour so the comparison is like-for-like. The
     // denominator rides with it: a rate without its n is the thing the track-record page exists to
     // refuse, and that rule does not stop at the page.
-    percentile_of_own_history: Math.round((below / complete.length) * 1000) / 10,
-    note: "percentile of the LAST COMPLETE hour against this ticker's own prior complete hours, " +
-          "n=" + complete.length + " buckets - a measurement of ATTENTION, never a direction",
+    percentile_of_own_history: Math.round((below / pool.length) * 1000) / 10,
+    note: "percentile of the LAST COMPLETE hour against " + poolName + ", n=" + pool.length +
+          " buckets - a measurement of ATTENTION, never a direction, and never a position",
   });
 }
 
