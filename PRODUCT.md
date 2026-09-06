@@ -361,3 +361,34 @@ so they have already gone stale once. Nothing rechecks them: it was a one-off au
 This is comparative advertising about named companies, so a wrong figure is worse than an
 embarrassment. **Re-verify against each vendor's own pricing page before quoting them anywhere new,
 and treat any figure older than a quarter as unverified.**
+
+## MCP: what an agent gets free, and the four pages that say so
+
+Verified live through `tools/call get_crypto_coin` on 2026-09-06, not copied from a doc.
+
+**Free payload:** `as_of · band · coin · price · totalOiUsd · funding[] · openInterest[] ·
+gammaSummary · liquidations24h · paid[]` — funding per venue (rate + annualised, never blended),
+open interest and 24h volume per venue, BTC/ETH gamma summary (spot, netGex, regime, expiry,
+settlementBook), and 24h longs/shorts forced out.
+
+**`paid[]` is the copy boundary, and it is load-bearing** — it is how an agent tells *withheld* from
+*zero*, which is the only reason this surface can be marketed honestly at all:
+
+> gamma by strike, call and put walls, flip zone · what a round trip actually costs you on Robinhood
+> · the price/open-interest regime read · history and percentiles · NoVo, who reads this map and the
+> equity dealer map
+
+**An entry entering or leaving `paid[]` is a copy change on four pages:**
+
+| Surface | Audience | The line |
+|---|---|---|
+| `index.html` free band | visitors | eleven tools; one puts a question to the analyst, *answered on what the free tier can see* |
+| `developers.html` | builders | *grounded in the same free map the other tools serve* |
+| `crypto.html` free coin section | crypto readers | *reads the same free coin data you do* |
+| `market-data.html` free crypto card | people already reading that payload | *read the same figures straight from our MCP server* |
+
+**None of those four pages observes the payload.** They describe it, so if its shape moves they keep
+describing the old one and nothing goes red — marketing copy as a derived store. Xavier
+(crypto lane) holds a matching note and will ping on a boundary change; this entry is the same
+obligation on the store side so it does not depend on one session surviving. Re-verify with the
+`tools/call` above before any rewrite.
