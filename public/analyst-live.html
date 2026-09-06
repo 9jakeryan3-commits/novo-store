@@ -1607,6 +1607,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
 
+<script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
 <button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
 
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
@@ -2131,6 +2132,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   // The bound is load-bearing: Safari in private mode throws on ANY setItem, so "drop one more and
   // retry" without a cap would discard the entire history chasing a write that can never land.
   function saveTurns(){
+      try { if (window.novoChatSync) window.novoChatSync.push(CHAT_SCOPE, TURNS); } catch(_e){}
     var put = function(rows){
       localStorage.setItem(CHAT_KEY, JSON.stringify({ t: Date.now(), turns: rows }));
     };
@@ -2158,6 +2160,34 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (m.s) srcLine(m.s);
     return el;
   }
+
+  /* ── CROSS-DEVICE SYNC (2026-09-06) ───────────────────────────────────────────────────────────
+     Jake: the transcript was per-BROWSER, so the same member on a phone found an empty chat. The
+     server copy is merged into localStorage by js/novo-chat-sync.js and this re-reads it. Kept to
+     a re-read rather than a render path of its own, because the page already knows how to draw a
+     transcript and a second drawing path is a second thing to keep in step. */
+  window.novoChatReload = function(){
+    TURNS = [];
+    PINNED = null;
+    var log = document.getElementById('novo-ask-log');
+    if (log) log.innerHTML = INTRO_HTML;
+    loadTurns();
+  };
+  var CHAT_SCOPE = (CHAT_KEY.indexOf('crypto') >= 0) ? 'crypto' : 'equity';
+  /* Analyst and Trader share `equity` on purpose: a subscriber does not experience them as two
+     products, and a Trader subscription always included this chat — it just used to live behind the
+     Analyst dashboard. Crypto keeps its own scope, which is what its author chose when they gave it
+     a separate storage key: a different desk, a different asset class. */
+  function novoChatPull(){
+    try {
+      if (!window.novoChatSync) return;
+      window.novoChatSync.pull(CHAT_SCOPE, CHAT_KEY).then(function(changed){
+        // Only repaint if the server actually had something this device did not.
+        if (changed) try { window.novoChatReload(); } catch(_e){}
+      });
+    } catch(_e){}
+  }
+
   function loadTurns(){
     try {
       var raw = localStorage.getItem(CHAT_KEY); if (!raw) return;
@@ -2220,6 +2250,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   };
   var INTRO_HTML = (function(){ var l = document.getElementById('novo-ask-log'); return l ? l.innerHTML : ''; })();
   loadTurns();
+    novoChatPull();
   // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
   // storage key it persists to instead, which is what the push-notification code already does.
   function tok(){
