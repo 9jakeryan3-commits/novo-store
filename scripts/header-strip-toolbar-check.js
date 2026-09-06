@@ -80,7 +80,11 @@ const FILL = `(() => {
 
   const BOX = `const B = s => { const e = typeof s === 'string' ? document.querySelector(s) : s;
     if (!e) return null; const r = e.getBoundingClientRect();
-    return r.width ? { l: Math.round(r.left), r: Math.round(r.right), w: Math.round(r.width) } : null; };`;
+    // h is returned as well as w: an assertion on a HEIGHT that this helper never reported read
+    // undefined and failed a button that was the right size. A box helper that omits a dimension
+    // makes every check of that dimension quietly false.
+    return r.width ? { l: Math.round(r.left), r: Math.round(r.right),
+                       w: Math.round(r.width), h: Math.round(r.height) } : null; };`;
 
   console.log('\nHeader clusters, scrolling strip, folding toolbar\n');
 
@@ -187,17 +191,25 @@ const FILL = `(() => {
   for (const page of ['analyst-live.html', 'crypto-live.html']) {
     await load(page, 1600, false);
     const g = await ev(`(() => { ${BOX}
-      const hint = B('#novo-keys-hint'), gear = B('.lv-gear');
+      const hint = B('#novo-keys-hint'), gear = B('.lv-gear'), bub = B('#novo-ask-bubble');
       // The gear's OWN PARENT, not a guessed 'header, .lv-head' selector -- that matched a
       // zero-width element on analyst, B() returned null for it, and the assertion below failed
       // on a page that was laid out correctly. An instrument that cannot see the thing it is
       // asked about reports a defect in the subject.
       const hd = document.querySelector('.lv-gear');
-      return { vw: innerWidth, hint, gear, hdr: hd ? B(hd.parentElement) : null }; })()`);
+      return { vw: innerWidth, hint, gear, bub, hdr: hd ? B(hd.parentElement) : null }; })()`);
     ok(page + ': the command buttons sit right beside Settings',
       g.hint && g.gear && (g.gear.l - g.hint.r) < 24 && g.gear.l > g.hint.l, JSON.stringify(g));
     /* Both must be at the RIGHT END. If the auto margin were simply deleted rather than moved, the
        pair would sit together in the middle of the header and pass the adjacency test alone. */
+    /* Jake: "way bigger than they need to be". The bound is stated against the SAME control on the
+       trader dashboard (115x29) rather than as a bare pixel count, because that is the actual
+       complaint -- one product's chat button dwarfing another's. 170x44 leaves room for the bigger
+       type these two pages legitimately use without letting a forced min-width back in. */
+    ok(page + ': the chat button is sized to its words, not to a search field',
+      g.bub && g.bub.w < 170 && g.bub.h < 44, JSON.stringify(g && g.bub));
+    ok(page + ': ...and it did not shrink into something unclickable',
+      g.bub && g.bub.w > 96 && g.bub.h >= 30, JSON.stringify(g && g.bub));
     ok(page + ': ...and the pair is still anchored to the right edge',
       g.gear && g.hdr && (g.hdr.r - g.gear.r) < 40 && g.gear.r > g.vw * 0.9, JSON.stringify(g));
   }

@@ -352,7 +352,6 @@ tr:last-child td{border-bottom:none}
    visual grammar of Intercom and Drift, and it frames the analyst as support staff. This is
    a command input: squared, muted placeholder, shortcut printed on the end. Mirrors the
    Analyst dashboard's #novo-ask-bubble, in this product's purple. */
-@media (max-width:640px){ #novo-ask-bubble{min-width:0} }
 /* Advertise the shortcut only where there is a keyboard. Width is the wrong test - a tablet
    is wide and still has no Ctrl key. */
 @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
@@ -443,14 +442,21 @@ tr:last-child td{border-bottom:none}
   /* In-flow header control, not a floating dock. */
   #novo-ask-bubble.open{border-color:var(--cx);color:#eaf3ff}
   #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
-    padding:11px 12px 11px 14px;border-radius:var(--r-2);border:1px solid rgba(167,139,250,.42);cursor:pointer;
+    padding:8px 12px;border-radius:var(--r-2);border:1px solid rgba(167,139,250,.42);cursor:pointer;
     background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
-    min-width:264px;text-align:left;
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+    /* ⚠ NO min-width. 264px was left over from when this was styled as a SEARCH FIELD with a
+       placeholder in it; the label is now three short words and the box was 2.3x the width and
+       1.5x the height of the same control on the trader dashboard. The width is whatever the
+       words need. */
+    text-align:left;
+    box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 22px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
   #novo-ask-bubble:hover{border-color:#a78bfa;color:var(--txt1);
     box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.62),inset 0 1px 0 rgba(255,255,255,.07)}
   #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
-  #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
+  /* margin-left was auto, which pinned the key to the far edge and stretched the label across
+     the whole button. With the box no longer forced wide there is nothing to stretch to, and an
+     auto margin here would now be the thing HOLDING it open. The flex gap does the spacing. */
+  #novo-ask-bubble kbd{margin-left:0;font-family:inherit;font-size:11px;font-weight:700;
     color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:var(--r-1);padding:2px 6px;
     background:rgba(255,255,255,.03)}
   #novo-ask-bubble.has-drop{border-color:#a78bfa;color:var(--txt1);
