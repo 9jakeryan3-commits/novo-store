@@ -180,22 +180,46 @@ const PRELUDE = `
     paint.panel === paint.body && paint.col === paint.body &&
     paint.panel !== 'rgba(0, 0, 0, 0)', JSON.stringify(paint));
 
-  /* letter-spacing is applied to the SPACE too, so "DR." + space rendered as a double gap. */
+  /* letter-spacing is applied to the SPACE too, so "DR." + space rendered as a double gap.
+     ⚠ This used to require word-spacing to cancel letter-spacing EXACTLY, which was correct while
+     the button was uppercase and letter-spaced. The button now matches the analyst and crypto ones:
+     mixed case, letter-spacing normal, so there is nothing being added to the space and nothing to
+     cancel. The requirement is unchanged -- the gap after "Dr." must be a plain space -- so it is
+     asserted directly: either no letter-spacing at all, or a word-spacing that exactly undoes it.
+     Written as a disjunction rather than deleted, because the defect returns the moment anyone
+     letter-spaces this button again. */
   const spacing = await evalIn(`(() => { const b = document.querySelector('.navbtn-novo');
     const c = getComputedStyle(b);
     return { ls: c.letterSpacing, ws: c.wordSpacing }; })()`);
+  const _ls = spacing.ls === 'normal' ? 0 : parseFloat(spacing.ls);
+  const _ws = spacing.ws === 'normal' ? 0 : parseFloat(spacing.ws);
   ok('the space after "Dr." is not double-width',
-    parseFloat(spacing.ws) < 0 && Math.abs(parseFloat(spacing.ws) + parseFloat(spacing.ls)) < 0.05,
-    JSON.stringify(spacing) + '  (word-spacing must cancel letter-spacing exactly)');
+    Math.abs(_ls + _ws) < 0.05,
+    JSON.stringify(spacing) + '  (letter-spacing must be normal, or word-spacing must cancel it)');
 
   ok('...and the mobile tab carries the same mark and name',
     (named.mob || '').indexOf('✦') >= 0 && /DR\. NOVO/.test(named.mob || ''),
     JSON.stringify(named));
 
   const glow = await evalIn(`(() => { const b = document.querySelector('.navbtn-novo');
-    const c = getComputedStyle(b); return { color: c.color, shadow: c.boxShadow, anim: c.animationName }; })()`);
-  ok('...and it is green', /34,\s*211,\s*153|52,\s*211,\s*153/.test(glow.color) || glow.color === 'rgb(52, 211, 153)', JSON.stringify(glow));
-  ok('...and it glows', glow.shadow && glow.shadow !== 'none' && glow.anim === 'novoGlowBtn', JSON.stringify(glow));
+    const c = getComputedStyle(b), k = b.querySelector('.caret');
+    return { color: c.color, shadow: c.boxShadow, anim: c.animationName, border: c.borderColor,
+             caret: k ? getComputedStyle(k).color : null }; })()`);
+  /* ⚠ GREEN MOVED, it did not leave. The label used to be green text on a bare outline; the button
+     now matches the analyst and crypto chat buttons, where the label is the page's normal text
+     colour and the product's accent is carried by the CARET, the BORDER and the glow. So the
+     assertion follows the accent to where it lives rather than continuing to read `color` -- which
+     would fail on a button that is green in every way a viewer can see. */
+  ok('...and it is green', /52,\s*211,\s*153/.test(glow.caret) && /52,\s*211,\s*153/.test(glow.border),
+    JSON.stringify(glow));
+  /* The 2.8s breathing animation is deliberately gone: Jake asked for the three chat buttons to be
+     uniform with colour as the only difference, and a pulse on one of three otherwise identical
+     controls is a difference that is not colour. It still glows -- the green cast is now static in
+     the box-shadow -- so that is what is asserted. Requiring the ANIMATION would be requiring the
+     thing that was removed on purpose; requiring only "some shadow" would pass a plain black drop
+     shadow with no green in it, so the green is named. */
+  ok('...and it glows', !!glow.shadow && glow.shadow !== 'none' && /52,\s*211,\s*153/.test(glow.shadow),
+    JSON.stringify(glow));
 
   // The panel must NOT exist before the tab is opened — mounting into a hidden column is the bug
   // that made INTRO_HTML capture an empty string.

@@ -442,7 +442,10 @@ tr:last-child td{border-bottom:none}
   /* In-flow header control, not a floating dock. */
   #novo-ask-bubble.open{border-color:var(--cx);color:#eaf3ff}
   #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
-    padding:8px 12px;border-radius:var(--r-2);border:1px solid rgba(167,139,250,.42);cursor:pointer;
+    padding:8px 12px;/* explicit line-height on all three: the button inherits a different font-family per
+       dashboard, and the font's own line box was making trader 2px taller than the other two
+       at identical padding and font-size. A fixed line-height takes the metric out of it. */
+    line-height:1.4;border-radius:10px;border:1px solid rgba(167,139,250,.42);cursor:pointer;
     background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
     /* ⚠ NO min-width. 264px was left over from when this was styled as a SEARCH FIELD with a
        placeholder in it; the label is now three short words and the box was 2.3x the width and
@@ -457,7 +460,7 @@ tr:last-child td{border-bottom:none}
      the whole button. With the box no longer forced wide there is nothing to stretch to, and an
      auto margin here would now be the thing HOLDING it open. The flex gap does the spacing. */
   #novo-ask-bubble kbd{margin-left:0;font-family:inherit;font-size:11px;font-weight:700;
-    color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:var(--r-1);padding:2px 6px;
+    color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
   #novo-ask-bubble.has-drop{border-color:#a78bfa;color:var(--txt1);
     box-shadow:0 0 0 1px rgba(167,139,250,.35), 0 0 24px rgba(167,139,250,.26)}

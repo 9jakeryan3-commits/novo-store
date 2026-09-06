@@ -1460,7 +1460,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      widget rather than a feature. */
   #novo-ask-bubble.open{border-color:#22d3ee;color:#eaf3ff}
   #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
-    padding:8px 12px;border-radius:10px;border:1px solid rgba(34,211,238,.42);cursor:pointer;
+    padding:8px 12px;/* explicit line-height on all three: the button inherits a different font-family per
+       dashboard, and the font's own line box was making trader 2px taller than the other two
+       at identical padding and font-size. A fixed line-height takes the metric out of it. */
+    line-height:1.4;border-radius:10px;border:1px solid rgba(34,211,238,.42);cursor:pointer;
     /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
        against and the button goes soft; the same glow over the page's own dark reads as
        an outline. Same treatment as the crypto map's bubble. */

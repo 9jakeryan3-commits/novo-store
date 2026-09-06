@@ -202,17 +202,50 @@ const FILL = `(() => {
       g.hint && g.gear && (g.gear.l - g.hint.r) < 24 && g.gear.l > g.hint.l, JSON.stringify(g));
     /* Both must be at the RIGHT END. If the auto margin were simply deleted rather than moved, the
        pair would sit together in the middle of the header and pass the adjacency test alone. */
-    /* Jake: "way bigger than they need to be". The bound is stated against the SAME control on the
-       trader dashboard (115x29) rather than as a bare pixel count, because that is the actual
-       complaint -- one product's chat button dwarfing another's. 170x44 leaves room for the bigger
-       type these two pages legitimately use without letting a forced min-width back in. */
-    ok(page + ': the chat button is sized to its words, not to a search field',
-      g.bub && g.bub.w < 170 && g.bub.h < 44, JSON.stringify(g && g.bub));
-    ok(page + ': ...and it did not shrink into something unclickable',
-      g.bub && g.bub.w > 96 && g.bub.h >= 30, JSON.stringify(g && g.bub));
     ok(page + ': ...and the pair is still anchored to the right edge',
       g.gear && g.hdr && (g.hdr.r - g.gear.r) < 40 && g.gear.r > g.vw * 0.9, JSON.stringify(g));
   }
+
+  /* -- 5. THE THREE CHAT BUTTONS ARE THE SAME BUTTON IN THREE COLOURS -------------------------
+     Jake: "lets make them uniform.. Trader is the odd one out only difference should be their
+     color." Stated as a comparison BETWEEN the three rather than as fixed pixel bounds, because
+     that is the actual requirement -- a bound like "under 170px wide" passes three buttons of
+     three different sizes. Compared this way the check also names which page drifted, and there is
+     no number in it to go stale when the design moves. */
+  const BTN = `(() => {
+    const b = document.getElementById('novo-ask-bubble') || document.querySelector('.navbtn-novo');
+    if (!b) return null;
+    const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+    const k = b.querySelector('kbd'), c = b.querySelector('.caret');
+    return { w: Math.round(r.width), h: Math.round(r.height),
+             pad: cs.padding, radius: cs.borderRadius, font: cs.fontSize, weight: cs.fontWeight,
+             tt: cs.textTransform, ls: cs.letterSpacing, gap: cs.gap,
+             kbdFont: k ? getComputedStyle(k).fontSize : null,
+             kbdRadius: k ? getComputedStyle(k).borderRadius : null,
+             border: cs.borderColor, caret: c ? getComputedStyle(c).color : null,
+             label: (b.textContent || '').replace(/\s+/g, ' ').trim() }; })()`;
+  const btns = {};
+  for (const page of ['trader-live.html', 'analyst-live.html', 'crypto-live.html']) {
+    await load(page, 1600, false);
+    btns[page] = await ev(BTN);
+  }
+  const names = Object.keys(btns);
+  const SHAPE = ['w', 'h', 'pad', 'radius', 'font', 'weight', 'tt', 'ls', 'gap',
+                 'kbdFont', 'kbdRadius', 'label'];
+  ok('all three dashboards have a chat button to compare',
+    names.every((n) => btns[n]), JSON.stringify(btns));
+  for (const k of SHAPE) {
+    const vals = names.map((n) => (btns[n] || {})[k]);
+    ok('chat button: ' + k + ' is identical on all three',
+      vals.every((v) => v === vals[0]),
+      names.map((n, i) => n.replace('-live.html', '') + '=' + vals[i]).join('  '));
+  }
+  /* And the one thing that MUST differ. Without this, painting all three the same colour would
+     satisfy every assertion above -- uniform, and wrong. */
+  const accents = names.map((n) => (btns[n] || {}).caret);
+  ok('chat button: colour is the ONE difference, and all three do differ',
+    new Set(accents).size === names.length,
+    names.map((n, i) => n.replace('-live.html', '') + '=' + accents[i]).join('  '));
 
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   if (process.env.SHOT) {

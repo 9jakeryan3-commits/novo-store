@@ -1801,30 +1801,40 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* NoVo: the one green control on a cyan dashboard, because it is the one that is not about the
      tape — it is the analyst. The glow is a slow breathe rather than a pulse; a fast blink beside a
      live chart reads as an alert, and this is an invitation. */
-  /* ⚠ word-spacing CANCELS the letter-spacing applied to the SPACE. .navbtn sets letter-spacing
-     0.8px and text-transform uppercase; letter-spacing is added after EVERY character including the
-     space, so "DR." + space carries the period's own side bearing plus 0.8px and reads as a double
-     gap — "DR.  NOVO". CHART and ANALYSIS never showed it because neither contains a space.
-     -0.8px removes exactly what letter-spacing added, no more. */
+  /* ⚠ THIS IS A COPY OF THE ANALYST / CRYPTO CHAT BUTTON, IN GREEN. Jake: "lets make them
+     uniform.. Trader is the odd one out only difference should be their color." The three
+     dashboards are three inline stylesheets, so nothing enforces the copy except this note and
+     header-strip-toolbar-check.js, which measures all three against EACH OTHER rather than against
+     fixed numbers -- change one and the check names the odd one out. Change all three together.
+     #17171a -> #0b0b0d is what --navy2 -> --sunk resolve to on the other two; trader defines
+     neither, so the literals are what keep them identical.
+     Gone with the old style: text-transform, letter-spacing, and the word-spacing:-0.8px that
+     existed only to cancel the letter-spacing applied to the space in "DR. NOVO". Mixed case has
+     no such problem, so the hack goes with the thing it was patching.
+     Also gone: the 2.8s breathing glow. Jake asked for a glowing green button and it still glows
+     -- the static green cast is in the box-shadow below -- but a pulse on one of three otherwise
+     identical controls IS a difference that is not colour. Flagged rather than assumed. */
+  .navbtn-novo { display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px !important; border-radius: 10px !important; line-height: 1.4 !important;
+    font-size: 13.5px !important; font-weight: 600 !important;
+    text-transform: none !important; letter-spacing: normal !important; word-spacing: normal;
+    border: 1px solid rgba(52,211,153,.42) !important;
+    background: linear-gradient(180deg,#17171a,#0b0b0d) !important;
+    color: var(--txt1) !important; text-align: left;
+    box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 22px -6px rgba(52,211,153,.45), inset 0 1px 0 rgba(255,255,255,.05); }
+  .navbtn-novo:hover, .navbtn-novo.on { border-color: #34d399 !important; color: var(--txt1) !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 30px -4px rgba(52,211,153,.62), inset 0 1px 0 rgba(255,255,255,.07); }
+  .navbtn-novo .caret { color: #34d399; font-weight: 800; text-shadow: 0 0 10px rgba(52,211,153,.75); }
   /* The shortcut printed ON the control it triggers. A key listed only in a help sheet is a key
      you have to go looking for; a key on the button is one you notice while using the mouse. */
-  .navbtn-kbd { display:inline-block; margin-left:6px; background:rgba(255,255,255,.07);
-    border:1px solid var(--bdr2); border-radius:4px; padding:0 4px; font-size:9.5px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--txt3);
-    vertical-align:1px; letter-spacing:0; word-spacing:0; }
-  .navbtn-novo:hover .navbtn-kbd, .navbtn-novo.on .navbtn-kbd { color:#eaf3ff; border-color:rgba(52,211,153,.5); }
-  @media (max-width:1100px){ .navbtn-kbd { display:none; } }
-  .navbtn-novo { word-spacing: -0.8px;
-    border-color: rgba(52,211,153,.5) !important; color: #34d399 !important;
-    box-shadow: 0 0 13px -3px rgba(52,211,153,.55); animation: novoGlowBtn 2.8s ease-in-out infinite; }
-  .navbtn-novo:hover, .navbtn-novo.on { border-color: #34d399 !important; color: #eaf3ff !important;
-    background: rgba(52,211,153,.10) !important; box-shadow: 0 0 20px -2px rgba(52,211,153,.85); }
-  @keyframes novoGlowBtn {
-    0%,100% { box-shadow: 0 0 11px -4px rgba(52,211,153,.45); }
-    50%     { box-shadow: 0 0 19px -2px rgba(52,211,153,.8); }
-  }
-  /* Motion is decoration here: the border colour already carries the meaning. */
-  @media (prefers-reduced-motion: reduce) { .navbtn-novo { animation: none !important; } }
+  .navbtn-kbd { margin-left: 0; font-family: inherit; font-size: 11px; font-weight: 700;
+    color: var(--txt3); border: 1px solid var(--bdr); border-radius: 6px; padding: 2px 6px;
+    background: rgba(255,255,255,.03); letter-spacing: 0; word-spacing: 0; }
+  .navbtn-novo:hover .navbtn-kbd, .navbtn-novo.on .navbtn-kbd { color: #eaf3ff; border-color: rgba(52,211,153,.5); }
+  /* Was max-width:1100px. The other two hide their key on POINTER, not width -- a narrow desktop
+     window still has a keyboard, and hiding the hint there advertises nothing on a machine that
+     could use it. Matched to them. */
+  @media (pointer:coarse){ .navbtn-kbd { display: none; } }
 
   .navbtn-run { border-color: rgba(34,211,238,.45) !important; color: var(--cyn) !important; }
   /* the same action, in the bottom bar */
@@ -1982,7 +1992,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        and the keyboard hint is how you drive the whole page — so they belong with the identity,
        not with the Chart/Analysis pair that switches what the middle of the screen shows. -->
   <div id="saas-nav-l">
-    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
+    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)"><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd class="navbtn-kbd" aria-hidden="true">N</kbd></button>
     <div id="novo-keys-hint"></div>
   </div>
   <span class="tb-sep"></span>
