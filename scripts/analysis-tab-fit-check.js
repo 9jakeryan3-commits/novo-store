@@ -75,8 +75,35 @@ const MEASURE = `(() => {
       innerCut: s ? Math.max(0, s.scrollHeight - s.clientHeight) : 0,
       innerScrolls: s ? ['auto','scroll'].includes(getComputedStyle(s).overflowY) : false };
   });
+  /* SLACK = the empty space inside a panel below its own content. This is the measurement that was
+     missing every previous time: a panel stretched to a taller neighbour is not "cut", it is not
+     "overflowing", every earlier assertion passed it -- and it renders as a bordered black box
+     thousands of pixels tall with nothing in it, which is what Jake kept drawing over. */
+  const slackOf = (c) => {
+    const kids = Array.from(c.children).filter((k) => k.getBoundingClientRect().height > 0);
+    if (!kids.length) return 0;
+    const top = c.getBoundingClientRect().top;
+    const last = Math.max.apply(null, kids.map((k) => k.getBoundingClientRect().bottom));
+    return Math.round(c.getBoundingClientRect().height - (last - top));
+  };
+  panels.forEach((c) => { const e = document.getElementById(c.id); if (e) c.slack = slackOf(e); });
+  const readEl = document.getElementById('card-read');
+  /* By id, not by a structural selector. '#workspace > .card' returned an EMPTY list -- the panels
+     are children of #col-feed -- and an empty list made this assertion fail for a reason that had
+     nothing to do with the page. An instrument that cannot see the thing it is asked about reports
+     a defect in the subject. */
+  const order = ['card-intel','row-unique','card-brain','card-read']
+    .map((id) => document.getElementById(id))
+    .filter((e) => e && e.getBoundingClientRect().height > 0)
+    .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
+    .map((e) => e.id);
+  const rb = readEl ? readEl.querySelector('.read2-body') : null;
   const tb = document.getElementById('topbar'), sh = document.getElementById('saas-header');
-  return { vh: innerHeight, doc: document.documentElement.scrollHeight,
+  return { order,
+           readCols: rb ? getComputedStyle(rb).columnWidth + '/' + getComputedStyle(rb).columnCount : null,
+           readColCount: rb ? Math.max(1, Math.round(rb.getBoundingClientRect().width /
+             (parseFloat(getComputedStyle(rb).columnWidth) || 1e9))) : 0,
+           vh: innerHeight, doc: document.documentElement.scrollHeight,
            wsH: ws ? Math.round(ws.getBoundingClientRect().height) : 0,
            topbarPos: tb ? getComputedStyle(tb).position : null,
            stripPos: sh ? getComputedStyle(sh).position : null,
@@ -126,15 +153,29 @@ const MEASURE = `(() => {
        so long as the panel could be scrolled inside. */
     v.panels.forEach((c) => {
       if (c.missing) return ok(vh + 'px: ' + c.id + ' exists', false, 'not in the DOM');
-      if (c.id === 'card-intel') {
-        /* The one deliberate exception: an unbounded session log. It is allowed to be shorter than
-           its content precisely BECAUSE it can scroll, so both halves are asserted together. */
-        return ok(vh + 'px: card-intel is the one bounded panel, and it scrolls',
-          c.innerScrolls, JSON.stringify(c));
-      }
       ok(vh + 'px: ' + c.id + ' shows all of its content, nothing cut',
         c.cut <= 2 && c.innerCut <= 2, JSON.stringify(c));
     });
+
+    /* Jake's actual words, three attempts in: "stop added scroller and stretching box". */
+    v.panels.forEach((c) => {
+      if (c.missing) return;
+      /* Proportional, not a flat pixel budget. 88px of slack under a 461px panel is ordinary
+         breathing room between two side-by-side readouts; the defect was 2,500px of slack under a
+         3,000px panel. A flat 40px ceiling flags the first and a flat 500px one misses nothing but
+         also catches nothing -- the share is what separates them. */
+      ok(vh + 'px: ' + c.id + ' is not a stretched empty box',
+        c.slack <= Math.max(40, c.h * 0.25), JSON.stringify(c) + ' share=' + Math.round(100 * c.slack / c.h) + '%');
+      ok(vh + 'px: ' + c.id + ' has no scrollbar of its own',
+        !c.innerScrolls, JSON.stringify(c));
+    });
+
+    /* "todays read should obviously be the last panel on the page split side by side like it is on
+       the analyst dashboard." Both halves asserted: last, and actually columnar. */
+    ok(vh + 'px: Today’s read is the LAST panel on the page',
+      v.order[v.order.length - 1] === 'card-read', JSON.stringify(v.order));
+    if (vh === 1040) ok('the read is split into columns, not one 1900px line',
+      v.readColCount >= 2, 'columns=' + v.readCols + ' -> ' + v.readColCount);
 
     ok(vh + 'px: the topbar and market strip stay put while the reading scrolls',
       v.topbarPos === 'sticky' && v.stripPos === 'sticky',

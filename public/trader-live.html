@@ -1741,11 +1741,38 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   /* Was "activity feed" side by side, which gave half the view to eleven boot lines that never
      change after startup. The Activity Feed is diagnostics: it collapses to a one-line status strip
      and the Analysis Feed takes the full width, with NoVo's own history underneath it. */
-  body.v-feeds #workspace {
-    grid-template-columns: 1.35fr 1fr;
-    grid-template-areas: "activity activity" "feed read" "unique unique" "brain brain";
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.9fr) auto;
-  }
+  /* ⚠ ONE COLUMN, THE READ LAST, AND align-items:start. All three are the fix.
+     The synopsis is a written document -- 3,000px on a normal session -- and it was sharing a grid
+     ROW with the Analysis Feed, which is a few hundred. A grid row stretches its cells to the
+     tallest, so the feed became a bordered black box thousands of pixels tall with nothing in it.
+     Jake, third time round: "stop added scroller and stretching box and fix the damn layout", and
+     then the answer: "todays read should obviously be the last panel on the page split side by side
+     like it is on the analyst dashboard."
+     Side by side only ever worked while BOTH panels were bounded boxes scrolling internally, which
+     is the thing being removed. Two panels of wildly different length cannot share a row.
+     align-items:start is the belt to those braces: no cell is stretched to its row, so a short
+     panel stays short even if something beside it grows later. */
+  /* ⚠ THE GRID PARENT IS #col-feed, NOT #workspace. The panels are children of #col-feed, which
+     carries its own inline display:grid -- so grid-template-areas set on #workspace never applied
+     to them, and neither did the grid-area names on the panels. The order was landing correctly by
+     ACCIDENT: `grid-area: read` names a line that does not exist, and the browser pushes such an
+     item into an implicit row after the explicit ones. Working by luck is not working.
+     A column FLEX on the real parent, with explicit order. A column flex has no rows, so it cannot
+     stretch one panel to match a taller neighbour -- the entire defect class Jake has been drawing
+     over disappears structurally rather than being held off by align-items. */
+  body.v-feeds #col-feed { display: flex !important; flex-direction: column;
+    height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.v-feeds #col-feed > * { flex: 0 0 auto; }
+  body.v-feeds #card-activity { order: 1; }
+  body.v-feeds #card-intel    { order: 2; }
+  body.v-feeds #row-unique    { order: 3; }
+  body.v-feeds #card-brain    { order: 4; }
+  /* Last, as Jake asked. */
+  body.v-feeds #card-read     { order: 5; }
+  /* The two side-by-side panels DO stay equal height: they are comparable readouts and a ragged
+     bottom edge between them would look broken. That is safe now precisely because the pathological
+     pairing -- a 3,000px document beside a 400px feed -- is no longer a pairing at all. */
+  body.v-feeds #row-unique { align-items: stretch; }
   body.v-feeds #card-brain { display: flex; }
   body.v-feeds #row-unique { display: grid; grid-area: unique !important; }
   /* ⚠ THE ANALYSIS TAB IS A DOCUMENT, NOT A 100vh COCKPIT. Read this before adding a height here.
@@ -1793,16 +1820,23 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   body.v-feeds #card-board .b3-wrap,
   body.v-feeds #card-brain .brain-grid { flex: 0 0 auto !important; height: auto !important;
     max-height: none !important; overflow: visible !important; }
-  /* ⚠ THE ONE EXCEPTION, AND WHY. The Analysis Feed is an unbounded log -- it grows for as long as
-     the session runs, and at content height it would be the only thing on the tab. It keeps an
-     inner scroll, and it is the reason the visible-scrollbar rule below still earns its place. */
-  body.v-feeds #card-intel { height: auto !important; min-height: 0 !important; overflow: hidden !important; }
-  body.v-feeds #card-intel .log-area { flex: 0 0 auto !important; height: 460px !important;
-    max-height: 460px !important; overflow-y: auto !important; }
-  /* Three columns of a record should start on the same line. They did not: the grid stretched each
-     column to the tallest, and the middle one -- nine rows against four -- pushed the others into
-     a ragged top edge under the panel's own scroll. */
-  body.v-feeds #card-brain .brain-grid { align-items: start; align-content: start; }
+  /* ⚠ NO FIXED HEIGHT HERE EITHER. I gave the feed a 460px window on the previous pass, reasoning
+     that a session log grows without bound. On a real session it holds one structured note -- a few
+     hundred pixels -- so the 460px window WAS one of the empty boxes Jake drew over. A fixed height
+     is a stretched box whenever the content is shorter than the number. It is its content's height
+     like everything else; if a long session ever makes it dominate the tab, that is a real
+     observation to fix then, not a number guessed at now. */
+  body.v-feeds #card-intel { height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.v-feeds #card-intel .log-area { flex: 0 0 auto !important; height: auto !important;
+    max-height: none !important; overflow: visible !important; }
+  /* ⚠ STRETCH, not start. The three record columns hold different numbers of rows, and each has its
+     own panel fill -- so sizing them to their content ends the panel in a ragged staircase of three
+     different bottom edges. Stretching them to the tallest makes the panel a clean rectangle, and
+     the tops line up either way because grid items begin at the row's top edge regardless.
+     I set align-items:start here on an earlier pass to fix a ragged TOP edge. That top edge was
+     ragged because the panel was scrolling internally at the time, not because of alignment, and
+     the setting has been producing the ragged bottom ever since. */
+  body.v-feeds #card-brain .brain-grid { align-items: stretch; align-content: stretch; }
   /* The Books table sat flush against the window edge — give the numbers shoulder room. */
   body.v-feeds #card-board .b3-wrap { padding-right: 16px; }
   /* ⚠ A PANEL THAT SCROLLS HAS TO LOOK LIKE IT SCROLLS. The global bar is 4px of #1e3255 on a
@@ -1811,17 +1845,19 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      that had been parked. That is what Jake meant by "missing scrollers": they were present and
      unseeable. Wider, lighter, and only on this tab's scroll areas, so the chart view's chrome is
      untouched. scrollbar-gutter keeps the text from reflowing as a panel crosses into overflow. */
-  body.v-feeds #card-intel .log-area { scrollbar-gutter: stable; }
-  body.v-feeds #card-intel .log-area::-webkit-scrollbar,
-  body.v-feeds::-webkit-scrollbar { width: 9px; height: 9px; }
-  body.v-feeds #card-intel .log-area::-webkit-scrollbar-thumb,
-  body.v-feeds::-webkit-scrollbar-thumb {
-    background: rgba(140,160,190,.34); border-radius: 99px;
-    border: 2px solid transparent; background-clip: padding-box; }
-  body.v-feeds #card-intel .log-area::-webkit-scrollbar-thumb:hover,
-  body.v-feeds::-webkit-scrollbar-thumb:hover { background: rgba(170,190,220,.55); }
-  body.v-feeds #card-read  { display: flex; grid-area: read !important; border-left: 1px solid var(--bdr); }
-  body.v-feeds #card-read .read2-body { max-height: none; }
+  /* The visible-scrollbar rules that stood here are gone along with the panels that needed them:
+     the only scroll left on this tab is the window's own, which the browser draws properly. */
+  /* The border-left placed it against the feed beside it; nothing is beside it now. */
+  body.v-feeds #card-read  { display: flex; grid-area: read !important; border-top: 1px solid var(--bdr); }
+  /* ⚠ COLUMNS, NOT A max-width. This is lifted from .lv-read on the analyst dashboard, whose own
+     comment records why: capping the line at 78ch fixes the measure but strands ~900px of empty
+     card beside it, "which looked worse than the long lines did" -- the same empty-box complaint,
+     arrived at from the other direction. Newspaper columns give a readable measure AND use the
+     width, and they roughly halve the height that made an inner scrollbar seem necessary.
+     34em is the analyst's figure and it collapses to a single column on its own below ~960px, so
+     there is no breakpoint here to go stale. */
+  body.v-feeds #card-read .read2-body { max-height: none;
+    columns: 34em auto; column-gap: 44px; }
   /* The two feed cards carry INLINE grid-column/grid-row for the overview layout, and an inline style
      outranks any selector -- which is why the existing area rules below carry !important. Same here. */
   body.v-feeds #card-activity { grid-area: activity !important; }
