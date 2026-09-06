@@ -67,7 +67,8 @@ module.exports = async (req, res) => {
   const wantIv = String((req.query && req.query.iv) || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   if (wantIv) {
     let h = null;
-    try { h = await r.hgetall(`iv:hist:${wantIv}`); } catch (_) { h = null; }
+    // iv:hist2 — session-only rows. See analyst-publish.js for why the old namespace is dead.
+    try { h = await r.hgetall(`iv:hist2:${wantIv}`); } catch (_) { h = null; }
     const days = Object.entries(h || {})
       .map(([d, v]) => [d, Number(v)])
       .filter(([, v]) => Number.isFinite(v) && v > 0)
@@ -94,12 +95,20 @@ module.exports = async (req, res) => {
        Same defect as the X mention percentile shipped an hour earlier, on a different clock: that
        one was partial by minutes, this one is partial by "not a trading day at all".
 
-       TWO FILTERS, and both are needed. Weekend buckets are dropped from the HISTORY as well as the
-       current value, because they are not session readings and they drag the window low down — SPY's
-       6.1 against a 16.2 high is a closed-market number setting the floor for every future session's
-       rank. And today's bucket is excluded whatever day it is, because mid-session it is still
-       moving. The writer now only records during RTH, so this reader filter is what cleans the rows
-       already stored. */
+       FILTERING WEEKENDS WAS NOT ENOUGH, and the first fix proved it live: with weekends dropped,
+       SPY still reported atmIv 6.1 == low, now dated to the Friday. Because the writer hset the same
+       UTC-date key on EVERY publish, the LAST write of each day won — and the engine keeps
+       publishing after the close, so every WEEKDAY bucket held an after-hours quote too. The
+       contamination was not the weekend, it was the whole history.
+
+       So the stored rows are abandoned rather than filtered: the writer moved to iv:hist2 and only
+       writes during RTH, the old keys expire on their own TTL, and the window rebuilds honestly from
+       the next session. Nothing destructive on live data, and until it fills this endpoint says
+       "building the window" — which is true, where a rank off contaminated rows was not.
+
+       The two filters below still earn their place on the NEW namespace: today's bucket is excluded
+       whatever day it is, because mid-session it is still moving, and the weekend test is belt to
+       the writer's braces. */
     const todayUTC = new Date().toISOString().slice(0, 10);
     const isWeekend = (d) => {
       const g = new Date(d + 'T00:00:00Z').getUTCDay();

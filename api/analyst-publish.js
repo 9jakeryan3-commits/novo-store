@@ -823,7 +823,16 @@ async function _recordAtmIv(state) {
     for (const i of (Array.isArray(state && state.indices) ? state.indices : [])) {
       const iv = Number(i && i.atm_iv);
       if (!i || !i.ticker || !Number.isFinite(iv) || iv <= 0) continue;
-      const key = `iv:hist:${String(i.ticker).toUpperCase()}`;
+      // NEW NAMESPACE, and the rename IS the fix for the stored rows. Every bucket under
+      // iv:hist: was written by the old code, which hset the same UTC-date key on every publish —
+      // so the LAST write of each day won, and the engine keeps publishing after the close. Every
+      // stored day therefore holds an AFTER-HOURS quote, not a session one, which is why SPY read
+      // 6.1 against a 16.2 window high and why all three tickers sat exactly on their own low.
+      // Filtering weekends was not enough because the weekdays are contaminated too.
+      // iv:hist2: takes only RTH writes (guarded above). The old keys are left to expire on their
+      // own TTL rather than purged — nothing destructive on live data, and the reader simply stops
+      // reading them, so the window rebuilds honestly from the next session.
+      const key = `iv:hist2:${String(i.ticker).toUpperCase()}`;
       await r.hset(key, { [day]: Math.round(iv * 100) / 100 });
       await r.expire(key, IV_HIST_TTL);
     }
