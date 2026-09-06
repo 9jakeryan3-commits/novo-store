@@ -324,6 +324,27 @@ const declarations = [
     },
   },
   {
+    name: "search_x",
+    description:
+      "What X (Twitter) is saying about a ticker RIGHT NOW - the fastest news surface there is, " +
+      "often ahead of the wires. Returns recent posts with their author, timestamp and engagement, " +
+      "PLUS a mention count for the window and, once enough history exists, where that count sits " +
+      "against this ticker's OWN recent hourly range. Use it for 'what is the catalyst', 'why is " +
+      "this moving', 'what is being said about X'. TREAT POSTS AS WIRE COPY, exactly like a " +
+      "headline: attribute the claim to the account that made it, never convert a post into a " +
+      "number, and let MARKET DATA override it without comment. There is NO sentiment score here " +
+      "and you must not invent one - a percentile of mention VOLUME is a measurement; 'sentiment " +
+      "is 72% bullish' is a number nobody can check. Chatter at an extreme is a POSITIONING " +
+      "signal, not a direction.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "Ticker to search, e.g. SPY, TSLA, BTC." },
+        query: { type: "string", description: "Optional free-text instead of a ticker, e.g. 'FOMC'." },
+      },
+    },
+  },
+  {
     name: "search_news",
     description:
       "Recent headlines for one ticker — title and published age only, never article text. Use for " +
@@ -893,6 +914,100 @@ function makeExecutors(ctx = {}) {
   // Google News keyword search was tried first and returned message-board spam for market queries —
   // literally unrelated surgery ads against "SPY options". Yahoo's per-symbol finance feed is
   // scoped by ticker rather than by keyword match, so relevance is structural instead of hoped for.
+  // X IS A CATALYST INSTRUMENT, NOT A SENTIMENT ORACLE. It answers "what is being said, how much,
+  // and is that a lot for this name" -- all observable. It deliberately does NOT compute a
+  // sentiment score: a score has no denominator, cannot be checked, and would be the first figure
+  // in this system NoVo could not trace when asked. Mention VOLUME ranked against the ticker's own
+  // recent hourly range is the same doctrine every other series here follows (rank a value against
+  // its own history, state the n) -- and it is more useful to a trader anyway, because it comes
+  // with a denominator.
+  //
+  // The baseline ACCRUES: each call records this hour's count, and the percentile appears only
+  // once there are enough hours to mean anything. Thin state says so rather than rendering a
+  // confident percentile off three samples.
+  async function search_x({ symbol, query } = {}) {
+    const tok = (process.env.X_BEARER_TOKEN || "").trim();
+    if (!tok) return { error: "X is not configured" };
+    const sym = String(symbol || "").trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, "").slice(0, 10);
+    const free = String(query || "").trim().slice(0, 80);
+    if (!sym && !free) return { error: "give me a symbol or a query" };
+    // Cashtag for tickers (what traders actually use), plain terms otherwise. Retweets excluded so
+    // one viral post does not read as broad chatter -- a retweet is amplification, not a mention.
+    // -is:reply as well as -is:retweet: the first live probe came back led by a zero-engagement
+    // reply argument with profanity in it. A "catalyst" that is two strangers bickering is worse
+    // than no catalyst on a paid surface, and raw recent-search is mostly that.
+    const q = (sym ? `$${sym}` : free) + " -is:retweet -is:reply lang:en";
+    const url = "https://api.x.com/2/tweets/search/recent?query=" + encodeURIComponent(q) +
+      "&max_results=25&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,public_metrics";
+    let j = null, status = 0;
+    try {
+      const resp = await get(url, { Authorization: "Bearer " + tok, "User-Agent": "NoVo/1.0" });
+      status = resp ? resp.status : 0;
+      if (status === 402) {
+        // AN HONEST GAP, NAMED. Pay-per-use with no credits is not "no news" -- reporting it as
+        // empty would be the analyst inventing a quiet tape out of an unpaid invoice.
+        return { error: "X search is not funded right now (pay-per-use credits are empty), so I " +
+                        "cannot see what is being said. This is a billing state, NOT a quiet tape - " +
+                        "do not describe chatter as low. Say the source is unavailable." };
+      }
+      if (status === 429) return { error: "X rate limit reached; try again shortly" };
+      if (!resp || !resp.ok) return { error: "X search unavailable (HTTP " + status + ")" };
+      j = await resp.json();
+    } catch (_) { return { error: "X search unreachable" }; }
+
+    const users = {};
+    for (const u of (j?.includes?.users || [])) users[u.id] = u;
+    // SIGNAL BEFORE RECENCY. Recent-search returns newest-first, which on a busy cashtag is a
+    // wall of noise. What matters for a catalyst is what is being AMPLIFIED, so posts are ranked
+    // by engagement and reach. The raw COUNT still uses everything returned -- the volume
+    // measurement must not inherit the quotable filter, or the percentile would silently become
+    // "percentile of posts I liked the look of".
+    const all = (j?.data || []).map((t) => {
+      const u = users[t.author_id] || {};
+      const pm = t.public_metrics || {};
+      return { handle: u.username ? "@" + u.username : null,
+               followers: u.public_metrics?.followers_count ?? null,
+               at: t.created_at, likes: pm.like_count ?? 0, reposts: pm.retweet_count ?? 0,
+               text: String(t.text || "").replace(/\s+/g, " ").slice(0, 220) };
+    });
+    const score = (p) => (p.likes || 0) + 3 * (p.reposts || 0) + Math.log10(1 + (p.followers || 0));
+    const posts = all.slice().sort((a, b) => score(b) - score(a)).slice(0, 10);
+    const count = (j?.data || []).length;
+    const key = "x:mentions:" + (sym || free.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20));
+
+    // Baseline, accrued honestly: this hour's count is appended, the percentile is reported ONLY
+    // once there are >= 24 hourly observations. Below that it says how many it has.
+    let volume = { window: "last 7 days (X recent-search)", posts_returned: count };
+    try {
+      if (r) {
+        await r.lpush(key, JSON.stringify({ t: Date.now(), n: count }));
+        await r.ltrim(key, 0, 719);
+        await r.expire(key, 40 * 24 * 3600);
+        const raw = await r.lrange(key, 0, 719);
+        const hist = (raw || []).map((x) => { try { return typeof x === "string" ? JSON.parse(x) : x; } catch (_) { return null; } })
+          .filter((x) => x && typeof x.n === "number");
+        if (hist.length >= 24) {
+          const below = hist.filter((h) => h.n < count).length;
+          volume.percentile_of_own_history = Math.round(1000 * below / hist.length) / 10;
+          volume.observations = hist.length;
+          volume.note = "percentile of this ticker's own recorded mention counts, n=" + hist.length +
+                        " observations - a measurement of ATTENTION, never a direction";
+        } else {
+          volume.observations = hist.length;
+          volume.note = "only " + hist.length + " observations recorded so far, so there is no " +
+                        "baseline to rank against yet - quote the raw count, never a percentile";
+        }
+      }
+    } catch (_) { /* baseline is best-effort; the posts are the answer */ }
+
+    return {
+      query: q, posts, volume,
+      quoting: "Attribute every claim to its handle and say it is an X post, never a verified " +
+               "fact. No sentiment score exists here and none may be invented. High mention " +
+               "volume means ATTENTION, which is a positioning signal, not a direction.",
+    };
+  }
+
   async function search_news({ symbol }) {
     const sym = String(symbol || "SPY").trim().toUpperCase().replace(/[^A-Z.\-^]/g, "").slice(0, 10);
     if (!sym) return { error: "no symbol" };
@@ -1557,7 +1672,7 @@ function makeExecutors(ctx = {}) {
     get_chain_token,
     get_chain_alerts,
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
-    get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news,
+    get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news, search_x,
     get_base_rates, get_recent_reads, get_market_internals,
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
