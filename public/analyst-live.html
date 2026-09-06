@@ -378,7 +378,14 @@ which Jake explicitly carved out. */
      amount or the two columns start at different heights. */
   .lv-grid-top .lv-strip .strip-hd { margin-bottom: 9px; }
   .lv-grid-top { margin: 16px 0; align-items: start; }
-  .lv-grid-top .lv-strip { margin: 0; height: 100%; align-content: start; }
+  /* Two things pushed the tickers below the bias card. The grid's `gap: 12px` is a ROW gap too,
+     and the heading spans 1/-1, so the cards cleared it by 9px margin + 12px gap while the bias
+     card cleared its own heading by 9px. And `height: 100%` (the bias column is taller) left
+     surplus that two auto rows split -- the heading box measured 25px at 1920 and 30px at 1280
+     against the bias heading's 18px, and the cards got 92px of a 138px column. `auto 1fr` pins
+     the heading to its text and gives ALL surplus to the cards; row-gap:0 leaves the heading's
+     own 9px margin as the clearance, which is exactly what the bias column uses. */
+  .lv-grid-top .lv-strip { margin: 0; height: 100%; grid-template-rows: auto 1fr; row-gap: 0; }
   .lv-bias .bias-row { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
     padding:10px 0; border-top:1px solid var(--bdr); }
   .lv-bias .bias-row:first-child { border-top:0; padding-top:2px; }
