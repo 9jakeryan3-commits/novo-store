@@ -52,7 +52,24 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --cyan:#22d3ee;
+    /* -- ONE SEPARATOR PER SURFACE (2026-09-06) -----------------------------
+       Same palette as shipped on /crypto. A surface that already carries its
+       own fill does not also need a containment outline, so the FILL has to do
+       the separating. --navy2 #1c1d21 sat at only DeltaL* 4.92 above the page --
+       under the floor of Material 3's dark card ramp (+6.4 -> +11.2), the first
+       step ambient light and cheap-panel black-crush eat. #232428 is DeltaL*
+       8.35 and keeps navy2's exact channel shape (R, R+1, R+5), so there is no
+       hue drift across the four accent families (cyan / green / amber / purple)
+       that sit on it.
+       --rule is for dividers INSIDE a lifted card: against #232428 --bdr
+       collapses from DeltaL* 9.07 to 5.60, which would quietly mute exactly the
+       borders doing real typographic work. --bdr still reads at DeltaL* 14.00
+       against the page, so section bands, the .helper rule, the footer rule and
+       the dropdown panels' outer hairlines keep it.
+       --blue moves with the lift: #3b82f6 on #232428 is 4.17:1 -- under AA for
+       the 11px small-caps .head .badge label that uses it; #4a8ef7 is 4.75:1. */
+    --navy:#121316; --navy2:#232428; --bdr:#2e3036; --rule:#34363c;
+    --blue:#4a8ef7; --cyan:#22d3ee;
     --green:#10b981; --red:#f43f5e; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#7d97b8;
   }
   html { scroll-behavior: smooth; }
@@ -86,7 +103,13 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* Header */
   .head { text-align: center; padding: 64px 0 28px; }
-  .head .badge { display: inline-block; background: var(--navy2); border: 1px solid var(--bdr); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 20px; }
+  /* The neutral 4-side box is gone -- the badge carries its own var(--navy2)
+     fill, which now separates on its own. The 3px left accent is NOT a box: it
+     is typographic work and stays. Nothing sets border-color on this selector,
+     so there is no state to carry. (/crypto's .hero-badge keeps its hairline
+     only because .hero::before paints a gradient under it; .head here has no
+     background at all, so the badge sits on flat var(--navy).) */
+  .head .badge { display: inline-block; background: var(--navy2); border-left: 3px solid var(--blue); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; margin-bottom: 20px; }
   .head h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; margin-bottom: 14px; }
   .head h1 .g { color: var(--green); }
   .head p { max-width: 620px; margin: 0 auto; color: var(--txt2); font-size: 16.5px; }
