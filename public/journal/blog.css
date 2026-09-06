@@ -5,7 +5,11 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --navy:#121316;        /* page bg (near-black navy) */
-  --navy2:#232428;       /* cards */
+  /* Reverted from the 2026-09-06 lift (#232428). A lifted panel is still a panel: that
+     value existed only to replace the card borders the same pass deleted. With the fills
+     gone too, it is back to the pre-lift value -- which .cover.founder below still
+     hard-codes, so the lift had also split the five cover washes into 4 + 1. */
+  --navy2:#1c1d21;       /* cards */
   --navy3:#26272c;       /* hover / raised */
   --bdr:#2e3036;
   --bdr2:#3a3c42;
@@ -163,7 +167,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .housead .ha-btn{display:inline-block;background:var(--green);color:#111a14;font-weight:800;font-size:13.5px;padding:11px 24px;border-radius:7px;letter-spacing:.02em;}
 .housead .ha-note{display:block;font-size:10px;color:var(--txt3);letter-spacing:.16em;text-transform:uppercase;margin-top:13px;font-weight:700;}
 /* rail newsletter */
-.rail-news{margin-top:22px;background:var(--navy2);border-radius:10px;padding:20px;}
+.rail-news{margin-top:22px;border-radius:10px;padding:20px;}
 @media(max-width:900px){.rail-cta{display:none;}}   /* redundant on mobile — the bottom CTA + archive cover it */
 
 /* ---------- KNOWLEDGE-BASE SEARCH ---------- */
@@ -223,14 +227,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .article-body ul{list-style:none;margin:0 0 18px;padding:0;}
 .article-body li{position:relative;padding-left:20px;margin:0 0 11px;}
 .article-body li::before{content:'';position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--cyan);}
-.article-body blockquote{margin:24px 0;padding:16px 22px;background:var(--navy2);border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;color:var(--txt1);font-size:18px;}
+/* Fill removed; the one-sided cyan bar is the accent and does the separating. Counting
+   SIDES is what keeps it: border-left alone is a pull-quote rule, never a box. */
+.article-body blockquote{margin:24px 0;padding:16px 22px;border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;color:var(--txt1);font-size:18px;}
 .pull{font-size:22px;font-weight:700;color:var(--txt1);line-height:1.4;margin:30px 0;letter-spacing:-.4px;}
 .article-body table{width:100%;border-collapse:collapse;margin:22px 0;font-size:15px;}
 .article-body th,.article-body td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--bdr);}
 .article-body th{color:var(--cyan);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;}
 .article-body td{color:var(--txt2);}
 .article-body td strong{color:var(--txt1);}
-.cta{background:var(--navy2);border-radius:12px;padding:32px;text-align:center;margin:48px 0 16px;}
+.cta{border-radius:12px;padding:32px;text-align:center;margin:48px 0 16px;}
 .cta h3{color:var(--txt1);font-size:22px;font-weight:800;margin-bottom:8px;letter-spacing:-.4px;}
 .cta p{color:var(--txt2);font-size:15px;margin-bottom:20px;}
 .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
@@ -240,7 +246,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .btn-ghost:hover{border-color:var(--cyan);}
 /* Dual-product article CTA (Trader + Analyst) */
 .cta-2up{display:flex;gap:16px;margin-top:6px;text-align:left;flex-wrap:wrap;}
-.cta-card{flex:1 1 260px;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:12px;padding:20px 20px 22px;display:flex;flex-direction:column;}
+/* Neutral box gone; the sided product accents below stay -- they are colour identity,
+   not containment, and each is a border-top SHORTHAND so it keeps its own style. */
+.cta-card{flex:1 1 260px;border-radius:12px;padding:20px 20px 22px;display:flex;flex-direction:column;}
 .cta-card-trader{border-top:2px solid #10b981;}
 .cta-card-analyst{border-top:2px solid #22d3ee;}
 .cta-card-crypto{border-top:2px solid #a78bfa;}
