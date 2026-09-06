@@ -30,16 +30,16 @@
   window.__novoChatPanel = true;
 
   var CSS = `  #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
-    padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(34,211,238,.42);cursor:pointer;
+    padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(var(--askacc-rgb),.42);cursor:pointer;
     /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
        against and the button goes soft; the same glow over the page's own dark reads as
        an outline. Same treatment as the crypto map's bubble. */
     background:linear-gradient(180deg,var(--navy2),#0b0b0d);color:var(--txt1);font-weight:600;font-size:13.5px;
     min-width:264px;text-align:left;
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(34,211,238,.45),inset 0 1px 0 rgba(255,255,255,.05)}
-  #novo-ask-bubble:hover{border-color:#22d3ee;color:var(--txt1);
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(34,211,238,.62),inset 0 1px 0 rgba(255,255,255,.07)}
-  #novo-ask-bubble .caret{color:#22d3ee;font-weight:800;text-shadow:0 0 10px rgba(34,211,238,.75)}
+    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(var(--askacc-rgb),.45),inset 0 1px 0 rgba(255,255,255,.05)}
+  #novo-ask-bubble:hover{border-color:var(--askacc);color:var(--txt1);
+    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(var(--askacc-rgb),.62),inset 0 1px 0 rgba(255,255,255,.07)}
+  #novo-ask-bubble .caret{color:var(--askacc);font-weight:800;text-shadow:0 0 10px rgba(var(--askacc-rgb),.75)}
   #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
     color:var(--txt3);border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
@@ -50,10 +50,10 @@
   @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
   /* NoVo left something. The bubble is the only place it can show, since the drop lands in a panel
      that is closed by default -- so the dot has to survive until the panel is actually opened. */
-  #novo-ask-bubble.has-drop{border-color:#22d3ee;color:var(--txt1);
-    box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 0 24px rgba(34,211,238,.26)}
+  #novo-ask-bubble.has-drop{border-color:var(--askacc);color:var(--txt1);
+    box-shadow:0 0 0 1px rgba(var(--askacc-rgb),.35), 0 0 24px rgba(var(--askacc-rgb),.26)}
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
-    background:#22d3ee;box-shadow:0 0 9px rgba(34,211,238,.9)}
+    background:var(--askacc);box-shadow:0 0 9px rgba(var(--askacc-rgb),.9)}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
   @keyframes novoDrop{0%,100%{opacity:1}50%{opacity:.3}}
   @media (prefers-reduced-motion:reduce){ #novo-ask-bubble.has-drop .dot{animation:none} }
@@ -81,7 +81,7 @@
   #novo-ask .clr{margin-left:auto;background:none;border:1px solid var(--bdr,#22303f);border-radius:999px;
     color:var(--txt2,#9fb6d1);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     padding:5px 11px;cursor:pointer}
-  #novo-ask .clr:hover{color:#eaf3ff;border-color:#22d3ee}
+  #novo-ask .clr:hover{color:#eaf3ff;border-color:var(--askacc)}
   #novo-ask .x{background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
   #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
     position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
@@ -92,7 +92,7 @@
      NoVo's answers running full width on the left. The asymmetry does what no label could -- you
      can see who said what while scrolling past, before reading a word of it. */
   #novo-ask .m.you{align-self:flex-end;max-width:min(78%,560px);
-    background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.30);
+    background:rgba(var(--askacc-rgb),.12);border:1px solid rgba(var(--askacc-rgb),.30);
     border-radius:14px 14px 4px 14px;padding:9px 13px;
     color:#d3f2fb;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.28)}
   /* The time sits INSIDE the message as a trailing inline element, the way a chat client does --
@@ -119,22 +119,22 @@
   #novo-ask .quick.on{display:flex}
   /* The one chip that is not canned. Accented so it is legible as a reading of the tape rather than
      a seventh stock question, and it always leads the row. */
-  #novo-ask .quick button.live{border-color:rgba(34,211,238,.5);color:#cfefff;
-    background:rgba(34,211,238,.08)}
-  #novo-ask .quick button.live:hover{border-color:#22d3ee;color:#eaf3ff}
-  #novo-ask .quick button{flex:0 0 auto;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.28);
+  #novo-ask .quick button.live{border-color:rgba(var(--askacc-rgb),.5);color:#cfefff;
+    background:rgba(var(--askacc-rgb),.08)}
+  #novo-ask .quick button.live:hover{border-color:var(--askacc);color:#eaf3ff}
+  #novo-ask .quick button{flex:0 0 auto;background:rgba(var(--askacc-rgb),.07);border:1px solid rgba(var(--askacc-rgb),.28);
     color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
-  #novo-ask .quick button:hover{border-color:#22d3ee;color:#eaf3ff}
+  #novo-ask .quick button:hover{border-color:var(--askacc);color:#eaf3ff}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,#22303f)}
   #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,#22303f);border-radius:10px;
     padding:10px 12px;color:#eaf3ff;font-size:13.5px;outline:none}
-  #novo-ask input:focus{border-color:#22d3ee}
-  #novo-ask button.go{background:#22d3ee;border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
+  #novo-ask input:focus{border-color:var(--askacc)}
+  #novo-ask button.go{background:var(--askacc);border:0;border-radius:10px;color:#04121a;font-weight:800;padding:0 15px;cursor:pointer}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
 
 
   /* ── chat, upgraded: full-screen on mobile, a thread that reads like a product ── */
-  #novo-ask{--askacc:#22d3ee}
+  #novo-ask{--askacc:#22d3ee;--askacc-rgb:34,211,238}
   #novo-ask .log{padding:16px 16px 10px;gap:14px}
   #novo-ask .log::-webkit-scrollbar{width:8px}
   #novo-ask .log::-webkit-scrollbar-thumb{background:rgba(128,148,168,.28);border-radius:99px}
@@ -199,14 +199,16 @@
   #novo-ask .term{border-bottom:1px dotted var(--askacc);cursor:help;text-underline-offset:2px}
   #novo-ask .term:hover,#novo-ask .term:focus{color:#eaf3ff;border-bottom-style:solid;outline:none}
   .termpop{position:fixed;z-index:2147483647;background:#0d1620;color:#dce9f7;
-    border:1px solid var(--askacc,#22d3ee);border-radius:10px;padding:9px 11px;font-size:13px;
+    border:1px solid var(--askacc,var(--askacc));border-radius:10px;padding:9px 11px;font-size:13px;
     line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.55)}
   @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px} }
   #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
   #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
   html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
-  @media (max-width:720px){ #novo-ask .mx{display:none} }`;
+  @media (max-width:720px){ #novo-ask .mx{display:none} }
+
+`;
 
   /* Docked overrides. The base rules position the panel `fixed` because it was built as a floating
      dock; inside a tab column it has to be an ordinary block that fills its parent. Kept as an
@@ -218,6 +220,11 @@
      surface reads black. Transparent does not mean "no colour", it means "whatever is behind me",
      and what was behind it was the one grey box on the page. Same trap as an artifact body with no
      background borrowing its host's. */
+  /* ONE OVERRIDE, WHOLE PANEL. Jake: the Trader chat was blue on a green dashboard. Every accent
+     in the base stylesheet now reads through --askacc, so this is the only place the Trader's
+     colour is stated — the input border, the Ask button, the quick chips, the level pill, the
+     status dot and the term underlines all follow it. */
+  #novo-ask.docked{--askacc:#34d399;--askacc-rgb:52,211,153}
   #novo-ask.docked{position:static;transform:none;left:auto;right:auto;bottom:auto;width:100%;
     height:100%;max-height:none;max-width:none;display:flex;border-radius:0;border:0;box-shadow:none;
     background:var(--bg,#09090b);z-index:auto}
@@ -232,7 +239,7 @@
   #novo-ask.docked.max{position:static;width:100%;height:100%}
   `;
 
-  var MARKUP = `<div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
+  var MARKUP = `<div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
       <b>Dr. NoVo</b>
@@ -912,8 +919,8 @@
     _inited = true;
     INTRO_HTML = l.innerHTML;       // captured BEFORE any turn is appended
     loadTurns();
-    novoChatPull();
   };
+    novoChatPull();
   // The dashboard keeps TOKEN inside its own IIFE, so it is not reachable from here — read the
   // storage key it persists to instead, which is what the push-notification code already does.
   function tok(){

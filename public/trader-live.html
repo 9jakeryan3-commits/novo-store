@@ -190,6 +190,24 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
 </script>
 <title>NoVo Trader</title>
 <style>
+/* ── PARKED ON THE TRADER DASHBOARD (Jake, 2026-09-06) ─────────────────────────────────────────
+   Gamma Squeeze and Analyst Score are pulled from Market Intel here. They STAY on the Analyst
+   dashboard, which is a different file and is untouched — this is a parking, not a deletion.
+
+   Kept as a hide rather than a markup removal on purpose: the rows, their meters and every writer
+   that fills them (t-sqz, t-sqz-bar, t-apex, t-apex-bar, and the staleness gate that lists them)
+   are all still here and still correct. Bringing them back is deleting this block; deleting the
+   markup would mean rebuilding two readouts and their fill logic from the analyst side.
+
+   The row break goes with them. It exists to force a deterministic 6+2 wrap, and it sits
+   immediately BEFORE these two — with them hidden it would push VIX onto a second row by itself,
+   which is a worse layout than the one it was added to prevent.
+
+   ⚠ AND THIS IS THE ACTUAL FIX FOR THE CLIPPED VIX. The one-line strip above 1850px was sized
+   against a measured width for EIGHT readouts; twelve had accumulated. Two fewer is real headroom,
+   where the wrap change below is only a safety net. */
+#row-sqz, #row-score, #t-sqz-drv-row,
+#saas-header #card-mktintel .strip-break { display: none !important; }
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
 :root {
   --bg:    #09090b;
@@ -1818,7 +1836,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
    So: wrap is the DEFAULT and this is the exception, rather than the other way round. Above 1850px the
    break switches off and the strip is the single dense line it was designed to be. */
 @media (min-width: 1850px) {
-  #saas-header #card-mktintel { flex-wrap: nowrap; gap: 0; }
+  /* ⚠ NOT `flex-wrap: nowrap`, AND THAT IS THE FIX. The 1850px figure was derived from a measured
+     content width — "the eight readouts ~1073px, so a single line needs ~1830px". There are no
+     longer eight: Vanna and Charm/day joined the strip afterwards and nothing re-derived the
+     number. So at 1920 the content exceeded the bar again, `overflow: hidden` clipped it, and the
+     VIX value came off the right edge — the exact failure the comment above says was already fixed
+     once ("it made the overflow silent, clipping Gamma Squeeze mid-value").
+     A threshold measured against content that later grows is a fact with an expiry date and no
+     alarm. Dropping nowrap makes the layout self-correcting instead: above 1850 the forced break is
+     still off, so the strip is ONE dense line whenever one line genuinely fits, and it wraps of its
+     own accord when it does not. Nothing to re-measure the next time a readout is added. */
+  #saas-header #card-mktintel { gap: 0; }
   #saas-header #card-mktintel .strip-break { display: none; }
   /* display:none does not remove it from the DOM, so `.strip-break + .bar-row` still matches and would
      strip the divider off Gamma Squeeze mid-row. Put it back. */
@@ -2192,7 +2220,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            Below that the header cannot hold them beside the ~730px action buttons, and the choice is a
            deterministic second row or silently clipping whatever falls off the right edge. -->
       <div class="strip-break"></div>
-      <div class="bar-row trial-lock">
+      <div class="bar-row trial-lock" id="row-sqz">
         <span class="bar-lbl" data-short="SQUEEZE">Gamma Squeeze</span>
         <span id="t-sqz" class="bar-val">—</span>
         <div class="bar-track"><div id="t-sqz-bar" class="bar-fill" style="width:0%"></div></div>
@@ -2200,7 +2228,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <div id="t-sqz-drv-row" class="trial-lock" style="display:none;font-size:11px;line-height:1.35;color:var(--txt3);padding:0 12px 8px 152px">
         <span id="t-sqz-drv">—</span>
       </div>
-      <div class="bar-row trial-lock" style="padding-bottom:12px">
+      <div class="bar-row trial-lock" id="row-score" style="padding-bottom:12px">
         <span class="bar-lbl" data-short="SCORE">Analyst Score</span>
         <span id="t-apex" class="bar-val">0/100</span>
         <div class="bar-track"><div id="t-apex-bar" class="bar-fill" style="width:0%"></div></div>
