@@ -260,6 +260,30 @@ async function posts(payload, symbol, opts) {
       r.allowlist.source_groups_failed.length === 0, JSON.stringify(r.allowlist.source_groups_failed));
   }
 
+  /* ── 11. THE DOCTRINE NOTE IS LOAD-BEARING, SO TRIMMING IT MUST FAIL ─────────────────────────
+   * Einstein's false-positive example stopped being hypothetical the moment this went live: on a
+   * real TSLA lookup the TOP-RANKED post was
+   *
+   *   [major] @WSJ "SpaceX and Tesla directors are backing academic research and a commercial..."
+   *
+   * A vetted wire, correctly attributed, ranked first by amplification, and NOT a market
+   * catalyst. The only thing between that and a fabricated causal claim is the note travelling
+   * with the payload — so it is not prose, it is the guard, and it gets asserted like one. A
+   * future trim "for tokens" should break a check rather than quietly remove the doctrine.
+   *
+   * Deliberately NOT tested: any ranking heuristic. The obvious one (prefer posts containing the
+   * cashtag) dies on a counter-example in the same result set — "TESLA SHARES HIT OVER ONE-WEEK
+   * HIGH" carries no cashtag and is exactly what we want. Cashtag presence is a weak signal, not
+   * a rule, and an unvalidated heuristic in the quote path is how a fabricated catalyst gets in. */
+  {
+    const r = await posts(impersonationPayload(), 'TSLA', { allowlistOnly: true, tiers: ['wire'] });
+    const n = r.allowlist.note || '';
+    ok('the payload carries the CANDIDATE-catalyst doctrine, not just the file header',
+      /CANDIDATE catalyst/.test(n) && /never assert/i.test(n), n);
+    ok('...and the wire-copy rule that forbids turning a post into a number',
+      /WIRE COPY/.test(n) && /never convert a post into a number/.test(n), n);
+  }
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })();
