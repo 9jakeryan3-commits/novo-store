@@ -180,6 +180,47 @@ function isWeekendET(iso) {
   }
 }
 
+/* ── AND FOR A 24/7 ASSET THE WEEKEND IS THE WRONG AXIS ENTIRELY ─────────────────────────────────
+   Xavier measured the same question on crypto rather than assuming Einstein's answer carried over,
+   and it does not. Live counts/recent, 168 complete hours per coin:
+
+     coin   weekday vs weekend       diurnal (UTC hour-of-day)
+     BTC    219 vs 167   x1.31       16Z 306 vs 02Z 128   x2.39
+     ETH    152 vs 117   x1.30       16Z 214 vs 00Z  89   x2.41
+     SOL    287 vs 256   x1.12       06Z 409 vs 00Z 140   x2.93
+     XRP    119 vs 109   x1.09       17Z 159 vs 05Z  86   x1.86
+
+   Crypto never closes, so there is no weekday/weekend DISCONTINUITY to capture — splitting on it
+   halves the pool to buy 1.1x of separation, which is worse than useless. But the same defect
+   exists rotated ninety degrees, and it is bigger: rank a 02Z hour against all 168 and it looks
+   permanently quiet while a 16Z hour looks permanently loud. THE PERCENTILE WOULD MOSTLY ENCODE
+   WHAT TIME IT IS, not whether anything unusual happened.
+
+   ⚠ AND A FIXED SESSION GRID DOES NOT FIX IT, which is the measurement that decided the approach.
+   8-hour UTC sessions capture only 1.26-1.61x of a 1.86-2.93x cycle, because the peaks sit near
+   session boundaries (BTC peaks at 16Z, the first hour of "US"). Worse, THE PEAK HOUR DIFFERS PER
+   COIN — SOL 06Z, BTC/ETH 16Z, XRP 17Z. Different communities keep genuinely different clocks, so
+   any shared grid is a compromise across assets that do not share a schedule.
+
+   So crypto DE-SEASONALISES instead of partitioning: divide each hour by the median of its OWN
+   hour-of-day across the week, then rank that ratio against all 168. The cycle comes out without
+   spending the pool, and the baseline is per-coin by construction.
+
+   ⚠ HONEST LIMIT, stated because it is the weak part: each hour-of-day baseline rests on 7
+   observations. That is thin, and it is reported (`baseline_n`) rather than buried. */
+function hourUTC(iso) {
+  try {
+    const h = new Date(iso).getUTCHours();
+    return Number.isFinite(h) ? h : null;
+  } catch (_) { return null; }
+}
+
+/* Assets that trade continuously, so "weekend" is not a market state for them. Kept explicit
+   rather than inferred from a name: a wrong guess here silently changes what the percentile
+   measures, and the payload names the mode it used so a wrong entry is visible rather than quiet. */
+const CONTINUOUS = new Set(["BTC", "ETH", "SOL", "XRP", "HYPE", "TRX", "AVAX", "DOGE", "ADA",
+                            "LINK", "BNB", "SUI", "TON", "LTC", "DOT", "APT", "ARB", "OP"]);
+
 /* -is:reply as well as -is:retweet: the first live probe came back led by a zero-engagement reply
    argument with profanity in it. A "catalyst" that is two strangers bickering is worse than no
    catalyst on a paid surface, and raw recent-search is mostly that. Kept verbatim from the original
@@ -226,7 +267,7 @@ async function call(url) {
    Returns null on failure rather than a zero. A zero here would be indistinguishable from a genuinely
    quiet hour, and the whole point of this rewrite is that a number which cannot tell those apart is
    worse than no number. */
-async function mentionVolume(symbol, free) {
+async function mentionVolume(symbol, free, o) {
   const url = COUNTS + "?query=" + encodeURIComponent(buildQuery(symbol, free)) + "&granularity=hour";
   const r = await call(url);
   if (!r.ok) return { error: r.error, status: r.status };
@@ -264,24 +305,85 @@ async function mentionVolume(symbol, free) {
      resolved for any bucket, or the like-pool is too short to be worth splitting, fall back to the
      whole window and SAY SO in the payload — a silent fallback would leave a caller unable to tell
      a like-for-like rank from a mixed one, which is the ambiguity this whole change exists to remove. */
-  const kinds = completeRows.map((b) => isWeekendET(b && b.start));
-  const lastKind = kinds[kinds.length - 1];
-  let pool = complete;
+  /* WHICH SEASONALITY APPLIES. Explicit override wins; otherwise a continuously-traded asset
+     de-seasonalises by hour-of-day and everything else splits weekday/weekend. The mode is always
+     reported, so a wrong classification shows up in the payload instead of quietly changing what
+     the percentile means. */
+  const season = (o && o.seasonality) ||
+    (symbol && CONTINUOUS.has(String(symbol).toUpperCase()) ? "hour_of_day" : "weekday_weekend");
+
+  let pool = complete;                 // the values the GATE reads - always raw counts
+  let rankSeries = complete;           // the values the RANK is taken against
+  let rankValue = lastComplete;        // the value being ranked
   let poolName = "all complete hours";
-  if (lastKind !== null && !kinds.some((k) => k === null)) {
-    const like = complete.filter((_n, i) => kinds[i] === lastKind);
-    if (like.length >= MIN_POOL_N) {
-      pool = like;
-      poolName = lastKind ? "weekend hours only (ET)" : "weekday hours only (ET)";
+  let baselineN = null;
+  let hourKind = null;      // weekend/weekday label, kept in the payload for the equity path
+
+  if (season === "hour_of_day") {
+    const hrs = completeRows.map((b) => hourUTC(b && b.start));
+    if (hrs.some((h) => h === null)) {
+      poolName = "all complete hours - bucket timestamps unreadable, could not de-seasonalise";
     } else {
-      poolName = "all complete hours - too few " +
-                 (lastKind ? "weekend" : "weekday") + " hours (" + like.length + ") to rank like-for-like";
+      // Median of each hour-of-day across the week: the per-coin baseline.
+      const byHour = new Map();
+      hrs.forEach((h, i) => {
+        if (!byHour.has(h)) byHour.set(h, []);
+        byHour.get(h).push(complete[i]);
+      });
+      const base = new Map();
+      for (const [h, vals] of byHour) {
+        const s = vals.slice().sort((a, b) => a - b);
+        base.set(h, s[Math.floor(s.length / 2)]);
+      }
+      /* An hour-of-day whose baseline is ZERO cannot produce a ratio, and substituting 1 would
+         invent a denominator. Those buckets leave the ranking pool and the count is reported —
+         dropping observations silently is how a percentile ends up computed over a population
+         nobody described. */
+      const keep = [];
+      hrs.forEach((h, i) => { if (base.get(h) > 0) keep.push(complete[i] / base.get(h)); });
+      const lastBase = base.get(hrs[hrs.length - 1]);
+      if (keep.length >= MIN_POOL_N && lastBase > 0) {
+        rankSeries = keep;
+        rankValue = lastComplete / lastBase;
+        baselineN = byHour.get(hrs[hrs.length - 1]).length;
+        poolName = "all complete hours, de-seasonalised by UTC hour-of-day" +
+          (keep.length < complete.length
+            ? " (" + (complete.length - keep.length) + " dropped: their hour-of-day baseline is zero)"
+            : "");
+      } else {
+        poolName = "all complete hours - too sparse to de-seasonalise (" + keep.length +
+                   " usable of " + complete.length + ")";
+      }
     }
-  } else if (lastKind === null) {
-    poolName = "all complete hours - bucket timestamps unreadable, could not split weekday/weekend";
+  } else {
+    const kinds = completeRows.map((b) => isWeekendET(b && b.start));
+    const lastKind = kinds[kinds.length - 1];
+    hourKind = lastKind === null ? "unknown" : (lastKind ? "weekend" : "weekday");
+    if (lastKind !== null && !kinds.some((k) => k === null)) {
+      const like = complete.filter((_n, i) => kinds[i] === lastKind);
+      if (like.length >= MIN_POOL_N) {
+        pool = like;
+        rankSeries = like;
+        poolName = lastKind ? "weekend hours only (ET)" : "weekday hours only (ET)";
+      } else {
+        poolName = "all complete hours - too few " +
+                   (lastKind ? "weekend" : "weekday") + " hours (" + like.length + ") to rank like-for-like";
+      }
+    } else if (lastKind === null) {
+      poolName = "all complete hours - bucket timestamps unreadable, could not split weekday/weekend";
+    }
   }
 
-  const below = pool.filter((n) => n < lastComplete).length;
+  /* ⚠ MID-RANK, NOT STRICTLY-BELOW, AND TIES ARE THE REASON. `below / n` counts only values
+     strictly less than the current one, so a series with heavy ties systematically UNDER-reports:
+     in the limit, a perfectly tied series returns percentile 0 — "the quietest hour on record" —
+     for a value that is exactly typical. Found while testing de-seasonalisation, where ratios
+     cluster hard around 1.0 by construction, but it was always latent on coarse raw series too
+     (IWM resolves to 33 distinct values in a week, so its ties are not rare).
+     Mid-rank credits half of each tie, which is the standard definition and cannot report a
+     typical value as an extreme. */
+  const below = rankSeries.filter((n) => n < rankValue).length +
+                rankSeries.filter((n) => n === rankValue).length / 2;
   const poolSorted = pool.slice().sort((a, b) => a - b);
   const median = poolSorted[Math.floor(poolSorted.length / 2)];
   const poolTotal = pool.reduce((a, b) => a + b, 0);
@@ -332,9 +434,9 @@ async function mentionVolume(symbol, free) {
      percentile exists to detect. Stated here so nobody "optimises" it into the current hour later.
      (Timmy's catch.) */
   let unrankable = null;
-  if (pool.length < MIN_POOL_N) {
-    unrankable = "only " + pool.length + " comparable hours (" + poolName + ") - too short to " +
-                 "percentile at all";
+  if (rankSeries.length < MIN_POOL_N) {
+    unrankable = "only " + rankSeries.length + " comparable hours (" + poolName + ") - too short " +
+                 "to percentile at all";
   } else if (median < MEDIAN_FLOOR) {
     unrankable = "median " + median + " posts/hr over " + pool.length + " " + poolName + " - at " +
                  "this resolution a single post moves the rank several points";
@@ -359,9 +461,13 @@ async function mentionVolume(symbol, free) {
     // eventually compare a weekend reading to a weekday one as though they shared a scale.
     ranked_against: {
       pool: poolName,
-      n: pool.length,
+      n: rankSeries.length,
       median_hour: median,
-      hour_kind: lastKind === null ? "unknown" : (lastKind ? "weekend" : "weekday"),
+      seasonality: season,
+      hour_kind: hourKind,          // null under hour_of_day: weekend is not a state for a 24/7 asset
+      // How many observations each hour-of-day baseline rests on. Thin by construction (a week
+      // gives 7) and reported rather than buried, because it is the weak part of the method.
+      baseline_n: baselineN,
     },
     // Reported, never ranked. Its own field name says it is partial and carries how partial, so a
     // reader can see what the ranked figure left out rather than being handed a quiet truncation.
@@ -388,8 +494,8 @@ async function mentionVolume(symbol, free) {
     // The headline measurement, over a COMPLETE hour so the comparison is like-for-like. The
     // denominator rides with it: a rate without its n is the thing the track-record page exists to
     // refuse, and that rule does not stop at the page.
-    percentile_of_own_history: Math.round((below / pool.length) * 1000) / 10,
-    note: "percentile of the LAST COMPLETE hour against " + poolName + ", n=" + pool.length +
+    percentile_of_own_history: Math.round((below / rankSeries.length) * 1000) / 10,
+    note: "percentile of the LAST COMPLETE hour against " + poolName + ", n=" + rankSeries.length +
           " buckets - a measurement of ATTENTION, never a direction, and never a position",
   });
 }

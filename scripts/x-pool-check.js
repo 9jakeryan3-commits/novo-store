@@ -192,6 +192,113 @@ async function volume(payload) {
       'pool was: ' + (v.ranked_against && v.ranked_against.pool));
   }
 
+  /* ── 6. A 24/7 ASSET DE-SEASONALISES BY HOUR-OF-DAY INSTEAD ──────────────────────────────────
+   * Xavier measured the same question on crypto rather than assuming Einstein's answer carried
+   * over, and it does not. Weekday/weekend is 1.09-1.31x on a coin; the DIURNAL cycle is
+   * 1.86-2.93x. Rank a 02Z hour against all 168 and the percentile mostly encodes WHAT TIME IT IS.
+   * The series below has Xavier's BTC shape: a 16Z peak against a 02Z trough, ~2.4x.
+   */
+  function diurnal({ peakHourUTC, peak, trough, lastRelative, endsUTC }) {
+    const rows = [];
+    let seed = 99991;
+    const end = new Date(endsUTC);
+    for (let i = 168; i >= 1; i--) {
+      const s = new Date(end.getTime() - i * 3600000);
+      const h = s.getUTCHours();
+      // smooth cycle peaking at peakHourUTC
+      const d = Math.min(Math.abs(h - peakHourUTC), 24 - Math.abs(h - peakHourUTC));
+      // Deterministic noise: a real diurnal series is a TENDENCY, not a repeating waveform. A
+      // noiseless cycle de-seasonalises to a constant, which tests nothing about ranking.
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      const jitter = 0.75 + 0.5 * (seed / 0x7fffffff);
+      const n = Math.round((trough + (peak - trough) * Math.cos((d / 12) * Math.PI) * 0.5 + (peak - trough) * 0.5) * jitter);
+      rows.push({ start: s.toISOString(), end: new Date(s.getTime() + 3600000).toISOString(), tweet_count: Math.max(0, n) });
+    }
+    /* The value under test is expressed RELATIVE to what that hour-of-day normally is, derived
+       from the series itself. Hard-coding "128 is typical at 02Z" was wrong — for a 16Z peak the
+       02Z level is ~140, not the trough — and the check then failed for a reason that had nothing
+       to do with the code. Deriving it means the test cannot drift from its own generator. */
+    const lastH = new Date(rows[rows.length - 1].start).getUTCHours();
+    const sameHour = rows.filter((r) => new Date(r.start).getUTCHours() === lastH)
+                         .map((r) => r.tweet_count).sort((a, b) => a - b);
+    const typical = sameHour[Math.floor(sameHour.length / 2)];
+    rows[rows.length - 1].tweet_count = Math.round(typical * lastRelative);
+    rows.push({ start: end.toISOString(), end: new Date(end.getTime() + 43 * 60000).toISOString(), tweet_count: 1 });
+    return { data: rows, meta: { total_tweet_count: rows.reduce((a, b) => a + b.tweet_count, 0) } };
+  }
+
+  {
+    // A 02Z hour sitting at its OWN hour-of-day's normal level. Against the raw 168 it looks like
+    // one of the quietest hours of the week; de-seasonalised it is unremarkable, which is true.
+    // x1.0 = exactly normal FOR 02Z, which raw-ranked would still sit near the bottom of the
+    // week purely because 02Z is always quiet.
+    const p = diurnal({ peakHourUTC: 16, peak: 306, trough: 128, lastRelative: 1.0,
+                        endsUTC: '2026-09-06T03:00:00Z' });
+    const { client, restore } = loadClient(p);
+    let v; try { v = await client.mentionVolume('BTC'); } finally { restore(); }
+
+    ok('a coin de-seasonalises by hour-of-day, not weekday/weekend',
+      v.ranked_against && v.ranked_against.seasonality === 'hour_of_day',
+      JSON.stringify(v.ranked_against));
+    ok('a TYPICAL 02Z hour is not reported as a weekly extreme',
+      v.rankable === true && v.percentile_of_own_history > 20 && v.percentile_of_own_history < 80,
+      'percentile=' + v.percentile_of_own_history + ' - raw-ranked it would sit near the bottom ' +
+      'purely because 02Z is always quiet');
+    ok('the pool is NOT halved to buy 1.1x of weekday/weekend separation',
+      v.ranked_against.n > 120, 'n=' + v.ranked_against.n);
+    ok('the thin part of the method is reported, not buried',
+      v.ranked_against.baseline_n === 7, 'baseline_n=' + v.ranked_against.baseline_n);
+
+    // ...and a genuinely busy 02Z hour must still reach the top. Otherwise de-seasonalising has
+    // merely flattened the signal along with the cycle, which would be a worse bug than the one
+    // it fixes: an anomaly detector that cannot detect an anomaly.
+    const busy = diurnal({ peakHourUTC: 16, peak: 306, trough: 128, lastRelative: 6.0,
+                           endsUTC: '2026-09-06T03:00:00Z' });
+    const l2 = loadClient(busy);
+    let v2; try { v2 = await l2.client.mentionVolume('BTC'); } finally { l2.restore(); }
+    ok('a genuinely ABNORMAL 02Z hour still ranks at the top',
+      v2.rankable === true && v2.percentile_of_own_history > 95,
+      'percentile=' + v2.percentile_of_own_history);
+  }
+
+  {
+    // An equity is unaffected by any of the above.
+    const v = await volume(series({ weekdayMedian: 77, weekendMedian: 41, lastHourCount: 77,
+      endsUTC: '2026-09-03T18:00:00Z' }));
+    ok('an equity still splits weekday/weekend',
+      v.ranked_against.seasonality === 'weekday_weekend' && v.ranked_against.baseline_n === null,
+      JSON.stringify(v.ranked_against));
+  }
+
+  /* ── 7. TIES MUST NOT READ AS EXTREMES ───────────────────────────────────────────────────────
+   * `below / n` counts only values strictly LESS than the current one, so a series with heavy ties
+   * under-reports — in the limit a perfectly tied series returns percentile 0, "the quietest hour
+   * on record", for a value that is exactly typical.
+   *
+   * I found this while testing de-seasonalisation (ratios cluster hard around 1.0) and switched to
+   * mid-rank — but the sabotage run showed every existing check still passed with the old formula
+   * restored, i.e. I had changed the published number with nothing testing it. This is that test.
+   * It is not synthetic-only: IWM resolves to 33 distinct values across a week, so its ties are
+   * common, and a tied IWM hour would have been reported at the bottom of its range. */
+  {
+    const rows = [];
+    const end = new Date('2026-09-03T18:00:00Z');
+    for (let i = 168; i >= 1; i--) {
+      const s = new Date(end.getTime() - i * 3600000);
+      // Heavy ties on purpose: 150 exactly, with a handful of outliers either side.
+      const n = (i % 40 === 0) ? 90 : (i % 37 === 0) ? 220 : 150;
+      rows.push({ start: s.toISOString(), end: new Date(s.getTime() + 3600000).toISOString(), tweet_count: n });
+    }
+    rows[rows.length - 1].tweet_count = 150;                    // dead typical
+    rows.push({ start: end.toISOString(), end: new Date(end.getTime() + 600000).toISOString(), tweet_count: 3 });
+    const { client, restore } = loadClient({ data: rows, meta: { total_tweet_count: 25000 } });
+    let v; try { v = await client.mentionVolume('SPY'); } finally { restore(); }
+    ok('a value tied with most of its history ranks near the MIDDLE, not at zero',
+      v.rankable === true && v.percentile_of_own_history > 35 && v.percentile_of_own_history < 65,
+      'percentile=' + v.percentile_of_own_history + ' - strictly-below counting reports a dead ' +
+      'typical value as the quietest hour on record');
+  }
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })();
