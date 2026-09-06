@@ -1481,8 +1481,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      them. Measuring a quiet moment and calling it fixed is how this drifts back mid-session.
      nowrap makes a second row impossible rather than unlikely -- and left-aligned, the strip fills the
      empty half of the header beside the action buttons, which is what it was moved here to do. */
+  /* justify-content: center (Jake, 2026-09-06 — "make sure the strip info is centered not left or
+     right"). The tiles are flex:1 1 0 so they usually absorb the whole bar and centring is a no-op
+     — but they cannot shrink below their own nowrap text, so whenever the content does not divide
+     evenly the leftover sat entirely on the RIGHT under the default flex-start. Measured at 1920:
+     1880px of content in a 1904px strip, so 24px of slack all on one side. Centring splits it, and
+     it matters more now that two readouts are parked and there is more slack to place. */
   #saas-header #card-mktintel { flex: 1 1 auto; min-width: 0; order: 2;
-    display: flex; align-items: center; flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
     gap: 2px 0; background: none; border: none; padding: 5px 12px; overflow: hidden; }
   /* The strip owns the WHOLE bar now (the action buttons left with the execution build), so the
      readouts stretch as equal tiles across it and the labels use their full words -- the
