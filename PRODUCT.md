@@ -326,3 +326,38 @@ four — they are copy-pasted per page, not included. See [[verify-fix-count-not
 | What does a free **account** get? | `NoVo-Pulse/control-plane/app.py` → `_free_snapshot`, `/portal` |
 | What does checkout actually charge? | `api/checkout-analyst.js`, `api/checkout-sub*.js` |
 | What is promised in writing? | `public/license.html`, `refund-policy.html`, `api/chat.js` |
+
+## X / chatter — lane practice for store copy, journal and SEO
+
+**X is a research input for whoever is writing. It does not render on this site.** Recorded 2026-09-05
+after probing it, so the next person does not re-derive it.
+
+- **Used for:** deciding what to write. Query it, read it, decide. Nothing is stored, nothing is
+  rendered, no number reaches a page — so the no-invented-sentiment guardrail cannot be violated
+  here, because there is no surface to violate it on.
+- **Measured usefulness: weak for this lane.** Ranked by engagement, `"gamma squeeze"` over 7 days
+  returned a BTC weekend-gap guess, January 2021 GME nostalgia, an $AMC hype video, an $SMCI price
+  question and one unrelated false positive. That is retail chatter, not question-shaped demand from
+  anyone who would pay for a dealer map. Do not build journal topic selection on it.
+- **Never in static copy.** Not because a page cannot fetch live data — several already do (the
+  ticker strip, `/crypto`, the `/ai` counter) — but because a chatter figure baked into copy is a
+  frozen 7-day snapshot presented as current. If chatter ever belongs on a selling surface it must
+  be *fetched live with its own timestamp*, never written into prose.
+- **One client only:** `api/_lib/x-client.js`. Never write a second fetcher.
+- **Posts are wire copy:** attribute to the handle, never convert a post into a number, let market
+  data override without comment. A volume percentile is a measurement; a sentiment score is a
+  fabrication. And an aggregate's newest bucket is not comparable to its history unless something
+  guarantees the bucket is complete — that defect *inverts* rather than degrades, reading lowest
+  exactly when the subject is busiest.
+
+## Third-party pricing on this site — needs a recheck cadence
+
+Five pages quote competitor prices (`compare-best-0dte-tools`, `compare-best-gamma-gex-tools`,
+`compare-novo-vs-spotgamma`, `plans`, and the shared comparison block): **SpotGamma $89–$299/mo,
+OptionsDepth ~$199–$249/mo**, plus a reference to Unusual Whales' top tier.
+
+These were last corrected on **2026-08-21**, by a commit titled *"every stale competitor number"* —
+so they have already gone stale once. Nothing rechecks them: it was a one-off audit, not a process.
+This is comparative advertising about named companies, so a wrong figure is worse than an
+embarrassment. **Re-verify against each vendor's own pricing page before quoting them anywhere new,
+and treat any figure older than a quarter as unverified.**
