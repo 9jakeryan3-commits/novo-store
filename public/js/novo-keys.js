@@ -164,8 +164,26 @@
       '@media (prefers-reduced-motion:no-preference){#nvk.on .box,#nvk-sheet.on .box{',
       'animation:nvk-in .13s ease-out}}',
       '@keyframes nvk-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}',
-      // Touch has no keyboard; the whole layer is dead weight on a phone.
-      '@media (pointer:coarse){#nvk,#nvk-sheet,#nvk-chip{display:none !important}}'
+      /* ── THE VISIBLE AFFORDANCE ──────────────────────────────────────────────────────────
+         Keyboard power nobody can SEE is keyboard power nobody uses. Everything above was
+         reachable only by already knowing to press Cmd-K, which is a discoverability dead end:
+         the one person guaranteed not to press it is the one who would benefit most.
+         So the shortcuts get a permanent, quiet home in the page's own chrome — and it is a
+         BUTTON, not a label, because a hint you cannot click is an instruction rather than a
+         control. Clicking does exactly what the key does. */
+      '#novo-keys-hint{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}',
+      '.nvk-hint-btn{display:inline-flex;align-items:center;gap:5px;background:none;cursor:pointer;',
+      'border:1px solid var(--bdr2,#2e3036);border-radius:8px;padding:3px 8px;color:#7d97b8;',
+      'font:600 11px/1.5 inherit;letter-spacing:.02em;transition:border-color .15s,color .15s}',
+      '.nvk-hint-btn:hover,.nvk-hint-btn:focus-visible{border-color:' + A + ';color:#eaf3ff;outline:none}',
+      '.nvk-hint-btn kbd{display:inline-block;background:#22242a;border:1px solid #33363d;',
+      'border-radius:4px;padding:0 5px;font:600 10.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;',
+      'color:#eaf3ff;min-width:8px;text-align:center}',
+      /* Below ~1100px the topbars are already fighting for room; the label goes, the key stays. */
+      '@media (max-width:1100px){.nvk-hint-btn span{display:none}}',
+      // Touch has no keyboard; the whole layer is dead weight on a phone — INCLUDING the hint,
+      // which would otherwise advertise a control the device cannot operate.
+      '@media (pointer:coarse){#nvk,#nvk-sheet,#nvk-chip,#novo-keys-hint{display:none !important}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -682,8 +700,43 @@
     if (isOpen()) render(input.value);
   });
 
+  /* Filled into whatever container the PAGE provides, because each dashboard knows where its own
+     chrome has room and this file does not. A page opts in with <div id="novo-keys-hint"></div>;
+     a page without one is unchanged. Idempotent — a late DOM or a second call cannot double it. */
+  function mountHint() {
+    var host = document.getElementById('novo-keys-hint');
+    if (!host || host.getAttribute('data-nvk-on')) return false;
+    host.setAttribute('data-nvk-on', '1');
+    css();
+    host.innerHTML =
+      '<button type="button" class="nvk-hint-btn" data-nvk-open ' +
+        'title="Search commands and pages" aria-label="Open the command palette">' +
+        '<kbd>' + MOD + '</kbd><kbd>K</kbd><span>Commands</span></button>' +
+      '<button type="button" class="nvk-hint-btn" data-nvk-help ' +
+        'title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">' +
+        '<kbd>?</kbd><span>Shortcuts</span></button>';
+    host.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.hasAttribute('data-nvk-open')) { open('cmd'); return; }
+      /* ⚠ ROUTE `?` TO WHICHEVER SHEET THIS PAGE ACTUALLY HAS. trader-live keeps its own, built
+         inside #novo-chart so it survives fullscreen and listing chart keys this file does not
+         know about. Calling the wrong one would open an empty panel on the page with the most
+         shortcuts. */
+      if (traderSheet()) { try { window._kbHelpToggle(); } catch (_e) {} }
+      else helpToggle(true);
+    });
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountHint);
+  } else {
+    mountHint();
+  }
+
   window.NovoKeys = {
     register: register,
+    mountHint: mountHint,
     addHelp: addHelp,
     open: open,
     close: close,

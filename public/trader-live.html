@@ -1739,6 +1739,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      space, so "DR." + space carries the period's own side bearing plus 0.8px and reads as a double
      gap — "DR.  NOVO". CHART and ANALYSIS never showed it because neither contains a space.
      -0.8px removes exactly what letter-spacing added, no more. */
+  /* The shortcut printed ON the control it triggers. A key listed only in a help sheet is a key
+     you have to go looking for; a key on the button is one you notice while using the mouse. */
+  .navbtn-kbd { display:inline-block; margin-left:6px; background:rgba(255,255,255,.07);
+    border:1px solid var(--bdr2); border-radius:4px; padding:0 4px; font-size:9.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--txt3);
+    vertical-align:1px; letter-spacing:0; word-spacing:0; }
+  .navbtn-novo:hover .navbtn-kbd, .navbtn-novo.on .navbtn-kbd { color:#eaf3ff; border-color:rgba(52,211,153,.5); }
+  @media (max-width:1100px){ .navbtn-kbd { display:none; } }
   .navbtn-novo { word-spacing: -0.8px;
     border-color: rgba(52,211,153,.5) !important; color: #34d399 !important;
     box-shadow: 0 0 13px -3px rgba(52,211,153,.55); animation: novoGlowBtn 2.8s ease-in-out infinite; }
@@ -1910,7 +1918,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
          was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
          tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
          slot in the nav. -->
-    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape">&#10022; Dr. NoVo</button>
+    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
+    <div id="novo-keys-hint"></div>
   </div>
 
   <div class="tb-right">
@@ -6861,7 +6870,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
     } catch (_e) {}
   };
 </script>
-<script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
+<script src="/js/novo-keys.js?v=e6fe7d13" defer></script>
 <script>
 /* EVERY COMMAND HERE CLICKS A REAL BUTTON. The toolbar's own handlers carry behaviour that is
    invisible from the outside and easy to lose in a reimplementation: the timeframe path preserves

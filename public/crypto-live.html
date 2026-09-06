@@ -595,7 +595,8 @@ tr:last-child td{border-bottom:none}
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
       
     </div>
-    <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
+    <div id="novo-keys-hint"></div>
+      <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
   </header>
   <main>
     <div class="col" id="rail"></div>
@@ -3158,7 +3159,7 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
 
 <!-- The shared keyboard layer. It owns the keys that mean the same thing on every NoVo surface —
      the command palette, the go-to chords, "/" and "n" and "?" — and knows nothing about this page. -->
-<script src="/js/novo-keys.js?v=dad9ecaf" defer></script>
+<script src="/js/novo-keys.js?v=e6fe7d13" defer></script>
 <script>
 /* NINETY COINS, TYPE-AHEAD, WHICH THIS MAP HAS NEVER HAD. The rail is grouped by band and sorted by
    open interest, so there is no A-Z order to scan and the only way to reach a coin was to know where
