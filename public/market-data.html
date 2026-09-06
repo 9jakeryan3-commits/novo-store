@@ -64,7 +64,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 </script>
 <style>
   :root {
-    --navy:#121316; --navy2:#1c1d21; --bdr:#2e3036; --blue:#3b82f6; --amber:#f59e0b;
+    --navy:#121316; --navy2:#232428;
+    --rule:  #34363c; --bdr:#2e3036; --blue:#3b82f6; --amber:#f59e0b;
     --green:#10b981; --red:#f43f5e; --cyan:#22d3ee; --txt1:#eaf3ff; --txt2:#8aacc8; --txt3:#7d97b8;
   }
   * { box-sizing: border-box; }
@@ -138,7 +139,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      also stays centred -- it is shared furniture on 34 pages and centring it here alone is what
      would create a real inconsistency. */
 
-  .card { background:var(--navy2); border:1px solid var(--bdr); border-radius:14px; padding:22px; }
+  .card { background:var(--navy2); border-radius:14px; padding:22px; }
   .muted { color:var(--txt3); font-size:12px; }
 
   /* HERO / pulse */
@@ -195,7 +196,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .fut { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
   @media(max-width:900px){ .fut{ grid-template-columns:repeat(3,1fr); } }
   @media(max-width:520px){ .fut{ grid-template-columns:repeat(2,1fr); } }
-  .fut .fc { background:var(--navy2); border:1px solid var(--bdr); border-radius:10px; padding:14px; }
+  .fut .fc { background:var(--navy2); border-radius:10px; padding:14px; }
   .fut .fn { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:1px; font-weight:700; }
   .fut .fp { font-size:20px; font-weight:800; color:var(--txt1); margin:6px 0 2px; }
   .fut .fg { font-size:12.5px; font-weight:700; }
@@ -288,7 +289,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ---- sector heatmap ---- */
   .hm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:12px; }
-  .hm-sec { background:var(--navy2); border:1px solid var(--bdr); border-radius:11px; padding:11px 12px 12px; }
+  .hm-sec { background:var(--navy2); border-radius:11px; padding:11px 12px 12px; }
   .hm-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:9px; }
   .hm-name { font-size:12.5px; font-weight:800; color:var(--txt1); letter-spacing:.2px; }
   .hm-pct { font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; }
@@ -519,6 +520,19 @@ nav { position: relative; }
 })();
 </script>
 <!-- PER-INDEX FEAR -->
+<div class="container sec" id="crypto">
+  <div class="card">
+    <div class="lbl">Crypto &middot; live 24/7</div>
+    <h2 class="h2" style="font-size:20px;margin-bottom:4px;">Crypto dealer gamma, funding &amp; liquidations</h2>
+    <p class="sub" style="margin:0 0 14px;font-size:13.5px;">Net dealer gamma on BTC and ETH from the options book, and leverage positioning per venue across the coins retail trades. Free, public data, updating around the clock. An AI agent can read the same figures straight from our <a href="/developers" style="color:#22d3ee;font-weight:600;">MCP server</a>.</p><p class="sub" style="margin:6px 0 0;font-size:13px;">Per-coin live pages: <a href="/crypto/btc" style="color:#a78bfa;">BTC</a> &middot; <a href="/crypto/eth" style="color:#a78bfa;">ETH</a> &middot; <a href="/crypto/sol" style="color:#a78bfa;">SOL</a> &middot; <a href="/crypto/xrp" style="color:#a78bfa;">XRP</a> &mdash; and every other mapped coin, A&ndash;Z from any of them.</p>
+    <div id="cx-gamma" class="cx-cards"><div class="muted">Loading&hellip;</div></div>
+    <div id="cx-fund" style="margin-top:16px"></div>
+    <p class="sub" style="margin:14px 0 0;font-size:12.5px;">
+      <a href="/crypto" style="color:#a78bfa;font-weight:700;">Gamma by strike, the walls and the flip</a>, liquidation clusters, what a round trip costs,
+      and Dr. NoVo reading all of it &rarr; <a href="/crypto" style="color:#a78bfa;font-weight:700;">the Crypto Market Map</a>.</p>
+  </div>
+</div>
+
 <div class="container sec" id="fear">
   <div class="lbl">Fear · by index</div>
   <h2 class="h2">S&amp;P, Nasdaq &amp; Russell — each on its own volatility</h2>
@@ -631,18 +645,7 @@ nav { position: relative; }
 <!-- WHAT IS THIS (SEO) -->
 
 <!-- FREE CRYPTO — the layers the market already gives away, so we do too -->
-<div class="container sec" id="crypto">
-  <div class="card">
-    <div class="lbl">Crypto &middot; live 24/7</div>
-    <h2 class="h2" style="font-size:20px;margin-bottom:4px;">Crypto dealer gamma, funding &amp; liquidations</h2>
-    <p class="sub" style="margin:0 0 14px;font-size:13.5px;">Net dealer gamma on BTC and ETH from the options book, and leverage positioning per venue across the coins retail trades. Free, public data, updating around the clock. An AI agent can read the same figures straight from our <a href="/developers" style="color:#22d3ee;font-weight:600;">MCP server</a>.</p><p class="sub" style="margin:6px 0 0;font-size:13px;">Per-coin live pages: <a href="/crypto/btc" style="color:#a78bfa;">BTC</a> &middot; <a href="/crypto/eth" style="color:#a78bfa;">ETH</a> &middot; <a href="/crypto/sol" style="color:#a78bfa;">SOL</a> &middot; <a href="/crypto/xrp" style="color:#a78bfa;">XRP</a> &mdash; and every other mapped coin, A&ndash;Z from any of them.</p>
-    <div id="cx-gamma" class="cx-cards"><div class="muted">Loading&hellip;</div></div>
-    <div id="cx-fund" style="margin-top:16px"></div>
-    <p class="sub" style="margin:14px 0 0;font-size:12.5px;">
-      <a href="/crypto" style="color:#a78bfa;font-weight:700;">Gamma by strike, the walls and the flip</a>, liquidation clusters, what a round trip costs,
-      and Dr. NoVo reading all of it &rarr; <a href="/crypto" style="color:#a78bfa;font-weight:700;">the Crypto Market Map</a>.</p>
-  </div>
-</div>
+
 
 <div class="container sec">
   <div class="lbl">About</div>
