@@ -57,7 +57,7 @@
       el = document.createElement('div');
       el.id = 'gate';
       el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;'
-        + 'justify-content:center;background:#0b0b0d;color:#e7e7ea;font:14px/1.6 system-ui,sans-serif;'
+        + 'justify-content:center;background:#0b0b0d;color:#e7e7ea;font:14px/1.6 var(--sans,system-ui);'
         + 'text-align:center;padding:24px;';
       document.body.appendChild(el);
     }
@@ -185,7 +185,7 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
     if(b||standalone())return b;
     b=document.createElement('button');
     b.id='novoInstall'; b.textContent='⤓  Install App';
-    b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#1a4a8a,#2a5298);color:#f0f0ee;border:none;padding:11px 16px;border-radius:8px;font:600 12px/1 system-ui,sans-serif;letter-spacing:1px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
+    b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#1a4a8a,#2a5298);color:#f0f0ee;border:none;padding:11px 16px;border-radius:8px;font:600 12px/1 var(--sans,system-ui);letter-spacing:1px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
     b.onclick=async function(){ if(!dp)return; dp.prompt(); try{await dp.userChoice;}catch(e){} dp=null; b.style.display='none'; };
     (document.body||document.documentElement).appendChild(b);
     return b;
@@ -233,7 +233,12 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
 .tb-brand .wm { display: flex; flex-direction: column; line-height: 1; }
 .tb-brand .wm-1 { font-family: var(--display); font-size: 21px; font-weight: 800;
   color: var(--txt1); letter-spacing: .2px; }
-.tb-brand .wm-2 { font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+/* ⚠ EXPLICIT, because .brand sets font-family: var(--font) and this element is inside it. Without
+   this line the wordmark's first line rendered in Space Grotesk and its SECOND line in Geist Mono --
+   one two-line brand lockup carrying two different faces, and neither matching the store's, whose
+   identical sub-line renders in Inter. The mark is the one thing that must look the same on every
+   surface. */
+.tb-brand .wm-2 { font-family: var(--sans); font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
   color: var(--txt3); margin-top: 3px; }
 @media (max-width: 900px) { .tb-brand .wm-2 { display: none; } .tb-brand img { height: 22px; } }
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}

@@ -103,7 +103,10 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .lv-brand{display:flex;align-items:center;gap:9px;text-decoration:none}
 .lv-brand img{height:26px;width:auto;display:block}
 .wm{display:flex;flex-direction:column;line-height:1}
-.wm-1{font-size:18px;font-weight:800;color:var(--txt1);letter-spacing:-.5px}
+/* ⚠ The display face, same as the store, the trader and the analyst. Measured: this wordmark
+   was rendering in Inter while the identical mark on the other three surfaces rendered in
+   Space Grotesk. The brand mark is the one element that must not vary by page. */
+.wm-1{font-family:var(--display);font-size:18px;font-weight:800;color:var(--txt1);letter-spacing:-.5px}
 .wm-2{font-size:8.5px;font-weight:700;letter-spacing:2.6px;text-transform:uppercase;color:var(--cx);margin-top:4px;white-space:nowrap}
 .lv-brand{flex:0 0 auto}
 .lv-status{margin-left:auto;min-width:0;display:flex;align-items:center;gap:11px;justify-content:flex-end}

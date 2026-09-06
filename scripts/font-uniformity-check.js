@@ -76,6 +76,11 @@ const MEASURE = `(async () => {
     delivered: delivered,
     tokens: { sans: tok('--sans'), display: tok('--display'), mono: tok('--mono'), font: tok('--font') },
     bodyFamily: bodyCS.fontFamily,
+    // the brand lockup: both lines, because they are styled by different rules and drifted apart
+    wm1: (function () { const e = document.querySelector('.wm-1');
+      return e ? getComputedStyle(e).fontFamily.split(',')[0].replace(/['\"]/g, '').trim() : null; })(),
+    wm2: (function () { const e = document.querySelector('.wm-2');
+      return e ? getComputedStyle(e).fontFamily.split(',')[0].replace(/['\"]/g, '').trim() : null; })(),
     bodyNumeric: bodyCS.fontVariantNumeric,
     // measured through the page's OWN body style, so it reflects what a readout actually inherits
     spreadAtBody: digitSpread('font-family:' + bodyCS.fontFamily + ';font-variant-numeric:' + bodyCS.fontVariantNumeric),
@@ -141,6 +146,28 @@ const MEASURE = `(async () => {
   const an = seen['analyst-live.html'];
   ok('analyst does NOT read in mono — only the trader does',
     an && !/Geist Mono/i.test(an.bodyFamily), an && an.bodyFamily);
+
+  /* THE BRAND MARK IS THE ONE ELEMENT THAT MUST NOT VARY BY PAGE, and it was varying two ways:
+     crypto's first line rendered in Inter instead of the display face, and the trader's SECOND line
+     rendered in Geist Mono because it sat inside .brand{font-family:var(--font)} and never
+     overrode it. One two-line lockup, two faces, neither matching the store's. */
+  const wm1s = names.map((n) => seen[n].wm1), wm2s = names.map((n) => seen[n].wm2);
+  ok('the wordmark first line is the display face on all three',
+    wm1s.every((x) => x === 'Space Grotesk'),
+    names.map((n, i) => n.replace('-live.html', '') + '=' + wm1s[i]).join('  '));
+  ok('...and its sub-line is the text face on all three, not the body face',
+    wm2s.every((x) => x === 'Inter'),
+    names.map((n, i) => n.replace('-live.html', '') + '=' + wm2s[i]).join('  '));
+
+  /* JS-injected overlays bypass the tokens entirely and are invisible to any CSS-only audit. The
+     sign-in gate is the FIRST thing an expired session sees on a paid surface, and it was rendering
+     in the OS font. Counted by substring rather than regex: no escapes to get mangled. */
+  BOARDS.forEach((f) => {
+    const txt = fs.readFileSync(path.join(PUBLIC, f), 'utf8');
+    const hard = txt.split('system-ui,sans-serif').length - 1;
+    ok(f.replace('-live.html', '') + ': no JS overlay hard-codes the OS font past the tokens',
+      hard === 0, hard + ' hard-coded system-ui font shorthand(s) remain');
+  });
 
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   ws.close(); proc.kill(); server.close();
