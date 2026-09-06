@@ -2008,6 +2008,49 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 }
 
 /* ── Settings drawer (desktop): Risk & Allocation lives here now ── */
+/* ⚠ SETTINGS DRAWER. The trader's entire settings menu was ONE item -- "Back to portal" -- against
+   seven on the analyst dashboard. Jake: "the settings menu is also missing alot." Same drawer
+   geometry as the other two dashboards so it is the same object in three products.
+   WHAT IS DELIBERATELY NOT HERE: the push-alerts toggle. The analyst has one and it would copy
+   across cleanly -- same novo_live_t token, same /api/analyst-publish endpoints -- but /trader/sw.js
+   is an install-only PWA shell with no push handler in it, so subscribing would SUCCEED and no
+   notification would ever arrive. A button that reports success and does nothing is worse than an
+   absent one. It goes in the moment that service worker handles push. */
+#set-scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 399; }
+#set-scrim.open { display: block; }
+#set-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 92vw; z-index: 400;
+  background: var(--bg1); border-left: 1px solid var(--bdr); box-shadow: -12px 0 40px rgba(0,0,0,.6);
+  overflow-y: auto; transform: translateX(101%); transition: transform .18s ease;
+  display: flex; flex-direction: column; }
+#set-drawer.open { transform: translateX(0); }
+#set-drawer .dh { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 48px;
+  border-bottom: 1px solid var(--bdr); flex: 0 0 auto;
+  background: linear-gradient(180deg, #17171a 0%, #0c0c0f 100%); }
+#set-drawer .dh b { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--txt2); }
+#set-drawer .dh button { margin-left: auto; background: none; border: none; color: var(--txt3);
+  font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; }
+#set-drawer .dh button:hover { color: var(--txt1); }
+#set-drawer .db { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+#set-drawer .dgrp { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--txt3); margin: 12px 2px 2px; }
+#set-drawer .dgrp:first-child { margin-top: 0; }
+#set-drawer .nf-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+  background: var(--bg2); border: 1px solid var(--bdr); border-radius: 9px; }
+#set-drawer .nf-k { font-size: 12.5px; font-weight: 700; color: var(--txt1); }
+#set-drawer .nf-s { font-size: 11px; color: var(--txt3); line-height: 1.4; margin-top: 2px; }
+#set-drawer .nf-btn { margin-left: auto; flex: 0 0 auto; background: rgba(255,255,255,.03);
+  border: 1px solid var(--bdr); border-radius: 7px; color: var(--txt2); font: inherit; font-size: 11.5px;
+  font-weight: 700; padding: 6px 12px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+#set-drawer .nf-btn:hover { border-color: rgba(52,211,153,.5); color: var(--txt1); }
+#set-drawer .nf-btn.on { border-color: rgba(52,211,153,.55); color: #34d399; }
+#set-drawer .nf-btn[disabled] { opacity: .55; cursor: default; }
+#set-drawer .dlink { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px;
+  color: var(--txt2); text-decoration: none; font-size: 12.5px; font-weight: 600;
+  border: 1px solid transparent; }
+#set-drawer .dlink:hover { background: var(--bg2); border-color: var(--bdr); color: var(--txt1); }
+#set-drawer .dlink .ar { margin-left: auto; color: var(--txt3); }
+#set-drawer .nf-note { font-size: 10.5px; color: var(--txt3); line-height: 1.5; padding: 2px 2px 0; }
 #risk-drawer { display: none; }
 @media (min-width: 769px) {
   #risk-drawer {
@@ -2092,10 +2135,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <span id="hdr-conn-text">LINKING</span>
     </div>
     <div class="hdr-menu-wrap">
-      <button class="hdr-menu-btn" onclick="toggleHdrMenu(event)" title="Menu">&#8942;</button>
-      <div class="hdr-dropdown" id="hdr-dropdown">
-        <a class="hdr-dd-item hdr-dd-logout" href="/portal">Back to portal</a>
-      </div>
+      <button class="hdr-menu-btn" onclick="traderSettings(1)" title="Settings" aria-label="Settings">&#8942;</button>
     </div>
   </div>
 </header>
@@ -2121,6 +2161,28 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        (moved in by _mountStrip), so removing this strip lets the SPY + PnL charts expand up. -->
 </div>
 
+<div id="set-scrim" onclick="traderSettings(0)"></div>
+<div id="set-drawer" role="dialog" aria-label="Settings" aria-modal="true">
+  <div class="dh"><b>Settings</b>
+    <button type="button" onclick="traderSettings(0)" aria-label="Close">&times;</button></div>
+  <div class="db">
+    <div class="dgrp">Notifications</div>
+    <div class="nf-row">
+      <div><div class="nf-k">Email reads</div><div class="nf-s">The Open, The Close &amp; the Sunday Week-Ahead</div></div>
+      <button class="nf-btn" id="tset-email" type="button">On</button>
+    </div>
+    <div class="nf-row">
+      <div><div class="nf-k">Discord community</div><div class="nf-s">Live discussion, &lsquo;The Line&rsquo; alerts &amp; daily tips</div></div>
+      <a class="nf-btn" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join &rarr;</a>
+    </div>
+    <div class="nf-note">Turn a channel off without touching your subscription &mdash; the dashboard is always your home base.</div>
+    <div class="dgrp">Account</div>
+    <a class="dlink" href="/portal">Member portal<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/analyst/methodology">How the map is built<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
+  </div>
+</div>
 <div id="workspace">
 
   <!-- ── COL 1: Market Intel + RISK ─────────────────────────── -->
@@ -2733,14 +2795,50 @@ let _mbBusy=false;
 
 
 
-function toggleHdrMenu(e){
-  e.stopPropagation();
-  document.getElementById('hdr-dropdown').classList.toggle('open');
+function traderSettings(on){
+  const d=document.getElementById('set-drawer'), sc=document.getElementById('set-scrim');
+  if(!d||!sc) return;
+  d.classList.toggle('open', !!on);
+  sc.classList.toggle('open', !!on);
+  // The drawer owns the screen while open, so the page behind it must not scroll -- which now
+  // matters, because the Analysis tab is a scrolling document.
+  document.body.style.overflow = on ? 'hidden' : '';
+  if(on) tsetEmailInit();
 }
-document.addEventListener('click',function(){
-  const d=document.getElementById('hdr-dropdown');
-  if(d) d.classList.remove('open');
-});
+// Kept so any stray caller still lands somewhere real: the ⋮ used to open a one-item dropdown.
+function toggleHdrMenu(e){ if(e&&e.stopPropagation) e.stopPropagation(); traderSettings(1); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') traderSettings(0); });
+
+/* The email-reads toggle, wired to the SAME endpoint and the SAME novo_live_t token the analyst
+   dashboard uses -- a trader member and an analyst member are one subscriber, so the preference has
+   to be one preference. Initialised on first open rather than at load: it costs a request, and most
+   sessions never open this drawer.
+   If the request fails the control is DISABLED rather than left showing a default. A toggle that
+   renders "On" without having asked the server is stating a preference it does not know. */
+var _tsetEmailDone = false;
+function tsetEmailInit(){
+  if(_tsetEmailDone) return;
+  var eb=document.getElementById('tset-email'); if(!eb) return;
+  var t=''; try{ t=localStorage.getItem('novo_live_t')||''; }catch(_){}
+  if(!t){ eb.disabled=true; eb.textContent='\u2014'; eb.title='Sign in to change this'; return; }
+  _tsetEmailDone = true;
+  function set(on){ eb.textContent=on?'On':'Off'; eb.classList.toggle('on',!!on); eb.dataset.on=on?'1':''; }
+  eb.disabled=true; eb.textContent='\u2026';
+  fetch('/api/analyst-publish?prefs=1&t='+encodeURIComponent(t))
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(d){ set(d.email_optin!==false); eb.disabled=false; })
+    .catch(function(){ eb.textContent='\u2014'; eb.title='Could not reach the preferences service'; _tsetEmailDone=false; });
+  eb.onclick=function(){
+    if(eb.disabled) return;
+    var want=!eb.dataset.on; eb.disabled=true;
+    fetch('/api/analyst-publish?prefs=1',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:t,email_optin:want})})
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(d){ set(d.email_optin!==false); })
+      .catch(function(){})
+      .then(function(){ eb.disabled=false; });
+  };
+}
 
 // Placeholder for a value the RTH scan loop has not written. Weekend / pre-market / after-hours /
 // closed all mean "not computed yet", not "broken" — only a gap DURING 09:30-16:00 is a real gap.
