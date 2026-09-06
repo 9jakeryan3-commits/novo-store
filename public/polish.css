@@ -392,15 +392,4 @@ nav.is-scrolled {
   .for-card.split2 li { break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; }
 }
 
-/* Keyboard hint in the nav. The layer (js/novo-keys.js) fills #novo-keys-hint with its own two
-   buttons and hides itself on touch, so this only places it: pushed to the end of the actions row
-   with order, next to the utilities rather than in front of the first nav link. Visibility is
-   left entirely to the layer: (pointer:coarse) hides it on touch, and below 1100px it drops the
-   label and keeps the key badges. A width query would hide it from keyboard users on a narrow
-   laptop window -- a device guess standing in for a device fact. The mount sits
-   directly after <div class="nav-actions"> because that is the one anchor present on all 1,427
-   pages -- position is a layout decision, not a markup-order one. */
-@media (min-width: 1025px) {
-  .nav-actions { display: flex; align-items: center; }
-  #novo-keys-hint { order: 90; margin-left: 10px; }
 }
