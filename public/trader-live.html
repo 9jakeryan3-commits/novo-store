@@ -1862,7 +1862,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
          was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
          tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
          slot in the nav. -->
-    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask NoVo about this tape">NoVo</button>
+    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape">&#10022; Dr. NoVo</button>
   </div>
 
   <div class="tb-right">
@@ -2271,7 +2271,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
     <div id="card-brain" class="card brain-empty" style="flex-direction:column;overflow:hidden;">
       <div class="ch">
-        <span class="ch-title">What NoVo Knows</span>
+        <span class="ch-title">What Dr. NoVo Knows</span>
         <span id="brain-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
       </div>
       <div class="brain-grid">
@@ -2305,8 +2305,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        active like the other two; the index is 4 because 0-3 are already spoken for and the CSS and
        the Analysis poll both gate on data-mtab, so reusing a number would break them silently. -->
   <button class="mob-tab mob-tab-novo" data-tab="4" onclick="switchMobileTab(4)">
-    <span class="mob-tab-icon">&#9670;</span>
-    <span>NOVO</span>
+    <span class="mob-tab-icon">&#10022;</span>
+    <span>DR. NOVO</span>
   </button>
 </nav>
 
@@ -2487,7 +2487,7 @@ window.runAnalysis = async function(){
     var t = b.querySelector('span:last-child') || b;
     t.textContent = txt;
   };
-  btns.forEach(function(b){ b.dataset.state = 'busy'; setText(b, 'Asking NoVo…'); });
+  btns.forEach(function(b){ b.dataset.state = 'busy'; setText(b, 'Asking Dr. NoVo…'); });
   var done = function(state, text){
     btns.forEach(function(b){ b.dataset.state = state; setText(b, text); });
     // Owned timer: a re-click inside the old 2.6s window let the previous run's reset strip the
@@ -6861,7 +6861,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
   }]);
 
   K.register([
-    { label: 'Ask NoVo', group: 'Chart',
+    { label: 'Ask Dr. NoVo', group: 'Chart',
       run: function () { try { window.setView('novo'); } catch (_e) {}
                          try { switchMobileTab(4); } catch (_e) {} } },
     { label: 'Back to live', group: 'Chart', keys: '<kbd>L</kbd>',

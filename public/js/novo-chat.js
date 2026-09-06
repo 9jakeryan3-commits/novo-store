@@ -228,7 +228,7 @@
   var MARKUP = `<div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
   <header>
     <div>
-      <b>NoVo</b>
+      <b>Dr. NoVo</b>
       <span>AI market analyst</span>
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
@@ -314,7 +314,7 @@
     if (_b) {
       _b.style.display = on ? 'none' : 'flex';
       // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
-      if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask NoVo, the AI market analyst'); }
+      if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask Dr. NoVo, the AI market analyst'); }
     }
     // Position on OPEN, not when the message arrived: everything measures zero while the panel is
     // display:none, so a drop or a restored transcript can only be placed once it is on screen.
@@ -629,7 +629,7 @@
   }
   function finishAnswer(d, _qel, el){
     if (!d || !d.ok){
-      var em = (d && d.error) || 'NoVo is unavailable right now.', _et = Date.now();
+      var em = (d && d.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
       if (el) el.remove();
       add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
       return;
@@ -649,7 +649,7 @@
     }
     if (d.sources && d.sources.length){
       _turn.s = 'Sources: ' + d.sources.map(function(x){
-        return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' · ');
+        return x.kind === 'memory' ? (x.title + " (Dr. NoVo's own read)") : x.title; }).join(' · ');
       srcLine(_turn.s);
     }
     // Only on a fast answer: a deep read IS the deeper version.
@@ -853,7 +853,7 @@
     var panel = document.getElementById('novo-ask');
     if (!panel || !panel.classList.contains('on')) {
       var b = document.getElementById('novo-ask-bubble');
-      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'NoVo left you a note'); }
+      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'Dr. NoVo left you a note'); }
     }
   };
   window.novoAskClear = function(){
@@ -953,13 +953,13 @@
         if (chkEl) chkEl.remove();
         if (errObj || !doneObj){
           if (ansEl) ansEl.remove();
-          var em = (errObj && errObj.error) || 'NoVo is unavailable right now.', _et = Date.now();
+          var em = (errObj && errObj.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
           add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
         } else {
           doneObj.__q = q; finishAnswer(doneObj, _qel, ansEl);
         }
       }
-    } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
+    } catch(e){ _stopThinking(); add('', 'Dr. NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
   };
 })();

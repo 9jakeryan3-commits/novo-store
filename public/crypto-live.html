@@ -638,12 +638,12 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&rsaquo;</span> Ask about this map&hellip; <kbd aria-hidden="true">N</kbd></button>
+<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
 
 <div id="novo-ask" role="dialog" aria-label="NoVo, the AI market analyst">
   <header>
     <div>
-      <b>NoVo</b>
+      <b>Dr. NoVo</b>
       <span>AI market analyst</span>
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
@@ -1866,7 +1866,7 @@ function drawCoin(){
         Measured against this coin's own ${oiP.n} logged readings${oiP.lt?`; the OKX line ranks the newest daily row of the venue's own archive (${oiP.lt.n} rows, perp + dated futures combined) inside that same series - like against like, never blended`:''}. How crowded, not which way.</div>`:''}
       </div></div>`;
   }
-  h+=`<div class="panel"><div class="ph"><h2>What NoVo said</h2>
+  h+=`<div class="panel"><div class="ph"><h2>What Dr. NoVo said</h2>
     <span class="sub">claims, scored when the horizon passes</span></div><div class="pb">`;
   // A standing observation is re-emitted every pass, so four rows could be one claim with
   // its countdown decremented. Collapse a RUN of the same unscored kind to its newest and
@@ -2092,7 +2092,7 @@ async function _loadInner(_mine){
       'Dealer gamma by strike on the <span data-bookcount>7</span> cryptos with a real options book — the call wall, the '
       + 'put wall and the gamma flip, across crypto-native AND US-listed books. Funding per venue across five venues, never '
       + 'blended. 24-hour liquidation flow. What a round trip actually costs at retail, all 90 '
-      + 'ranked. And <b>NoVo</b>, who reads this map and the equity dealer map, answering off both.';
+      + 'ranked. And <b>Dr. NoVo</b>, who reads this map and the equity dealer map, answering off both.';
     var b2=$('#login').querySelector('.lv-btn');
     b2.textContent='Start the 7-day free trial — $79/mo';
     b2.setAttribute('href','/crypto#pricing');
@@ -2182,7 +2182,7 @@ window.addEventListener('hashchange', function(){
     var _b = document.getElementById('novo-ask-bubble');
     _b.style.display = on ? 'none' : 'flex';
     // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
-    if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask NoVo, the AI market analyst'); }
+    if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask Dr. NoVo, the AI market analyst'); }
     // Position on OPEN, not when the message arrived: everything measures zero while the panel is
     // display:none, so a drop or a restored transcript can only be placed once it is on screen.
     if (on) {
@@ -2497,7 +2497,7 @@ window.addEventListener('hashchange', function(){
   }
   function finishAnswer(d, _qel, el){
     if (!d || !d.ok){
-      var em = (d && d.error) || 'NoVo is unavailable right now.', _et = Date.now();
+      var em = (d && d.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
       if (el) el.remove();
       add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
       return;
@@ -2517,7 +2517,7 @@ window.addEventListener('hashchange', function(){
     }
     if (d.sources && d.sources.length){
       _turn.s = 'Sources: ' + d.sources.map(function(x){
-        return x.kind === 'memory' ? (x.title + " (NoVo's own read)") : x.title; }).join(' · ');
+        return x.kind === 'memory' ? (x.title + " (Dr. NoVo's own read)") : x.title; }).join(' · ');
       srcLine(_turn.s);
     }
     // Only on a fast answer: a deep read IS the deeper version.
@@ -2787,7 +2787,7 @@ window.addEventListener('hashchange', function(){
     var panel = document.getElementById('novo-ask');
     if (!panel || !panel.classList.contains('on')) {
       var b = document.getElementById('novo-ask-bubble');
-      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'NoVo left you a note'); }
+      if (b) { b.classList.add('has-drop'); b.setAttribute('aria-label', 'Dr. NoVo left you a note'); }
     }
   };
   window.novoAskClear = function(){
@@ -2885,13 +2885,13 @@ window.addEventListener('hashchange', function(){
         if (chkEl) chkEl.remove();
         if (errObj || !doneObj){
           if (ansEl) ansEl.remove();
-          var em = (errObj && errObj.error) || 'NoVo is unavailable right now.', _et = Date.now();
+          var em = (errObj && errObj.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
           add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
         } else {
           doneObj.__q = q; finishAnswer(doneObj, _qel, ansEl);
         }
       }
-    } catch(e){ _stopThinking(); add('', 'NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
+    } catch(e){ _stopThinking(); add('', 'Dr. NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
   };
 })();
@@ -3199,18 +3199,18 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
     { label: 'Settings', group: 'Page', run: function () { window.lvSettings(1); } },
     { label: 'Refresh the map now', group: 'Page',
       run: function () { try { window.load(); } catch (_e) {} } },
-    { label: 'Clear the conversation', group: 'NoVo',
+    { label: 'Clear the conversation', group: 'Dr. NoVo',
       run: function () { window.novoAskClear(); } },
-    { label: 'Expand NoVo to full screen', group: 'NoVo',
+    { label: 'Expand Dr. NoVo to full screen', group: 'Dr. NoVo',
       run: function () { window.novoAskOpen(1); window.novoAskMax(); } },
-    { label: 'Plain English — define the jargon as I go', group: 'NoVo',
+    { label: 'Plain English — define the jargon as I go', group: 'Dr. NoVo',
       run: function () { window.novoAskLevel(); } }
   ]);
 
   K.register(function () {
     var out = [], b = rows('#novo-ask-quick button[data-q]');
     for (var i = 0; i < b.length; i++) {
-      out.push({ label: 'Ask: ' + (b[i].dataset.q || ''), group: 'NoVo',
+      out.push({ label: 'Ask: ' + (b[i].dataset.q || ''), group: 'Dr. NoVo',
         run: (function (el) { return function () { el.click(); }; })(b[i]) });
     }
     return out;

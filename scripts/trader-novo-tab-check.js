@@ -147,6 +147,21 @@ const PRELUDE = `
   ok('a NoVo view button is in its place',
     await evalIn('!!document.querySelector(".navbtn-novo[data-v=\'novo\']")'));
 
+  /* The NAME is a product decision, so it is asserted rather than assumed — Jake, 2026-09-06: the
+     analyst is Dr. NoVo, and the chat buttons simply say so with the AI mark in front. Checked as
+     rendered text, because an entity like &#10022; that fails to decode still "contains" nothing
+     recognisable and would sail past a source grep. */
+  const named = await evalIn(`(() => {
+    const b = document.querySelector('.navbtn-novo');
+    const m = document.querySelector('.mob-tab-novo');
+    return { desk: b && b.textContent.trim(),
+             mob: m && m.textContent.replace(/[\\s\\u00a0]+/g, ' ').trim() }; })()`);
+  ok('the desktop button reads the AI mark then "Dr. NoVo"',
+    named.desk === '✦ Dr. NoVo', JSON.stringify(named));
+  ok('...and the mobile tab carries the same mark and name',
+    (named.mob || '').indexOf('✦') >= 0 && /DR\. NOVO/.test(named.mob || ''),
+    JSON.stringify(named));
+
   const glow = await evalIn(`(() => { const b = document.querySelector('.navbtn-novo');
     const c = getComputedStyle(b); return { color: c.color, shadow: c.boxShadow, anim: c.animationName }; })()`);
   ok('...and it is green', /34,\s*211,\s*153|52,\s*211,\s*153/.test(glow.color) || glow.color === 'rgb(52, 211, 153)', JSON.stringify(glow));
