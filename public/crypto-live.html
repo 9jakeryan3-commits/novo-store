@@ -154,6 +154,23 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
    bottom of the record panel were permanently covered. */
 #rail{border-right:1px solid var(--bdr2);background:var(--sunk);padding-bottom:64px}
 #side{border-left:1px solid var(--bdr2);background:var(--sunk);padding-bottom:72px}
+/* ── THE CHAT OPENS INTO THE MIDDLE SECTION (Jake, 2026-09-06) ─────────────────────────────────
+   Desktop: it fills #center, the column the coin's own read already occupies — so asking about the
+   map replaces the map's detail rather than covering it, and the rail and the right-hand stats stay
+   readable beside the answer. That is the difference from the analyst dashboard, which goes full
+   screen: there the chat IS the task, here it is one lens among three columns.
+   Mobile: full screen, because #center IS the whole viewport at that width and a "docked" panel in
+   a single-column layout is just a full-screen panel with extra steps. */
+@media(min-width:641px){
+  #center{position:relative}
+  #novo-ask.on{position:absolute;inset:0;left:auto;top:0;transform:none;width:100%;height:100%;
+    max-width:none;max-height:none;border-radius:0;border:0;border-left:1px solid var(--bdr,#22303f);
+    z-index:5}
+  /* #center scrolls; the panel must not scroll away with the content behind it. */
+  #center:has(#novo-ask.on){overflow:hidden}
+  /* Expanding to true full screen is still available and still means something here. */
+  #novo-ask.on.max{position:fixed;inset:0;width:100vw;height:100dvh;border-left:0;z-index:60}
+}
 #center{padding:14px 16px 48px}
 /* Below 640px the install pill sits ABOVE the ask bubble, so the two of them occupy
    ~120px of the bottom edge and the column has to scroll clear of both. */
@@ -412,7 +429,9 @@ tr:last-child td{border-bottom:none}
   .cx-install[hidden]{display:none}
   .cx-install:hover{filter:brightness(1.07)}
   @media (max-width:640px){ .cx-install{bottom:70px;left:12px} }
-  #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
+  /* In-flow header control, not a floating dock. */
+  #novo-ask-bubble.open{border-color:var(--cx);color:#eaf3ff}
+  #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
     padding:11px 12px 11px 14px;border-radius:var(--r-2);border:1px solid rgba(167,139,250,.42);cursor:pointer;
     background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
     min-width:264px;text-align:left;
@@ -591,6 +610,9 @@ tr:last-child td{border-bottom:none}
       <img src="/novo-coin.png?v=2" alt="" width="160" height="160" decoding="async">
       <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Crypto Market Map</span></span>
     </div>
+    <!-- Dr. NoVo sits IN THE HEADER beside the wordmark (Jake, 2026-09-06) rather than floating
+         over the bottom-right corner, where it read as a support widget bolted onto the map. -->
+    <button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
     <div class="lv-status">
       <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
       
@@ -601,48 +623,7 @@ tr:last-child td{border-bottom:none}
   <main>
     <div class="col" id="rail"></div>
     <div class="col" id="center">
-      <div id="readstrip" hidden></div>
-      <div id="head"><div id="sym">&mdash;</div><div id="px"></div><div id="headmeta"></div></div>
-      <div id="body"></div>
-    </div>
-    <div class="col" id="side"></div>
-  </main>
-
-
-<div class="lv-scrim" id="lv-scrim" onclick="lvSettings(0)"></div>
-<div class="lv-drawer" id="lv-drawer" role="dialog" aria-label="Settings" aria-modal="true">
-  <div class="dh"><b>Settings</b>
-    <button type="button" onclick="lvSettings(0)" aria-label="Close">&times;</button></div>
-  <div class="db">
-    <div class="dgrp">This map</div>
-    <div class="nf-row" id="nf-install-row">
-      <div><div class="nf-k">Install the app</div><div class="nf-s">Put the map on your home screen &mdash; full screen, no browser chrome</div></div>
-      <button class="nf-btn" id="nf-install" type="button" onclick="cxInstall.go()">Install</button>
-    </div>
-    <div class="nf-row">
-      <div><div class="nf-k">Discord community</div><div class="nf-s">Live discussion and daily tips</div></div>
-      <a class="nf-btn" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join &rarr;</a>
-    </div>
-    <div class="dgrp">Collector</div>
-    <div id="dstats"></div>
-    <div class="dgrp">The fine print</div>
-    <div style="padding:2px 2px 10px;font-size:11px;line-height:1.55;color:var(--txt4)">
-      Market analysis and education only &mdash; not financial advice. The map is read-only and
-      cannot place an order. Digital assets are volatile; you can lose your capital.
-    </div>
-    <div class="dgrp">Account</div>
-    <a class="dlink" href="/portal">Member portal<span class="ar">&rarr;</span></a>
-    <a class="dlink" href="/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
-    <a class="dlink" href="/crypto">What this map is built from<span class="ar">&rarr;</span></a>
-    <a class="dlink" href="/market-data#crypto">Free crypto data<span class="ar">&rarr;</span></a>
-    <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
-  </div>
-</div>
-
-<script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
-<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
-
-<div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
+      <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
       <b>Dr. NoVo</b>
@@ -688,6 +669,46 @@ tr:last-child td{border-bottom:none}
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>
+      <div id="readstrip" hidden></div>
+      <div id="head"><div id="sym">&mdash;</div><div id="px"></div><div id="headmeta"></div></div>
+      <div id="body"></div>
+    </div>
+    <div class="col" id="side"></div>
+  </main>
+
+
+<div class="lv-scrim" id="lv-scrim" onclick="lvSettings(0)"></div>
+<div class="lv-drawer" id="lv-drawer" role="dialog" aria-label="Settings" aria-modal="true">
+  <div class="dh"><b>Settings</b>
+    <button type="button" onclick="lvSettings(0)" aria-label="Close">&times;</button></div>
+  <div class="db">
+    <div class="dgrp">This map</div>
+    <div class="nf-row" id="nf-install-row">
+      <div><div class="nf-k">Install the app</div><div class="nf-s">Put the map on your home screen &mdash; full screen, no browser chrome</div></div>
+      <button class="nf-btn" id="nf-install" type="button" onclick="cxInstall.go()">Install</button>
+    </div>
+    <div class="nf-row">
+      <div><div class="nf-k">Discord community</div><div class="nf-s">Live discussion and daily tips</div></div>
+      <a class="nf-btn" href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener">Join &rarr;</a>
+    </div>
+    <div class="dgrp">Collector</div>
+    <div id="dstats"></div>
+    <div class="dgrp">The fine print</div>
+    <div style="padding:2px 2px 10px;font-size:11px;line-height:1.55;color:var(--txt4)">
+      Market analysis and education only &mdash; not financial advice. The map is read-only and
+      cannot place an order. Digital assets are volatile; you can lose your capital.
+    </div>
+    <div class="dgrp">Account</div>
+    <a class="dlink" href="/portal">Member portal<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/status">Subscription &amp; billing<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/crypto">What this map is built from<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/market-data#crypto">Free crypto data<span class="ar">&rarr;</span></a>
+    <a class="dlink" href="/help">Help &amp; FAQ<span class="ar">&rarr;</span></a>
+  </div>
+</div>
+
+<script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
+
 
 </div>
 
@@ -2177,13 +2198,26 @@ window.addEventListener('hashchange', function(){
 (function(){
   var busy = false;
   window.novoAskOpen = function(on){
-    document.getElementById('novo-ask').classList.toggle('on', !!on);
+    var _p = document.getElementById('novo-ask');
+    _p.classList.toggle('on', !!on);
+    /* Docked into #center on desktop by CSS; on a phone #center IS the viewport, so `.max` is what
+       actually delivers "full screen on mobile" rather than a panel pretending to be docked. */
+    try {
+      var _small = window.matchMedia && window.matchMedia('(max-width:640px)').matches;
+      _p.classList.toggle('max', !!on && _small);
+    } catch (_e) {}
     // Full-screen on mobile means the page behind must not scroll underneath.
     try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
     try { document.documentElement.classList.toggle('novo-ask-lock-x', !!on && document.getElementById('novo-ask').classList.contains('max')); } catch(_){}
     var _b = document.getElementById('novo-ask-bubble');
-    _b.style.display = on ? 'none' : 'flex';
-    // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
+    /* ⚠ THE BUTTON STAYS PUT NOW THAT IT LIVES IN THE HEADER. Hiding it on open was right for a
+       floating dock — the panel appeared where the bubble had been, so leaving both would have
+       stacked two things in one corner. In the header it just punches a hole in the chrome next to
+       the wordmark, and on crypto (where the panel docks into the middle column rather than
+       covering the page) that hole is visible the whole time the chat is open.
+       So it stays visible and carries an `open` class instead, which is also the honest state: the
+       control is still there and still the way back out. */
+    _b.classList.toggle('open', !!on);
     if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask Dr. NoVo, the AI market analyst'); }
     // Position on OPEN, not when the message arrived: everything measures zero while the panel is
     // display:none, so a drop or a restored transcript can only be placed once it is on screen.

@@ -315,6 +315,15 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .lv-strip { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin: 16px 0; }
   /* The strip now lives INSIDE a grid cell beside the bias card, so its own vertical margin would
      push it out of line with the card it sits next to. */
+  /* The bias column is now a heading + card, so the WRAPPER is the grid cell and the card fills
+     what is left under the label. Without this the card keeps its own height and the heading pushes
+     it out of line with the ticker strip beside it. */
+  .bias-col { display: flex; flex-direction: column; min-height: 0; }
+  .bias-col .strip-hd { margin-bottom: 9px; }
+  .bias-col .lv-card { flex: 1 1 auto; }
+  /* The ticker strip labels itself the same way, so its own heading has to clear by the same
+     amount or the two columns start at different heights. */
+  .lv-grid-top .lv-strip .strip-hd { margin-bottom: 9px; }
   .lv-grid-top { margin: 16px 0; align-items: start; }
   .lv-grid-top .lv-strip { margin: 0; height: 100%; align-content: start; }
   .lv-bias .bias-row { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
@@ -471,6 +480,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="dash" class="hidden skel">
     <div class="lv-top">
       <div class="lv-brand"><img src="/novo-coin.png?v=2" alt="" width="160" height="160" decoding="async"><span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span></div>
+      <!-- Dr. NoVo sits IN THE HEADER beside the wordmark (Jake, 2026-09-06), not floating over the
+           bottom-right corner. As a floating dock it read as a support widget bolted onto the page
+           and it collided with the PWA install pill; in the header it reads as part of the product,
+           which is what it is. -->
+      <button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
       <div class="lv-status">
         <span id="live" class="lv-live"><span class="dot"></span><span id="live-t">LIVE</span></span>
         <span id="sess" class="lv-sess"></span>
@@ -489,9 +503,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          the tickers first, which is the order they are used in. -->
     <div class="lv-grid lv-grid-top">
       <div class="lv-strip" id="strip"></div>
-      <div class="lv-card lv-bias" id="bias-card">
-        <h2>Dr. NoVo&rsquo;s bias</h2>
-        <div id="bias-rows"></div>
+      <!-- The heading sits ABOVE the card, not inside it (Jake, 2026-09-06) — the same treatment
+           the ticker strip's "Switch ticker — the other two indices" already has, and the reason
+           the two columns did not read as a matched pair before: one labelled itself from the
+           outside and the other from within its own border. -->
+      <div class="bias-col">
+        <div class="strip-hd">Dr. NoVo&rsquo;s bias</div>
+        <div class="lv-card lv-bias" id="bias-card">
+          <div id="bias-rows"></div>
+        </div>
       </div>
     </div>
 
@@ -1425,7 +1445,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      Intercom and Drift, and a pulsing presence dot in that corner means "an agent is online" — which
      framed the analyst as support staff. This reads as a command input instead: squared, muted
      placeholder text, and the shortcut printed on the end of it. */
-  #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
+  /* IN-FLOW, not fixed: it is a header control now. The floating geometry is what made it a
+     widget rather than a feature. */
+  #novo-ask-bubble.open{border-color:#22d3ee;color:#eaf3ff}
+  #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
     padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(34,211,238,.42);cursor:pointer;
     /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
        against and the button goes soft; the same glow over the page's own dark reads as
@@ -1609,8 +1632,6 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 </style>
 
 <script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
-<button type="button" id="novo-ask-bubble" onclick="novoAskOpen(1)" aria-label="Ask Dr. NoVo, the AI market analyst"><span class="dot" aria-hidden="true"></span><span class="caret" aria-hidden="true">&#10022;</span> Dr. NoVo <kbd aria-hidden="true">N</kbd></button>
-
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
@@ -1663,13 +1684,25 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 (function(){
   var busy = false;
   window.novoAskOpen = function(on){
-    document.getElementById('novo-ask').classList.toggle('on', !!on);
+    var _p = document.getElementById('novo-ask');
+    _p.classList.toggle('on', !!on);
+    /* FULL SCREEN ON EVERY WIDTH (Jake, 2026-09-06). The panel used to open as a floating dock and
+       maximise only on request; on this dashboard the chat IS the task once you are in it, and a
+       560px column over a dealer map is neither reading the map nor reading the answer. `.max` is
+       the same class the expand button already used, so nothing new renders — it just starts there. */
+    _p.classList.toggle('max', !!on);
     // Full-screen on mobile means the page behind must not scroll underneath.
     try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
     try { document.documentElement.classList.toggle('novo-ask-lock-x', !!on && document.getElementById('novo-ask').classList.contains('max')); } catch(_){}
     var _b = document.getElementById('novo-ask-bubble');
-    _b.style.display = on ? 'none' : 'flex';
-    // Opening the panel IS the acknowledgement -- there is nothing else to dismiss.
+    /* ⚠ THE BUTTON STAYS PUT NOW THAT IT LIVES IN THE HEADER. Hiding it on open was right for a
+       floating dock — the panel appeared where the bubble had been, so leaving both would have
+       stacked two things in one corner. In the header it just punches a hole in the chrome next to
+       the wordmark, and on crypto (where the panel docks into the middle column rather than
+       covering the page) that hole is visible the whole time the chat is open.
+       So it stays visible and carries an `open` class instead, which is also the honest state: the
+       control is still there and still the way back out. */
+    _b.classList.toggle('open', !!on);
     if (on) { _b.classList.remove('has-drop'); _b.setAttribute('aria-label', 'Ask Dr. NoVo, the AI market analyst'); }
     // Position on OPEN, not when the message arrived: everything measures zero while the panel is
     // display:none, so a drop or a restored transcript can only be placed once it is on screen.

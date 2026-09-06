@@ -156,8 +156,17 @@ const PRELUDE = `
     const m = document.querySelector('.mob-tab-novo');
     return { desk: b && b.textContent.trim(),
              mob: m && m.textContent.replace(/[\\s\\u00a0]+/g, ' ').trim() }; })()`);
+  /* ⚠ NOT AN EXACT STRING. The button legitimately gained a <kbd>N</kbd> shortcut badge when the
+     keyboard layer was made visible, so equality against "✦ Dr. NoVo" started failing a correct
+     button. Assert the mark and the NAME and let the badge come and go — an exact-match assertion
+     on a control that is still being designed fails for growth as readily as for regression. */
+  /* ⚠ ✦ BY CODE POINT, NOT A PASTED GLYPH. A literal ✦ in this file was mangled once by a
+     rewriting script, and that failure looks identical to a broken button: the assertion goes red
+     while the page is perfect. An escape survives any encoding a tool round-trips the file through. */
   ok('the desktop button reads the AI mark then "Dr. NoVo"',
-    named.desk === '✦ Dr. NoVo', JSON.stringify(named));
+    /^✦\s*Dr\. NoVo/.test(named.desk || ''), JSON.stringify(named));
+  ok('...and carries its keyboard shortcut on the control itself',
+    /\bN\b/.test(named.desk || ''), JSON.stringify(named));
   /* ⚠ THE CHAT MUST PAINT ITS OWN BACKGROUND. Left transparent it showed #workspace's rgb(44,44,48)
      and read as a grey card on a black dashboard (Jake spotted it on desktop). "Transparent" is not
      "no colour", it is "whatever is behind me" — and what was behind it was the one grey box on the

@@ -208,6 +208,28 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
    where the wrap change below is only a safety net. */
 #row-sqz, #row-score, #t-sqz-drv-row,
 #saas-header #card-mktintel .strip-break { display: none !important; }
+
+/* ── THE "Studying…" PILL IS PULLED (Jake, 2026-09-06) ─────────────────────────────────────────
+   It was added months ago to show the page was alive; the live dot, the clock and LINKED all do
+   that now, and it has been absent from mobile for some time already.
+
+   ⚠ HIDDEN, NOT DELETED, AND THE REASON IS IN THE MARKUP'S OWN COMMENT. Three JS sites do
+   `let row = getElementById('term-live-row'); if (!row) { ...create...; terminal.insertBefore(...) }`.
+   Pre-placing the element is what makes that branch dead code. Delete the markup and the branch
+   comes alive and INJECTS the pill into the Activity Feed instead — the readout would not
+   disappear, it would reappear somewhere worse. So it stays in the DOM, unstyled and unseen, and
+   all three writers keep writing to it harmlessly. */
+#term-live-row { display: none !important; }
+
+/* The real wordmark, matching /analyst/live and /crypto/live. */
+.tb-brand { display: flex; align-items: center; gap: 10px; letter-spacing: normal; }
+.tb-brand img { height: 26px; width: auto; }
+.tb-brand .wm { display: flex; flex-direction: column; line-height: 1; }
+.tb-brand .wm-1 { font-family: 'Space Grotesk','Inter',sans-serif; font-size: 21px; font-weight: 800;
+  color: var(--txt1); letter-spacing: .2px; }
+.tb-brand .wm-2 { font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--txt3); margin-top: 3px; }
+@media (max-width: 900px) { .tb-brand .wm-2 { display: none; } .tb-brand img { height: 22px; } }
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
 :root {
   --bg:    #09090b;
@@ -1728,7 +1750,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   body.v-journal #col-perf         { display: flex !important; }
 
   /* header nav buttons — in the TOPBAR, beside the brand */
-  #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; margin-left: 18px; align-self: center; }
+  /* In .tb-right now, which is align-items:stretch at 48px — so the nav centres itself in that
+     height and takes its spacing from the readouts beside it rather than from the brand. */
+  #saas-nav { display: flex; gap: 4px; flex: 0 0 auto; align-self: center;
+    margin-left: 0; margin-right: 14px; }
   /* An action, not a view. Cyan hairline so it reads as "do something" next to two toggles, without
      shouting -- this page has exactly one button and it should not look like a trade control. */
   /* NoVo: the one green control on a cyan dashboard, because it is the one that is not about the
@@ -1901,28 +1926,35 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
 <!-- TOPBAR -->
 <header id="topbar">
-  <div class="brand">
-    <span class="brand-tri">&#x25B2;</span>
-    NOVO
-    <span class="brand-sub">Trading Dashboard</span>
+  <!-- The real mark, matching /analyst/live and /crypto/live (Jake, 2026-09-06: the trader
+       "never actually got the real logo and wordmark like the other two"). Same coin, same
+       two-line lockup, product name on the sub-line — Options Trading / Crypto Market Map /
+       Trading Dashboard. The old &#9650; glyph and letter-spaced NOVO were a placeholder that
+       outlived the other two being done properly. -->
+  <div class="brand tb-brand">
+    <img src="/novo-coin.png?v=2" alt="" width="160" height="160" decoding="async">
+    <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Trading Dashboard</span></span>
   </div>
   <span class="tb-sep"></span>
   <!-- The PAPER/LIVE badge and the broker name are gone: both describe how the owner's
        account is set up, which is not a subscriber's business and was never theirs to see. -->
 
-  <!-- SaaS view-switchers, in the TOPBAR beside the brand (the v9 pattern). Desktop only. -->
-  <div id="saas-nav">
-    <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
-    <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
-    <!-- NoVo chat, a VIEW like the other two (Jake, 2026-09-06). It replaces Run Analysis, which
-         was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
-         tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
-         slot in the nav. -->
-    <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
-    <div id="novo-keys-hint"></div>
-  </div>
 
   <div class="tb-right">
+      <!-- The view switchers live on the RIGHT now, where the Studying pill was (Jake,
+           2026-09-06). Moved as ONE GROUP rather than just Chart and Analysis: Dr. NoVo is a view
+           like the other two and the keyboard hint belongs with the controls it describes, so
+           splitting them would leave two halves of one cluster at opposite ends of the bar. -->
+    <div id="saas-nav">
+      <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
+      <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
+      <!-- NoVo chat, a VIEW like the other two (Jake, 2026-09-06). It replaces Run Analysis, which
+           was an ACTION: it nudged the engine and you waited for the answer to appear in the Analysis
+           tab. Asking NoVo directly is the same job done better, so the nudge is no longer earning a
+           slot in the nav. -->
+      <button class="navbtn navbtn-novo" data-v="novo" onclick="setView('novo')" title="Ask Dr. NoVo about this tape (n)">&#10022; Dr. NoVo <kbd class="navbtn-kbd">N</kbd></button>
+      <div id="novo-keys-hint"></div>
+    </div>
     <!-- ARMED / LIVE / HALTED row, RELOCATED into the topbar-right (2026-07-14).
          Pre-placed on purpose: every creator in the JS does
            let row = getElementById('term-live-row'); if(!row){ ...; terminal.insertBefore(row, ...) }
