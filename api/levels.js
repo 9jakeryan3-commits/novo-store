@@ -67,8 +67,20 @@ module.exports = async (req, res) => {
   const wantIv = String((req.query && req.query.iv) || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   if (wantIv) {
     let h = null;
-    // iv:hist2 — session-only rows. See analyst-publish.js for why the old namespace is dead.
+    // iv:hist2 — SESSION rows only. See analyst-publish.js for why the old namespace is dead.
     try { h = await r.hgetall(`iv:hist2:${wantIv}`); } catch (_) { h = null; }
+    // The latest CLOSED-MARKET reading, kept beside the series and never inside it. This is what
+    // the Sunday Week Ahead is about — where IV sits going into the week — and it ships labelled
+    // so a report can quote it against a named session close instead of a mixed-population rank.
+    let closed = null;
+    try {
+      const raw = await r.get(`iv:closed:${wantIv}`);
+      closed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch (_) { closed = null; }
+    const closedOut = (closed && Number.isFinite(Number(closed.atmIv)))
+      ? { atmIv: Number(closed.atmIv), at: closed.at, session: closed.session, ranked: false,
+          note: 'latest quote outside regular hours - reported, never ranked against sessions' }
+      : undefined;
     const days = Object.entries(h || {})
       .map(([d, v]) => [d, Number(v)])
       .filter(([, v]) => Number.isFinite(v) && v > 0)
@@ -78,7 +90,8 @@ module.exports = async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600');
     if (days.length < 2) {
       return res.status(200).json({ ok: true, ticker: wantIv, atmIv: days.length ? days[days.length - 1][1] : null,
-        ivRank: null, ivPercentile: null, days: days.length, note: 'building the window' });
+        ivRank: null, ivPercentile: null, days: days.length, note: 'building the window',
+        closedReading: closedOut });
     }
     /* ⚠ A BUCKET IS NOT COMPARABLE TO ITS HISTORY UNTIL IT IS COMPLETE — and this ranked whatever
        the engine last wrote, against everything it had ever written.
@@ -119,7 +132,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, ticker: wantIv,
         atmIv: days.length ? days[days.length - 1][1] : null,
         ivRank: null, ivPercentile: null, days: sessions.length,
-        note: 'not enough completed sessions to rank yet' });
+        note: 'not enough completed sessions to rank yet', closedReading: closedOut });
     }
     const vals = sessions.map(([, v]) => v);
     const cur = vals[vals.length - 1];
@@ -129,14 +142,13 @@ module.exports = async (req, res) => {
     const pct = Math.round((below / vals.length) * 1000) / 10;
     // The in-progress/non-session reading still ships, in its own field, never ranked — absence
     // gets its own rendering and "no session yet today" must not look like "IV is at its low".
-    const latest = days[days.length - 1];
     return res.status(200).json({ ok: true, ticker: wantIv, atmIv: cur, ivRank: rank, ivPercentile: pct,
       low: lo, high: hi, days: vals.length,
+      // asOf names WHICH session the rank belongs to. Without it a Sunday reader cannot tell
+      // whether they are looking at Friday's close or something newer, which is the ambiguity that
+      // let the original bug hide in plain sight.
       asOf: sessions[sessions.length - 1][0],
-      current: (latest && latest[0] !== sessions[sessions.length - 1][0])
-        ? { day: latest[0], atmIv: latest[1], ranked: false,
-            note: 'not a completed session - reported, never ranked' }
-        : undefined });
+      closedReading: closedOut });
   }
 
   let snap = null;

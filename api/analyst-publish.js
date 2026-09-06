@@ -812,29 +812,41 @@ async function _recordAtmIv(state) {
   try {
     const r = kv();
     if (!r) return;
-    /* ⚠ ONLY RECORD DURING A LIVE SESSION. This ran on every publish, so weekends and after-hours
-       wrote buckets indistinguishable from trading days — and levels.js then ranked the newest one
-       as though it were a session. It also poisoned the WINDOW: a closed-market ATM IV of 6.1
-       became the 21-day low that every future session's rank was measured against. Three public
-       pages were reporting "0% of the last 21 sessions were lower" off exactly that.
-       state.session comes from the engine as closed|premarket|open|afterhours. */
-    if (String((state && state.session) || '') !== 'open') return;
+    /* TWO POPULATIONS, KEPT APART. Both readings are real and both are useful; what was broken was
+       MIXING them. The old code hset the same UTC-date key on EVERY publish, so the last write of
+       each day won — and the engine publishes all evening, so every stored day held an AFTER-HOURS
+       quote rather than the session's. levels.js then ranked the newest one against the rest and
+       three public pages reported "0% of the last 21 sessions were lower" off a closed-market 6.1
+       sitting against a 16.2 window high.
+
+       SESSION SERIES (iv:hist2) — RTH writes only, so the last write of a trading day is that day's
+       CLOSE. This is the only population the percentile ranks, and it is what finally makes a
+       "versus Friday's close" comparison possible at all; there was no clean close stored before.
+
+       CLOSED-MARKET READING (iv:closed) — the latest quote outside RTH, kept deliberately rather
+       than discarded, because it is what the Sunday Week Ahead is actually about: where IV sits
+       going into the week. Jake's call, and he was right that dropping it lost something. It is a
+       single value with its timestamp, never appended to the ranked series, so it can inform a
+       report without inventing a denominator.
+
+       The old iv:hist keys are abandoned to their own TTL rather than purged — nothing destructive
+       on live data, and the window rebuilds honestly from the next session. */
+    const sess = String((state && state.session) || '');
     const day = new Date().toISOString().slice(0, 10);
     for (const i of (Array.isArray(state && state.indices) ? state.indices : [])) {
       const iv = Number(i && i.atm_iv);
       if (!i || !i.ticker || !Number.isFinite(iv) || iv <= 0) continue;
-      // NEW NAMESPACE, and the rename IS the fix for the stored rows. Every bucket under
-      // iv:hist: was written by the old code, which hset the same UTC-date key on every publish —
-      // so the LAST write of each day won, and the engine keeps publishing after the close. Every
-      // stored day therefore holds an AFTER-HOURS quote, not a session one, which is why SPY read
-      // 6.1 against a 16.2 window high and why all three tickers sat exactly on their own low.
-      // Filtering weekends was not enough because the weekdays are contaminated too.
-      // iv:hist2: takes only RTH writes (guarded above). The old keys are left to expire on their
-      // own TTL rather than purged — nothing destructive on live data, and the reader simply stops
-      // reading them, so the window rebuilds honestly from the next session.
-      const key = `iv:hist2:${String(i.ticker).toUpperCase()}`;
-      await r.hset(key, { [day]: Math.round(iv * 100) / 100 });
-      await r.expire(key, IV_HIST_TTL);
+      const T = String(i.ticker).toUpperCase();
+      const val = Math.round(iv * 100) / 100;
+      if (sess === 'open') {
+        const key = `iv:hist2:${T}`;
+        await r.hset(key, { [day]: val });
+        await r.expire(key, IV_HIST_TTL);
+      } else {
+        const key = `iv:closed:${T}`;
+        await r.set(key, JSON.stringify({ atmIv: val, at: Date.now(), session: sess || 'closed' }));
+        await r.expire(key, IV_HIST_TTL);
+      }
     }
   } catch (_) { /* best-effort: never break a publish over history */ }
 }
