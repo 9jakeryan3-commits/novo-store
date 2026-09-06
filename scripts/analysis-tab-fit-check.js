@@ -1,21 +1,17 @@
-/* analysis-tab-fit-check.js — the trader Analysis tab fits, and everything it hides is reachable.
+/* analysis-tab-fit-check.js — the trader Analysis tab is a scrolling document and nothing is cut.
  *
- * Jake, 2026-09-06: "the trader analysis tab needs serious layout work...missing scrollers,
- * fitment and such."
+ * Jake, 2026-09-06, after two failed attempts at this: "i see no difference maybe worse. fix the
+ * damn tab... make it all fit and look right." And: "this is not the analysis tab of a $200
+ * product."
  *
- * ⚠ THE PANELS ARE FILLED BEFORE ANYTHING IS MEASURED. An empty Analysis tab fits at every height
- * and hides nothing, so a check that loads the page and measures it passes while the tab is
- * visibly broken -- which is how this survived an earlier inventory pass on this very session.
- * The fill below is sized from Jake's screenshot.
+ * ⚠ THIS FILE ASSERTS THE OPPOSITE OF WHAT IT ASSERTED THIS MORNING, ON PURPOSE. The first version
+ * checked that each panel could scroll its own overflow -- it passed 16/16 while the tab was still
+ * visibly broken, because "the content is reachable if you find the scrollbar inside the panel" was
+ * never what Jake asked for. The model changed: the Analysis tab is reading material, so the PAGE
+ * scrolls and every panel is its content's full height. The check now says exactly that, and the
+ * old assertions would fail against it.
  *
- * The three defects this locks down, all measured at a 1040px viewport (his 1080px window less
- * Chrome's own chrome):
- *   1. the brain row was `auto`, so What Dr. NoVo Knows took its full 498px content height and
- *      starved the feed row to 241px and the Line/Books row to 217px;
- *   2. .brain-grid only scrolled below a max-height:1010px media query, so at 1040 its overflow
- *      was unreachable -- clipped, with nothing to drag;
- *   3. #workspace was overflow:hidden despite a comment promising it scrolled, so once the rows
- *      hit their floors the bottom panel was simply cut off.
+ * ⚠ PANELS ARE FILLED FIRST. An empty tab fits at any height and hides nothing.
  */
 const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
 const { spawn } = require('child_process');
@@ -68,23 +64,23 @@ const MEASURE = `(() => {
   const inner = { 'card-intel':'.log-area', 'card-read':'.read2-body', 'card-line':'.lf-area',
                   'card-board':'.b3-wrap', 'card-brain':'.brain-grid' };
   const ws = document.getElementById('workspace');
-  const out = Object.keys(inner).map(id => {
+  const panels = Object.keys(inner).map(id => {
     const c = document.getElementById(id);
     if (!c) return { id, missing: true };
     const r = c.getBoundingClientRect();
     const s = c.querySelector(inner[id]);
-    const cs = s ? getComputedStyle(s) : null;
     return { id, h: Math.round(r.height),
-      onScreen: r.width > 0 && r.height > 0,
-      belowFold: r.bottom > innerHeight + 2 ? Math.round(r.bottom - innerHeight) : 0,
-      hidden: s ? Math.max(0, s.scrollHeight - s.clientHeight) : 0,
-      scrolls: cs ? (cs.overflowY === 'auto' || cs.overflowY === 'scroll') : false,
-      barW: s ? Math.round(s.offsetWidth - s.clientWidth) : 0 };
+      // a panel is CUT when its own box is shorter than the content inside it
+      cut: Math.max(0, c.scrollHeight - c.clientHeight),
+      innerCut: s ? Math.max(0, s.scrollHeight - s.clientHeight) : 0,
+      innerScrolls: s ? ['auto','scroll'].includes(getComputedStyle(s).overflowY) : false };
   });
-  const rows = ws ? getComputedStyle(ws).gridTemplateRows.split(' ').map(parseFloat) : [];
-  return { vh: innerHeight, rows,
-           wsScrollable: ws ? Math.max(0, ws.scrollHeight - ws.clientHeight) : 0,
-           wsOverflowY: ws ? getComputedStyle(ws).overflowY : null, out }; })()`;
+  const tb = document.getElementById('topbar'), sh = document.getElementById('saas-header');
+  return { vh: innerHeight, doc: document.documentElement.scrollHeight,
+           wsH: ws ? Math.round(ws.getBoundingClientRect().height) : 0,
+           topbarPos: tb ? getComputedStyle(tb).position : null,
+           stripPos: sh ? getComputedStyle(sh).position : null,
+           panels }; })()`;
 
 (async () => {
   const PORT = 8854;
@@ -113,61 +109,46 @@ const MEASURE = `(() => {
     await ev("window.setView('feeds')");
     await new Promise((r) => setTimeout(r, 700));
     await ev(FILL);
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 700));
     return ev(MEASURE);
   };
 
-  console.log('\nAnalysis tab: fitment and scrollers\n');
+  console.log('\nAnalysis tab: a scrolling document, nothing cut\n');
 
-  /* ── Jake's own viewport ─────────────────────────────────────────────────────────────────── */
-  const v = await openTab(1040);
-  const rows = v.rows.filter((n) => n > 0);
-  const total = rows.reduce((a, b) => a + b, 0);
-  const biggest = Math.max.apply(null, rows);
+  for (const vh of [1040, 900, 700]) {
+    const v = await openTab(vh);
 
-  /* NO ROW EATS THE VIEW. Stated as a share of the grid rather than a pixel ceiling, because the
-     defect was proportional: What Dr. NoVo Knows took 498 of 958px and left the feed 241. Three
-     content rows means an even split is 33% each; 45% allows a deliberately dominant row and still
-     fails the 52% the brain row was taking. */
-  ok('no single row takes over the tab (the brain row was taking 52%)',
-    biggest / total < 0.45,
-    'rows=' + rows.map(Math.round).join(' / ') + '  biggest=' + Math.round(100 * biggest / total) + '%');
+    ok(vh + 'px: the PAGE scrolls — the tab is not pinned to the viewport',
+      v.doc > v.vh + 4, 'document=' + v.doc + ' viewport=' + v.vh + ' workspace=' + v.wsH);
 
-  /* Everything hidden must be reachable. This is the whole of "missing scrollers": a panel may hide
-     content, but never without a way to get at it. */
-  v.out.forEach((c) => {
-    if (c.missing) return ok(c.id + ': panel exists', false, 'not in the DOM');
-    ok(c.id + ': on screen, not pushed below the fold',
-      c.onScreen && !c.belowFold, JSON.stringify(c));
-    if (c.hidden > 4) {
-      ok(c.id + ': hides ' + c.hidden + 'px and can be scrolled to it',
-        c.scrolls, JSON.stringify(c));
-      /* A 4px bar of #1e3255 on a near-black panel is present and unseeable, which is what made
-         parked content read as cut content. The bar has to be findable, not merely to exist. */
-      ok(c.id + ': ...and the scrollbar is wide enough to see and grab',
-        c.barW >= 8, JSON.stringify(c));
-    }
-  });
+    /* THE CORE CLAIM. Every panel is its content's height. This is what "make it all fit" means,
+       and it is the assertion the previous version of this file got wrong: it accepted a cut panel
+       so long as the panel could be scrolled inside. */
+    v.panels.forEach((c) => {
+      if (c.missing) return ok(vh + 'px: ' + c.id + ' exists', false, 'not in the DOM');
+      if (c.id === 'card-intel') {
+        /* The one deliberate exception: an unbounded session log. It is allowed to be shorter than
+           its content precisely BECAUSE it can scroll, so both halves are asserted together. */
+        return ok(vh + 'px: card-intel is the one bounded panel, and it scrolls',
+          c.innerScrolls, JSON.stringify(c));
+      }
+      ok(vh + 'px: ' + c.id + ' shows all of its content, nothing cut',
+        c.cut <= 2 && c.innerCut <= 2, JSON.stringify(c));
+    });
 
-  /* ── The safety net, at a height where the rows cannot all fit ───────────────────────────── */
-  for (const vh of [700, 600]) {
-    const s = await openTab(vh);
-    ok(vh + 'px tall: the tab itself scrolls once the rows hit their floors',
-      s.wsScrollable > 0 && s.wsOverflowY !== 'hidden',
-      'workspace overflow-y=' + s.wsOverflowY + ' scrollable=' + s.wsScrollable +
-      ' rows=' + s.rows.filter((n) => n > 0).map(Math.round).join(' / '));
-    const stranded = s.out.filter((c) => !c.missing && c.hidden > 4 && !c.scrolls);
-    ok(vh + 'px tall: ...and no panel is left holding content nothing can reach',
-      stranded.length === 0, JSON.stringify(stranded));
+    ok(vh + 'px: the topbar and market strip stay put while the reading scrolls',
+      v.topbarPos === 'sticky' && v.stripPos === 'sticky',
+      'topbar=' + v.topbarPos + ' strip=' + v.stripPos);
   }
 
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   if (process.env.SHOT) {
     const out = process.env.SHOT_DIR || os.tmpdir();
-    await openTab(1040);
-    const png = (await send('Page.captureScreenshot', { format: 'png' }, sid)).result;
-    fs.writeFileSync(path.join(out, 'analysis-tab-1040.png'), Buffer.from(png.data, 'base64'));
-    console.log('  .. shot -> ' + path.join(out, 'analysis-tab-1040.png'));
+    const v = await openTab(1040);
+    const png = (await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: 1920, height: Math.min(v.doc, 4000), scale: 0.5 } }, sid)).result;
+    fs.writeFileSync(path.join(out, 'analysis-tab.png'), Buffer.from(png.data, 'base64'));
+    console.log('  .. shot -> ' + path.join(out, 'analysis-tab.png'));
   }
   ws.close(); proc.kill(); server.close();
   process.exit(failures ? 1 : 0);
