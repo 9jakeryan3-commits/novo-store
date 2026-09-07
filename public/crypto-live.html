@@ -249,7 +249,10 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
   .nf-btn{min-height:44px}
 }
 
-.panel{background:var(--panel);border:1px solid var(--bdr2);border-radius:var(--r-3);margin-bottom:12px}
+/* BOXES AND BORDERS ARE BANNED. The panels were the last outlined containers on this page;
+   they are separated by a hairline and spacing now, like every other surface. */
+.panel{background:none;border:0;border-top:1px solid var(--bdr2);border-radius:0;
+  padding-top:4px;margin-bottom:18px}
 .rdn{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:5px;letter-spacing:.04em}
 .ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
 .ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
@@ -420,12 +423,19 @@ tr:last-child td{border-bottom:none}
     body.rail-open{overflow:hidden}
     /* On a phone the coin name IS the picker for the other 89 coins, so it has to
        read as a control and not as a heading. */
+    /* THE COIN SELECTOR (Jake: "make a proper coin selector in the top there where it should
+       be"). It is the ONLY door to the picker now that Coins is off the bar, so it has to read as
+       tappable - but a bordered pill is a box, and the ban has no carve-out for a div that acts
+       like a button. A hairline under the name plus the caret says "this opens" without drawing
+       a container around it, and the underline picks up the accent while the picker is open. */
     #sym{cursor:pointer;display:inline-flex;align-items:center;gap:9px;
-      border:1px solid var(--bdr);border-radius:var(--r-3);padding:3px 11px 4px;
-      background:var(--navy2);-webkit-tap-highlight-color:transparent}
+      border:0;border-bottom:2px solid var(--bdr);border-radius:0;padding:2px 2px 3px;
+      background:none;-webkit-tap-highlight-color:transparent;
+      transition:border-color .15s ease}
     #sym::after{content:"\25BE";display:inline-block;color:var(--cx);font-size:.52em;
       font-weight:900;line-height:1;transition:transform .18s ease}
-    #sym:active{border-color:var(--cx);background:var(--sunk)}
+    #sym:active,
+    body.rail-open #sym{border-bottom-color:var(--cx);background:none}
     body.rail-open #sym::after{transform:rotate(180deg)}
     #railclose{display:block}
   }
@@ -717,13 +727,33 @@ tr:last-child td{border-bottom:none}
        name moves. Naming all four is not tidiness: ordering SOME children of a flex row reorders
        ALL of them, and the one left at the default 0 sorts ahead of everything given a positive
        order. That is exactly how this page's header rendered backwards earlier this week. */
-    .mob-tab[data-mtab="stats"] { order: 1; }
-    .mob-tab[data-mtab="coins"] { order: 2; }
-    .mob-tab[data-mtab="map"]   { order: 3; }
-    .mob-tab[data-mtab="novo"]  { order: 4; }
-    .mob-tab[data-mtab="alerts"] { order: 5; }
-    .mob-tab[data-mtab="digest"] { order: 6; }
-    .mob-tab[data-mtab="predict"] { order: 7; }
+    /* Jake, 2026-09-07: "the coin tab comes out, make a proper coin selector in the top there
+       where it should be ... screener deserves its own tab and page". Coins was never a
+       destination - it was a PICKER wearing a tab, which is why picking a coin immediately sent
+       you somewhere else. The picker now belongs to the coin name in the header, where it always
+       half-lived, and its slot on the bar goes to the Screener, which IS a destination.
+       Four main and a More, matching trader and analyst. */
+    .mob-tab[data-mtab="stats"]    { order: 1; }
+    .mob-tab[data-mtab="screener"] { order: 2; }
+    .mob-tab[data-mtab="map"]      { order: 3; }
+    .mob-tab[data-mtab="novo"]     { order: 4; }
+    #mob-more                      { order: 5; }
+    .mob-tab[data-mtab="coins"],
+    .mob-tab[data-mtab="alerts"],
+    .mob-tab[data-mtab="digest"],
+    .mob-tab[data-mtab="predict"] { display: none !important; }
+    /* The More menu — hairlines and type, like every other surface. */
+    #more-menu { position: fixed; left: 0; right: 0; z-index: 1001;
+      bottom: calc(var(--navh, 52px) + env(safe-area-inset-bottom, 0px));
+      background: var(--bg, #08080a); border-top: 1px solid var(--bdr); }
+    #more-menu[hidden] { display: none; }
+    #more-menu button { display: flex; align-items: center; gap: 11px; width: 100%;
+      padding: 15px 20px; background: none; border: 0; border-top: 1px solid var(--bdr2);
+      color: var(--txt2); font-family: inherit; font-size: 13px; font-weight: 600;
+      letter-spacing: .3px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    #more-menu button:first-child { border-top: 0; }
+    #more-menu button.on { color: var(--txt1); }
+    #more-menu button[hidden] { display: none; }
     .mob-tab[hidden] { display: none; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
@@ -1009,8 +1039,19 @@ tr:last-child td{border-bottom:none}
   <button class="mob-tab" type="button" data-mtab="stats" onclick="cxMobTab('stats')">
     <span class="mob-tab-icon" aria-hidden="true">&#9707;</span><span>Stats</span>
   </button>
-  <button class="mob-tab" type="button" data-mtab="coins" onclick="cxMobTab('coins')">
+<!-- Coins stays in the DOM, display:none, because cxMobTab and the picker's own state still
+       speak its name; deleting it would leave two of them disagreeing about what "coins" means. -->
+    <button class="mob-tab" type="button" data-mtab="coins" onclick="cxMobTab('coins')">
     <span class="mob-tab-icon" aria-hidden="true">&#9673;</span><span>Coins</span>
+  </button>
+  <button class="mob-tab" type="button" data-mtab="screener" onclick="cxMobTab('screener')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9776;</span>
+    <span>Screener</span>
+  </button>
+  <button class="mob-tab" id="mob-more" type="button" onclick="toggleMoreMenu()"
+          aria-expanded="false" aria-controls="more-menu">
+    <span class="mob-tab-icon" aria-hidden="true">&#8943;</span>
+    <span>More</span>
   </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="cxMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span><span>Dr. NoVo</span>
@@ -1025,16 +1066,47 @@ tr:last-child td{border-bottom:none}
     <span class="mob-tab-icon" aria-hidden="true">&#9670;</span><span>Predict</span>
   </button>
 </nav>
+<!-- The overflow. Rows call cxMobTab by the same name the hidden bar buttons use. -->
+<div id="more-menu" hidden>
+  <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
+  <button type="button" data-mtab="digest" onclick="pickMore('digest')"><span aria-hidden="true">&#9788;</span>Digest</button>
+  <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predict</button>
+</div>
 <script>
 (function(){
   var bar = document.getElementById('mobile-tabs');
   var panel = document.getElementById('novo-ask');
   if (!bar || !panel) return;
   if (!document.body.getAttribute('data-mtab')) document.body.setAttribute('data-mtab', 'map');
+  window.toggleMoreMenu = function(force){
+    var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
+    if (!m || !b) return;
+    var open = (force === undefined) ? m.hasAttribute('hidden') : !!force;
+    if (open) m.removeAttribute('hidden'); else m.setAttribute('hidden', '');
+    b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  window.pickMore = function(which){ window.toggleMoreMenu(false); window.cxMobTab(which); };
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('more-menu');
+    if (!m || m.hasAttribute('hidden')) return;
+    if (m.contains(e.target) || (e.target.closest && e.target.closest('#mob-more'))) return;
+    window.toggleMoreMenu(false);
+  });
+
   window.cxMobTab = function(which){
     try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
     if (which === 'novo') return;
     var coins = which === 'coins';
+    /* The screener is a VIEW flag on the main column, not a column of its own - the same flag the
+       old picker entry set. Setting it here means the tab and any remaining code path cannot
+       disagree about what "the screener is showing" means. */
+    if (which === 'screener') {
+      SCREEN = true; FEED = false; TOK = null;
+      document.body.classList.remove('rail-open');
+      try { drawRail(''); drawScreener(); } catch (_e) {}
+    } else if (which === 'map' || which === 'stats') {
+      if (SCREEN) { SCREEN = false; try { draw(); } catch (_e) {} }
+    }
     /* rail-open is the picker's OWN state, already toggled by the coin name in the header and
        cleared by every pick handler in drawRail. Reusing it means the bar and the header chip
        cannot disagree about whether the picker is open. */
@@ -1079,19 +1151,28 @@ tr:last-child td{border-bottom:none}
     var live = panel.classList.contains('on') ? 'novo'
              : document.body.classList.contains('rail-open') ? 'coins'
              : (document.body.getAttribute('data-mtab') || 'map');
+    // SCREEN is a view flag rather than a tab attribute, so the bar has to ask it directly or the
+    // screener would light nothing - the same "nothing selected" bug the More button fixes.
+    try { if (live !== 'novo' && typeof SCREEN !== 'undefined' && SCREEN) live = 'screener'; } catch (_e) {}
     Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
       var on = t.getAttribute('data-mtab') === live;
       t.classList.toggle('mob-active', on);
       /* aria-current is present or absent - there is no false. */
       if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
+    try {
+      var mb = document.getElementById('mob-more');
+      if (mb) mb.classList.toggle('mob-active', ['alerts', 'digest', 'predict'].indexOf(live) >= 0);
+      Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
+        r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
+    } catch (_e) {}
   }
   new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
   new MutationObserver(sync).observe(document.body,
     { attributes: true, attributeFilter: ['class', 'data-mtab'] });
   sync();
   window.addEventListener('load', function () {
-    try { window.novoPredict.reveal('.mob-tab[data-mtab="predict"]'); } catch (_e) {}
+    try { window.novoPredict.reveal('#more-menu button[data-mtab="predict"]'); } catch (_e) {}
   });
   /* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
      crypto device's digest opens /crypto/live#novo and a fired alert opens /crypto/live#alerts.
@@ -1660,8 +1741,15 @@ function drawRail(filter=''){
   const crows=chain.filter(t=>String(t.symbol||'').toUpperCase().includes(f));
   const total=all.length+chain.length;
   let h=`<div class="railhead"><input id="search" placeholder="filter ${total} tokens" value="${filter}"></div>`;
+  /* ⚠ THE PICKER LISTS COINS. NOTHING ELSE.
+     It used to carry two entries that are not coins - "Live reads" and "Screener" - so opening it
+     to change coin meant scrolling past two destinations first. Jake: "inside that coin selector
+     page dont need live reads it has its spot and screener deserves its own tab". The reads live
+     on the strip at the top of the page; the screener is a tab now. Both blocks are deleted here
+     rather than hidden, because a picker that still renders them is one CSS rule away from
+     showing them again. */
   const fd = Array.isArray(SNAP.feed) ? SNAP.feed : [];
-  if (fd.length) {
+  if (false) {
     // REAL counts, not the length of the page. `feed` is capped at 60 rows, so this read 60 all
     // day whatever fired -- and "open" was worse: filtering unresolved over a window whose newest
     // rows are unresolved by definition, it saturated at the cap and could never move off it.
@@ -3632,8 +3720,22 @@ window.cxLive = (function(){
 (function(){
   var sym=document.getElementById('sym');
   if(sym) sym.addEventListener('click', function(){
-    if(window.matchMedia('(max-width:720px)').matches)
-      document.body.classList.toggle('rail-open');
+    if(!window.matchMedia('(max-width:720px)').matches) return;
+    /* ⚠ CLOSE THE CHAT ON THE WAY IN. The Coins TAB used to be the other door and it went through
+       cxMobTab, which closes the chat; this one toggled a class and nothing else. With the tab
+       gone this is the ONLY door, so the behaviour it never had to carry is now its job - without
+       it the picker opens underneath an open chat panel. */
+    try { window.novoAskOpen(0); } catch (_e) {}
+    var opening = !document.body.classList.contains('rail-open');
+    document.body.classList.toggle('rail-open');
+    /* ⚠ AND PUT THE VIEW UNDERNEATH BACK ON THE MAP. cxMobTab did this when Coins was a tab -
+       "a coin's home is its map" - and the coin-name door never had to. With the tab gone it
+       does: otherwise picking a coin from the Stats or Screener view lands you on the new coin
+       with its map never shown, which is not what tapping a coin means. */
+    if (opening) {
+      SCREEN = false; FEED = false; TOK = null;
+      document.body.setAttribute('data-mtab', 'map');
+    }
   });
   var rail=document.getElementById('rail');
   if(rail){

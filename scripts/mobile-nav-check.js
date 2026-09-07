@@ -717,8 +717,12 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Jake, 2026-09-07: "crypto order / Stats / Coins / Map / Dr. NoVo". Read left-to-right off
      the rendered row, not out of the DOM — the row is arranged with CSS `order`, so reading the
      markup would report the source order and pass while the screen showed something else. */
-  ok('six tabs, Digest appended', bar.tabs.length === 6 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo|Alerts|Digest',
+  /* Coins came OFF the bar (Jake, 2026-09-07): it was a picker wearing a tab, which is why
+     picking a coin immediately navigated somewhere else. Its slot goes to the Screener, which is
+     a real destination, and Alerts/Digest/Predict move behind More. */
+  ok('five tabs: Stats, Screener, Map, Dr. NoVo, More — and Coins is not one of them',
+    bar.tabs.length === 5 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Stats|Screener|Map|Dr. NoVo|More',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('every tab is wide enough to hit on a 430px phone',
     bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
@@ -822,13 +826,15 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('...and the bar reports the chat, not Stats',
     litTab(bar) === 'novo', JSON.stringify(litTab(bar)));
 
-  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="coins"]').click()`);
+  /* THE COIN NAME IS THE PICKER NOW. There is no Coins tab to click, so this exercises the
+     door that actually exists. */
+  await B.evalIn(`document.getElementById('sym').click()`);
   await new Promise((r) => setTimeout(r, 450));
   const rail = await B.evalIn(vis('#rail'));
   panel = await B.evalIn(vis('#novo-ask'));
   bar = await B.evalIn(READ_BAR);
-  ok('Coins opens the picker', rail.shown && rail.h > 300 && litTab(bar) === 'coins',
-    JSON.stringify({ rail: rail.shown, h: rail.h, lit: litTab(bar) }));
+  ok('the coin name opens the picker', rail.shown && rail.h > 300,
+    JSON.stringify({ rail: rail.shown, h: rail.h }));
   ok('...and closes the chat on the way', !panel.shown, JSON.stringify(panel));
   ok('...and the bar stays on top of the picker, so there is a way back',
     bar.display === 'flex' && Number(bar.z) > 60, JSON.stringify({ display: bar.display, z: bar.z }));
@@ -845,12 +851,17 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     sym === 'ETH' && center.shown && litTab(bar) === 'map',
     JSON.stringify({ sym, center: center.shown, lit: litTab(bar) }));
 
-  /* The header chip is the other way into the picker. The bar must agree with it. */
+  /* THE PICKER LISTS COINS AND ONLY COINS. Live reads and the Screener used to sit at the top
+     of it, so changing coin meant scrolling past two destinations first. */
   await B.evalIn(`document.getElementById('sym').click()`);
   await new Promise((r) => setTimeout(r, 400));
-  bar = await B.evalIn(READ_BAR);
-  ok('the coin chip and the Coins tab cannot disagree about the picker',
-    litTab(bar) === 'coins', JSON.stringify(litTab(bar)));
+  const railOnly = await B.evalIn(`(() => {
+    const txt = (document.getElementById('rail') || {}).textContent || '';
+    return { liveReads: txt.indexOf('Live reads') >= 0, screener: txt.indexOf('Screener') >= 0,
+             coins: document.querySelectorAll('#rail .coin[data-c]').length }; })()`);
+  ok('the picker holds coins only — no Live reads, no Screener inside it',
+    railOnly.liveReads === false && railOnly.screener === false && railOnly.coins >= 3,
+    JSON.stringify(railOnly));
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
   await new Promise((r) => setTimeout(r, 400));
 
@@ -962,7 +973,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   for (const [page, open] of [
       ['trader-live.html', `pickMore(5)`],
       ['analyst-live.html', `pickMore('alerts')`],
-      ['crypto-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`]]) {
+      ['crypto-live.html', `pickMore('alerts')`]]) {
     const app = page.split('-')[0];
     await B.goto(base + '/' + page, 430, 900);
     const tab = await B.evalIn(`(() => {
@@ -975,7 +986,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     /* Trader moved Alerts behind More (Jake's 4-main bar), so "on the bar" is the wrong
        assertion THERE and still the right one on the other two. Asserting the same shape
        everywhere would either fail on trader or have to be loosened until it proved nothing. */
-    if (app === 'trader' || app === 'analyst') {
+    if (app === 'trader' || app === 'analyst' || app === 'crypto') {
       const row = await B.evalIn(`(() => {
         const r = document.querySelector('#more-menu button[data-tab="5"], #more-menu button[data-mtab="alerts"]');
         if (!r) return { missing: true };
@@ -1064,7 +1075,13 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
         /* Read the LABEL, which is what a member actually sees. The trader keys its tabs on
            data-tab and the other two on data-mtab, so one assertion covers all three. */
         return t ? (t.textContent || '').trim().toLowerCase() : null; })()`);
-      ok(app + ': ?open=' + want + ' opens the tab it names', re.test(lit || ''), JSON.stringify({ lit }));
+      /* An overflow tab lights MORE rather than itself - that is the arrangement Jake asked for,
+         so the assertion accepts either. Demanding the tab's own name would fail on the design.
+         What the deep link really has to prove is that the VIEW arrived, and the checks above
+         own that; this one is about the bar not lying about where you are. */
+      const litOk = re.test(lit || '') || String(lit || '').indexOf('more') >= 0;
+      ok(app + ': ?open=' + want + ' opens the tab it names (or lights More, if it lives there)',
+        litOk, JSON.stringify({ lit }));
     }
   }
 
@@ -1176,7 +1193,8 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
    so probing it would ask whether a permanently hidden element is hidden — true for a comp seat
    and a free one alike, which is a check that cannot fail. */
 const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
-    analyst: '#more-menu button[data-mtab="predict"]', crypto: '.mob-tab[data-mtab="predict"]' };
+    analyst: '#more-menu button[data-mtab="predict"]',
+    crypto: '#more-menu button[data-mtab="predict"]' };
   const predTabProbe = (sel) => B.evalIn(
     '(() => { const t = document.querySelector(' + JSON.stringify(sel) + ');'
     + ' if (!t) return { there: false };'
@@ -1198,13 +1216,11 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     /* Trader's row lives inside the More menu, so a closed menu makes it zero-sized whether
        the seat is comp or not. Open the menu first: what a comp seat is owed is that Predict is
        THERE when they look, not that a hidden container is hidden. */
-    if (app === 'trader' || app === 'analyst') await B.evalIn('toggleMoreMenu(true)');
+    if (app === 'trader' || app === 'analyst' || app === 'crypto') await B.evalIn('toggleMoreMenu(true)');
     const tabv = await predTabProbe(PRED_TAB[app]);
     ok(app + ': comp seat — the tab reveals itself from the server’s answer',
       tabv.visible === true, JSON.stringify(tabv));
-    await B.evalIn(app === 'trader' ? 'pickMore(7)'
-      : app === 'analyst' ? "pickMore('predict')"
-      : 'document.querySelector(' + JSON.stringify(PRED_TAB[app]) + ').click()');
+    await B.evalIn(app === 'trader' ? 'pickMore(7)' : "pickMore('predict')");
     await new Promise((r) => setTimeout(r, 900));
     const pv = await B.evalIn(`(() => {
       const c = document.querySelector('.novo-predict');
@@ -1608,6 +1624,36 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
      to have in it." The audit below walks the WHOLE dashboard rather than a list of classes I
      happened to think of — a de-box verified against the elements I remembered to name is a
      de-box that misses the one I forgot. */
+  /* ══ CRYPTO: DE-BOXED ════════════════════════════════════════════════════════════════════
+     Jake, 2026-09-07: "a proper de-box in crypto to finish it off." Same audit as the analyst -
+     every element on the page, not a list of classes I remembered - because that audit already
+     caught one I had missed after I called the analyst done by hand. */
+  console.log('\nCrypto — de-boxed\n');
+  await B.goto(base + '/crypto/live', 430, 900);
+  await new Promise((r) => setTimeout(r, 1400));
+  const cxBoxes = await B.evalIn(`(() => {
+    const bad = [];
+    [...document.querySelectorAll('body *')].forEach((e) => {
+      if (/^(BUTTON|INPUT|SELECT|TEXTAREA|KBD|CANVAS|SVG|PATH|IMG|HR)$/i.test(e.tagName)) return;
+      /* Controls keep their borders - that is the one carve-out in the ban - and this page marks
+         its own: the .nf-btn / [role=button] / .coin list at the top of its stylesheet is the
+         page's own definition of what is a control, so the audit uses THAT rather than a second
+         opinion of mine that could drift from it. */
+      if (e.closest('button, input, select, textarea, #novo-ask, [role="button"], .nf-btn, .dlink, .coin')) return;
+      const r = e.getBoundingClientRect();
+      if (r.width < 40 || r.height < 16) return;
+      const c = getComputedStyle(e);
+      if (c.position === 'fixed' && c.zIndex && Number(c.zIndex) > 900) return;  // menus/sheets
+      const sides = ['Top','Right','Bottom','Left'].filter((k) =>
+        parseFloat(c['border' + k + 'Width']) > 0 && c['border' + k + 'Style'] !== 'none');
+      const radius = parseFloat(c.borderTopLeftRadius) || 0;
+      if (sides.length >= 4) bad.push((e.id || e.className || e.tagName) + ':4-sided');
+      else if (radius > 0 && sides.length) bad.push((e.id || e.className || e.tagName) + ':radius+border');
+    });
+    return { n: bad.length, bad: bad.slice(0, 8) }; })()`);
+  ok('the crypto dashboard draws NO boxes — audited element by element',
+    cxBoxes.n === 0, JSON.stringify(cxBoxes));
+
   console.log('\nAnalyst — de-boxed, four main tabs and a More menu\n');
   await B.goto(base + '/analyst/live', 430, 900);
   await new Promise((r) => setTimeout(r, 1100));
