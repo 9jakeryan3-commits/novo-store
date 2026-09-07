@@ -397,27 +397,16 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     if (!m || !n) return { missing: true };
     const rm = m.getBoundingClientRect(), rn = n.getBoundingClientRect();
     return { metaBottom: Math.round(rm.bottom), noteTop: Math.round(rn.top) }; })()`);
-  /* ── THE MORNING DIGEST ────────────────────────────────────────────────────────────────────
-     Jake met this as a push at 08:00 with nothing behind it: "no idea what it is and I literally
-     only see the notification". Its notification now points at this card, so the card has to name
-     it, say what it covers, and be able to stop it — otherwise the fix lands the member on a page
-     that still does not mention the thing that woke them. */
-  const dgView = () => B.evalIn(`(() => {
-    const row = document.querySelector('#alerts-card .al-digest');
-    if (!row) return { there: false };
-    return { there: true,
-             text: (row.textContent || '').replace(/\\s+/g, ' ').trim(),
-             stop: !!row.querySelector('[data-stop-digest]') }; })()`);
-  let dgv = await dgView();
-  ok('the digest is on the card, named, with what it covers',
-    dgv.there && /Morning digest/i.test(dgv.text) && dgv.text.indexOf('SPY') >= 0
-      && dgv.text.indexOf('only if gamma flipped') >= 0, JSON.stringify(dgv));
-  ok('...and it can be stopped from here', dgv.stop === true, JSON.stringify(dgv));
-  await B.evalIn(`document.querySelector('#alerts-card [data-stop-digest]').click()`);
-  await new Promise((r) => setTimeout(r, 700));
-  dgv = await dgView();
-  ok('...stopping it takes the row away, from the store’s own answer',
-    dgv.there === false, JSON.stringify(dgv));
+  /* ⚠ THE DIGEST IS NOT ON THIS CARD, and that is a REQUIREMENT, not an absence. Jake, after it
+     briefly was: "schedule your daily digest (lands in Dr. NoVo tab, not alerts), schedule alerts
+     that do land on thr alerts tab". The endpoint still returns it, so this asserts the card
+     CHOOSES not to render it rather than simply never having been given it. */
+  const dgOnAlerts = await B.evalIn(`(() => {
+    const card = document.getElementById('alerts-card');
+    return { hasRow: !!card.querySelector('.al-digest'),
+             mentions: /morning digest/i.test(card.textContent || '') }; })()`);
+  ok('the digest is NOT on the Alerts card — it belongs to the Dr. NoVo tab',
+    dgOnAlerts.hasRow === false && dgOnAlerts.mentions === false, JSON.stringify(dgOnAlerts));
 
   ok('...and a note sits on its OWN line, not run on from the meta',
     !noteGeo.missing && noteGeo.noteTop >= noteGeo.metaBottom - 1, JSON.stringify(noteGeo));
@@ -805,6 +794,85 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     ok(app + ': ...and it reached the endpoint and rendered the member’s alerts',
       card.rows >= 1 && card.text.indexOf('SPY above its call wall') >= 0,
       JSON.stringify(card.text).slice(0, 200));
+  }
+
+  // ══ THE DR. NoVo TAB'S OWN PANEL ══════════════════════════════════════════════════════════
+  /* Jake: "the Dr. NoVo tab does need a help button that opens and tells them all the features and
+     things they can do with Dr. NoVo a button next to the plain English button", and the digest is
+     managed there rather than on Alerts. */
+  console.log('\nDr. NoVo\u2019s help panel\n');
+  for (const [page, openChat] of [
+      ['trader-live.html', `switchMobileTab(4)`],
+      ['analyst-live.html', `novoAskOpen(1)`],
+      ['crypto-live.html', `novoAskOpen(1)`]]) {
+    const app = page.split('-')[0];
+    await B.goto(base + '/' + page, 430, 900);
+    await B.evalIn(openChat);
+    await new Promise((r) => setTimeout(r, 700));
+
+    const btn = await B.evalIn(`(() => {
+      const h = document.getElementById('novo-ask-help');
+      const l = document.getElementById('novo-ask-lvl');
+      if (!h || !l) return { missing: !h ? 'help' : 'lvl' };
+      const rh = h.getBoundingClientRect(), rl = l.getBoundingClientRect();
+      return { shown: getComputedStyle(h).display !== 'none' && rh.width > 0,
+               /* "next to the plain English button" -- same row, and before it. */
+               sameRow: Math.abs(rh.top - rl.top) <= 6,
+               before: rh.left < rl.left,
+               /* Measured against its NEIGHBOUR, not an absolute: "next to the plain English
+                  button" means it should look like it belongs beside it. */
+               tall: rh.height >= rl.height - 1 }; })()`);
+    ok(app + ': a Help button sits beside Plain English',
+      !btn.missing && btn.shown && btn.sameRow && btn.before && btn.tall, JSON.stringify(btn));
+
+    await B.evalIn(`document.getElementById('novo-ask-help').click()`);
+    await new Promise((r) => setTimeout(r, 700));
+    const panel = await B.evalIn(`(() => {
+      const d = document.getElementById('novo-desk');
+      if (!d) return { open: false };
+      const r = d.getBoundingClientRect();
+      return { open: d.classList.contains('on'),
+               visible: getComputedStyle(d).display !== 'none' && r.width > 0 && r.height > 0,
+               rows: d.querySelectorAll('[data-say]').length,
+               digest: !!d.querySelector('[data-nd-stop]'),
+               text: (d.textContent || '').replace(/\\s+/g, ' ').trim() }; })()`);
+    ok(app + ': ...it opens a panel of things you can actually do',
+      panel.open && panel.visible && panel.rows >= 8, JSON.stringify(panel).slice(0, 200));
+    ok(app + ': ...covering alerts AND the digest, and saying which lands where',
+      /Alerts tab/i.test(panel.text) && /every morning/i.test(panel.text),
+      JSON.stringify(panel.text).slice(0, 260));
+    /* ⚠ NO BOXES. Jake's standing rule, and this panel shipped its first draft breaking it -- a
+       1px border and an 11px radius around every row. The existing debox-check could not have
+       caught it: that scans the PAGES, and these styles are injected by novo-desk.js, so they have
+       no file to scan. Asserted where the panel is actually rendered instead. */
+    const boxes = await B.evalIn(`(() => {
+      const d = document.getElementById('novo-desk');
+      const bad = [];
+      d.querySelectorAll('.nd-row, .nd-card').forEach(function (e) {
+        const c = getComputedStyle(e);
+        const sides = ['Right', 'Bottom', 'Left'].filter(function (k) {
+          return parseFloat(c['border' + k + 'Width']) > 0 && c['border' + k + 'Style'] !== 'none'; });
+        if (sides.length || parseFloat(c.borderRadius) > 0)
+          bad.push((e.className || '') + ':' + sides.join('/') + ' r=' + c.borderRadius);
+      });
+      return { bad: bad.slice(0, 4), n: bad.length }; })()`);
+    ok(app + ': ...and it draws no boxes — hairlines between rows, not frames around them',
+      boxes.n === 0, JSON.stringify(boxes));
+
+    ok(app + ': ...and the digest is managed HERE, with a way to stop it',
+      panel.digest === true, JSON.stringify({ digest: panel.digest }));
+
+    /* A row is only a feature if tapping it asks the thing it advertises. */
+    const said = await B.evalIn(`(() => {
+      window.__asked = null;
+      window.novoAsk = function (q) { window.__asked = q; };
+      const r = document.querySelector('#novo-desk [data-say]');
+      const want = r.getAttribute('data-say');
+      r.click();
+      return { want: want, got: window.__asked,
+               closed: !document.getElementById('novo-desk').classList.contains('on') }; })()`);
+    ok(app + ': ...tapping one sends exactly what it promised, and closes',
+      said.got === said.want && said.closed === true, JSON.stringify(said));
   }
 
   console.log('\nDr. NoVo carries each app’s own colour\n');

@@ -256,6 +256,7 @@
       <span>AI market analyst</span>
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
+    <button class="lvl" id="novo-ask-help" type="button" aria-expanded="false" title="What Dr. NoVo can do">Help</button>
     <button class="lvl" id="novo-ask-lvl" type="button" onclick="novoAskLevel()" aria-pressed="false" title="Plain English: define the jargon as I go">Plain English</button>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
     <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>

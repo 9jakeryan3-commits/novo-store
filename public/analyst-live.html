@@ -1838,6 +1838,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <!-- VAPID and the alerts card, shared with the crypto and trader dashboards. -->
 <script src="/js/novo-push.js?v=ff83380d"></script>
 <script src="/js/novo-alerts.js?v=aa261c13"></script>
+<script src="/js/novo-desk.js?v=1"></script>
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
@@ -1845,6 +1846,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       <span>AI market analyst</span>
     </div>
     <button class="mx" id="novo-ask-mx" type="button" onclick="novoAskMax()" title="Expand to full screen" aria-label="Expand to full screen">&#x2922;</button>
+    <button class="lvl" id="novo-ask-help" type="button" aria-expanded="false" title="What Dr. NoVo can do">Help</button>
     <button class="lvl" id="novo-ask-lvl" type="button" onclick="novoAskLevel()" aria-pressed="false" title="Plain English: define the jargon as I go">Plain English</button>
     <button class="clr" onclick="novoAskClear()" aria-label="Clear this conversation" title="Clear this conversation">Clear</button>
     <button class="x" onclick="novoAskOpen(0)" aria-label="Minimize" title="Minimize"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
@@ -1970,6 +1972,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      Only on a phone: the bar is what owns views, and on the desk the card is already on the page. */
   try {
     if (location.hash === '#alerts' && getComputedStyle(bar).display !== 'none') lvMobTab('alerts');
+    /* The digest push points here. On a phone that is the Dr. NoVo tab; on the desk the chat panel
+       is the same destination, so it opens either way rather than doing nothing on a laptop. */
+    if (location.hash === '#novo') {
+      if (getComputedStyle(bar).display !== 'none') lvMobTab('novo');
+      else window.novoAskOpen(1);
+    }
   } catch (_e) {}
 })();
 </script>

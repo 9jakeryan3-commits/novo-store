@@ -235,9 +235,11 @@ module.exports = async (req, res) => {
       for (const s of subs.slice(0, 5)) {
         // ⚠ A url, SO TAPPING IT LANDS SOMEWHERE. Without one the service worker falls back to
         // /analyst/live — the dashboard, which shows no digest anywhere — so the notification read
-        // as a message from nothing. It opens the Alerts tab, which is where the digest can now be
-        // seen and turned off.
-        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: "/analyst/live#alerts" })); sent++; }
+        // as a message from nothing. It opens the Dr. NoVo tab, where the digest is managed.
+        // KNOWN LIMIT, SAID RATHER THAN HIDDEN: this is hardcoded to the ANALYST dashboard, so a
+        // crypto-only member's digest notification lands somewhere they cannot open. The cron does
+        // not currently know which product a member holds; wiring that is a separate change.
+        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: "/analyst/live#novo" })); sent++; }
         catch (_) {}
       }
     } catch (_) { errors++; }

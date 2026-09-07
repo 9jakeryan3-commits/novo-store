@@ -105,26 +105,14 @@
       route.hidden = true;
     }
 
-    /* THE MORNING DIGEST, where its own notification now lands. It was invisible before: it
-       arrived on a phone at 08:00 with no page behind it and no way to tell what it was or stop it,
-       which is exactly how Jake met it. Shown as its own row, with what it covers, because "a
-       personal digest" that cannot be inspected is indistinguishable from a broadcast. */
-    var dg = d && d.digest;
-    var dgHtml = dg ? '<div class="al-row al-digest">'
-      + '<span class="al-what"><b>Morning digest \u00b7 08:00 ET</b>'
-      + '<span class="al-meta">' + esc((dg.symbols || []).join(' \u00b7 ')) + '</span>'
-      + (dg.focus ? '<span class="al-note">' + esc(dg.focus) + '</span>' : '')
-      + '</span>'
-      + '<button class="al-x" type="button" data-stop-digest="1" '
-      + 'aria-label="Stop the morning digest">Stop</button></div>' : '';
+    /* ⚠ THE DIGEST IS NOT SHOWN HERE. It briefly was, on 2026-09-07, and Jake moved it: a digest
+       is a standing arrangement with NoVo, an alert is about the market, and they belong on
+       different tabs. It is managed in /js/novo-desk.js, behind the Dr. NoVo tab's Help panel.
+       The endpoint still returns it — this card just is not its home. */
+    var dgHtml = '';
 
-    if (!list.length && !dgHtml) {
-      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>';
-      return;
-    }
     if (!list.length) {
-      box.innerHTML = dgHtml;
-      wireDigest();
+      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>';
       return;
     }
     box.innerHTML = list.map(function (a) {
@@ -139,29 +127,10 @@
         + '</span>'
         + '<button class="al-x" type="button" data-cancel="' + esc(a.id) + '" '
         + 'aria-label="Stop watching ' + esc(a.alert) + '">Stop</button></div>';
-    }).join('') + dgHtml;
+    }).join('');
     Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
       b.onclick = function () { cancel(b.getAttribute('data-cancel'), b); };
     });
-    wireDigest();
-  }
-
-  function wireDigest() {
-    var b = box.querySelector('[data-stop-digest]');
-    if (!b) return;
-    b.onclick = async function () {
-      b.disabled = true; b.textContent = 'Stopping…';
-      try {
-        var r = await fetch('/api/alerts', { method: 'POST', cache: 'no-store',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ t: tok(), digest: false }) });
-        var d = await r.json();
-        if (!r.ok) throw new Error('stop failed');
-        render(d);
-      } catch (_e) {
-        b.disabled = false; b.textContent = 'Stop';
-      }
-    };
   }
 
   function fail(msg) {
@@ -220,8 +189,7 @@
       + '<div class="al-body"><div class="al-empty">Loading…</div></div>'
       + '<div class="al-how">Set one in a sentence — ask ' + esc(opts.who || 'Dr. NoVo')
       + ' <em>“' + esc(opts.example || 'ping me if SPY crosses its flip') + '”</em>. '
-      + 'Alerts run for 7 days, up to <span class="al-max">10</span> at a time. '
-      + 'A daily digest is the same — ask for one and say what it should cover.</div>';
+      + 'Alerts run for 7 days, up to <span class="al-max">10</span> at a time.</div>';
     root = el;
     box = el.querySelector('.al-body');
     route = el.querySelector('.al-route');
