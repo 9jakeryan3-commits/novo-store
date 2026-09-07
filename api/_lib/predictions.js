@@ -259,6 +259,73 @@ async function listPredictions(limit, assetClass) {
   };
 }
 
+// ── DR. NOVO'S ALERTS — the curated feed ─────────────────────────────────────────────────────
+// Jake, 2026-09-07: the private crypto and equity alerts get a UI surface — "a curated list
+// surfaced into the Alerts tab as Dr. NoVo's Alerts when edges are found we dont want those rapid
+// fire hosing into that page we wont the good ones. thats why everything is graded."
+// The GRADING IS THE CURATOR: nothing enters this feed unless the rule that fired it has proven
+// out-of-sample edge at or above its own floor. The raw firehose stays where it is (the map's
+// feed, the chat tools); this list is only what cleared the bar.
+const FEED_KEY = "novo:alerts:feed";
+async function appendNovoFire(entry) {
+  const r = kv();
+  if (!r) return;
+  let l = null;
+  try { l = await r.get(FEED_KEY); } catch (_) { l = null; }
+  if (typeof l === "string") { try { l = JSON.parse(l); } catch (_) { l = null; } }
+  l = Array.isArray(l) ? l : [];
+  l.push({ ts: Date.now(), ...entry });
+  try { await r.set(FEED_KEY, JSON.stringify(l.slice(-100)), { ex: 60 * 24 * 3600 }); } catch (_) {}
+}
+async function listNovoFires(assetClass, limit) {
+  const r = kv();
+  if (!r) return [];
+  let l = null;
+  try { l = await r.get(FEED_KEY); } catch (_) { l = null; }
+  if (typeof l === "string") { try { l = JSON.parse(l); } catch (_) { l = null; } }
+  l = Array.isArray(l) ? l : [];
+  if (assetClass) l = l.filter((x) => x.asset_class === assetClass);
+  return l.slice(-(limit || 25)).reverse();
+}
+
+// Chain tickets, curated by their own gate math: a kind enters only when its out-of-sample edge
+// clears its own floor — the exact bar chain_alerts' ACT gate uses, computed from the levels the
+// snapshot already publishes so this can never disagree with the lab.
+async function curateChainFires(snap) {
+  const r = kv();
+  const a = snap && snap.alerts;
+  if (!r || !a || !Array.isArray(a.open)) return { kept: 0 };
+  const levels = a.levels || {};
+  let kept = 0;
+  for (const t of a.open) {
+    try {
+      if (!t || !t.kind) continue;
+      const madeTs = Date.parse(t.ts_utc || "") || 0;
+      if (!madeTs || Date.now() - madeTs > 12 * 60 * 1000) continue;
+      const lv = levels[t.kind];
+      const edge = lv && lv.oos_trig_target != null && lv.oos_base_target != null
+        ? lv.oos_trig_target - lv.oos_base_target : null;
+      const floor = lv && lv.edge_floor_pp != null ? lv.edge_floor_pp : 5;
+      if (edge == null || !(edge >= floor)) continue;         // no proven edge, no surface
+      const seenKey = "novofeed:seen:" + crypto.createHash("sha256")
+        .update((t.asset_code || "") + "|" + t.kind + "|" + (t.ts_utc || ""))
+        .digest("hex").slice(0, 24);
+      let seen = null;
+      try { seen = await r.get(seenKey); } catch (_) {}
+      if (seen) continue;
+      await appendNovoFire({
+        asset_class: "crypto", symbol: String(t.asset_code || "").toUpperCase(),
+        kind: t.kind, title: String(t.claim || (t.kind + " fired")).slice(0, 200),
+        horizon_min: Number(t.horizon_min) || null,
+        receipts: "oos edge +" + edge.toFixed(1) + "pp over its own floor " + floor,
+      });
+      try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
+      kept++;
+    } catch (_) { /* one bad ticket must not stop the pass */ }
+  }
+  return { kept };
+}
+
 // ── THE CRYPTO SELECTOR ──────────────────────────────────────────────────────────────────────
 // Jake, 2026-09-07: "he is always watching the data flow the Eye and other alerts systems in
 // crypto and all to make his own predictions when he sees a fitting trade or moment."
@@ -318,6 +385,14 @@ async function selectCryptoPredictions(snap) {
       if (out && out.ok) {
         made++;
         try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
+        // The same event, surfaced: a reading he turned into a call IS an edge found.
+        try {
+          await appendNovoFire({ asset_class: "crypto", symbol: sym, kind: f.kind,
+            title: sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m"),
+            horizon_min: hm,
+            receipts: rate.hit_rate + "% over " + rate.n_cells + " coin-days vs "
+              + baseShare.toFixed(1) + "% base" });
+        } catch (_) {}
       }
     } catch (_) { /* one bad reading must not stop the pass */ }
   }
@@ -325,4 +400,5 @@ async function selectCryptoPredictions(snap) {
 }
 
 module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+                   appendNovoFire, listNovoFires, curateChainFires,
                    evaluateEquityPredictions, evaluateCryptoPredictions };

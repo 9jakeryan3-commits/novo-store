@@ -41,6 +41,7 @@
     '.novo-alerts .al-x:hover{border-color:#f43f5e;color:#f43f5e}',
     '.novo-alerts .al-x[disabled]{opacity:.5;cursor:default}',
     '.novo-alerts .al-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
+    '.novo-alerts .al-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:18px 0 2px;padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-alerts .al-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-alerts .al-how em{color:var(--txt2,#a8a8a8);font-style:normal}'
   ].join('');
@@ -112,8 +113,29 @@
        The endpoint still returns it — this card just is not its home. */
     var dgHtml = '';
 
+    /* ── DR. NOVO'S ALERTS (comp seats; the key is ABSENT otherwise, same as predictions).
+       Curated by the grading: only fires from rules with proven out-of-sample edge reach this
+       list — "we dont want those rapid fire hosing into that page we wont the good ones." The
+       firehose stays on the map and in the chat tools. Hairlines only; the box ban is law. */
+    var nv = Array.isArray(d && d.novo_alerts) ? d.novo_alerts : null;
+    var nvHtml = '';
+    if (nv) {
+      nvHtml = '<div class="al-grp">Dr. NoVo\u2019s alerts \u00b7 edge-cleared only</div>'
+        + (nv.length ? nv.map(function (x) {
+            var ago = '';
+            try { ago = new Date(x.ts).toLocaleString('en-US', { timeZone: 'America/New_York',
+              month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET'; } catch (_e) {}
+            return '<div class="al-row"><span class="al-what"><b>' + esc(x.title || (x.symbol + ' \u00b7 ' + x.kind)) + '</b>'
+              + '<span class="al-meta">' + esc(ago)
+              + (x.horizon_min ? ' \u00b7 ' + (x.horizon_min >= 60 ? Math.round(x.horizon_min / 60) + 'h' : x.horizon_min + 'm') + ' horizon' : '') + '</span>'
+              + (x.receipts ? '<span class="al-note">' + esc(x.receipts) + '</span>' : '')
+              + '</span></div>';
+          }).join('')
+        : '<div class="al-empty">Nothing has cleared the bar lately. The bar is the point.</div>');
+    }
+
     if (!list.length) {
-      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>';
+      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>' + nvHtml;
       return;
     }
     box.innerHTML = list.map(function (a) {
@@ -128,7 +150,7 @@
         + '</span>'
         + '<button class="al-x" type="button" data-cancel="' + esc(a.id) + '" '
         + 'aria-label="Stop watching ' + esc(a.alert) + '">Stop</button></div>';
-    }).join('');
+    }).join('') + nvHtml;
     Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
       b.onclick = function () { cancel(b.getAttribute('data-cancel'), b); };
     });

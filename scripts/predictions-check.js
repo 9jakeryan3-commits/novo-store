@@ -165,6 +165,53 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     eqList.open.length === 0 && cxList.open.length === 1,
     JSON.stringify({ equity: eqList.open.length, crypto: cxList.open.length }));
 
+  // ── 8. DR. NOVO'S ALERTS: the grading is the curator ───────────────────────────────────────
+  reset();
+  const NOWTS = new Date().toISOString();
+  const CHAIN_SNAP = {
+    alerts: {
+      open: [
+        // rule with proven oos edge over its own floor → surfaces
+        { ts_utc: NOWTS, asset_code: 'PNUT', kind: 'chain_pump_buyers',
+          claim: 'Ten separate wallets bid PNUT in one pass.', horizon_min: 240 },
+        // rule BELOW its own floor → firehose stays put
+        { ts_utc: NOWTS, asset_code: 'MEW', kind: 'chain_holds_bid',
+          claim: 'Turnover above its own normal.', horizon_min: 240 },
+        // negative out of sample → never
+        { ts_utc: NOWTS, asset_code: 'WOFI', kind: 'chain_pump_sellers',
+          claim: 'Sellers into buyers.', horizon_min: 240 },
+        // stale → not a moment
+        { ts_utc: '2026-09-07T01:00:00Z', asset_code: 'PNUT', kind: 'chain_pump_buyers',
+          claim: 'HOURS OLD.', horizon_min: 240 },
+      ],
+      levels: {
+        chain_pump_buyers:  { oos_trig_target: 61.2, oos_base_target: 40.0, edge_floor_pp: 5.0 },
+        chain_holds_bid:    { oos_trig_target: 44.3, oos_base_target: 40.0, edge_floor_pp: 5.0 },
+        chain_pump_sellers: { oos_trig_target: 39.5, oos_base_target: 40.0, edge_floor_pp: 5.8 },
+      },
+    },
+  };
+  const cur = await P.curateChainFires(CHAIN_SNAP);
+  const feed = JSON.parse(S.get('novo:alerts:feed') || '[]');
+  ok('a chain ticket surfaces ONLY when its rule’s oos edge clears its own floor',
+    cur.kept === 1 && feed.length === 1 && feed[0].symbol === 'PNUT',
+    JSON.stringify({ kept: cur.kept, feed: feed.map((x) => x.symbol + ':' + x.kind) }));
+  ok('...below-floor, negative-oos and stale tickets all stay in the firehose',
+    !feed.some((x) => ['MEW', 'WOFI'].includes(x.symbol)),
+    JSON.stringify(feed.map((x) => x.symbol)));
+  ok('...and the surfaced row carries its receipts — the edge and the floor it beat',
+    /oos edge \+21\.2pp over its own floor 5/.test(feed[0].receipts || ''),
+    JSON.stringify(feed[0].receipts));
+  const cur2 = await P.curateChainFires(CHAIN_SNAP);
+  ok('...and the same ticket can never surface twice',
+    cur2.kept === 0 && JSON.parse(S.get('novo:alerts:feed')).length === 1,
+    JSON.stringify(cur2));
+  const eqOnly = await P.listNovoFires('equity');
+  const cxOnly = await P.listNovoFires('crypto');
+  ok('the feed splits per desk like everything else',
+    eqOnly.length === 0 && cxOnly.length === 1,
+    JSON.stringify({ equity: eqOnly.length, crypto: cxOnly.length }));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

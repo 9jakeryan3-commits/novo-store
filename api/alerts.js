@@ -88,16 +88,20 @@ module.exports = async (req, res) => {
       /* NoVo Unleashed: the prediction record, COMP SEATS ONLY — the same server-side gate the
          tools carry. Everyone else gets comp:false and no predictions key at all: absence, not an
          empty list, so the page can tell "not yours to see" from "none yet". */
-      let comp = false, predictions;
+      let comp = false, predictions, novo_alerts;
       try { comp = require("./_lib/comp.js").isComp(email); } catch (_) {}
       if (comp) {
         // Per desk: the crypto dashboard reads NoVo's crypto calls, the equity dashboards his
         // equity calls -- the same split every other feature already honours.
         try { predictions = await require("./_lib/predictions.js")
           .listPredictions(40, app === "crypto" ? "crypto" : "equity"); } catch (_) {}
+        // Dr. NoVo's Alerts — the curated fires, same comp gate, same per-desk split.
+        try { novo_alerts = await require("./_lib/predictions.js")
+          .listNovoFires(app === "crypto" ? "crypto" : "equity", 20); } catch (_) {}
       }
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
-                                    ...(comp && predictions && !predictions.error ? { predictions } : {}) });
+                                    ...(comp && predictions && !predictions.error ? { predictions } : {}),
+                                    ...(comp && Array.isArray(novo_alerts) ? { novo_alerts } : {}) });
     }
 
     if (req.method === "POST") {

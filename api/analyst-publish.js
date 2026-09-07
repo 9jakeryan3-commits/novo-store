@@ -757,7 +757,18 @@ export default async function handler(req, res) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     try {
       const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      const out = await require('./_lib/predictions.js').makePrediction({ ...b, source: 'novo' });
+      const P = require('./_lib/predictions.js');
+      const out = await P.makePrediction({ ...b, source: 'novo' });
+      // An Eye fire that recorded is an edge found — it surfaces as one of Dr. NoVo's Alerts too.
+      if (out && out.ok) {
+        try {
+          await P.appendNovoFire({ asset_class: b.asset_class === 'crypto' ? 'crypto' : 'equity',
+            symbol: String(b.symbol || '').toUpperCase(), kind: 'eye_rule',
+            title: String(b.thesis || 'The Eye fired').slice(0, 200),
+            horizon_min: Number(b.horizon_min) || null,
+            receipts: String(b.basis || 'forward-registered rule').slice(0, 160) });
+        } catch (_) {}
+      }
       return res.status(out && out.ok ? 200 : 400).json(out);
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }

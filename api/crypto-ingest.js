@@ -130,6 +130,8 @@ module.exports = async (req, res) => {
     try { await require("./_lib/predictions.js").evaluateCryptoPredictions(b); } catch (_) {}
     // NoVo's own crypto calls: a new reading with demonstrated edge becomes a recorded prediction.
     try { await require("./_lib/predictions.js").selectCryptoPredictions(b); } catch (_) {}
+    // Dr. NoVo's Alerts: chain tickets whose rule has proven edge, surfaced; the firehose stays put.
+    try { await require("./_lib/predictions.js").curateChainFires(b); } catch (_) {}
     const shape = {};
     for (const k of Object.keys(b)) {
       const v = b[k];
