@@ -32,7 +32,34 @@ const { kv } = require("./../_kv.js");
 const KEY = "pred:log";
 const MAX_KEPT = 400;          // graded history kept for the score; oldest graded rows fall off
 const MAX_OPEN = 40;           // a runaway prompt cannot flood the record
-const KINDS = new Set(["close_at", "direction", "trade_call", "level_touch"]);
+const KINDS = new Set(["close_at", "open_at", "direction", "trade_call", "level_touch"]);
+
+// ── THE EQUITY CALENDAR ──────────────────────────────────────────────────────────────────────
+// The first real prediction (Jake, Labor Day 2026) was recorded with horizon "today_close" ON A
+// MARKET HOLIDAY: at 16:00 the evaluator would have graded it against a spot frozen since Friday,
+// actual == spot_at, and handed NoVo a free HIT on a market that never traded — a check that
+// cannot fail, landed in the track record itself. Same family as the LIVE badge on Labor Day:
+// a clock that knows hours but not days.
+// Mirror of the engine's skills/market_calendar holiday set; extend annually. Half-day closes need
+// no special case here: grading at 16:00 reads the last spot, which IS that day's close.
+const MKT_HOLIDAYS = new Set([
+  "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19",
+  "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+  "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18",
+  "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24",
+]);
+function _etParts(ms) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York",
+    hour12: false, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", weekday: "short" })
+    .formatToParts(new Date(ms)).reduce((o, x) => (o[x.type] = x.value, o), {});
+}
+function _etDate(ms) { const p = _etParts(ms); return p.year + "-" + p.month + "-" + p.day; }
+function isTradingDayEt(ms) {
+  const p = _etParts(ms);
+  if (p.weekday === "Sat" || p.weekday === "Sun") return false;
+  return !MKT_HOLIDAYS.has(p.year + "-" + p.month + "-" + p.day);
+}
 const SIDES = new Set(["up", "down", "buy", "sell", "touch"]);
 
 async function _load(r) {
@@ -48,18 +75,29 @@ async function _save(r, list) {
   await r.set(KEY, JSON.stringify([...graded, ...open]), { ex: 365 * 24 * 3600 });
 }
 
-// "today_close" resolves against the ET calendar the product already speaks.
-function _todayCloseUtc(now) {
-  const d = now ? new Date(now) : new Date();
-  const et = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
-    hour12: false, year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit" }).formatToParts(d)
-    .reduce((o, p) => (o[p.type] = p.value, o), {});
-  // Local-ET 16:00 today, expressed in UTC by asking what UTC offset ET carries right now.
-  const asUtc = Date.UTC(+et.year, +et.month - 1, +et.day, 16, 0, 0);
+// An ET wall-clock time on a given day, expressed in UTC by asking what offset ET carries then.
+function _etWallUtc(dayMs, hh, mm) {
+  const et = _etParts(dayMs);
+  const asUtc = Date.UTC(+et.year, +et.month - 1, +et.day, hh, mm, 0);
   const offsetMin = (Date.UTC(+et.year, +et.month - 1, +et.day, +et.hour, +et.minute)
-    - (Math.floor(d.getTime() / 60000) * 60000)) / 60000;
+    - (Math.floor(dayMs / 60000) * 60000)) / 60000;
   return asUtc - offsetMin * 60000;
+}
+// Named horizons resolve to the NEXT SESSION THAT EXISTS. "today_close" on a holiday, a weekend,
+// or after the bell means the next trading day's close — never a time no market trades at.
+function resolveHorizon(name, nowMs) {
+  const now = nowMs || Date.now();
+  const DAY = 24 * 3600 * 1000;
+  let day = now;
+  const wantOpen = name === "tomorrow_open";
+  const strictlyTomorrow = name === "tomorrow_open" || name === "tomorrow_close";
+  if (strictlyTomorrow) day += DAY;
+  for (let i = 0; i < 10; i++, day += DAY) {
+    if (!isTradingDayEt(day)) continue;
+    const t = _etWallUtc(day, wantOpen ? 9 : 16, wantOpen ? 30 : 0);
+    if (t > now) return t;
+  }
+  return null;
 }
 
 async function makePrediction(args = {}) {
@@ -74,7 +112,7 @@ async function makePrediction(args = {}) {
     return { error: "side must be up/down (direction) or buy/sell (trade_call)" };
 
   const value = Number(args.value);
-  if ((kind === "close_at" || kind === "level_touch") && !(isFinite(value) && value > 0))
+  if ((kind === "close_at" || kind === "open_at" || kind === "level_touch") && !(isFinite(value) && value > 0))
     return { error: kind + " needs a numeric value" };
 
   const spot_at = Number(args.spot_at);
@@ -84,7 +122,8 @@ async function makePrediction(args = {}) {
 
   // The horizon is WHEN THIS BECOMES FALSIFIABLE. Required, always.
   let horizon_utc = null;
-  if (args.horizon === "today_close") horizon_utc = _todayCloseUtc();
+  if (["today_close", "tomorrow_open", "tomorrow_close"].includes(args.horizon))
+    horizon_utc = resolveHorizon(args.horizon);
   else if (isFinite(Number(args.horizon_min)) && Number(args.horizon_min) >= 5)
     horizon_utc = Date.now() + Number(args.horizon_min) * 60000;
   if (!horizon_utc || horizon_utc > Date.now() + 14 * 24 * 3600 * 1000)
@@ -100,7 +139,7 @@ async function makePrediction(args = {}) {
     source: args.source === "novo" ? "novo" : "conversation",
     asset_class: args.asset_class === "crypto" ? "crypto" : "equity",
     symbol, kind,
-    side: side || (kind === "close_at" ? (value >= spot_at ? "up" : "down") : (kind === "level_touch" ? "touch" : null)),
+    side: side || (kind === "close_at" || kind === "open_at" ? (value >= spot_at ? "up" : "down") : (kind === "level_touch" ? "touch" : null)),
     value: isFinite(value) ? value : null,
     spot_at,
     horizon_utc,
@@ -118,7 +157,7 @@ function _grade(p, actual) {
   const dirUp = p.side === "up" || p.side === "buy";
   const moved = actual - p.spot_at;
   const out = { actual: actual, graded_utc: Date.now() };
-  if (p.kind === "close_at") {
+  if (p.kind === "close_at" || p.kind === "open_at") {
     out.error_pct = p.value ? +(((actual - p.value) / p.value) * 100).toFixed(3) : null;
     out.hit = (p.value >= p.spot_at) === (moved >= 0);
   } else if (p.kind === "level_touch") {
@@ -137,6 +176,19 @@ async function evaluate(getSpot) {
   let changed = 0;
   for (const p of list) {
     if (p.status !== "open") continue;
+    /* ⚠ VOID, NOT GRADED, when an equity horizon fell on a day no market traded. This is the
+       migration guard for rows recorded before the calendar existed — one is live right now,
+       "today_close" stamped on Labor Day — and the permanent backstop for anything that slips
+       past creation. Grading it would compare a frozen spot to itself and mint a free HIT; a
+       record with free hits in it is not a record. Voided rows are kept, shown, and excluded
+       from the score, with the reason on the row. */
+    if (p.asset_class === "equity" && Date.now() >= p.horizon_utc && !isTradingDayEt(p.horizon_utc)) {
+      p.status = "void";
+      p.outcome = { reason: "horizon fell on a market holiday — nothing traded, nothing to grade",
+                    graded_utc: Date.now() };
+      changed++;
+      continue;
+    }
     const spot = getSpot(p);
     if (!isFinite(spot)) continue;
     if (p.kind === "level_touch") {
@@ -196,6 +248,7 @@ async function listPredictions(limit) {
   return {
     open: list.filter((p) => p.status === "open").sort((a, b) => a.horizon_utc - b.horizon_utc),
     graded: graded.slice(-(limit || 40)).reverse(),
+    void: list.filter((p) => p.status === "void").slice(-10).reverse(),
     score, overall,
   };
 }

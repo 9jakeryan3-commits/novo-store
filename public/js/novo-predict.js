@@ -56,6 +56,7 @@
   }
   function describe(p) {
     if (p.kind === 'close_at') return p.symbol + ' closes at ' + p.value;
+    if (p.kind === 'open_at') return p.symbol + ' opens at ' + p.value;
     if (p.kind === 'level_touch') return p.symbol + ' touches ' + p.value;
     if (p.kind === 'trade_call') return (p.side === 'sell' ? 'Sell' : 'Buy') + ' ' + p.symbol + ' now';
     return p.symbol + ' ' + (p.side || '');
@@ -109,7 +110,16 @@
           + '</div>';
       }).join('');
     }
-    if (!open.length && !graded.length) {
+    var voided = pr.void || [];
+    if (voided.length) {
+      h += '<div class="pd-grp">Void — could not be graded</div>';
+      h += voided.map(function (p) {
+        return '<div class="pd-row"><span class="pd-what">' + esc(describe(p))
+          + ' → <span style="color:var(--txt3,#6e6e6e);font-weight:800">VOID</span></span>'
+          + '<span class="pd-meta">' + esc((p.outcome && p.outcome.reason) || '') + '</span></div>';
+      }).join('');
+    }
+    if (!open.length && !graded.length && !voided.length) {
       h += '<div class="pd-empty">Nothing on the record yet. Ask him what he thinks — any real '
         + 'prediction he makes goes on the record the moment he says it.</div>';
     }

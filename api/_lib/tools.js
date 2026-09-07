@@ -371,15 +371,20 @@ const declarations = [
       properties: {
         symbol: { type: "string", description: "SPY/QQQ/IWM, or a mapped coin." },
         asset_class: { type: "string", enum: ["equity", "crypto"] },
-        kind: { type: "string", enum: ["close_at", "direction", "trade_call", "level_touch"],
-          description: "close_at: a point estimate. direction: up/down by the horizon. " +
-            "trade_call: buy/sell now (a direction said with intent). level_touch: trades " +
-            "through a level before the horizon." },
+        kind: { type: "string", enum: ["close_at", "open_at", "direction", "trade_call", "level_touch"],
+          description: "close_at / open_at: a point estimate for a close or an open - RECORD THE " +
+            "THING YOU ACTUALLY PREDICTED (asked about tomorrow's open, record open_at with " +
+            "horizon tomorrow_open, not a close). direction: up/down by the horizon. trade_call: " +
+            "buy/sell now (a direction said with intent). level_touch: trades through a level " +
+            "before the horizon." },
         side: { type: "string", enum: ["up", "down", "buy", "sell"],
           description: "Required for direction and trade_call." },
         value: { type: "number", description: "The predicted price (close_at) or the level (level_touch)." },
         spot_at: { type: "number", description: "The price on screen RIGHT NOW, from the data you just read." },
-        horizon: { type: "string", enum: ["today_close"], description: "Use for 'by the close'." },
+        horizon: { type: "string", enum: ["today_close", "tomorrow_open", "tomorrow_close"],
+          description: "Named horizons resolve to the NEXT SESSION THAT EXISTS - today_close on " +
+            "a holiday or after the bell becomes the next trading day's close, so a prediction " +
+            "can never be graded against a market that did not trade." },
         horizon_min: { type: "number", description: "Or minutes from now (5 to 20160)." },
         thesis: { type: "string", description: "One line: the alignment you saw. Their words appear on the record." },
         basis: { type: "string", description: "The specific numbers it rests on, e.g. 'GEX -270M, 0.15% under flip'." },
