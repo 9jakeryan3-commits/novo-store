@@ -1778,6 +1778,19 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab-novo { color: #22d3ee; }
     .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(34,211,238,.85); }
     .mob-tab-novo.mob-active { color: #67e8f9; border-top-color: #22d3ee; }
+    /* ── THE READ IS ITS OWN TAB (Jake, 2026-09-07: "lets give Today's Read its own tab
+       'The Read' on mobile"). It is a thousand words of prose sitting at the very bottom of a
+       document whose other ten sections are dense numeric panels — on a phone, reaching the one
+       part of this dashboard you READ rather than scan meant scrolling past all of it.
+       Stated as "what each tab hides", against #dash's DIRECT children only, so a panel added to
+       the dashboard later joins the map tab automatically instead of appearing on both. The header
+       and the footer are on every tab: one is the brand and the live badge, the other is the
+       "not financial advice" line, and that line does not get a tab it can be missing from. */
+    body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot) { display: none; }
+    body[data-mtab="map"]  #dash > .lv-read { display: none; }
+    /* First thing under the header on its own tab, so it does not need the gap it needed when it
+       followed The Line. */
+    body[data-mtab="read"] .lv-read { margin-top: 0; }
     /* The document has to END above the bar, or the last card is permanently underneath it. */
     .lv-wrap { padding-bottom: calc(var(--navh) + 16px); }
     /* ...and so does the settings sheet, whose last link sat under the bar otherwise. */
@@ -1860,13 +1873,19 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 
 <!-- ═════ MOBILE TAB BAR ═════
      "Dealer Map | Dr. NoVo at minimum for now until we add more to it" (Jake, 2026-09-07).
-     Two entries today. data-mtab is the name of the view, not an index, so adding a third tab
-     later is one button and one branch — the trader's numeric indices are a legacy this page
-     does not have to inherit. -->
+     Three entries now — The Read joined the same day, and it cost exactly what this comment said
+     it would: one button and one branch. data-mtab is the name of the view, not an index; the
+     trader's numeric indices are a legacy this page does not have to inherit. No `order` on any of
+     these, deliberately: source order is already the wanted order, and a flex row where SOME
+     children carry an order puts every unnamed one in front. Add one and you must add all three. -->
 <nav id="mobile-tabs" aria-label="Dashboard sections">
   <button class="mob-tab" type="button" data-mtab="map" onclick="lvMobTab('map')">
     <span class="mob-tab-icon" aria-hidden="true">&#9638;</span>
     <span>Dealer Map</span>
+  </button>
+  <button class="mob-tab" type="button" data-mtab="read" onclick="lvMobTab('read')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9636;</span>
+    <span>The Read</span>
   </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
@@ -1878,22 +1897,50 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   var bar = document.getElementById('mobile-tabs');
   var panel = document.getElementById('novo-ask');
   if (!bar || !panel) return;
+  if (!document.body.getAttribute('data-mtab')) document.body.setAttribute('data-mtab', 'map');
+  /* One scroll position per tab. This page is a single document scroll, not a column per view, so
+     without this you leave the map halfway down, read the note, come back and land in the middle of
+     the gamma card. Saved on the way out, restored after layout — the document is a different
+     height on each tab, so a synchronous scrollTo would be clamped to the old one. */
+  var scrollAt = { map: 0, read: 0 };
   window.lvMobTab = function(which){
+    var from = document.body.getAttribute('data-mtab') || 'map';
+    /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
+       we would save that zero over a real position. */
+    if (!panel.classList.contains('on') && (from === 'map' || from === 'read'))
+      scrollAt[from] = window.scrollY || 0;
     try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
+    if (which === 'novo') return;
+    document.body.setAttribute('data-mtab', which);
+    requestAnimationFrame(function(){
+      window.scrollTo(0, scrollAt[which] || 0);
+      /* ⚠ CANVASES SIZED WHILE HIDDEN MEASURE ZERO. If a data refresh lands while The Read is
+         showing, the gamma heat redraws against a display:none wrapper and comes back blank. The
+         page already treats a resize as "re-measure the canvases that care", so say so.
+         Honest about what this does NOT cover: drawProfile has no resize hook at all, so the volume
+         profile still waits for the next poll. That gap predates this tab — it is why the profile
+         is also wrong after a phone rotate — and this is not the change that fixes it. */
+      if (which === 'map') { try { window.dispatchEvent(new Event('resize')); } catch (_e) {} }
+    });
   };
-  /* Reads the panel, never remembers a click. See the note in the stylesheet. */
+  /* Reads the panel and the body, never remembers a click. See the note in the stylesheet.
+     ⚠ sync() no longer WRITES data-mtab. It used to set it to 'novo' or 'map', which was harmless
+     while those were the only two views and would now silently overwrite 'read' every time the
+     chat opened or closed. */
   function sync(){
-    var on = panel.classList.contains('on');
-    document.body.setAttribute('data-mtab', on ? 'novo' : 'map');
+    var live = panel.classList.contains('on')
+      ? 'novo' : (document.body.getAttribute('data-mtab') || 'map');
     Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
-      var live = (t.getAttribute('data-mtab') === 'novo') === on;
-      t.classList.toggle('mob-active', live);
+      var on = t.getAttribute('data-mtab') === live;
+      t.classList.toggle('mob-active', on);
       /* aria-current has no false value — it is present or it is not. Setting "false" would
          announce every tab as current on some screen readers. */
-      if (live) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+      if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
   }
   new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(sync).observe(document.body,
+    { attributes: true, attributeFilter: ['data-mtab'] });
   sync();
 })();
 </script>
@@ -2624,7 +2671,18 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   function jump(sel, label) {
     return { label: label, group: 'Jump to', run: function () {
       var el = document.querySelector(sel);
-      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!el || !el.scrollIntoView) return;
+      /* ⚠ ON A PHONE THESE TARGETS NOW LIVE ON DIFFERENT TABS, and scrollIntoView on a
+         display:none element does nothing whatsoever — the command would light up, run, and go
+         nowhere. Reveal the tab first. Gated on the bar actually being on screen rather than on a
+         width, so nothing about the desktop palette changes. */
+      var bar = document.getElementById('mobile-tabs');
+      if (bar && getComputedStyle(bar).display !== 'none' && window.lvMobTab) {
+        window.lvMobTab(el.closest('.lv-read') ? 'read' : 'map');
+        setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+        return;
+      }
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } };
   }
 

@@ -448,10 +448,7 @@ tr:last-child td{border-bottom:none}
     .lv-brand{order:1}
     #novo-ask-bubble{order:2}
     .lv-gear{order:3;margin-left:auto}
-    /* justify-content is explicit: .lv-status inherits margin-left:auto from the desktop row,
-       which on its own wrapped line pushes LIVE to the right edge instead of sitting under the
-       wordmark where Jake asked for it. */
-    .lv-status{order:4;flex:0 0 100%;margin:0;padding-left:2px;justify-content:flex-start}
+    /* LIVE's placement is set in the 768px block below, beside the rule that made room for it. */
     /* ⚠ EVERY CHILD NEEDS AN ORDER ONCE ANY CHILD HAS ONE. Default order is 0, so the one element
        I did not name -- the keyboard hint -- sorted BEFORE the brand and the header rendered
        backwards: Ctrl-K, ?, logo, Dr. NoVo. It is display:none on a real phone (pointer:coarse),
@@ -473,9 +470,18 @@ tr:last-child td{border-bottom:none}
        so on a phone it wraps to its own line BELOW the price and the block reads
        symbol / price / chips -- three stacked left-aligned rows with the chips orphaned at the
        bottom. Ordering it first puts the qualifiers above the number they qualify, which is also
-       the reading order: what kind of read this is, then the read. */
+       the reading order: what kind of read this is, then the read.
+       RIGHT-ALIGNED ON THAT ROW (Jake, 2026-09-07: "move those confidence band panels over to
+       right side"). They are three small pills ending around 60% of the width, so left-aligned they
+       left a ragged gap on the right while the big SOL and its price sat left-aligned underneath.
+       Pushed right, the row is bounded on both edges and the chips read as an annotation on the
+       block rather than a fourth left-aligned line. They are NOT put on the price row itself, and
+       the reason is MEASURED, not eyeballed: on a 398px row the chips run ~224px, the symbol ~97px
+       and the price ~90px, plus two 15px gaps -- ~441px, so the row cannot hold them. (Chips and
+       symbol ALONE do fit; my first note here said they did not, which was an estimate written down
+       as a fact. It is the price that makes it impossible.) */
     #head{flex-wrap:wrap;align-items:baseline;row-gap:6px}
-    #headmeta{order:-1;flex:0 0 100%;margin-left:0}
+    #headmeta{order:-1;flex:0 0 100%;margin-left:0;justify-content:flex-end}
     #sym{font-size:30px}
     #px{font-size:17px}
     /* Wide tables scroll inside their own panel rather than stretching it. */
@@ -745,6 +751,19 @@ tr:last-child td{border-bottom:none}
     /* One control, one place. The bar carries Dr. NoVo on a phone exactly as it does on the
        trader, where the entire header button row is desktop-only. */
     #novo-ask-bubble { display: none; }
+    /* ...AND LIVE MOVES BACK UP INTO THE ROW THE BUTTON JUST LEFT (Jake, 2026-09-07: "move the live
+       indicator back up centered in the same row"). It was dropped to its own line yesterday
+       because the brand, Dr. NoVo, LIVE and the gear were fighting over ~340px; with the button in
+       the tab bar that fight is over, and a whole row was being spent on two words.
+       Centred in the SPACE BETWEEN the brand and the gear, not on the page: true page-centring
+       would put LIVE at roughly x=155-225 on a 390px screen, straight through the right edge of the
+       "CRYPTO MARKET MAP" wordmark. flex:1 takes the gap and centres inside it.
+       ⚠ The order is explicit like every other child of this header. .lv-status had no order of its
+       own before -- it did not need one while it was a full-width wrapped row -- and a child left
+       at the default 0 sorts ahead of everything given a positive order, which would have put LIVE
+       in front of the logo. That is the same trap that rendered this exact header backwards. */
+    .lv-status { order: 2; flex: 1 1 auto; margin: 0; padding: 0;
+                 justify-content: center; }
   }
   /* Below 641px the chat is fixed and full-screen rather than docked into #center, so it is the one
      surface that would still cover the bar. It stops at the bar instead: on the trader Dr. NoVo is

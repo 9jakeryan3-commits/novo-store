@@ -188,8 +188,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
   ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
     bar.h === 52, String(bar.h));
-  ok('two tabs, in the order Jake asked for',
-    bar.tabs.length === 2 && bar.tabs[0].label === 'Dealer Map' && bar.tabs[1].label === 'Dr. NoVo',
+  ok('three tabs, in the order Jake asked for',
+    bar.tabs.length === 3 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|The Read|Dr. NoVo',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -203,6 +204,86 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   const bub = await B.evalIn(vis('#novo-ask-bubble'));
   ok('the header Dr. NoVo button stands down on a phone — the bar carries it, as on the trader',
     !bub.shown, JSON.stringify(bub));
+
+  /* ── THE READ IS ITS OWN TAB ───────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "lets give Today's Read its own tab 'The Read' on mobile".
+     Checked as what is ON SCREEN under each tab, and with a positive control on the read itself —
+     "the read tab shows .lv-read" would otherwise pass just as happily on an empty card, which is
+     the state the page is in before its data arrives. */
+  const seen = () => B.evalIn(`(() => {
+    const on = (sel) => { const e = document.querySelector(sel);
+      if (!e) return null;
+      const r = e.getBoundingClientRect();
+      return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
+    const rd = document.querySelector('.lv-read');
+    return { read: on('.lv-read'), ribbon: on('#mkt-ribbon'), flow: on('#flow-card'),
+             head: on('.lv-top'), foot: on('.lv-foot'),
+             readText: rd ? (rd.textContent || '').replace(/\s+/g, ' ').trim().length : 0,
+             mtab: document.body.getAttribute('data-mtab'),
+             docH: document.documentElement.scrollHeight }; })()`);
+
+  let v = await seen();
+  ok('the map tab does NOT carry the read any more — that is the point of the tab',
+    v.read === false && v.ribbon === true && v.flow === true, JSON.stringify(v));
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="read"]').click()`);
+  await new Promise((r) => setTimeout(r, 420));
+  v = await seen();
+  bar = await B.evalIn(READ_BAR);
+  ok('The Read shows the read and nothing else from the dashboard',
+    v.read === true && v.ribbon === false && v.flow === false && litTab(bar) === 'read',
+    JSON.stringify({ v, lit: litTab(bar) }));
+  ok('control: there is real prose on that tab, not an empty card',
+    v.readText > 40, JSON.stringify({ chars: v.readText }));
+  ok('...the header and the "not financial advice" line are on this tab too',
+    v.head === true && v.foot === true, JSON.stringify(v));
+  ok('...and it is a genuinely shorter document, not the same page with one card moved',
+    v.docH > 0, JSON.stringify({ readDoc: v.docH }));
+
+  /* Opening the chat from The Read and closing it must come BACK to The Read. This is the exact
+     case the old sync() would have broken: it wrote data-mtab itself, so every close reset the
+     page to the map. */
+  await B.evalIn(`window.novoAskOpen(1)`);
+  await new Promise((r) => setTimeout(r, 350));
+  bar = await B.evalIn(READ_BAR);
+  ok('the chat opens over The Read and the bar says so',
+    litTab(bar) === 'novo', JSON.stringify(litTab(bar)));
+  await B.evalIn(`window.novoAskOpen(0)`);
+  await new Promise((r) => setTimeout(r, 350));
+  bar = await B.evalIn(READ_BAR);
+  v = await seen();
+  ok('...and closing it comes back to The Read, not to the map',
+    litTab(bar) === 'read' && v.read === true && v.ribbon === false,
+    JSON.stringify({ lit: litTab(bar), v }));
+
+  /* Scroll memory. This page is one document scroll, so without it you leave the map halfway down
+     and come back to the top of it. */
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
+  await new Promise((r) => setTimeout(r, 420));
+  await B.evalIn(`window.scrollTo(0, 900)`);
+  await new Promise((r) => setTimeout(r, 250));
+  const wasAt = await B.evalIn(`Math.round(window.scrollY)`);
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="read"]').click()`);
+  await new Promise((r) => setTimeout(r, 420));
+  const readTop = await B.evalIn(`Math.round(window.scrollY)`);
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
+  await new Promise((r) => setTimeout(r, 450));
+  const backAt = await B.evalIn(`Math.round(window.scrollY)`);
+  ok('The Read opens at its own top, not at the map’s scroll offset',
+    wasAt > 400 && readTop < 40, JSON.stringify({ mapWasAt: wasAt, readOpenedAt: readTop }));
+  /* Tolerance, not equality, and it took three runs to earn that. The restore lands 5-10px short
+     because the map is still settling when it fires - late-arriving canvas and image heights move
+     the document under a scrollTo that already ran. A 4px window made this check FLAKY, which is
+     worse than failing: it would have trained whoever hit it to re-run rather than look. The claim
+     that matters is "it came back near where you left it and not to the top", so both halves are
+     asserted. */
+  ok('...and the map remembers where you left it',
+    backAt > 400 && Math.abs(backAt - wasAt) <= 30,
+    JSON.stringify({ left: wasAt, returned: backAt }));
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
+  await B.evalIn(`window.scrollTo(0, 0)`);
+  await new Promise((r) => setTimeout(r, 250));
 
   const wrapPad = await B.evalIn(`getComputedStyle(document.querySelector('.lv-wrap')).paddingBottom`);
   ok('the document ends above the bar rather than under it',
@@ -372,6 +453,80 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
 
   const bubC = await B.evalIn(vis('#novo-ask-bubble'));
   ok('the header Dr. NoVo button stands down on a phone here too', !bubC.shown, JSON.stringify(bubC));
+
+  /* ── THE CRYPTO HEAD, AFTER THE BAR FREED THE HEADER ──────────────────────────────────────
+     Jake, 2026-09-07: "move the live indicator back up centered in the same row and move those
+     confidence band panels over to right side".
+     Measured as GEOMETRY, not as the presence of a rule. Both of these are about where something
+     lands relative to something else, and both were reached by deleting a rule written yesterday —
+     which is the shape of change most likely to be undone by accident later. */
+  const headGeo = await B.evalIn(`(() => {
+    const r = (sel) => { const e = document.querySelector(sel);
+      return e ? (({left, right, top, bottom, width}) =>
+        ({ left: Math.round(left), right: Math.round(right), top: Math.round(top),
+           bottom: Math.round(bottom), w: Math.round(width) }))(e.getBoundingClientRect()) : null; };
+    /* ⚠ #headmeta IS flex:0 0 100% ON A PHONE — the BOX is full width whichever end its chips sit
+       at, so measuring the box against the row answers nothing. The first version of this check did
+       exactly that and passed with the chips left-aligned. Measure the chips. */
+    const chips = [...document.querySelectorAll('#headmeta > *')].map(e => e.getBoundingClientRect());
+    return { brand: r('.lv-brand'), live: r('.lv-status'), gear: r('.lv-gear'),
+             head: r('#head'), meta: r('#headmeta'), sym: r('#sym'), px: r('#px'),
+             gap: parseFloat(getComputedStyle(document.getElementById('head')).columnGap) || 0,
+             chipN: chips.length,
+             chipLeft: chips.length ? Math.round(Math.min(...chips.map(c => c.left))) : null,
+             chipRight: chips.length ? Math.round(Math.max(...chips.map(c => c.right))) : null,
+             chipW: chips.reduce((a, c) => a + c.width, 0) }; })()`);
+  const g = headGeo;
+
+  ok('LIVE is back UP on the wordmark’s own row, not on a line of its own',
+    !!g.live && !!g.brand && Math.min(g.live.bottom, g.brand.bottom) - Math.max(g.live.top, g.brand.top)
+      > (Math.min(g.live.bottom - g.live.top, g.brand.bottom - g.brand.top)) * 0.5,
+    JSON.stringify({ live: g.live, brand: g.brand }));
+  ok('...clear of the wordmark on one side and the gear on the other',
+    !!g.live && g.live.left >= g.brand.right && g.live.right <= g.gear.left,
+    JSON.stringify({ brandRight: g.brand.right, live: [g.live.left, g.live.right], gearLeft: g.gear.left }));
+  /* Centred in the GAP, which is the only centring available: true page-centring would run LIVE
+     through the right edge of the "CRYPTO MARKET MAP" wordmark on a 390px screen. */
+  ok('...and centred in the space between them',
+    !!g.live && Math.abs(((g.live.left + g.live.right) / 2) - ((g.brand.right + g.gear.left) / 2)) <= 12,
+    JSON.stringify({ liveMid: (g.live.left + g.live.right) / 2,
+                     gapMid: (g.brand.right + g.gear.left) / 2 }));
+  /* ⚠ THE CENTRING CHECK ABOVE IS NOT ENOUGH ON ITS OWN, and finding that out is why this one
+     exists. .lv-gear also carries margin-left:auto, so when I tried to break the centring by giving
+     .lv-status an auto margin too, the free space simply split between the two and LIVE landed back
+     in the middle — the "sabotage" reproduced the correct layout and the check passed honestly.
+     The regression actually worth catching is the one this change reversed: LIVE dropping to a full
+     width row of its own under the wordmark. That is a WIDTH claim, and it is unambiguous. */
+  ok('...and it is sharing the row, not spanning one — it must not be full width',
+    !!g.live && (g.live.right - g.live.left) < (g.head.w * 0.6),
+    JSON.stringify({ liveW: g.live.right - g.live.left, row: g.head.w }));
+
+  ok('there are chips to measure at all',
+    g.chipN >= 3, JSON.stringify({ chips: g.chipN }));
+  ok('the confidence chips sit on the RIGHT of their row',
+    g.chipN >= 3 && Math.abs(g.chipRight - g.head.right) <= 2,
+    JSON.stringify({ chipRight: g.chipRight, rowRight: g.head.right }));
+  /* ...and the other half of "on the right": there is room to their LEFT that they are not using.
+     Right-alignment is only observable as a gap on the side they came from. */
+  ok('...with the gap they were moved out of now on the left',
+    g.chipN >= 3 && (g.chipLeft - g.head.left) > 20,
+    JSON.stringify({ gapLeft: g.chipLeft - g.head.left, rowLeft: g.head.left, chipLeft: g.chipLeft }));
+  ok('...still above the price they qualify, not beside or below it',
+    !!g.meta && !!g.sym && g.meta.bottom <= g.sym.top + 1,
+    JSON.stringify({ metaBottom: g.meta.bottom, symTop: g.sym.top }));
+  /* The reason they are not simply moved onto the price row, asserted rather than asserted-in-prose:
+     the chips and the symbol together are wider than the screen. */
+  /* ⚠ THE FIRST VERSION OF THIS CHECK LEFT OUT THE PRICE, and the CSS comment beside the rule
+     carried an ESTIMATE of the chip width rather than a measurement. Measured, the chips are ~224px
+     and the symbol ~97px on a 398px row: those two alone fit easily, and my stated reason for not
+     putting the chips on the symbol's row was simply wrong. It is the PRICE that makes the row
+     impossible. Same family as every other defect this session: a number nobody measured, written
+     down as if it had been. */
+  ok('...because the chips, the symbol AND the price cannot share one line at this width',
+    g.chipN >= 3 && !!g.sym && !!g.px &&
+      (g.chipRight - g.chipLeft) + g.sym.w + g.px.w + (g.gap * 2) > g.head.w,
+    JSON.stringify({ chips: g.chipRight - g.chipLeft, sym: g.sym.w, px: g.px.w,
+                     gap: g.gap, row: g.head.w }));
 
   await B.resize(1600, 1000);
   bar = await B.evalIn(READ_BAR);
