@@ -1789,11 +1789,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="alerts"] { order: 4; }
     .mob-tab[data-mtab="digest"] { order: 5; }
     .mob-tab[data-mtab="predict"] { order: 6; }
-    /* Appended rather than slotted next to The Read on purpose: Jake has set this order twice by
-       screenshot, and quietly resequencing his tabs to make room for a new one is not my call.
-       With Readings the visible count reaches six, which is what makes the "4 main + a More
-       button" work he sequenced for later actually due. */
-    .mob-tab[data-mtab="readings"] { order: 7; }
+    /* NO READINGS TAB (Jake, 2026-09-07: "I clearly said analyst will get the live reading strip
+       like crypto and no reading tab. the strip click opens the live readings page just like on
+       crypto."). The readings VIEW still exists and the strip opens it — it just is not a tab, the
+       same way the crypto map's feed is a view you reach from the strip rather than a nav entry.
+       Leaving the bar at the five Jake ordered. */
     .mob-tab[hidden] { display: none; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
@@ -1829,7 +1829,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
     body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
     body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
-    body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-readings):not(.lv-foot) { display: none; }
+    /* The readings view: reached from the strip, left by tapping any tab. No tab lights up while
+       it is open, which is honest — there is no tab. The strip itself stays visible so the way
+       back out is never a dead end. */
+    body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-readings):not(.lv-foot):not(#eye-readbar) { display: none; }
     body[data-mtab="map"]  #dash > .lv-read,
     body[data-mtab="map"]  #dash > .lv-alerts,
     body[data-mtab="map"]  #dash > .lv-digest,
@@ -1982,10 +1985,6 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   <button class="mob-tab" type="button" data-mtab="digest" onclick="lvMobTab('digest')">
     <span class="mob-tab-icon" aria-hidden="true">&#9788;</span>
     <span>Digest</span>
-  </button>
-  <button class="mob-tab" type="button" data-mtab="readings" onclick="lvMobTab('readings')">
-    <span class="mob-tab-icon" aria-hidden="true">&#9672;</span>
-    <span>Readings</span>
   </button>
   <button class="mob-tab" type="button" data-mtab="predict" onclick="lvMobTab('predict')" hidden>
     <span class="mob-tab-icon" aria-hidden="true">&#9670;</span>

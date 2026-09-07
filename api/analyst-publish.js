@@ -507,7 +507,20 @@ async function handleArchive(req, res) {
    does not control (content-type normalisation by an intermediary, a runtime change). The engine
    intakes are machine-to-machine and their failure surfaces only as an HTTP code in a log on
    another host, so they read the raw stream rather than trusting one shape. */
+/* Body-marker routing. _bodyOf caches on the request so reading it twice cannot consume the
+   stream out from under the branch that finally handles it. */
+async function _isKind(req, kind) {
+  try { const b = await _bodyOf(req); return !!(b && b.kind === kind); } catch (_) { return false; }
+}
+
 async function _bodyOf(req) {
+  if (req.__novoBody !== undefined) return req.__novoBody;
+  const parsed = await _readBody(req);
+  try { req.__novoBody = parsed; } catch (_) {}
+  return parsed;
+}
+
+async function _readBody(req) {
   const b = req.body;
   if (b && typeof b === 'object' && !Buffer.isBuffer(b)) return b;
   let raw = Buffer.isBuffer(b) ? b.toString('utf8') : (typeof b === 'string' ? b : null);
@@ -776,7 +789,14 @@ export default async function handler(req, res) {
   // are a SNAPSHOT of now, not an append-only record, so there is nothing here to merge and
   // nothing to age out. The 6h TTL is a dead-engine detector: if the Eye stops publishing, the
   // key expires and the bar goes quiet rather than showing yesterday as though it were today.
-  if (req.method === 'POST' && req.query && 'readings' in req.query) {
+  /* ⚠ ROUTED ON THE BODY AS WELL AS THE QUERY. Every readings publish returned HTTP 400, and the
+     body of that 400 — once the engine was made to actually read it — was "title + text/html
+     required": an error from the JOURNAL branch hundreds of lines below. The request was reaching
+     this file and sailing past this line, which can only happen if `readings` is not in req.query
+     by the time it gets here. Rather than keep theorising about who eats the query string, the
+     marker now travels in the payload too, where nothing between the engine and this function can
+     touch it. The query check stays so the endpoint keeps working for anything already using it. */
+  if (req.method === 'POST' && ((req.query && 'readings' in req.query) || (await _isKind(req, 'eye_readings')))) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     try {
       const b = await _bodyOf(req);
@@ -805,7 +825,7 @@ export default async function handler(req, res) {
   // which made a threshold trip into a stated prediction with no judgement in between. The fire
   // now arrives as a fire, with the rule's graded record attached, and onEquityFire applies the
   // same bar the crypto side applies: earn it, or stay a private signal.
-  if (req.method === 'POST' && req.query && 'fire' in req.query) {
+  if (req.method === 'POST' && ((req.query && 'fire' in req.query) || (await _isKind(req, 'eye_fire')))) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     try {
       const b = (await _bodyOf(req)) || {};

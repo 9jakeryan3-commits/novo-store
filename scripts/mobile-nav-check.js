@@ -405,13 +405,12 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
   ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
     bar.h === 52, String(bar.h));
-  /* Jake set the first five by screenshot, twice. Readings was APPENDED rather than slotted
-     beside The Read for that reason — resequencing tabs he has already ordered is not a free
-     move. The assertion keeps his five in his order and pins the new one to the end, so a future
-     tab that quietly reshuffles them still fails here. */
-  ok('six tabs: Jake\u2019s five in his order, with Readings appended',
-    bar.tabs.length === 6 &&
-    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest|Readings',
+  /* FIVE. Readings is NOT a tab here (Jake, 2026-09-07: "analyst will get the live reading strip
+     like crypto and no reading tab") — it is a view the strip opens, the way the crypto map's
+     feed is. This assertion is what stops it, or anything else, quietly reappearing on the bar. */
+  ok('five tabs, in the order Jake asked for \u2014 and Readings is not one of them',
+    bar.tabs.length === 5 &&
+    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -1583,21 +1582,30 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      analyst would get the bar that crypto has and trader would get a nav bar tab." */
   console.log('\nLive readings — the strip, the tab, and the honest empty state\n');
 
+  /* TWO DIFFERENT DOORS, ON PURPOSE. The analyst reaches readings by tapping the strip — there is
+     no tab — and the trader reaches them by its nav tab. That is exactly how Jake split it, and
+     asserting each app's OWN door is the only way this stays true. */
   for (const [app, page, tabSel, open] of [
-    ['analyst', 'analyst/live', '.mob-tab[data-mtab="readings"]', "lvMobTab('readings')"],
+    ['analyst', 'analyst/live', null, "document.querySelector('#eye-readbar').click()"],
     ['trader', 'trader/live', '.mob-tab[data-tab="8"]', 'switchMobileTab(8)'],
   ]) {
     await B.goto(base + '/' + page, 430, 900);
     await new Promise((r) => setTimeout(r, 900));
 
-    const tab = await B.evalIn(`(() => { const t = document.querySelector('${tabSel}');
-      if (!t) return { missing: true };
-      const r = t.getBoundingClientRect();
-      return { label: (t.textContent || '').trim(), w: r.width, h: r.height,
-               onBar: r.bottom > innerHeight - 90 }; })()`);
-    ok(app + ': there is a Live Readings tab on the bar, at a real size',
-      !tab.missing && /Readings/i.test(tab.label) && tab.w > 20 && tab.h > 20 && tab.onBar,
-      JSON.stringify(tab));
+    if (tabSel) {
+      const tab = await B.evalIn(`(() => { const t = document.querySelector('${tabSel}');
+        if (!t) return { missing: true };
+        const r = t.getBoundingClientRect();
+        return { label: (t.textContent || '').trim(), w: r.width, h: r.height,
+                 onBar: r.bottom > innerHeight - 90 }; })()`);
+      ok(app + ': there is a Live Readings tab on the bar, at a real size',
+        !tab.missing && /Readings/i.test(tab.label) && tab.w > 20 && tab.h > 20 && tab.onBar,
+        JSON.stringify(tab));
+    } else {
+      const none = await B.evalIn(`!!document.querySelector('.mob-tab[data-mtab="readings"]')`);
+      ok(app + ': there is NO Readings tab \u2014 the strip is the door, as on the crypto map',
+        none === false, JSON.stringify(none));
+    }
 
     await B.evalIn(open);
     await new Promise((r) => setTimeout(r, 700));
@@ -1611,7 +1619,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
                rows: el.querySelectorAll('.rd-row').length,
                groups: Array.from(el.querySelectorAll('.rd-grp')).map((g) => g.textContent.trim()),
                txt: txt.slice(0, 900) }; })()`);
-    ok(app + ': tapping it mounts the readings and they are on screen',
+    ok(app + ': opening it mounts the readings and they are on screen',
       !pg.missing && pg.onScreen === true && pg.rows >= 6, JSON.stringify({ ...pg, txt: undefined }));
     ok(app + ': ...the claims are the ENGINE\u2019s sentences, printed not rebuilt',
       /regime line is contested/.test(pg.txt) && /dealer hedging reverses sign/.test(pg.txt),
