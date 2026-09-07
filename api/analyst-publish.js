@@ -645,8 +645,20 @@ export default async function handler(req, res) {
         let id = null;
         try { const g = await resend.contacts.get({ audienceId: aud, email }); id = g && g.data && g.data.id; } catch (_) {}
         if (id) await resend.contacts.update({ audienceId: aud, id, unsubscribed: !want });
-        else if (want && !isReservedEmail(email)) await resend.contacts.create({ audienceId: aud, email, unsubscribed: false });
-      } catch (e) { console.error('[prefs] email toggle:', e.message); }
+        /* ⚠ OPTING OUT WITHOUT A CONTACT RECORD USED TO BE A NO-OP, and it is why the toggle
+           "switched back after reopening the app" (Jake, 2026-09-07). A member not yet in the
+           audience who pressed Off hit the `want &&` guard, nothing was written anywhere, this
+           handler returned ok:true email_optin:false — and the GET on the next open found no
+           contact, defaulted to opted-in, and painted the toggle back On. The UI was honest both
+           times; the store never heard about the choice. An opt-OUT now writes an unsubscribed
+           contact, so there is a record for the GET to read. */
+        else if (!isReservedEmail(email)) await resend.contacts.create({ audienceId: aud, email, unsubscribed: !want });
+      } catch (e) {
+        /* And a failed write is a failure, not an ok that echoes the wish. Returning
+           email_optin:want after the store refused it painted a state that did not exist. */
+        console.error('[prefs] email toggle:', e.message);
+        return res.status(502).json({ error: 'could not save that just now' });
+      }
     }
     return res.status(200).json({ ok: true, email_optin: want });
   }

@@ -190,7 +190,20 @@ const reset = async () => { STORE.clear(); };
       && /it is saved — no need to ask twice/.test(askSrc),
     'a failed turn hides its own side effects');
 
-  // ── 11. the cron reads the new field, not the old one ──────────────────────────────────────
+  // ── 11. an email opt-out is written even for a member with no contact record ───────────────
+  /* Jake: toggles "switch back after i reopen the app". The GET defaults a MISSING contact to
+     opted-in, so an opt-out that writes nothing un-does itself on the next open. The write has to
+     happen on opt-out too, and a failed write has to be an error, not an ok echoing the wish. */
+  const pubSrc = fs.readFileSync(path.join(__dirname, '..', 'api', 'analyst-publish.js'), 'utf8');
+  ok('an opt-out without a contact record still writes one',
+    /* create(...unsubscribed: !want) specifically — the update() line also says !want, so a loose
+       match would pass with the create regressed. */
+    /email, unsubscribed: !want/.test(pubSrc) && !/want && !isReservedEmail/.test(pubSrc),
+    'the opt-out no-op is back');
+  ok('...and a failed preference write returns an error, not a fake ok',
+    /could not save that just now/.test(pubSrc), 'failure is silent again');
+
+  // ── 12. the cron reads the new field, not the old one ──────────────────────────────────────
   /* A source assertion, and named as one: it cannot prove the cron behaves, only that it no longer
      asks the question that caused this. The behaviour above is what the gate actually rests on. */
   const cron = fs.readFileSync(path.join(__dirname, '..', 'api', 'daily-digest.js'), 'utf8');

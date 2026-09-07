@@ -75,6 +75,7 @@ const SEED = [
     kind: 'crypto_level', ticker: 'BTC', level: 92000, direction: 'below',
     recurring: true, armed: true },
 ];
+const PREFS = { email: true };
 const ALERTS = {
   mode: 'ok',
   delivery: null,
@@ -114,6 +115,22 @@ const server = http.createServer((req, res) => {
                            'service-worker-allowed': '/' });
       res.end(fs.readFileSync(f)); return;
     }
+  }
+  if (rel === '/api/analyst-publish' && req.url.indexOf('prefs') >= 0) {
+    /* A real (in-memory) preference, so the harness can prove the toggle re-renders from the
+       STORE on a fresh load — which is the exact thing that was broken. */
+    if (req.method === 'POST') {
+      let b = '';
+      req.on('data', (c) => { b += c; });
+      req.on('end', () => {
+        try { PREFS.email = JSON.parse(b || '{}').email_optin !== false; } catch (_) {}
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, email_optin: PREFS.email }));
+      });
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ email_optin: PREFS.email })); return;
   }
   if (rel === '/__reset-alerts') {
     /* THE STUB IS MUTABLE AND THE CANCEL TEST MUTATES IT. Without this the cross-dashboard section
@@ -947,6 +964,70 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      Asserted as RENDERED colour, not as a token value — a token is only a promise until something
      paints with it — and paired with the two things that had to SURVIVE the change: the borders
      that do the framing, and a hover state that was sharing the token being blacked out. */
+  // == THE THREE DASHBOARDS HAVE NOT DRIFTED APART =========================================
+  /* Jake, 2026-09-07: "just check all the settings panels in the dashboards they should be similar
+     and working toggles ... make sure these dashboard havent drifted apart in the ways that matter,
+     Dr. NoVo chats/tabs as well."
+     One loop, one list of things that must exist on every dashboard. A feature added to one page
+     and forgotten on the others now fails here by name instead of waiting for Jake's phone. */
+  console.log('\nDashboard parity\n');
+  const OPEN_SETTINGS = { trader: 'traderSettings(1)', analyst: 'lvSettings(1)', crypto: 'lvSettings(1)' };
+  for (const app of ['trader', 'analyst', 'crypto']) {
+    await B.goto(base + '/' + app + '/live', 430, 900);
+    /* The trader MOUNTS its chat on first open, so Help and Plain English do not exist until the
+       Dr. NoVo tab has been visited — which is also the only time they are usable. Visit it first
+       on every app, so the parity question is asked of comparable states. */
+    await B.evalIn(app === 'trader' ? 'switchMobileTab(4)'
+      : `document.querySelector('.mob-tab[data-mtab="novo"]').click()`);
+    await new Promise((r) => setTimeout(r, 700));
+    await B.evalIn(app === 'trader' ? 'switchMobileTab(2)' : 'window.novoAskOpen(0)');
+    await new Promise((r) => setTimeout(r, 300));
+    await B.evalIn(OPEN_SETTINGS[app]);
+    await new Promise((r) => setTimeout(r, 700));
+    const par = await B.evalIn(`(async () => {
+      const vis = (sel) => { const e = document.querySelector(sel);
+        if (!e) return false; const r = e.getBoundingClientRect();
+        return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
+      const push = document.getElementById('nf-push');
+      const mail = document.getElementById('nf-email');
+      const mailBefore = mail ? mail.textContent.trim() : null;
+      /* Click Off, then re-wire from scratch — the same thing reopening the app does. The state
+         must come back from the STORE, not from the click or a default. */
+      let mailAfterReload = null;
+      if (mail && !mail.disabled) {
+        mail.click();
+        await new Promise((r) => setTimeout(r, 500));
+        mail._ns = 0; window.novoSettings.wire();
+        await new Promise((r) => setTimeout(r, 500));
+        mailAfterReload = mail.textContent.trim();
+      }
+      return {
+        pushRow: vis('#nf-push'), mailRow: vis('#nf-email'),
+        pushWired: !!(push && push._ns), mailBefore, mailAfterReload,
+        helpBtn: !!document.getElementById('novo-ask-help'),
+        lvlBtn: !!document.getElementById('novo-ask-lvl'),
+        alertsTab: [...document.querySelectorAll('.mob-tab')]
+          .some((t) => /alerts/i.test(t.textContent || '')),
+        novoTab: [...document.querySelectorAll('.mob-tab')]
+          .some((t) => /novo/i.test(t.textContent || '')),
+        settingsMod: !![...document.querySelectorAll('script[src]')]
+          .find((x) => /novo-settings/.test(x.getAttribute('src'))),
+      }; })()`);
+    ok(app + ': settings carries BOTH notification toggles, wired by the shared module',
+      par.pushRow && par.mailRow && par.pushWired && par.settingsMod, JSON.stringify(par));
+    /* THE REVERT BUG. Off is clicked, the wiring is torn down and rebuilt (what reopening does),
+       and the toggle must still say Off — from the store, not the click. */
+    ok(app + ': the email toggle survives a reload of its own wiring',
+      par.mailBefore === 'On' && par.mailAfterReload === 'Off',
+      JSON.stringify({ before: par.mailBefore, after: par.mailAfterReload }));
+    ok(app + ': Dr. NoVo carries Help and Plain English, and the bar carries his tab and Alerts',
+      par.helpBtn && par.lvlBtn && par.alertsTab && par.novoTab, JSON.stringify(par));
+    /* reset the stub's preference for the next app */
+    await fetch(base + '/api/analyst-publish?prefs=1', { method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: 'x', email_optin: true }) }).catch(() => {});
+  }
+
   console.log('\nThe trader is black\n');
   await B.goto(base + '/trader/live', 430, 900);
   const dark = await B.evalIn(`(() => {
