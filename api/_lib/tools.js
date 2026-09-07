@@ -1269,7 +1269,8 @@ function makeExecutors(ctx = {}) {
     const a = { ...args };
     // level arrives as a string in the schema; a number-looking one is a price
     if (a.level != null && /^[\d.]+$/.test(String(a.level).trim())) a.level = Number(a.level);
-    return setAlert(ctx.email, a);
+    /* The alert remembers which dashboard it was set in, so it can ping from that one only. */
+    return setAlert(ctx.email, { ...a, app: ctx.app });
   }
   async function list_alerts() {
     const { listAlerts } = require("./alerts.js");
@@ -1308,6 +1309,8 @@ function makeExecutors(ctx = {}) {
   async function update_reader_memory(args = {}) {
     const { updateMemory, indexMember } = require("./member-memory.js");
     if (!ctx.email) return { error: "no signed-in reader" };
+    /* Same for the digest: set it on the crypto map and it pings from the crypto app. */
+    if (args && args.digest && args.digest.on) args = { ...args, digest: { ...args.digest, app: ctx.app } };
     const out = await updateMemory(ctx.email, args);
     /* ⚠ A DIGEST-ONLY MEMBER HAS TO BE INDEXED TOO. The cron walks mem:index, and this used to
        index only on add_interests — so someone who asked for a digest and named symbols, without

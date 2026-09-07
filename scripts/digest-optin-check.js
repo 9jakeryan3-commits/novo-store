@@ -118,7 +118,53 @@ const reset = async () => { STORE.clear(); };
       /* an unknown target is dropped rather than pasted into the url */
       && pushUrl({ app: 'crypto' }, 'evil') === '/crypto/live', pushUrl({ app: '../../evil' }, 'novo'));
 
-  // ── 8. the cron reads the new field, not the old one ───────────────────────────────────────
+  // ── 8. one alert, one app, one ping ────────────────────────────────────────────────────────
+  /* Jake, 2026-09-07: "trader subscribers where chats do blend, alerts should not. this would cause
+     double pings in two apps. alerts should only ping from the app they are set it in same for
+     digest."
+     push:u:<hash> holds every device a member registered across all three dashboards. Sending to
+     all of them is the double ping. The CONVERSATION still follows the member across trader and
+     analyst — that is deliberate and unchanged; this is only about who gets pinged. */
+  const { pushTargets } = require(path.join(__dirname, '..', 'api', '_lib', 'alerts.js'));
+  const A_ = { endpoint: 'a', app: 'analyst' }, T_ = { endpoint: 't', app: 'trader' };
+  const L_ = { endpoint: 'l' };                       // registered before the app was recorded
+  const eps = (list) => list.map((x) => x.endpoint).join(',');
+
+  ok('a member on trader AND analyst is pinged ONCE, by the app the alert was set in',
+    eps(pushTargets([A_, T_], 'trader')) === 't'
+      && eps(pushTargets([A_, T_], 'analyst')) === 'a',
+    JSON.stringify({ trader: eps(pushTargets([A_, T_], 'trader')),
+                     analyst: eps(pushTargets([A_, T_], 'analyst')) }));
+
+  /* The guarantee that matters most: never the WRONG app. A ping arriving on a surface that cannot
+     act on it is worse than a missed one — it is the bug, delivered. */
+  ok('...and an alert never reaches a device belonging to a different app',
+    eps(pushTargets([A_, T_], 'crypto')) === '', eps(pushTargets([A_, T_], 'crypto')));
+
+  /* Two narrow exceptions, both about not silently dropping delivery during the changeover. */
+  ok('a device registered before the app was recorded still gets it',
+    eps(pushTargets([L_], 'crypto')) === 'l', eps(pushTargets([L_], 'crypto')));
+  ok('...and an alert set before this shipped keeps its old fan-out until it expires',
+    eps(pushTargets([A_, T_], null)) === 'a,t', eps(pushTargets([A_, T_], null)));
+
+  /* One function, both senders — the same discipline as pushUrl, and for the same reason: two
+     copies of a targeting rule is how one of them drifts back into double-pinging. */
+  const digestSrc = fs.readFileSync(path.join(__dirname, '..', 'api', 'daily-digest.js'), 'utf8');
+  const alertsSrc2 = fs.readFileSync(path.join(__dirname, '..', 'api', '_lib', 'alerts.js'), 'utf8');
+  ok('both senders target through the same function',
+    /for \(const s of pushTargets\(subs, dg\.app\)\)/.test(digestSrc)
+      && /for \(const s of pushTargets\(subs, app\)\)/.test(alertsSrc2),
+    'a sender is not using pushTargets');
+
+  /* And the alert has to CARRY an app for any of it to work. */
+  ok('an alert records the dashboard it was set in',
+    /if \(APPS\.has\(app\)\) a\.app = app;/.test(alertsSrc2), 'setAlert does not record app');
+  const toolsSrc = fs.readFileSync(path.join(__dirname, '..', 'api', '_lib', 'tools.js'), 'utf8');
+  ok('...stamped from the dashboard the question came from, not guessed',
+    /setAlert\(ctx\.email, \{ \.\.\.a, app: ctx\.app \}\)/.test(toolsSrc),
+    'the alert tool does not stamp ctx.app');
+
+  // ── 9. the cron reads the new field, not the old one ───────────────────────────────────────
   /* A source assertion, and named as one: it cannot prove the cron behaves, only that it no longer
      asks the question that caused this. The behaviour above is what the gate actually rests on. */
   const cron = fs.readFileSync(path.join(__dirname, '..', 'api', 'daily-digest.js'), 'utf8');

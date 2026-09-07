@@ -709,6 +709,13 @@ module.exports = async (req, res) => {
   // Which dashboard is asking, and what it has open. Default 'equity': an older cached page sends
   // neither, and leading with the equity map is what this endpoint has always done.
   const surface = (req.body && req.body.surface) === 'crypto' ? 'crypto' : 'equity';
+  /* ⚠ WHICH DASHBOARD, WHICH IS NOT THE SAME QUESTION AS `surface`. surface is 'equity' for BOTH
+     the trader and the analyst, deliberately — one conversation follows the member across them.
+     Alerts must not blend that way (Jake, 2026-09-07): "trader subscribers where chats do blend,
+     alerts should not. this would cause double pings in two apps." So the app is its own field. */
+  const APP_SET = new Set(['analyst', 'crypto', 'trader']);
+  const app = APP_SET.has((req.body && req.body.app) || '') ? req.body.app
+            : (surface === 'crypto' ? 'crypto' : 'analyst');
   const focus = _focus(req.body && req.body.focus);
 
   // AN ATTACHED IMAGE — a chart or screenshot the reader wants read. Bounded hard: type-checked
@@ -1170,7 +1177,7 @@ module.exports = async (req, res) => {
     // through the session. The model chooses from a fixed, server-owned, read-only set; this runs
     // them and hands the results back as data. It still never executes anything and never computes
     // a number — the market/account line is enforced by what is absent from the tool list.
-    const exec = makeExecutors({ index: idx, embed, search, email });
+    const exec = makeExecutors({ index: idx, embed, search, email, app });
     const userParts = [{ text: prompt }];
     if (image) userParts.push({ inlineData: image });
     const contents = [{ role: 'user', parts: userParts }];

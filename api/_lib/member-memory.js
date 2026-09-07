@@ -75,7 +75,7 @@ async function getMemory(email) {
            level: LEVELS.includes(m.level) ? m.level : null,
            digest: (m.digest && m.digest.on && Array.isArray(m.digest.symbols) && m.digest.symbols.length)
              ? { on: true, symbols: m.digest.symbols, focus: m.digest.focus || null,
-                 set_utc: m.digest.set_utc || null }
+                 set_utc: m.digest.set_utc || null, app: m.digest.app || null }
              : null,
            updated: m.updated || null };
 }
@@ -140,7 +140,11 @@ async function updateMemory(email, { add_interests, remove_interests, note, leve
         if (focus && (ACCOUNT_SHAPED.test(focus) || INSTRUCTION_SHAPED.test(focus))) {
           refused.push(focus); focus = null;
         }
-        cur.digest = { on: true, symbols: syms, focus: focus, set_utc: Date.now() };
+        // WHICH DASHBOARD ASKED FOR IT. Same rule as an alert: a digest set on the crypto map
+        // pings from the crypto app, not from every app the member has a device on.
+        const DAPPS = ["analyst", "crypto", "trader"];
+        cur.digest = { on: true, symbols: syms, focus: focus, set_utc: Date.now(),
+                       app: DAPPS.includes(digest.app) ? digest.app : null };
       }
     }
   }

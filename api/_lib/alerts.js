@@ -43,6 +43,26 @@ const APPS = new Set(["analyst", "crypto", "trader"]);
 // "#novo" was parsed as a coin called NOVO, the map came up empty, and the notification landed
 // nowhere. The fragment is spoken for on one of three dashboards, which means it is not available
 // on any of them.
+// WHICH DEVICES A NOTIFICATION GOES TO. Exported, and used by the digest cron as well, because the
+// rule is the same and two copies of it would drift — one of them into double-pinging again.
+//
+// Jake, 2026-09-07: "trader subscribers where chats do blend, alerts should not. this would cause
+// double pings in two apps. alerts should only ping from the app they are set it in same for
+// digest." push:u:<hash> holds every device the member registered across all three dashboards, and
+// sending to all of them is exactly that double ping.
+//
+// THE FALLBACK IS NARROW ON PURPOSE. If no device carries this app we fall back to devices carrying
+// NO app — registered before the app was recorded, and re-stamped on their next dashboard load —
+// and NEVER to a device belonging to a different app. A ping from the wrong app is worse than a
+// missed one: it is the bug, arriving on the surface that cannot act on it.
+// A notification with no app of its own (created before this shipped) keeps the old fan-out.
+function pushTargets(subs, app) {
+  const all = (Array.isArray(subs) ? subs : []).filter(Boolean).slice(0, 5);
+  if (!app) return all;
+  const mine = all.filter((s) => s.app === app);
+  return mine.length ? mine : all.filter((s) => !s.app);
+}
+
 function pushUrl(sub, open) {
   const app = sub && APPS.has(sub.app) ? sub.app : "analyst";
   const o = (open === "novo" || open === "alerts") ? "?open=" + open : "";
@@ -102,7 +122,7 @@ async function _cryptoSnap(r) {
   } catch (_) { return null; }
 }
 
-async function setAlert(email, { kind, ticker, coin, level, direction, note, recurring, min_usd } = {}) {
+async function setAlert(email, { kind, ticker, coin, level, direction, note, recurring, min_usd, app } = {}) {
   const r = kv();
   if (!r || !email) return { error: "alerts unavailable" };
   kind = String(kind || "").trim();
@@ -114,6 +134,11 @@ async function setAlert(email, { kind, ticker, coin, level, direction, note, rec
   const a = { id: crypto.randomBytes(4).toString("hex"), kind,
               note: String(note || "").slice(0, 120) || null,
               created: Date.now(), expires: Date.now() + DEFAULT_TTL_MS };
+  // WHICH DASHBOARD SET IT. An alert pings from the app it was set in and no other — a member on
+  // both the trader and the analyst shares one CONVERSATION across them but must not get one alert
+  // twice. Absent on alerts created before this shipped; they keep the old fan-out and age out
+  // inside the 7-day TTL.
+  if (APPS.has(app)) a.app = app;
   if (needsDirection) a.direction = direction;
   if (recurring === true && kind !== "crypto_block") { a.recurring = true; a.armed = true; }
 
@@ -247,7 +272,7 @@ async function cancelAlert(email, { id } = {}) {
 }
 
 // ── delivery ─────────────────────────────────────────────────────────────────
-async function _push(email, title, body) {
+async function _push(email, title, body, app) {
   const r = kv();
   if (!r) return 0;
   let subs = null;
@@ -259,7 +284,7 @@ async function _push(email, title, body) {
   webpush.setVapidDetails(process.env.ANALYST_VAPID_SUBJECT || "mailto:support@novo-options.trade",
     process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
   let sent = 0;
-  for (const s of subs.slice(0, 5)) {
+  for (const s of pushTargets(subs, app)) {
     try {
       // PER SUBSCRIPTION, not per member: a member can hold two products and have a device on
       // each, and the notification should open the one that device belongs to. Without this every
@@ -322,9 +347,9 @@ async function _discordDM(r, email, body) {
   } catch (e) { console.error("[alerts] discord dm:", e.message); return false; }
 }
 
-async function _deliver(email, title, body) {
+async function _deliver(email, title, body, app) {
   const r = kv();
-  const sent = await _push(email, title, body);
+  const sent = await _push(email, title, body, app);
   // Discord DM removed 2026-09-07 — see the note on _delivery. VAPID only.
   const dm = false;
   if (!sent && !dm) console.error("[alerts] fire had no route for", eh(email));
@@ -354,9 +379,10 @@ async function _evaluate(kinds, check) {
       if (res.changed) changed = true;
       if (res.fire) {
         changed = true;
+        // a.app — the alert pings from the dashboard it was set in, and no other.
         await _deliver(email, "NoVo alert",
           `${res.fire}${a.note ? " · " + a.note : ""}. ` +
-          "A condition you set was met; what to do about it stays yours.");
+          "A condition you set was met; what to do about it stays yours.", a.app);
       }
     }
     if (changed) await _save(r, email, list.filter((x) => !x.fired));
@@ -456,4 +482,4 @@ async function evaluateCrypto(snap) {
   } catch (_) {}
 }
 
-module.exports = { setAlert, listAlerts, cancelAlert, evaluateEquity, evaluateCrypto, eh, pushUrl };
+module.exports = { setAlert, listAlerts, cancelAlert, evaluateEquity, evaluateCrypto, eh, pushUrl, pushTargets };

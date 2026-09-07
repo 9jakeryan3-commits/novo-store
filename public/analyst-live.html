@@ -2684,7 +2684,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
-      var _body = { question: q, t: tok() || null, history: hist, surface: 'equity', stream: true,
+      var _body = { question: q, app: 'analyst', t: tok() || null, history: hist, surface: 'equity', stream: true,
                     level: LEVEL || undefined, deep: opts.deep || undefined };
       if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
       var r = await fetch('/api/analyst-ask', {

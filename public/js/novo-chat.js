@@ -999,7 +999,7 @@
     pinTop(_qel);
     busy = true; document.getElementById('novo-ask-go').disabled = true;
     try{
-      var _body = { question: q, t: tok() || null, history: hist, surface: (window.NOVO_CHAT_SURFACE || 'equity'), stream: true,
+      var _body = { question: q, app: 'trader', t: tok() || null, history: hist, surface: (window.NOVO_CHAT_SURFACE || 'equity'), stream: true,
                     level: LEVEL || undefined, deep: opts.deep || undefined };
       if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
       var r = await fetch('/api/analyst-ask', {

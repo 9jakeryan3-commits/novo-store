@@ -139,7 +139,7 @@ module.exports = async (req, res) => {
   const r = kvf();
   if (!r) return res.status(200).json({ ok: false, note: "kv unavailable" });
   const { getMemory } = require("./_lib/member-memory.js");
-  const { pushUrl } = require("./_lib/alerts.js");
+  const { pushUrl, pushTargets } = require("./_lib/alerts.js");
   const { vertex } = require("./_vertex.js");
   const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
 
@@ -233,7 +233,9 @@ module.exports = async (req, res) => {
       }
       if (guard) console.log(`[DIGEST] grounding guard: ${guard}`);
       if (!text) { errors++; continue; }
-      for (const s of subs.slice(0, 5)) {
+      /* Only the dashboard the digest was asked for on — same rule, same function, as a fired
+         alert. See pushTargets in api/_lib/alerts.js. */
+      for (const s of pushTargets(subs, dg.app)) {
         // ⚠ A url, SO TAPPING IT LANDS SOMEWHERE. Without one the service worker falls back to
         // /analyst/live — the dashboard, which shows no digest anywhere — so the notification read
         // as a message from nothing. It opens the Dr. NoVo tab, where the digest is managed.

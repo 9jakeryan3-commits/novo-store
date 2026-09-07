@@ -3286,7 +3286,7 @@ window.addEventListener('hashchange', function(){
           ? { kind:'chain_token', symbol:TOK.symbol, address:TOK.address, network:TOK.network }
           : { kind:'coin', code:CUR };
       } catch(_e){}
-      var _body = { question: q, t: tok() || null, history: hist, surface: 'crypto', focus: focus, stream: true,
+      var _body = { question: q, app: 'crypto', t: tok() || null, history: hist, surface: 'crypto', focus: focus, stream: true,
                     level: LEVEL || undefined, deep: opts.deep || undefined };
       if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
       var r = await fetch('/api/analyst-ask', {
