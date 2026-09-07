@@ -128,6 +128,8 @@ module.exports = async (req, res) => {
     // Reader-defined crypto price alerts, evaluated on the pass that just landed.
     try { await require("./_lib/alerts.js").evaluateCrypto(b); } catch (_) {}
     try { await require("./_lib/predictions.js").evaluateCryptoPredictions(b); } catch (_) {}
+    // NoVo's own crypto calls: a new reading with demonstrated edge becomes a recorded prediction.
+    try { await require("./_lib/predictions.js").selectCryptoPredictions(b); } catch (_) {}
     const shape = {};
     for (const k of Object.keys(b)) {
       const v = b[k];

@@ -117,6 +117,54 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   ok('...and hits the moment it trades through', rows()[0].status === 'graded'
     && rows()[0].outcome.hit === true, JSON.stringify(rows()[0].outcome));
 
+  // ── 6. THE CRYPTO SELECTOR: "a fitting moment" is defined by the record, not vibes ─────────
+  reset();
+  const NOW = new Date().toISOString();
+  const SNAP = {
+    coins: { BTC: { price: 100000 }, DOGE: { price: 0.4 } },
+    health: { base_rates: [
+      // real edge: 61% hit over its own 52% up-share, honest denominator
+      { kind: 'funding_extreme_shorts_paying', hit_rate: 61.0, n: 900, n_cells: 120,
+        n_up: 468, n_down: 432, avg_move: 0.8 },
+      // NO edge: 52% hit vs a 51% base — a coin flip wearing a rate
+      { kind: 'oi_quadrant_up', hit_rate: 52.0, n: 900, n_cells: 300,
+        n_up: 459, n_down: 441, avg_move: 0.1 },
+      // edge but a denominator too thin to trust
+      { kind: 'cost_anomaly', hit_rate: 80.0, n: 40, n_cells: 6, n_up: 30, n_down: 10, avg_move: 1 },
+    ] },
+    feed: [
+      { kind: 'funding_extreme', side: 'shorts_paying', asset_code: 'BTC', ts_utc: NOW,
+        horizon_min: 240, claim: 'BTC funding -4.7 sigma; shorts paying' },
+      { kind: 'oi_quadrant', side: 'up', asset_code: 'DOGE', ts_utc: NOW, horizon_min: 240,
+        claim: 'DOGE OI regime up' },
+      { kind: 'cost_anomaly', asset_code: 'DOGE', ts_utc: NOW, horizon_min: 240, claim: 'cheap' },
+      { kind: 'funding_extreme', side: 'shorts_paying', asset_code: 'BTC',
+        ts_utc: '2026-09-07T01:00:00Z', horizon_min: 240, claim: 'HOURS-OLD reading' },
+    ],
+  };
+  const sel = await P.selectCryptoPredictions(SNAP);
+  const after = rows();
+  ok('the selector takes ONLY the reading with real edge on a real denominator',
+    sel.made === 1 && after.length === 1 && after[0].symbol === 'BTC'
+      && after[0].source === 'novo' && after[0].kind === 'direction',
+    JSON.stringify({ made: sel.made, rows: after.map((p) => p.symbol + ':' + p.kind) }));
+  ok('...a coin-flip rate, a thin denominator and a stale reading are all refused',
+    !after.some((p) => p.symbol === 'DOGE') && after.length === 1,
+    JSON.stringify(after.map((p) => p.symbol)));
+  ok('...and the call carries its receipts — the rate, the cells and the base it beat',
+    /61% over 120 coin-days vs 52.0% base/.test(after[0].basis || ''),
+    JSON.stringify(after[0].basis));
+  const again = await P.selectCryptoPredictions(SNAP);
+  ok('...and the same reading can never become a second prediction',
+    again.made === 0 && rows().length === 1, JSON.stringify(again));
+
+  // ── 7. per-desk: crypto calls at the crypto desk, equities on the equity side ──────────────
+  const eqList = await P.listPredictions(40, 'equity');
+  const cxList = await P.listPredictions(40, 'crypto');
+  ok('the record splits per desk — the equity side does not show crypto calls',
+    eqList.open.length === 0 && cxList.open.length === 1,
+    JSON.stringify({ equity: eqList.open.length, crypto: cxList.open.length }));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

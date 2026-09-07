@@ -224,10 +224,13 @@ async function evaluateCryptoPredictions(snap) {
 }
 
 // ── the read, with the score attached ────────────────────────────────────────────────────────
-async function listPredictions(limit) {
+async function listPredictions(limit, assetClass) {
   const r = kv();
   if (!r) return { error: "predictions unavailable" };
-  const list = await _load(r);
+  let list = await _load(r);
+  // PER DESK (Jake): "hes make crypto predictions at his crypto desk and equities on the equities
+  // side." One log; each dashboard reads its own asset class of it.
+  if (assetClass) list = list.filter((p) => p.asset_class === assetClass);
   const graded = list.filter((p) => p.status === "graded" && p.outcome);
   const by = {};
   for (const p of graded) {
@@ -256,5 +259,63 @@ async function listPredictions(limit) {
   };
 }
 
-module.exports = { makePrediction, listPredictions, evaluate,
+// ── THE CRYPTO SELECTOR ──────────────────────────────────────────────────────────────────────
+// Jake, 2026-09-07: "he is always watching the data flow the Eye and other alerts systems in
+// crypto and all to make his own predictions when he sees a fitting trade or moment."
+// Rides the snapshot the collector already pushes every ~5 minutes. "A fitting moment" is defined
+// by the record, not by vibes: a new reading whose kind's base rate shows real edge over its own
+// outcome distribution, on the honest denominator. Requirements, stated:
+//   * n_cells >= 25   -- distinct coin-days, the denominator the census already fought for
+//   * edge >= 5pp     -- hit_rate minus that side's own base share of outcomes
+//   * the reading is fresh (< 12 min) and not already taken (KV seen-key, 7d)
+// makePrediction's MAX_OPEN caps the flood; one reading = at most one prediction, ever.
+async function selectCryptoPredictions(snap) {
+  const r = kv();
+  if (!r || !snap) return { made: 0 };
+  const feed = Array.isArray(snap.feed) ? snap.feed : [];
+  const rates = ((snap.health || {}).base_rates) || [];
+  const byKind = {};
+  for (const b of rates) byKind[b.kind] = b;
+  let made = 0;
+  for (const f of feed) {
+    try {
+      if (!f || !f.kind || (!f.asset_code && !f.asset)) continue;
+      const sym = String(f.asset_code || f.asset || "").toUpperCase();
+      const madeTs = Date.parse(f.ts_utc || "") || 0;
+      if (!madeTs || Date.now() - madeTs > 12 * 60 * 1000) continue;   // stale = not a moment
+      const rate = byKind[f.kind + (f.side ? "_" + f.side : "")] || byKind[f.kind];
+      if (!rate || !(rate.n_cells >= 25) || rate.hit_rate == null) continue;
+      const nUp = rate.n_up || 0, nDn = rate.n_down || 0;
+      const total = nUp + nDn;
+      if (!total) continue;
+      const side = (rate.avg_move != null && rate.avg_move < 0) ? "down" : "up";
+      const baseShare = (side === "up" ? nUp : nDn) / total * 100;
+      const edge = rate.hit_rate - baseShare;
+      if (!(edge >= 5)) continue;                                       // no edge, no call
+      const seenKey = "pred:seen:" + crypto.createHash("sha256")
+        .update(sym + "|" + f.kind + "|" + (f.ts_utc || "")).digest("hex").slice(0, 24);
+      let seen = null;
+      try { seen = await r.get(seenKey); } catch (_) {}
+      if (seen) continue;
+      const coin = (snap.coins || {})[sym];
+      const spot = coin && Number(coin.price || (coin.true_cost && coin.true_cost.price));
+      if (!isFinite(spot) || spot <= 0) continue;
+      const hm = Number(f.horizon_min) >= 5 ? Number(f.horizon_min) : 240;
+      const out = await makePrediction({
+        source: "novo", asset_class: "crypto", symbol: sym, kind: "direction", side,
+        spot_at: spot, horizon_min: hm,
+        thesis: String(f.claim || (f.kind + " fired")).slice(0, 200),
+        basis: f.kind + " \u00b7 " + rate.hit_rate + "% over " + rate.n_cells
+          + " coin-days vs " + baseShare.toFixed(1) + "% base",
+      });
+      if (out && out.ok) {
+        made++;
+        try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
+      }
+    } catch (_) { /* one bad reading must not stop the pass */ }
+  }
+  return { made };
+}
+
+module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
                    evaluateEquityPredictions, evaluateCryptoPredictions };

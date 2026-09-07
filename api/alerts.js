@@ -91,7 +91,10 @@ module.exports = async (req, res) => {
       let comp = false, predictions;
       try { comp = require("./_lib/comp.js").isComp(email); } catch (_) {}
       if (comp) {
-        try { predictions = await require("./_lib/predictions.js").listPredictions(40); } catch (_) {}
+        // Per desk: the crypto dashboard reads NoVo's crypto calls, the equity dashboards his
+        // equity calls -- the same split every other feature already honours.
+        try { predictions = await require("./_lib/predictions.js")
+          .listPredictions(40, app === "crypto" ? "crypto" : "equity"); } catch (_) {}
       }
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
                                     ...(comp && predictions && !predictions.error ? { predictions } : {}) });

@@ -750,7 +750,19 @@ export default async function handler(req, res) {
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
   //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
   if (req.method === 'DELETE') {
+    // ── NoVo's self-initiated predictions (the Eye, the crypto selector) ─────────────────────
+  // Engine-authed intake. Same secret as every other engine write; same makePrediction the chat
+  // tool calls, so the Eye cannot record a shape the conversation could not.
+  if (req.method === 'POST' && req.query && 'pred' in req.query) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
+    try {
+      const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      const out = await require('./_lib/predictions.js').makePrediction({ ...b, source: 'novo' });
+      return res.status(out && out.ok ? 200 : 400).json(out);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
+  if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     const BT = process.env.BLOB_READ_WRITE_TOKEN;
     if (!BT) return res.status(500).json({ error: 'no blob token' });
     const slug = (req.query && req.query.slug ? String(req.query.slug) : '').replace(/[^a-z0-9-]/gi, '').slice(0, 80);
