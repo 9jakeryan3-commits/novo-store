@@ -107,6 +107,27 @@ server.listen(8795, async () => {
       docOverflowX: document.documentElement.scrollWidth > innerWidth + 1,
       chartBottom: (function(){ var c = document.getElementById('novo-chart');
         return c ? Math.round(c.getBoundingClientRect().bottom) : 0; })(),
+      // THE SHEET. Collapsed it shows its handle and nothing else; the cards it swallowed must
+      // actually be inside it, or the chart tab just lost content instead of reorganising it.
+      sheet: (function(){ var sh = document.getElementById('chart-sheet');
+        if (!sh) return null; var r = sh.getBoundingClientRect();
+        var hnd = sh.querySelector('.sh-handle');
+        return { top: Math.round(r.top), visible: Math.round(innerHeight - r.top),
+                 handleH: hnd ? Math.round(hnd.getBoundingClientRect().height) : 0,
+                 open: sh.classList.contains('open'),
+                 kids: sh.querySelectorAll('.sh-body > *').length,
+                 kidList: Array.from(sh.querySelectorAll('.sh-body > *')).map(function(k){
+                   return (k.id || k.className || k.tagName) + ':' + Math.round(k.getBoundingClientRect().height); }),
+                 hasIntel: !!sh.querySelector('#card-mktintel'),
+                 chartInside: !!sh.querySelector('#novo-chart') }; })(),
+      colKids: (function(){ var c = document.getElementById('col-intel');
+        return c ? Array.from(c.children).map(function(k){
+          return (k.id || k.className || k.tagName) + ':' + Math.round(k.getBoundingClientRect().height); }) : null; })(),
+      intelWhere: (function(){ var e = document.getElementById('card-mktintel');
+        if (!e) return 'absent';
+        var path = [], n = e;
+        while (n && n !== document.body) { path.push(n.id || n.className || n.tagName); n = n.parentElement; }
+        return path.join(' < '); })(),
       // WHAT ACTUALLY APPLIED, from the browser, rather than from reading the stylesheet.
       chartCss: (function(){ var c = document.getElementById('novo-chart'); if (!c) return null;
         var g = getComputedStyle(c);
@@ -189,6 +210,19 @@ server.listen(8795, async () => {
      JSON.stringify(fleet.map((f) => f.name + ':' + f.peek)));
   ok('...with the chart still the dominant thing on screen (>= 58%)',
      fleet.every((f) => f.pct >= 58), JSON.stringify(fleet.map((f) => f.name + ':' + f.pct + '%')));
+
+  /* THE SHEET actually holds the intel. The first build moved whatever happened to be a sibling
+     at that instant and caught a single status card, leaving the panels in place — a tab that
+     looks reorganised while nothing moved. Assert the content, not the container. */
+  ok('the intel sheet exists, collapsed, showing only its handle',
+     !!phone.sheet && phone.sheet.open === false && phone.sheet.handleH >= 40
+       && phone.sheet.visible <= phone.sheet.handleH + 56,
+     JSON.stringify(phone.sheet));
+  ok('...and it actually swallowed the Market Intel panel',
+     !!phone.sheet && phone.sheet.hasIntel === true,
+     JSON.stringify(phone.sheet && phone.sheet.kidList));
+  ok('...and the chart did NOT get swept into it',
+     !!phone.sheet && phone.sheet.chartInside === false, JSON.stringify(phone.sheet && phone.sheet.chartInside));
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
   try { proc.kill(); } catch (_) {}
   server.close();

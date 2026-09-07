@@ -435,6 +435,11 @@ body {
 #col-predict { display: none; }
 #col-readings { display: none; }
 @media (min-width: 769px) {
+  /* No sheet on desktop — the wrapper stays in the flow and the column reads as it always has. */
+  #chart-sheet { position: static; transform: none; max-height: none; overflow: visible;
+    background: none; border-top: 0; }
+  #chart-sheet .sh-handle { display: none; }
+  #chart-sheet .sh-body { overflow: visible; max-height: none; }
   #workspace { min-height: calc(100vh - 48px); }
 }
 
@@ -1361,6 +1366,30 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      it, which is most current handsets, and the change appears to do nothing on exactly the
      devices it was asked for. dvh so the address bar does not lie. */
   #novo-chart { height: 74dvh !important; min-height: 528px; max-height: 845px; }
+  /* ── THE INTEL SHEET (Jake, 2026-09-07: "maybe all this needs to go on the chart or somewhere
+     else and let the chart tab be owned by the chart"). Everything that used to sit BELOW the
+     chart — Market Intel, Chart Levels, Highs/Lows — moves into a sheet pinned above the tab bar.
+     The chart owns the tab and never scrolls; the handle is always visible, and it doubles as the
+     scroll target the chart canvas was stealing, which is the problem that started this.
+     Hairlines only: the sheet is separated by one rule, not outlined. */
+  #chart-sheet { position: fixed; left: 0; right: 0; z-index: 60;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg); border-top: 1px solid var(--bdr);
+    max-height: 76dvh; overflow: hidden;
+    transform: translateY(calc(100% - 44px));
+    transition: transform .22s ease; will-change: transform; }
+  #chart-sheet.open { transform: translateY(0); }
+  #chart-sheet .sh-handle { display: flex; align-items: center; gap: 9px; width: 100%;
+    height: 44px; padding: 0 14px; background: none; border: 0; cursor: pointer;
+    font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--txt3); -webkit-tap-highlight-color: transparent; }
+  #chart-sheet .sh-grip { width: 26px; height: 3px; border-radius: 2px; background: var(--bdr); flex: 0 0 auto; }
+  #chart-sheet .sh-caret { margin-left: auto; font-size: 9px; opacity: .8; transition: transform .22s ease; }
+  #chart-sheet.open .sh-caret { transform: rotate(180deg); }
+  #chart-sheet .sh-body { overflow-y: auto; overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch; max-height: calc(76dvh - 44px); padding-bottom: 10px; }
+  /* The pane IS the tab now: nothing scrolls behind the sheet. */
+  #col-intel.mob-active { overflow: hidden; }
   #chart-legend2 { font-size: 9.5px; letter-spacing: 0; }
   #novo-chip { top: 24px; }
   #novo-chip .c-reg { font-size: 8.5px; }
@@ -4223,7 +4252,59 @@ function _paintCtb(){
      Inline + !important because it must outrank the stylesheet's own !important height; min and
      max are neutralised for the same reason. If this never runs, the CSS rule below is still
      there and behaves as it did before. */
-  var CHART_PEEK = 56;      // visible, grabbable surface below the pane - measured to the tab bar
+  /* Everything below the chart becomes one sheet. Built in JS rather than re-marked-up by hand
+     because those cards are shared with the desktop column: reparenting keeps one source for
+     both, and there are no `#col-intel >` selectors for the extra wrapper to break (checked). */
+  function buildChartSheet(){
+    var col = document.getElementById('col-intel');
+    var card = document.getElementById('card-spy');
+    if (!col || !card || document.getElementById('chart-sheet')) return;
+    var sheet = document.createElement('div');
+    sheet.id = 'chart-sheet';
+    var handle = document.createElement('button');
+    handle.type = 'button';
+    handle.className = 'sh-handle';
+    handle.setAttribute('aria-expanded', 'false');
+    handle.innerHTML = '<span class="sh-grip"></span><span>Market intel &amp; levels</span>'
+                     + '<span class="sh-caret">\u25B2</span>';
+    var body = document.createElement('div');
+    body.className = 'sh-body';
+    sheet.appendChild(handle);
+    sheet.appendChild(body);
+    col.appendChild(sheet);
+    /* ⚠ ADOPT LATE ARRIVALS. The first version moved whatever were siblings at build time and
+       stopped — and the intel cards are rendered by the app AFTER this runs, so the sheet caught
+       one status card and the panels Jake wanted moved stayed exactly where they were. The tab
+       would have looked reorganised while nothing had moved. An observer keeps it true whenever
+       the app renders, rather than betting on running last. */
+    function adopt(){
+      var n = card.nextElementSibling;
+      while (n) {
+        var next = n.nextElementSibling;
+        if (n !== sheet) body.appendChild(n);
+        n = next;
+      }
+    }
+    adopt();
+    try { new MutationObserver(adopt).observe(col, { childList: true }); } catch (_e) {}
+    function setOpen(open){
+      sheet.classList.toggle('open', open);
+      handle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    handle.addEventListener('click', function(){ setOpen(!sheet.classList.contains('open')); });
+    // Swiping the handle is the gesture people try before they try tapping it.
+    var y0 = null;
+    handle.addEventListener('touchstart', function(e){ y0 = e.touches[0].clientY; }, { passive: true });
+    handle.addEventListener('touchend', function(e){
+      if (y0 == null) return;
+      var dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dy) > 24) setOpen(dy < 0);
+      y0 = null;
+    }, { passive: true });
+  }
+  buildChartSheet();
+
+  var CHART_PEEK = 0;       // the sheet handle IS the grab surface now, so nothing is reserved
   var CHART_MIN = 300;      // a floor that only bites on a viewport no phone actually has
   function sizeChartToPhone(){
     var c = document.getElementById('novo-chart');
@@ -4241,8 +4322,13 @@ function _paintCtb(){
        BEHIND the fixed tab bar, so budgeting the peek out of col.clientHeight spent most of it
        underneath the bar: a 68px allowance produced 16px of visible, grabbable surface. The bar
        is the real floor of the visible area, so ask it where it is. */
+    /* The floor is the SHEET's top edge when there is one — the chart owns everything above the
+       handle. Falling back to the tab bar keeps this correct if the sheet ever fails to build. */
+    var sheet = document.getElementById('chart-sheet');
     var bar = document.getElementById('mobile-tabs');
-    var floorY = col.getBoundingClientRect().top + col.clientHeight; // sabotage: back to the column bottom
+    var floorY = (sheet && sheet.getBoundingClientRect().height)
+      ? sheet.getBoundingClientRect().top
+      : (bar ? bar.getBoundingClientRect().top : innerHeight);
     // Where the pane sits when the column is at rest — so a mid-scroll resize does not size the
     // chart against a scrolled-away position.
     var topAtRest = c.getBoundingClientRect().top + col.scrollTop;
