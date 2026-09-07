@@ -716,6 +716,8 @@ tr:last-child td{border-bottom:none}
     .mob-tab[data-mtab="novo"]  { order: 4; }
     .mob-tab[data-mtab="alerts"] { order: 5; }
     .mob-tab[data-mtab="digest"] { order: 6; }
+    .mob-tab[data-mtab="predict"] { order: 7; }
+    .mob-tab[hidden] { display: none; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -746,7 +748,11 @@ tr:last-child td{border-bottom:none}
        on it. Written as its own pair rather than folded into the Stats rules, because the two views
        hide different things: Stats keeps #center in the DOM for the chat to dock into, and Alerts
        has no such tenant. */
-    #alerts-col, #digest-col { display: none; }
+    #alerts-col, #digest-col, #predict-col { display: none; }
+    body[data-mtab="predict"] #predict-col { display: block; padding: 14px 16px 28px; }
+    body[data-mtab="predict"] #center, body[data-mtab="predict"] #side { display: none; }
+    body[data-mtab="predict"]:has(#novo-ask.on) #center { display: block; }
+    body[data-mtab="predict"]:has(#novo-ask.on) #predict-col { display: none; }
     body[data-mtab="alerts"] #alerts-col { display: block; padding: 14px 16px 28px; }
     body[data-mtab="digest"] #digest-col { display: block; padding: 14px 16px 28px; }
     body[data-mtab="alerts"] #center, body[data-mtab="digest"] #center,
@@ -923,6 +929,7 @@ tr:last-child td{border-bottom:none}
          have to be torn down and rebuilt every time drawCoin ran. -->
     <div class="col" id="alerts-col"></div>
     <div class="col" id="digest-col"></div>
+    <div class="col" id="predict-col"></div>
   </main>
 
 
@@ -979,6 +986,7 @@ tr:last-child td{border-bottom:none}
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
 <script src="/js/novo-digest.js?v=e0640c54"></script>
+<script src="/js/novo-predict.js?v=f95fd959"></script>
 
 <!-- ===== MOBILE TAB BAR =====  (inside #app on purpose: #app carries .hidden until the member is
      through the gate, so the login screen never shows a nav to nowhere.)
@@ -1006,6 +1014,9 @@ tr:last-child td{border-bottom:none}
   <button class="mob-tab" type="button" data-mtab="digest" onclick="cxMobTab('digest')">
     <span class="mob-tab-icon" aria-hidden="true">&#9788;</span><span>Digest</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="predict" onclick="cxMobTab('predict')" hidden>
+    <span class="mob-tab-icon" aria-hidden="true">&#9670;</span><span>Predict</span>
+  </button>
 </nav>
 <script>
 (function(){
@@ -1028,6 +1039,13 @@ tr:last-child td{border-bottom:none}
     /* Mounted on FIRST arrival and refreshed on every one after. Alerts change when the member
        changes them or when one fires, both rare -- but a list that silently went stale while the
        tab sat open is the thing this surface exists to prevent. */
+    if (which === 'predict') {
+      try {
+        if (!window._cxPredMounted && window.novoPredict) {
+          window._cxPredMounted = window.novoPredict.mount('#predict-col', { app: 'crypto' });
+        } else if (window.novoPredict) { window.novoPredict.load(); }
+      } catch (_e) {}
+    }
     if (which === 'digest') {
       try {
         if (!window._cxDigestMounted && window.novoDigest) {
@@ -1065,6 +1083,9 @@ tr:last-child td{border-bottom:none}
   new MutationObserver(sync).observe(document.body,
     { attributes: true, attributeFilter: ['class', 'data-mtab'] });
   sync();
+  window.addEventListener('load', function () {
+    try { window.novoPredict.reveal('.mob-tab[data-mtab="predict"]'); } catch (_e) {}
+  });
   /* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
      crypto device's digest opens /crypto/live#novo and a fired alert opens /crypto/live#alerts.
      Getting the url right and leaving the hash inert on two of three dashboards would have been

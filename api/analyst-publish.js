@@ -1115,6 +1115,8 @@ async function _promotePublicLevels(state) {
         const alerts = (await import('./_lib/alerts.js')).default;
         await alerts.evaluateEquity(state);
       } catch (_) {}
+      // NoVo's own predictions grade on the same publish, same numbers, same best-effort rule.
+      try { await require('./_lib/predictions.js').evaluateEquityPredictions(state); } catch (_) {}
       return res.status(200).json({ ok: true });
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }

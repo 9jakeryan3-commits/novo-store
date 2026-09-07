@@ -85,7 +85,16 @@ module.exports = async (req, res) => {
           }
         }
       } catch (_) {}
-      return res.status(200).json({ ok: true, ...out, digest, digest_log });
+      /* NoVo Unleashed: the prediction record, COMP SEATS ONLY — the same server-side gate the
+         tools carry. Everyone else gets comp:false and no predictions key at all: absence, not an
+         empty list, so the page can tell "not yours to see" from "none yet". */
+      let comp = false, predictions;
+      try { comp = require("./_lib/comp.js").isComp(email); } catch (_) {}
+      if (comp) {
+        try { predictions = await require("./_lib/predictions.js").listPredictions(40); } catch (_) {}
+      }
+      return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
+                                    ...(comp && predictions && !predictions.error ? { predictions } : {}) });
     }
 
     if (req.method === "POST") {

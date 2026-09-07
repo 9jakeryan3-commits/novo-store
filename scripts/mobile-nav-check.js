@@ -76,13 +76,31 @@ const SEED = [
     recurring: true, armed: true },
 ];
 const PREFS = { email: true };
+// comp seat or not — flipped by /__set-comp so both faces of the gate are tested
+
 const ALERTS = {
   mode: 'ok',
+  comp: false,
   delivery: null,
   digest: { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1757232000000, time: '06:30' },
   active: JSON.parse(JSON.stringify(SEED)),
 };
 function alertsBody() {
+  if (ALERTS.comp) {
+    return { ...alertsBase(), comp: true, predictions: {
+      open: [{ id: 'p1', made_utc: 1757250000000, source: 'conversation', asset_class: 'equity',
+               symbol: 'SPY', kind: 'close_at', side: 'down', value: 769.2, spot_at: 769.62,
+               horizon_utc: 1757275200000, thesis: 'short gamma below the flip', status: 'open' }],
+      graded: [{ id: 'p0', made_utc: 1757150000000, source: 'novo', asset_class: 'crypto',
+                 symbol: 'BTC', kind: 'trade_call', side: 'buy', spot_at: 100000,
+                 horizon_utc: 1757153600000, thesis: 'funding squeeze', status: 'graded',
+                 outcome: { actual: 101500, hit: true, graded_utc: 1757153700000 } }],
+      score: { trade_call: { n: 1, hits: 1, hit_rate: 100, avg_abs_error_pct: null } },
+      overall: { n: 1, hits: 1, hit_rate: 100 } } };
+  }
+  return { ...alertsBase(), comp: false };
+}
+function alertsBase() {
   return { ok: true, active: ALERTS.active, max_active: 10,
            devices_registered: ALERTS.delivery ? 1 : 0, discord_linked: false,
            delivery: ALERTS.delivery, digest: ALERTS.digest,
@@ -146,6 +164,11 @@ const server = http.createServer((req, res) => {
     ALERTS.digest = { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1757232000000, time: '06:30' };
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, n: ALERTS.active.length })); return;
+  }
+  if (rel === '/__set-comp') {
+    ALERTS.comp = new URL(req.url, 'http://x').searchParams.get('c') === '1';
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ comp: ALERTS.comp })); return;
   }
   if (rel === '/__set-delivery') {
     ALERTS.delivery = (new URL(req.url, 'http://x').searchParams.get('d')) || null;
@@ -270,6 +293,9 @@ const READ_BAR = `(() => {
   const cs = getComputedStyle(bar);
   const tabs = [...bar.querySelectorAll('.mob-tab')]
     .map(t => ({ el: t, r: t.getBoundingClientRect() }))
+    /* A hidden tab (the comp-gated Predict) has no box; including it put a ghost at x=0 and every
+       order assertion started describing a bar no member sees. The bar is what RENDERS. */
+    .filter(x => x.r.width > 0)
     .sort((a, b) => a.r.left - b.r.left)
     .map(({ el, r }) => ({
       name: el.getAttribute('data-mtab'),
@@ -1053,6 +1079,55 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      Displays: the mornings, from the log the cron now writes BEFORE sending — until today the push
      was the whole artifact and there was nothing a page could show. Manages: the standing order,
      stop, and change-via-chat. Per-dashboard like everything but the chat. */
+  // == NOVO UNLEASHED: THE PREDICTION RECORD ===============================================
+  /* Jake, 2026-09-07: "Add a predictions tab/page (shows for comp seats only) that displays these
+     and there outcome with a score from each ones graded outcome and accuracy."
+     BOTH FACES OF THE GATE: a comp seat sees the tab and the record; a non-comp seat must never
+     see the tab EXIST. The invisibility is the half that ships broken quietly. */
+  console.log('\nNoVo Unleashed — the prediction record\n');
+  const PRED_TAB = { trader: '.mob-tab[data-tab="7"]',
+    analyst: '.mob-tab[data-mtab="predict"]', crypto: '.mob-tab[data-mtab="predict"]' };
+  const predTabProbe = (sel) => B.evalIn(
+    '(() => { const t = document.querySelector(' + JSON.stringify(sel) + ');'
+    + ' if (!t) return { there: false };'
+    + ' const r = t.getBoundingClientRect();'
+    + ' return { there: true, hidden: t.hidden,'
+    + ' visible: getComputedStyle(t).display !== "none" && r.width > 0 }; })()');
+
+  await fetch(base + '/__set-comp?c=0').catch(() => {});
+  await B.goto(base + '/analyst/live', 430, 900);
+  await new Promise((r) => setTimeout(r, 1200));
+  const noComp = await predTabProbe(PRED_TAB.analyst);
+  ok('non-comp: the Predictions tab does not exist on screen',
+    noComp.there && noComp.hidden === true && noComp.visible === false, JSON.stringify(noComp));
+
+  await fetch(base + '/__set-comp?c=1').catch(() => {});
+  for (const app of ['trader', 'analyst', 'crypto']) {
+    await B.goto(base + '/' + app + '/live', 430, 900);
+    await new Promise((r) => setTimeout(r, 1500));
+    const tabv = await predTabProbe(PRED_TAB[app]);
+    ok(app + ': comp seat — the tab reveals itself from the server’s answer',
+      tabv.visible === true, JSON.stringify(tabv));
+    await B.evalIn(app === 'trader' ? 'switchMobileTab(7)'
+      : 'document.querySelector(' + JSON.stringify(PRED_TAB[app]) + ').click()');
+    await new Promise((r) => setTimeout(r, 900));
+    const pv = await B.evalIn(`(() => {
+      const c = document.querySelector('.novo-predict');
+      if (!c) return { mounted: false };
+      const r = c.getBoundingClientRect();
+      return { mounted: true,
+               visible: getComputedStyle(c).display !== 'none' && r.width > 0 && r.height > 0,
+               text: (c.textContent || '').replace(/\\s+/g, ' ').trim() }; })()`);
+    ok(app + ': ...the record displays — score, open call, graded outcome',
+      pv.mounted && pv.visible
+        && pv.text.indexOf('100%') >= 0
+        && pv.text.indexOf('SPY closes at 769.2') >= 0
+        && pv.text.indexOf('Buy BTC now') >= 0 && pv.text.indexOf('HIT') >= 0
+        && /self-scored/i.test(pv.text),
+      JSON.stringify(pv.text ? pv.text.slice(0, 200) : pv));
+  }
+  await fetch(base + '/__set-comp?c=0').catch(() => {});
+
   console.log('\nThe Daily Digest suite\n');
   const OPEN_DIGEST = { trader: 'switchMobileTab(6)',
     analyst: `document.querySelector('.mob-tab[data-mtab="digest"]').click()`,

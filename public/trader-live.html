@@ -432,6 +432,7 @@ body {
    #col-alerts.mob-active rule inside the mobile block is the only thing that shows it. */
 #col-alerts { display: none; }
 #col-digest { display: none; }
+#col-predict { display: none; }
 @media (min-width: 769px) {
   #workspace { min-height: calc(100vh - 48px); }
 }
@@ -1309,6 +1310,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      the mobile rule has to be id-level too or the tab opens onto nothing. */
   #col-alerts.mob-active { display: block !important; overflow-y: auto; padding: 14px 12px 72px; }
   #col-digest.mob-active { display: block !important; overflow-y: auto; padding: 14px 12px 72px; }
+  #col-predict.mob-active { display: block !important; overflow-y: auto; padding: 14px 12px 72px; }
   /* #col-novo carries an id-level `display:none` so it stays hidden in the desktop views it does
      not belong to. An id beats `.col.mob-active`, so the mobile rule has to be id-level too or the
      NOVO tab opens onto nothing. */
@@ -1460,6 +1462,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   .mob-tab[data-tab="4"] { order: 3; }   /* Dr. NoVo */
   .mob-tab[data-tab="5"] { order: 4; }   /* Alerts   */
   .mob-tab[data-tab="6"] { order: 5; }   /* Digest   */
+  .mob-tab[data-tab="7"] { order: 6; }   /* Predict  */
+  .mob-tab[hidden] { display: none; }
   .mob-tab {
     flex: 1;
     display: flex; flex-direction: column;
@@ -2626,6 +2630,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <!-- Index 6 — APPENDED, same law as col-alerts: switchMobileTab's array is positional. -->
   <div id="col-digest" class="col"><div id="col-digest-body"></div></div>
 
+  <!-- Index 7. NOVO UNLEASHED — comp seats only; the tab stays hidden until the server says so. -->
+  <div id="col-predict" class="col"><div id="col-predict-body"></div></div>
+
   <div id="col-feed" class="col" style="display:grid;grid-template-columns:1fr;grid-template-rows:minmax(180px,1fr) auto 2fr;height:calc(100vh - 48px);">
 
 
@@ -2717,6 +2724,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <button class="mob-tab" data-tab="6" onclick="switchMobileTab(6)">
     <span class="mob-tab-icon">&#9788;</span>
     <span>Digest</span>
+  </button>
+  <button class="mob-tab" data-tab="7" onclick="switchMobileTab(7)" hidden>
+    <span class="mob-tab-icon">&#9670;</span>
+    <span>Predict</span>
   </button>
 </nav>
 
@@ -3475,7 +3486,8 @@ function switchMobileTab(idx) {
     document.getElementById('col-feed'),     // 3 ANALYSIS
     document.getElementById('col-novo'),     // 4 NOVO  (chat)
     document.getElementById('col-alerts'),   // 5 ALERTS
-    document.getElementById('col-digest')    // 6 DIGEST
+    document.getElementById('col-digest'),   // 6 DIGEST
+    document.getElementById('col-predict')   // 7 PREDICT (comp only; tab hidden otherwise)
   ];
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
@@ -3486,6 +3498,13 @@ function switchMobileTab(idx) {
   /* Mounted on first arrival, refreshed on every one after — the card measures nothing while its
      column is display:none, and a list that went stale while the tab sat open is exactly what this
      surface exists to prevent. */
+  if (idx === 7) setTimeout(function(){
+    try {
+      if (!window._trPredMounted && window.novoPredict) {
+        window._trPredMounted = window.novoPredict.mount('#col-predict-body', { app: 'trader' });
+      } else if (window.novoPredict) { window.novoPredict.load(); }
+    } catch (e) {}
+  }, 60);
   if (idx === 6) setTimeout(function(){
     try {
       if (!window._trDigestMounted && window.novoDigest) {
@@ -3505,6 +3524,9 @@ function switchMobileTab(idx) {
   }, 60);
 }
 if (window.matchMedia('(max-width: 768px)').matches) switchMobileTab(2);   // open on the TRADE (chart) tab
+window.addEventListener('load', function () {
+  try { window.novoPredict.reveal('.mob-tab[data-tab="7"]'); } catch (_e) {}
+});
 /* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
    trader device's digest opens /trader/live#novo and a fired alert opens /trader/live#alerts.
    Runs AFTER the default tab is chosen, or the line above would immediately overwrite it. */
@@ -7431,6 +7453,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
 <script src="/js/novo-digest.js?v=e0640c54"></script>
+<script src="/js/novo-predict.js?v=f95fd959"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.

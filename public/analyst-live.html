@@ -671,6 +671,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- THE DAILY DIGEST SUITE (Jake, 2026-09-07). Mounted from /js/novo-digest.js — the mornings
          themselves, and the standing order. -->
     <div class="lv-card lv-digest" id="digest-card"></div>
+    <!-- NOVO UNLEASHED (comp seats only — the tab stays hidden until the server says comp). -->
+    <div class="lv-card lv-predict" id="predict-card"></div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
   </div>
 
@@ -1772,6 +1774,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="novo"]   { order: 3; }
     .mob-tab[data-mtab="alerts"] { order: 4; }
     .mob-tab[data-mtab="digest"] { order: 5; }
+    .mob-tab[data-mtab="predict"] { order: 6; }
+    .mob-tab[hidden] { display: none; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -1805,14 +1809,17 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot) { display: none; }
     body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
     body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
+    body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
     body[data-mtab="map"]  #dash > .lv-read,
     body[data-mtab="map"]  #dash > .lv-alerts,
-    body[data-mtab="map"]  #dash > .lv-digest { display: none; }
+    body[data-mtab="map"]  #dash > .lv-digest,
+    body[data-mtab="map"]  #dash > .lv-predict { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
     body[data-mtab="alerts"] .lv-alerts { margin-top: 0; }
     body[data-mtab="digest"] .lv-digest { margin-top: 0; }
+    body[data-mtab="predict"] .lv-predict { margin-top: 0; }
     /* Four labels now. "Dealer Map" is the widest and it is what forces this: at 390px four tabs
        get ~97px each and the label was already set to the width of three. */
     .mob-tab { font-size: 9px; letter-spacing: 0; }
@@ -1855,6 +1862,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
 <script src="/js/novo-digest.js?v=e0640c54"></script>
+<script src="/js/novo-predict.js?v=f95fd959"></script>
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
@@ -1928,6 +1936,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <span class="mob-tab-icon" aria-hidden="true">&#9788;</span>
     <span>Digest</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="predict" onclick="lvMobTab('predict')" hidden>
+    <span class="mob-tab-icon" aria-hidden="true">&#9670;</span>
+    <span>Predict</span>
+  </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
     <span>Dr. NoVo</span>
@@ -1943,7 +1955,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      without this you leave the map halfway down, read the note, come back and land in the middle of
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
-  var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0 };
+  var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0 };
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
     /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
@@ -1970,6 +1982,13 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
          never refreshed after the first mount. The catch that made the page resilient also made
          the regression invisible. */
       if (which === 'alerts') { try { window.novoAlerts.load(); } catch (_e) {} }
+      if (which === 'predict') {
+        try {
+          if (!window._lvPredMounted && window.novoPredict) {
+            window._lvPredMounted = window.novoPredict.mount('#predict-card', { app: 'analyst' });
+          } else if (window.novoPredict) { window.novoPredict.load(); }
+        } catch (_e) {}
+      }
       if (which === 'digest') {
         try {
           if (!window._lvDigestMounted && window.novoDigest) {
@@ -1999,6 +2018,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   new MutationObserver(sync).observe(document.body,
     { attributes: true, attributeFilter: ['data-mtab'] });
   sync();
+  /* comp seats get the Predictions tab; everyone else never sees it exist */
+  window.addEventListener('load', function () {
+    try { window.novoPredict.reveal('.mob-tab[data-mtab="predict"]'); } catch (_e) {}
+  });
   /* The morning digest push points at /analyst/live#alerts, so the hash has to mean something or
      the notification lands on the map again -- which is the whole complaint it was meant to fix.
      Only on a phone: the bar is what owns views, and on the desk the card is already on the page. */

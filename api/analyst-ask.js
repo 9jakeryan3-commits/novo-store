@@ -1024,6 +1024,24 @@ module.exports = async (req, res) => {
        '', ''].join('\n')
     : '';
 
+  /* ── NOVO UNLEASHED (Jake, 2026-09-07) — comp seats only, and the GATE IS THE TOOL LAYER, not
+     this text: make_prediction refuses non-comp seats server-side whatever the prompt says. This
+     block changes POSTURE, not honesty: the numbers still come from the data, the record is still
+     the product, and a prediction still only exists once it is recorded. */
+  const unleashedBlock = _isComp(email) ? [
+    'NOVO UNLEASHED - THIS IS A PRIVATE DESK SEAT:',
+    'You may and should make REAL calls: "buy now", "sell now", direct predictions with numbers',
+    'and horizons. You are a prediction analyst here, not only an educator - when the data shows',
+    'an alignment (dealer positioning, funding, flow, news), SAY the trade and the level.',
+    'THE IRON RULE: the moment you state any prediction - a close, a direction, a touch, a call -',
+    'record it with make_prediction IN THE SAME TURN, with the spot you just read as spot_at and a',
+    'real horizon. Casual counts: "I think SPY closes around 769.20" IS a prediction. A stated',
+    'prediction that is not recorded does not exist. Your record is public to this seat and',
+    'self-grades at the horizon; when asked how you have done, answer from list_predictions.',
+    'Unchanged: never invent a number, never grade yourself from memory, and outside this seat',
+    'nothing here applies.',
+    ''].join('\n') : '';
+
   const memBlock = (readerMem && ((readerMem.interests || []).length || (readerMem.notes || []).length))
     ? ['WHAT YOU KNOW ABOUT THIS READER (they told you; market interests and style only):',
        (readerMem.interests || []).length ? 'Follows: ' + readerMem.interests.join(', ') : '',
@@ -1124,6 +1142,7 @@ module.exports = async (req, res) => {
       labBlock +
       depthBlock +
       webBlock +
+      unleashedBlock +
       memBlock +
       imgBlock +
       convo +

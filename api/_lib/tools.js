@@ -357,6 +357,45 @@ const declarations = [
     },
   },
   {
+    name: "make_prediction",
+    description:
+      "COMP SEATS ONLY - NoVo Unleashed. Record a REAL prediction the moment you state one. Any " +
+      "time you give a number or a direction about the future - 'SPY closes at 769.20', 'buy " +
+      "now', 'BTC touches 102k within the hour' - you MUST call this in the same turn; a stated " +
+      "prediction that is not recorded does not exist, and the record is the product. It grades " +
+      "itself at the horizon against the same published numbers everything else is graded on. " +
+      "Never invent the inputs: spot_at is the price you just read from MARKET DATA or a tool, " +
+      "and the thesis is the alignment you actually saw.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "SPY/QQQ/IWM, or a mapped coin." },
+        asset_class: { type: "string", enum: ["equity", "crypto"] },
+        kind: { type: "string", enum: ["close_at", "direction", "trade_call", "level_touch"],
+          description: "close_at: a point estimate. direction: up/down by the horizon. " +
+            "trade_call: buy/sell now (a direction said with intent). level_touch: trades " +
+            "through a level before the horizon." },
+        side: { type: "string", enum: ["up", "down", "buy", "sell"],
+          description: "Required for direction and trade_call." },
+        value: { type: "number", description: "The predicted price (close_at) or the level (level_touch)." },
+        spot_at: { type: "number", description: "The price on screen RIGHT NOW, from the data you just read." },
+        horizon: { type: "string", enum: ["today_close"], description: "Use for 'by the close'." },
+        horizon_min: { type: "number", description: "Or minutes from now (5 to 20160)." },
+        thesis: { type: "string", description: "One line: the alignment you saw. Their words appear on the record." },
+        basis: { type: "string", description: "The specific numbers it rests on, e.g. 'GEX -270M, 0.15% under flip'." },
+      },
+      required: ["symbol", "kind", "spot_at"],
+    },
+  },
+  {
+    name: "list_predictions",
+    description:
+      "COMP SEATS ONLY. NoVo's own prediction record - open calls and graded outcomes with hit " +
+      "rates and average error. Use it to answer 'how have your predictions done' honestly, from " +
+      "the record rather than memory.",
+    parameters: { type: "object", properties: { limit: { type: "number" } } },
+  },
+  {
     name: "set_alert",
     description:
       "Set an alert FOR THIS READER, delivered by push and by Discord DM if they linked one — " +
@@ -1314,6 +1353,19 @@ function makeExecutors(ctx = {}) {
     } catch (e) { return { error: "could not log: " + e.message }; }
   }
 
+  async function make_prediction(args = {}) {
+    /* ⚠ THE GATE IS HERE, SERVER-SIDE, not in the prompt. A prompt-only gate is a paywall made of
+       suggestion. Non-comp seats get a refusal that tells the model what to say instead. */
+    if (!isComp(ctx.email)) return { error: "predictions are a private desk feature - not on this seat" };
+    const P = require("./predictions.js");
+    return P.makePrediction({ ...args, source: "conversation" });
+  }
+  async function list_predictions(args = {}) {
+    if (!isComp(ctx.email)) return { error: "predictions are a private desk feature - not on this seat" };
+    const P = require("./predictions.js");
+    return P.listPredictions(args && args.limit);
+  }
+
   async function update_reader_memory(args = {}) {
     const { updateMemory, indexMember } = require("./member-memory.js");
     if (!ctx.email) return { error: "no signed-in reader" };
@@ -1679,7 +1731,7 @@ function makeExecutors(ctx = {}) {
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
     describe_archive, query_archive, update_reader_memory, log_forecast,
-    set_alert, list_alerts, cancel_alert, get_live_chain,
+    set_alert, list_alerts, cancel_alert, make_prediction, list_predictions, get_live_chain,
   };
 }
 
