@@ -294,10 +294,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      1048px and overflows the 600px fan. */
   .ss-fan-card img { width: 100%; height: auto; display: block; }
   .ss-fan-card { width: 55%; }
-  .ss-fan-1 { transform: translateX(-12%) rotate(8deg); z-index: 4; }
-  .ss-fan-2 { transform: translateX(-37%) rotate(3deg); z-index: 3; }
-  .ss-fan-3 { transform: translateX(-63%) rotate(-3deg); z-index: 2; }
-  .ss-fan-4 { transform: translateX(-88%) rotate(-8deg); z-index: 1; }
+  /* Three cards, not four (2026-09-06). The four positions were spaced 25% apart
+     and centred on -50%; keeping them and simply deleting the fourth would have
+     hung the whole fan off to one side. These are respaced to stay centred. */
+  .ss-fan-1 { transform: translateX(-24%) rotate(7deg); z-index: 3; }
+  .ss-fan-2 { transform: translateX(-50%) rotate(0deg); z-index: 2; }
+  .ss-fan-3 { transform: translateX(-76%) rotate(-7deg); z-index: 1; }
   .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: translateX(-50%) translateY(-16px) rotate(0deg) scale(1.05); z-index: 5; box-shadow: 0 36px 104px rgba(0,0,0,.72); outline: none; }
   /* Mobile: keep the SAME fanned/overlapping stack (not a flat vertical list); tap a card to bring it forward */
   /* Mobile: STACK, do not fan. At 76% card width a translateX(-74%) card starts ~30px
@@ -309,7 +311,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
               display: flex; flex-direction: column; gap: 16px; }
     .ss-fan-card { position: static; top: auto; left: auto; width: 100%;
                    transform: none !important; box-shadow: 0 14px 44px rgba(0,0,0,.5); }
-    .ss-fan-1, .ss-fan-2, .ss-fan-3, .ss-fan-4 { transform: none; z-index: auto; }
+    .ss-fan-1, .ss-fan-2, .ss-fan-3 { transform: none; z-index: auto; }
     .ss-fan-card:hover, .ss-fan-card:focus-visible, .ss-fan-card.front { transform: none !important; box-shadow: 0 22px 60px rgba(0,0,0,.7); }
   }
   @media(max-width:600px) { .ss-mobile-row > div { flex-basis: 82%; max-width: 82%; } }
@@ -741,22 +743,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="ss-fan">
         <figure class="ss-fan-card ss-fan-1" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-1.webp?v=5" width="1570" height="1045" alt="Analyst dashboard &mdash; the 24/5 futures ribbon, the QQQ and IWM switcher cards, the SPY session chart with the zero-gamma line, call wall, put wall and gravity drawn on the candles, and the dealer-positioning ladder: net GEX in a short-gamma regime, the gamma-squeeze gauge, every level with its distance from spot, and the expected move for the day and week" decoding="async" loading="eager" fetchpriority="high">
+          <img src="/screenshots/analyst-dash-1.webp?v=6" width="1528" height="1059" alt="Analyst dashboard &mdash; the 24/5 futures ribbon, the QQQ and IWM switcher cards, Dr. NoVo&rsquo;s premarket and hourly bias with the hit rate behind each, the SPY session chart with the zero-gamma line, call wall, put wall and gravity drawn on the candles, and the dealer-positioning ladder: net GEX in a short-gamma regime, the gamma-squeeze gauge, every level with its distance from spot, what this same setup resolved to historically, and the expected move for the day and the week" decoding="async" loading="eager" fetchpriority="high">
         </figure>
         <figure class="ss-fan-card ss-fan-2" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-2.webp?v=4" width="1573" height="1049" alt="Analyst dashboard &mdash; the gamma profile by strike, gamma by strike through the whole session as it built and drained, the put/call skew, vanna and charm tiles, the VIX fear gauge ranked against its own history, and the live options-flow read with the day&rsquo;s unusual-volume strikes" decoding="async" loading="lazy">
+          <img src="/screenshots/analyst-dash-2.webp?v=5" width="1528" height="1059" alt="Analyst dashboard &mdash; the gamma profile by strike, the expected move, put/call skew and near-versus-far skew, the vanna and charm exposure tiles, the VIX fear gauge ranked against its own year, gamma by strike through the whole session as it built and drained, and the live options-flow read with the day&rsquo;s unusual-volume strikes" decoding="async" loading="lazy">
         </figure>
         <figure class="ss-fan-card ss-fan-3" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-3.webp?v=5" width="1571" height="1048" alt="Analyst dashboard &mdash; the live sweeps &amp; blocks print tape with sweep bias and aggressor-tagged prints, the &lsquo;today looks like&hellip;&rsquo; historical analogues with how each resolved, and &lsquo;The Line&rsquo; level-break playbooks firing in real time" decoding="async" loading="lazy">
+          <img src="/screenshots/analyst-dash-3.webp?v=6" width="1528" height="1059" alt="Analyst dashboard &mdash; &lsquo;today looks like&hellip;&rsquo;, the closest historical SPY dealer setups with their match score and how each resolved at 15 minutes, 60 minutes and into the close; &lsquo;The Line&rsquo; level-break playbooks; and Today&rsquo;s Read, the full written outlook with the bottom line, the week ahead, the catalysts, and the dealer-positioning map across SPY, QQQ and IWM" decoding="async" loading="lazy">
         </figure>
-        <figure class="ss-fan-card ss-fan-4" tabindex="0">
-          <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; today&rsquo;s read</span></div>
-          <img src="/screenshots/analyst-dash-4-read.webp?v=1" width="1571" height="1044" alt="Today&rsquo;s Read on the Analyst dashboard &mdash; a full pre-market primer: the bottom line, the setup, dealer positioning and levels to watch, then the dealer map for SPY, QQQ and IWM with net GEX, flip, gravity, walls, historical resolution rates with sample sizes, expected moves, skew and IV rank" decoding="async" loading="lazy">
-        </figure>
+        
       </div>
-      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the full dealer read with vanna &amp; charm, gamma by strike through the session, the flow and print tape, the analogues and the written read. Installs like an app on desktop &amp; mobile.</p>
+      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the full dealer read with vanna &amp; charm, gamma by strike through the session, the options flow, the analogues and the written read. Installs like an app on desktop &amp; mobile.</p>
     </div>
     <script>(function(){var c=document.querySelectorAll('.ss-fan-card');c.forEach(function(el){el.addEventListener('click',function(){c.forEach(function(x){x.classList.remove('front');});el.classList.add('front');});});})();</script>
   </div>
