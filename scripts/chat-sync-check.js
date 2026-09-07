@@ -161,12 +161,45 @@ async function attach(port) {
     after.n >= 1 && /flip on SPY/.test(after.first || ''), JSON.stringify(after));
   ok('...and it is RENDERED, not merely in storage', after.rendered >= 1, JSON.stringify(after));
 
-  // ── SCOPE: crypto is a different desk and must NOT inherit the equity transcript. ───────────
+  /* ── SCOPE: crypto is a different desk. ────────────────────────────────────────────────────
+     Jake, 2026-09-07: "make sure you didnt blend crypto chats with the equities side ... crypto
+     blend would be a loss."
+
+     ⚠ THE ORIGINAL FORM OF THIS CHECK COULD NOT ANSWER THAT QUESTION. It asserted only that the
+     crypto transcript was EMPTY — which is also exactly what you get if crypto's sync is broken, if
+     the key name here has drifted, or if the page never loaded at all. An instrument that cannot
+     find anything and one reporting that nothing is there look identical. So the negative gets a
+     POSITIVE CONTROL beside it: a turn is pushed into the CRYPTO scope first, and the crypto page
+     must receive THAT while still not receiving the equity one. Now it fails in both directions —
+     if the desks blend, and if the crypto lane silently stops working. */
+  const CQ = 'what is BTC funding doing?';
+  await A.evalIn(`(async () => {
+    window.novoChatSync.push('crypto', [{ r:'you', x:${JSON.stringify(CQ)}, t: Date.now() }]);
+    await new Promise(r => setTimeout(r, 2200)); })()`);
+  ok('control: a crypto-scoped turn reaches the server under its OWN key',
+    (STORE['member-alpha|crypto'] || []).length === 1,
+    JSON.stringify(Object.keys(STORE)));
+
   await B.goto(base + '/crypto-live.html', 430);
   await new Promise((r) => setTimeout(r, 2000));
-  const crypto = await B.evalIn(`(() => { try { return (JSON.parse(localStorage.getItem('novo_ask_log_crypto')||'{}').turns||[]).length; } catch(e){ return 0; } })()`);
-  ok('crypto stays its own desk — it does not inherit the equity transcript',
-    crypto === 0, JSON.stringify(crypto) + '  (equity has ' + (STORE['member-alpha|equity'] || []).length + ')');
+  const cx = await B.evalIn(`(() => {
+    const rd = (k) => { try { return (JSON.parse(localStorage.getItem(k)||'{}').turns||[]); } catch(e){ return []; } };
+    const c = rd('novo_ask_log_crypto');
+    return { n: c.length, text: c.map(m => m.x).join(' | '),
+             rendered: document.querySelectorAll('#novo-ask-log .m').length,
+             renderedText: [...document.querySelectorAll('#novo-ask-log .m')].map(e => e.textContent).join(' | ') }; })()`);
+
+  ok('control: the crypto desk DOES receive its own transcript (so the instrument works)',
+    cx.n >= 1 && cx.text.indexOf('BTC funding') >= 0, JSON.stringify(cx).slice(0, 240));
+  ok('crypto stays its own desk — the equity transcript is not in it',
+    cx.text.indexOf('flip on SPY') < 0 && cx.renderedText.indexOf('flip on SPY') < 0,
+    JSON.stringify(cx).slice(0, 240) + '  (equity holds ' + (STORE['member-alpha|equity'] || []).length + ')');
+  ok('...and the equity desk did not swallow the crypto turn either',
+    ((STORE['member-alpha|equity'] || []).map((m) => m.x).join(' | ')).indexOf('BTC funding') < 0,
+    JSON.stringify((STORE['member-alpha|equity'] || []).map((m) => m.x)));
+  ok('...the two scopes are separate keys on the server, not one bucket',
+    (STORE['member-alpha|crypto'] || []).length === 1 && (STORE['member-alpha|equity'] || []).length >= 1,
+    JSON.stringify(Object.fromEntries(Object.entries(STORE).map(([k, v]) => [k, v.length]))));
 
   // ── FAIL SOFT: with the endpoint dead, the chat must behave exactly as before. ──────────────
   const C = A;

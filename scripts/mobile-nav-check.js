@@ -157,6 +157,14 @@ const READ_BAR = `(() => {
   };
 })()`;
 
+/* ⚠ WHICH TAB IS LIT IS ASKED BY NAME, NEVER BY POSITION. The first version of this file asserted
+   bar.tabs[0].active for "Map is lit" — true only while Map happened to be leftmost. Jake reordered
+   the crypto bar to Stats / Coins / Map / Dr. NoVo an hour later, and every one of those index
+   assertions would have gone on passing or failing about a DIFFERENT tab than its own name claims.
+   A check that quietly changes its subject is worse than one that breaks. */
+const litTab = (b) => ((b.tabs || []).find((t) => t.active) || {}).name;
+const tabNamed = (b, n) => ((b.tabs || []).find((t) => t.name === n) || {});
+
 const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)});
   if (!e) return { missing: true };
   const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
@@ -184,12 +192,13 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.tabs.length === 2 && bar.tabs[0].label === 'Dealer Map' && bar.tabs[1].label === 'Dr. NoVo',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
-    (bar.tabs[1] || {}).icon.indexOf('\u2726') >= 0, JSON.stringify((bar.tabs[1] || {}).icon));
-  ok('Dealer Map is the tab you land on', bar.tabs[0].active && !bar.tabs[1].active,
-    JSON.stringify(bar.tabs.map((t) => t.active)));
+    (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
+    JSON.stringify(tabNamed(bar, 'novo').icon));
+  ok('Dealer Map is the tab you land on', litTab(bar) === 'map',
+    JSON.stringify(bar.tabs.map((t) => t.name + ':' + t.active)));
   ok('the landed tab is announced, and only it',
-    bar.tabs[0].current === 'page' && bar.tabs[1].current === null,
-    JSON.stringify(bar.tabs.map((t) => t.current)));
+    tabNamed(bar, 'map').current === 'page' && tabNamed(bar, 'novo').current === null,
+    JSON.stringify(bar.tabs.map((t) => t.name + ':' + t.current)));
 
   const bub = await B.evalIn(vis('#novo-ask-bubble'));
   ok('the header Dr. NoVo button stands down on a phone — the bar carries it, as on the trader',
@@ -210,7 +219,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('...and the chat STOPS at the bar instead of covering it',
     panel.bottom <= bar.top + 1, JSON.stringify({ chatBottom: panel.bottom, barTop: bar.top }));
   ok('...and the Dr. NoVo tab is the lit one',
-    bar.tabs[1].active && !bar.tabs[0].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+    litTab(bar) === 'novo', JSON.stringify(litTab(bar)));
 
   /* ⚠ FOUND IN A SCREENSHOT, NOT IN A CHECK. Lifting the install pill clear of the bar landed it
      exactly on the composer — it covered the Ask button — and every geometry assertion still
@@ -234,8 +243,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('tapping Dealer Map closes the chat', !panel.shown, JSON.stringify(panel));
   ok('...the pill comes back, above the bar rather than under it',
     !pillA2.shown || pillA2.bottom <= bar.top, JSON.stringify({ pill: pillA2, barTop: bar.top }));
-  ok('...and the bar follows', bar.tabs[0].active && !bar.tabs[1].active,
-    JSON.stringify(bar.tabs.map((t) => t.active)));
+  ok('...and the bar follows', litTab(bar) === 'map', JSON.stringify(litTab(bar)));
 
   /* THE OBSERVER CHECK. Opened by a path that never touches the bar — which is what the "n" key,
      the command palette and a restored deep link all do. */
@@ -243,12 +251,12 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await new Promise((r) => setTimeout(r, 300));
   bar = await B.evalIn(READ_BAR);
   ok('the bar follows the chat even when something else opened it',
-    bar.tabs[1].active && !bar.tabs[0].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+    litTab(bar) === 'novo', JSON.stringify(litTab(bar)));
   await B.evalIn(`window.novoAskOpen(0)`);
   await new Promise((r) => setTimeout(r, 300));
   bar = await B.evalIn(READ_BAR);
   ok('...and when something else closed it',
-    bar.tabs[0].active && !bar.tabs[1].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+    litTab(bar) === 'map', JSON.stringify(litTab(bar)));
 
   await B.resize(1600, 1000);
   bar = await B.evalIn(READ_BAR);
@@ -270,13 +278,17 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('the bar renders at 430px', !bar.missing && bar.display === 'flex', JSON.stringify(bar).slice(0, 200));
   ok('it is pinned to the bottom of the viewport',
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
-  ok('four tabs, in order', bar.tabs.length === 4 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Map|Stats|Coins|Dr. NoVo',
+  /* Jake, 2026-09-07: "crypto order / Stats / Coins / Map / Dr. NoVo". Read left-to-right off
+     the rendered row, not out of the DOM — the row is arranged with CSS `order`, so reading the
+     markup would report the source order and pass while the screen showed something else. */
+  ok('four tabs, in the order Jake asked for', bar.tabs.length === 4 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('every tab is wide enough to hit on a 430px phone',
     bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
   ok('Dr. NoVo carries the same mark as the other two dashboards',
-    (bar.tabs[3] || {}).icon.indexOf('\u2726') >= 0, JSON.stringify((bar.tabs[3] || {}).icon));
+    (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
+    JSON.stringify(tabNamed(bar, 'novo').icon));
 
   /* THE BAR SHRINKS THE APP. If it merely floated over a 100vh grid, the last 52px of whichever
      column was scrolling would be permanently underneath it. */
@@ -288,8 +300,8 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   let side = await B.evalIn(vis('#side'));
   const sidePanels = await B.evalIn(`document.querySelectorAll('#side .panel').length`);
   ok('Map is the tab you land on, and it is the coin map',
-    bar.tabs[0].active && center.shown && !side.shown,
-    JSON.stringify({ active: bar.tabs.map((t) => t.active), center: center.shown, side: side.shown }));
+    litTab(bar) === 'map' && center.shown && !side.shown,
+    JSON.stringify({ lit: litTab(bar), center: center.shown, side: side.shown }));
   ok('the column Stats names has real panels in it — this is the content a phone could not reach',
     sidePanels >= 2, 'panels=' + sidePanels);
   const pillC0 = await B.evalIn(vis('.cx-install'));
@@ -302,8 +314,8 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   side = await B.evalIn(vis('#side'));
   bar = await B.evalIn(READ_BAR);
   ok('Stats shows the side column and hides the map',
-    side.shown && !center.shown && bar.tabs[1].active,
-    JSON.stringify({ center: center.shown, side: side.shown, active: bar.tabs.map((t) => t.active) }));
+    side.shown && !center.shown && litTab(bar) === 'stats',
+    JSON.stringify({ center: center.shown, side: side.shown, lit: litTab(bar) }));
   ok('...as the full width of the page, not a 310px rail',
     side.w >= 400, String(side.w));
 
@@ -324,15 +336,15 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('...and the install pill stands down instead of sitting on the ask field',
     !pillC.shown, JSON.stringify(pillC));
   ok('...and the bar reports the chat, not Stats',
-    bar.tabs[3].active && !bar.tabs[1].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+    litTab(bar) === 'novo', JSON.stringify(litTab(bar)));
 
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="coins"]').click()`);
   await new Promise((r) => setTimeout(r, 450));
   const rail = await B.evalIn(vis('#rail'));
   panel = await B.evalIn(vis('#novo-ask'));
   bar = await B.evalIn(READ_BAR);
-  ok('Coins opens the picker', rail.shown && rail.h > 300 && bar.tabs[2].active,
-    JSON.stringify({ rail: rail.shown, h: rail.h, active: bar.tabs.map((t) => t.active) }));
+  ok('Coins opens the picker', rail.shown && rail.h > 300 && litTab(bar) === 'coins',
+    JSON.stringify({ rail: rail.shown, h: rail.h, lit: litTab(bar) }));
   ok('...and closes the chat on the way', !panel.shown, JSON.stringify(panel));
   ok('...and the bar stays on top of the picker, so there is a way back',
     bar.display === 'flex' && Number(bar.z) > 60, JSON.stringify({ display: bar.display, z: bar.z }));
@@ -346,15 +358,15 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   const sym = await B.evalIn(`document.getElementById('sym').textContent.trim()`);
   center = await B.evalIn(vis('#center'));
   ok('picking a coin closes the picker and lands on that coin\u2019s map',
-    sym === 'ETH' && center.shown && bar.tabs[0].active,
-    JSON.stringify({ sym, center: center.shown, active: bar.tabs.map((t) => t.active) }));
+    sym === 'ETH' && center.shown && litTab(bar) === 'map',
+    JSON.stringify({ sym, center: center.shown, lit: litTab(bar) }));
 
   /* The header chip is the other way into the picker. The bar must agree with it. */
   await B.evalIn(`document.getElementById('sym').click()`);
   await new Promise((r) => setTimeout(r, 400));
   bar = await B.evalIn(READ_BAR);
   ok('the coin chip and the Coins tab cannot disagree about the picker',
-    bar.tabs[2].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+    litTab(bar) === 'coins', JSON.stringify(litTab(bar)));
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
   await new Promise((r) => setTimeout(r, 400));
 
@@ -373,6 +385,103 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
 
   errs = await B.evalIn(`window.__errs`);
   ok('the crypto page threw nothing', Array.isArray(errs) && errs.length === 0, JSON.stringify(errs));
+
+  // == DR. NoVo'S COLOUR IS PER-APP =========================================================
+  /* Jake, 2026-09-07, before he had even looked: "is the Dr. NoVo glow color correct for each app?"
+     It was not - the first cut of these bars copied the trader's green onto all three.
+     THE EXPECTED VALUE IS DERIVED, NOT TYPED. Each page already states its own Dr. NoVo colour on
+     the header button's caret, so the tab is checked AGAINST THAT rather than against a hex written
+     into this file. A test carrying its own copy of the answer goes stale the day someone retunes a
+     palette, and would then be wrong in the same direction as the bug it exists to catch. */
+  console.log('\nDr. NoVo carries each app’s own colour\n');
+  const rgb = (v) => (String(v).match(/\d+(\.\d+)?/g) || []).slice(0, 3).join(',');
+  const marks = {};
+  for (const [page, caretSel] of [['trader-live.html', '.navbtn-novo .caret'],
+                                  ['analyst-live.html', '#novo-ask-bubble .caret'],
+                                  ['crypto-live.html', '#novo-ask-bubble .caret']]) {
+    const app = page.split('-')[0];
+    await B.goto(base + '/' + page, 1600, 1000);
+    const caret = await B.evalIn(`(() => { const e = document.querySelector(${JSON.stringify(caretSel)});
+      return e ? getComputedStyle(e).color : null; })()`);
+    await B.resize(430, 900);
+    const tab = await B.evalIn(`(() => {
+      const t = document.querySelector('.mob-tab-novo'), i = t && t.querySelector('.mob-tab-icon');
+      const other = document.querySelector('.mob-tab:not(.mob-tab-novo)');
+      if (!t || !i || !other) return { missing: true };
+      /* Transitions OFF for the measurement. The bar animates colour and border-color over .15s,
+         and getComputedStyle during a transition returns the CURRENT animated value, not the
+         target -- so reading immediately after adding the class reports the colour the tab is
+         leaving. That is what the first run of this check measured: the trader came back
+         rgb(110,110,110), its IDLE colour, against a rule that was perfectly correct. An
+         instrument sampling an animation cannot answer a question about a stylesheet. */
+      const had = other.classList.contains('mob-active');
+      const prevT = other.style.transition;
+      other.style.transition = 'none';
+      other.classList.add('mob-active');
+      const act = getComputedStyle(other).color, brd = getComputedStyle(other).borderTopColor;
+      if (!had) other.classList.remove('mob-active');
+      other.style.transition = prevT;
+      return { color: getComputedStyle(t).color, shadow: getComputedStyle(i).textShadow,
+               active: act, activeBorder: brd }; })()`);
+    marks[app] = { caret, tab };
+    ok(app + ': the tab’s Dr. NoVo mark is the colour this app already uses for him',
+      !tab.missing && !!caret && rgb(tab.color) === rgb(caret),
+      JSON.stringify({ caret, tab: tab.color }));
+    ok(app + ': ...and the glow is that same colour, not a leftover from another dashboard',
+      !tab.missing && rgb(tab.shadow) === rgb(caret),
+      JSON.stringify({ caret, shadow: tab.shadow }));
+    /* The neutral is what keeps the hue meaningful: if "active" took the page accent, the active
+       tab and the Dr. NoVo tab would be the SAME colour on both analyst and crypto, and only a 2px
+       border would tell them apart. */
+    ok(app + ': ...and an active ordinary tab stays NEUTRAL, so Dr. NoVo is the only hue in the bar',
+      !tab.missing && rgb(tab.active) === '168,174,187' && rgb(tab.activeBorder) === '168,174,187',
+      JSON.stringify({ active: tab.active, border: tab.activeBorder }));
+  }
+  /* The cross-app invariant that would have caught the original bug on sight: one hex copied across
+     three dashboards collapses this set to one entry. */
+  const hues = ['trader', 'analyst', 'crypto'].map((a) => rgb((marks[a] || {}).caret));
+  ok('all three Dr. NoVo colours are DIFFERENT - one hex copied across the apps fails here',
+    new Set(hues).size === 3 && hues.every(Boolean), JSON.stringify(hues));
+
+  // == OPENING THE CHAT MUST NOT RAISE THE ON-SCREEN KEYBOARD ===============================
+  /* Jake, 2026-09-07: "both analyst and crypto open keyboard automatically when chat is open while
+     trader doesnt open keyboard until you actually hit inside the text box. make both them like
+     trader."
+     There is no way to observe a soft keyboard from a page, so the check measures the thing that
+     SUMMONS it: whether the composer holds focus after the panel opens. And it is run BOTH ways -
+     a phone must not focus, and a desktop must - because "activeElement is not the input" is also
+     what you would see if the chat simply failed to open. The negative alone proves nothing. */
+  console.log('\nOpening the chat does not summon the keyboard\n');
+  const FOCUSED = `(() => { const q = document.getElementById('novo-ask-q');
+    return { has: !!q, focused: !!q && document.activeElement === q,
+             coarse: matchMedia('(hover: hover) and (pointer: fine)').matches }; })()`;
+  for (const [page, openMobile, openDesk] of [
+      ['trader-live.html', `switchMobileTab(4)`, `setView('novo')`],
+      ['analyst-live.html', `document.querySelector('.mob-tab[data-mtab="novo"]').click()`, `novoAskOpen(1)`],
+      ['crypto-live.html', `document.querySelector('.mob-tab[data-mtab="novo"]').click()`, `novoAskOpen(1)`]]) {
+    const app = page.split('-')[0];
+
+    await B.goto(base + '/' + page, 430, 900);
+    await B.evalIn(openMobile);
+    await new Promise((r) => setTimeout(r, 500));
+    const mob = await B.evalIn(FOCUSED);
+    ok(app + ' @430: the emulator really is reporting a touch device',
+      mob.coarse === false, JSON.stringify(mob));
+    ok(app + ' @430: opening the chat leaves the composer UNfocused - no keyboard until it is tapped',
+      mob.has && mob.focused === false, JSON.stringify(mob));
+    /* ...and tapping the box still works, which is the whole point of the gate. */
+    const tapped = await B.evalIn(`(() => { const q = document.getElementById('novo-ask-q');
+      q.focus(); return document.activeElement === q; })()`);
+    ok(app + ' @430: ...but tapping the box still focuses it',
+      tapped === true, JSON.stringify(tapped));
+
+    await B.goto(base + '/' + page, 1600, 1000);
+    await B.evalIn(openDesk);
+    await new Promise((r) => setTimeout(r, 500));
+    const desk = await B.evalIn(FOCUSED);
+    ok(app + ' @1600: control - a real keyboard still gets the cursor put in the box',
+      desk.has && desk.focused === true, JSON.stringify(desk));
+  }
 
   console.log('\n' + (failures ? 'FAIL ' : 'OK   ') + (checks - failures) + '/' + checks + ' checks\n');
   try { proc.kill(); } catch (_) {}

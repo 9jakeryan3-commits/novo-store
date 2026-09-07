@@ -325,6 +325,22 @@
     return panel;
   };
   var busy = false;
+  /* ⚠ DO NOT FOCUS THE COMPOSER ON A PHONE. Jake, 2026-09-07: "both analyst and crypto open
+     keyboard automatically when chat is open while trader doesnt ... no keyboard until text box
+     tapped." Focusing an input IS the gesture that raises the on-screen keyboard, so an autofocus
+     on open buries the answer under half a screen of keys before it has been read.
+     The trader already had this guard on its own reveal path, which is why only these two showed
+     the behaviour - all three files carry the identical q.focus() line, but the trader reaches the
+     panel through _novoChatReveal and never through here.
+     THE TEST IS FOR A KEYBOARD, NOT FOR A WIDE SCREEN. The trader's guard asked min-width:769px,
+     and a tablet is wide and still has no keys - it would have kept doing exactly what Jake is
+     reporting. A mouse-and-hover device is the honest proxy for "there is something to type on".
+     Returns true when matchMedia is missing so an old browser keeps the desktop behaviour. */
+  function _novoHasKeyboard(){
+    try { return !!(window.matchMedia &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches); }
+    catch (_e) { return true; }
+  }
   window.novoAskOpen = function(on){
     document.getElementById('novo-ask').classList.toggle('on', !!on);
     // Full-screen on mobile means the page behind must not scroll underneath.
@@ -347,7 +363,8 @@
       if (PINNED) pinTop(PINNED, 1);
       else if (_lg) { _lg.style.scrollBehavior = 'auto'; _lg.scrollTop = _lg.scrollHeight; _lg.style.scrollBehavior = ''; }
     }
-    if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
+    if (on && _novoHasKeyboard())
+      setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
   // Summoned with "n" when you are not already typing, or "/ask" from the palette. Esc dismisses.
@@ -915,7 +932,9 @@
     var log = document.getElementById('novo-ask-log');
     if (log) log.innerHTML = INTRO_HTML;   // takes the spacer with it; padEl() rebuilds it on demand
     PINNED = null;
-    var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
+    /* Same rule on Clear: tapping it should empty the box, not summon the keyboard. */
+    var qi = document.getElementById('novo-ask-q');
+    if (qi) { qi.value = ''; if (_novoHasKeyboard()) qi.focus(); }
     window.novoAskQuick();
   };
   /* ⚠ RUNS AT FIRST MOUNT, NOT AT LOAD — see the build script for why. Neither of these throws

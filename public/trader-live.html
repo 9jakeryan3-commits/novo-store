@@ -7335,7 +7335,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <!-- NoVo chat. Loaded BEFORE novo-keys.js so window.novoAsk exists when the keyboard layer binds
      "n" and registers /ask — the same shortcut that opens the chat on every other surface. -->
 <script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
-<script src="/js/novo-chat.js?v=aa159c82"></script>
+<script src="/js/novo-chat.js?v=1b59f20f"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.
@@ -7346,7 +7346,13 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
       var q = document.getElementById('novo-ask-q');
       // Focus only where there is a keyboard to focus into: on a phone this would throw the
       // on-screen keyboard up over the answer the moment the tab opens.
-      if (q && window.matchMedia && window.matchMedia('(min-width: 769px)').matches) q.focus();
+      // WIDTH WAS THE WRONG TEST and is now a pointer test (2026-09-07, when the same guard went
+      // into the analyst and crypto chats): a tablet is wide and still has no keys, so the old
+      // condition would have raised the on-screen keyboard on exactly the device it was meant to
+      // spare. Desktop and phone behaviour are unchanged; only tablets move, and they move to the
+      // correct side. The other two files carry this rule as _novoHasKeyboard().
+      if (q && window.matchMedia &&
+          window.matchMedia('(hover: hover) and (pointer: fine)').matches) q.focus();
     } catch (_e) {}
   };
 </script>

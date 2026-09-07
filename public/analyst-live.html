@@ -1762,12 +1762,22 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       font-size: 9.5px; font-weight: 800; letter-spacing: .2px; cursor: pointer;
       transition: color .15s, border-color .15s; -webkit-tap-highlight-color: transparent; }
     .mob-tab-icon { font-size: 17px; line-height: 1; }
-    .mob-tab.mob-active { color: #22d3ee; border-top-color: #22d3ee; }
-    /* Dr. NoVo is green on every dashboard and KEEPS its colour when active — the other tabs take
-       the page accent, this one is the analyst and stays itself. */
-    .mob-tab-novo { color: #34d399; }
-    .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(52,211,153,.85); }
-    .mob-tab-novo.mob-active { color: #6ee7b7; border-top-color: #34d399; }
+    /* ⚠ DR. NoVo'S COLOUR IS PER-APP, AND THE ACTIVE TAB IS NEUTRAL SO HE IS THE ONLY HUE IN THE
+       BAR. Jake's rule for these controls: uniform, "only difference should be thier color". The
+       first cut of this bar copied the trader's GREEN to all three, which is wrong twice over —
+       this app's Dr. NoVo mark is cyan (#22d3ee), the same colour its header button's caret and
+       glow already use, and green belongs to the trader alone.
+       The active tab takes #a8aebb, the trader's --blu: a neutral blue-grey, not an accent. That is
+       load-bearing here. Using this page's own accent for "active" would have made the active tab
+       and the Dr. NoVo tab the SAME cyan, and the only thing telling them apart would have been
+       a 2px border. Neutral for every tab, hue for Dr. NoVo, is what makes the bar readable at a
+       glance on all three apps. */
+    .mob-tab.mob-active { color: #a8aebb; border-top-color: #a8aebb; }
+    /* Tinted even when idle, and it keeps its colour when active — the other tabs go neutral, this
+       one is the analyst and stays itself. */
+    .mob-tab-novo { color: #22d3ee; }
+    .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(34,211,238,.85); }
+    .mob-tab-novo.mob-active { color: #67e8f9; border-top-color: #22d3ee; }
     /* The document has to END above the bar, or the last card is permanently underneath it. */
     .lv-wrap { padding-bottom: calc(var(--navh) + 16px); }
     /* ...and so does the settings sheet, whose last link sat under the bar otherwise. */
@@ -1891,6 +1901,22 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script>
 (function(){
   var busy = false;
+  /* ⚠ DO NOT FOCUS THE COMPOSER ON A PHONE. Jake, 2026-09-07: "both analyst and crypto open
+     keyboard automatically when chat is open while trader doesnt ... no keyboard until text box
+     tapped." Focusing an input IS the gesture that raises the on-screen keyboard, so an autofocus
+     on open buries the answer under half a screen of keys before it has been read.
+     The trader already had this guard on its own reveal path, which is why only these two showed
+     the behaviour - all three files carry the identical q.focus() line, but the trader reaches the
+     panel through _novoChatReveal and never through here.
+     THE TEST IS FOR A KEYBOARD, NOT FOR A WIDE SCREEN. The trader's guard asked min-width:769px,
+     and a tablet is wide and still has no keys - it would have kept doing exactly what Jake is
+     reporting. A mouse-and-hover device is the honest proxy for "there is something to type on".
+     Returns true when matchMedia is missing so an old browser keeps the desktop behaviour. */
+  function _novoHasKeyboard(){
+    try { return !!(window.matchMedia &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches); }
+    catch (_e) { return true; }
+  }
   window.novoAskOpen = function(on){
     var _p = document.getElementById('novo-ask');
     _p.classList.toggle('on', !!on);
@@ -1919,7 +1945,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       if (PINNED) pinTop(PINNED, 1);
       else if (_lg) { _lg.style.scrollBehavior = 'auto'; _lg.scrollTop = _lg.scrollHeight; _lg.style.scrollBehavior = ''; }
     }
-    if (on) setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
+    if (on && _novoHasKeyboard())
+      setTimeout(function(){ var q=document.getElementById('novo-ask-q'); if(q) q.focus(); }, 60);
   };
 
   // Summoned with "n" when you are not already typing, or "/ask" from the palette. Esc dismisses.
@@ -2487,7 +2514,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var log = document.getElementById('novo-ask-log');
     if (log) log.innerHTML = INTRO_HTML;   // takes the spacer with it; padEl() rebuilds it on demand
     PINNED = null;
-    var qi = document.getElementById('novo-ask-q'); if (qi) { qi.value = ''; qi.focus(); }
+    /* Same rule on Clear: tapping it should empty the box, not summon the keyboard. */
+    var qi = document.getElementById('novo-ask-q');
+    if (qi) { qi.value = ''; if (_novoHasKeyboard()) qi.focus(); }
     window.novoAskQuick();
   };
   var INTRO_HTML = (function(){ var l = document.getElementById('novo-ask-log'); return l ? l.innerHTML : ''; })();
