@@ -190,7 +190,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.h === 52, String(bar.h));
   ok('three tabs, in the order Jake asked for',
     bar.tabs.length === 3 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|The Read|Dr. NoVo',
+    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|Dr. NoVo|The Read',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,

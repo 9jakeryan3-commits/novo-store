@@ -1756,6 +1756,17 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       height: var(--navh); padding-bottom: env(safe-area-inset-bottom, 0px);
       background: var(--panel); border-top: 1px solid var(--bdr); border-bottom: 0;
       backdrop-filter: none; box-shadow: 0 -4px 20px rgba(0,0,0,.5); z-index: 1000; }
+    /* ORDER IS SET IN CSS, AND ALL THREE ARE NAMED. Jake, 2026-09-07: "order should be
+       Dealer Map / Dr. NoVo / The Read" - the same shape as the trader, where Dr. NoVo sits in the
+       middle between the two reading surfaces. data-mtab is each tab identity: the click handler,
+       the observer and the view rules all key on it, so the row is reordered visually and no name
+       moves. Naming all three is not tidiness. The comment that stood here an hour ago said source
+       order was already right and warned that adding an order to one means adding it to all - a
+       flex row where SOME children carry an order puts every unnamed one in FRONT, which is how
+       the crypto header rendered backwards this week. */
+    .mob-tab[data-mtab="map"]  { order: 1; }
+    .mob-tab[data-mtab="novo"] { order: 2; }
+    .mob-tab[data-mtab="read"] { order: 3; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -1876,8 +1887,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      Three entries now — The Read joined the same day, and it cost exactly what this comment said
      it would: one button and one branch. data-mtab is the name of the view, not an index; the
      trader's numeric indices are a legacy this page does not have to inherit. No `order` on any of
-     these, deliberately: source order is already the wanted order, and a flex row where SOME
-     children carry an order puts every unnamed one in front. Add one and you must add all three. -->
+     these three carry an explicit CSS `order` (see the stylesheet): Jake wants Dr. NoVo in the
+     middle, and the markup order is left alone because data-mtab is what every handler keys on. -->
 <nav id="mobile-tabs" aria-label="Dashboard sections">
   <button class="mob-tab" type="button" data-mtab="map" onclick="lvMobTab('map')">
     <span class="mob-tab-icon" aria-hidden="true">&#9638;</span>
