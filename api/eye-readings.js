@@ -44,6 +44,51 @@ function verifyToken(token) {
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+
+  // ── THE ENGINE'S WRITE ────────────────────────────────────────────────────────────────────
+  // Jake, 2026-09-07: "it already works in crypto live readings works, this aint new."
+  // He was right, and it is the reason this took four rounds. The crypto readings land because
+  // they POST to a DEDICATED endpoint (api/crypto-ingest.js): one file, one job, no routing to
+  // get wrong. The equity readings were pushed into api/analyst-publish.js instead - a handler
+  // with a dozen POST branches, matched on query keys and body markers - and every one of those
+  // four debugging rounds was spent on routing I had invented for myself. The publish never
+  // reached its branch and fell through to the journal handler, which asked for a title.
+  //
+  // Same shape as crypto-ingest now, and the same secret. Nothing to route, nothing to miss.
+  if (req.method === "POST") {
+    const secret = process.env.ANALYST_PUBLISH_SECRET || "";
+    if (!secret || req.headers["x-analyst-secret"] !== secret) {
+      return res.status(401).json({ error: "unauthorized" });
+    }
+    let b = req.body;
+    if (typeof b === "string") { try { b = JSON.parse(b); } catch (_) { b = null; } }
+    if (Buffer.isBuffer(b)) { try { b = JSON.parse(b.toString("utf8")); } catch (_) { b = null; } }
+    // A RULE FIRE, not a readings snapshot. The Eye reports it; NoVo decides in onEquityFire
+    // whether it has earned a call and a place in his alerts. Same endpoint because it is the
+    // same channel — the Eye talking to the store — and one door is the entire lesson here.
+    if (b && b.kind === "eye_fire") {
+      if (!b.rule || !b.symbol) return res.status(400).json({ error: "rule and symbol required" });
+      const out = await require("./_lib/predictions.js").onEquityFire({ ...b, ts: Date.now() });
+      return res.status(200).json({ ok: true, ...out });
+    }
+    if (!b || !Array.isArray(b.readings)) {
+      return res.status(400).json({ error: "readings[] required",
+        got: Object.prototype.toString.call(b) });
+    }
+    const w = kv();
+    if (!w) return res.status(503).json({ error: "store unavailable" });
+    // A snapshot of now, replaced whole - nothing to merge, nothing to age out. The 6h TTL is a
+    // dead-engine detector: stop publishing and the key expires, so the strip goes quiet rather
+    // than showing yesterday as though it were today.
+    await w.set("eye:readings:live", JSON.stringify({
+      as_of: b.as_of || new Date().toISOString(),
+      readings: b.readings.slice(0, 60),
+      rules: Array.isArray(b.rules) ? b.rules.slice(0, 40) : [],
+      n: Number(b.n) || b.readings.length,
+    }), { ex: 6 * 3600 });
+    return res.status(200).json({ ok: true, stored: b.readings.length });
+  }
+
   const email = verifyToken(
     req.query.t || String(req.headers["authorization"] || "").replace(/^Bearer\s+/i, ""));
   if (!email) return res.status(401).json({ error: "unauthorized" });

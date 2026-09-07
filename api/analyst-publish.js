@@ -783,61 +783,12 @@ export default async function handler(req, res) {
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
   //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
   if (req.method === 'DELETE') {
-    // ── THE EYE'S LIVE READINGS ──────────────────────────────────────────────────────────────
-  // Jake, 2026-09-07: "equities side needs the same live readings feature or similar as crypto ...
-  // reading from the Eye". Engine-authed intake, one KV key, replaced whole each pass — readings
-  // are a SNAPSHOT of now, not an append-only record, so there is nothing here to merge and
-  // nothing to age out. The 6h TTL is a dead-engine detector: if the Eye stops publishing, the
-  // key expires and the bar goes quiet rather than showing yesterday as though it were today.
-  /* ⚠ ROUTED ON THE BODY AS WELL AS THE QUERY. Every readings publish returned HTTP 400, and the
-     body of that 400 — once the engine was made to actually read it — was "title + text/html
-     required": an error from the JOURNAL branch hundreds of lines below. The request was reaching
-     this file and sailing past this line, which can only happen if `readings` is not in req.query
-     by the time it gets here. Rather than keep theorising about who eats the query string, the
-     marker now travels in the payload too, where nothing between the engine and this function can
-     touch it. The query check stays so the endpoint keeps working for anything already using it. */
-  if (req.method === 'POST' && ((req.query && 'readings' in req.query) || (await _isKind(req, 'eye_readings')))) {
-    /* The 401 NAMES ITS BRANCH. Every gate in this file answered a bare "unauthorized", so an
-       unauthenticated probe could not tell which branch refused it - and that ambiguity is what
-       made four rounds of this bug undiagnosable from outside. Naming the branch leaks nothing:
-       the caller already knows which endpoint they aimed at. */
-    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized', branch: 'readings' });
-    try {
-      const b = await _bodyOf(req);
-      // Name what arrived. The first live attempt returned a bare "readings[] required" and the
-      // engine logged only "HTTP Error 400", which said nothing about WHICH of the three possible
-      // causes it was — an error that cannot be acted on from the other side of the wire.
-      if (!b || !Array.isArray(b.readings)) {
-        return res.status(400).json({ error: 'readings[] required',
-          got: b === null ? 'unparseable body' : Object.prototype.toString.call(b),
-          keys: (b && typeof b === 'object') ? Object.keys(b).slice(0, 8) : [] });
-      }
-      const r = kv();
-      if (!r) return res.status(503).json({ error: 'store unavailable' });
-      await r.set('eye:readings:live', JSON.stringify({
-        as_of: b.as_of || new Date().toISOString(),
-        readings: b.readings.slice(0, 60),
-        rules: Array.isArray(b.rules) ? b.rules.slice(0, 40) : [],
-        n: Number(b.n) || b.readings.length,
-      }), { ex: 6 * 3600 });
-      return res.status(200).json({ ok: true, stored: b.readings.length });
-    } catch (e) { return res.status(500).json({ error: e.message }); }
-  }
-
-  // ── THE EYE'S RULE FIRES ─────────────────────────────────────────────────────────────────
-  // The instrument reports; NoVo decides. This used to arrive at ?pred=1 as a finished call,
-  // which made a threshold trip into a stated prediction with no judgement in between. The fire
-  // now arrives as a fire, with the rule's graded record attached, and onEquityFire applies the
-  // same bar the crypto side applies: earn it, or stay a private signal.
-  if (req.method === 'POST' && ((req.query && 'fire' in req.query) || (await _isKind(req, 'eye_fire')))) {
-    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized', branch: 'fire' });
-    try {
-      const b = (await _bodyOf(req)) || {};
-      if (!b.rule || !b.symbol) return res.status(400).json({ error: 'rule and symbol required' });
-      const out = await require('./_lib/predictions.js').onEquityFire({ ...b, ts: Date.now() });
-      return res.status(200).json({ ok: true, ...out });
-    } catch (e) { return res.status(500).json({ error: e.message }); }
-  }
+    /* THE EYE'S INTAKES LIVED HERE AND NO LONGER DO. Readings and rule fires now POST to
+     api/eye-readings.js, a dedicated endpoint in the shape of api/crypto-ingest.js - which is how
+     the crypto readings have always worked, and worked first time. Putting them in this handler
+     meant matching on query keys and body markers among a dozen sibling branches, and the publish
+     silently fell through all of them to the journal branch below for four deploy cycles. One
+     file, one job: there is no routing here to get wrong. */
 
   // ── NoVo's self-initiated predictions (the crypto selector, and his own calls) ────────────
   // Engine-authed intake. Same secret as every other engine write; same makePrediction the chat
