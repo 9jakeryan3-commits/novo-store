@@ -579,15 +579,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .bar-fill  { height: 100%; border-radius: 6px; width: 0; color: var(--cyn);
   transition: width .5s ease, color .3s ease;
   background: currentColor; box-shadow: 0 0 9px currentColor, inset 0 1px 0 rgba(255,255,255,.28); }
-.spy-hero { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; border-bottom: 1px solid var(--bdr); background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.22)); }
+.spy-hero { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; gap: 10px; border-bottom: 1px solid var(--bdr2); background: none; }
 .spy-hero-l { display: flex; flex-direction: column; gap: 2px; }
 .spy-hero-tkr { font-family: var(--font); font-size: 15px; font-weight: 900; letter-spacing: 2px; color: var(--txt1); }
 /* The ticker switcher. Same type as the old static ticker text so the hero reads the same at rest;
    the selected pill is bright with a cyan underline, the other two are muted but obviously clickable. */
 .tkr-pills { display: flex; gap: 4px; }
-.tkr-pill { font-family: var(--font); font-size: 14px; font-weight: 900; letter-spacing: 1.5px;
+.tkr-pill { font-family: var(--font); font-size: 12.5px; font-weight: 700; letter-spacing: .5px;
   color: var(--txt3); background: none; border: 0; border-bottom: 2px solid transparent;
-  padding: 2px 7px 3px; cursor: pointer; line-height: 1.2; border-radius: 4px 4px 0 0;
+  padding: 2px 6px 3px; cursor: pointer; line-height: 1.2; border-radius: 3px 3px 0 0;
   transition: color .15s ease, border-color .15s ease, background .15s ease; }
 .tkr-pill:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
 .tkr-pill.on { color: var(--txt1); border-bottom-color: #22d3ee; }
@@ -621,7 +621,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   #chart-toolbar { order: 4; flex-basis: 100%; justify-content: flex-start; padding: 2px 0 0; gap: 4px; row-gap: 5px; }
   /* B11: the drawing/overlay toolbar was the one control row excluded from the touch-target bump —
      ~22px tall on the chart-first phone layout. Bring each button up to a fingertip. */
-  #chart-toolbar .ctb-btn { padding: 9px 10px; font-size: 11.5px; }
+  #chart-toolbar .ctb-btn { padding: 8px 9px; font-size: 11.5px; }
   #chart-toolbar .ctb-group { gap: 3px; }
   .b3 td, .b3 th { font-size: 10px; padding: 3px 4px; }
   .b3 .b3-d { font-size: 8.5px; }
@@ -638,14 +638,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   #gex-agree { font-size: 9px; padding: 2px 5px; right: 58px; bottom: 26px; }
 }
 .ctb-group { display: flex; gap: 2px; }
-.ctb-sep { width: 1px; height: 16px; background: var(--bdr); margin: 0 4px; }
-.ctb-btn { font-family: var(--font); font-size: 10.5px; font-weight: 800; letter-spacing: .8px;
-  color: var(--txt3); background: none; border: 1px solid transparent; border-radius: 5px;
-  padding: 3px 8px; cursor: pointer; line-height: 1.4;
+.ctb-sep { width: 1px; height: 13px; background: var(--bdr2); margin: 0 3px; opacity: .8; }
+.ctb-btn { font-family: var(--font); font-size: 11px; font-weight: 600; letter-spacing: .2px;
+  color: var(--txt3); background: none; border: 0; border-radius: 4px;
+  padding: 4px 7px; cursor: pointer; line-height: 1.35;
   transition: color .12s ease, background .12s ease, border-color .12s ease; }
-.ctb-btn:hover { color: var(--txt1); background: rgba(255,255,255,.05); }
-.ctb-btn.on { color: #22d3ee; background: rgba(34,211,238,.08); border-color: rgba(34,211,238,.3); }
-.ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.35); }
+.ctb-btn:hover { color: var(--txt1); background: rgba(255,255,255,.06); }
+.ctb-btn.on { color: #22d3ee; background: rgba(34,211,238,.13); }
+.ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.16); }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
 #novo-chart.drawing { cursor: crosshair; }
 /* Pro overlays: OHLCV legend (top-left), NoVo read chip under it, ticker/frame watermark,
@@ -660,8 +660,8 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   font-family: var(--font); font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px;
   text-transform: uppercase; display: flex; gap: 6px; align-items: center; }
 #novo-chip .c-reg { padding: 2px 7px; border-radius: 4px; }
-#novo-chip .c-reg.lg { color: var(--grn); background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.25); }
-#novo-chip .c-reg.sg { color: var(--red); background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.25); }
+#novo-chip .c-reg.lg { color: var(--grn); background: rgba(52,211,153,.13); }
+#novo-chip .c-reg.sg { color: var(--red); background: rgba(244,63,94,.13); }
 #novo-chip .c-flip { color: var(--txt3); }
 #chart-wm { position: absolute; inset: 0; z-index: 1; pointer-events: none; display: flex;
   align-items: center; justify-content: center; font-family: var(--font); font-weight: 900;
@@ -701,10 +701,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .read2-body { flex: 1 1 0; min-height: 0; max-height: 170px; overflow-y: auto; padding: 10px 16px 14px;
   font-size: 12px; line-height: 1.7; color: var(--txt2); white-space: pre-wrap; }
 #card-read { display: none; }
-.spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); }
+.spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--txt4, #555); }
 .spy-hero-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-.spy-hero-px { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--txt1); }
-.spy-hero-chg { font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--txt3); }
+.spy-hero-px { font-family: var(--font); font-size: 21px; font-weight: 700; letter-spacing: -.6px; line-height: 1; color: var(--txt1); }
+.spy-hero-chg { font-family: var(--font); font-size: 11px; font-weight: 600; color: var(--txt3); }
 
 /* color helpers */
 .cblue  { color: var(--txt1) !important; }
@@ -4180,9 +4180,49 @@ function _paintCtb(){
     return n ? w + gap * (n - 1) + pad : 0;
   }
 
+  /* ⚠ THE SPACE THE TOOLBAR ACTUALLY HAS, not the width it was handed.
+     This measured tb.clientWidth — the toolbar's own line — which cannot see the constraint that
+     matters. #chart-toolbar is a flex child of a WRAPPING rail: the moment it needs more room than
+     is left beside the ticker and the price, the rail wraps and hands the toolbar a full-width
+     line of its own. It then measures as fitting comfortably, so it never folds, and the rail
+     silently becomes two rows tall. That is what made the header bulky on every desktop where the
+     chart card is narrower than the viewport — which is all of them, since the chart sits in a
+     three-column layout.
+     The real constraint is the gap between the two columns that flank it, so measure that. */
+  /* A flex row that has not wrapped is exactly as tall as its tallest child. Anything more and a
+     child has been pushed onto a second line — which is the state this whole mechanism exists to
+     prevent, and the one thing that was never actually being measured. */
+  function railWrapped(){
+    var hero = tb.parentElement;
+    if (!hero || !hero.clientHeight) return false;
+    var cs = getComputedStyle(hero);
+    var inner = hero.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    var tallest = 0;
+    Array.prototype.forEach.call(hero.children, function(c){
+      var h = c.getBoundingClientRect().height;
+      if (h > tallest) tallest = h;
+    });
+    return tallest > 0 && inner > tallest + 2;
+  }
+
+  // Enough room that unfolding cannot immediately re-wrap. Without it the bar sits on the
+  // boundary and alternates on every resize tick.
+  var UNFOLD_SLACK = 28;
+
+  function availWidth(){
+    var hero = tb.parentElement;
+    if (!hero || !hero.clientWidth) return 0;
+    var cs = getComputedStyle(hero);
+    var gap = parseFloat(cs.columnGap || cs.gap) || 0;
+    var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var L = hero.querySelector('.spy-hero-l'), R = hero.querySelector('.spy-hero-r');
+    var used = (L ? L.offsetWidth : 0) + (R ? R.offsetWidth : 0);
+    return hero.clientWidth - pad - used - gap * 2;
+  }
+
   function fit(){
     if (busy) return;
-    var avail = tb.clientWidth;
+    var avail = availWidth();
     if (!avail) return;                                // chart view not on screen yet; RO will call back
     if (matchMedia('(max-width:768px)').matches) {      // phones already fold via the media query
       tb.classList.remove('ctb-compact'); lastW = avail; return;
@@ -4204,15 +4244,32 @@ function _paintCtb(){
     }
     if (!NAT) return;
     busy = true;
-    // 2px of slack: sub-pixel widths sum to a hair over the container and would fold a bar that fits.
-    tb.classList.toggle('ctb-compact', NAT > avail + 2);
+    /* ⚠ FOLD ON THE OBSERVED WRAP, NOT ON ARITHMETIC THAT TIES.
+       Comparing NAT to a computed available width produced avail 1423 / NAT 1423 — a dead heat, so
+       the bar declined to fold while the rail visibly sat on two rows. Predicting a flex wrap to
+       the pixel means reproducing the layout algorithm, sub-pixel rounding included, and then
+       being wrong by a hair in exactly the case that matters. The browser already knows the
+       answer: a flex row that has not wrapped is exactly as tall as its tallest child.
+       Hysteresis keeps it from flapping: fold the moment it wraps, and unfold only when there is
+       real room to spare, never at the boundary where the two states each look correct. */
+    var wrapped = railWrapped();
+    var folded = tb.classList.contains('ctb-compact');
+    var next = folded ? !(NAT + UNFOLD_SLACK <= avail) : wrapped;
+    try {
+      window.__ctbFit = { avail: Math.round(avail), NAT: Math.round(NAT),
+                          wrapped: wrapped, folded: next };
+    } catch (_e) {}
+    tb.classList.toggle('ctb-compact', next);
     lastW = avail;
     busy = false;
   }
 
+  /* The observer's early-out compares against what fit() actually measures. Left on
+     tb.clientWidth it would skip the recompute in exactly the case this fix exists for: the rail
+     rewraps, the toolbar's own width is unchanged, and nothing re-runs. */
   new ResizeObserver(function(){
     // Width only. Folding changes the bar's HEIGHT, which would re-enter this observer forever.
-    if (tb.clientWidth === lastW) return;
+    if (availWidth() === lastW) return;
     fit();
   }).observe(tb);
 
