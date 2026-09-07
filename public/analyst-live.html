@@ -144,7 +144,26 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
     padding: 7px 12px; border-radius: 9px; cursor: pointer; }
   .lv-gear:hover { border-color: #22d3ee; color: var(--txt1); }
   @media (pointer: coarse) { .lv-gear { margin-left: auto; } }
-  @media (max-width: 560px) { .lv-gear { margin-left: 0; } }
+  /* ⚠ ICON ONLY ON MOBILE, TOP RIGHT — matching the crypto map (Jake, 2026-09-06). The word
+     costs more width than it earns once the bar is this tight, and this header also carries the
+     brand, Dr. NoVo and LIVE. margin-left:auto is KEPT here, unlike the old rule that zeroed it:
+     zeroing it is what let the gear drift in from the right edge on a phone. The button keeps its
+     aria-label, so hiding the word costs a sighted user nothing and a screen-reader user nothing.*/
+  @media (max-width: 560px) {
+    /* ⚠ THE GEAR STAYS ON THE FIRST ROW, with the logo and Dr. NoVo (Jake, 2026-09-06). .lv-top
+       already wraps, so without an explicit order the gear falls to the second line and sits beside
+       MARKET CLOSED -- which is where it landed on the first attempt. Ordering every child fixes
+       the row it lands on; ordering only some is what put the crypto header in backwards, because
+       any child left at the default 0 sorts ahead of everything given a positive order. */
+    .lv-brand        { order: 1; }
+    #novo-ask-bubble { order: 2; }
+    .lv-gear         { order: 3; margin-left: auto; padding: 7px 10px; font-size: 13px; }
+    .lv-gear .gl     { display: none; }
+    /* the session line drops to its own row underneath, left-aligned under the wordmark --
+       justify-content is explicit because .lv-status carries flex-end for the desktop row */
+    .lv-status       { order: 4; flex: 0 0 100%; margin: 0; justify-content: flex-start; }
+    #novo-keys-hint  { order: 5; }
+  }
   .lv-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.6); opacity: 0; pointer-events: none;
     transition: opacity .2s ease; z-index: 70; }
   .lv-scrim.on { opacity: 1; pointer-events: auto; }
@@ -551,7 +570,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span id="sess" class="lv-sess"></span>
       </div>
       <div id="novo-keys-hint"></div>
-      <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881; Settings</button>
+      <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
     </div>
 
     <!-- market ribbon -->

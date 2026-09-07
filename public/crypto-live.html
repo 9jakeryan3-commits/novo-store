@@ -432,6 +432,26 @@ tr:last-child td{border-bottom:none}
      and it shows on a phone: the brand stacked to three lines, the venue table pushed the
      panel sideways, and the ask pill sat on top of the last row of content. */
   @media (max-width:560px){
+    /* ⚠ MOBILE HEADER ORDER (Jake, 2026-09-06): LIVE drops BELOW the wordmark, as on the analyst.
+       The header is one flex row, so on a phone the brand, Dr. NoVo, LIVE and the gear compete for
+       ~340px and LIVE ends up wedged against the button. flex-wrap plus a full-width basis on
+       .lv-status puts it on its own line under the brand without touching the desktop row.
+       order is explicit rather than relying on source order, because the gear must stay on the
+       FIRST line at the right -- which is the second half of what Jake asked for. */
+    header{flex-wrap:wrap;row-gap:6px}
+    .lv-brand{order:1}
+    #novo-ask-bubble{order:2}
+    .lv-gear{order:3;margin-left:auto}
+    /* justify-content is explicit: .lv-status inherits margin-left:auto from the desktop row,
+       which on its own wrapped line pushes LIVE to the right edge instead of sitting under the
+       wordmark where Jake asked for it. */
+    .lv-status{order:4;flex:0 0 100%;margin:0;padding-left:2px;justify-content:flex-start}
+    /* ⚠ EVERY CHILD NEEDS AN ORDER ONCE ANY CHILD HAS ONE. Default order is 0, so the one element
+       I did not name -- the keyboard hint -- sorted BEFORE the brand and the header rendered
+       backwards: Ctrl-K, ?, logo, Dr. NoVo. It is display:none on a real phone (pointer:coarse),
+       which is exactly why it was easy to miss: the bug only appears on a device that has a
+       keyboard AND a narrow screen. Named explicitly rather than left to the default. */
+    #novo-keys-hint{order:5}
     .wm-1{font-size:15px}
     .wm-2{font-size:8px;letter-spacing:2.1px}
     .lv-brand img{height:22px}
@@ -443,6 +463,13 @@ tr:last-child td{border-bottom:none}
     /* the word costs more width than it earns once the bar is this tight */
     .lv-gear{padding:7px 10px;font-size:13px}
     .lv-gear .gl{display:none}
+    /* ⚠ THE CHIPS GO ABOVE THE PRICE, not beside it. #headmeta is margin-left:auto in a flex row,
+       so on a phone it wraps to its own line BELOW the price and the block reads
+       symbol / price / chips -- three stacked left-aligned rows with the chips orphaned at the
+       bottom. Ordering it first puts the qualifiers above the number they qualify, which is also
+       the reading order: what kind of read this is, then the read. */
+    #head{flex-wrap:wrap;align-items:baseline;row-gap:6px}
+    #headmeta{order:-1;flex:0 0 100%;margin-left:0}
     #sym{font-size:30px}
     #px{font-size:17px}
     /* Wide tables scroll inside their own panel rather than stretching it. */
