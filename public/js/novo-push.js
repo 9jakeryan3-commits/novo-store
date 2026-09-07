@@ -30,6 +30,21 @@
 
   function tok() { try { return localStorage.getItem('novo_live_t') || ''; } catch (_) { return ''; } }
 
+  /* WHICH DASHBOARD THIS DEVICE REGISTERED FROM, taken from the service worker's own scope.
+     Jake, 2026-09-07: "zero Dr. NoVo features are per app gated, Dr. NoVo can do all the same
+     things in each app that is very important."
+     Every per-member push — a fired alert, the morning digest — used to open /analyst/live, which
+     a crypto-only or trader-only member cannot open at all. The endpoint is the wrong thing to ask,
+     because it says nothing about the product; the SCOPE is exact, and it is per DEVICE, so a
+     notification opens the dashboard the person was actually standing on when they turned push on.
+     Falls back to null rather than guessing: the server treats a missing app as legacy. */
+  function appOf(reg) {
+    try {
+      var m = String((reg && reg.scope) || '').match(/\/(analyst|crypto|trader)\//);
+      return m ? m[1] : null;
+    } catch (_) { return null; }
+  }
+
   function u2a(s) {
     var p = '='.repeat((4 - s.length % 4) % 4), b = (s + p).replace(/-/g, '+').replace(/_/g, '/');
     var r = atob(b), o = new Uint8Array(r.length);
@@ -49,7 +64,7 @@
         || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u2a(kr.key) });
       var res = await fetch('/api/analyst-publish?push=subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: t, sub: sub }) });
+        body: JSON.stringify({ token: t, sub: sub, app: appOf(reg) }) });
       if (res.ok) localStorage.setItem('novo_analyst_push', '1');
       return res.ok;
     } catch (e) { return false; }

@@ -78,6 +78,32 @@ function alertsBody() {
 
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]);
+  /* The dashboards are served at /analyst/live etc. in production, NOT at the .html path. That is
+     load-bearing for the scope check below: a worker at /analyst/sw.js can only control pages under
+     /analyst/, so navigator.serviceWorker.ready never resolves for /analyst-live.html and the check
+     failed against a perfectly correct page. Mirrored so the harness asks the question the real
+     origin answers. */
+  {
+    const mrw = rel.match(/^\/(analyst|crypto|trader)\/live$/);
+    if (mrw) {
+      const f = path.join(PUBLIC, mrw[1] + '-live.html');
+      if (fs.existsSync(f)) {
+        res.writeHead(200, { 'content-type': 'text/html', 'cache-control': 'no-store' });
+        res.end(fs.readFileSync(f)); return;
+      }
+    }
+  }
+  /* The service workers are vercel.json REWRITES in production (/analyst/sw.js -> /analyst-sw.js),
+     so a plain static server 404s them and registration fails — which would make the scope check
+     below fail against a correct page. Mirrored here. */
+  if (/^\/(analyst|crypto|trader)\/sw\.js$/.test(rel)) {
+    const f = path.join(PUBLIC, rel.split('/')[1] + '-sw.js');
+    if (fs.existsSync(f)) {
+      res.writeHead(200, { 'content-type': 'text/javascript', 'cache-control': 'no-store',
+                           'service-worker-allowed': '/' });
+      res.end(fs.readFileSync(f)); return;
+    }
+  }
   if (rel === '/__reset-alerts') {
     /* THE STUB IS MUTABLE AND THE CANCEL TEST MUTATES IT. Without this the cross-dashboard section
        ran against one leftover alert and failed looking for the one it had itself deleted three
@@ -800,6 +826,30 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Jake: "the Dr. NoVo tab does need a help button that opens and tells them all the features and
      things they can do with Dr. NoVo a button next to the plain English button", and the digest is
      managed there rather than on Alerts. */
+  // ══ A PUSH OPENS THE DASHBOARD IT CAME FROM ═══════════════════════════════════════════════
+  /* The app is read from the service worker's own scope, so this checks the INPUT to that: each
+     dashboard registers a worker whose scope names it. Get this wrong — two pages registering the
+     same scope, say — and every subscription would be stamped with one product's name and the
+     server-side url logic would be perfectly correct about the wrong thing. */
+  console.log('\nEach dashboard registers its own scope\n');
+  for (const [page, want] of [['trader-live.html', 'trader'],
+                              ['analyst-live.html', 'analyst'],
+                              ['crypto-live.html', 'crypto']]) {
+    /* At its PRODUCTION path, so the worker's scope actually covers the page. */
+    await B.goto(base + '/' + page.split('-')[0] + '/live', 430, 900);
+    const sw = await B.evalIn(`(async () => {
+      try {
+        const reg = await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise((r) => setTimeout(() => r(null), 4000))]);
+        if (!reg) return { scope: null };
+        const m = String(reg.scope || '').match(/\\/(analyst|crypto|trader)\\//);
+        return { scope: reg.scope, app: m ? m[1] : null };
+      } catch (e) { return { err: String(e).slice(0, 80) }; } })()`);
+    ok(page.split('-')[0] + ': registers a service worker scoped to its own dashboard',
+      sw.app === want, JSON.stringify(sw));
+  }
+
   console.log('\nDr. NoVo\u2019s help panel\n');
   for (const [page, openChat] of [
       ['trader-live.html', `switchMobileTab(4)`],

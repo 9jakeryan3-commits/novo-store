@@ -685,8 +685,8 @@ export default async function handler(req, res) {
   // Save a signed-in member's device push subscription (member-token auth, NOT the owner secret). Stored at an
   // unguessable (endpoint-hashed) public blob path; the send fan-out lists them by prefix (server-token only).
   if (req.method === 'POST' && req.query && req.query.push === 'subscribe') {
-    let tokenV = '', sub = null;
-    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); tokenV = String(b.token || ''); sub = b.sub || null; } catch (_) {}
+    let tokenV = '', sub = null, _app = '';
+    try { const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); tokenV = String(b.token || ''); sub = b.sub || null; _app = String(b.app || ''); } catch (_) {}
     const _pEmail = _verifyToken(tokenV);
     if (!_pEmail) return res.status(401).json({ error: 'unauthorized' });
     if (!sub || !sub.endpoint) return res.status(400).json({ error: 'bad subscription' });
@@ -720,6 +720,13 @@ export default async function handler(req, res) {
           try { cur = await r2.get('push:u:' + ehash); } catch (_) { cur = null; }
           if (typeof cur === 'string') { try { cur = JSON.parse(cur); } catch (_) { cur = null; } }
           const list = (Array.isArray(cur) ? cur : []).filter((s) => s && s.endpoint !== sub.endpoint);
+          // WHICH DASHBOARD THIS DEVICE IS. Carried on the subscription itself, so every
+          // person-addressed push can open a page this member can actually reach — /analyst/live is
+          // a dead end for a crypto-only or trader-only subscriber. Allowlisted, because it is
+          // client-supplied and ends up in a URL. Absent = legacy; the sender falls back and the
+          // next refresh() on any dashboard stamps it.
+          const APPS = ['analyst', 'crypto', 'trader'];
+          if (APPS.includes(_app)) sub.app = _app;
           list.push(sub);
           await r2.set('push:u:' + ehash, JSON.stringify(list.slice(-5)), { ex: 270 * 24 * 3600 });
         }

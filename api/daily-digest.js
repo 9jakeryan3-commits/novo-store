@@ -139,6 +139,7 @@ module.exports = async (req, res) => {
   const r = kvf();
   if (!r) return res.status(200).json({ ok: false, note: "kv unavailable" });
   const { getMemory } = require("./_lib/member-memory.js");
+  const { pushUrl } = require("./_lib/alerts.js");
   const { vertex } = require("./_vertex.js");
   const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
 
@@ -236,10 +237,11 @@ module.exports = async (req, res) => {
         // ⚠ A url, SO TAPPING IT LANDS SOMEWHERE. Without one the service worker falls back to
         // /analyst/live — the dashboard, which shows no digest anywhere — so the notification read
         // as a message from nothing. It opens the Dr. NoVo tab, where the digest is managed.
-        // KNOWN LIMIT, SAID RATHER THAN HIDDEN: this is hardcoded to the ANALYST dashboard, so a
-        // crypto-only member's digest notification lands somewhere they cannot open. The cron does
-        // not currently know which product a member holds; wiring that is a separate change.
-        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: "/analyst/live#novo" })); sent++; }
+        // PER SUBSCRIPTION. It was hardcoded to /analyst/live, which a crypto-only member cannot
+        // open — Jake: "zero Dr. NoVo features are per app gated". The device's own service-worker
+        // scope is stored on the subscription at registration, so this opens the dashboard the
+        // person was standing on when they turned push on.
+        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: pushUrl(s, "#novo") })); sent++; }
         catch (_) {}
       }
     } catch (_) { errors++; }

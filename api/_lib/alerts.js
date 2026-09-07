@@ -25,6 +25,23 @@ const COOLDOWN_MS = 60 * 60 * 1000;        // recurring level alerts: at most on
 const BLOCK_COOLDOWN_MS = 30 * 60 * 1000;  // block alerts: a whale day is not 40 pushes
 const BLOCK_MIN_USD_FLOOR = 100000;        // below this the "block" tape is ordinary prints
 const EQ_TICKERS = new Set(["SPY", "QQQ", "IWM"]);
+// WHERE A PUSH OPENS. One function, exported, because the digest cron sends the other kind of
+// person-addressed push and two copies of this would drift the first time a fourth dashboard
+// appears — one product would quietly keep opening a page its members cannot reach, which is the
+// exact bug this replaces.
+//
+// The app is stored ON THE SUBSCRIPTION at registration, taken from that device's service-worker
+// scope (api/analyst-publish.js?push=subscribe). Per DEVICE, not per member: someone holding two
+// products with a device on each gets each notification on the dashboard that device belongs to.
+//
+// Absent or unrecognised falls back to analyst — the behaviour before this existed. Legacy
+// subscriptions carry no app, and they self-heal: novoPush.refresh() re-registers an opted-in
+// browser on every dashboard load, stamping the app as it goes.
+const APPS = new Set(["analyst", "crypto", "trader"]);
+function pushUrl(sub, hash) {
+  const app = sub && APPS.has(sub.app) ? sub.app : "analyst";
+  return "/" + app + "/live" + (hash || "");
+}
 const NAMED_LEVELS = new Set(["flip", "call_wall", "put_wall"]);
 // The crypto map publishes these on every coin with a real options book. flip maps to the
 // snapshot's flip_zone; max_pain exists on crypto (settled daily at 08:00 UTC) so it earns
@@ -238,7 +255,11 @@ async function _push(email, title, body) {
   let sent = 0;
   for (const s of subs.slice(0, 5)) {
     try {
-      await webpush.sendNotification(s, JSON.stringify({ title, body, tag: "novo-alert" }));
+      // PER SUBSCRIPTION, not per member: a member can hold two products and have a device on
+      // each, and the notification should open the one that device belongs to. Without this every
+      // alert opened /analyst/live, which a crypto-only subscriber cannot open at all.
+      await webpush.sendNotification(s, JSON.stringify({
+        title, body, tag: "novo-alert", url: pushUrl(s, "#alerts") }));
       sent++;
     } catch (_) { /* dead sub - left for the next re-subscribe to replace */ }
   }
@@ -429,4 +450,4 @@ async function evaluateCrypto(snap) {
   } catch (_) {}
 }
 
-module.exports = { setAlert, listAlerts, cancelAlert, evaluateEquity, evaluateCrypto, eh };
+module.exports = { setAlert, listAlerts, cancelAlert, evaluateEquity, evaluateCrypto, eh, pushUrl };
