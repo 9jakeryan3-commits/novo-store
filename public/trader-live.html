@@ -1353,12 +1353,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      ~56% of the real viewport (dvh, so the address bar doesn't lie), floored and capped. The
      overlays shrink with it: the OHLCV legend was clipping its change% off the right edge at
      412px. */
-  /* 56dvh -> 67dvh, and the floor and cap move with it (Jake, 2026-09-07: "make the mobile
-     chart taller, like 20% more height"). All three move together on purpose: raising only
-     the percentage leaves a 640px cap that silently eats the increase on any phone taller
-     than ~955px, which is most current handsets -- the change would appear to do nothing on
-     exactly the devices it was asked for. dvh so the address bar does not lie. */
-  #novo-chart { height: 67dvh !important; min-height: 480px; max-height: 768px; }
+  /* 56dvh -> 67dvh -> 74dvh, floor and cap moving with it each time (Jake, 2026-09-07: "make
+     the mobile chart taller, like 20% more height", then "make the chart 10% taller on mobile").
+     TEN PERCENT OF THE CURRENT HEIGHT, not ten points added: 67 x 1.1 = 73.7, so 74dvh, with the
+     floor and cap scaled by the same factor. All three move together on purpose -- raising only
+     the percentage leaves a cap that silently eats the increase on any phone tall enough to hit
+     it, which is most current handsets, and the change appears to do nothing on exactly the
+     devices it was asked for. dvh so the address bar does not lie. */
+  #novo-chart { height: 74dvh !important; min-height: 528px; max-height: 845px; }
   #chart-legend2 { font-size: 9.5px; letter-spacing: 0; }
   #novo-chip { top: 24px; }
   #novo-chip .c-reg { font-size: 8.5px; }
@@ -2392,8 +2394,17 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         /* !important + child selectors: `#card-spy #novo-chart { flex:1 1 auto }` (two ids) otherwise
            outranks this, basis:auto resolves to the inline width:100%, and pane 2 collapses to 0px. */
         #chart-split > #novo-chart, #chart-split > #novo-chart2 { min-width: 0; flex: 1 1 0 !important; width: auto !important; }
-        #card-spy #chart-split { flex: 1 1 auto; min-height: 0; }
-        #card-spy #chart-split > #novo-chart, #card-spy #chart-split > #novo-chart2 { height: auto !important; align-self: stretch; }
+        /* ⚠ DESKTOP ONLY, AND IT NEVER SAID SO. These two rules give the split wrapper the
+           card's flex role, which is a DESKTOP arrangement - split view only exists at 1100px+.
+           But they carried no media condition, and #novo-chart is re-parented into #chart-split
+           on every viewport, so `height: auto !important` at two IDs quietly outranked the phone
+           rule at one ID. The mobile chart height has therefore been governed by its min-height
+           floor alone: raising 56dvh to 67dvh changed nothing on a phone, which is why the same
+           request had to be made twice. Guarded now. */
+        @media (min-width: 769px) {
+          #card-spy #chart-split { flex: 1 1 auto; min-height: 0; }
+          #card-spy #chart-split > #novo-chart, #card-spy #chart-split > #novo-chart2 { height: auto !important; align-self: stretch; }
+        }
         #novo-chart2 { display: none; position: relative; border-radius: 7px; overflow: hidden;
           border: 1px solid var(--bdr2); background: rgba(0,0,0,0.25); box-shadow: 0 1px 6px rgba(0,0,0,0.25); }
         #ctb-split { display: none; }

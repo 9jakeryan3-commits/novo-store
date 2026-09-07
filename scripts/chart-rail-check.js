@@ -94,6 +94,45 @@ server.listen(8795, async () => {
       wrapped: Math.round(hr.height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom))
                > Math.max.apply(null, Array.from(hero.children).map(c => c.getBoundingClientRect().height)) + 2,
       fitDebug: window.__ctbFit || null,
+      // THE CHART ITSELF. Height in px and as a share of the viewport, plus whether the taller
+      // pane has pushed anything off-screen — a chart that grows by shoving the tab bar past the
+      // fold is not the change that was asked for.
+      chartH: (function(){ var c = document.getElementById('novo-chart');
+        return c ? Math.round(c.getBoundingClientRect().height) : 0; })(),
+      chartPct: (function(){ var c = document.getElementById('novo-chart');
+        return c ? Math.round(c.getBoundingClientRect().height / innerHeight * 100) : 0; })(),
+      barBottom: (function(){ var b = document.querySelector('#mobile-tabs, .mob-tab');
+        b = b && (b.id === 'mobile-tabs' ? b : b.parentElement);
+        return b ? Math.round(b.getBoundingClientRect().bottom) : null; })(),
+      docOverflowX: document.documentElement.scrollWidth > innerWidth + 1,
+      // WHAT ACTUALLY APPLIED, from the browser, rather than from reading the stylesheet.
+      chartCss: (function(){ var c = document.getElementById('novo-chart'); if (!c) return null;
+        var g = getComputedStyle(c);
+        return { height: g.height, minH: g.minHeight, maxH: g.maxHeight, display: g.display,
+                 inline: c.getAttribute('style') || '', parent: c.parentElement && (c.parentElement.id || c.parentElement.className) }; })(),
+      // WHICH RULE WON. Reading the stylesheet by eye is how the last hour went; this walks the
+      // live CSSOM for every rule that sets a height on #novo-chart and reports whether its media
+      // condition currently matches. The winner is the last matching one by specificity order.
+      chartRules: (function(){
+        var out = [];
+        for (var i = 0; i < document.styleSheets.length; i++) {
+          var sh; try { sh = document.styleSheets[i].cssRules; } catch (e) { continue; }
+          (function walk(rules, media){
+            for (var j = 0; j < rules.length; j++) {
+              var r = rules[j];
+              if (r.media) { walk(r.cssRules, r.conditionText || r.media.mediaText); continue; }
+              if (!r.selectorText || r.selectorText.indexOf('novo-chart') < 0) continue;
+              var h = r.style && (r.style.getPropertyValue('height') || r.style.getPropertyValue('min-height'));
+              if (!h) continue;
+              out.push({ sel: r.selectorText.slice(0, 60), h: r.style.getPropertyValue('height'),
+                         imp: r.style.getPropertyPriority('height'),
+                         minH: r.style.getPropertyValue('min-height'),
+                         media: media || '(none)',
+                         matches: media ? matchMedia(media).matches : true });
+            }
+          })(sh, null);
+        }
+        return out; })(),
       folded: tb ? tb.classList.contains('ctb-compact') : null,
     }; })()`;
 
@@ -116,6 +155,11 @@ server.listen(8795, async () => {
   ok('buttons stay tappable on a phone (>= 28px)', phone.btnH >= 28, 'h=' + phone.btnH);
   ok('the desktop toolbar still fits on one line', desk.toolbarWrapped === false, String(desk.toolbarWrapped));
   ok('the price is still the loudest thing on the rail', desk.priceSize >= 19, String(desk.priceSize));
+  ok('the mobile chart is ~74% of the viewport', phone.chartPct >= 70 && phone.chartPct <= 78,
+     JSON.stringify({ pct: phone.chartPct, px: phone.chartH, vh: 900 }));
+  ok('...and the tab bar is still on screen, not pushed past the fold',
+     phone.barBottom !== null && phone.barBottom <= 902, String(phone.barBottom));
+  ok('...and nothing scrolls sideways', phone.docOverflowX === false, String(phone.docOverflowX));
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
   try { proc.kill(); } catch (_) {}
   server.close();
