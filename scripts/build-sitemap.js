@@ -49,16 +49,42 @@ const redirects = new Set(
 // ~1,100 processes; this is one.
 const lastmod = new Map();
 try {
-  const log = execSync('git log --name-only --format=%x00%cs --diff-filter=AM -- public', {
+  // ── lastmod SKIPS MECHANICAL COMMITS ─────────────────────────────────────────
+  // Every CSS/JS change runs stamp-assets.js, which rewrites the ?v= hash inside
+  // ~1,430 pages, and that commit used to become their lastmod. On 2026-09-06 alone
+  // there were EIGHT such commits, four touching 1,291-1,432 files, so the sitemap
+  // told Google that 1,300 pages changed several times in one day while the prose
+  // had not moved in weeks. lastmod is a crawl-prioritisation hint; a hint that is
+  // demonstrably wrong gets discounted, which is the opposite of what a site with
+  // 1,275 newly-published URLs needs.
+  //
+  // This is the same disease the RSS feed already treats further down ("any
+  // mechanical site-wide commit re-dated all 1,287 articles and every subscriber
+  // saw the same 40 arrive as new") -- the feed's cure was datePublished, which is
+  // right for a feed and wrong here, because a genuinely edited page SHOULD show a
+  // newer lastmod. So instead: walk each file's history newest-first and take the
+  // first commit that is not a generated one.
+  //
+  // Checked before shipping: all 1,653 files in public/ have at least one
+  // non-generated commit, so nothing loses its date. If that ever stops being true
+  // the fallback at the call site is `|| today`, which is the old behaviour.
+  const MECHANICAL = /^generated:/i;
+  const log = execSync('git log --name-only --format=%x00%cs\x1f%s --diff-filter=AM -- public', {
     cwd: ROOT, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024,
   });
   let date = null;
+  let mechanical = false;
   for (const line of log.split('\n')) {
     // %x00 emits a NUL ahead of each date line. Tested by charCode, not by a literal in
     // the source -- an embedded NUL makes git call this file binary and hides its diffs.
-    if (line.charCodeAt(0) === 0) { date = line.slice(1).trim(); continue; }
+    if (line.charCodeAt(0) === 0) {
+      const parts = line.slice(1).split('\x1f');
+      date = (parts[0] || '').trim();
+      mechanical = MECHANICAL.test((parts[1] || '').trim());
+      continue;
+    }
     const f = line.trim();
-    if (f && date && !lastmod.has(f)) lastmod.set(f, date);   // log is newest-first
+    if (f && date && !mechanical && !lastmod.has(f)) lastmod.set(f, date);   // log is newest-first
   }
 } catch (e) {
   console.error('  ! git log failed (' + e.message.split('\n')[0] + ') -- lastmod will be omitted');
@@ -111,7 +137,19 @@ for (const abs of walk(PUB)) {
     : depth <= 1 ? '0.8' : '0.7';
 
   const prev = entries.get(url);
-  const mod = lastmod.get('public/' + rel) || today;
+  // ── THE PAGE'S OWN dateModified OUTRANKS ITS COMMIT DATE ────────────────────
+  // 1,281 of 1,435 pages state a dateModified in their JSON-LD, and it is the real
+  // one: what-is-max-pain says 2026-07-18, spy-vs-spx-0dte says 2026-01-23. The git
+  // date said 2026-09-06 for both, because a site-wide chrome sweep touched every
+  // file that day. So the site was telling Google two different things about the
+  // same page -- and Google trusts the page, then learns the sitemap is noise.
+  // Filtering `generated:` commits above is necessary but not sufficient: plenty of
+  // site-wide commits are legitimate (a copy sweep, a nav change) and still say
+  // nothing about whether the ARTICLE changed. The page's own declaration does.
+  // Falls back to the commit date for the ~154 pages that declare nothing, which is
+  // mostly hubs and legal pages.
+  const declared = (html.match(/"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})/) || [])[1];
+  const mod = declared || lastmod.get('public/' + rel) || today;
   if (!prev || mod > prev.lastmod) entries.set(url, { lastmod: mod, priority });
 }
 
