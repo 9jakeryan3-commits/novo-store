@@ -266,23 +266,31 @@ and data looks like it sits on the page" -- KEEPING THE FRAME. The border and ra
 the lift goes, so the panel reads as a hairline outline around data sitting on the page rather
 than a raised slab. Not var(--panel): that token still fills .lv-ribbon, the futures strip,
 which Jake explicitly carved out. */
-  .lv-card { background: #09090b; border: 1px solid var(--bdr2); border-radius: 14px; padding: 16px 18px; }
+  /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07). Hairlines and type, never an outline. */
+  .lv-card { background: none; border: 0; border-top: 1px solid var(--bdr2); border-radius: 0;
+             padding: 20px 0 6px; }
+  #dash > .lv-card:first-of-type { border-top: 0; }
   .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
-  .lv-card img.chart { width: 100%; border-radius: 8px; border: 1px solid var(--bdr); display: block; }
+  .lv-card img.chart { width: 100%; border-radius: 0; border: 0; display: block; }
   /* dealer tiles */
   .lv-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   /* ⚠ NO FILL. --navy against the .lv-card it sits in measures 1.022 -- no separation at all -- while
      its hairline runs 1.387. The border carries ~17x the signal, so the fill was the redundant
      channel here, not the border. Do not "finish the job" by removing the border too. */
-  .lv-tile { border: 1px solid var(--bdr); border-radius: 10px; padding: 12px 14px; }
+  /* The ticker switchers. Two outlined boxes side by side were the loudest thing above the
+     read; they are two columns of type now, told apart by spacing and weight. */
+  .lv-tile { border: 0; border-radius: 0; padding: 12px 0 4px; }
   .lv-tile .k { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .lv-tile .v { font-size: 20px; font-weight: 800; color: var(--txt1); font-family: var(--display); margin-top: 3px; }
   .lv-tile .s { font-size: 11.5px; color: var(--txt2); margin-top: 2px; line-height: 1.35; }
   /* DEALER MAP — call wall / flip / spot / gravity / put wall are POSITIONS ON A PRICE AXIS, not five
      equal boxes. Rendering them as a rail in true price order, with spot in its real place, makes
      "where am I and what is above/below me" one glance instead of five separate reads. */
-  .dm-regime { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:11px 14px; margin:0 0 12px;
-               border:1px solid var(--bdr); border-radius:10px; background:var(--navy); }
+  /* The regime strip: the audit caught this one after I had already called the page de-boxed,
+     which is the whole argument for walking every element instead of a list of classes I
+     remembered. Hairline under, no outline. */
+  .dm-regime { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:11px 0 12px;
+    margin:0 0 12px; border:0; border-bottom:1px solid var(--bdr2); border-radius:0; background:none; }
   .dm-regime .rg-v { font-size:24px; font-weight:900; font-family: var(--display); letter-spacing:-.5px; }
   .dm-regime .rg-k { font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--txt3); }
   /* The sentence will never share a line with a 24px value inside a ~500px column, so it stops
@@ -410,8 +418,9 @@ which Jake explicitly carved out. */
   .lv-bias .bias-row:first-child { border-top:0; padding-top:2px; }
   .lv-bias .bk { font-size:11px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase;
     color:var(--txt3); flex:0 0 auto; min-width:78px; }
-  .lv-bias .bpill { display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.1em;
-    text-transform:uppercase; padding:4px 11px; border-radius:999px; }
+  .lv-bias .bpill { display:inline-block; font-size:12px; font-weight:800; letter-spacing:.12em;
+    text-transform:uppercase; padding:0; border-radius:0; background:none !important;
+    border:0 !important; }
   .lv-bias .bage { font-size:11px; color:var(--txt3); }
   .lv-bias .bsc { flex-basis:100%; font-size:12px; color:var(--txt2); line-height:1.5; }
   .lv-bias .bsc b { color:var(--txt1); }
@@ -452,7 +461,8 @@ which Jake explicitly carved out. */
     .lv-bottom .b-strip { grid-column: 1; grid-row: auto; order: 2; }
     .lv-bottom .b-line  { grid-column: 1; grid-row: auto; order: 3; }
   }
-  .lv-mini { background: #09090b; border: 1px solid var(--bdr2); border-radius: 12px; padding: 16px 20px; cursor: pointer; }
+  .lv-mini { background: none; border: 0; border-top: 1px solid var(--bdr2); border-radius: 0;
+             padding: 18px 0 6px; cursor: pointer; }
   .lv-mini.on { border-color: rgba(34,211,238,.5); }
   .lv-mini:hover { border-color: rgba(34,211,238,.45); background: rgba(34,211,238,.05); }
   .strip-hd { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: 2px;
@@ -464,7 +474,7 @@ which Jake explicitly carved out. */
   .lv-feed li { border-top: 1px solid var(--bdr); padding: 9px 0; font-size: 13px; color: var(--txt2); line-height: 1.5; }
   .lv-feed li .ts { color: #22d3ee; font-weight: 700; font-size: 11.5px; margin-right: 6px; }
   .lv-feed li .now { color: var(--txt3); }
-  .lv-feed li .lbias { font-size: 9.5px; font-weight: 800; letter-spacing: .07em; padding: 2px 7px; border-radius: 999px; margin-left: 7px; vertical-align: 1px; }
+  .lv-feed li .lbias { font-size: 9.5px; font-weight: 800; letter-spacing: .07em; padding: 0; border-radius: 0; margin-left: 7px; vertical-align: 1px; }
   .lv-feed li .ln { display: block; margin: 5px 0 0 4px; padding-left: 9px; border-left: 2px solid var(--bdr); font-size: 12.5px; color: var(--txt2); }
   .lv-feed li .ln.watch { border-left-color: #22d3ee; color: #cfe6f2; }
   .lv-read { margin-top: 16px; }   /* space between The Line (mobile) / the strip (desktop) and the Latest Read */
@@ -503,7 +513,7 @@ which Jake explicitly carved out. */
      the loudest row on the page a set of numbers NoVo does not even compute. It is context, so it is
      now one thin segmented strip: a single container, hairline dividers, values inline. */
   .lv-ribbon { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; margin: 0 0 14px;
-               background: var(--panel); border: 1px solid var(--bdr2); border-radius: 10px; }
+               background: none; border: 0; border-bottom: 1px solid var(--bdr2); border-radius: 0; }
   .lv-ribbon::-webkit-scrollbar { height: 0; }
   .rib { position: relative; flex: 1 0 auto; padding: 9px 15px; display: flex; align-items: baseline;
          gap: 8px; white-space: nowrap; }
@@ -513,7 +523,7 @@ which Jake explicitly carved out. */
            margin-left: auto; font-variant-numeric: tabular-nums; }
   .rib-c { font-size: 11px; font-weight: 700; }
   /* VIX fear gauge */
-  .lv-fear { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--bdr); border-radius: 10px; }
+  .lv-fear { margin-top: 12px; padding: 14px 0 4px; border: 0; border-top: 1px solid var(--bdr2); border-radius: 0; }
   .fear-hd { display: flex; align-items: center; justify-content: space-between; }
   .fear-lbl { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--txt3); }
   .fear-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--txt2); }
@@ -1405,8 +1415,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     }
     var c = _BIAS_C[val.bias] || _BIAS_C.NEUTRAL;
     var h = '<div class="bias-row"><span class="bk">' + label + '</span>' +
-            '<span class="bpill" style="background:' + c[0] + ';color:' + c[1] +
-            ';border:1px solid ' + c[2] + ';">' + _escH(val.bias) + '</span>' +
+            /* Colour only. The tint and the outline came from here, which is why the CSS
+               above also has to say !important - an inline style outranks a stylesheet rule. */
+            '<span class="bpill" style="color:' + c[1] + ';">' + _escH(val.bias) + '</span>' +
             '<span class="bage">' + _escH(_biasAge(val.age_min)) + '</span>';
     if (rec && rec.enough && rec.correct_rate != null) {
       h += '<span class="bsc">Right <b>' + rec.correct_rate + '%</b> of the time over ' +
@@ -1786,9 +1797,23 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="read"]   { order: 1; }
     .mob-tab[data-mtab="map"]    { order: 2; }
     .mob-tab[data-mtab="novo"]   { order: 3; }
-    .mob-tab[data-mtab="alerts"] { order: 4; }
-    .mob-tab[data-mtab="digest"] { order: 5; }
-    .mob-tab[data-mtab="predict"] { order: 6; }
+    /* FOUR MAIN, THEN MORE — the same shape Jake set on trader, and the same four roles:
+       the read, the map, NoVo, the digest. Alerts and Predict move behind More. */
+    .mob-tab[data-mtab="digest"] { order: 4; }
+    #mob-more { order: 5; }
+    .mob-tab[data-mtab="alerts"], .mob-tab[data-mtab="predict"] { display: none !important; }
+    /* The More menu. Hairlines and type; the box ban applies here as everywhere. */
+    #more-menu { position: fixed; left: 0; right: 0; z-index: 1001;
+      bottom: calc(var(--navh) + env(safe-area-inset-bottom, 0px));
+      background: var(--bg, #09090b); border-top: 1px solid var(--bdr); }
+    #more-menu[hidden] { display: none; }
+    #more-menu button { display: flex; align-items: center; gap: 11px; width: 100%;
+      padding: 15px 20px; background: none; border: 0; border-top: 1px solid var(--bdr2);
+      color: var(--txt2); font-family: inherit; font-size: 13px; font-weight: 600;
+      letter-spacing: .3px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    #more-menu button:first-child { border-top: 0; }
+    #more-menu button.on { color: var(--txt1); }
+    #more-menu button[hidden] { display: none; }
     /* NO READINGS TAB (Jake, 2026-09-07: "I clearly said analyst will get the live reading strip
        like crypto and no reading tab. the strip click opens the live readings page just like on
        crypto."). The readings VIEW still exists and the strip opens it — it just is not a tab, the
@@ -1994,7 +2019,20 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
     <span>Dr. NoVo</span>
   </button>
+  <button class="mob-tab" id="mob-more" type="button" onclick="toggleMoreMenu()"
+          aria-expanded="false" aria-controls="more-menu">
+    <span class="mob-tab-icon" aria-hidden="true">&#8943;</span>
+    <span>More</span>
+  </button>
 </nav>
+<!-- The overflow. Each row calls lvMobTab with the same name its hidden bar button uses, so a tab
+     has one definition whether you reach it from the bar or the menu. Readings is deliberately
+     absent: on the analyst the STRIP is its door (Jake, 2026-09-07), and a second door in here
+     would contradict that. -->
+<div id="more-menu" hidden>
+  <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
+  <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predict</button>
+</div>
 <script>
 (function(){
   var bar = document.getElementById('mobile-tabs');
@@ -2006,6 +2044,23 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
   var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0 };
+  /* ── THE MORE MENU ─────────────────────────────────────────────────────────────────────── */
+  var MORE_TABS = ['alerts', 'predict'];
+  window.toggleMoreMenu = function(force){
+    var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
+    if (!m || !b) return;
+    var open = (force === undefined) ? m.hasAttribute('hidden') : !!force;
+    if (open) m.removeAttribute('hidden'); else m.setAttribute('hidden', '');
+    b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  window.pickMore = function(which){ window.toggleMoreMenu(false); window.lvMobTab(which); };
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('more-menu');
+    if (!m || m.hasAttribute('hidden')) return;
+    if (m.contains(e.target) || (e.target.closest && e.target.closest('#mob-more'))) return;
+    window.toggleMoreMenu(false);
+  });
+
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
     /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
@@ -2071,6 +2126,15 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
          announce every tab as current on some screen readers. */
       if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
+    /* More carries the state for whatever is hidden behind it, and the chosen row is marked -
+       otherwise landing on Alerts leaves every tab dark and the bar reads as "nothing selected". */
+    try {
+      var mb = document.getElementById('mob-more');
+      if (mb) mb.classList.toggle('mob-active', MORE_TABS.indexOf(live) >= 0);
+      Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
+        r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
+      if (MORE_TABS.indexOf(live) >= 0) window.toggleMoreMenu(false);
+    } catch (_e) {}
   }
   new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
   new MutationObserver(sync).observe(document.body,
@@ -2078,7 +2142,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   sync();
   /* comp seats get the Predictions tab; everyone else never sees it exist */
   window.addEventListener('load', function () {
-    try { window.novoPredict.reveal('.mob-tab[data-mtab="predict"]'); } catch (_e) {}
+    /* The bar button is display:none for everyone now; the MENU row is what a comp seat reaches. */
+    try { window.novoPredict.reveal('#more-menu button[data-mtab="predict"]'); } catch (_e) {}
   });
   /* The morning digest push points at /analyst/live#alerts, so the hash has to mean something or
      the notification lands on the map again -- which is the whole complaint it was meant to fix.

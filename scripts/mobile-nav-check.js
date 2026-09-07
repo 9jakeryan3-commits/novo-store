@@ -408,9 +408,11 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* FIVE. Readings is NOT a tab here (Jake, 2026-09-07: "analyst will get the live reading strip
      like crypto and no reading tab") — it is a view the strip opens, the way the crypto map's
      feed is. This assertion is what stops it, or anything else, quietly reappearing on the bar. */
-  ok('five tabs, in the order Jake asked for \u2014 and Readings is not one of them',
+  /* Four mains and More, matching the shape Jake set on trader. Readings stays off the bar -
+     the strip is its door - and Alerts moved behind More. */
+  ok('five tabs: the four mains Jake numbered, then More',
     bar.tabs.length === 5 &&
-    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest',
+    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Digest|More',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -524,13 +526,15 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
              count: (document.querySelector('#alerts-card .al-n') || {}).textContent || '',
              ribbon: on(document.querySelector('#mkt-ribbon')) }; })()`);
 
-  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="alerts"]').click()`);
+  // Reached through the More menu now, which is the path a member actually takes.
+  await B.evalIn(`pickMore('alerts')`);
   await new Promise((r) => setTimeout(r, 700));
   let al = await alertsView();
   bar = await B.evalIn(READ_BAR);
-  ok('Alerts is its own tab and shows only the alerts',
-    litTab(bar) === 'alerts' && al.cardShown === true && al.ribbon === false,
-    JSON.stringify({ lit: litTab(bar), card: al.cardShown, ribbon: al.ribbon }));
+  const moreLit = await B.evalIn(`document.getElementById('mob-more').classList.contains('mob-active')`);
+  ok('Alerts is its own view, reached from More, showing only the alerts',
+    moreLit === true && al.cardShown === true && al.ribbon === false,
+    JSON.stringify({ moreLit: moreLit, card: al.cardShown, ribbon: al.ribbon }));
   ok('...it lists what is actually being watched',
     al.rows === 2 && al.count.indexOf('2 of 10') >= 0, JSON.stringify(al).slice(0, 220));
   /* The sentence has to be the SERVER'S. If the page ever starts composing its own, the chat and
@@ -957,7 +961,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   console.log('\nThe Alerts tab, on all three dashboards\n');
   for (const [page, open] of [
       ['trader-live.html', `pickMore(5)`],
-      ['analyst-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`],
+      ['analyst-live.html', `pickMore('alerts')`],
       ['crypto-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`]]) {
     const app = page.split('-')[0];
     await B.goto(base + '/' + page, 430, 900);
@@ -971,9 +975,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     /* Trader moved Alerts behind More (Jake's 4-main bar), so "on the bar" is the wrong
        assertion THERE and still the right one on the other two. Asserting the same shape
        everywhere would either fail on trader or have to be loosened until it proved nothing. */
-    if (app === 'trader') {
+    if (app === 'trader' || app === 'analyst') {
       const row = await B.evalIn(`(() => {
-        const r = document.querySelector('#more-menu button[data-tab="5"]');
+        const r = document.querySelector('#more-menu button[data-tab="5"], #more-menu button[data-mtab="alerts"]');
         if (!r) return { missing: true };
         const onBar = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
           .some((e) => (e.textContent || '').indexOf('Alerts') >= 0
@@ -1172,7 +1176,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
    so probing it would ask whether a permanently hidden element is hidden — true for a comp seat
    and a free one alike, which is a check that cannot fail. */
 const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
-    analyst: '.mob-tab[data-mtab="predict"]', crypto: '.mob-tab[data-mtab="predict"]' };
+    analyst: '#more-menu button[data-mtab="predict"]', crypto: '.mob-tab[data-mtab="predict"]' };
   const predTabProbe = (sel) => B.evalIn(
     '(() => { const t = document.querySelector(' + JSON.stringify(sel) + ');'
     + ' if (!t) return { there: false };'
@@ -1194,11 +1198,12 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     /* Trader's row lives inside the More menu, so a closed menu makes it zero-sized whether
        the seat is comp or not. Open the menu first: what a comp seat is owed is that Predict is
        THERE when they look, not that a hidden container is hidden. */
-    if (app === 'trader') await B.evalIn('toggleMoreMenu(true)');
+    if (app === 'trader' || app === 'analyst') await B.evalIn('toggleMoreMenu(true)');
     const tabv = await predTabProbe(PRED_TAB[app]);
     ok(app + ': comp seat — the tab reveals itself from the server’s answer',
       tabv.visible === true, JSON.stringify(tabv));
     await B.evalIn(app === 'trader' ? 'pickMore(7)'
+      : app === 'analyst' ? "pickMore('predict')"
       : 'document.querySelector(' + JSON.stringify(PRED_TAB[app]) + ').click()');
     await new Promise((r) => setTimeout(r, 900));
     const pv = await B.evalIn(`(() => {
@@ -1597,6 +1602,69 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     ok(app + ' @1600: control - a real keyboard still gets the cursor put in the box',
       desk.has && desk.focused === true, JSON.stringify(desk));
   }
+
+  /* ══ THE ANALYST: DE-BOXED, AND FOUR MAIN + MORE ═════════════════════════════════════════
+     Jake, 2026-09-07: "Analyst needs the de-box job and the w more with whatever pages make sense
+     to have in it." The audit below walks the WHOLE dashboard rather than a list of classes I
+     happened to think of — a de-box verified against the elements I remembered to name is a
+     de-box that misses the one I forgot. */
+  console.log('\nAnalyst — de-boxed, four main tabs and a More menu\n');
+  await B.goto(base + '/analyst/live', 430, 900);
+  await new Promise((r) => setTimeout(r, 1100));
+
+  const boxes = await B.evalIn(`(() => {
+    const root = document.getElementById('dash');
+    if (!root) return { missing: true };
+    const bad = [];
+    [root, ...root.querySelectorAll('*')].forEach((e) => {
+      if (/^(BUTTON|INPUT|SELECT|TEXTAREA|KBD|CANVAS|SVG|PATH|IMG)$/i.test(e.tagName)) return;
+      if (e.closest('button, input, select, textarea')) return;
+      const r = e.getBoundingClientRect();
+      if (r.width < 24 || r.height < 12) return;           // decorative slivers, not boxes
+      const c = getComputedStyle(e);
+      const sides = ['Top','Right','Bottom','Left'].filter((k) =>
+        parseFloat(c['border' + k + 'Width']) > 0 && c['border' + k + 'Style'] !== 'none');
+      const radius = parseFloat(c.borderTopLeftRadius) || 0;
+      if (sides.length >= 4) bad.push((e.id || e.className || e.tagName) + ':4-sided');
+      else if (radius > 0 && sides.length) bad.push((e.id || e.className || e.tagName) + ':radius+border');
+    });
+    return { n: bad.length, bad: bad.slice(0, 6) }; })()`);
+  ok('the analyst dashboard draws NO boxes anywhere — audited element by element',
+    boxes.n === 0, JSON.stringify(boxes));
+
+  const aBar = await B.evalIn(`(() => {
+    const vis = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
+      .filter((t) => getComputedStyle(t).display !== 'none' && t.getBoundingClientRect().width > 0)
+      .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+    const label = (t) => [...t.querySelectorAll('span')]
+      .filter((sp) => !sp.classList.contains('mob-tab-icon'))
+      .map((sp) => sp.textContent).join(' ').trim();
+    return { labels: vis.map(label),
+             widths: vis.map((t) => Math.round(t.getBoundingClientRect().width)) }; })()`);
+  ok('the analyst bar shows five: The Read, Dealer Map, Dr. NoVo, Digest, More',
+    aBar.labels.join('|') === 'The Read|Dealer Map|Dr. NoVo|Digest|More',
+    JSON.stringify(aBar.labels));
+
+  const aMenu = await B.evalIn(`(() => {
+    document.getElementById('mob-more').click();
+    const m = document.getElementById('more-menu');
+    const rows = [...m.querySelectorAll('button')].filter((r) => !r.hasAttribute('hidden'))
+      .map((r) => [...r.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim());
+    return { open: !m.hasAttribute('hidden'), rows: rows,
+             readingsRow: !!m.querySelector('[data-mtab="readings"]') }; })()`);
+  ok('...More holds Alerts (Predict hidden for a free seat)',
+    aMenu.open === true && aMenu.rows.join('|') === 'Alerts', JSON.stringify(aMenu.rows));
+  ok('...and Readings is NOT duplicated in there — the strip is its door',
+    aMenu.readingsRow === false, JSON.stringify(aMenu.readingsRow));
+
+  const aPick = await B.evalIn(`(() => { pickMore('alerts');
+    return new Promise((r) => setTimeout(() => r({
+      closed: document.getElementById('more-menu').hasAttribute('hidden'),
+      onTab: document.body.getAttribute('data-mtab'),
+      moreLit: document.getElementById('mob-more').classList.contains('mob-active') }), 500)); })()`);
+  ok('...picking Alerts switches to it, closes the menu, and lights More',
+    aPick.closed === true && aPick.onTab === 'alerts' && aPick.moreLit === true,
+    JSON.stringify(aPick));
 
   /* ══ THE TRADER BAR: FOUR MAIN + MORE ════════════════════════════════════════════════════
      Jake numbered it 1-4 and struck Readings. Seven tabs on a 375px phone gave each 53px, which
