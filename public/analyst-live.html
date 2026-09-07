@@ -1725,6 +1725,76 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
   @media (max-width:720px){ #novo-ask .mx{display:none} }
 
+  /* ── MOBILE TAB BAR ──────────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "Analyst and Crypto need to use the tab bar also ... Analyst could simply
+     have Dealer Map | Dr. NoVo at minimum for now until we add more to it."
+     The SAME bar as the Trader dashboard on purpose — same 52px, same safe-area handling, same
+     glyph size, same green for Dr. NoVo. The three apps differ by COLOUR, not by furniture, which
+     is the rule Jake already set for the chat buttons.
+
+     ⚠ THE ACTIVE STATE IS OBSERVED, NOT SET BY THE CALLER. The chat opens from five places on this
+     page — this bar, the header button, the "n" key, the command palette, a restored deep link —
+     and closes from three more. A bar that lit itself inside its own click handler would go stale
+     the first time any of the other callers ran, and it would go stale SILENTLY. It watches the
+     panel's class instead, so it reports what IS rather than what this file last asked for. */
+  #mobile-tabs { display: none; }
+  @media (max-width: 768px) {
+    :root { --navh: calc(52px + env(safe-area-inset-bottom, 0px)); }
+    /* INSET, NOT bottom/left/right, AND THREE EXPLICIT RESETS. This dashboard links
+       /journal/blog.css, which styles the SITE header with a bare element selector:
+         nav { position:sticky; top:0; z-index:100; background:...; backdrop-filter:blur(8px);
+               border-bottom:1px solid var(--bdr) }
+       An id beats an element selector only for the properties the id rule actually declares. This
+       rule declared `bottom` and not `top`, so blog.css's `top:0` survived untouched — and a fixed
+       box with top, bottom AND height resolves from the top. The bar rendered pinned to the TOP of
+       the phone, across the market ribbon, while every state check passed: the tabs were right, the
+       labels were right, the taps worked. Caught by measuring where it PAINTED.
+       `inset: auto 0 0 0` states all four edges so nothing can be inherited into the gap, and the
+       blur and the hairline are turned off by name for the same reason. The other two dashboards do
+       not link blog.css, which is exactly why this only ever showed up here. */
+    #mobile-tabs { display: flex; position: fixed; inset: auto 0 0 0;
+      height: var(--navh); padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--panel); border-top: 1px solid var(--bdr); border-bottom: 0;
+      backdrop-filter: none; box-shadow: 0 -4px 20px rgba(0,0,0,.5); z-index: 1000; }
+    .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 3px; background: none; border: none;
+      border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
+      font-size: 9.5px; font-weight: 800; letter-spacing: .2px; cursor: pointer;
+      transition: color .15s, border-color .15s; -webkit-tap-highlight-color: transparent; }
+    .mob-tab-icon { font-size: 17px; line-height: 1; }
+    .mob-tab.mob-active { color: #22d3ee; border-top-color: #22d3ee; }
+    /* Dr. NoVo is green on every dashboard and KEEPS its colour when active — the other tabs take
+       the page accent, this one is the analyst and stays itself. */
+    .mob-tab-novo { color: #34d399; }
+    .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(52,211,153,.85); }
+    .mob-tab-novo.mob-active { color: #6ee7b7; border-top-color: #34d399; }
+    /* The document has to END above the bar, or the last card is permanently underneath it. */
+    .lv-wrap { padding-bottom: calc(var(--navh) + 16px); }
+    /* ...and so does the settings sheet, whose last link sat under the bar otherwise. */
+    .lv-drawer .db { padding-bottom: calc(var(--navh) + 14px); }
+    /* ⚠ BOTH PILLS ARE INLINE-STYLED by the scripts that create them, and an inline style outranks
+       every selector — !important is the only thing that moves them off the bar. */
+    #novoInstall, #novoNotif { bottom: calc(var(--navh) + 14px) !important; }
+    /* ...and they stand down entirely while the chat is open. Lifting them clear of the bar put
+       them exactly ON the composer -- the install pill covered the Ask button. Caught in a
+       screenshot, not in a check: every geometry assertion still passed, because the pill and the
+       composer are both where their own rules put them. Keyed on the panel being open rather than
+       on a class some caller has to remember to set. */
+    body:has(#novo-ask.on) #novoInstall,
+    body:has(#novo-ask.on) #novoNotif { display: none !important; }
+    /* THE CHAT STOPS SHORT OF THE BAR. On the trader, Dr. NoVo is a view with the bar still under
+       it and the bar is the way back out; a chat that covered the bar would make this the one tab
+       you cannot leave by tapping a tab — a modal wearing a tab bar's clothes. */
+    #novo-ask.on, #novo-ask.on.max { left: 0; right: 0; top: 0; bottom: var(--navh);
+      transform: none; width: 100vw; height: auto; max-height: none; border-radius: 0; border: 0; }
+    /* The composer padded itself clear of the home bar back when it WAS the bottom of the screen.
+       The tab bar owns that inset now, so keeping both counts the home bar twice. */
+    #novo-ask form { padding-bottom: 11px; }
+    /* One control, one place. The bar carries Dr. NoVo on a phone exactly as it does on the
+       trader, where the entire header button row is desktop-only. */
+    #novo-ask-bubble { display: none; }
+  }
+
 
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#22d3ee;color:#04121a;padding:10px 16px;border-radius:0 0 6px 0;font-weight:800;font-size:14px;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
 </style>
@@ -1777,6 +1847,46 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <button class="go" id="novo-ask-go" type="submit">Ask</button>
   </form>
 </div>
+
+<!-- ═════ MOBILE TAB BAR ═════
+     "Dealer Map | Dr. NoVo at minimum for now until we add more to it" (Jake, 2026-09-07).
+     Two entries today. data-mtab is the name of the view, not an index, so adding a third tab
+     later is one button and one branch — the trader's numeric indices are a legacy this page
+     does not have to inherit. -->
+<nav id="mobile-tabs" aria-label="Dashboard sections">
+  <button class="mob-tab" type="button" data-mtab="map" onclick="lvMobTab('map')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9638;</span>
+    <span>Dealer Map</span>
+  </button>
+  <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
+    <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
+    <span>Dr. NoVo</span>
+  </button>
+</nav>
+<script>
+(function(){
+  var bar = document.getElementById('mobile-tabs');
+  var panel = document.getElementById('novo-ask');
+  if (!bar || !panel) return;
+  window.lvMobTab = function(which){
+    try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
+  };
+  /* Reads the panel, never remembers a click. See the note in the stylesheet. */
+  function sync(){
+    var on = panel.classList.contains('on');
+    document.body.setAttribute('data-mtab', on ? 'novo' : 'map');
+    Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
+      var live = (t.getAttribute('data-mtab') === 'novo') === on;
+      t.classList.toggle('mob-active', live);
+      /* aria-current has no false value — it is present or it is not. Setting "false" would
+         announce every tab as current on some screen readers. */
+      if (live) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+  }
+  new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
+  sync();
+})();
+</script>
 
 <script>
 (function(){

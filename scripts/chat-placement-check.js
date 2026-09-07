@@ -83,19 +83,51 @@ if (!CHROME) { console.error('No Chrome found; set CHROME_BIN'); process.exit(2)
 
   console.log('\nChat button placement and open behaviour\n');
 
-  // ── ANALYST: header button, FULL SCREEN at both widths ─────────────────────────────────────
+  /* ⚠ THE REQUIREMENT MOVED ON 2026-09-07, SO THE ASSERTION IS RESTATED RATHER THAN RELAXED.
+     Two of these read "the button is in the header at 430px" and "the panel height equals the
+     viewport height". Both were true descriptions of yesterday's build and neither was ever the
+     REQUIREMENT. What Jake asked for was: one Dr. NoVo control, anchored in the page's own chrome
+     rather than floating over the content as a support widget; and a chat that IS the screen on a
+     phone rather than a sheet over a half-visible page. The mobile tab bar now carries the control
+     and owns the bottom 52px, so a check pinned to "in the header" and "h === vh" would fail a
+     product that got MORE correct — which is the same trap that broke the trader tab check
+     yesterday when "Dr. NoVo" stopped being uppercase.
+     Restated: the control is where the chrome is (header on the desk, tab bar on a phone) and never
+     floating; and the panel is full-bleed from the top edge to whatever chrome ends the page. */
+  const FULLBLEED = `(() => { window.novoAskOpen(1);
+    const p = document.getElementById('novo-ask'); const r = p.getBoundingClientRect();
+    const bar = document.getElementById('mobile-tabs');
+    const barTop = (bar && getComputedStyle(bar).display !== 'none')
+      ? Math.round(bar.getBoundingClientRect().top) : innerHeight;
+    return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top),
+             bottom: Math.round(r.bottom), radius: getComputedStyle(p).borderTopLeftRadius,
+             vw: innerWidth, vh: innerHeight, barTop, max: p.classList.contains('max') }; })()`;
+  const fullBleed = (o) => o.max && o.w >= o.vw - 2 && o.top <= 1 &&
+    o.bottom >= o.barTop - 2 && parseFloat(o.radius) === 0;
+
+  // ── ANALYST: one anchored control, full-bleed chat at both widths ──────────────────────────
   for (const w of [1600, 430]) {
     await load('analyst-live.html', w);
     const h = await evalIn(HEADER);
-    ok('analyst @' + w + ': the button is in the header beside the wordmark',
-      !h.missing && h.visible && h.sameBand && h.rightOfMark && !h.fixed, JSON.stringify(h));
+    const tab = await evalIn(`(() => { const t = document.querySelector('.mob-tab[data-mtab="novo"]');
+      if (!t) return { missing: true };
+      const r = t.getBoundingClientRect();
+      return { shown: getComputedStyle(t).display !== 'none' && r.width > 0,
+               w: Math.round(r.width), bottom: Math.round(r.bottom), vh: innerHeight }; })()`);
+    if (w > 768) {
+      ok('analyst @' + w + ': the button is in the header beside the wordmark',
+        !h.missing && h.visible && h.sameBand && h.rightOfMark && !h.fixed, JSON.stringify(h));
+      ok('analyst @' + w + ': and the tab bar is not competing with it',
+        !tab.shown, JSON.stringify(tab));
+    } else {
+      ok('analyst @' + w + ': the tab bar carries Dr. NoVo, and the header stands down',
+        !h.visible && tab.shown && tab.w >= 44 && Math.abs(tab.bottom - tab.vh) <= 1,
+        JSON.stringify({ header: h.visible, tab }));
+    }
 
-    const open = await evalIn(`(() => { window.novoAskOpen(1);
-      const p = document.getElementById('novo-ask'); const r = p.getBoundingClientRect();
-      return { w: Math.round(r.width), h: Math.round(r.height),
-               vw: innerWidth, vh: innerHeight, max: p.classList.contains('max') }; })()`);
-    ok('analyst @' + w + ': it opens FULL SCREEN',
-      open.max && open.w >= open.vw - 2 && open.h >= open.vh - 2, JSON.stringify(open));
+    const open = await evalIn(FULLBLEED);
+    ok('analyst @' + w + ': it opens FULL BLEED, from the top edge to the page chrome',
+      fullBleed(open), JSON.stringify(open));
   }
 
   // ── CRYPTO: header button; docked into #center on desktop, full screen on mobile ────────────
@@ -118,12 +150,17 @@ if (!CHROME) { console.error('No Chrome found; set CHROME_BIN'); process.exit(2)
     mid.inside && mid.fills && !mid.max && mid.center[1] < mid.vw - 100, JSON.stringify(mid));
 
   await load('crypto-live.html', 430);
-  const cm = await evalIn(`(() => { window.novoAskOpen(1);
-    const p = document.getElementById('novo-ask'); const r = p.getBoundingClientRect();
-    return { w: Math.round(r.width), h: Math.round(r.height), vw: innerWidth, vh: innerHeight,
-             max: p.classList.contains('max') }; })()`);
-  ok('crypto @430: it opens FULL SCREEN on mobile',
-    cm.max && cm.w >= cm.vw - 2 && cm.h >= cm.vh - 2, JSON.stringify(cm));
+  const cm = await evalIn(FULLBLEED);
+  ok('crypto @430: it opens FULL BLEED on mobile, from the top edge to the tab bar',
+    fullBleed(cm), JSON.stringify(cm));
+  const cmh = await evalIn(HEADER);
+  const cmt = await evalIn(`(() => { const t = document.querySelector('.mob-tab[data-mtab="novo"]');
+    if (!t) return { missing: true }; const r = t.getBoundingClientRect();
+    return { shown: getComputedStyle(t).display !== 'none' && r.width > 0,
+             bottom: Math.round(r.bottom), vh: innerHeight }; })()`);
+  ok('crypto @430: the tab bar carries Dr. NoVo, and the header stands down',
+    !cmh.visible && cmt.shown && Math.abs(cmt.bottom - cmt.vh) <= 1,
+    JSON.stringify({ header: cmh.visible, tab: cmt }));
 
   // ── ANALYST: the bias heading sits OUTSIDE its card, like the ticker strip's ────────────────
   await load('analyst-live.html', 1600);

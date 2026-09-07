@@ -1,0 +1,381 @@
+/* mobile-nav-check.js — the Analyst and Crypto dashboards carry the Trader's mobile tab bar.
+ *
+ * Jake, 2026-09-07: "Analyst and Crypto need to use the tab bar also. crypto definitely could
+ * utilize a nav bar on mobile. Analyst could simply have Dealer Map | Dr. NoVo at minimum."
+ *
+ * Driven in headless Chrome at a real phone width, because every claim here is about RENDERED
+ * layout and live wiring — whether the bar is pinned, whether a tab reveals the column it names,
+ * whether the chat stops short of the bar instead of covering it. None of that is answerable by
+ * reading the file. The last time a layout change on these dashboards was reported from the source
+ * rather than the screen, it was a literal no-op and Jake had to say so twice.
+ *
+ * THE TWO CHECKS THAT COULD ACTUALLY FAIL AGAINST WORKING-LOOKING CODE, and so are the point:
+ *   - Crypto's chat panel is a CHILD of #center. The Stats tab hides #center. So "open the chat
+ *     while Stats is showing" is the exact state where the panel is .on, every state read says the
+ *     chat is open, and the screen shows the numbers. Asserted with the panel actually painted.
+ *   - The bar's active state is OBSERVED from the panel, not set where it was clicked. So the test
+ *     opens the chat by a path that never touches the bar (novoAskOpen directly, as the "n" key and
+ *     the command palette do) and requires the bar to have followed.
+ *
+ * What it does NOT prove: that the live /api/crypto-map payload renders. The map is member-gated,
+ * so the snapshot here is a minimal fixture — enough to exercise the rail, the coin view and the
+ * side column, not enough to speak for production data.
+ */
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const http = require('http');
+const { spawn } = require('child_process');
+
+const PUBLIC = path.join(__dirname, '..', 'public');
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
+               '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
+
+let failures = 0, checks = 0;
+function ok(name, cond, detail) {
+  checks++;
+  if (cond) { console.log('  PASS  ' + name); return; }
+  failures++; console.log('  FAIL  ' + name + (detail ? '\n        ' + detail : ''));
+}
+
+/* A coin carries `panels` and `band` unconditionally — drawCoin reads d.panels.length before any
+   guard, so a fixture without them throws and every check below fails for the wrong reason. */
+const COIN = (band, conf, price, oi) => ({
+  band, confidence: conf, price, oi_usd: oi, panels: ['gamma', 'funding'],
+  funding_venues: 5, perp_venues: 5, bars: 912, bar_density: 0.97, min_order_size: '0.001',
+});
+const SNAP = {
+  as_of: '2026-09-07T02:00:00Z', age_min: 2,
+  coins: { BTC: COIN('A', 'high', 100000, 1e9), SOL: COIN('B', 'medium', 105.64, 1e8),
+           ETH: COIN('A', 'high', 3400, 5e8) },
+  chain: [], feed: [], breadth: {},
+  health: { base_rates: [{ kind: 'chain_rug_risk', hit_rate: 95, n: 40 }] },
+};
+
+const server = http.createServer((req, res) => {
+  const rel = decodeURIComponent(req.url.split('?')[0]);
+  if (rel === '/api/crypto-map') {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(SNAP)); return;
+  }
+  if (rel.startsWith('/api/')) { res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}'); return; }
+  const f = path.join(PUBLIC, rel === '/' ? 'index.html' : rel);
+  if (!f.startsWith(PUBLIC) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) {
+    res.writeHead(404); res.end('not found: ' + rel); return;
+  }
+  res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream',
+                       'cache-control': 'no-store' });
+  res.end(fs.readFileSync(f));
+});
+
+const CHROME = process.env.CHROME_BIN || [
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+].find((p) => fs.existsSync(p));
+if (!CHROME) { console.error('No Chrome found; set CHROME_BIN'); process.exit(2); }
+
+const PORT = Number(process.env.MN_PORT || 9377);
+const proc = spawn(CHROME, ['--headless=new', '--remote-debugging-port=' + PORT, '--no-first-run',
+  '--no-default-browser-check',
+  '--user-data-dir=' + path.join(os.tmpdir(), 'mobilenav-' + PORT + '-' + Date.now()),
+  'about:blank'], { stdio: 'ignore' });
+
+/* Real error capture. A page that throws during init renders a plausible-looking half-page, and
+   every geometry check below would then be measuring the wreck rather than the layout. */
+const PRELUDE = `
+  try { localStorage.setItem('novo_live_t', 'stub.token'); } catch (e) {}
+  window.__errs = [];
+  window.addEventListener('error', function(e){ window.__errs.push(String(e.message)); });
+  window.addEventListener('unhandledrejection', function(e){
+    window.__errs.push('rejection: ' + String((e.reason && e.reason.message) || e.reason)); });
+`;
+
+async function attach() {
+  let wsUrl;
+  for (let i = 0; i < 150; i++) {
+    try { wsUrl = (await (await fetch('http://127.0.0.1:' + PORT + '/json/version')).json()).webSocketDebuggerUrl; break; }
+    catch (_) { await new Promise((r) => setTimeout(r, 150)); }
+  }
+  const ws = new WebSocket(wsUrl);
+  let id = 0; const waiting = new Map();
+  ws.onmessage = (m) => { const d = JSON.parse(m.data); if (waiting.has(d.id)) { waiting.get(d.id)(d); waiting.delete(d.id); } };
+  const send = (method, params, sessionId) => new Promise((r) => {
+    const i = ++id; waiting.set(i, r); ws.send(JSON.stringify({ id: i, method, params, sessionId })); });
+  await new Promise((r) => { ws.onopen = r; });
+  const t = (await send('Target.createTarget', { url: 'about:blank' })).result;
+  const sid = (await send('Target.attachToTarget', { targetId: t.targetId, flatten: true })).result.sessionId;
+  await send('Page.enable', {}, sid);
+  await send('Runtime.enable', {}, sid);
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: PRELUDE }, sid);
+  const evalIn = async (expr) => {
+    const r = (await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: expr }, sid)).result;
+    if (r.exceptionDetails) return { __err: String((r.exceptionDetails.exception || {}).description || r.exceptionDetails.text) };
+    return r.result.value;
+  };
+  /* ⚠ TOUCH EMULATION, NOT JUST A NARROW WINDOW. `mobile:false` at 430px still reports a page with
+     a mouse: (pointer:coarse) rules never apply and (hover:hover) ones still do, so the harness
+     shows a layout no phone renders. This bit me on the last mobile pass. */
+  const goto = async (url, w, h) => {
+    await send('Emulation.setDeviceMetricsOverride',
+      { width: w, height: h || 900, deviceScaleFactor: 2, mobile: w < 769 }, sid);
+    await send('Emulation.setTouchEmulationEnabled', { enabled: w < 769, maxTouchPoints: 5 }, sid);
+    await send('Page.navigate', { url }, sid);
+    await new Promise((r) => setTimeout(r, 1900));
+  };
+  const resize = async (w, h) => {
+    await send('Emulation.setDeviceMetricsOverride',
+      { width: w, height: h || 900, deviceScaleFactor: 2, mobile: w < 769 }, sid);
+    await send('Emulation.setTouchEmulationEnabled', { enabled: w < 769, maxTouchPoints: 5 }, sid);
+    await new Promise((r) => setTimeout(r, 500));
+  };
+  return { evalIn, goto, resize };
+}
+
+/* One expression, reused: the bar's geometry plus the label of every tab in VISUAL order.
+   Visual, not source — the trader's bar is ordered with CSS `order`, and reading the DOM would
+   have reported the source order and passed while the screen showed something else. */
+const READ_BAR = `(() => {
+  const bar = document.getElementById('mobile-tabs');
+  if (!bar) return { missing: true };
+  const br = bar.getBoundingClientRect();
+  const cs = getComputedStyle(bar);
+  const tabs = [...bar.querySelectorAll('.mob-tab')]
+    .map(t => ({ el: t, r: t.getBoundingClientRect() }))
+    .sort((a, b) => a.r.left - b.r.left)
+    .map(({ el, r }) => ({
+      name: el.getAttribute('data-mtab'),
+      label: (el.querySelector('span:last-child') || {}).textContent || '',
+      icon: (el.querySelector('.mob-tab-icon') || {}).textContent || '',
+      active: el.classList.contains('mob-active'),
+      current: el.getAttribute('aria-current'),
+      w: Math.round(r.width),
+    }));
+  return {
+    display: cs.display, position: cs.position, z: cs.zIndex,
+    top: Math.round(br.top), bottom: Math.round(br.bottom), h: Math.round(br.height),
+    vh: window.innerHeight, tabs,
+  };
+})()`;
+
+const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)});
+  if (!e) return { missing: true };
+  const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+  return { display: cs.display, w: Math.round(r.width), h: Math.round(r.height),
+           top: Math.round(r.top), bottom: Math.round(r.bottom),
+           shown: cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0 };
+})()`;
+
+(async () => {
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const base = 'http://127.0.0.1:' + server.address().port;
+  const B = await attach();
+
+  // ══ ANALYST ═══════════════════════════════════════════════════════════════════════════════
+  console.log('\nAnalyst — Dealer Map | Dr. NoVo\n');
+  await B.goto(base + '/analyst-live.html', 430, 900);
+
+  let bar = await B.evalIn(READ_BAR);
+  ok('the bar renders at 430px', !bar.missing && bar.display === 'flex', JSON.stringify(bar).slice(0, 200));
+  ok('it is pinned to the bottom of the viewport',
+    bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
+  ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
+    bar.h === 52, String(bar.h));
+  ok('two tabs, in the order Jake asked for',
+    bar.tabs.length === 2 && bar.tabs[0].label === 'Dealer Map' && bar.tabs[1].label === 'Dr. NoVo',
+    JSON.stringify(bar.tabs.map((t) => t.label)));
+  ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
+    (bar.tabs[1] || {}).icon.indexOf('\u2726') >= 0, JSON.stringify((bar.tabs[1] || {}).icon));
+  ok('Dealer Map is the tab you land on', bar.tabs[0].active && !bar.tabs[1].active,
+    JSON.stringify(bar.tabs.map((t) => t.active)));
+  ok('the landed tab is announced, and only it',
+    bar.tabs[0].current === 'page' && bar.tabs[1].current === null,
+    JSON.stringify(bar.tabs.map((t) => t.current)));
+
+  const bub = await B.evalIn(vis('#novo-ask-bubble'));
+  ok('the header Dr. NoVo button stands down on a phone — the bar carries it, as on the trader',
+    !bub.shown, JSON.stringify(bub));
+
+  const wrapPad = await B.evalIn(`getComputedStyle(document.querySelector('.lv-wrap')).paddingBottom`);
+  ok('the document ends above the bar rather than under it',
+    parseFloat(wrapPad) >= 52, String(wrapPad));
+
+  // the chat, opened FROM the bar
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="novo"]').click()`);
+  await new Promise((r) => setTimeout(r, 420));
+  let panel = await B.evalIn(vis('#novo-ask'));
+  bar = await B.evalIn(READ_BAR);
+  ok('tapping Dr. NoVo opens the chat', panel.shown, JSON.stringify(panel));
+  ok('...and the bar is still on screen under it', bar.display === 'flex' && Math.abs(bar.bottom - bar.vh) <= 1,
+    JSON.stringify({ display: bar.display, bottom: bar.bottom, vh: bar.vh }));
+  ok('...and the chat STOPS at the bar instead of covering it',
+    panel.bottom <= bar.top + 1, JSON.stringify({ chatBottom: panel.bottom, barTop: bar.top }));
+  ok('...and the Dr. NoVo tab is the lit one',
+    bar.tabs[1].active && !bar.tabs[0].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+
+  /* ⚠ FOUND IN A SCREENSHOT, NOT IN A CHECK. Lifting the install pill clear of the bar landed it
+     exactly on the composer — it covered the Ask button — and every geometry assertion still
+     passed, because the pill and the composer were each where their own rules put them. Two
+     elements can both be correct and still collide; only looking, or asking about the pair, finds
+     it. Asserted in both directions: clear of the bar when the map is showing, gone when the chat
+     is. */
+  const pillA = await B.evalIn(vis('#novoInstall'));
+  ok('the install pill stands down over the chat instead of sitting on the Ask button',
+    !pillA.shown, JSON.stringify(pillA));
+
+  const compose = await B.evalIn(`getComputedStyle(document.querySelector('#novo-ask form')).paddingBottom`);
+  ok('the composer stops padding itself for a home bar the tab bar now owns',
+    parseFloat(compose) <= 12, String(compose));
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
+  await new Promise((r) => setTimeout(r, 420));
+  panel = await B.evalIn(vis('#novo-ask'));
+  bar = await B.evalIn(READ_BAR);
+  const pillA2 = await B.evalIn(vis('#novoInstall'));
+  ok('tapping Dealer Map closes the chat', !panel.shown, JSON.stringify(panel));
+  ok('...the pill comes back, above the bar rather than under it',
+    !pillA2.shown || pillA2.bottom <= bar.top, JSON.stringify({ pill: pillA2, barTop: bar.top }));
+  ok('...and the bar follows', bar.tabs[0].active && !bar.tabs[1].active,
+    JSON.stringify(bar.tabs.map((t) => t.active)));
+
+  /* THE OBSERVER CHECK. Opened by a path that never touches the bar — which is what the "n" key,
+     the command palette and a restored deep link all do. */
+  await B.evalIn(`window.novoAskOpen(1)`);
+  await new Promise((r) => setTimeout(r, 300));
+  bar = await B.evalIn(READ_BAR);
+  ok('the bar follows the chat even when something else opened it',
+    bar.tabs[1].active && !bar.tabs[0].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+  await B.evalIn(`window.novoAskOpen(0)`);
+  await new Promise((r) => setTimeout(r, 300));
+  bar = await B.evalIn(READ_BAR);
+  ok('...and when something else closed it',
+    bar.tabs[0].active && !bar.tabs[1].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+
+  await B.resize(1600, 1000);
+  bar = await B.evalIn(READ_BAR);
+  const bubD = await B.evalIn(vis('#novo-ask-bubble'));
+  ok('the bar is mobile-only — nothing changes on the desk', bar.display === 'none', bar.display);
+  ok('...and the header button comes back with it', bubD.shown, JSON.stringify(bubD));
+
+  let errs = await B.evalIn(`window.__errs`);
+  ok('the analyst page threw nothing', Array.isArray(errs) && errs.length === 0, JSON.stringify(errs));
+
+  // ══ CRYPTO ════════════════════════════════════════════════════════════════════════════════
+  console.log('\nCrypto — Map | Stats | Coins | Dr. NoVo\n');
+  await B.goto(base + '/crypto-live.html', 430, 900);
+
+  const app = await B.evalIn(vis('#app'));
+  ok('the map rendered (the fixture got through the gate)', app.shown, JSON.stringify(app));
+
+  bar = await B.evalIn(READ_BAR);
+  ok('the bar renders at 430px', !bar.missing && bar.display === 'flex', JSON.stringify(bar).slice(0, 200));
+  ok('it is pinned to the bottom of the viewport',
+    bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
+  ok('four tabs, in order', bar.tabs.length === 4 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Map|Stats|Coins|Dr. NoVo',
+    JSON.stringify(bar.tabs.map((t) => t.label)));
+  ok('every tab is wide enough to hit on a 430px phone',
+    bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
+  ok('Dr. NoVo carries the same mark as the other two dashboards',
+    (bar.tabs[3] || {}).icon.indexOf('\u2726') >= 0, JSON.stringify((bar.tabs[3] || {}).icon));
+
+  /* THE BAR SHRINKS THE APP. If it merely floated over a 100vh grid, the last 52px of whichever
+     column was scrolling would be permanently underneath it. */
+  const appBox = await B.evalIn(vis('#app'));
+  ok('the bar takes its height off the app rather than covering it',
+    Math.abs(appBox.bottom - bar.top) <= 1, JSON.stringify({ appBottom: appBox.bottom, barTop: bar.top }));
+
+  let center = await B.evalIn(vis('#center'));
+  let side = await B.evalIn(vis('#side'));
+  const sidePanels = await B.evalIn(`document.querySelectorAll('#side .panel').length`);
+  ok('Map is the tab you land on, and it is the coin map',
+    bar.tabs[0].active && center.shown && !side.shown,
+    JSON.stringify({ active: bar.tabs.map((t) => t.active), center: center.shown, side: side.shown }));
+  ok('the column Stats names has real panels in it — this is the content a phone could not reach',
+    sidePanels >= 2, 'panels=' + sidePanels);
+  const pillC0 = await B.evalIn(vis('.cx-install'));
+  ok('the install pill floats above the bar, not under it',
+    !pillC0.shown || pillC0.bottom <= bar.top, JSON.stringify({ pill: pillC0, barTop: bar.top }));
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="stats"]').click()`);
+  await new Promise((r) => setTimeout(r, 400));
+  center = await B.evalIn(vis('#center'));
+  side = await B.evalIn(vis('#side'));
+  bar = await B.evalIn(READ_BAR);
+  ok('Stats shows the side column and hides the map',
+    side.shown && !center.shown && bar.tabs[1].active,
+    JSON.stringify({ center: center.shown, side: side.shown, active: bar.tabs.map((t) => t.active) }));
+  ok('...as the full width of the page, not a 310px rail',
+    side.w >= 400, String(side.w));
+
+  /* THE ONE THAT WOULD HAVE SHIPPED BROKEN. The chat panel is a child of #center, which Stats
+     hides — so the panel would be .on, every state read would say "open", and the screen would
+     show the numbers. Opened here the way the keyboard opens it, not via the bar. */
+  await B.evalIn(`window.novoAskOpen(1)`);
+  await new Promise((r) => setTimeout(r, 400));
+  panel = await B.evalIn(vis('#novo-ask'));
+  center = await B.evalIn(vis('#center'));
+  bar = await B.evalIn(READ_BAR);
+  ok('opening the chat while Stats is showing actually PAINTS the chat',
+    panel.shown && panel.h > 200 && center.shown,
+    JSON.stringify({ panel: panel.shown, h: panel.h, center: center.shown }));
+  ok('...and the chat stops at the bar here too',
+    panel.bottom <= bar.top + 1, JSON.stringify({ chatBottom: panel.bottom, barTop: bar.top }));
+  const pillC = await B.evalIn(vis('.cx-install'));
+  ok('...and the install pill stands down instead of sitting on the ask field',
+    !pillC.shown, JSON.stringify(pillC));
+  ok('...and the bar reports the chat, not Stats',
+    bar.tabs[3].active && !bar.tabs[1].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="coins"]').click()`);
+  await new Promise((r) => setTimeout(r, 450));
+  const rail = await B.evalIn(vis('#rail'));
+  panel = await B.evalIn(vis('#novo-ask'));
+  bar = await B.evalIn(READ_BAR);
+  ok('Coins opens the picker', rail.shown && rail.h > 300 && bar.tabs[2].active,
+    JSON.stringify({ rail: rail.shown, h: rail.h, active: bar.tabs.map((t) => t.active) }));
+  ok('...and closes the chat on the way', !panel.shown, JSON.stringify(panel));
+  ok('...and the bar stays on top of the picker, so there is a way back',
+    bar.display === 'flex' && Number(bar.z) > 60, JSON.stringify({ display: bar.display, z: bar.z }));
+
+  const railCount = await B.evalIn(`document.querySelectorAll('#rail .coin').length`);
+  ok('the picker holds every coin in the fixture', railCount >= 3, 'coins=' + railCount);
+
+  await B.evalIn(`document.querySelector('#rail .coin[data-c="ETH"]').click()`);
+  await new Promise((r) => setTimeout(r, 450));
+  bar = await B.evalIn(READ_BAR);
+  const sym = await B.evalIn(`document.getElementById('sym').textContent.trim()`);
+  center = await B.evalIn(vis('#center'));
+  ok('picking a coin closes the picker and lands on that coin\u2019s map',
+    sym === 'ETH' && center.shown && bar.tabs[0].active,
+    JSON.stringify({ sym, center: center.shown, active: bar.tabs.map((t) => t.active) }));
+
+  /* The header chip is the other way into the picker. The bar must agree with it. */
+  await B.evalIn(`document.getElementById('sym').click()`);
+  await new Promise((r) => setTimeout(r, 400));
+  bar = await B.evalIn(READ_BAR);
+  ok('the coin chip and the Coins tab cannot disagree about the picker',
+    bar.tabs[2].active, JSON.stringify(bar.tabs.map((t) => t.active)));
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
+  await new Promise((r) => setTimeout(r, 400));
+
+  const bubC = await B.evalIn(vis('#novo-ask-bubble'));
+  ok('the header Dr. NoVo button stands down on a phone here too', !bubC.shown, JSON.stringify(bubC));
+
+  await B.resize(1600, 1000);
+  bar = await B.evalIn(READ_BAR);
+  side = await B.evalIn(vis('#side'));
+  const bubCD = await B.evalIn(vis('#novo-ask-bubble'));
+  const appD = await B.evalIn(`getComputedStyle(document.getElementById('app')).height`);
+  ok('the bar is mobile-only', bar.display === 'none', bar.display);
+  ok('...the side column is back where it always was', side.shown && side.w >= 250, JSON.stringify(side));
+  ok('...the header button is back', bubCD.shown, JSON.stringify(bubCD));
+  ok('...and the desk app is a full viewport again', Math.abs(parseFloat(appD) - 1000) <= 1, appD);
+
+  errs = await B.evalIn(`window.__errs`);
+  ok('the crypto page threw nothing', Array.isArray(errs) && errs.length === 0, JSON.stringify(errs));
+
+  console.log('\n' + (failures ? 'FAIL ' : 'OK   ') + (checks - failures) + '/' + checks + ' checks\n');
+  try { proc.kill(); } catch (_) {}
+  server.close();
+  process.exit(failures ? 1 : 0);
+})().catch((e) => { console.error(e); try { proc.kill(); } catch (_) {} process.exit(2); });

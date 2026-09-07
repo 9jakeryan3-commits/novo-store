@@ -382,7 +382,13 @@ tr:last-child td{border-bottom:none}
 @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
 @media(max-width:720px){#ask{right:10px;bottom:10px;width:calc(100vw - 20px)}}
 @media(max-width:1100px){main{grid-template-columns:170px 1fr}#side{display:none}}
-@media(max-width:720px){
+/* 720 -> 768 (2026-09-07): the width at which this page becomes a phone layout now matches the
+   trader's, which is where the mobile tab bar starts. They have to be the same number - at 721
+   to 768 the old bound left a 170px rail beside the map AND a bottom bar switching between
+   columns, and the Stats tab would have opened #side as a second grid ROW rather than as the
+   page. The band this widens is 48px of tablet-landscape; the rail becomes the same
+   full-screen picker it already was one pixel below. */
+@media(max-width:768px){
     main{grid-template-columns:1fr}
     /* The rail was simply display:none here, which took 89 of the 90 coins with it. It
        becomes a full-screen picker instead: the coin name in the header is the trigger, the
@@ -651,6 +657,86 @@ tr:last-child td{border-bottom:none}
   html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
   @media (max-width:720px){ #novo-ask .mx{display:none} }
 
+  /* -- MOBILE TAB BAR ----------------------------------------------------------------------
+     Jake, 2026-09-07: "crypto definitely could utilize a nav bar on mobile."
+     Same bar as the Trader and Analyst dashboards - same 52px, same safe-area handling, same glyph
+     size, same green for Dr. NoVo. They differ by ACCENT COLOUR, not by furniture.
+
+     WHAT THE BAR ACTUALLY BUYS, beyond consistency: #side is display:none from 1100px down, so a
+     phone has never been able to reach it - nine panels (true cost, liquidations, 7d price,
+     funding lean, liquidation profile, stablecoins, cost across the book, my record, coverage) that
+     desktop shows and a phone silently did not. Stats is that column. That hole is also why the bar
+     is worth its 52px here and is only two entries on the analyst: this page had content with no
+     way in, and that one does not. */
+  #mobile-tabs { display: none; }
+  @media (max-width: 768px) {
+    :root { --navh: calc(52px + env(safe-area-inset-bottom, 0px)); }
+    /* THE BAR SHRINKS THE APP, IT DOES NOT OVERLAY IT. #app is a 100vh grid and every column
+       inside it has its own scroller, so an overlaid bar would cover the last 52px of whichever
+       column happened to be scrolling - three separate padding-bottoms to remember, and a fourth
+       the next time a column is added. Taking the height off the grid is one rule that cannot be
+       forgotten. */
+    #app { height: calc(100vh - var(--navh)); }
+    #mobile-tabs { display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--navh); padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--panel); border-top: 1px solid var(--bdr);
+      box-shadow: 0 -4px 20px rgba(0,0,0,.5); z-index: 1000; }
+    .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 3px; background: none; border: none;
+      border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
+      font-size: 9.5px; font-weight: 800; letter-spacing: .2px; cursor: pointer;
+      transition: color .15s, border-color .15s; -webkit-tap-highlight-color: transparent; }
+    .mob-tab:active { transform: none; }
+    .mob-tab-icon { font-size: 17px; line-height: 1; }
+    .mob-tab.mob-active { color: var(--cx); border-top-color: var(--cx); }
+    /* Dr. NoVo is green on every dashboard and KEEPS its colour when active - the other tabs take
+       the page accent, this one is the analyst and stays itself. */
+    .mob-tab-novo { color: #34d399; }
+    .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(52,211,153,.85); }
+    .mob-tab-novo.mob-active { color: #6ee7b7; border-top-color: #34d399; }
+
+    /* STATS - the right-hand column, given a way in. The display:none it carries comes from the
+       1100px rule; these are two ids deep, so they win on specificity wherever both apply. */
+    body[data-mtab="stats"] #center { display: none; }
+    body[data-mtab="stats"] #side { display: block; border-left: 0; background: transparent;
+      padding: 14px 16px 28px; }
+    /* THE CHAT PANEL LIVES INSIDE #center ON THIS PAGE (it docks into the middle column on
+       desktop). Hiding #center for Stats would hide the chat with it, and hide it INVISIBLY - the
+       panel would still carry .on, so every state read would say the chat was open while the
+       screen showed the numbers. The chat is also summoned by the "n" key and the command palette,
+       not just this bar, so the guard belongs in CSS where it covers every caller rather than in
+       the one handler I happened to write. */
+    body[data-mtab="stats"]:has(#novo-ask.on) #center { display: block; }
+    body[data-mtab="stats"]:has(#novo-ask.on) #side { display: none; }
+    /* The column is empty on the screener, the live-reads feed and a chain token - all three clear
+       it. Say so, rather than showing a blank screen that reads as a broken tab. */
+    #side:empty::before { content: "The coin\2019s supporting numbers live here \2014 cost, funding, liquidations, the record. Pick a coin from Coins."; display: block; padding: 26px 4px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: var(--txt4); }
+    /* #center reserved 132px for the install pill stacked over a floating ask bubble. The bubble
+       moved into the header yesterday and the bar carries the pill clear now. */
+    #center { padding-bottom: 30px; }
+    .cx-install { bottom: calc(var(--navh) + 14px) !important; left: 12px; }
+    /* ...and it stands down entirely while the chat is open. Lifting it clear of the bar put it
+       exactly ON the composer -- it covered half the ask field. Caught in a screenshot, not in a
+       check: every geometry assertion still passed, because the pill and the composer are both
+       where their own rules put them. */
+    body:has(#novo-ask.on) .cx-install { display: none !important; }
+    /* the settings sheet's last link sat under the bar otherwise */
+    .lv-drawer .db { padding-bottom: calc(var(--navh) + 14px); }
+    /* One control, one place. The bar carries Dr. NoVo on a phone exactly as it does on the
+       trader, where the entire header button row is desktop-only. */
+    #novo-ask-bubble { display: none; }
+  }
+  /* Below 641px the chat is fixed and full-screen rather than docked into #center, so it is the one
+     surface that would still cover the bar. It stops at the bar instead: on the trader Dr. NoVo is
+     a view with the bar under it, and the bar is the way back out. Above 641px it is absolutely
+     positioned inside #center, which the rule above already ends above the bar. */
+  @media (max-width: 640px) {
+    #novo-ask.on, #novo-ask.on.max { bottom: var(--navh); height: auto; }
+    /* The composer padded itself clear of the home bar back when it WAS the bottom of the screen.
+       The bar owns that inset now, so keeping both counts the home bar twice. */
+    #novo-ask form { padding-bottom: 11px; }
+  }
+
 
 /* Below ~375px the bar is wider than the phone. Nothing is dropped - the type tightens. */
 @media(max-width:374px){
@@ -790,6 +876,66 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
+
+<!-- ===== MOBILE TAB BAR =====  (inside #app on purpose: #app carries .hidden until the member is
+     through the gate, so the login screen never shows a nav to nowhere.)
+     Map | Stats | Coins | Dr. NoVo. Screener and "what just fired" are entries INSIDE the Coins
+     picker already and stay there - a nav entry each would have made five tabs on a 390px screen
+     to reach two views the picker opens in one more tap. -->
+<nav id="mobile-tabs" aria-label="Map sections">
+  <button class="mob-tab" type="button" data-mtab="map" onclick="cxMobTab('map')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9638;</span><span>Map</span>
+  </button>
+  <button class="mob-tab" type="button" data-mtab="stats" onclick="cxMobTab('stats')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9707;</span><span>Stats</span>
+  </button>
+  <button class="mob-tab" type="button" data-mtab="coins" onclick="cxMobTab('coins')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9673;</span><span>Coins</span>
+  </button>
+  <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="cxMobTab('novo')">
+    <span class="mob-tab-icon" aria-hidden="true">&#10022;</span><span>Dr. NoVo</span>
+  </button>
+</nav>
+<script>
+(function(){
+  var bar = document.getElementById('mobile-tabs');
+  var panel = document.getElementById('novo-ask');
+  if (!bar || !panel) return;
+  if (!document.body.getAttribute('data-mtab')) document.body.setAttribute('data-mtab', 'map');
+  window.cxMobTab = function(which){
+    try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
+    if (which === 'novo') return;
+    var coins = which === 'coins';
+    /* rail-open is the picker's OWN state, already toggled by the coin name in the header and
+       cleared by every pick handler in drawRail. Reusing it means the bar and the header chip
+       cannot disagree about whether the picker is open. */
+    document.body.classList.toggle('rail-open', coins);
+    /* The picker is a way INTO a coin, and a coin's home is its map - so opening it puts the view
+       underneath back on Map. Otherwise picking a coin while Stats is showing lands you on the new
+       coin's numbers with its map never shown, which is not what tapping a coin means. */
+    document.body.setAttribute('data-mtab', coins ? 'map' : which);
+  };
+  /* OBSERVED, NOT SET IN THE CLICK HANDLER. Three of the four tabs can be entered without touching
+     this bar: the coin name in the header opens the picker, every pick in drawRail closes it, and
+     the chat answers to the "n" key, the command palette and its own chevron. A bar that lit itself
+     where it was clicked would be wrong after any of those, and wrong silently. */
+  function sync(){
+    var live = panel.classList.contains('on') ? 'novo'
+             : document.body.classList.contains('rail-open') ? 'coins'
+             : (document.body.getAttribute('data-mtab') || 'map');
+    Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
+      var on = t.getAttribute('data-mtab') === live;
+      t.classList.toggle('mob-active', on);
+      /* aria-current is present or absent - there is no false. */
+      if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+  }
+  new MutationObserver(sync).observe(panel, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(sync).observe(document.body,
+    { attributes: true, attributeFilter: ['class', 'data-mtab'] });
+  sync();
+})();
+</script>
 
 
 </div>
