@@ -64,12 +64,21 @@ function get(url) {
     ['data-tr-live', /(<span[^>]*data-tr-live[^>]*>)[\d,]+(<\/span>)/g, '$1' + nn(live) + '$2'],
     ['data-tr-arch', /(<span[^>]*data-tr-arch[^>]*>)[\d,]+(<\/span>)/g, '$1' + nn(arch) + '$2'],
     ['data-tr-snapshots', /(<span[^>]*data-tr-snapshots[^>]*>)[\d,]+(<\/span>)/g, '$1' + nn(snaps) + '$2'],
+    // THE GEX RANK WINDOW. Copy used to hard-code "the last 90 closes"; 90 is the SQL
+    // LIMIT in NoVo-Pulse/skills/dealer_history.py:642 (gex_rank(days=90)), never the
+    // sample. The corpus starts 2026-07-24, so the real window was 33 sessions and the
+    // dashboard said so -- it prints `pct of ' + R.n_days + 'd'`. Same source, same
+    // number: sessions_logged counts distinct dealer-snapshot dates, which is exactly
+    // what the rank query ranks against. Capped at 90 because the query is
+    // ORDER BY date DESC LIMIT 90, so the window stops growing there (around December).
+    ['data-gex-window', /(<span[^>]*data-gex-window[^>]*>)[\d,]+(<\/span>)/g,
+      '$1' + nn(Math.min(live, 90)) + '$2'],
   ];
 
   const files = fs.readdirSync(PUB)
     .filter((f) => f.endsWith('.html'))
     .map((f) => path.join(PUB, f))
-    .filter((p) => /data-tr-(scored|live|arch|snapshots)/.test(fs.readFileSync(p, 'utf8')));
+    .filter((p) => /data-tr-(scored|live|arch|snapshots)|data-gex-window/.test(fs.readFileSync(p, 'utf8')));
 
   let touched = 0;
   for (const p of files) {
@@ -80,7 +89,7 @@ function get(url) {
   }
   console.log(touched
     ? '.. track-record counts synced across ' + touched + ' file(s) -> ' + nn(scored)
-      + ' scored (' + nn(live) + ' live + ' + nn(arch) + ' archive), ' + nn(snaps) + ' snapshots'
+      + ' scored (' + nn(live) + ' live + ' + nn(arch) + ' archive), ' + nn(snaps) + ' snapshots, gex window ' + nn(Math.min(live, 90)) + 'd'
     : '.. track-record counts already current across ' + files.length + ' file(s) ('
-      + nn(scored) + ' scored, ' + nn(live) + ' live, ' + nn(snaps) + ' snapshots)');
+      + nn(scored) + ' scored, ' + nn(live) + ' live, ' + nn(snaps) + ' snapshots, gex window ' + nn(Math.min(live, 90)) + 'd)');
 })();
