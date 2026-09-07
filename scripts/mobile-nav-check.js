@@ -1013,11 +1013,17 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
         settingsMod: !![...document.querySelectorAll('script[src]')]
           .find((x) => /novo-settings/.test(x.getAttribute('src'))),
       }; })()`);
-    ok(app + ': settings carries BOTH notification toggles, wired by the shared module',
-      par.pushRow && par.mailRow && par.pushWired && par.settingsMod, JSON.stringify(par));
+    /* ⚠ CRYPTO HAS NO EMAIL TOGGLE, BY DECISION (Jake, 2026-09-07): the Email reads toggle
+       governs the ANALYST Resend audience and crypto subscribers are not on that list — a switch
+       controlling mail the member does not receive is a lie wearing parity's clothes. Asserted as
+       an ABSENCE by name, so it cannot quietly come back as "parity" and cannot be read as drift. */
+    const wantsEmail = app !== 'crypto';
+    ok(app + ': settings carries the toggles this product actually has, on the shared module',
+      par.pushRow && par.pushWired && par.settingsMod && par.mailRow === wantsEmail,
+      JSON.stringify(par));
     /* THE REVERT BUG. Off is clicked, the wiring is torn down and rebuilt (what reopening does),
        and the toggle must still say Off — from the store, not the click. */
-    ok(app + ': the email toggle survives a reload of its own wiring',
+    if (wantsEmail) ok(app + ': the email toggle survives a reload of its own wiring',
       par.mailBefore === 'On' && par.mailAfterReload === 'Off',
       JSON.stringify({ before: par.mailBefore, after: par.mailAfterReload }));
     ok(app + ': Dr. NoVo carries Help and Plain English, and the bar carries his tab and Alerts',
@@ -1027,6 +1033,36 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ token: 'x', email_optin: true }) }).catch(() => {});
   }
+
+  // == THE PUSH TOGGLES ARE NOT CONNECTED ==================================================
+  /* Jake, 2026-09-07: "the alerts toggle should not be connected between any of them because
+     alerts do not ping or schedule between dashboards so toggling alerts of between dashboards is
+     wrong." The subscription always was per-scope; the localStorage FLAG was one shared key, so
+     the toggles painted and acted on each other's state. Proven by the exact motion he described:
+     turn push off on one dashboard, and the others' flags must not move. */
+  console.log('\nThe push toggles are independent\n');
+  await B.goto(base + '/crypto/live', 430, 900);
+  const cross = await B.evalIn(`(async () => {
+    localStorage.setItem('novo_analyst_push', '1');
+    localStorage.setItem('novo_push_trader', '1');
+    localStorage.setItem('novo_push_crypto', '1');
+    await window.novoPush.disable();
+    return { analyst: localStorage.getItem('novo_analyst_push'),
+             trader: localStorage.getItem('novo_push_trader'),
+             crypto: localStorage.getItem('novo_push_crypto') }; })()`);
+  ok('turning push off on the crypto map clears ONLY the crypto flag',
+    cross.crypto === null && cross.analyst === '1' && cross.trader === '1',
+    JSON.stringify(cross));
+  await B.goto(base + '/analyst/live', 430, 900);
+  const cross2 = await B.evalIn(`(async () => {
+    localStorage.setItem('novo_push_crypto', '1');
+    await window.novoPush.disable();
+    return { analyst: localStorage.getItem('novo_analyst_push'),
+             crypto: localStorage.getItem('novo_push_crypto') }; })()`);
+  ok('...and off on the analyst clears only the analyst’s (its legacy key, kept)',
+    cross2.analyst === null && cross2.crypto === '1', JSON.stringify(cross2));
+  await B.evalIn(`['novo_analyst_push','novo_push_trader','novo_push_crypto']
+    .forEach((k) => localStorage.removeItem(k))`);
 
   console.log('\nThe trader is black\n');
   await B.goto(base + '/trader/live', 430, 900);

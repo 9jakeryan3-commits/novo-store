@@ -21,14 +21,31 @@
  * trader-only subscriber registers through it exactly like an analyst subscriber. The name is
  * history, not a scope.
  *
- * ⚠ THE LOCALSTORAGE FLAG IS STILL novo_analyst_push. It is per-BROWSER, it means "this browser
- * has registered", and thousands of analyst members already carry it. Renaming it would ask every
- * one of them for permission again on their next visit.
+ * ⚠ THE FLAG IS PER-DASHBOARD (Jake, 2026-09-07: "the alerts toggle should not be connected
+ * between any of them because alerts do not ping or schedule between dashboards"). The
+ * SUBSCRIPTION always was per-dashboard — each page registers its own service-worker scope with
+ * its own endpoint — but the flag was one shared key, so the three toggles painted and acted on
+ * each other: turning push off on the crypto map made the trader's toggle say Enable while the
+ * trader's subscription stayed live and delivering. State that is per-thing has to be KEYED per
+ * thing.
+ * The analyst keeps the legacy name novo_analyst_push — thousands of members carry it, and
+ * renaming it would ask each of them for permission again on their next visit. Crypto and trader
+ * get keys of their own; they never truthfully shared the old one.
  */
 (function () {
   var SUPPORTED = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
 
   function tok() { try { return localStorage.getItem('novo_live_t') || ''; } catch (_) { return ''; } }
+
+  /* Which dashboard this PAGE is, synchronously — on() cannot await a registration. The path is
+     the same signal appOf() reads from the worker's scope, one step earlier. */
+  var PAGE_APP = (function () {
+    try {
+      var m = location.pathname.match(/\/(analyst|crypto|trader)[\/-]/);
+      return m ? m[1] : 'analyst';
+    } catch (_) { return 'analyst'; }
+  })();
+  var FLAG = PAGE_APP === 'analyst' ? 'novo_analyst_push' : 'novo_push_' + PAGE_APP;
 
   /* WHICH DASHBOARD THIS DEVICE REGISTERED FROM, taken from the service worker's own scope.
      Jake, 2026-09-07: "zero Dr. NoVo features are per app gated, Dr. NoVo can do all the same
@@ -65,7 +82,7 @@
       var res = await fetch('/api/analyst-publish?push=subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: t, sub: sub, app: appOf(reg) }) });
-      if (res.ok) localStorage.setItem('novo_analyst_push', '1');
+      if (res.ok) localStorage.setItem(FLAG, '1');
       return res.ok;
     } catch (e) { return false; }
   }
@@ -76,7 +93,7 @@
       var s = await reg.pushManager.getSubscription();
       if (s) await s.unsubscribe();
     } catch (_) {}
-    try { localStorage.removeItem('novo_analyst_push'); } catch (_) {}
+    try { localStorage.removeItem(FLAG); } catch (_) {}
   }
 
   /* What THIS BROWSER believes. The authority on whether a route exists is the server — the alerts
@@ -85,7 +102,7 @@
   function on() {
     try {
       return SUPPORTED && Notification.permission === 'granted'
-        && localStorage.getItem('novo_analyst_push') === '1';
+        && localStorage.getItem(FLAG) === '1';
     } catch (_) { return false; }
   }
 

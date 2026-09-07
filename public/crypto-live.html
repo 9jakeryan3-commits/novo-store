@@ -943,10 +943,12 @@ tr:last-child td{border-bottom:none}
       <div><div class="nf-k">Live push alerts</div><div class="nf-s">The alerts you set with Dr. NoVo, your morning digest, and level-break pings &mdash; to this device</div></div>
       <button class="nf-btn" id="nf-push" type="button">Enable</button>
     </div>
-    <div class="nf-row">
-      <div><div class="nf-k">Email reads</div><div class="nf-s">The Open, The Close &amp; the Sunday Week-Ahead</div></div>
-      <button class="nf-btn" id="nf-email" type="button">On</button>
-    </div>
+    <!-- ⚠ NO EMAIL TOGGLE HERE, DELIBERATELY (Jake, 2026-09-07: "crypto should not have a emails
+         toggle that dont have and email list"). The Email reads toggle governs the ANALYST Resend
+         audience — The Open, The Close, the Week-Ahead — and crypto subscribers are not on that
+         list. A switch controlling mail the member does not receive is not parity, it is a lie
+         wearing parity's clothes. The parity sweep asserts this ABSENCE by name, so it reads as a
+         decision rather than drift. Push stays: alerts and the digest are product-agnostic. -->
     <div class="dgrp">Collector</div>
     <div id="dstats"></div>
     <div class="dgrp">The fine print</div>
