@@ -48,8 +48,19 @@ const SNAP = {
   as_of: '2026-09-07T02:00:00Z', age_min: 2,
   coins: { BTC: COIN('A', 'high', 100000, 1e9), SOL: COIN('B', 'medium', 105.64, 1e8),
            ETH: COIN('A', 'high', 3400, 5e8) },
-  chain: [], feed: [], breadth: {},
-  health: { base_rates: [{ kind: 'chain_rug_risk', hit_rate: 95, n: 40 }] },
+  chain: [],
+  feed: [{ kind: 'funding_extreme', asset_code: 'BTC', claim: 'BTC funding is -4.7 sigma',
+           ts_utc: '2026-09-07T15:16:00Z', horizon_min: 240 }],
+  breadth: {},
+  /* The shape signals.base_rates() really returns: hit_rate is ALREADY a percentage
+     (ROUND(AVG(correct)*100, 1)), n is the claim count and n_cells is the independent-sample
+     denominator the panel's own subtitle promises. Both are here so the panel can be caught
+     printing the wrong one. */
+  health: { base_rates: [
+    { kind: 'funding_extreme_shorts_paying', hit_rate: 57.9, n: 7826, n_cells: 412 },
+    { kind: 'oi_quadrant_down', hit_rate: 49.2, n: 14991, n_cells: 903 },
+    { kind: 'gamma_damp', hit_rate: 52.4, n: 3419, n_cells: 288 },
+  ] },
 };
 
 /* The alerts store, stubbed with the same SHAPE api/_lib/alerts.js returns — including the
@@ -615,6 +626,54 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   const pillC0 = await B.evalIn(vis('.cx-install'));
   ok('the install pill floats above the bar, not under it',
     !pillC0.shown || pillC0.bottom <= bar.top, JSON.stringify({ pill: pillC0, barTop: bar.top }));
+
+  /* ── HOW EACH KIND HAS SCORED ───────────────────────────────────────────────────────────────
+     Jake spotted the clipped labels on his phone; the numbers beside them were worse. */
+  /* ⚠ THIS PANEL IS IN THE FEED VIEW, not the coin map — it is what Jake was looking at, under
+     "what just fired". Checked against the map it found zero cells, and the overflow assertion
+     PASSED on zero cells, which is a check that cannot fail. Both fixed: drive the right view, and
+     require the cells to exist before saying anything about them. */
+  const scored = await B.evalIn(`(() => {
+    try { drawFeed(); } catch (_e) {}
+    return null; })()`) || await B.evalIn(`(() => {
+    const cells = [...document.querySelectorAll('#body .cell')];
+    const panel = cells.length ? cells[0].closest('.panel') : null;
+    const sub = document.querySelector('#body .panel .sub');
+    const pr = panel ? panel.getBoundingClientRect() : null;
+    const over = (e) => { const r = e.getBoundingClientRect(); return pr ? (r.right > pr.right + 1) : false; };
+    return {
+      n: cells.length,
+      rates: cells.map((c) => (c.querySelector('.v') || {}).textContent || ''),
+      labels: cells.map((c) => (c.querySelector('.k') || {}).textContent || ''),
+      counts: cells.map((c) => (c.querySelector('.s') || {}).textContent || ''),
+      subOver: sub ? over(sub) : null,
+      cellOver: cells.filter(over).length,
+      /* the panel itself must not push the page sideways */
+      docWide: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    }; })()`);
+
+  /* ⚠ THE ONE THAT MATTERS. hit_rate is already a percentage, and it was multiplied by 100 again —
+     "4920%" on a paid surface, describing a hit rate. */
+  ok('the scored panel renders at all — nothing below this means anything without it',
+    scored.n === 3, JSON.stringify({ cells: scored.n }));
+  ok('a scored rate is a percentage, with the decimal the engine computed',
+    scored.n === 3 && scored.rates.join('|') === '57.9%|49.2%|52.4%', JSON.stringify(scored.rates));
+  /* The subtitle says "independent samples, not claim count" and the cells printed COUNT(*). */
+  ok('...counted by the denominator the panel says it uses',
+    scored.counts.every((c) => /samples/.test(c))
+      && scored.counts.join('|').indexOf('14,991') < 0
+      && scored.counts.join('|').indexOf('903') >= 0,
+    JSON.stringify(scored.counts));
+  /* base_rates splits two kinds by side, and those keys had no label. */
+  ok('...and every kind has a written label, not its raw key',
+    scored.n === 3 && scored.labels.every((l) => !/_/.test(l))
+      /* the two split kinds must say their side in words, not carry the raw suffix */
+      && /shorts paying/i.test(scored.labels.join(' '))
+      && /OI regime . down/i.test(scored.labels.join(' ')),
+    JSON.stringify(scored.labels));
+  ok('...with nothing running off the edge of the panel',
+    scored.n === 3 && scored.subOver === false && scored.cellOver === 0 && scored.docWide === false,
+    JSON.stringify({ n: scored.n, sub: scored.subOver, cells: scored.cellOver, doc: scored.docWide }));
 
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="stats"]').click()`);
   await new Promise((r) => setTimeout(r, 400));

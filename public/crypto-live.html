@@ -253,7 +253,10 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .rdn{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:5px;letter-spacing:.04em}
 .ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
 .ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
-.ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto}
+/* min-width:0 lets it shrink and wrap instead of pushing past the panel edge — margin-left:auto
+   on a flex item that cannot shrink is what ran 'independent samples, not claim count' off the
+   right side of the phone. */
+.ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto;min-width:0;overflow-wrap:anywhere}
 .pb{padding:12px}
 .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:var(--r-1);font-weight:600}
 .t-hi{background:rgba(16,185,129,.14);color:var(--green2)}
@@ -348,7 +351,9 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 
 .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:1px;background:var(--bdr2)}
 .cell{background:var(--panel);padding:12px 13px}
-.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4);margin-bottom:3px}
+/* A label longer than its cell WRAPS rather than running off the edge. These are generated
+   keys, so their length is not something the layout gets to assume. */
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt4);margin-bottom:3px;overflow-wrap:anywhere}
 .cell .v{font-family:var(--mono);font-size:19px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
 .cell .s{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:2px}
 .up{color:var(--green2)} .dn{color:var(--red)} .am{color:var(--amber)} .nu{color:var(--txt2)}
@@ -1680,6 +1685,14 @@ function drawReadStrip(){
 const KINDLABEL = {
   gamma_damp: 'Gamma damp', gamma_pin: 'Gamma pin', funding_extreme: 'Funding extreme',
   oi_quadrant: 'OI regime', cost_anomaly: 'Cost anomaly',
+  /* ⚠ base_rates() SPLITS TWO OF THESE BY SIDE and returns kind_side — funding_extreme becomes
+     funding_extreme_longs_paying / _shorts_paying, oi_quadrant becomes _up / _down. Without an
+     entry each, the raw key printed: "FUNDING_EXTREME_SHORTS_PAYING" in a 116px cell, clipped mid
+     word. The wording follows the SQL rather than improving on it — the side is literally which
+     side is paying funding. */
+  funding_extreme_longs_paying: 'Funding · longs paying',
+  funding_extreme_shorts_paying: 'Funding · shorts paying',
+  oi_quadrant_up: 'OI regime · up', oi_quadrant_down: 'OI regime · down',
 };
 // The counts the collector ships alongside the 60-row page, with the old len(feed) derivation as
 // the fallback -- KV holds a snapshot for 2h, so the first loads after a deploy predate them.
@@ -1732,11 +1745,24 @@ function drawFeed(){
     h += `<div class="panel"><div class="ph"><h2>How each kind has scored</h2>
       <span class="sub">independent samples, not claim count</span></div><div class="grid4">`;
     for(const b of br){
-      const n = b.n || b.samples || b.resolved || 0;
-      const hr = b.hit_rate!=null ? b.hit_rate : (b.rate!=null ? b.rate : null);
+      /* ⚠ hit_rate IS ALREADY A PERCENTAGE. signals.base_rates() computes
+         ROUND(AVG(correct)*100, 1) - so 49.2 means 49.2%. This multiplied it by 100 again and
+         published "4920%" on a paid surface. The other panel on this page (`My record`) prints the
+         same field raw, which is why only this one was wrong: two readers of one field, one of them
+         guessing at its scale. The `b.rate` fallback went with it - base_rates has no such key, so
+         it was dead code carrying a DIFFERENT scale, waiting to be the next version of this bug.
+         Decimal kept, because it is the precision the engine actually computed. */
+      const hr = b.hit_rate != null ? Number(b.hit_rate) : null;
+      /* ⚠ AND THE DENOMINATOR HAS TO BE THE ONE THE SUBTITLE PROMISES. The header says
+         "independent samples, not claim count" and this printed b.n, which is COUNT(*) - the claim
+         count, the exact thing it says it is not. n_cells is COUNT(DISTINCT coin || day), the
+         honest denominator, and it was in the payload all along. signals.py says it in its own
+         docstring: a product that sells the sample size on every rate has to publish the one that
+         means something. The number on screen drops a lot, and it is the true one. */
+      const n = b.n_cells != null ? b.n_cells : (b.n || 0);
       h += `<div class="cell"><div class="k">${KINDLABEL[b.kind]||b.kind}</div>
-        <div class="v nu">${hr!=null ? Math.round(hr*100)+'%' : '\u2014'}</div>
-        <div class="s">${n} resolved</div></div>`;
+        <div class="v nu">${hr!=null ? hr.toFixed(1)+'%' : '\u2014'}</div>
+        <div class="s">${n0(n)} samples</div></div>`;
     }
     h += `</div></div>`;
   }
