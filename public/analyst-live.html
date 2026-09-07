@@ -492,7 +492,10 @@ which Jake explicitly carved out. */
      markup renders it, static or from JS. */
   /* The Alerts card's styles are injected by /js/novo-alerts.js — see the note in that file.
      Only the outer card keeps a rule here, because the page owns how its cards sit. */
-  .lv-alerts { margin-top: 16px; padding: 0; border: 0; background: none; }
+  /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07). All three module cards shed the page's
+     .lv-card box — only .lv-alerts had this override, so Digest and Predict shipped boxed, which
+     is exactly what got the rule written down. */
+  .lv-alerts, .lv-digest, .lv-predict { margin-top: 16px; padding: 0; border: 0; background: none; border-radius: 0; }
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
   /* market ribbon */
@@ -1857,12 +1860,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script src="/js/novo-chat-sync.js?v=1dfdc652"></script>
 <!-- VAPID and the alerts card, shared with the crypto and trader dashboards. -->
 <script src="/js/novo-push.js?v=2f74b5df"></script>
-<script src="/js/novo-alerts.js?v=39d04c37"></script>
+<script src="/js/novo-alerts.js?v=10d61d9d"></script>
 <script src="/js/novo-desk.js?v=75f4891e"></script>
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
-<script src="/js/novo-digest.js?v=e0640c54"></script>
-<script src="/js/novo-predict.js?v=fa422d58"></script>
+<script src="/js/novo-digest.js?v=833b5090"></script>
+<script src="/js/novo-predict.js?v=830bc7a9"></script>
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>

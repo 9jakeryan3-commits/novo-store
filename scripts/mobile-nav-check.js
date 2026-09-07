@@ -317,6 +317,10 @@ const READ_BAR = `(() => {
    the crypto bar to Stats / Coins / Map / Dr. NoVo an hour later, and every one of those index
    assertions would have gone on passing or failing about a DIFFERENT tab than its own name claims.
    A check that quietly changes its subject is worse than one that breaks. */
+/* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): "no more full boxes only line breaks can be
+   used." A full box = a 4-sided border or a border-radius on anything that is not a control.
+   These modules inject their CSS, so the page-level debox-check never sees them — the ban is
+   asserted where they RENDER. Buttons and inputs are controls and exempt. */
 const litTab = (b) => ((b.tabs || []).find((t) => t.active) || {}).name;
 const tabNamed = (b, n) => ((b.tabs || []).find((t) => t.name === n) || {});
 
@@ -332,6 +336,23 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = 'http://127.0.0.1:' + server.address().port;
   const B = await attach();
+  /* Defined here, after B exists — hoisted above it, this threw at first call. */
+  const noBoxes = async (rootSel) => B.evalIn(
+  '(() => {'
+  + ' const root = document.querySelector(' + JSON.stringify(rootSel) + ');'
+  + ' if (!root) return { missing: true };'
+  + ' const bad = [];'
+  + ' [root, ...root.querySelectorAll("*")].forEach((e) => {'
+  + '   if (/^(BUTTON|INPUT|SELECT|TEXTAREA|KBD)$/.test(e.tagName)) return;'
+  + '   const c = getComputedStyle(e);'
+  + '   const sides = ["Top", "Right", "Bottom", "Left"].filter((k) =>'
+  + '     parseFloat(c["border" + k + "Width"]) > 0 && c["border" + k + "Style"] !== "none");'
+  + '   if (sides.length >= 4) bad.push((e.className || e.tagName) + ":4-sided");'
+  + '   else if (parseFloat(c.borderTopLeftRadius) > 0 && sides.length)'
+  + '     bad.push((e.className || e.tagName) + ":radius");'
+  + ' });'
+  + ' return { bad: bad.slice(0, 4), n: bad.length }; })()');
+
 
   // ══ ANALYST ═══════════════════════════════════════════════════════════════════════════════
   console.log('\nAnalyst — Dealer Map | Dr. NoVo\n');
@@ -922,6 +943,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       card.mounted && card.visible, JSON.stringify(card).slice(0, 200));
     ok(app + ': ...the card brought its own styles with it',
       card.styled === true, JSON.stringify({ styled: card.styled }));
+    const abx = await noBoxes('.novo-alerts');
+    ok(app + ': ...and the alerts card draws NO boxes — the ban, enforced where the CSS renders',
+      abx.n === 0, JSON.stringify(abx));
     /* The stub serves the same two alerts to every page, because the store is per MEMBER, not per
        product — one subscription, one list, three windows onto it. */
     ok(app + ': ...and it reached the endpoint and rendered the member’s alerts',
@@ -1118,6 +1142,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       return { mounted: true,
                visible: getComputedStyle(c).display !== 'none' && r.width > 0 && r.height > 0,
                text: (c.textContent || '').replace(/\\s+/g, ' ').trim() }; })()`);
+    const pbx = await noBoxes('.novo-predict');
+    ok(app + ': ...and the prediction record draws NO boxes',
+      pbx.n === 0, JSON.stringify(pbx));
     ok(app + ': ...the record displays — score, open call, graded outcome',
       pv.mounted && pv.visible
         && pv.text.indexOf('100%') >= 0
@@ -1156,6 +1183,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
            removed, one layer up */
         && dgv.text.indexOf('6:30 AM ET') >= 0 && dgv.text.indexOf('8:00') < 0,
       JSON.stringify({ syms: dgv.syms, text: dgv.text.slice(0, 120) }));
+    const dbx = await noBoxes('.novo-digest');
+    ok(app + ': ...and the digest suite draws NO boxes',
+      dbx.n === 0, JSON.stringify(dbx));
     ok(app + ': ...the mornings themselves display, newest first',
       dgv.days === 2 && dgv.text.indexOf('under its flip') >= 0
         && dgv.text.indexOf('under its flip') < dgv.text.indexOf('Quiet holiday tape'),

@@ -20,7 +20,12 @@ const crypto = require("crypto");
 const { kv } = require("../_kv.js");
 
 const MAX_ACTIVE = 10;
-const DEFAULT_TTL_MS = 7 * 24 * 3600 * 1000;
+// NO AUTO-EXPIRY (Jake, 2026-09-07: "alerts and predictions and all should run until closed by
+// user or the actual thing happening"). The 7-day TTL silently retired alerts nobody had touched —
+// a watch the member set and was still counting on, gone without a word. An alert now ends exactly
+// two ways: it fires (one-shots retire on fire, which IS the thing happening), or the member stops
+// it. Rows written before this carry their old expires and are honoured until it passes.
+const DEFAULT_TTL_MS = null;
 const COOLDOWN_MS = 60 * 60 * 1000;        // recurring level alerts: at most one fire an hour
 const BLOCK_COOLDOWN_MS = 30 * 60 * 1000;  // block alerts: a whale day is not 40 pushes
 const BLOCK_MIN_USD_FLOOR = 100000;        // below this the "block" tape is ordinary prints
@@ -84,15 +89,18 @@ async function _load(r, email) {
   try { a = await r.get(_akey(email)); } catch (_) { a = null; }
   if (typeof a === "string") { try { a = JSON.parse(a); } catch (_) { a = null; } }
   const now = Date.now();
-  return (Array.isArray(a) ? a : []).filter((x) => x && x.expires > now && !x.fired);
+  return (Array.isArray(a) ? a : []).filter((x) => x && (!x.expires || x.expires > now) && !x.fired);
 }
 
 async function _save(r, email, list) {
   try {
-    await r.set(_akey(email), JSON.stringify(list), { ex: 30 * 24 * 3600 });
+    // 365d, refreshed on every save (and the evaluators save on every state change) — the KV TTL
+    // is a dead-account sweep now, not a lifecycle: an alert with no expiry must not be eaten by
+    // its own storage.
+    await r.set(_akey(email), JSON.stringify(list), { ex: 365 * 24 * 3600 });
     if (list.length) await r.sadd("alerts:index", eh(email));
     else await r.srem("alerts:index", eh(email));
-    if (list.length) await r.set("alerts:e:" + eh(email), String(email).trim().toLowerCase(), { ex: 30 * 24 * 3600 });
+    if (list.length) await r.set("alerts:e:" + eh(email), String(email).trim().toLowerCase(), { ex: 365 * 24 * 3600 });
   } catch (_) {}
 }
 
@@ -133,7 +141,7 @@ async function setAlert(email, { kind, ticker, coin, level, direction, note, rec
 
   const a = { id: crypto.randomBytes(4).toString("hex"), kind,
               note: String(note || "").slice(0, 120) || null,
-              created: Date.now(), expires: Date.now() + DEFAULT_TTL_MS };
+              created: Date.now(), expires: null };
   // WHICH DASHBOARD SET IT. An alert pings from the app it was set in and no other — a member on
   // both the trader and the analyst shares one CONVERSATION across them but must not get one alert
   // twice. Absent on alerts created before this shipped; they keep the old fan-out and age out
@@ -203,7 +211,7 @@ async function setAlert(email, { kind, ticker, coin, level, direction, note, rec
   // A route has to exist for the message to land. Say so NOW, not at fire time.
   const d = await _delivery(r, email);
   return { ok: true, id: a.id, watching: _describe(a),
-           expires_in_days: 7,
+           runs_until: "it fires, or you stop it",
            one_shot: kind !== "crypto_block" && !a.recurring,
            devices_registered: d.devices, discord_linked: d.discord,
            note: d.routes.length
@@ -252,7 +260,8 @@ async function listAlerts(email, app) {
   return {
     active: list.map((x) => ({
       id: x.id, alert: _describe(x), note: x.note,
-      expires_in_h: Math.round((x.expires - Date.now()) / 3600000),
+      // null = runs until fired or stopped; a number only on rows from the old 7-day era
+      expires_in_h: x.expires ? Math.round((x.expires - Date.now()) / 3600000) : null,
       // The page renders rows, not sentences, so it needs the parts too. _describe stays the
       // ONE place the sentence is written — the page shows it verbatim rather than rebuilding
       // it from these, which is how the chat and a UI drift into describing the same alert

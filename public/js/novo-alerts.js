@@ -20,11 +20,12 @@
  */
 (function () {
   var CSS = [
-    '.novo-alerts{background:var(--panel,#111113);border:1px solid var(--bdr2,#242428);border-radius:14px;padding:16px 18px}',
+    /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): no full boxes, hairline line-breaks only. */
+    '.novo-alerts{padding:4px 2px}',
     '.novo-alerts h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
     '.novo-alerts .al-n{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.06em;margin-left:8px;text-transform:none}',
-    '.novo-alerts .al-route{font-size:12.5px;line-height:1.55;padding:10px 12px;border-radius:9px;margin:2px 0 12px;border:1px solid var(--bdr2,#242428);color:var(--txt2,#a8a8a8)}',
-    '.novo-alerts .al-route.warn{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07);color:#fbbf24}',
+    '.novo-alerts .al-route{font-size:12.5px;line-height:1.55;padding:10px 0;margin:0 0 4px;border-bottom:1px solid var(--bdr2,#242428);color:var(--txt2,#a8a8a8)}',
+    '.novo-alerts .al-route.warn{color:#fbbf24}',
     '.novo-alerts .al-enable{display:inline-block;margin-top:9px;background:#f59e0b;color:#17150c;border:0;border-radius:8px;font:inherit;font-size:12.5px;font-weight:800;padding:9px 14px;cursor:pointer;min-height:38px}',
     '.novo-alerts .al-enable:hover{filter:brightness(1.06)}',
     '.novo-alerts .al-enable[disabled]{opacity:.6;cursor:default}',
@@ -193,7 +194,7 @@
       + '<div class="al-body"><div class="al-empty">Loading…</div></div>'
       + '<div class="al-how">Set one in a sentence — ask ' + esc(opts.who || 'Dr. NoVo')
       + ' <em>“' + esc(opts.example || 'ping me if SPY crosses its flip') + '”</em>. '
-      + 'Alerts run for 7 days, up to <span class="al-max">10</span> at a time.</div>';
+      + 'Alerts run until they fire or you stop them — up to <span class="al-max">10</span> at a time.</div>';
     root = el;
     box = el.querySelector('.al-body');
     route = el.querySelector('.al-route');

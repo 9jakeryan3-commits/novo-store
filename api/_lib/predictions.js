@@ -126,8 +126,11 @@ async function makePrediction(args = {}) {
     horizon_utc = resolveHorizon(args.horizon);
   else if (isFinite(Number(args.horizon_min)) && Number(args.horizon_min) >= 5)
     horizon_utc = Date.now() + Number(args.horizon_min) * 60000;
-  if (!horizon_utc || horizon_utc > Date.now() + 14 * 24 * 3600 * 1000)
-    return { error: "horizon must be 'today_close' or horizon_min (5 minutes to 14 days)" };
+  /* Up to a year (Jake: run "until the actual thing happening"). The horizon is still REQUIRED —
+     that is what makes a prediction falsifiable, and the grade IS the thing happening — but its
+     reach is the member's call, not a two-week ceiling. */
+  if (!horizon_utc || horizon_utc > Date.now() + 366 * 24 * 3600 * 1000)
+    return { error: "horizon must be today_close / tomorrow_open / tomorrow_close, or horizon_min (5 minutes to a year)" };
 
   const list = await _load(r);
   if (list.filter((p) => p.status === "open").length >= MAX_OPEN)

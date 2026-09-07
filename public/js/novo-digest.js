@@ -23,13 +23,15 @@
  */
 (function () {
   var CSS = [
-    '.novo-digest{background:var(--panel,#111113);border:1px solid var(--bdr2,#242428);border-radius:14px;padding:16px 18px}',
+    /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): no full boxes, hairline line-breaks only. */
+    '.novo-digest{padding:4px 2px}',
     '.novo-digest h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
     '.novo-digest .dg-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.06em;margin-left:8px;text-transform:none}',
     /* the standing order — a header block, not a box */
     '.novo-digest .dg-order{padding:2px 0 12px;border-bottom:1px solid var(--bdr2,#242428)}',
     '.novo-digest .dg-syms{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 7px}',
-    '.novo-digest .dg-sym{font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--txt1,#f0f0ee);border:1px solid var(--bdr,#2c2c30);border-radius:999px;padding:4px 10px}',
+    '.novo-digest .dg-sym{font-family:var(--mono,ui-monospace),monospace;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--txt1,#f0f0ee)}',
+    '.novo-digest .dg-sym + .dg-sym::before{content:"\u00b7  ";color:var(--txt3,#6e6e6e);font-weight:400}',
     '.novo-digest .dg-focus{font-size:12.5px;color:var(--txt2,#a8a8a8);font-style:italic;margin:0 0 7px}',
     '.novo-digest .dg-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
     '.novo-digest .dg-actions{display:flex;gap:8px;margin-top:11px}',
@@ -43,7 +45,7 @@
     '.novo-digest .dg-date{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-bottom:5px}',
     '.novo-digest .dg-text{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.65;white-space:pre-wrap}',
     '.novo-digest .dg-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
-    '.novo-digest .dg-route{font-size:12.5px;line-height:1.55;padding:10px 12px;border-radius:9px;margin:12px 0 0;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.07);color:#fbbf24}',
+    '.novo-digest .dg-route{font-size:12.5px;line-height:1.55;padding:12px 0 0;margin:12px 0 0;border-top:1px solid var(--bdr2,#242428);color:#fbbf24}',
     '.novo-digest .dg-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-digest .dg-how em{color:var(--txt2,#a8a8a8);font-style:normal}',
     '.novo-digest .dg-ask{display:inline-block;margin-top:9px;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt1,#f0f0ee);border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;padding:9px 14px;cursor:pointer;min-height:38px}',

@@ -16,7 +16,8 @@
  */
 (function () {
   var CSS = [
-    '.novo-predict{background:var(--panel,#111113);border:1px solid var(--bdr2,#242428);border-radius:14px;padding:16px 18px}',
+    /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): no full boxes, hairline line-breaks only. */
+    '.novo-predict{padding:4px 2px}',
     '.novo-predict h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
     '.novo-predict .pd-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.06em;margin-left:8px;text-transform:none}',
     /* the score row — the headline is the RECORD, not any single call */
