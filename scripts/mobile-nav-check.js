@@ -985,6 +985,40 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('...and the hover state kept a colour of its own',
     !!dark.hov && dark.hov !== dark.bg2, JSON.stringify({ hov: dark.hov, bg2: dark.bg2 }));
 
+  /* The header was a grey-to-black GRADIENT, so a token check would have missed it entirely — its
+     top was the same #17171a the surfaces just lost, leaving a light band across a black page.
+     Sampled as a computed background, which is what a gradient cannot hide from. */
+  const hdr = await B.evalIn(`(() => {
+    const t = document.getElementById('topbar');
+    const c = getComputedStyle(t);
+    return { bg: c.backgroundColor, img: c.backgroundImage,
+             border: parseFloat(c.borderBottomWidth),
+             body: getComputedStyle(document.body).backgroundColor }; })()`);
+  ok('the header is black too, with no gradient left in it',
+    hdr.bg === hdr.body && hdr.img === 'none', JSON.stringify(hdr));
+  ok('...and it keeps the line under it',
+    hdr.border > 0, JSON.stringify({ borderBottom: hdr.border }));
+
+  /* ⚠ AT BOTH PHONE WIDTHS. The market state was hidden at 768 and hidden AGAIN, harder, at 430
+     with !important — so a check at one width only would have passed while the readout was still
+     gone on the device it matters on. */
+  for (const w of [430, 390]) {
+    await B.resize(w, 900);
+    await new Promise((r) => setTimeout(r, 350));
+    const sess = await B.evalIn(`(() => {
+      const e = document.getElementById('hdr-session-ts');
+      const v = document.getElementById('hdr-session');
+      if (!e || !v) return { missing: true };
+      const r = e.getBoundingClientRect();
+      return { shown: getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0,
+               text: (v.textContent || '').trim(),
+               colour: getComputedStyle(v).color }; })()`);
+    ok('trader @' + w + ': the market state is on the header, where a phone can see it',
+      sess.shown === true && /^(OPEN|PRE-MKT|AFT-HRS|CLOSED|—)$/.test(sess.text),
+      JSON.stringify(sess));
+  }
+  await B.resize(430, 900);
+
   console.log('\nThe page does not pinch-zoom\n');
   for (const app of ['trader', 'analyst', 'crypto']) {
     await B.goto(base + '/' + app + '/live', 430, 900);

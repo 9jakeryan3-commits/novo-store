@@ -320,7 +320,10 @@ body {
   display: flex;
   align-items: center;
   padding: 0 16px;
-  background: linear-gradient(180deg, #17171a 0%, #0c0c0f 100%);
+  /* Black, like the rest of it (Jake, 2026-09-07). This was a grey-to-black gradient whose TOP
+     was #17171a — the same grey the surfaces just lost — so the header stayed a light band across
+     a black page. The border-bottom and the inset hairline are untouched: those are the lines. */
+  background: var(--bg);
   border-bottom: 1px solid var(--bdr);
   box-shadow: 0 1px 20px rgba(0,0,0,.5), 0 0 0 1px rgba(168,174,187,.08) inset;
   gap: 0;
@@ -1263,7 +1266,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
   #topbar { padding: 0 10px; gap: 4px; }
   .brand-sub, #hdr-broker, .tb-sep { display: none; }
-  #hdr-session-ts { display: none; }
+  /* ⚠ THE MARKET STATE STAYS ON A PHONE. Jake, 2026-09-07: "it could also get a market indicator
+     there... not sure why mobile omitts it." It was hidden here and then hidden AGAIN, harder, at
+     430px (#topbar .ts { display:none !important }) — so the one readout that says whether the
+     market is open vanished on exactly the device you check it from.
+     Compact: the "Session" caption goes, the coloured word stays — OPEN / PRE-MKT / AFT-HRS /
+     CLOSED, in the colour tickClock already gives it. The Eastern clock stays hidden; a phone has
+     one in its own status bar. */
+  #hdr-session-ts { display: flex; justify-content: center; padding: 0 10px; }
+  #hdr-session-ts .ts-k { display: none; }
+  #hdr-session-ts .ts-v { font-size: 11px; letter-spacing: 1.5px; }
   #hdr-conn-text  { display: none; }
   .ts { padding: 0 8px; }
   .ts-v { font-size: 12px; }
@@ -1504,8 +1516,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
 /* ── Very narrow screens (Z Fold outer, compact phones ≤430px) ────────── */
 @media (max-width: 430px) {
-  /* Drop the topbar P&L and clock on truly tiny screens */
+  /* Drop the topbar clock on truly tiny screens — but NOT the market state, which is the one
+     readout on that row worth the width. !important because the rule it overrides carries one. */
   #topbar .ts { display: none !important; }
+  #topbar #hdr-session-ts { display: flex !important; padding: 0 8px; }
   /* The ⋮ menu was being pushed 13px off the right edge at 390px (measured), which makes the only
      way back to the portal unreachable. The topbar is a flex row and the status pill had no upper
      bound, so it took the width and the fixed item to its right went over the edge. Bound the pill
@@ -2130,7 +2144,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 #set-drawer.open { transform: translateX(0); }
 #set-drawer .dh { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 48px;
   border-bottom: 1px solid var(--bdr); flex: 0 0 auto;
-  background: linear-gradient(180deg, #17171a 0%, #0c0c0f 100%); }
+  background: var(--bg); }
 #set-drawer .dh b { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--txt2); }
 #set-drawer .dh button { margin-left: auto; background: none; border: none; color: var(--txt3);
