@@ -797,7 +797,11 @@ export default async function handler(req, res) {
      marker now travels in the payload too, where nothing between the engine and this function can
      touch it. The query check stays so the endpoint keeps working for anything already using it. */
   if (req.method === 'POST' && ((req.query && 'readings' in req.query) || (await _isKind(req, 'eye_readings')))) {
-    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
+    /* The 401 NAMES ITS BRANCH. Every gate in this file answered a bare "unauthorized", so an
+       unauthenticated probe could not tell which branch refused it - and that ambiguity is what
+       made four rounds of this bug undiagnosable from outside. Naming the branch leaks nothing:
+       the caller already knows which endpoint they aimed at. */
+    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized', branch: 'readings' });
     try {
       const b = await _bodyOf(req);
       // Name what arrived. The first live attempt returned a bare "readings[] required" and the
@@ -826,7 +830,7 @@ export default async function handler(req, res) {
   // now arrives as a fire, with the rule's graded record attached, and onEquityFire applies the
   // same bar the crypto side applies: earn it, or stay a private signal.
   if (req.method === 'POST' && ((req.query && 'fire' in req.query) || (await _isKind(req, 'eye_fire')))) {
-    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
+    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized', branch: 'fire' });
     try {
       const b = (await _bodyOf(req)) || {};
       if (!b.rule || !b.symbol) return res.status(400).json({ error: 'rule and symbol required' });
