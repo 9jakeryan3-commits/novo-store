@@ -52,8 +52,61 @@ const SNAP = {
   health: { base_rates: [{ kind: 'chain_rug_risk', hit_rate: 95, n: 40 }] },
 };
 
+/* The alerts store, stubbed with the same SHAPE api/_lib/alerts.js returns — including the
+   server-rendered `alert` sentence, which the page must print verbatim rather than rebuild.
+   ALERTS.mode lets a test ask for the failure that matters: a 503, which must NOT render as
+   "no alerts". */
+const ALERTS = {
+  mode: 'ok',
+  delivery: null,
+  active: [
+    { id: 'a1', alert: 'SPY above its call wall', note: null, expires_in_h: 130,
+      kind: 'equity_level', ticker: 'SPY', level: 'call_wall', direction: 'above',
+      recurring: false, armed: null },
+    { id: 'a2', alert: 'BTC below 92000 (recurring)', note: 'watching the sweep', expires_in_h: 20,
+      kind: 'crypto_level', ticker: 'BTC', level: 92000, direction: 'below',
+      recurring: true, armed: true },
+  ],
+};
+function alertsBody() {
+  return { ok: true, active: ALERTS.active, max_active: 10,
+           devices_registered: ALERTS.delivery ? 1 : 0, discord_linked: false,
+           delivery: ALERTS.delivery };
+}
+
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]);
+  if (rel === '/__set-delivery') {
+    ALERTS.delivery = (new URL(req.url, 'http://x').searchParams.get('d')) || null;
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ delivery: ALERTS.delivery })); return;
+  }
+  if (rel === '/__set-alerts-mode') {
+    ALERTS.mode = (new URL(req.url, 'http://x').searchParams.get('m') === '503') ? '503' : 'ok';
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ mode: ALERTS.mode })); return;
+  }
+  if (rel === '/api/alerts') {
+    if (ALERTS.mode === '503') {
+      res.writeHead(503, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'alerts unavailable' })); return;
+    }
+    if (req.method === 'POST') {
+      let b = '';
+      req.on('data', (c) => { b += c; });
+      req.on('end', () => {
+        let id = '';
+        try { id = JSON.parse(b || '{}').cancel || ''; } catch (_) {}
+        const before = ALERTS.active.length;
+        ALERTS.active = ALERTS.active.filter((a) => a.id !== id);
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, cancelled: before - ALERTS.active.length, ...alertsBody() }));
+      });
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(alertsBody())); return;
+  }
   if (rel === '/api/crypto-map') {
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify(SNAP)); return;
@@ -188,9 +241,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
   ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
     bar.h === 52, String(bar.h));
-  ok('three tabs, in the order Jake asked for',
-    bar.tabs.length === 3 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|Dr. NoVo|The Read',
+  ok('four tabs, in the order Jake asked for',
+    bar.tabs.length === 4 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|Dr. NoVo|The Read|Alerts',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -218,7 +271,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     const rd = document.querySelector('.lv-read');
     return { read: on('.lv-read'), ribbon: on('#mkt-ribbon'), flow: on('#flow-card'),
              head: on('.lv-top'), foot: on('.lv-foot'),
-             readText: rd ? (rd.textContent || '').replace(/\s+/g, ' ').trim().length : 0,
+             readText: rd ? (rd.textContent || '').replace(/\\s+/g, ' ').trim().length : 0,
              mtab: document.body.getAttribute('data-mtab'),
              docH: document.documentElement.scrollHeight }; })()`);
 
@@ -284,6 +337,121 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
   await B.evalIn(`window.scrollTo(0, 0)`);
   await new Promise((r) => setTimeout(r, 250));
+
+  /* ── ALERTS ────────────────────────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "we need an Alerts tab to self manage these alerts." */
+  const alertsView = () => B.evalIn(`(() => {
+    const box = document.getElementById('al-body');
+    const route = document.getElementById('al-route');
+    const card = document.getElementById('alerts-card');
+    const on = (e) => { if (!e) return false; const r = e.getBoundingClientRect();
+      return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
+    return { cardShown: on(card),
+             rows: document.querySelectorAll('#al-body .al-row').length,
+             text: (box ? box.textContent : '').replace(/\\s+/g, ' ').trim(),
+             routeShown: !!route && !route.hidden,
+             routeWarn: !!route && route.className.indexOf('warn') >= 0,
+             routeText: (route ? route.textContent : '').replace(/\\s+/g, ' ').trim(),
+             count: (document.getElementById('al-count') || {}).textContent || '',
+             ribbon: on(document.querySelector('#mkt-ribbon')) }; })()`);
+
+  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="alerts"]').click()`);
+  await new Promise((r) => setTimeout(r, 700));
+  let al = await alertsView();
+  bar = await B.evalIn(READ_BAR);
+  ok('Alerts is its own tab and shows only the alerts',
+    litTab(bar) === 'alerts' && al.cardShown === true && al.ribbon === false,
+    JSON.stringify({ lit: litTab(bar), card: al.cardShown, ribbon: al.ribbon }));
+  ok('...it lists what is actually being watched',
+    al.rows === 2 && al.count.indexOf('2 of 10') >= 0, JSON.stringify(al).slice(0, 220));
+  /* The sentence has to be the SERVER'S. If the page ever starts composing its own, the chat and
+     this tab will describe the same alert two different ways. */
+  ok('...printing the server’s own sentence, not one the page rebuilt',
+    al.text.indexOf('SPY above its call wall') >= 0 &&
+    al.text.indexOf('BTC below 92000 (recurring)') >= 0, JSON.stringify(al.text).slice(0, 220));
+  /* Boxes, not text. "20H LEFTwatching the sweep" concatenates perfectly well in textContent and
+     reads as a defect on screen; only geometry sees it. */
+  const noteGeo = await B.evalIn(`(() => {
+    const row = document.querySelector('#al-body .al-row:nth-child(2)');
+    if (!row) return { missing: true };
+    const m = row.querySelector('.al-meta'), n = row.querySelector('.al-note');
+    if (!m || !n) return { missing: true };
+    const rm = m.getBoundingClientRect(), rn = n.getBoundingClientRect();
+    return { metaBottom: Math.round(rm.bottom), noteTop: Math.round(rn.top) }; })()`);
+  ok('...and a note sits on its OWN line, not run on from the meta',
+    !noteGeo.missing && noteGeo.noteTop >= noteGeo.metaBottom - 1, JSON.stringify(noteGeo));
+  ok('...with the one-shot / recurring difference on the row',
+    al.text.indexOf('one-shot') >= 0 && al.text.indexOf('recurring') >= 0,
+    JSON.stringify(al.text).slice(0, 220));
+
+  /* THE HONESTY CHECK. Nothing is registered to receive these, so they are saved, evaluated and
+     silently dropped at fire time. A tab that shows them looking armed is worse than no tab. */
+  ok('...and it SAYS SO when nothing can reach the member',
+    al.routeShown && al.routeWarn && /nothing can reach you/i.test(al.routeText),
+    JSON.stringify({ shown: al.routeShown, warn: al.routeWarn, text: al.routeText.slice(0, 120) }));
+
+  /* Cancel goes to the store and the list is re-rendered from its answer. */
+  await B.evalIn(`document.querySelector('#al-body [data-cancel="a1"]').click()`);
+  await new Promise((r) => setTimeout(r, 600));
+  al = await alertsView();
+  ok('Stop cancels the alert and the list comes back from the store',
+    al.rows === 1 && al.text.indexOf('SPY above its call wall') < 0 &&
+    al.text.indexOf('BTC below 92000') >= 0, JSON.stringify(al).slice(0, 220));
+
+  /* ── VAPID ─────────────────────────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "VAPID just like the Analyst line alerts and today's read already do."
+     These alerts ride the SAME registration: api/_lib/alerts.js reads push:u:<hash>, which is what
+     ?push=subscribe writes for The Line and the session read. So the banner offers that exact flow
+     rather than a second one, and the check that matters is that there IS only one. */
+  /* ⚠ THIRD TIME: A BACKSLASH INSIDE A TEMPLATE LITERAL IS EATEN BEFORE THE BROWSER SEES IT.
+     Every expression here is a JS template string, so /\s+/ arrives as /s+/ (which strips
+     the letter s from every result and reads as garbled data, not as a bug) and /\(/ arrives as an
+     unterminated group. Any regex written in one of these needs its backslashes doubled. */
+  const oneFlow = await B.evalIn(`(() => {
+    const html = document.documentElement.innerHTML;
+    return { subscribeCalls: (html.match(/pushManager\\.subscribe\\(/g) || []).length,
+             exposed: typeof window.novoEnablePush }; })()`);
+  ok('the VAPID subscribe path is exposed for the Alerts tab to reuse',
+    oneFlow.exposed === 'function', JSON.stringify(oneFlow));
+  ok('...and there is still exactly ONE of it on the page, not a copy behind the banner',
+    oneFlow.subscribeCalls === 1, JSON.stringify(oneFlow));
+
+  /* Geometry again: an inline button mid-sentence renders as a block of orange wedged between two
+     half-lines of text, and every textContent assertion is happy with it. */
+  const btn = await B.evalIn(`(() => {
+    const b = document.getElementById('al-push'); const r = document.getElementById('al-route');
+    if (!b || !r) return { missing: true };
+    const rb = b.getBoundingClientRect(), rr = r.getBoundingClientRect();
+    return { there: true, ownLine: Math.round(rb.left) <= Math.round(rr.left) + 16,
+             tall: rb.height >= 34 }; })()`);
+  ok('...and the warning offers the switch instead of describing where to find it',
+    btn.there === true, JSON.stringify(btn));
+  ok('...on its own line and a real tap target, not wedged into the sentence',
+    btn.ownLine === true && btn.tall === true, JSON.stringify(btn));
+
+  /* Turning it on must be believed only once the SERVER says a route exists. */
+  await B.evalIn(`window.novoEnablePush = async function () {
+    await fetch('/__set-delivery?d=' + encodeURIComponent('push to 1 device'));
+    return true; }`);
+  await B.evalIn(`document.getElementById('al-push').click()`);
+  await new Promise((r) => setTimeout(r, 800));
+  al = await alertsView();
+  ok('...turning push on clears the warning and names the route the server confirmed',
+    al.routeShown && !al.routeWarn && /push to 1 device/.test(al.routeText),
+    JSON.stringify({ warn: al.routeWarn, text: al.routeText.slice(0, 120) }));
+  await fetch(base + '/__set-delivery').catch(() => {});
+
+  /* ⚠ THE FAILURE THAT MATTERS. A dead store must never render as "you have no alerts" — a member
+     whose alerts are fine would be told they have none and would go and set them all again. */
+  await B.evalIn(`window.__alertsMode = '503'`);
+  await fetch(base + '/__set-alerts-mode?m=503').catch(() => {});
+  await B.evalIn(`window.lvAlerts.load()`);
+  await new Promise((r) => setTimeout(r, 600));
+  al = await alertsView();
+  ok('a dead alerts store does NOT render as "nothing being watched"',
+    al.text.indexOf('Nothing being watched') < 0 && /still running/i.test(al.text),
+    JSON.stringify(al.text).slice(0, 200));
+  await fetch(base + '/__set-alerts-mode?m=ok').catch(() => {});
 
   const wrapPad = await B.evalIn(`getComputedStyle(document.querySelector('.lv-wrap')).paddingBottom`);
   ok('the document ends above the bar rather than under it',

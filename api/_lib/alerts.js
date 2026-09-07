@@ -153,31 +153,58 @@ async function setAlert(email, { kind, ticker, coin, level, direction, note, rec
   await _save(r, email, list);
 
   // A route has to exist for the message to land. Say so NOW, not at fire time.
+  const d = await _delivery(r, email);
+  return { ok: true, id: a.id, watching: _describe(a),
+           expires_in_days: 7,
+           one_shot: kind !== "crypto_block" && !a.recurring,
+           devices_registered: d.devices, discord_linked: d.discord,
+           note: d.routes.length
+             ? `fires as ${d.routes.join(" and ")}${kind !== "crypto_block" && !a.recurring ? ", then retires" : ""}`
+             : "SAVED, but no route can reach you - toggle 'Live push alerts' on the " +
+               "dashboard once, or link Discord from your welcome email" };
+}
+
+// WHERE AN ALERT WOULD ACTUALLY LAND, as one answer both the chat and the Alerts tab give.
+// This lived inline in setAlert, so creating an alert told you honestly that nothing could
+// reach you and LISTING them never mentioned it again. An alert with no route is not a
+// pending alert, it is a silent one, and the surface built to manage them is exactly where
+// that has to be visible.
+async function _delivery(r, email) {
   let devices = 0;
   try {
     const subs = await r.get("push:u:" + eh(email));
     devices = (typeof subs === "string" ? JSON.parse(subs) : subs || []).length;
   } catch (_) {}
-  const discord = !!(await _discordId(r, email));
+  let discord = false;
+  try { discord = !!(await _discordId(r, email)); } catch (_) {}
   const routes = [];
   if (devices) routes.push(`push to ${devices} device${devices > 1 ? "s" : ""}`);
   if (discord) routes.push("a Discord DM");
-  return { ok: true, id: a.id, watching: _describe(a),
-           expires_in_days: 7,
-           one_shot: kind !== "crypto_block" && !a.recurring,
-           devices_registered: devices, discord_linked: discord,
-           note: routes.length
-             ? `fires as ${routes.join(" and ")}${kind !== "crypto_block" && !a.recurring ? ", then retires" : ""}`
-             : "SAVED, but no route can reach you - toggle 'Live push alerts' on the " +
-               "dashboard once, or link Discord from your welcome email" };
+  return { devices, discord, routes };
 }
 
 async function listAlerts(email) {
   const r = kv();
   if (!r || !email) return { error: "alerts unavailable" };
   const list = await _load(r, email);
-  return { active: list.map((x) => ({ id: x.id, alert: _describe(x), note: x.note,
-                                      expires_in_h: Math.round((x.expires - Date.now()) / 3600000) })) };
+  const d = await _delivery(r, email);
+  return {
+    active: list.map((x) => ({
+      id: x.id, alert: _describe(x), note: x.note,
+      expires_in_h: Math.round((x.expires - Date.now()) / 3600000),
+      // The page renders rows, not sentences, so it needs the parts too. _describe stays the
+      // ONE place the sentence is written — the page shows it verbatim rather than rebuilding
+      // it from these, which is how the chat and a UI drift into describing the same alert
+      // two different ways.
+      kind: x.kind, ticker: x.ticker || x.coin || null, level: x.level ?? null,
+      direction: x.direction || null,
+      recurring: !!x.recurring, armed: x.recurring ? !!x.armed : null,
+    })),
+    max_active: MAX_ACTIVE,
+    devices_registered: d.devices, discord_linked: d.discord,
+    // Said in the same words the chat uses when it saves one.
+    delivery: d.routes.length ? d.routes.join(" and ") : null,
+  };
 }
 
 async function cancelAlert(email, { id } = {}) {

@@ -490,6 +490,40 @@ which Jake explicitly carved out. */
                  columns: 34em auto; column-gap: 44px; }   /* 34em collapses to one column on its own below ~960px */
   /* .lv-vol deleted 2026-09-06: dead. Its only occurrence in this file was this rule -- no
      markup renders it, static or from JS. */
+  /* ── ALERTS ─────────────────────────────────────────────────────────────────────────────── */
+  .lv-alerts { margin-top: 16px; }
+  .lv-alerts .ah-sub { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--txt3);
+    letter-spacing: .06em; margin-left: 8px; text-transform: none; }
+  /* The delivery line is a WARNING, not decoration: an alert with no route is a silent alert, and
+     the member has no way to discover that from the alert itself. */
+  .al-route { font-size: 12.5px; line-height: 1.55; padding: 10px 12px; border-radius: 9px;
+    margin: 2px 0 12px; border: 1px solid var(--bdr2); color: var(--txt2); }
+  .al-route.warn { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.07); color: #fbbf24; }
+  .al-enable { display: inline-block; margin-top: 8px; background: #f59e0b; color: #17150c;
+    border: 0; border-radius: 8px; font: inherit; font-size: 12.5px; font-weight: 800;
+    padding: 9px 14px; cursor: pointer; min-height: 38px; }
+  .al-enable:hover { filter: brightness(1.06); }
+  .al-enable[disabled] { opacity: .6; cursor: default; }
+  .al-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 0;
+    border-top: 1px solid var(--bdr2); }
+  .al-row:first-child { border-top: 0; }
+  .al-what { flex: 1; min-width: 0; }
+  .al-what b { display: block; font-size: 13.5px; color: var(--txt1); font-weight: 700; }
+  /* BLOCK, both of them. They are spans inside a span, so without this the note runs straight on
+     from the meta line -- "20H LEFTwatching the sweep". Invisible to a textContent assertion,
+     which is why the check beside it measures their boxes instead. */
+  .al-meta { font-family: var(--mono); font-size: 10.5px; color: var(--txt3);
+    letter-spacing: .05em; text-transform: uppercase; margin-top: 3px; }
+  .al-note { display: block; font-size: 12px; color: var(--txt2); margin-top: 3px; }
+  .al-x { flex: 0 0 auto; background: none; border: 1px solid var(--bdr); color: var(--txt3);
+    border-radius: 8px; font: inherit; font-size: 11.5px; font-weight: 700; padding: 7px 11px;
+    cursor: pointer; min-height: 34px; }
+  .al-x:hover { border-color: #f43f5e; color: #f43f5e; }
+  .al-x[disabled] { opacity: .5; cursor: default; }
+  .al-empty { font-size: 13px; color: var(--txt2); line-height: 1.6; padding: 4px 0 2px; }
+  .al-how { font-size: 11.5px; color: var(--txt3); line-height: 1.6; margin-top: 14px;
+    padding-top: 12px; border-top: 1px solid var(--bdr2); }
+  .al-how em { color: var(--txt2); font-style: normal; }
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
   /* market ribbon */
@@ -660,6 +694,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- today's read (full-width prose) -->
     <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
 
+    <!-- ALERTS. Jake, 2026-09-07: "we need an Alerts tab to self manage these alerts."
+         These objects have existed for weeks behind the chat's tool layer and have never had a
+         surface: you could create one in a sentence and then had no way to see, three days later,
+         what you were still watching. Creating stays in the chat on purpose (see api/alerts.js) --
+         this manages what exists. -->
+    <div class="lv-card lv-alerts" id="alerts-card">
+      <h2>Your alerts <span class="ah-sub" id="al-count"></span></h2>
+      <div id="al-route" class="al-route" hidden></div>
+      <div id="al-body" class="al-body">Loading&hellip;</div>
+      <div class="al-how">Set one in a sentence &mdash; ask Dr. NoVo
+        <em>&ldquo;ping me if SPY crosses its flip&rdquo;</em>. Alerts run for 7 days, up to
+        <span id="al-max">10</span> at a time.</div>
+    </div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
   </div>
 
@@ -675,7 +722,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lv-card lv-notif hidden" id="notif">
       <h2>Notifications</h2>
       <div class="nf-row">
-        <div><div class="nf-k">Live push alerts</div><div class="nf-s">‘The Line’ level-breaks and each session’s read, to your home screen — install the app first</div></div>
+        <div><div class="nf-k">Live push alerts</div><div class="nf-s">‘The Line’ level-breaks, each session’s read, and the alerts you set with Dr. NoVo, to your home screen — install the app first</div></div>
         <button class="nf-btn" id="nf-push" type="button">Enable</button>
       </div>
       <div class="nf-row">
@@ -1512,6 +1559,21 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       try{ var r=await fetch('/api/analyst-publish?prefs=1&t='+encodeURIComponent(tok())); if(r.ok){ var d=await r.json(); setEmail(d.email_optin!==false); } }catch(_){}
       eb.onclick=async function(){ eb.disabled=true; var want=!eb.dataset.on; try{ var rr=await fetch('/api/analyst-publish?prefs=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok(),email_optin:want})}); if(rr.ok){ var dd=await rr.json(); setEmail(dd.email_optin!==false); } }catch(_){} eb.disabled=false; };
     }
+    /* ⚠ ONE VAPID FLOW, SHARED — NOT COPIED. The Alerts tab needs to offer "enable push" inline,
+       and the whole subscribe path already lives here: permission prompt, key fetch from
+       ?push=key, PushManager.subscribe, POST to ?push=subscribe. Re-typing any of that behind the
+       alerts banner would give the product two subscribe paths to keep in step, and the one that
+       is not the switchboard would be the one nobody remembers to update. Exposed instead.
+       Reader-set alerts ride this SAME subscription: api/_lib/alerts.js reads push:u:<hash>, which
+       is exactly what ?push=subscribe writes. Turning on "Live push alerts" for The Line and the
+       session read turns them on for your own alerts too, because it is one registration. */
+    window.novoEnablePush = subscribe;
+    window.novoPushOn = function () {
+      try {
+        return ('Notification' in window) && Notification.permission === 'granted'
+          && localStorage.getItem('novo_analyst_push') === '1';
+      } catch (_e) { return false; }
+    };
     window.addEventListener('load',function(){ setTimeout(ready,1400); setTimeout(initNotif,1500); });
   })();
 })();
@@ -1767,6 +1829,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="map"]  { order: 1; }
     .mob-tab[data-mtab="novo"] { order: 2; }
     .mob-tab[data-mtab="read"] { order: 3; }
+    .mob-tab[data-mtab="alerts"] { order: 4; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -1798,10 +1861,16 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
        and the footer are on every tab: one is the brand and the live badge, the other is the
        "not financial advice" line, and that line does not get a tab it can be missing from. */
     body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot) { display: none; }
-    body[data-mtab="map"]  #dash > .lv-read { display: none; }
+    body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
+    body[data-mtab="map"]  #dash > .lv-read,
+    body[data-mtab="map"]  #dash > .lv-alerts { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
+    body[data-mtab="alerts"] .lv-alerts { margin-top: 0; }
+    /* Four labels now. "Dealer Map" is the widest and it is what forces this: at 390px four tabs
+       get ~97px each and the label was already set to the width of three. */
+    .mob-tab { font-size: 9px; letter-spacing: 0; }
     /* The document has to END above the bar, or the last card is permanently underneath it. */
     .lv-wrap { padding-bottom: calc(var(--navh) + 16px); }
     /* ...and so does the settings sheet, whose last link sat under the bar otherwise. */
@@ -1898,6 +1967,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <span class="mob-tab-icon" aria-hidden="true">&#9636;</span>
     <span>The Read</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="alerts" onclick="lvMobTab('alerts')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9673;</span>
+    <span>Alerts</span>
+  </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
     <span>Dr. NoVo</span>
@@ -1913,12 +1986,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      without this you leave the map halfway down, read the note, come back and land in the middle of
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
-  var scrollAt = { map: 0, read: 0 };
+  var scrollAt = { map: 0, read: 0, alerts: 0 };
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
     /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
        we would save that zero over a real position. */
-    if (!panel.classList.contains('on') && (from === 'map' || from === 'read'))
+    if (!panel.classList.contains('on') && from !== 'novo')
       scrollAt[from] = window.scrollY || 0;
     try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
     if (which === 'novo') return;
@@ -1932,6 +2005,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
          profile still waits for the next poll. That gap predates this tab — it is why the profile
          is also wrong after a phone rotate — and this is not the change that fixes it. */
       if (which === 'map') { try { window.dispatchEvent(new Event('resize')); } catch (_e) {} }
+      /* Refreshed on ARRIVAL rather than polled: alerts change when the member changes them or
+         when one fires, both rare, and a list that silently went stale while the tab sat open is
+         the thing this surface exists to prevent. */
+      if (which === 'alerts') { try { window.lvAlerts.load(); } catch (_e) {} }
     });
   };
   /* Reads the panel and the body, never remembers a click. See the note in the stylesheet.
@@ -1953,6 +2030,159 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   new MutationObserver(sync).observe(document.body,
     { attributes: true, attributeFilter: ['data-mtab'] });
   sync();
+})();
+</script>
+
+<script>
+/* ── ALERTS ────────────────────────────────────────────────────────────────────────────────────
+   The reader's own alerts, listed and cancellable. api/alerts.js is the whole contract; this file
+   renders it and nothing more.
+
+   ⚠ THE DESCRIPTION IS THE SERVER'S SENTENCE, RENDERED VERBATIM. It would be easy to rebuild
+   "SPY above its call wall" here out of kind/ticker/level/direction — every one of those fields is
+   in the payload. Doing that would give the product two places that describe the same alert, and
+   they would drift the first time a new alert kind is added: the chat would say one thing and this
+   tab another about the same object. _describe() in api/_lib/alerts.js stays the only author. The
+   parts ride along for the METADATA line, which is a different claim.
+
+   ⚠ AND IT SAYS WHEN NOTHING CAN REACH YOU. An alert with no push subscription and no linked
+   Discord is saved, evaluated, and silently discarded at fire time. The chat says so at creation
+   and then never again — this is the surface where that has to stay visible, or the tab becomes a
+   list of alerts that look armed and are not. */
+(function () {
+  var box = document.getElementById('al-body');
+  var route = document.getElementById('al-route');
+  var count = document.getElementById('al-count');
+  if (!box) return;
+
+  function tok() { try { return localStorage.getItem('novo_live_t') || ''; } catch (_e) { return ''; } }
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  /* 168h reads as a machine's answer to "how long have I got". */
+  function left(h) {
+    if (h == null || !isFinite(h)) return '';
+    if (h < 1) return 'under an hour left';
+    if (h < 48) return h + 'h left';
+    return Math.round(h / 24) + 'd left';
+  }
+
+  function render(d) {
+    var list = (d && d.active) || [];
+    count.textContent = list.length
+      ? list.length + ' of ' + (d.max_active || 10) : '';
+    var mx = document.getElementById('al-max');
+    if (mx && d && d.max_active) mx.textContent = d.max_active;
+
+    /* The delivery line only appears when it has something to say. A green "you are reachable"
+       banner on every load is noise; the warning is the whole point. */
+    if (list.length && !d.delivery) {
+      route.hidden = false;
+      route.className = 'al-route warn';
+      /* ⚠ AN ACTION, NOT DIRECTIONS. This used to say "turn on Live push alerts in Settings",
+         which is a true sentence and a bad one: the member is looking at their own silent alerts
+         and being sent to find a switch. It is the SAME VAPID registration The Line and the
+         session read already use, and it is one call away, so offer it here. */
+      route.innerHTML = '<b>Nothing can reach you yet.</b> These are saved and being watched, but ' +
+        'no device is registered to receive them. It is the same push the ‘Line’ alerts and the ' +
+        'session read use.' +
+        (window.novoEnablePush ? '<div><button class="al-enable" type="button" id="al-push">' +
+          'Turn on push</button></div>' : ' Turn on <b>Live push alerts</b> in Settings.');
+      var eb = document.getElementById('al-push');
+      if (eb) eb.onclick = async function () {
+        eb.disabled = true; eb.textContent = 'Enabling…';
+        var okp = false;
+        try { okp = await window.novoEnablePush(); } catch (_e) { okp = false; }
+        /* Re-read from the SERVER rather than assuming. The subscription only counts once
+           ?push=subscribe has stored it, and that is the same store listAlerts reports from — so
+           the banner can only claim a route once the route provably exists. */
+        if (okp) return load();
+        eb.disabled = false; eb.textContent = 'Turn on push';
+        route.insertAdjacentHTML('beforeend',
+          '<div style="margin-top:8px">That did not go through — your browser may have blocked ' +
+          'notifications for this site. Install the app to your home screen first, then try again.</div>');
+      };
+    } else if (list.length) {
+      route.hidden = false;
+      route.className = 'al-route';
+      route.innerHTML = 'Delivered by ' + esc(d.delivery) + '.';
+    } else {
+      route.hidden = true;
+    }
+
+    if (!list.length) {
+      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>';
+      return;
+    }
+    box.innerHTML = list.map(function (a) {
+      var bits = [];
+      if (a.recurring) bits.push(a.armed === false ? 'recurring \u00b7 re-arming' : 'recurring');
+      else if (a.kind !== 'crypto_block') bits.push('one-shot');
+      var l = left(a.expires_in_h); if (l) bits.push(l);
+      return '<div class="al-row" data-id="' + esc(a.id) + '">' +
+        '<span class="al-what"><b>' + esc(a.alert) + '</b>' +
+        (bits.length ? '<span class="al-meta">' + esc(bits.join(' \u00b7 ')) + '</span>' : '') +
+        (a.note ? '<span class="al-note">' + esc(a.note) + '</span>' : '') +
+        '</span>' +
+        '<button class="al-x" type="button" data-cancel="' + esc(a.id) + '" ' +
+        'aria-label="Stop watching ' + esc(a.alert) + '">Stop</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
+      b.onclick = function () { cancel(b.getAttribute('data-cancel'), b); };
+    });
+  }
+
+  function fail(msg) {
+    route.hidden = true;
+    box.innerHTML = '<div class="al-empty">' + esc(msg) + '</div>';
+  }
+
+  async function load() {
+    var t = tok();
+    if (!t) return fail('Sign in on the dashboard to see your alerts.');
+    box.innerHTML = '<div class="al-empty">Loading\u2026</div>';
+    try {
+      var r = await fetch('/api/alerts?t=' + encodeURIComponent(t), { cache: 'no-store' });
+      var d = await r.json();
+      /* ⚠ A FAILED READ MUST NOT RENDER AS "no alerts". The endpoint answers 503 when the store is
+         unreachable, and an empty list is the single most dangerous thing to show here: a member
+         whose alerts are fine would be told they have none, and would go and make them again. */
+      if (!r.ok) return fail(r.status === 401
+        ? 'Your session expired \u2014 reload the dashboard.'
+        : 'Could not reach your alerts just now. They are still running.');
+      render(d);
+    } catch (_e) {
+      fail('Could not reach your alerts just now. They are still running.');
+    }
+  }
+
+  async function cancel(id, btn) {
+    var t = tok(); if (!t) return;
+    btn.disabled = true; btn.textContent = 'Stopping\u2026';
+    try {
+      var r = await fetch('/api/alerts', { method: 'POST', cache: 'no-store',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ t: t, cancel: id }) });
+      var d = await r.json();
+      if (!r.ok) throw new Error('cancel failed');
+      /* Re-rendered from the STORE's answer, not by removing the row locally. A row that vanishes
+         because the click handler removed it looks identical whether the cancel landed or not. */
+      render(d);
+    } catch (_e) {
+      btn.disabled = false; btn.textContent = 'Stop';
+      route.hidden = false; route.className = 'al-route warn';
+      route.textContent = 'That did not go through \u2014 the alert is still active. Try again.';
+    }
+  }
+
+  window.lvAlerts = { load: load };
+  /* On desktop the card is simply part of the page, so it loads with the page. On a phone it is a
+     tab and lvMobTab reloads it on arrival — but it still loads once here, because the member may
+     land on it directly and because a stale card is worse than a loading one. */
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', load);
+  else load();
 })();
 </script>
 
