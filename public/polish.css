@@ -51,6 +51,39 @@ p, li, .section-sub, .hero-tagline { text-wrap: pretty; }
 :where(.feature, .included-item):hover { transform: translateY(-2px); }
 :where(.feature, .included-item):active { transform: translateY(0); }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE FEATURE STACK IS ONE COMPONENT, AND IT HAD DRIFTED PER PAGE.
+   Jake, 2026-09-06: "home page feature stack has color matched lifted background
+   and looks great trader and analyst dont have the same style".
+   Measured on mobile before this rule: / had box-shadow 0 6px 24px rgba(0,0,0,.28)
+   with a 14px radius and a 14px near-white h3, while /trader and /analyst had NO
+   shadow and fell back to the generic h3 at 18.72px in muted --txt2 blue-grey.
+   Only index.html carried the rule, in its own inline <style>.
+
+   This is NOT the box that was removed on 09-06. That was a FILL plus a BORDER
+   (background var(--navy2) + 1px solid var(--bdr)) and it is still gone. What
+   stays is elevation only -- no fill, no border, a soft shadow on the page
+   ground -- which is what index.html's own comment already called out: ".ai-card
+   and .feature still have a surface to raise, so they stay."
+   Lives here rather than in three inline blocks so the three pages cannot drift
+   apart again.
+   ══════════════════════════════════════════════════════════════════════════════ */
+.feature,
+.read-card,
+.split-card,
+.how-card,
+.ai-card {
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+:where(.read-card, .split-card, .how-card):hover { transform: translateY(-2px); }
+
+/* Only the .feature heading is normalised. /crypto's .split-card h4 is purple and
+   /trader's .cost-card h3 is green -- those are the page's own accent doing work,
+   not drift, so they are left alone. Jake's call if he wants them unified too. */
+.feature h3 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }
+
 /* Inline links get an underline that grows from the left instead of appearing. */
 :where(.container p, .section-sub) a:not([class]) {
   background-image: linear-gradient(currentColor, currentColor);
