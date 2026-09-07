@@ -956,7 +956,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await fetch(base + '/__reset-alerts').catch(() => {});
   console.log('\nThe Alerts tab, on all three dashboards\n');
   for (const [page, open] of [
-      ['trader-live.html', `switchMobileTab(5)`],
+      ['trader-live.html', `pickMore(5)`],
       ['analyst-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`],
       ['crypto-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`]]) {
     const app = page.split('-')[0];
@@ -968,9 +968,24 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       const r = t.getBoundingClientRect();
       return { shown: getComputedStyle(t).display !== 'none' && r.width > 0,
                w: Math.round(r.width), bottom: Math.round(r.bottom), vh: innerHeight }; })()`);
-    ok(app + ': has an Alerts tab, on the bar, at a real size',
-      !tab.missing && tab.shown && tab.w >= 44 && Math.abs(tab.bottom - tab.vh) <= 1,
-      JSON.stringify(tab));
+    /* Trader moved Alerts behind More (Jake's 4-main bar), so "on the bar" is the wrong
+       assertion THERE and still the right one on the other two. Asserting the same shape
+       everywhere would either fail on trader or have to be loosened until it proved nothing. */
+    if (app === 'trader') {
+      const row = await B.evalIn(`(() => {
+        const r = document.querySelector('#more-menu button[data-tab="5"]');
+        if (!r) return { missing: true };
+        const onBar = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
+          .some((e) => (e.textContent || '').indexOf('Alerts') >= 0
+                       && getComputedStyle(e).display !== 'none');
+        return { inMenu: true, onBar: onBar, label: (r.textContent || '').trim() }; })()`);
+      ok(app + ': Alerts lives in the More menu, and NOT on the bar',
+        !row.missing && row.inMenu && row.onBar === false, JSON.stringify(row));
+    } else {
+      ok(app + ': has an Alerts tab, on the bar, at a real size',
+        !tab.missing && tab.shown && tab.w >= 44 && Math.abs(tab.bottom - tab.vh) <= 1,
+        JSON.stringify(tab));
+    }
 
     await B.evalIn(open);
     await new Promise((r) => setTimeout(r, 900));
@@ -1153,7 +1168,10 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      BOTH FACES OF THE GATE: a comp seat sees the tab and the record; a non-comp seat must never
      see the tab EXIST. The invisibility is the half that ships broken quietly. */
   console.log('\nNoVo Unleashed — the prediction record\n');
-  const PRED_TAB = { trader: '.mob-tab[data-tab="7"]',
+  /* Trader's Predict is a row in the More menu now; the bar button is display:none for everyone,
+   so probing it would ask whether a permanently hidden element is hidden — true for a comp seat
+   and a free one alike, which is a check that cannot fail. */
+const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     analyst: '.mob-tab[data-mtab="predict"]', crypto: '.mob-tab[data-mtab="predict"]' };
   const predTabProbe = (sel) => B.evalIn(
     '(() => { const t = document.querySelector(' + JSON.stringify(sel) + ');'
@@ -1173,10 +1191,14 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   for (const app of ['trader', 'analyst', 'crypto']) {
     await B.goto(base + '/' + app + '/live', 430, 900);
     await new Promise((r) => setTimeout(r, 1500));
+    /* Trader's row lives inside the More menu, so a closed menu makes it zero-sized whether
+       the seat is comp or not. Open the menu first: what a comp seat is owed is that Predict is
+       THERE when they look, not that a hidden container is hidden. */
+    if (app === 'trader') await B.evalIn('toggleMoreMenu(true)');
     const tabv = await predTabProbe(PRED_TAB[app]);
     ok(app + ': comp seat — the tab reveals itself from the server’s answer',
       tabv.visible === true, JSON.stringify(tabv));
-    await B.evalIn(app === 'trader' ? 'switchMobileTab(7)'
+    await B.evalIn(app === 'trader' ? 'pickMore(7)'
       : 'document.querySelector(' + JSON.stringify(PRED_TAB[app]) + ').click()');
     await new Promise((r) => setTimeout(r, 900));
     const pv = await B.evalIn(`(() => {
@@ -1576,6 +1598,59 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       desk.has && desk.focused === true, JSON.stringify(desk));
   }
 
+  /* ══ THE TRADER BAR: FOUR MAIN + MORE ════════════════════════════════════════════════════
+     Jake numbered it 1-4 and struck Readings. Seven tabs on a 375px phone gave each 53px, which
+     is narrower than a fingertip — this asserts the bar he asked for and that the overflow is
+     genuinely reachable, not merely hidden. */
+  console.log('\nTrader nav — four main tabs and a More menu\n');
+  await B.goto(base + '/trader/live', 375, 667);
+  await new Promise((r) => setTimeout(r, 900));
+  const trBar = await B.evalIn(`(() => {
+    /* (No backticks in here: this comment lives INSIDE a template literal, and one backtick
+       ends the string early - which is exactly how it broke the first time.)
+       ⚠ SORT BY POSITION, NOT DOM ORDER. The bar is ordered with the flex order property, so
+       querySelectorAll returns the markup sequence — which reported Chart before Analysis on a
+       bar that renders Analysis first. A probe reading a different axis than the one the user
+       sees is not measuring the thing under test. */
+    const vis = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
+      .filter((t) => getComputedStyle(t).display !== 'none' && t.getBoundingClientRect().width > 0)
+      .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+    return { labels: vis.map((t) => (t.textContent || '').replace(/\\s+/g, ' ').trim().split(' ').pop()),
+             widths: vis.map((t) => Math.round(t.getBoundingClientRect().width)) }; })()`);
+  ok('the trader bar shows five: Jake\u2019s four mains, then More',
+    trBar.labels.join('|') === 'Analysis|Chart|NoVo|Digest|More',
+    JSON.stringify(trBar.labels));
+  ok('...and every one is at least a fingertip wide on a 375px phone',
+    trBar.widths.every((w) => w >= 60), JSON.stringify(trBar.widths));
+
+  const menu = await B.evalIn(`(() => {
+    document.getElementById('mob-more').click();
+    const m = document.getElementById('more-menu');
+    const open = !m.hasAttribute('hidden');
+    // The label only — the icon span is decorative, and including it makes the comparison
+    // brittle against a glyph change that means nothing.
+    const rows = [...m.querySelectorAll('button')].filter((r) => !r.hasAttribute('hidden'))
+      .map((r) => [...r.childNodes].filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent).join('').trim());
+    const c = getComputedStyle(m);
+    const sides = ['Top','Right','Bottom','Left'].filter((k) =>
+      parseFloat(c['border'+k+'Width']) > 0 && c['border'+k+'Style'] !== 'none');
+    return { open: open, rows: rows, sides: sides.length,
+             radius: parseFloat(c.borderTopLeftRadius) || 0 }; })()`);
+  ok('...tapping More opens it with the overflow tabs (Predict hidden for a free seat)',
+    menu.open === true && menu.rows.join('|') === 'Alerts|Readings', JSON.stringify(menu.rows));
+  ok('...and the menu is hairlines, not a box',
+    menu.sides === 1 && menu.radius === 0, JSON.stringify({ sides: menu.sides, r: menu.radius }));
+
+  const picked = await B.evalIn(`(() => { pickMore(8);
+    return new Promise((r) => setTimeout(() => r({
+      closed: document.getElementById('more-menu').hasAttribute('hidden'),
+      onTab: document.body.getAttribute('data-mtab'),
+      moreLit: document.getElementById('mob-more').classList.contains('mob-active') }), 400)); })()`);
+  ok('...picking a row switches to it, closes the menu, and lights More so the bar is not blank',
+    picked.closed === true && picked.onTab === '8' && picked.moreLit === true,
+    JSON.stringify(picked));
+
   /* ══ LIVE READINGS — the Eye's readouts, on both equity dashboards ═══════════════════════
      Jake, 2026-09-07: "equities side needs the same live readings feature or similar as crypto,
      in its own way the page and bar across the top like crypto has, reading from the Eye ...
@@ -1585,22 +1660,27 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* TWO DIFFERENT DOORS, ON PURPOSE. The analyst reaches readings by tapping the strip — there is
      no tab — and the trader reaches them by its nav tab. That is exactly how Jake split it, and
      asserting each app's OWN door is the only way this stays true. */
-  for (const [app, page, tabSel, open] of [
-    ['analyst', 'analyst/live', null, "document.querySelector('#eye-readbar').click()"],
-    ['trader', 'trader/live', '.mob-tab[data-tab="8"]', 'switchMobileTab(8)'],
+  for (const [app, page, where, open] of [
+    ['analyst', 'analyst/live', 'strip', "document.querySelector('#eye-readbar').click()"],
+    ['trader', 'trader/live', 'menu', 'pickMore(8)'],
   ]) {
     await B.goto(base + '/' + page, 430, 900);
     await new Promise((r) => setTimeout(r, 900));
 
-    if (tabSel) {
-      const tab = await B.evalIn(`(() => { const t = document.querySelector('${tabSel}');
-        if (!t) return { missing: true };
-        const r = t.getBoundingClientRect();
-        return { label: (t.textContent || '').trim(), w: r.width, h: r.height,
-                 onBar: r.bottom > innerHeight - 90 }; })()`);
-      ok(app + ': there is a Live Readings tab on the bar, at a real size',
-        !tab.missing && /Readings/i.test(tab.label) && tab.w > 20 && tab.h > 20 && tab.onBar,
-        JSON.stringify(tab));
+    if (where === 'menu') {
+      const row = await B.evalIn(`(() => {
+        const onBar = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
+          .some((e) => (e.textContent || '').indexOf('Readings') >= 0
+                       && getComputedStyle(e).display !== 'none');
+        toggleMoreMenu(true);
+        const r = document.querySelector('#more-menu button[data-tab="8"]');
+        const rect = r ? r.getBoundingClientRect() : null;
+        const out = { onBar: onBar, inMenu: !!r,
+                      w: rect ? Math.round(rect.width) : 0, h: rect ? Math.round(rect.height) : 0 };
+        toggleMoreMenu(false);
+        return out; })()`);
+      ok(app + ': Readings is a row in the More menu, at a real tap size, and not on the bar',
+        row.inMenu && row.onBar === false && row.w > 200 && row.h >= 40, JSON.stringify(row));
     } else {
       const none = await B.evalIn(`!!document.querySelector('.mob-tab[data-mtab="readings"]')`);
       ok(app + ': there is NO Readings tab \u2014 the strip is the door, as on the crypto map',

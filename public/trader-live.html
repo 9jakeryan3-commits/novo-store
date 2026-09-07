@@ -1522,13 +1522,32 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      backwards earlier today. */
   /* Jake, 2026-09-07, numbered on a screenshot: Analysis | Chart | Dr. NoVo | Alerts. Same shape
      as the analyst's — Dr. NoVo third, Alerts last — with the two reading surfaces leading. */
+  /* FOUR MAIN, THEN MORE (Jake, 2026-09-07, numbering the bar 1-4 and striking Readings; the
+     plan he set earlier: "The nav bar will be 4 main plus a more button once we get over 5 tabs
+     we will work these one at a time starting in trader"). Seven tabs on a 375px phone gives each
+     one 53px - narrower than a fingertip - so the bar was already past what it could carry. */
   .mob-tab[data-tab="3"] { order: 1; }   /* Analysis */
   .mob-tab[data-tab="2"] { order: 2; }   /* Chart    */
   .mob-tab[data-tab="4"] { order: 3; }   /* Dr. NoVo */
-  .mob-tab[data-tab="5"] { order: 4; }   /* Alerts   */
-  .mob-tab[data-tab="6"] { order: 5; }   /* Digest   */
-  .mob-tab[data-tab="7"] { order: 6; }   /* Predict  */
-  .mob-tab[data-tab="8"] { order: 7; }   /* Readings */
+  .mob-tab[data-tab="6"] { order: 4; }   /* Digest   */
+  #mob-more            { order: 5; }     /* More     */
+  /* The overflow. display:none rather than removed from the DOM: switchMobileTab still toggles
+     .mob-active on them, and the menu reads its rows from the same data-tab indices, so there is
+     exactly one definition of what each tab IS. */
+  .mob-tab[data-tab="5"], .mob-tab[data-tab="7"], .mob-tab[data-tab="8"] { display: none !important; }
+  /* ── THE MORE MENU. Hairlines and type, no card: the box ban applies here too. */
+  #more-menu { position: fixed; left: 0; right: 0; z-index: 70;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg); border-top: 1px solid var(--bdr); }
+  #more-menu[hidden] { display: none; }
+  #more-menu button { display: flex; align-items: center; gap: 11px; width: 100%;
+    padding: 15px 20px; background: none; border: 0; border-top: 1px solid var(--bdr2);
+    color: var(--txt2); font-family: var(--font); font-size: 13px; font-weight: 600;
+    letter-spacing: .3px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  #more-menu button:first-child { border-top: 0; }
+  #more-menu button .mm-ico { font-size: 15px; line-height: 1; opacity: .85; }
+  #more-menu button.on { color: var(--txt1); }
+  #more-menu button[hidden] { display: none; }
   .mob-tab[hidden] { display: none; }
   .mob-tab {
     flex: 1;
@@ -2811,7 +2830,19 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     <span class="mob-tab-icon">&#9672;</span>
     <span>Readings</span>
   </button>
+  <button class="mob-tab" id="mob-more" type="button" onclick="toggleMoreMenu()"
+          aria-expanded="false" aria-controls="more-menu">
+    <span class="mob-tab-icon">&#8943;</span>
+    <span>More</span>
+  </button>
 </nav>
+<!-- The overflow tabs. Each row simply calls switchMobileTab with the same index its hidden bar
+     button uses, so there is no second definition of what a tab does. -->
+<div id="more-menu" hidden>
+  <button type="button" data-tab="5" onclick="pickMore(5)"><span class="mm-ico">&#9673;</span>Alerts</button>
+  <button type="button" data-tab="7" onclick="pickMore(7)" hidden><span class="mm-ico">&#9670;</span>Predict</button>
+  <button type="button" data-tab="8" onclick="pickMore(8)"><span class="mm-ico">&#9672;</span>Readings</button>
+</div>
 
 
 <script>
@@ -3560,6 +3591,26 @@ function connectTelemetry(){
   ws.onerror=ev=>ev.target.close();
 }
 
+/* ── THE MORE MENU ───────────────────────────────────────────────────────────────────────────
+   Opens over the bar, closes on a pick, on a second tap, or on any tap outside it. The More
+   button lights up whenever the tab you are ON lives inside the menu — without that, choosing
+   Readings leaves the whole bar looking unselected and the app looks like it lost your place. */
+var MORE_TABS = [5, 7, 8];
+function toggleMoreMenu(force){
+  var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
+  if (!m || !b) return;
+  var open = (force === undefined) ? m.hasAttribute('hidden') : !!force;
+  if (open) m.removeAttribute('hidden'); else m.setAttribute('hidden', '');
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function pickMore(idx){ toggleMoreMenu(false); switchMobileTab(idx); }
+document.addEventListener('click', function(e){
+  var m = document.getElementById('more-menu');
+  if (!m || m.hasAttribute('hidden')) return;
+  if (m.contains(e.target) || (e.target.closest && e.target.closest('#mob-more'))) return;
+  toggleMoreMenu(false);
+});
+
 function switchMobileTab(idx) {
   const cols = [
     document.getElementById('col-perf'),     // 0 JOURNAL
@@ -3574,6 +3625,15 @@ function switchMobileTab(idx) {
   ];
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
+  // The More button carries the active state for whatever is hidden behind it, and the menu row
+  // marks which one, so the bar never reads as "nothing selected".
+  try {
+    var mb = document.getElementById('mob-more');
+    if (mb) mb.classList.toggle('mob-active', MORE_TABS.indexOf(idx) >= 0);
+    document.querySelectorAll('#more-menu button').forEach(function(r){
+      r.classList.toggle('on', Number(r.dataset.tab) === idx); });
+    toggleMoreMenu(false);
+  } catch (_e) {}
   document.body.setAttribute('data-mtab', String(idx));   // drives the pinned quick-trade bar on the SIGNAL tab
   // Size BEFORE the redraw: loadNovoChart measures the pane, so resizing after it would draw
   // once into the old box and leave the canvas a frame behind on every visit to the tab.
@@ -3618,7 +3678,9 @@ function switchMobileTab(idx) {
 }
 if (window.matchMedia('(max-width: 768px)').matches) switchMobileTab(2);   // open on the TRADE (chart) tab
 window.addEventListener('load', function () {
-  try { window.novoPredict.reveal('.mob-tab[data-tab="7"]'); } catch (_e) {}
+  /* The bar button for Predict is display:none for everyone now, so revealing it would unhide
+     something nobody can see. The MENU row is the surface a comp seat actually reaches. */
+  try { window.novoPredict.reveal('#more-menu button[data-tab="7"]'); } catch (_e) {}
 });
 /* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
    trader device's digest opens /trader/live#novo and a fired alert opens /trader/live#alerts.
