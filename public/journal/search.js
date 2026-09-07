@@ -12,7 +12,7 @@
     .then(function (r) { return r.json(); })
     .then(function (j) {
       data = j; ready = true;
-      if (meta) meta.textContent = 'Search the whole site — guides, coins, tools and the read archive.';
+      if (meta) meta.textContent = 'Search the whole site — dealer levels, 0DTE, gamma, coins and tools.';
       var q = (new URLSearchParams(location.search)).get('q');
       if (q) { input.value = q; run(q); input.focus(); }
     })
@@ -38,7 +38,7 @@
     var toks = q.split(/\s+/).filter(Boolean);
     var res = [];
     data.forEach(function (a) {
-      var hay = (a.t + ' ' + a.k + ' ' + a.d).toLowerCase();
+      var hay = (a.t + ' ' + a.k + ' ' + a.d + ' ' + a.u).toLowerCase();
       if (!toks.every(function (t) { return hay.indexOf(t) > -1; })) return;
       var score = 0, tl = a.t.toLowerCase();
       toks.forEach(function (t) {
@@ -46,6 +46,11 @@
         if (a.k.toLowerCase().indexOf(t) > -1) score += 1;
       });
       if (tl.indexOf(q) > -1) score += 5;
+      // Same slug/path boost as site-search.js - see the note there.
+      var path = a.u.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      var slug = (a.u.toLowerCase().split('/').filter(Boolean).pop() || 'home')
+                   .replace(/[^a-z0-9]+/g, ' ').trim();
+      if (q === path || q === slug) score += 12;
       res.push({ a: a, score: score });
     });
     res.sort(function (x, y) { return y.score - x.score || x.a.t.length - y.a.t.length; });

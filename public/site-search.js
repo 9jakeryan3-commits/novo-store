@@ -128,10 +128,10 @@
   // fixed number is wrong the moment the font or the copy changes. Try longest first, take
   // the first that actually fits the box it is sitting in.
   var PLACEHOLDERS = [
-    'Search NoVo — guides, coins, tools, the read archive…',
-    'Search NoVo — guides, coins, tools…',
-    'Search NoVo — guides, coins…',
-    'Search NoVo…'
+    'Search dealer levels, 0DTE, gamma, coins and tools…',
+    'Search dealer levels, 0DTE, coins…',
+    'Search gamma, 0DTE, coins…',
+    'Search gamma…'
   ];
   /* THE BADGES STEAL THE PLACEHOLDER'S ROOM, so the two are chosen TOGETHER — longest label with
      the longest placeholder that still fits, then the short badge form, rather than picking a
@@ -237,6 +237,20 @@
         a._h = (a.t + ' ' + (a.k || '') + ' ' + a.d + ' ' + a.u)
                  .toLowerCase().replace(/[^a-z0-9]+/g, ' ');
         a._t = a.t.toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+        // THE STORE'S OWN PAGES MUST NOT LOSE TO THE JOURNAL. A product page's title is
+        // written for search engines, not for this box: /trader is titled "NoVo | SPY, QQQ &
+        // IWM Scalping Made Easy - The Live Dealer Map" and contains the word "trader"
+        // NOWHERE, so it scored 0 for the query "trader" and sorted LAST of 91 results,
+        // behind "Trader Tax Status". /analyst ranked 87th of 97. The URL is the one place
+        // a page reliably names itself, so an exact hit on the slug or the whole path
+        // outranks any partial title/kind match.
+        a._p = a.u.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        // The slug is the last PATH SEGMENT, split on "/" BEFORE punctuation is flattened.
+        // Splitting the flattened string takes the last hyphen-part instead, so
+        // /journal/iv-vs-hv-day-trader claimed the exact-match bonus for "trader" and
+        // scored 20, outranking /trader itself. Caught by driving the real widget.
+        a._s = (a.u.toLowerCase().split('/').filter(Boolean).pop() || 'home')
+                 .replace(/[^a-z0-9]+/g, ' ').trim();
       }
       var hay = a._h;
       for (var j = 0; j < toks.length; j++) { if (hay.indexOf(toks[j]) < 0) { ok = false; break; } }
@@ -247,6 +261,7 @@
         if ((a.k || '').toLowerCase().indexOf(toks[k]) > -1) score += 1;
       }
       if (tl.indexOf(q) > -1) score += 5;
+      if (q === a._s || q === a._p) score += 12;
       res.push({ a: a, s: score });
     }
     res.sort(function (x, y) { return y.s - x.s || x.a.t.length - y.a.t.length; });
