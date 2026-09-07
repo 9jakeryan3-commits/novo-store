@@ -733,14 +733,16 @@ tr:last-child td{border-bottom:none}
        you somewhere else. The picker now belongs to the coin name in the header, where it always
        half-lived, and its slot on the bar goes to the Screener, which IS a destination.
        Four main and a More, matching trader and analyst. */
-    .mob-tab[data-mtab="stats"]    { order: 1; }
-    .mob-tab[data-mtab="screener"] { order: 2; }
-    .mob-tab[data-mtab="map"]      { order: 3; }
-    .mob-tab[data-mtab="novo"]     { order: 4; }
-    #mob-more                      { order: 5; }
+    /* Jake, 2026-09-07: "screener goes in the more digest sits at 4" - which lands crypto on the
+       identical four to trader and analyst: the overview, the main surface, NoVo, the digest. */
+    .mob-tab[data-mtab="stats"]  { order: 1; }
+    .mob-tab[data-mtab="map"]    { order: 2; }
+    .mob-tab[data-mtab="novo"]   { order: 3; }
+    .mob-tab[data-mtab="digest"] { order: 4; }
+    #mob-more                    { order: 5; }
     .mob-tab[data-mtab="coins"],
+    .mob-tab[data-mtab="screener"],
     .mob-tab[data-mtab="alerts"],
-    .mob-tab[data-mtab="digest"],
     .mob-tab[data-mtab="predict"] { display: none !important; }
     /* The More menu — hairlines and type, like every other surface. */
     #more-menu { position: fixed; left: 0; right: 0; z-index: 1001;
@@ -1068,8 +1070,8 @@ tr:last-child td{border-bottom:none}
 </nav>
 <!-- The overflow. Rows call cxMobTab by the same name the hidden bar buttons use. -->
 <div id="more-menu" hidden>
+  <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
   <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
-  <button type="button" data-mtab="digest" onclick="pickMore('digest')"><span aria-hidden="true">&#9788;</span>Digest</button>
   <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predict</button>
 </div>
 <script>
@@ -1162,7 +1164,7 @@ tr:last-child td{border-bottom:none}
     });
     try {
       var mb = document.getElementById('mob-more');
-      if (mb) mb.classList.toggle('mob-active', ['alerts', 'digest', 'predict'].indexOf(live) >= 0);
+      if (mb) mb.classList.toggle('mob-active', ['screener', 'alerts', 'predict'].indexOf(live) >= 0);
       Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
         r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
     } catch (_e) {}

@@ -1799,6 +1799,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="novo"]   { order: 3; }
     /* FOUR MAIN, THEN MORE — the same shape Jake set on trader, and the same four roles:
        the read, the map, NoVo, the digest. Alerts and Predict move behind More. */
+    /* DR. NOVO'S BIAS ABOVE THE TICKER PICKER (Jake, 2026-09-07). The top grid collapses to one
+       column here with the tickers first, which was the desktop reading order; on a phone the
+       bias is the thing you want before you go looking at another index. Ordering the two
+       children rather than moving markup keeps the desktop pair intact. */
+    .lv-grid-top .bias-col { order: -1; }
+    .lv-grid-top #strip { order: 0; }
     .mob-tab[data-mtab="digest"] { order: 4; }
     #mob-more { order: 5; }
     .mob-tab[data-mtab="alerts"], .mob-tab[data-mtab="predict"] { display: none !important; }
@@ -1918,6 +1924,34 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip
      calls when tapped — defined here rather than in the module because only the page knows how it
      switches views (mobile tabs on a phone, a scroll on a desktop, and they are not the same act). */
+  /* THE FEAR GAUGE SITS UNDER THE CHART ON A PHONE (Jake, 2026-09-07: "vix bar under the chart
+     shot"). It is markup INSIDE the dealer-positioning card, so no amount of CSS order can lift
+     it out - ordering only ever rearranges siblings. It is moved, and moved back above 768px, so
+     the desktop card keeps the block it was written with. */
+  (function(){
+    var fear = document.getElementById('d-fear');
+    var head = document.getElementById('chart-h');
+    if (!fear || !head) return;
+    var chartCard = head.closest('.lv-card');
+    if (!chartCard) return;
+    var home = fear.parentElement, after = fear.nextElementSibling;
+    function place(){
+      var phone = window.matchMedia('(max-width: 768px)').matches;
+      if (phone) {
+        /* INSIDE the chart card, not after it. As a sibling it is a GRID item, and the grid's
+           order rules re-sorted it above the chart - measured at y=353 with the chart at y=928.
+           Appending it to the card puts it under the chart itself, which is what was asked for
+           and what no ordering rule can undo. */
+        if (fear.parentElement !== chartCard) chartCard.appendChild(fear);
+      } else if (fear.parentElement !== home) {
+        if (after && after.parentElement === home) home.insertBefore(fear, after);
+        else home.appendChild(fear);
+      }
+    }
+    place();
+    addEventListener('resize', place);
+  })();
+
   window.novoReadings && window.novoReadings.bar('#eye-readbar');
   window.novoReadings = window.novoReadings || {};
   window.novoReadings.open = function () {

@@ -720,9 +720,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Coins came OFF the bar (Jake, 2026-09-07): it was a picker wearing a tab, which is why
      picking a coin immediately navigated somewhere else. Its slot goes to the Screener, which is
      a real destination, and Alerts/Digest/Predict move behind More. */
-  ok('five tabs: Stats, Screener, Map, Dr. NoVo, More — and Coins is not one of them',
+  ok('five tabs: Stats, Map, Dr. NoVo, Digest, More — Coins and Screener are behind More',
     bar.tabs.length === 5 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Stats|Screener|Map|Dr. NoVo|More',
+    bar.tabs.map((t) => t.label).join('|') === 'Stats|Map|Dr. NoVo|Digest|More',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('every tab is wide enough to hit on a 430px phone',
     bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
@@ -1677,6 +1677,33 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     return { n: bad.length, bad: bad.slice(0, 6) }; })()`);
   ok('the analyst dashboard draws NO boxes anywhere — audited element by element',
     boxes.n === 0, JSON.stringify(boxes));
+
+  /* ══ THE PHONE READING ORDER ═════════════════════════════════════════════════════════════
+     Jake, 2026-09-07: "on mobile analyst needs to be vix bar under the chart shot and dr novos
+     bias above the ticker picker." Measured by PAINTED POSITION, not DOM position: one of these
+     moves with CSS order and the other by relocating markup, and only the rendered y tells you
+     whether a reader sees them where they were asked to be. */
+  const order = await B.evalIn(`(() => {
+    const y = (el) => el ? Math.round(el.getBoundingClientRect().top + scrollY) : null;
+    const head = document.getElementById('chart-h');
+    const chartCard = head ? head.closest('.lv-card') : null;
+    const fear = document.getElementById('d-fear');
+    const bias = document.querySelector('.bias-col');
+    const strip = document.getElementById('strip');
+    return { bias: y(bias), strip: y(strip),
+             chartTop: y(chartCard),
+             chartBottom: chartCard ? Math.round(chartCard.getBoundingClientRect().bottom + scrollY) : null,
+             fear: y(fear),
+             fearInChart: !!(fear && chartCard && chartCard.contains(fear)),
+             parentDisplay: chartCard && chartCard.parentElement ? getComputedStyle(chartCard.parentElement).display : null,
+             cols: chartCard && chartCard.parentElement ? getComputedStyle(chartCard.parentElement).gridTemplateColumns : null,
+             fearParent: fear && fear.parentElement ? (fear.parentElement.id || fear.parentElement.className) : null }; })()`);
+  ok('Dr. NoVo\u2019s bias sits ABOVE the ticker picker on a phone',
+    order.bias !== null && order.strip !== null && order.bias < order.strip,
+    JSON.stringify({ bias: order.bias, strip: order.strip }));
+  ok('...and the VIX gauge sits under the chart itself',
+    order.fearInChart === true && order.fear > order.chartTop,
+    JSON.stringify(order));
 
   const aBar = await B.evalIn(`(() => {
     const vis = [...document.querySelectorAll('#mobile-tabs .mob-tab')]
