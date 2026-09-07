@@ -170,8 +170,15 @@ module.exports = async (req, res) => {
       if (typeof subs === "string") { try { subs = JSON.parse(subs); } catch (_) { subs = null; } }
       if (!Array.isArray(subs) || !subs.length || !canPush) { skipped++; continue; }
       const mem = await getMemory(email);
-      const interests = (mem && mem.interests) || [];
-      if (!interests.length) { skipped++; continue; }
+      // ⚠ THE GATE. A digest goes out ONLY to a member who asked for one and said what it should be
+      // about (Jake, 2026-09-07). This used to read `interests` — what NoVo had LEARNED about the
+      // reader — so a sentence like "I mostly trade SPY" enrolled them in a daily push they never
+      // requested, landing on a phone with nothing behind it to explain itself.
+      // getMemory returns digest:null unless on===true AND symbols is non-empty, so there is no
+      // partial state that leaks a send.
+      const dg = mem && mem.digest;
+      if (!dg) { skipped++; continue; }
+      const interests = dg.symbols;
 
       // Assemble ONLY their interests' facts — the model narrates, it never invents.
       const facts = [];
@@ -226,7 +233,11 @@ module.exports = async (req, res) => {
       if (guard) console.log(`[DIGEST] grounding guard: ${guard}`);
       if (!text) { errors++; continue; }
       for (const s of subs.slice(0, 5)) {
-        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest" })); sent++; }
+        // ⚠ A url, SO TAPPING IT LANDS SOMEWHERE. Without one the service worker falls back to
+        // /analyst/live — the dashboard, which shows no digest anywhere — so the notification read
+        // as a message from nothing. It opens the Alerts tab, which is where the digest can now be
+        // seen and turned off.
+        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: "/analyst/live#alerts" })); sent++; }
         catch (_) {}
       }
     } catch (_) { errors++; }

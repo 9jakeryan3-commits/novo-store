@@ -67,12 +67,13 @@ const SEED = [
 const ALERTS = {
   mode: 'ok',
   delivery: null,
+  digest: { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1 },
   active: JSON.parse(JSON.stringify(SEED)),
 };
 function alertsBody() {
   return { ok: true, active: ALERTS.active, max_active: 10,
            devices_registered: ALERTS.delivery ? 1 : 0, discord_linked: false,
-           delivery: ALERTS.delivery };
+           delivery: ALERTS.delivery, digest: ALERTS.digest };
 }
 
 const server = http.createServer((req, res) => {
@@ -83,6 +84,7 @@ const server = http.createServer((req, res) => {
        sections earlier -- a harness testing the residue of its own previous step. */
     ALERTS.active = JSON.parse(JSON.stringify(SEED));
     ALERTS.delivery = null; ALERTS.mode = 'ok';
+    ALERTS.digest = { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1 };
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, n: ALERTS.active.length })); return;
   }
@@ -105,8 +107,13 @@ const server = http.createServer((req, res) => {
       let b = '';
       req.on('data', (c) => { b += c; });
       req.on('end', () => {
-        let id = '';
-        try { id = JSON.parse(b || '{}').cancel || ''; } catch (_) {}
+        let id = '', body = {};
+        try { body = JSON.parse(b || '{}'); id = body.cancel || ''; } catch (_) {}
+        if (body.digest === false) {
+          ALERTS.digest = null;
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, ...alertsBody() })); return;
+        }
         const before = ALERTS.active.length;
         ALERTS.active = ALERTS.active.filter((a) => a.id !== id);
         res.writeHead(200, { 'content-type': 'application/json' });
@@ -357,7 +364,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     const on = (e) => { if (!e) return false; const r = e.getBoundingClientRect();
       return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
     return { cardShown: on(card),
-             rows: document.querySelectorAll('#alerts-card .al-row').length,
+             /* :not(.al-digest) -- the digest is rendered as an .al-row too, and counting it as an alert
+                made this assert 3 where the member has 2. Different objects, different counts. */
+             rows: document.querySelectorAll('#alerts-card .al-row:not(.al-digest)').length,
              text: (box ? box.textContent : '').replace(/\\s+/g, ' ').trim(),
              routeShown: !!route && !route.hidden,
              routeWarn: !!route && route.className.indexOf('warn') >= 0,
@@ -388,6 +397,28 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     if (!m || !n) return { missing: true };
     const rm = m.getBoundingClientRect(), rn = n.getBoundingClientRect();
     return { metaBottom: Math.round(rm.bottom), noteTop: Math.round(rn.top) }; })()`);
+  /* ── THE MORNING DIGEST ────────────────────────────────────────────────────────────────────
+     Jake met this as a push at 08:00 with nothing behind it: "no idea what it is and I literally
+     only see the notification". Its notification now points at this card, so the card has to name
+     it, say what it covers, and be able to stop it — otherwise the fix lands the member on a page
+     that still does not mention the thing that woke them. */
+  const dgView = () => B.evalIn(`(() => {
+    const row = document.querySelector('#alerts-card .al-digest');
+    if (!row) return { there: false };
+    return { there: true,
+             text: (row.textContent || '').replace(/\\s+/g, ' ').trim(),
+             stop: !!row.querySelector('[data-stop-digest]') }; })()`);
+  let dgv = await dgView();
+  ok('the digest is on the card, named, with what it covers',
+    dgv.there && /Morning digest/i.test(dgv.text) && dgv.text.indexOf('SPY') >= 0
+      && dgv.text.indexOf('only if gamma flipped') >= 0, JSON.stringify(dgv));
+  ok('...and it can be stopped from here', dgv.stop === true, JSON.stringify(dgv));
+  await B.evalIn(`document.querySelector('#alerts-card [data-stop-digest]').click()`);
+  await new Promise((r) => setTimeout(r, 700));
+  dgv = await dgView();
+  ok('...stopping it takes the row away, from the store’s own answer',
+    dgv.there === false, JSON.stringify(dgv));
+
   ok('...and a note sits on its OWN line, not run on from the meta',
     !noteGeo.missing && noteGeo.noteTop >= noteGeo.metaBottom - 1, JSON.stringify(noteGeo));
   ok('...with the one-shot / recurring difference on the row',

@@ -18,6 +18,22 @@ const MAX_NOTES = 8;
 const MAX_NOTE_LEN = 160;
 const TTL_S = 270 * 24 * 3600;
 
+// ── THE DAILY DIGEST IS ITS OWN, EXPLICIT RECORD ──────────────────────────────────────────────
+// Jake, 2026-09-07: "it will not go out unless the user tell NoVo they want it and tell him what
+// they would like to know daily in thier digest. its a personal digest not a another cookie cutter
+// market message."
+//
+// It used to key off `interests`, which is what NoVo LEARNED about a reader in conversation — so
+// saying "I mostly trade SPY" once silently enrolled that reader in a daily push they never asked
+// for, arriving on a device with no way to tell what it was. Interests are a memory; a digest is a
+// standing request. They are now different fields because they are different consents.
+//
+// symbols drive the FACTS (same live-data path as before, so the grounding guard in
+// api/daily-digest.js still refuses any number that is not in them). focus only steers EMPHASIS —
+// it can never introduce a number, which is why free text is safe here at all.
+const MAX_DIGEST_SYMBOLS = 6;
+const MAX_FOCUS_LEN = 160;
+
 // HOW MUCH VOCABULARY THIS READER WANTS. Its own field rather than a free-text note, because the
 // prompt has to branch on it deterministically and a note that happens to say "keep it simple" is
 // a sentence, not a setting.
@@ -53,12 +69,18 @@ async function getMemory(email) {
   if (typeof m === "string") { try { m = JSON.parse(m); } catch (_) { m = null; } }
   // A reader who has ONLY set a level has real memory — returning null there would drop the
   // setting on every read and silently undo it.
-  if (!m || (!Array.isArray(m.interests) && !Array.isArray(m.notes) && !m.level)) return null;
+  // A reader who has ONLY a digest has real memory too — same reason the level check is here.
+  if (!m || (!Array.isArray(m.interests) && !Array.isArray(m.notes) && !m.level && !m.digest)) return null;
   return { interests: m.interests || [], notes: m.notes || [],
-           level: LEVELS.includes(m.level) ? m.level : null, updated: m.updated || null };
+           level: LEVELS.includes(m.level) ? m.level : null,
+           digest: (m.digest && m.digest.on && Array.isArray(m.digest.symbols) && m.digest.symbols.length)
+             ? { on: true, symbols: m.digest.symbols, focus: m.digest.focus || null,
+                 set_utc: m.digest.set_utc || null }
+             : null,
+           updated: m.updated || null };
 }
 
-async function updateMemory(email, { add_interests, remove_interests, note, level, clear } = {}) {
+async function updateMemory(email, { add_interests, remove_interests, note, level, digest, clear } = {}) {
   const r = kv();
   if (!r || !email) return { error: "memory unavailable" };
   if (clear) {
@@ -96,13 +118,41 @@ async function updateMemory(email, { add_interests, remove_interests, note, leve
     else if (lv === "" || lv === "reset") delete cur.level;
   }
 
+  // ── the digest ────────────────────────────────────────────────────────────────────────────
+  // Off is one field; on requires SYMBOLS. "Send me a digest" with nothing named does not become a
+  // digest about whatever NoVo happens to remember — that is the exact behaviour being removed.
+  if (digest !== undefined) {
+    if (!digest || digest.on === false) {
+      delete cur.digest;
+    } else {
+      const syms = (Array.isArray(digest.symbols) ? digest.symbols : [])
+        .map((x) => String(x || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, ""))
+        .filter(Boolean)
+        .filter((x, i, a) => a.indexOf(x) === i)
+        .slice(0, MAX_DIGEST_SYMBOLS);
+      if (!syms.length) {
+        refused.push("a digest needs at least one symbol to be about");
+      } else {
+        let focus = clean(digest.focus, MAX_FOCUS_LEN) || null;
+        // The focus line is rendered into the digest prompt, so it gets the SAME two guards a note
+        // gets: one screens what it is about, the other what it tries to do. A stored "ignore your
+        // instructions" here would ride every morning's generation for that member.
+        if (focus && (ACCOUNT_SHAPED.test(focus) || INSTRUCTION_SHAPED.test(focus))) {
+          refused.push(focus); focus = null;
+        }
+        cur.digest = { on: true, symbols: syms, focus: focus, set_utc: Date.now() };
+      }
+    }
+  }
+
   cur.updated = Date.now();
   try {
     await r.set(_key(email), JSON.stringify(cur), { ex: TTL_S });
   } catch (e) {
     return { error: "could not save" };
   }
-  const out = { ok: true, interests: cur.interests, notes: cur.notes, level: cur.level || null };
+  const out = { ok: true, interests: cur.interests, notes: cur.notes, level: cur.level || null,
+                digest: cur.digest || null };
   if (refused.length) {
     out.refused = refused;
     out.note = "position/account-shaped items are never stored - I read markets, not accounts";
@@ -110,9 +160,12 @@ async function updateMemory(email, { add_interests, remove_interests, note, leve
   return out;
 }
 
-// The digest cron walks this to find who gets one. Kept as a KV set of email hashes with a
-// parallel hash->email map ONLY for members who opted into a digest by having interests —
-// the email is needed to mint their push lookup, nothing else.
+// The digest cron walks this to find WHO TO CONSIDER — it is not a list of who gets one. Whether a
+// member actually receives a digest is decided by their own `digest` record, in the cron.
+// ⚠ THE COMMENT THAT USED TO BE HERE SAID "members who opted into a digest by having interests",
+// which is exactly the false equivalence being removed: having interests was never a request for a
+// daily push. Kept as a KV set of email hashes with a parallel hash->email map; the email is needed
+// to mint their push lookup, nothing else.
 async function indexMember(email) {
   const r = kv();
   if (!r || !email) return;

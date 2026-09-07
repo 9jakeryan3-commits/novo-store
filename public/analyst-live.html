@@ -1965,6 +1965,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   new MutationObserver(sync).observe(document.body,
     { attributes: true, attributeFilter: ['data-mtab'] });
   sync();
+  /* The morning digest push points at /analyst/live#alerts, so the hash has to mean something or
+     the notification lands on the map again -- which is the whole complaint it was meant to fix.
+     Only on a phone: the bar is what owns views, and on the desk the card is already on the page. */
+  try {
+    if (location.hash === '#alerts' && getComputedStyle(bar).display !== 'none') lvMobTab('alerts');
+  } catch (_e) {}
 })();
 </script>
 

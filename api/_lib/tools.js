@@ -459,6 +459,35 @@ const declarations = [
             "you to stop explaining or say they trade professionally. 'reset' returns to default. " +
             "This changes only the WORDS: the read, the numbers and the honesty never move.",
         },
+        digest: {
+          type: "object",
+          description:
+            "THE DAILY DIGEST — a short personal brief pushed to their phone each morning at " +
+            "08:00 ET. ONLY EVER SET THIS WHEN THEY ASK FOR IT IN SO MANY WORDS ('send me a " +
+            "daily digest', 'brief me every morning'). Never infer it from interest in a " +
+            "ticker, never offer to switch it on as a favour, and never set it in the same " +
+            "breath as remembering an interest - wanting to follow SPY is not asking to be " +
+            "messaged about it daily. If they ask for one without saying what it should cover, " +
+            "ASK THEM before calling this; a digest with nothing named is refused server-side. " +
+            "Set on:false the moment they want it stopped.",
+          properties: {
+            on: { type: "boolean", description: "true to start it, false to stop it." },
+            symbols: {
+              type: "array", items: { type: "string" },
+              description:
+                "What the brief is ABOUT, in their words: tickers and coins, up to 6. These pick " +
+                "the live facts the brief is written from, so anything not named here can never " +
+                "appear in it.",
+            },
+            focus: {
+              type: "string",
+              description:
+                "Optional, one line, THEIR words for what they care about — 'just tell me if " +
+                "gamma flipped', 'funding and liquidations only'. Steers emphasis only; it " +
+                "cannot add a number the facts do not contain.",
+            },
+          },
+        },
         clear: { type: "boolean", description: "Erase everything on their request." },
       },
     },
@@ -1280,7 +1309,12 @@ function makeExecutors(ctx = {}) {
     const { updateMemory, indexMember } = require("./member-memory.js");
     if (!ctx.email) return { error: "no signed-in reader" };
     const out = await updateMemory(ctx.email, args);
-    if (out && out.ok && !out.cleared && (args.add_interests || []).length) {
+    /* ⚠ A DIGEST-ONLY MEMBER HAS TO BE INDEXED TOO. The cron walks mem:index, and this used to
+       index only on add_interests — so someone who asked for a digest and named symbols, without
+       ever stating an interest, would have been saved correctly and then never visited by the job.
+       Silent, and indistinguishable from "the digest is broken". */
+    if (out && out.ok && !out.cleared &&
+        ((args.add_interests || []).length || (args.digest && args.digest.on))) {
       await indexMember(ctx.email);
     }
     return out;

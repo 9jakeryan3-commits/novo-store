@@ -20,6 +20,11 @@
 // api/chat-log.js does not — a Trader subscription has always included this.
 const crypto = require("crypto");
 const { listAlerts, cancelAlert } = require("./_lib/alerts.js");
+// The morning digest is a standing request like an alert is, it is delivered down the same
+// VAPID lane, and after 2026-09-07 its notification points here — so this is where it has to
+// be visible and stoppable. It is stored with the reader's memory rather than with alerts,
+// which is why it is a second read.
+const { getMemory, updateMemory } = require("./_lib/member-memory.js");
 
 function verifyToken(token) {
   try {
@@ -51,10 +56,21 @@ module.exports = async (req, res) => {
       // listAlerts answers {error} when KV is unreachable. That is a 503, not an empty list —
       // rendering "no alerts" over a dead store tells a member their alerts are gone.
       if (out && out.error) return res.status(503).json(out);
-      return res.status(200).json({ ok: true, ...out });
+      // Best-effort and separate: a digest read that fails must not take the alerts list with it.
+      let digest = null;
+      try { const m = await getMemory(email); digest = (m && m.digest) || null; } catch (_) {}
+      return res.status(200).json({ ok: true, ...out, digest });
     }
 
     if (req.method === "POST") {
+      // Stopping the digest. Only ever OFF from here: starting one requires the member to say what
+      // it should cover, which is a conversation with Dr. NoVo, not a button (see api/_lib/tools.js).
+      if (body.digest === false) {
+        const r = await updateMemory(email, { digest: { on: false } });
+        if (r && r.error) return res.status(503).json(r);
+        const now = await listAlerts(email);
+        return res.status(200).json({ ok: true, digest: null, ...(now.error ? {} : now) });
+      }
       const id = String(body.cancel || "").trim();
       if (!id) return res.status(400).json({ error: "nothing to cancel" });
       const out = await cancelAlert(email, { id });
@@ -62,7 +78,10 @@ module.exports = async (req, res) => {
       // Hand back the fresh list in the same round trip, so the page never renders a cancel it
       // has not had confirmed by the store.
       const now = await listAlerts(email);
-      return res.status(200).json({ ok: true, cancelled: out.cancelled, ...(now.error ? {} : now) });
+      let digest2 = null;
+      try { const m = await getMemory(email); digest2 = (m && m.digest) || null; } catch (_) {}
+      return res.status(200).json({ ok: true, cancelled: out.cancelled,
+                                    ...(now.error ? {} : now), digest: digest2 });
     }
 
     res.setHeader("allow", "GET, POST");
