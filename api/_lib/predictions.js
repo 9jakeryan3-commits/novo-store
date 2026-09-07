@@ -304,7 +304,14 @@ async function selectCryptoPredictions(snap) {
       const out = await makePrediction({
         source: "novo", asset_class: "crypto", symbol: sym, kind: "direction", side,
         spot_at: spot, horizon_min: hm,
-        thesis: String(f.claim || (f.kind + " fired")).slice(0, 200),
+        /* ⚠ THE CALL LEADS, THE READING FOLLOWS (Jake, 2026-09-07: "his prediction on not just the
+           same raw alerts the crypto public already has... his predictions are direct calls").
+           The public reading is descriptive — "funding is -4.7 sigma, shorts paying". Copying that
+           verbatim made his prediction row read like the public alert wearing a new label. His
+           thesis now states the directed, falsifiable claim first, in his own voice, with the
+           reading as the why. */
+        thesis: (sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m")
+          + " — " + String(f.claim || (f.kind + " fired"))).slice(0, 200),
         basis: f.kind + " \u00b7 " + rate.hit_rate + "% over " + rate.n_cells
           + " coin-days vs " + baseShare.toFixed(1) + "% base",
       });
