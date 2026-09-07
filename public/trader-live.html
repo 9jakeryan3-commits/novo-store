@@ -3476,6 +3476,32 @@ function switchMobileTab(idx) {
   }, 60);
 }
 if (window.matchMedia('(max-width: 768px)').matches) switchMobileTab(2);   // open on the TRADE (chart) tab
+/* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
+   trader device's digest opens /trader/live#novo and a fired alert opens /trader/live#alerts.
+   Runs AFTER the default tab is chosen, or the line above would immediately overwrite it. */
+/* ⚠ ON LOAD, NOT AT PARSE TIME. The first version of this ran inline, where novoAskOpen is not
+   defined yet on two of the three dashboards and the chat panel is not mounted on the third — the
+   call threw into a catch, the handler returned having done nothing, and the member landed on the
+   default tab. Which is exactly the bug the url change was meant to fix, reintroduced one layer
+   down. A destination has to exist before you can navigate to it. */
+/* Read at parse time, acted on at load. A push opens ?open=novo or ?open=alerts — a query, not a
+   fragment, because the crypto dashboard already owns its hash for the coin selector and a channel
+   that works on two of three surfaces is not a channel. */
+var _OPEN = (function () {
+  try {
+    var q = new URLSearchParams(location.search).get('open');
+    if (q === 'novo' || q === 'alerts') return q;
+    var h = String(location.hash || '').replace('#', '');
+    return (h === 'novo' || h === 'alerts') ? h : null;
+  } catch (_e) { return null; }
+})();
+window.addEventListener('load', function () { setTimeout(function () {
+  try {
+    var phone = window.matchMedia('(max-width: 768px)').matches;
+    if (_OPEN === 'novo') { if (phone) switchMobileTab(4); else setView('novo'); }
+    else if (_OPEN === 'alerts' && phone) switchMobileTab(5);
+  } catch (_e) {}
+}, 120); });
 
 
 // ── NoVo live SPY chart — candles (Tradier) + NoVo's OWN levels & entry/exit markers ──

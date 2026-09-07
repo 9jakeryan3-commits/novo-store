@@ -104,17 +104,19 @@ const reset = async () => { STORE.clear(); };
      at registration, so the notification opens the dashboard that device belongs to. */
   const { pushUrl } = require(path.join(__dirname, '..', 'api', '_lib', 'alerts.js'));
   ok('a crypto device is sent to the crypto dashboard',
-    pushUrl({ app: 'crypto' }, '#novo') === '/crypto/live#novo', pushUrl({ app: 'crypto' }, '#novo'));
+    pushUrl({ app: 'crypto' }, 'novo') === '/crypto/live?open=novo', pushUrl({ app: 'crypto' }, 'novo'));
   ok('a trader device is sent to the trader dashboard',
-    pushUrl({ app: 'trader' }, '#alerts') === '/trader/live#alerts', pushUrl({ app: 'trader' }, '#alerts'));
+    pushUrl({ app: 'trader' }, 'alerts') === '/trader/live?open=alerts', pushUrl({ app: 'trader' }, 'alerts'));
   /* Every subscription registered before this shipped carries no app. They must still land
      somewhere real, and they self-heal on the next dashboard load. */
   ok('a legacy subscription still lands somewhere real',
-    pushUrl({}, '#novo') === '/analyst/live#novo', pushUrl({}, '#novo'));
+    pushUrl({}, 'novo') === '/analyst/live?open=novo', pushUrl({}, 'novo'));
   /* The app is client-supplied and ends up in a URL, so the allowlist is the guard, not a filter. */
   ok('...and an unrecognised app cannot steer the url',
-    pushUrl({ app: '../../evil' }, '#novo') === '/analyst/live#novo'
-      && pushUrl({ app: 'ANALYST' }, '') === '/analyst/live', pushUrl({ app: '../../evil' }, '#novo'));
+    pushUrl({ app: '../../evil' }, 'novo') === '/analyst/live?open=novo'
+      && pushUrl({ app: 'ANALYST' }, '') === '/analyst/live'
+      /* an unknown target is dropped rather than pasted into the url */
+      && pushUrl({ app: 'crypto' }, 'evil') === '/crypto/live', pushUrl({ app: '../../evil' }, 'novo'));
 
   // ── 8. the cron reads the new field, not the old one ───────────────────────────────────────
   /* A source assertion, and named as one: it cannot prove the cron behaves, only that it no longer
@@ -131,11 +133,11 @@ const reset = async () => { STORE.clear(); };
   /* Both senders through ONE function. Two copies would drift the first time a fourth dashboard
      appears, and one product would quietly keep opening a page its members cannot reach. */
   ok('...built by the shared pushUrl, not a second copy of the same logic',
-    /url: pushUrl\(s, "#novo"\)/.test(cron) && /require\("\.\/_lib\/alerts\.js"\)/.test(cron),
+    /url: pushUrl\(s, "novo"\)/.test(cron) && /require\("\.\/_lib\/alerts\.js"\)/.test(cron),
     'digest does not use pushUrl');
   const alertsSrc = fs.readFileSync(path.join(__dirname, '..', 'api', '_lib', 'alerts.js'), 'utf8');
   ok('...and a fired alert uses it too',
-    /url: pushUrl\(s, "#alerts"\)/.test(alertsSrc), 'alerts _push does not use pushUrl');
+    /url: pushUrl\(s, "alerts"\)/.test(alertsSrc), 'alerts _push does not use pushUrl');
 
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);

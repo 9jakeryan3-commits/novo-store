@@ -850,6 +850,30 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       sw.app === want, JSON.stringify(sw));
   }
 
+  // == THE PUSH ACTUALLY LANDS =============================================================
+  /* Getting the url right is half a fix. The hash has to MEAN something on the dashboard it points
+     at, and it only did on the analyst -- a crypto device's digest opened /crypto/live#novo and put
+     the member on the map, which is the exact complaint that started all of this. Both hashes, all
+     three dashboards. */
+  console.log('\nA push lands on the surface it names\n');
+  for (const app of ['trader', 'analyst', 'crypto']) {
+    for (const [want, re] of [['novo', /novo/], ['alerts', /alerts/]]) {
+      /* ⚠ A UNIQUE QUERY, OR IT IS NOT A NAVIGATION AT ALL. Going from /x/live#novo to
+         /x/live#alerts is a same-DOCUMENT fragment change: the page does not reload, load never
+         fires again, and the second case ran against the first case still open. It failed showing
+         "Dr. NoVo" for #alerts -- the previous test's state, read as a bug in this one. */
+      await B.goto(base + '/' + app + '/live?n=' + Date.now() + '&open=' + want, 430, 900);
+      await new Promise((r) => setTimeout(r, 1800));
+      const lit = await B.evalIn(`(() => {
+        const t = [...document.querySelectorAll('.mob-tab')]
+          .find((e) => e.classList.contains('mob-active'));
+        /* Read the LABEL, which is what a member actually sees. The trader keys its tabs on
+           data-tab and the other two on data-mtab, so one assertion covers all three. */
+        return t ? (t.textContent || '').trim().toLowerCase() : null; })()`);
+      ok(app + ': ?open=' + want + ' opens the tab it names', re.test(lit || ''), JSON.stringify({ lit }));
+    }
+  }
+
   console.log('\nDr. NoVo\u2019s help panel\n');
   for (const [page, openChat] of [
       ['trader-live.html', `switchMobileTab(4)`],

@@ -38,9 +38,15 @@ const EQ_TICKERS = new Set(["SPY", "QQQ", "IWM"]);
 // subscriptions carry no app, and they self-heal: novoPush.refresh() re-registers an opted-in
 // browser on every dashboard load, stamping the app as it goes.
 const APPS = new Set(["analyst", "crypto", "trader"]);
-function pushUrl(sub, hash) {
+// ⚠ A QUERY, NOT A FRAGMENT. It was "#novo" until the crypto dashboard was tested with it: that
+// page already owns the hash — coinFromHash() reads it to pick which coin is on screen — so
+// "#novo" was parsed as a coin called NOVO, the map came up empty, and the notification landed
+// nowhere. The fragment is spoken for on one of three dashboards, which means it is not available
+// on any of them.
+function pushUrl(sub, open) {
   const app = sub && APPS.has(sub.app) ? sub.app : "analyst";
-  return "/" + app + "/live" + (hash || "");
+  const o = (open === "novo" || open === "alerts") ? "?open=" + open : "";
+  return "/" + app + "/live" + o;
 }
 const NAMED_LEVELS = new Set(["flip", "call_wall", "put_wall"]);
 // The crypto map publishes these on every coin with a real options book. flip maps to the
@@ -259,7 +265,7 @@ async function _push(email, title, body) {
       // each, and the notification should open the one that device belongs to. Without this every
       // alert opened /analyst/live, which a crypto-only subscriber cannot open at all.
       await webpush.sendNotification(s, JSON.stringify({
-        title, body, tag: "novo-alert", url: pushUrl(s, "#alerts") }));
+        title, body, tag: "novo-alert", url: pushUrl(s, "alerts") }));
       sent++;
     } catch (_) { /* dead sub - left for the next re-subscribe to replace */ }
   }

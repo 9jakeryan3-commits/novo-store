@@ -1979,15 +1979,34 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   /* The morning digest push points at /analyst/live#alerts, so the hash has to mean something or
      the notification lands on the map again -- which is the whole complaint it was meant to fix.
      Only on a phone: the bar is what owns views, and on the desk the card is already on the page. */
-  try {
-    if (location.hash === '#alerts' && getComputedStyle(bar).display !== 'none') lvMobTab('alerts');
-    /* The digest push points here. On a phone that is the Dr. NoVo tab; on the desk the chat panel
-       is the same destination, so it opens either way rather than doing nothing on a laptop. */
-    if (location.hash === '#novo') {
-      if (getComputedStyle(bar).display !== 'none') lvMobTab('novo');
-      else window.novoAskOpen(1);
-    }
-  } catch (_e) {}
+  /* ⚠ ON LOAD, NOT AT PARSE TIME. The first version of this ran inline, where novoAskOpen is not
+     defined yet on two of the three dashboards and the chat panel is not mounted on the third — the
+     call threw into a catch, the handler returned having done nothing, and the member landed on the
+     default tab. Which is exactly the bug the url change was meant to fix, reintroduced one layer
+     down. A destination has to exist before you can navigate to it. */
+  /* ⚠ READ AT PARSE TIME, ACTED ON AT LOAD. A push opens ?open=novo or ?open=alerts. The query,
+     not a fragment: the crypto map already owns its hash (coinFromHash reads it to pick the coin),
+     so "#novo" was parsed there as a coin called NOVO and the map came up empty. And it is captured
+     HERE rather than read later, because these pages rewrite their own URL early in init. */
+  var _OPEN = (function () {
+    try {
+      var q = new URLSearchParams(location.search).get('open');
+      if (q === 'novo' || q === 'alerts') return q;
+      var h = String(location.hash || '').replace('#', '');
+      return (h === 'novo' || h === 'alerts') ? h : null;
+    } catch (_e) { return null; }
+  })();
+  window.addEventListener('load', function () { setTimeout(function () {
+    try {
+      /* ⚠ WIDTH, NOT THE BAR'S COMPUTED DISPLAY. On crypto the bar lives inside #app, which is
+         .hidden until the map payload lands -- so it measured display:none, this read "not a
+         phone", and both hashes fell through to the desktop branch and did nothing. The viewport
+         is the same answer and it does not depend on how far the page has loaded. */
+      var phone = window.matchMedia('(max-width: 768px)').matches;
+      if (_OPEN === 'novo') { if (phone) lvMobTab('novo'); else window.novoAskOpen(1); }
+      else if (_OPEN === 'alerts' && phone) lvMobTab('alerts');
+    } catch (_e) {}
+  }, 120); });
 })();
 </script>
 

@@ -241,7 +241,7 @@ module.exports = async (req, res) => {
         // open — Jake: "zero Dr. NoVo features are per app gated". The device's own service-worker
         // scope is stored on the subscription at registration, so this opens the dashboard the
         // person was standing on when they turned push on.
-        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: pushUrl(s, "#novo") })); sent++; }
+        try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: pushUrl(s, "novo") })); sent++; }
         catch (_) {}
       }
     } catch (_) { errors++; }
