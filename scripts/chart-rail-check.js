@@ -105,6 +105,8 @@ server.listen(8795, async () => {
         b = b && (b.id === 'mobile-tabs' ? b : b.parentElement);
         return b ? Math.round(b.getBoundingClientRect().bottom) : null; })(),
       docOverflowX: document.documentElement.scrollWidth > innerWidth + 1,
+      chartBottom: (function(){ var c = document.getElementById('novo-chart');
+        return c ? Math.round(c.getBoundingClientRect().bottom) : 0; })(),
       // WHAT ACTUALLY APPLIED, from the browser, rather than from reading the stylesheet.
       chartCss: (function(){ var c = document.getElementById('novo-chart'); if (!c) return null;
         var g = getComputedStyle(c);
@@ -140,6 +142,23 @@ server.listen(8795, async () => {
   const desk = await evalIn(PROBE);
   await goto(430, 900, true);
   const phone = await evalIn(PROBE);
+  /* SHORT PHONES ARE THE CASE THAT BREAKS. A min-height floor beats a percentage on any viewport
+     small enough, so the pane that lands perfectly on a tall handset can overhang the fold on an
+     SE. Measure the real spread rather than trusting one device. */
+  const sizes = [[375, 667, 'iPhone SE'], [390, 844, 'iPhone 14'], [412, 915, 'Pixel 7'], [430, 932, 'Pro Max']];
+  const fleet = [];
+  for (const [w, h, name] of sizes) {
+    await goto(w, h, true);
+    await evalIn('try{window.sizeChartToPhone()}catch(e){}');
+    await new Promise((r) => setTimeout(r, 250));
+    const d = await evalIn(PROBE);
+    // PEEK: how much non-chart surface is left below the pane and above the tab bar. This is the
+    // scroll handle, and a chart that fills it perfectly is a chart the page cannot be scrolled
+    // past — so it is asserted, not merely observed.
+    fleet.push({ name, w, h, chart: d.chartH, pct: d.chartPct, bottom: d.chartBottom,
+                 peek: (h - 52) - d.chartBottom, over: d.chartBottom > h - 52 });
+  }
+  console.log(String.fromCharCode(10) + '  fleet:'); fleet.forEach(f => console.log('   ', JSON.stringify(f)));
 
   console.log('\nCHART RAIL — measured, not eyeballed\n');
   console.log('  desktop 1600:', JSON.stringify(desk));
@@ -160,6 +179,16 @@ server.listen(8795, async () => {
   ok('...and the tab bar is still on screen, not pushed past the fold',
      phone.barBottom !== null && phone.barBottom <= 902, String(phone.barBottom));
   ok('...and nothing scrolls sideways', phone.docOverflowX === false, String(phone.docOverflowX));
+
+  /* THE FLEET. One handset is not evidence: the height that landed perfectly on a tall phone
+     overhung the fold on an SE by 62px, and only measuring the spread showed it. */
+  ok('the chart clears the tab bar on every phone size, short ones included',
+     fleet.every((f) => !f.over), JSON.stringify(fleet.filter((f) => f.over)));
+  ok('...and leaves the SAME grabbable strip below it on all of them',
+     new Set(fleet.map((f) => f.peek)).size === 1 && fleet[0].peek >= 40,
+     JSON.stringify(fleet.map((f) => f.name + ':' + f.peek)));
+  ok('...with the chart still the dominant thing on screen (>= 58%)',
+     fleet.every((f) => f.pct >= 58), JSON.stringify(fleet.map((f) => f.name + ':' + f.pct + '%')));
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
   try { proc.kill(); } catch (_) {}
   server.close();

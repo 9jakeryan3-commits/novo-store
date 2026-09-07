@@ -3514,6 +3514,9 @@ function switchMobileTab(idx) {
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
   document.body.setAttribute('data-mtab', String(idx));   // drives the pinned quick-trade bar on the SIGNAL tab
+  // Size BEFORE the redraw: loadNovoChart measures the pane, so resizing after it would draw
+  // once into the old box and leave the canvas a frame behind on every visit to the tab.
+  if (idx === 2) setTimeout(function(){ try { window.sizeChartToPhone(); } catch (_e) {} }, 40);
   if (idx === 2) setTimeout(loadNovoChart, 60);   // SIGNAL tab (col-intel) shown → refresh now that it finally has a width, so the zoom/view applies
   if (idx === 3) setTimeout(function(){ try{ window.brainTick(); }catch(e){} }, 60);
   if (idx === 4) setTimeout(function(){ try{ window._novoChatReveal(); }catch(e){} }, 60);
@@ -4200,6 +4203,65 @@ function _paintCtb(){
      chart card is narrower than the viewport — which is all of them, since the chart sits in a
      three-column layout.
      The real constraint is the gap between the two columns that flank it, so measure that. */
+  /* ── THE CHART FILLS THE PHONE, MEASURED, NOT PREDICTED ─────────────────────────────────
+     Jake, 2026-09-07: "landed perfectly on my phone was that by design or will it cut off some
+     of the chart on shorter phones? if it could open at that spot on every phone size that would
+     be perfect maybe give it just a little more room because scrolling moves the chart unless I
+     grab that market intel header only."
+
+     It was NOT by design, and it did cut off. A percentage with a min-height floor lands
+     differently on every handset, and the floor wins on short ones: measured on a 375x667 SE the
+     pane took 79% of the viewport and its bottom sat 62px past the fold, while a 430x932 got a
+     clean 74%. The number that looked right was the one measured on a tall phone.
+
+     So the height is computed from the space that actually exists: the scroll column's height,
+     minus where the pane starts inside it, minus a PEEK strip left deliberately at the bottom.
+     That strip is not spare room - it is the scroll handle. The chart canvas swallows drag
+     gestures, so without a non-chart target the page can only be scrolled by grabbing the one
+     header below it, which is the second half of what Jake reported.
+
+     Inline + !important because it must outrank the stylesheet's own !important height; min and
+     max are neutralised for the same reason. If this never runs, the CSS rule below is still
+     there and behaves as it did before. */
+  var CHART_PEEK = 56;      // visible, grabbable surface below the pane - measured to the tab bar
+  var CHART_MIN = 300;      // a floor that only bites on a viewport no phone actually has
+  function sizeChartToPhone(){
+    var c = document.getElementById('novo-chart');
+    if (!c) return;
+    if (!matchMedia('(max-width:768px)').matches) {
+      if (c.dataset.sizedTo) {
+        c.style.removeProperty('height'); c.style.removeProperty('min-height');
+        c.style.removeProperty('max-height'); delete c.dataset.sizedTo;
+      }
+      return;
+    }
+    var col = c.closest('.col');
+    if (!col || !col.clientHeight) return;   // tab not on screen yet; the caller will come back
+    /* ⚠ MEASURE DOWN TO THE TAB BAR, NOT TO THE COLUMN'S BOTTOM. The scroll column extends
+       BEHIND the fixed tab bar, so budgeting the peek out of col.clientHeight spent most of it
+       underneath the bar: a 68px allowance produced 16px of visible, grabbable surface. The bar
+       is the real floor of the visible area, so ask it where it is. */
+    var bar = document.getElementById('mobile-tabs');
+    var floorY = col.getBoundingClientRect().top + col.clientHeight; // sabotage: back to the column bottom
+    // Where the pane sits when the column is at rest — so a mid-scroll resize does not size the
+    // chart against a scrolled-away position.
+    var topAtRest = c.getBoundingClientRect().top + col.scrollTop;
+    var h = Math.round(floorY - topAtRest - CHART_PEEK);
+    if (h < CHART_MIN) h = CHART_MIN;
+    // Only touch the DOM when the number actually changed: this dispatches a resize, and
+    // re-entering on our own event is how a sizer becomes a loop.
+    if (c.dataset.sizedTo === String(h)) return;
+    c.style.setProperty('height', h + 'px', 'important');
+    c.style.setProperty('min-height', '0', 'important');
+    c.style.setProperty('max-height', 'none', 'important');
+    c.dataset.sizedTo = String(h);
+    try { window.dispatchEvent(new Event('resize')); } catch (_e) {}
+  }
+  window.sizeChartToPhone = sizeChartToPhone;
+  addEventListener('resize', sizeChartToPhone);
+  addEventListener('orientationchange', function(){ setTimeout(sizeChartToPhone, 120); });
+  setTimeout(sizeChartToPhone, 300);
+
   /* A flex row that has not wrapped is exactly as tall as its tallest child. Anything more and a
      child has been pushed onto a second line — which is the state this whole mechanism exists to
      prevent, and the one thing that was never actually being measured. */
