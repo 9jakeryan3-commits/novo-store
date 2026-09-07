@@ -652,6 +652,30 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .ctb-btn.on { color: #22d3ee; background: rgba(34,211,238,.13); }
 .ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.16); }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
+/* THE CHART IS NOT A CARD, ON ANY SCREEN. First put inside the phone media block, which left the
+   frame on every desktop — and Jake's objection was to the box, not to the box on small screens. */
+#novo-chart, #novo-chart2 { border: 0 !important; border-radius: 0 !important;
+  box-shadow: none !important; }
+/* ── FULLSCREEN FILLS THE SCREEN ──────────────────────────────────────────────────────────────
+   requestFullscreen is called on #card-spy, so the card becomes the whole viewport — but the
+   chart inside it keeps whatever pixel height was last written to it (an inline height set by
+   the phone sizer, or the 340px it ships with), and the rest of the screen stays empty. The
+   element going fullscreen has to become a flex column and the chart has to be the part that
+   grows; nothing else makes a fixed pixel height yield. !important because the height it is
+   fighting is itself an inline !important. */
+#card-spy:fullscreen { display: flex; flex-direction: column; background: var(--bg); }
+#card-spy:fullscreen #chart-split { flex: 1 1 auto; min-height: 0; height: auto; }
+/* ⚠ THE CSS BELOW CANNOT WIN ON ITS OWN, and the measured test is what said so: fullscreen was
+   entered and the chart still covered 74% of the screen. The phone sizer writes an INLINE height
+   with !important, and an inline !important declaration outranks every stylesheet rule, including
+   another !important one. No selector is specific enough to beat it — the inline value has to be
+   removed, which the fullscreenchange handler now does. This rule is what takes over once it is
+   gone, and it stays for the case where no inline height was ever written. */
+#card-spy:fullscreen #novo-chart, #card-spy:fullscreen #novo-chart2 {
+  height: 100% !important; min-height: 0 !important; max-height: none !important;
+  border: 0 !important; border-radius: 0 !important; }
+#card-spy:fullscreen > div[style*="margin"] { margin: 0 !important; flex: 1 1 auto;
+  display: flex; flex-direction: column; min-height: 0; }
 #novo-chart.drawing { cursor: crosshair; }
 /* Pro overlays: OHLCV legend (top-left), NoVo read chip under it, ticker/frame watermark,
    and the switch veil. All pointer-events:none — the chart owns the mouse. */
@@ -1390,6 +1414,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     -webkit-overflow-scrolling: touch; max-height: calc(76dvh - 44px); padding-bottom: 10px; }
   /* The pane IS the tab now: nothing scrolls behind the sheet. */
   #col-intel.mob-active { overflow: hidden; }
+  /* ── THE CHART IS NOT A CARD (Jake, 2026-09-07: "the chart is boxed in ... I hate boxes and
+     borders, plus this boxed in effect doesnt let the full screen button take it to actually full
+     screen"). The pane carried an inline border, a 7px radius, a drop shadow and an 8px margin on
+     its wrapper — a framed picture of a chart. Those four things are also exactly why fullscreen
+     never filled: the frame and its inset survive into the fullscreen element.
+     Edge to edge on a phone, and the box ban finally reaches the biggest surface on the app. */
+  /* Edge to edge is the phone half; the border/radius/shadow removal is global (below). */
+  #card-spy > div[style*="margin"] { margin: 0 !important; }
   #chart-legend2 { font-size: 9.5px; letter-spacing: 0; }
   #novo-chip { top: 24px; }
   #novo-chip .c-reg { font-size: 8.5px; }
@@ -4309,6 +4341,9 @@ function _paintCtb(){
   function sizeChartToPhone(){
     var c = document.getElementById('novo-chart');
     if (!c) return;
+    /* Fullscreen owns the geometry while it lasts: writing a pixel height here would put the
+       frame back, in the one mode that exists to remove it. */
+    if (document.fullscreenElement) return;
     if (!matchMedia('(max-width:768px)').matches) {
       if (c.dataset.sizedTo) {
         c.style.removeProperty('height'); c.style.removeProperty('min-height');
@@ -4345,6 +4380,25 @@ function _paintCtb(){
   }
   window.sizeChartToPhone = sizeChartToPhone;
   addEventListener('resize', sizeChartToPhone);
+  /* The chart library measures its container on resize, and entering fullscreen does not fire one
+     reliably. Coming back out, the inline height the sizer wrote is stale by a whole viewport. */
+  addEventListener('fullscreenchange', function(){
+    var c = document.getElementById('novo-chart');
+    if (c) {
+      // Entering: DROP the inline height. It is written with !important by the sizer, and an
+      // inline !important beats any stylesheet rule, so the fullscreen CSS is powerless until
+      // this is gone. Leaving: drop the marker so the next size is recomputed rather than
+      // skipped as unchanged, because the viewport it was computed against is gone.
+      c.style.removeProperty('height');
+      c.style.removeProperty('min-height');
+      c.style.removeProperty('max-height');
+      delete c.dataset.sizedTo;
+    }
+    setTimeout(function(){
+      try { window.sizeChartToPhone(); } catch (_e) {}
+      try { window.dispatchEvent(new Event('resize')); } catch (_e) {}
+    }, 60);
+  });
   addEventListener('orientationchange', function(){ setTimeout(sizeChartToPhone, 120); });
   setTimeout(sizeChartToPhone, 300);
 

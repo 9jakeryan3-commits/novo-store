@@ -45,6 +45,13 @@ server.listen(8795, async () => {
   await send('Page.addScriptToEvaluateOnNewDocument',
     { source: "try{localStorage.setItem('novo_live_t','stub.token')}catch(e){}" }, sid);
 
+  /* userGesture:true — requestFullscreen is gesture-gated, and without it the promise rejects
+     and a fullscreen test silently "passes" by never entering fullscreen at all. */
+  const evalGesture = async (expr) => {
+    const r = (await send('Runtime.evaluate',
+      { returnByValue: true, awaitPromise: true, userGesture: true, expression: expr }, sid)).result;
+    return r.exceptionDetails ? { __err: String((r.exceptionDetails.exception || {}).description || '') } : r.result.value;
+  };
   const evalIn = async (expr) => {
     const r = (await send('Runtime.evaluate', { returnByValue: true, awaitPromise: true, expression: expr }, sid)).result;
     return r.exceptionDetails ? { __err: String((r.exceptionDetails.exception || {}).description || '') } : r.result.value;
@@ -120,6 +127,18 @@ server.listen(8795, async () => {
                    return (k.id || k.className || k.tagName) + ':' + Math.round(k.getBoundingClientRect().height); }),
                  hasIntel: !!sh.querySelector('#card-mktintel'),
                  chartInside: !!sh.querySelector('#novo-chart') }; })(),
+      // THE CHART ITSELF MUST NOT BE A BOX. Border, radius and shadow on the biggest surface in
+      // the app, plus the inset margin that framed it — all four are what fullscreen inherits.
+      chartBox: (function(){ var c = document.getElementById('novo-chart'); if (!c) return null;
+        var g = getComputedStyle(c);
+        var sides = ['Top','Right','Bottom','Left'].filter(function(k){
+          return parseFloat(g['border'+k+'Width']) > 0 && g['border'+k+'Style'] !== 'none'; });
+        var wrap = c.closest('#card-spy > div');
+        return { sides: sides.length, radius: parseFloat(g.borderTopLeftRadius) || 0,
+                 shadow: g.boxShadow && g.boxShadow !== 'none',
+                 wrapMargin: wrap ? getComputedStyle(wrap).marginLeft : 'n/a',
+                 left: Math.round(c.getBoundingClientRect().left),
+                 right: Math.round(innerWidth - c.getBoundingClientRect().right) }; })(),
       colKids: (function(){ var c = document.getElementById('col-intel');
         return c ? Array.from(c.children).map(function(k){
           return (k.id || k.className || k.tagName) + ':' + Math.round(k.getBoundingClientRect().height); }) : null; })(),
@@ -221,6 +240,38 @@ server.listen(8795, async () => {
   ok('...and it actually swallowed the Market Intel panel',
      !!phone.sheet && phone.sheet.hasIntel === true,
      JSON.stringify(phone.sheet && phone.sheet.kidList));
+  ok('the chart is not a box on DESKTOP either — the objection was to the box, not to its size',
+     !!desk.chartBox && desk.chartBox.sides === 0 && desk.chartBox.radius === 0
+       && desk.chartBox.shadow === false,
+     JSON.stringify(desk.chartBox));
+  ok('the chart is not a box: no border, no radius, no shadow',
+     !!phone.chartBox && phone.chartBox.sides === 0 && phone.chartBox.radius === 0
+       && phone.chartBox.shadow === false,
+     JSON.stringify(phone.chartBox));
+  ok('...and it runs edge to edge on a phone',
+     !!phone.chartBox && phone.chartBox.left <= 1 && phone.chartBox.right <= 1,
+     JSON.stringify(phone.chartBox && { l: phone.chartBox.left, r: phone.chartBox.right, m: phone.chartBox.wrapMargin }));
+  /* FULLSCREEN, ACTUALLY ENTERED. The complaint was that the button did not fill the screen, so
+     asserting the CSS exists would be asserting the wrong thing — enter it and measure the pane. */
+  await goto(412, 915, true);
+  const fs = await evalGesture(`(async () => {
+    const card = document.getElementById('card-spy');
+    if (!card || !card.requestFullscreen) return { unsupported: true };
+    try { await card.requestFullscreen(); } catch (e) { return { rejected: String(e && e.message) }; }
+    await new Promise(r => setTimeout(r, 400));
+    const c = document.getElementById('novo-chart');
+    const r = c.getBoundingClientRect();
+    const out = { entered: !!document.fullscreenElement, h: Math.round(r.height),
+                  vh: innerHeight, covers: Math.round(r.height / innerHeight * 100) };
+    try { await document.exitFullscreen(); } catch (e) {}
+    return out; })()`);
+  if (fs && (fs.unsupported || fs.rejected)) {
+    console.log('  SKIP  fullscreen not available in this browser context: ' + JSON.stringify(fs));
+  } else {
+    ok('fullscreen actually fills the screen with the chart (>= 80% of it)',
+       fs.entered === true && fs.covers >= 80, JSON.stringify(fs));
+  }
+
   ok('...and the chart did NOT get swept into it',
      !!phone.sheet && phone.sheet.chartInside === false, JSON.stringify(phone.sheet && phone.sheet.chartInside));
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
