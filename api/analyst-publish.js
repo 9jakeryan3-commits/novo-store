@@ -502,6 +502,26 @@ async function handleArchive(req, res) {
     canon, inner, head, crumbs));
 }
 
+/* The body, however this platform chose to hand it over. Vercel usually parses JSON into an
+   object, but a Buffer or an untouched stream both reach handlers under conditions this codebase
+   does not control (content-type normalisation by an intermediary, a runtime change). The engine
+   intakes are machine-to-machine and their failure surfaces only as an HTTP code in a log on
+   another host, so they read the raw stream rather than trusting one shape. */
+async function _bodyOf(req) {
+  const b = req.body;
+  if (b && typeof b === 'object' && !Buffer.isBuffer(b)) return b;
+  let raw = Buffer.isBuffer(b) ? b.toString('utf8') : (typeof b === 'string' ? b : null);
+  if (raw === null) {
+    try {
+      const chunks = [];
+      for await (const c of req) chunks.push(c);
+      raw = Buffer.concat(chunks).toString('utf8');
+    } catch (_) { return null; }
+  }
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (_) { return null; }
+}
+
 export default async function handler(req, res) {
   // Recent desk notes as JSON, for the member portal at novo-options.trade/portal. The archive itself is
   // already public HTML, so this exposes nothing new -- it just saves the portal scraping a page.
@@ -759,8 +779,15 @@ export default async function handler(req, res) {
   if (req.method === 'POST' && req.query && 'readings' in req.query) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     try {
-      const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      if (!b || !Array.isArray(b.readings)) return res.status(400).json({ error: 'readings[] required' });
+      const b = await _bodyOf(req);
+      // Name what arrived. The first live attempt returned a bare "readings[] required" and the
+      // engine logged only "HTTP Error 400", which said nothing about WHICH of the three possible
+      // causes it was — an error that cannot be acted on from the other side of the wire.
+      if (!b || !Array.isArray(b.readings)) {
+        return res.status(400).json({ error: 'readings[] required',
+          got: b === null ? 'unparseable body' : Object.prototype.toString.call(b),
+          keys: (b && typeof b === 'object') ? Object.keys(b).slice(0, 8) : [] });
+      }
       const r = kv();
       if (!r) return res.status(503).json({ error: 'store unavailable' });
       await r.set('eye:readings:live', JSON.stringify({
@@ -779,7 +806,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST' && req.query && 'pred' in req.query) {
     if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
     try {
-      const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      const b = (await _bodyOf(req)) || {};
       const P = require('./_lib/predictions.js');
       const out = await P.makePrediction({ ...b, source: 'novo' });
       // An Eye fire that recorded is an edge found — it surfaces as one of Dr. NoVo's Alerts too.
