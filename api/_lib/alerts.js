@@ -169,18 +169,23 @@ async function setAlert(email, { kind, ticker, coin, level, direction, note, rec
 // reach you and LISTING them never mentioned it again. An alert with no route is not a
 // pending alert, it is a silent one, and the surface built to manage them is exactly where
 // that has to be visible.
+// ⚠ VAPID ONLY (Jake, 2026-09-07): "it is VAPID only no option to go to email or discord or
+// whatever is pinged from the app only. redundant any other way."
+// A reader-set alert is a push to the app or it is nothing. This used to also report — and _deliver
+// used to also send — a Discord DM, which gave the feature two channels to keep in step and gave
+// the Alerts tab a state it could not honestly render (a member reachable only by DM would have
+// been told "nothing can reach you" while DMs kept arriving). One channel, one truth.
+// The Discord helpers below are NOT deleted: novo-broadcast and the Line alerts use the same link,
+// and removing a shared lookup because one caller stopped needing it is how the other callers break.
 async function _delivery(r, email) {
   let devices = 0;
   try {
     const subs = await r.get("push:u:" + eh(email));
     devices = (typeof subs === "string" ? JSON.parse(subs) : subs || []).length;
   } catch (_) {}
-  let discord = false;
-  try { discord = !!(await _discordId(r, email)); } catch (_) {}
   const routes = [];
   if (devices) routes.push(`push to ${devices} device${devices > 1 ? "s" : ""}`);
-  if (discord) routes.push("a Discord DM");
-  return { devices, discord, routes };
+  return { devices, discord: false, routes };
 }
 
 async function listAlerts(email) {
@@ -293,7 +298,8 @@ async function _discordDM(r, email, body) {
 async function _deliver(email, title, body) {
   const r = kv();
   const sent = await _push(email, title, body);
-  const dm = r ? await _discordDM(r, email, `**${title}** — ${body}`) : false;
+  // Discord DM removed 2026-09-07 — see the note on _delivery. VAPID only.
+  const dm = false;
   if (!sent && !dm) console.error("[alerts] fire had no route for", eh(email));
 }
 

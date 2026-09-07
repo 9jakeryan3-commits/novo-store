@@ -56,17 +56,18 @@ const SNAP = {
    server-rendered `alert` sentence, which the page must print verbatim rather than rebuild.
    ALERTS.mode lets a test ask for the failure that matters: a 503, which must NOT render as
    "no alerts". */
+const SEED = [
+  { id: 'a1', alert: 'SPY above its call wall', note: null, expires_in_h: 130,
+    kind: 'equity_level', ticker: 'SPY', level: 'call_wall', direction: 'above',
+    recurring: false, armed: null },
+  { id: 'a2', alert: 'BTC below 92000 (recurring)', note: 'watching the sweep', expires_in_h: 20,
+    kind: 'crypto_level', ticker: 'BTC', level: 92000, direction: 'below',
+    recurring: true, armed: true },
+];
 const ALERTS = {
   mode: 'ok',
   delivery: null,
-  active: [
-    { id: 'a1', alert: 'SPY above its call wall', note: null, expires_in_h: 130,
-      kind: 'equity_level', ticker: 'SPY', level: 'call_wall', direction: 'above',
-      recurring: false, armed: null },
-    { id: 'a2', alert: 'BTC below 92000 (recurring)', note: 'watching the sweep', expires_in_h: 20,
-      kind: 'crypto_level', ticker: 'BTC', level: 92000, direction: 'below',
-      recurring: true, armed: true },
-  ],
+  active: JSON.parse(JSON.stringify(SEED)),
 };
 function alertsBody() {
   return { ok: true, active: ALERTS.active, max_active: 10,
@@ -76,6 +77,15 @@ function alertsBody() {
 
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]);
+  if (rel === '/__reset-alerts') {
+    /* THE STUB IS MUTABLE AND THE CANCEL TEST MUTATES IT. Without this the cross-dashboard section
+       ran against one leftover alert and failed looking for the one it had itself deleted three
+       sections earlier -- a harness testing the residue of its own previous step. */
+    ALERTS.active = JSON.parse(JSON.stringify(SEED));
+    ALERTS.delivery = null; ALERTS.mode = 'ok';
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, n: ALERTS.active.length })); return;
+  }
   if (rel === '/__set-delivery') {
     ALERTS.delivery = (new URL(req.url, 'http://x').searchParams.get('d')) || null;
     res.writeHead(200, { 'content-type': 'application/json' });
@@ -341,18 +351,18 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* ── ALERTS ────────────────────────────────────────────────────────────────────────────────
      Jake, 2026-09-07: "we need an Alerts tab to self manage these alerts." */
   const alertsView = () => B.evalIn(`(() => {
-    const box = document.getElementById('al-body');
-    const route = document.getElementById('al-route');
+    const box = document.querySelector('#alerts-card .al-body');
+    const route = document.querySelector('#alerts-card .al-route');
     const card = document.getElementById('alerts-card');
     const on = (e) => { if (!e) return false; const r = e.getBoundingClientRect();
       return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
     return { cardShown: on(card),
-             rows: document.querySelectorAll('#al-body .al-row').length,
+             rows: document.querySelectorAll('#alerts-card .al-row').length,
              text: (box ? box.textContent : '').replace(/\\s+/g, ' ').trim(),
              routeShown: !!route && !route.hidden,
              routeWarn: !!route && route.className.indexOf('warn') >= 0,
              routeText: (route ? route.textContent : '').replace(/\\s+/g, ' ').trim(),
-             count: (document.getElementById('al-count') || {}).textContent || '',
+             count: (document.querySelector('#alerts-card .al-n') || {}).textContent || '',
              ribbon: on(document.querySelector('#mkt-ribbon')) }; })()`);
 
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="alerts"]').click()`);
@@ -372,7 +382,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Boxes, not text. "20H LEFTwatching the sweep" concatenates perfectly well in textContent and
      reads as a defect on screen; only geometry sees it. */
   const noteGeo = await B.evalIn(`(() => {
-    const row = document.querySelector('#al-body .al-row:nth-child(2)');
+    const row = document.querySelector('#alerts-card .al-row:nth-child(2)');
     if (!row) return { missing: true };
     const m = row.querySelector('.al-meta'), n = row.querySelector('.al-note');
     if (!m || !n) return { missing: true };
@@ -391,7 +401,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     JSON.stringify({ shown: al.routeShown, warn: al.routeWarn, text: al.routeText.slice(0, 120) }));
 
   /* Cancel goes to the store and the list is re-rendered from its answer. */
-  await B.evalIn(`document.querySelector('#al-body [data-cancel="a1"]').click()`);
+  await B.evalIn(`document.querySelector('#alerts-card [data-cancel="a1"]').click()`);
   await new Promise((r) => setTimeout(r, 600));
   al = await alertsView();
   ok('Stop cancels the alert and the list comes back from the store',
@@ -409,17 +419,20 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      unterminated group. Any regex written in one of these needs its backslashes doubled. */
   const oneFlow = await B.evalIn(`(() => {
     const html = document.documentElement.innerHTML;
-    return { subscribeCalls: (html.match(/pushManager\\.subscribe\\(/g) || []).length,
-             exposed: typeof window.novoEnablePush }; })()`);
-  ok('the VAPID subscribe path is exposed for the Alerts tab to reuse',
-    oneFlow.exposed === 'function', JSON.stringify(oneFlow));
-  ok('...and there is still exactly ONE of it on the page, not a copy behind the banner',
-    oneFlow.subscribeCalls === 1, JSON.stringify(oneFlow));
+    return { inlineSubscribe: (html.match(/pushManager\\.subscribe\\(/g) || []).length,
+             exposed: typeof window.novoEnablePush,
+             mod: typeof (window.novoPush || {}).enable }; })()`);
+  ok('the shared VAPID module is loaded and exposed',
+    oneFlow.exposed === 'function' && oneFlow.mod === 'function', JSON.stringify(oneFlow));
+  /* The flow now lives in /js/novo-push.js. Any pushManager.subscribe left INLINE on a dashboard
+     is by definition a second copy — which is the thing Jake asked for once, not three times. */
+  ok('...and the page carries no inline copy of it',
+    oneFlow.inlineSubscribe === 0, JSON.stringify(oneFlow));
 
   /* Geometry again: an inline button mid-sentence renders as a block of orange wedged between two
      half-lines of text, and every textContent assertion is happy with it. */
   const btn = await B.evalIn(`(() => {
-    const b = document.getElementById('al-push'); const r = document.getElementById('al-route');
+    const b = document.querySelector('#alerts-card [data-al-push]'); const r = document.querySelector('#alerts-card .al-route');
     if (!b || !r) return { missing: true };
     const rb = b.getBoundingClientRect(), rr = r.getBoundingClientRect();
     return { there: true, ownLine: Math.round(rb.left) <= Math.round(rr.left) + 16,
@@ -433,7 +446,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await B.evalIn(`window.novoEnablePush = async function () {
     await fetch('/__set-delivery?d=' + encodeURIComponent('push to 1 device'));
     return true; }`);
-  await B.evalIn(`document.getElementById('al-push').click()`);
+  await B.evalIn(`document.querySelector('#alerts-card [data-al-push]').click()`);
   await new Promise((r) => setTimeout(r, 800));
   al = await alertsView();
   ok('...turning push on clears the warning and names the route the server confirmed',
@@ -445,7 +458,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      whose alerts are fine would be told they have none and would go and set them all again. */
   await B.evalIn(`window.__alertsMode = '503'`);
   await fetch(base + '/__set-alerts-mode?m=503').catch(() => {});
-  await B.evalIn(`window.lvAlerts.load()`);
+  await B.evalIn(`window.novoAlerts.load()`);
   await new Promise((r) => setTimeout(r, 600));
   al = await alertsView();
   ok('a dead alerts store does NOT render as "nothing being watched"',
@@ -530,8 +543,8 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Jake, 2026-09-07: "crypto order / Stats / Coins / Map / Dr. NoVo". Read left-to-right off
      the rendered row, not out of the DOM — the row is arranged with CSS `order`, so reading the
      markup would report the source order and pass while the screen showed something else. */
-  ok('four tabs, in the order Jake asked for', bar.tabs.length === 4 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo',
+  ok('five tabs, Alerts appended', bar.tabs.length === 5 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo|Alerts',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('every tab is wide enough to hit on a 430px phone',
     bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
@@ -716,6 +729,53 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      the header button's caret, so the tab is checked AGAINST THAT rather than against a hex written
      into this file. A test carrying its own copy of the answer goes stale the day someone retunes a
      palette, and would then be wrong in the same direction as the bug it exists to catch. */
+  // ══ ALERTS ON ALL THREE ═══════════════════════════════════════════════════════════════════
+  /* Jake, 2026-09-07: "all 3 get this alerts tab ... crypto subs can schedule and ask to be alerted
+     just like the other two can."
+     One card (/js/novo-alerts.js) and one VAPID registration (/js/novo-push.js) across three pages,
+     so what is checked per page is that the tab EXISTS, that tapping it MOUNTS the card, and that
+     the card reached the endpoint — not the card's internals again. */
+  await fetch(base + '/__reset-alerts').catch(() => {});
+  console.log('\nThe Alerts tab, on all three dashboards\n');
+  for (const [page, open] of [
+      ['trader-live.html', `switchMobileTab(5)`],
+      ['analyst-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`],
+      ['crypto-live.html', `document.querySelector('.mob-tab[data-mtab="alerts"]').click()`]]) {
+    const app = page.split('-')[0];
+    await B.goto(base + '/' + page, 430, 900);
+    const tab = await B.evalIn(`(() => {
+      const t = [...document.querySelectorAll('.mob-tab')]
+        .find((e) => (e.textContent || '').indexOf('Alerts') >= 0);
+      if (!t) return { missing: true };
+      const r = t.getBoundingClientRect();
+      return { shown: getComputedStyle(t).display !== 'none' && r.width > 0,
+               w: Math.round(r.width), bottom: Math.round(r.bottom), vh: innerHeight }; })()`);
+    ok(app + ': has an Alerts tab, on the bar, at a real size',
+      !tab.missing && tab.shown && tab.w >= 44 && Math.abs(tab.bottom - tab.vh) <= 1,
+      JSON.stringify(tab));
+
+    await B.evalIn(open);
+    await new Promise((r) => setTimeout(r, 900));
+    const card = await B.evalIn(`(() => {
+      const c = document.querySelector('.novo-alerts');
+      if (!c) return { mounted: false };
+      const r = c.getBoundingClientRect();
+      return { mounted: true,
+               visible: getComputedStyle(c).display !== 'none' && r.width > 0 && r.height > 0,
+               rows: c.querySelectorAll('.al-row').length,
+               text: (c.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 700),
+               styled: !!document.querySelector('style[data-novo-alerts]') }; })()`);
+    ok(app + ': tapping it mounts the shared card and it is on screen',
+      card.mounted && card.visible, JSON.stringify(card).slice(0, 200));
+    ok(app + ': ...the card brought its own styles with it',
+      card.styled === true, JSON.stringify({ styled: card.styled }));
+    /* The stub serves the same two alerts to every page, because the store is per MEMBER, not per
+       product — one subscription, one list, three windows onto it. */
+    ok(app + ': ...and it reached the endpoint and rendered the member’s alerts',
+      card.rows >= 1 && card.text.indexOf('SPY above its call wall') >= 0,
+      JSON.stringify(card.text).slice(0, 200));
+  }
+
   console.log('\nDr. NoVo carries each app’s own colour\n');
   const rgb = (v) => (String(v).match(/\d+(\.\d+)?/g) || []).slice(0, 3).join(',');
   const marks = {};
