@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#17171a">
 <meta name="robots" content="noindex, nofollow">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1428,9 +1428,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      Every child is named: ordering some children of a flex row reorders all of them, and the one
      left at the default sorts ahead of the rest -- which is exactly how the crypto header rendered
      backwards earlier today. */
+  /* Jake, 2026-09-07, numbered on a screenshot: Analysis | Chart | Dr. NoVo | Alerts. Same shape
+     as the analyst's — Dr. NoVo third, Alerts last — with the two reading surfaces leading. */
   .mob-tab[data-tab="3"] { order: 1; }   /* Analysis */
-  .mob-tab[data-tab="4"] { order: 2; }   /* Dr. NoVo */
-  .mob-tab[data-tab="2"] { order: 3; }   /* Chart    */
+  .mob-tab[data-tab="2"] { order: 2; }   /* Chart    */
+  .mob-tab[data-tab="4"] { order: 3; }   /* Dr. NoVo */
   .mob-tab[data-tab="5"] { order: 4; }   /* Alerts   */
   .mob-tab {
     flex: 1;
@@ -3470,7 +3472,7 @@ function switchMobileTab(idx) {
     try {
       if (!window._trAlertsMounted && window.novoAlerts) {
         window._trAlertsMounted = window.novoAlerts.mount('#col-alerts-body',
-          { example: 'ping me if SPY crosses its flip' });
+          { app: 'trader', example: 'ping me if SPY crosses its flip' });
       } else if (window.novoAlerts) { window.novoAlerts.load(); }
     } catch (e) {}
   }, 60);
@@ -7399,6 +7401,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-push.js?v=e6b24da0"></script>
 <script src="/js/novo-alerts.js?v=ef4b3331"></script>
 <script src="/js/novo-desk.js?v=2c535f74"></script>
+<script src="/js/novo-appfeel.js?v=1"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.

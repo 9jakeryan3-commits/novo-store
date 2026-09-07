@@ -50,15 +50,26 @@ module.exports = async (req, res) => {
   const email = verifyToken(body.t || (req.query && req.query.t));
   if (!email) return res.status(401).json({ error: "sign in on the dashboard" });
 
+  // Which dashboard is asking. Allowlisted; absent means "everything", which is what a caller
+  // that has not been taught about apps yet should still get.
+  const APPS = new Set(["analyst", "crypto", "trader"]);
+  const _q = (req.query && req.query.app) || body.app || "";
+  const app = APPS.has(_q) ? _q : null;
+
   try {
     if (req.method === "GET") {
-      const out = await listAlerts(email);
+      const out = await listAlerts(email, app);
       // listAlerts answers {error} when KV is unreachable. That is a 503, not an empty list —
       // rendering "no alerts" over a dead store tells a member their alerts are gone.
       if (out && out.error) return res.status(503).json(out);
       // Best-effort and separate: a digest read that fails must not take the alerts list with it.
       let digest = null;
-      try { const m = await getMemory(email); digest = (m && m.digest) || null; } catch (_) {}
+      try {
+        const m = await getMemory(email);
+        const dg = (m && m.digest) || null;
+        // Same rule as the alerts: a digest asked for on one dashboard is managed there.
+        digest = (dg && (!app || !dg.app || dg.app === app)) ? dg : null;
+      } catch (_) {}
       return res.status(200).json({ ok: true, ...out, digest });
     }
 
@@ -68,7 +79,7 @@ module.exports = async (req, res) => {
       if (body.digest === false) {
         const r = await updateMemory(email, { digest: { on: false } });
         if (r && r.error) return res.status(503).json(r);
-        const now = await listAlerts(email);
+        const now = await listAlerts(email, app);
         return res.status(200).json({ ok: true, digest: null, ...(now.error ? {} : now) });
       }
       const id = String(body.cancel || "").trim();
@@ -77,9 +88,13 @@ module.exports = async (req, res) => {
       if (out && out.error) return res.status(503).json(out);
       // Hand back the fresh list in the same round trip, so the page never renders a cancel it
       // has not had confirmed by the store.
-      const now = await listAlerts(email);
+      const now = await listAlerts(email, app);
       let digest2 = null;
-      try { const m = await getMemory(email); digest2 = (m && m.digest) || null; } catch (_) {}
+      try {
+        const m = await getMemory(email);
+        const dg2 = (m && m.digest) || null;
+        digest2 = (dg2 && (!app || !dg2.app || dg2.app === app)) ? dg2 : null;
+      } catch (_) {}
       return res.status(200).json({ ok: true, cancelled: out.cancelled,
                                     ...(now.error ? {} : now), digest: digest2 });
     }

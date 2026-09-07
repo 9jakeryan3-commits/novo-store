@@ -164,7 +164,33 @@ const reset = async () => { STORE.clear(); };
     /setAlert\(ctx\.email, \{ \.\.\.a, app: ctx\.app \}\)/.test(toolsSrc),
     'the alert tool does not stamp ctx.app');
 
-  // ── 9. the cron reads the new field, not the old one ───────────────────────────────────────
+  // ── 9. the list is scoped to the app that asked ────────────────────────────────────────────
+  /* Jake, 2026-09-07: "my alerts still set in both analyst and trader" ... "went into crypto too".
+     One SPY alert set on the trader was listed on all three dashboards. Scoping the PING and
+     leaving the LIST global was half the rule. */
+  const alertsSrc3 = fs.readFileSync(path.join(__dirname, '..', 'api', '_lib', 'alerts.js'), 'utf8');
+  ok('listAlerts filters to the app that asked',
+    /async function listAlerts\(email, app\)/.test(alertsSrc3)
+      && /list = list\.filter\(\(x\) => !x\.app \|\| x\.app === app\)/.test(alertsSrc3),
+    'listAlerts is not scoped');
+  /* An alert nobody can see is an alert nobody can cancel, so the ones created before the app was
+     recorded stay visible everywhere until they expire. */
+  ok('...and an alert with no app is still listed, so it can be cancelled',
+    /!x\.app \|\|/.test(alertsSrc3), 'legacy alerts are hidden');
+  const cardSrc = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'novo-alerts.js'), 'utf8');
+  ok('...and the card tells the endpoint which dashboard it is',
+    /APP \? '&app=' \+ encodeURIComponent\(APP\)/.test(cardSrc), 'the card sends no app');
+
+  // ── 10. a turn that fails after doing something says what it did ───────────────────────────
+  /* He asked for an alert, was told only "I am rate limited", and the alert HAD been set — so the
+     natural next move is to ask again and set a second one. The ledger already knew. */
+  const askSrc = fs.readFileSync(path.join(__dirname, '..', 'api', 'analyst-ask.js'), 'utf8');
+  ok('a rate-limited turn still reports the alert it already saved',
+    /set_alert: 'your alert is set'/.test(askSrc)
+      && /it is saved — no need to ask twice/.test(askSrc),
+    'a failed turn hides its own side effects');
+
+  // ── 11. the cron reads the new field, not the old one ──────────────────────────────────────
   /* A source assertion, and named as one: it cannot prove the cron behaves, only that it no longer
      asks the question that caused this. The behaviour above is what the gate actually rests on. */
   const cron = fs.readFileSync(path.join(__dirname, '..', 'api', 'daily-digest.js'), 'utf8');

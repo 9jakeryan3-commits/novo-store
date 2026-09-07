@@ -286,7 +286,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.h === 52, String(bar.h));
   ok('four tabs, in the order Jake asked for',
     bar.tabs.length === 4 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Dealer Map|Dr. NoVo|The Read|Alerts',
+    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -873,6 +873,42 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       ok(app + ': ?open=' + want + ' opens the tab it names', re.test(lit || ''), JSON.stringify({ lit }));
     }
   }
+
+  // == THE PAGE DOES NOT PINCH-ZOOM ========================================================
+  /* Jake, 2026-09-07: "zoom cam we lock it so you can pinch zoom on mobile really kills the app
+     feel."
+     Three mechanisms, because no one of them covers every browser: the viewport meta (ignored by
+     iOS Safari since iOS 10), touch-action on the root (the one that does the work there), and the
+     iOS gesture events. The check asks for the two that are observable, and separately that the
+     CHART is still exempt — taking pinch away from the one surface where it is a feature would be
+     a worse bug than the one being fixed. */
+  console.log('\nThe page does not pinch-zoom\n');
+  for (const app of ['trader', 'analyst', 'crypto']) {
+    await B.goto(base + '/' + app + '/live', 430, 900);
+    const z = await B.evalIn(`(() => {
+      const m = document.querySelector('meta[name="viewport"]');
+      const c = (m && m.getAttribute('content')) || '';
+      return { scalable: /user-scalable\\s*=\\s*no/.test(c),
+               maxScale: /maximum-scale\\s*=\\s*1/.test(c),
+               touch: getComputedStyle(document.documentElement).touchAction,
+               loaded: typeof window.novoAlerts }; })()`);
+    ok(app + ': the viewport refuses to scale',
+      z.scalable && z.maxScale, JSON.stringify(z));
+    /* pan-x pan-y keeps scrolling and gives up the browser's pinch and double-tap zoom.
+       "manipulation" would NOT do it — that one still permits pinch. */
+    ok(app + ': ...and the root gives up pinch while keeping scroll',
+      /pan-x/.test(z.touch) && /pan-y/.test(z.touch) && !/pinch/.test(z.touch),
+      JSON.stringify({ touchAction: z.touch }));
+  }
+  /* The chart draws its own gestures — the trader file already carries a touch-action rule written
+     around it — so it must stay exempt. */
+  await B.goto(base + '/trader/live', 430, 900);
+  const exempt = await B.evalIn(`(() => {
+    const src = [...document.querySelectorAll('script[src]')]
+      .map((s) => s.getAttribute('src')).join(' ');
+    return { hasModule: /novo-appfeel/.test(src) }; })()`);
+  ok('trader: the app-feel module is loaded where the chart lives',
+    exempt.hasModule === true, JSON.stringify(exempt));
 
   console.log('\nDr. NoVo\u2019s help panel\n');
   for (const [page, openChat] of [

@@ -65,7 +65,7 @@
     return Math.round(h / 24) + 'd left';
   }
 
-  var box, route, count, hint, root;
+  var box, route, count, hint, root, APP = null;
 
   function render(d) {
     var list = (d && d.active) || [];
@@ -144,7 +144,8 @@
     if (!t) return fail('Sign in on the dashboard to see your alerts.');
     box.innerHTML = '<div class="al-empty">Loading…</div>';
     try {
-      var r = await fetch('/api/alerts?t=' + encodeURIComponent(t), { cache: 'no-store' });
+      var r = await fetch('/api/alerts?t=' + encodeURIComponent(t)
+        + (APP ? '&app=' + encodeURIComponent(APP) : ''), { cache: 'no-store' });
       var d = await r.json();
       /* ⚠ A FAILED READ MUST NOT RENDER AS "no alerts". The endpoint answers 503 when the store is
          unreachable, and an empty list is the most dangerous thing to show here: a member whose
@@ -164,7 +165,7 @@
     try {
       var r = await fetch('/api/alerts', { method: 'POST', cache: 'no-store',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ t: t, cancel: id }) });
+        body: JSON.stringify({ t: t, cancel: id, app: APP }) });
       var d = await r.json();
       if (!r.ok) throw new Error('cancel failed');
       /* Re-rendered from the STORE's answer, never by removing the row locally: a row that vanishes
@@ -182,6 +183,9 @@
     if (!el) return null;
     styles();
     opts = opts || {};
+    /* WHICH DASHBOARD THIS CARD IS ON. Without it the endpoint returns every alert the member has
+       across all three and the crypto map lists equity alerts it will never fire. */
+    APP = opts.app || null;
     el.classList.add('novo-alerts');
     el.innerHTML =
       '<h2>Your alerts <span class="al-n"></span></h2>'

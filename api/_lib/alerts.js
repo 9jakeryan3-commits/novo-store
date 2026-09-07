@@ -236,10 +236,18 @@ async function _delivery(r, email) {
   return { devices, discord: false, routes };
 }
 
-async function listAlerts(email) {
+// ⚠ SCOPED TO THE APP THAT ASKED. Jake, 2026-09-07: "my alerts still set in both analyst and
+// trader", and then "went into crypto too" — one SPY alert set on the trader was listed on all
+// three dashboards. Scoping the PING and leaving the LIST global was half the rule: the app that
+// pings an alert is the app that manages it, or the Alerts tab on the crypto map shows equity
+// alerts it will never fire.
+// Alerts created before the app was recorded carry none, and they are listed EVERYWHERE on purpose
+// — an alert nobody can see is an alert nobody can cancel. They age out inside the 7-day TTL.
+async function listAlerts(email, app) {
   const r = kv();
   if (!r || !email) return { error: "alerts unavailable" };
-  const list = await _load(r, email);
+  let list = await _load(r, email);
+  if (app) list = list.filter((x) => !x.app || x.app === app);
   const d = await _delivery(r, email);
   return {
     active: list.map((x) => ({

@@ -1297,11 +1297,22 @@ module.exports = async (req, res) => {
       // Say which of the two it was. "no answer" described the symptom and hid the cause, so a
       // rate-limited model and a genuinely empty response looked identical on screen and identical
       // in the logs -- which is how this sat unnoticed.
-      const emsg = upstream
+      /* ⚠ SAY WHAT ALREADY HAPPENED. Jake, 2026-09-07: he asked for an alert, got only "I am rate
+         limited right now — give it a moment and ask again", and the alert HAD been set. The tool
+         call succeeds in an earlier turn and only the final narration is rate-limited, so the
+         member is told nothing happened and asks again — which sets a second alert.
+         The ledger already knows. Anything with a side effect that came back ok is named. */
+      const DID = { set_alert: 'your alert is set', cancel_alert: 'the alert was cancelled',
+                    update_reader_memory: 'what you asked me to remember is saved' };
+      const done = [...new Set((ledger || []).filter((l) => l && l.ok && DID[l.tool])
+                                             .map((l) => DID[l.tool]))];
+      const emsg = (done.length ? 'Done — ' + done.join(', ') + '. ' : '') + (upstream
         ? ((upstream.status === 429 || upstream.status === 503)
-            ? 'I am rate limited right now — give it a moment and ask again.'
+            ? (done.length
+                ? 'I am rate limited so I cannot write it up right now, but it is saved — no need to ask twice.'
+                : 'I am rate limited right now — give it a moment and ask again.')
             : 'I could not reach my model just then. Ask again.')
-        : 'I came back with nothing there — ask me again.';
+        : 'I came back with nothing there — ask me again.');
       if (sse) { sse({ type: 'error', error: emsg }); return res.end(); }
       return res.status(502).json({ error: emsg });
     }
