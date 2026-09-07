@@ -197,8 +197,19 @@ const PRELUDE = `
     Math.abs(_ls + _ws) < 0.05,
     JSON.stringify(spacing) + '  (letter-spacing must be normal, or word-spacing must cancel it)');
 
-  ok('...and the mobile tab carries the same mark and name',
-    (named.mob || '').indexOf('✦') >= 0 && /DR\. NOVO/.test(named.mob || ''),
+  /* ⚠ COMPARE THE TWO SURFACES, DO NOT MATCH A FIXED STRING. This asserted /DR\. NOVO/ in
+     capitals, which was never the requirement -- it was an artifact of the tab bar's
+     text-transform:uppercase. When Jake asked for sentence case the label became "Dr. NoVo", the
+     check failed, and the product was more correct than the test. The actual invariant is that the
+     mobile tab and the desktop control carry the SAME mark and the SAME name, so that is what is
+     compared now: it survives a rename, and it still fails if the two drift apart. */
+  /* The desktop control carries a keyboard hint ("N") that the mobile tab has no room for, so the
+     two labels are not identical and never should be. CONTAINMENT is the honest invariant: the tab
+     shows the same mark and the same name, and the desktop adds the shortcut. Stripping the hint
+     with a regex was the first attempt and it fought the string instead of stating the rule. */
+  const _tidy = (t) => (t || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  ok('...and the mobile tab carries the same mark and name as the desktop control',
+    (named.mob || '').indexOf('✦') >= 0 && _tidy(named.desk).startsWith(_tidy(named.mob)),
     JSON.stringify(named));
 
   const glow = await evalIn(`(() => { const b = document.querySelector('.navbtn-novo');

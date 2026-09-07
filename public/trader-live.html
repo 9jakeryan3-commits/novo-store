@@ -1317,7 +1317,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      ~56% of the real viewport (dvh, so the address bar doesn't lie), floored and capped. The
      overlays shrink with it: the OHLCV legend was clipping its change% off the right edge at
      412px. */
-  #novo-chart { height: 56dvh !important; min-height: 400px; max-height: 640px; }
+  /* 56dvh -> 67dvh, and the floor and cap move with it (Jake, 2026-09-07: "make the mobile
+     chart taller, like 20% more height"). All three move together on purpose: raising only
+     the percentage leaves a 640px cap that silently eats the increase on any phone taller
+     than ~955px, which is most current handsets -- the change would appear to do nothing on
+     exactly the devices it was asked for. dvh so the address bar does not lie. */
+  #novo-chart { height: 67dvh !important; min-height: 480px; max-height: 768px; }
   #chart-legend2 { font-size: 9.5px; letter-spacing: 0; }
   #novo-chip { top: 24px; }
   #novo-chip .c-reg { font-size: 8.5px; }
@@ -1409,6 +1414,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     box-shadow: 0 -4px 20px rgba(0,0,0,.5);
     z-index: 1000;
   }
+  /* ⚠ ORDER IS SET IN CSS, NOT BY MOVING THE MARKUP. Jake: "the 3 buttons order should be
+     Analysis | Dr. NoVo | Chart". data-tab drives the active styling AND switchMobileTab's index,
+     and the comment above the markup warns that renumbering breaks the CSS and the Analysis poll
+     silently. Reordering visually with `order` leaves every index untouched.
+     Every child is named: ordering some children of a flex row reorders all of them, and the one
+     left at the default sorts ahead of the rest -- which is exactly how the crypto header rendered
+     backwards earlier today. */
+  .mob-tab[data-tab="3"] { order: 1; }   /* Analysis */
+  .mob-tab[data-tab="4"] { order: 2; }   /* Dr. NoVo */
+  .mob-tab[data-tab="2"] { order: 3; }   /* Chart    */
   .mob-tab {
     flex: 1;
     display: flex; flex-direction: column;
@@ -1418,8 +1433,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     border-top: 2px solid transparent;
     color: var(--txt3);
     font-family: var(--font);
-    font-size: 7.5px; font-weight: 900; letter-spacing: 1px;
-    text-transform: uppercase;
+    /* Sentence case (Jake). The label is set in the markup now rather than forced by CSS, so
+       "Dr. NoVo" keeps its capitals where a text-transform would have flattened them to "Dr. Novo".
+       Losing the uppercase costs some width back, so the size comes up a little and the tracking
+       comes down -- letter-spacing tuned for caps reads as gaps in mixed case. */
+    font-size: 9.5px; font-weight: 800; letter-spacing: .2px;
     cursor: pointer;
     transition: color .15s, border-color .15s;
     -webkit-tap-highlight-color: transparent;
@@ -2622,18 +2640,18 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        that the button position no longer equals the view index. -->
   <button class="mob-tab" data-tab="2" onclick="switchMobileTab(2)">
     <span class="mob-tab-icon">&#9672;</span>
-    <span>CHART</span>
+    <span>Chart</span>
   </button>
   <button class="mob-tab" data-tab="3" onclick="switchMobileTab(3)">
     <span class="mob-tab-icon">&#9707;</span>
-    <span>ANALYSIS</span>
+    <span>Analysis</span>
   </button>
   <!-- Now a REAL VIEW, where RUN was an action. It carries data-tab so switchMobileTab marks it
        active like the other two; the index is 4 because 0-3 are already spoken for and the CSS and
        the Analysis poll both gate on data-mtab, so reusing a number would break them silently. -->
   <button class="mob-tab mob-tab-novo" data-tab="4" onclick="switchMobileTab(4)">
     <span class="mob-tab-icon">&#10022;</span>
-    <span>DR. NOVO</span>
+    <span>Dr. NoVo</span>
   </button>
 </nav>
 
