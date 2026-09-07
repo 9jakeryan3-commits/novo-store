@@ -495,7 +495,7 @@ which Jake explicitly carved out. */
   /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07). All three module cards shed the page's
      .lv-card box — only .lv-alerts had this override, so Digest and Predict shipped boxed, which
      is exactly what got the rule written down. */
-  .lv-alerts, .lv-digest, .lv-predict { margin-top: 16px; padding: 0; border: 0; background: none; border-radius: 0; }
+  .lv-alerts, .lv-digest, .lv-predict, .lv-readings { margin-top: 16px; padding: 0; border: 0; background: none; border-radius: 0; }
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
   /* market ribbon */
@@ -582,6 +582,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- market ribbon -->
     <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt3);margin:2px 0 9px;">Futures &middot; <span style="color:#34d399;">Live 24/5</span></div>
     <div class="lv-ribbon" id="mkt-ribbon"></div>
+
+    <!-- LIVE READINGS STRIP (Jake, 2026-09-07: "analyst would get the bar that crypto has").
+         Painted by /js/novo-readings.js from the Eye's own published readings, and it hides itself
+         when there is nothing to say — an empty strip beats a strip announcing its emptiness at
+         the top of every load. Tapping it opens the Readings tab, the way the crypto strip opens
+         its feed. Hairline only: the crypto original is still a bordered card, and it is the
+         surface that got the box ban written down. -->
+    <div id="eye-readbar"></div>
 
     <!-- Ticker switcher | NoVo's bias. Deliberately the SAME .lv-grid columns as the hero row
          below, so the two ticker cards sit over the chart and the bias card sits over the dealer
@@ -676,6 +684,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lv-card lv-digest" id="digest-card"></div>
     <!-- NOVO UNLEASHED (comp seats only — the tab stays hidden until the server says comp). -->
     <div class="lv-card lv-predict" id="predict-card"></div>
+    <!-- LIVE READINGS, the full list plus the Eye's forward register. Descriptive readouts, not
+         calls: the tickets stay comp-gated in Dr. NoVo's Alerts and the prediction record. -->
+    <div class="lv-card lv-readings" id="readings-card"></div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
   </div>
 
@@ -1778,6 +1789,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="alerts"] { order: 4; }
     .mob-tab[data-mtab="digest"] { order: 5; }
     .mob-tab[data-mtab="predict"] { order: 6; }
+    /* Appended rather than slotted next to The Read on purpose: Jake has set this order twice by
+       screenshot, and quietly resequencing his tabs to make room for a new one is not my call.
+       With Readings the visible count reaches six, which is what makes the "4 main + a More
+       button" work he sequenced for later actually due. */
+    .mob-tab[data-mtab="readings"] { order: 7; }
     .mob-tab[hidden] { display: none; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
@@ -1809,14 +1825,16 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
        the dashboard later joins the map tab automatically instead of appearing on both. The header
        and the footer are on every tab: one is the brand and the live badge, the other is the
        "not financial advice" line, and that line does not get a tab it can be missing from. */
-    body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot) { display: none; }
+    body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot):not(#eye-readbar) { display: none; }
     body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
     body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
     body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
+    body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-readings):not(.lv-foot) { display: none; }
     body[data-mtab="map"]  #dash > .lv-read,
     body[data-mtab="map"]  #dash > .lv-alerts,
     body[data-mtab="map"]  #dash > .lv-digest,
-    body[data-mtab="map"]  #dash > .lv-predict { display: none; }
+    body[data-mtab="map"]  #dash > .lv-predict,
+    body[data-mtab="map"]  #dash > .lv-readings { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
@@ -1866,6 +1884,32 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
 <script src="/js/novo-digest.js?v=833b5090"></script>
 <script src="/js/novo-predict.js?v=830bc7a9"></script>
+<!-- LIVE READINGS: the strip and the tab, both fed by one fetch of the Eye's published readings. -->
+<script src="/js/novo-readings.js?v=e8f949b8"></script>
+<script>
+  /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip
+     calls when tapped — defined here rather than in the module because only the page knows how it
+     switches views (mobile tabs on a phone, a scroll on a desktop, and they are not the same act). */
+  window.novoReadings && window.novoReadings.bar('#eye-readbar');
+  window.novoReadings = window.novoReadings || {};
+  window.novoReadings.open = function () {
+    try {
+      if (window.matchMedia('(max-width: 768px)').matches) { lvMobTab('readings'); return; }
+      if (!window._lvReadMounted && window.novoReadings.mount) {
+        window.novoReadings.mount('#readings-card'); window._lvReadMounted = 1;
+      }
+      var el = document.getElementById('readings-card');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (_e) {}
+  };
+  /* On a desktop the tab does not exist, so the card would sit empty below the fold until someone
+     tapped a strip that only phones show. Mount it there on load instead. */
+  try {
+    if (!window.matchMedia('(max-width: 768px)').matches && window.novoReadings.mount) {
+      window.novoReadings.mount('#readings-card'); window._lvReadMounted = 1;
+    }
+  } catch (_e) {}
+</script>
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
@@ -1939,6 +1983,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <span class="mob-tab-icon" aria-hidden="true">&#9788;</span>
     <span>Digest</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="readings" onclick="lvMobTab('readings')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9672;</span>
+    <span>Readings</span>
+  </button>
   <button class="mob-tab" type="button" data-mtab="predict" onclick="lvMobTab('predict')" hidden>
     <span class="mob-tab-icon" aria-hidden="true">&#9670;</span>
     <span>Predict</span>
@@ -1985,6 +2033,14 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
          never refreshed after the first mount. The catch that made the page resilient also made
          the regression invisible. */
       if (which === 'alerts') { try { window.novoAlerts.load(); } catch (_e) {} }
+      if (which === 'readings') {
+        try {
+          if (!window._lvReadMounted && window.novoReadings) {
+            window.novoReadings.mount('#readings-card');
+            window._lvReadMounted = 1;
+          } else if (window.novoReadings) { window.novoReadings.refresh(); }
+        } catch (_e) {}
+      }
       if (which === 'predict') {
         try {
           if (!window._lvPredMounted && window.novoPredict) {

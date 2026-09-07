@@ -234,8 +234,49 @@ const proc = spawn(CHROME, ['--headless=new', '--remote-debugging-port=' + PORT,
 
 /* Real error capture. A page that throws during init renders a plausible-looking half-page, and
    every geometry check below would then be measuring the wreck rather than the layout. */
+const READINGS_FIXTURE = {
+  ok: true, live: true, as_of: '__NOW__',
+  readings: [
+    { ts_utc: '__NOW__', ticker: 'SPY', kind: 'gamma_regime',
+      claim: 'SPY is 0.06% below its gamma flip at $770.61 - the regime line is contested, and dealer hedging reverses sign across it.',
+      features: { dist_flip_pct: -0.06, net_gex: -270900000, gamma: 'short', n: 1840 } },
+    { ts_utc: '__NOW__', ticker: 'SPY', kind: 'wall_proximity',
+      claim: 'SPY is 0.31% from its call wall - where hedging concentrates above.',
+      features: { call_wall_pct: 0.31 } },
+    { ts_utc: '__NOW__', ticker: 'IWM', kind: 'squeeze_state',
+      claim: 'IWM squeeze score 71.4 - the 94th percentile of its own last 1,610 readings.',
+      features: { squeeze_score: 71.4, pct: 94, n: 1610 } },
+  ],
+  rules: [
+    { rule: 'eye_vix_inverted', ticker: 'SPY', feature: 'd_vix_vix3m', op: 'gt', threshold: 1,
+      value: 1.04, direction: 'down', since: '2026-09-07T00:35', firing: true },
+    { rule: 'eye_cx_liq_cascade', ticker: 'SPY', feature: 'cx_liq_usd', op: 'gt', threshold: 2.5,
+      value: 0.4, direction: 'down', since: '2026-09-07T00:35', firing: false },
+    { rule: 'eye_cx_funding_hot', ticker: 'SPY', feature: 'cx_funding_annual', op: 'gt',
+      threshold: 2.5, value: null, direction: 'down', since: '2026-09-07T00:35', firing: null },
+  ],
+  n: 3,
+};
+
 const PRELUDE = `
   try { localStorage.setItem('novo_live_t', 'stub.token'); } catch (e) {}
+  /* Readings fixture. window.__readingsMode flips the same UI between a live feed and a dead
+     publisher; the page has to render those differently and this is how that gets proved. */
+  window.__readings = ${JSON.stringify(READINGS_FIXTURE).replace(/__NOW__/g, '" + new Date().toISOString() + "')};
+  window.__readingsMode = 'live';
+  (function () {
+    var f = window.fetch;
+    window.fetch = function (u, o) {
+      if (String(u).indexOf('/api/eye-readings') === 0) {
+        var body = window.__readingsMode === 'dead'
+          ? { ok: true, live: false, note: 'The Eye has not published readings recently.' }
+          : window.__readings;
+        return Promise.resolve(new Response(JSON.stringify(body),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      return f.apply(this, arguments);
+    };
+  })();
   window.__errs = [];
   window.addEventListener('error', function(e){ window.__errs.push(String(e.message)); });
   window.addEventListener('unhandledrejection', function(e){
@@ -364,9 +405,13 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
   ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
     bar.h === 52, String(bar.h));
-  ok('five tabs, in the order Jake asked for',
-    bar.tabs.length === 5 &&
-    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest',
+  /* Jake set the first five by screenshot, twice. Readings was APPENDED rather than slotted
+     beside The Read for that reason — resequencing tabs he has already ordered is not a free
+     move. The assertion keeps his five in his order and pins the new one to the end, so a future
+     tab that quietly reshuffles them still fails here. */
+  ok('six tabs: Jake\u2019s five in his order, with Readings appended',
+    bar.tabs.length === 6 &&
+    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest|Readings',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -1531,6 +1576,130 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     ok(app + ' @1600: control - a real keyboard still gets the cursor put in the box',
       desk.has && desk.focused === true, JSON.stringify(desk));
   }
+
+  /* ══ LIVE READINGS — the Eye's readouts, on both equity dashboards ═══════════════════════
+     Jake, 2026-09-07: "equities side needs the same live readings feature or similar as crypto,
+     in its own way the page and bar across the top like crypto has, reading from the Eye ...
+     analyst would get the bar that crypto has and trader would get a nav bar tab." */
+  console.log('\nLive readings — the strip, the tab, and the honest empty state\n');
+
+  for (const [app, page, tabSel, open] of [
+    ['analyst', 'analyst/live', '.mob-tab[data-mtab="readings"]', "lvMobTab('readings')"],
+    ['trader', 'trader/live', '.mob-tab[data-tab="8"]', 'switchMobileTab(8)'],
+  ]) {
+    await B.goto(base + '/' + page, 430, 900);
+    await new Promise((r) => setTimeout(r, 900));
+
+    const tab = await B.evalIn(`(() => { const t = document.querySelector('${tabSel}');
+      if (!t) return { missing: true };
+      const r = t.getBoundingClientRect();
+      return { label: (t.textContent || '').trim(), w: r.width, h: r.height,
+               onBar: r.bottom > innerHeight - 90 }; })()`);
+    ok(app + ': there is a Live Readings tab on the bar, at a real size',
+      !tab.missing && /Readings/i.test(tab.label) && tab.w > 20 && tab.h > 20 && tab.onBar,
+      JSON.stringify(tab));
+
+    await B.evalIn(open);
+    await new Promise((r) => setTimeout(r, 700));
+
+    const pg = await B.evalIn(`(() => {
+      const el = document.querySelector('.novo-readings');
+      if (!el) return { missing: true };
+      const r = el.getBoundingClientRect();
+      const txt = (el.textContent || '').replace(/\\s+/g, ' ');
+      return { onScreen: r.width > 100 && r.height > 40 && r.top < innerHeight,
+               rows: el.querySelectorAll('.rd-row').length,
+               groups: Array.from(el.querySelectorAll('.rd-grp')).map((g) => g.textContent.trim()),
+               txt: txt.slice(0, 900) }; })()`);
+    ok(app + ': tapping it mounts the readings and they are on screen',
+      !pg.missing && pg.onScreen === true && pg.rows >= 6, JSON.stringify({ ...pg, txt: undefined }));
+    ok(app + ': ...the claims are the ENGINE\u2019s sentences, printed not rebuilt',
+      /regime line is contested/.test(pg.txt) && /dealer hedging reverses sign/.test(pg.txt),
+      JSON.stringify(pg.txt.slice(0, 200)));
+    ok(app + ': ...grouped by ticker, so two books never read as one',
+      pg.groups.includes('SPY') && pg.groups.includes('IWM'), JSON.stringify(pg.groups));
+    ok(app + ': ...and every sigma claim carries the sample it rests on',
+      /n 1840/.test(pg.txt) && /94th percentile of its own last 1,610/.test(pg.txt),
+      JSON.stringify(pg.txt.match(/n \\d+/g)));
+
+    /* THE THREE RULE STATES. "Not firing" and "cannot tell" are different facts about the world
+       and the whole point of printing the register is lost if they share a rendering. */
+    const rules = await B.evalIn(`(() => {
+      const el = document.querySelector('.novo-readings');
+      const f = el.querySelector('.rd-fire'), a = el.querySelector('.rd-armed'), u = el.querySelector('.rd-unknown');
+      return { fire: f && f.textContent.trim(), armed: a && a.textContent.trim(),
+               unknown: u && u.textContent.trim(),
+               txt: (el.textContent || '').replace(/\\s+/g, ' ') }; })()`);
+    ok(app + ': ...the register shows FIRING, armed and no-reading as three different answers',
+      rules.fire === 'FIRING' && rules.armed === 'armed' && rules.unknown === 'no reading',
+      JSON.stringify({ f: rules.fire, a: rules.armed, u: rules.unknown }));
+    ok(app + ': ...a rule with no live value says so rather than reading as quiet',
+      /no live value/.test(rules.txt), JSON.stringify(rules.txt.slice(-260)));
+
+    const bx = await noBoxes('.novo-readings');
+    ok(app + ': ...and the readings page draws NO boxes', bx.n === 0, JSON.stringify(bx));
+
+    /* A DEAD PUBLISHER AND A QUIET MARKET MUST NOT LOOK ALIKE. This is the check that would have
+       caught the equity version shipping a silent, permanently-empty tab. */
+    await B.evalIn(`window.__readingsMode = 'dead'; window.novoReadings.refresh();`);
+    await new Promise((r) => setTimeout(r, 500));
+    const dead = await B.evalIn(`(() => { const el = document.querySelector('.novo-readings');
+      return (el.textContent || '').replace(/\\s+/g, ' '); })()`);
+    ok(app + ': ...and a dead publisher says so, instead of rendering a quiet market',
+      /has not published readings recently/.test(dead) && /not a quiet market/.test(dead),
+      JSON.stringify(dead.slice(0, 220)));
+  }
+
+  /* THE STRIP — analyst only, exactly as Jake split it. */
+  await B.goto(base + '/analyst/live', 430, 900);
+  await new Promise((r) => setTimeout(r, 900));
+  const strip = await B.evalIn(`(() => {
+    const el = document.querySelector('#eye-readbar');
+    if (!el) return { missing: true };
+    const r = el.getBoundingClientRect(), c = getComputedStyle(el);
+    const sides = ['Top','Right','Bottom','Left'].filter((k) =>
+      parseFloat(c['border' + k + 'Width']) > 0 && c['border' + k + 'Style'] !== 'none');
+    return { shown: !el.hidden && r.height > 10, top: r.top, w: r.width,
+             sides: sides, radius: parseFloat(c.borderTopLeftRadius) || 0,
+             txt: (el.textContent || '').replace(/\\s+/g, ' ').trim() }; })()`);
+  ok('analyst: the read strip is on the page, near the top, above the cards',
+    strip.shown === true && strip.top < 460, JSON.stringify({ ...strip, txt: undefined }));
+  ok('analyst: ...it prints a real reading and how old it is',
+    /regime line is contested/.test(strip.txt) && /(just now|m ago|h ago|d ago)/.test(strip.txt),
+    JSON.stringify(strip.txt.slice(0, 190)));
+  ok('analyst: ...on ONE hairline, not in a box \u2014 the crypto original is the surface Jake marked',
+    strip.sides.length === 1 && strip.sides[0] === 'Bottom' && strip.radius === 0,
+    JSON.stringify({ sides: strip.sides, radius: strip.radius }));
+
+  const tapped = await B.evalIn(`(() => { document.querySelector('#eye-readbar').click();
+    return new Promise((r) => setTimeout(() => r({
+      tab: document.body.getAttribute('data-mtab'),
+      mounted: !!document.querySelector('.novo-readings .rd-row') }), 500)); })()`);
+  ok('analyst: ...and tapping it opens the Readings tab, the way the crypto strip opens its feed',
+    tapped.tab === 'readings' && tapped.mounted === true, JSON.stringify(tapped));
+
+  /* The strip must not appear where it has nothing to add, and must vanish when the Eye is out. */
+  const hidden = await B.evalIn(`(() => { lvMobTab('alerts');
+    return new Promise((r) => setTimeout(() => {
+      const el = document.querySelector('#eye-readbar');
+      r({ vis: el.getBoundingClientRect().height > 4 }); }, 400)); })()`);
+  ok('analyst: ...the strip stands down on the single-card tabs',
+    hidden.vis === false, JSON.stringify(hidden));
+
+  await B.goto(base + '/analyst/live', 430, 900);
+  await B.evalIn(`window.__readingsMode = 'dead';`);
+  await B.evalIn(`window.novoReadings.refresh()`);
+  await new Promise((r) => setTimeout(r, 600));
+  const quiet = await B.evalIn(`(() => { const el = document.querySelector('#eye-readbar');
+    return { h: el.getBoundingClientRect().height, hidden: !!el.hidden }; })()`);
+  ok('analyst: ...and with no feed it hides entirely rather than announcing its own emptiness',
+    quiet.hidden === true && quiet.h < 4, JSON.stringify(quiet));
+
+  const trStrip = await B.goto(base + '/trader/live', 430, 900)
+    .then(() => new Promise((r) => setTimeout(r, 700)))
+    .then(() => B.evalIn(`!!document.querySelector('#eye-readbar')`));
+  ok('trader: has NO strip \u2014 the analyst gets the bar, the trader gets the tab, as Jake split it',
+    trStrip === false, JSON.stringify(trStrip));
 
   console.log('\n' + (failures ? 'FAIL ' : 'OK   ') + (checks - failures) + '/' + checks + ' checks\n');
   try { proc.kill(); } catch (_) {}

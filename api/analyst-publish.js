@@ -750,7 +750,30 @@ export default async function handler(req, res) {
   // DELETE — pull a bad read from the public archive (blob + index entry). Same shared-secret auth as POST.
   //   DELETE /api/analyst-publish?slug=YYYY-MM-DD-the-close   (x-analyst-secret header)
   if (req.method === 'DELETE') {
-    // ── NoVo's self-initiated predictions (the Eye, the crypto selector) ─────────────────────
+    // ── THE EYE'S LIVE READINGS ──────────────────────────────────────────────────────────────
+  // Jake, 2026-09-07: "equities side needs the same live readings feature or similar as crypto ...
+  // reading from the Eye". Engine-authed intake, one KV key, replaced whole each pass — readings
+  // are a SNAPSHOT of now, not an append-only record, so there is nothing here to merge and
+  // nothing to age out. The 6h TTL is a dead-engine detector: if the Eye stops publishing, the
+  // key expires and the bar goes quiet rather than showing yesterday as though it were today.
+  if (req.method === 'POST' && req.query && 'readings' in req.query) {
+    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
+    try {
+      const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      if (!b || !Array.isArray(b.readings)) return res.status(400).json({ error: 'readings[] required' });
+      const r = kv();
+      if (!r) return res.status(503).json({ error: 'store unavailable' });
+      await r.set('eye:readings:live', JSON.stringify({
+        as_of: b.as_of || new Date().toISOString(),
+        readings: b.readings.slice(0, 60),
+        rules: Array.isArray(b.rules) ? b.rules.slice(0, 40) : [],
+        n: Number(b.n) || b.readings.length,
+      }), { ex: 6 * 3600 });
+      return res.status(200).json({ ok: true, stored: b.readings.length });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
+  // ── NoVo's self-initiated predictions (the Eye, the crypto selector) ─────────────────────
   // Engine-authed intake. Same secret as every other engine write; same makePrediction the chat
   // tool calls, so the Eye cannot record a shape the conversation could not.
   if (req.method === 'POST' && req.query && 'pred' in req.query) {

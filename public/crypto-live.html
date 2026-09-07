@@ -258,7 +258,10 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
    right side of the phone. */
 .ph .sub{font-family:var(--mono);font-size:10px;color:var(--txt4);margin-left:auto;min-width:0;overflow-wrap:anywhere}
 .pb{padding:12px}
-.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:var(--r-1);font-weight:600}
+/* Chips, not boxes: the ban removes the pill; the colour and the mono caps still carry the
+   grade. Separation between them is a middot, added below, not four borders each. */
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:0;background:none;font-weight:700}
+.tag + .tag::before{content:"·";margin:0 7px;color:var(--txt4);font-weight:400}
 .t-hi{background:rgba(16,185,129,.14);color:var(--green2)}
 .t-md{background:rgba(245,158,11,.14);color:var(--amber)}
 .t-lo{background:rgba(244,63,94,.14);color:var(--red)}
@@ -269,10 +272,14 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
    min-width:0 on the flexing child plus ellipsis on the text, because the claim is written by the
    model and its length is not something this layout gets to assume. */
 #readstrip[hidden]{display:none}
-#readstrip{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;
-  border:1px solid var(--bdr);border-radius:var(--r-2);background:var(--panel);
+/* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): "no more full boxes only line breaks can be
+   used." This strip was a bordered, rounded, filled card — and it is the surface Jake marked up
+   when he asked for the equity version, so the equity one was never going to be built from it as
+   it stood. One hairline underneath does the same separating work. */
+#readstrip{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:0 0 11px;
+  border-bottom:1px solid var(--bdr);
   cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden}
-#readstrip:hover{border-color:var(--cx-line)}
+#readstrip:hover{border-bottom-color:var(--cx-line)}
 #readstrip .rs-ico{flex:0 0 auto;font-size:13px;line-height:1}
 #readstrip .rs-body{flex:1 1 auto;min-width:0;max-width:100%}
 #readstrip .rs-line{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -284,7 +291,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 @media(max-width:720px){
   /* Two lines is a luxury on a phone: one read, and the count. */
   #readstrip .rs-line + .rs-line{display:none}
-  #readstrip{padding:8px 11px;gap:8px}
+  #readstrip{padding:0 0 9px;gap:8px}
 }
 #sym{font-family: var(--display);font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
 #px{font-family:var(--mono);font-size:19px;color:var(--txt2);line-height:1}
