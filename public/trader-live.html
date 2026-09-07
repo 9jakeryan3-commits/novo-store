@@ -243,10 +243,21 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
 @media (max-width: 900px) { .tb-brand .wm-2 { display: none; } .tb-brand img { height: 22px; } }
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
 :root {
+  /* ⚠ THE TRADER IS BLACK (Jake, 2026-09-07): "trader needs to go dark. all that grayish
+     background needs to go black ... keep all the lines and headers on the analysis tab as is just
+     make it black background."
+     Same move the analyst and crypto dashboards already made: the SURFACES drop to the page ground
+     so panels stop reading as grey slabs, and the framing survives because it was never the fill
+     doing the work — .card carries border-bottom:1px var(--bdr), the strip carries its own rules,
+     and every header keeps its own colour. Nothing about the lines or the type moves.
+     --hov exists because --bg2 was doing two jobs: a panel fill AND the hover state on three
+     controls. Blacking the token would have taken the hover with it, which is not a theme change,
+     it is a control that stopped answering. */
   --bg:    #09090b;
-  --bg1:   #111113;
-  --bg2:   #17171a;
+  --bg1:   #09090b;
+  --bg2:   #09090b;
   --bg3:   #0a0a0d;
+  --hov:   #17171a;
   --bdr:   #2c2c30;
   --bdr2:  #1c1c20;
   --txt1:  #f0f0ee;
@@ -740,7 +751,7 @@ input.inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; ma
   letter-spacing: .8px; text-transform: uppercase; padding: 8px 2px; cursor: pointer;
   transition: .12s;
 }
-.agg-btn:hover { color: var(--txt1); background: var(--bg2); }
+.agg-btn:hover { color: var(--txt1); background: var(--hov); }
 .agg-btn.a-cons { background: var(--blu);  color: #fff; }
 .agg-btn.a-bal  { background: var(--grn);  color: #fff; }
 .agg-btn.a-agg  { background: var(--amb);  color: #000; }
@@ -784,7 +795,7 @@ input.inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; ma
   letter-spacing: .5px; text-transform: uppercase; padding: 10px 2px; cursor: pointer;
   transition: .12s;
 }
-.mode-btn:hover { color: var(--txt1); background: var(--bg2); }
+.mode-btn:hover { color: var(--txt1); background: var(--hov); }
 .mode-btn.m-paper { background: var(--grn-d); color: var(--grn); border: 1px solid rgba(16,185,129,.3); }
 .mode-btn.m-live  { background: var(--red-d);  color: var(--red);  border: 1px solid rgba(244,63,94,.3); }
 #mode-pending { font-size: 8px; color: var(--amb); padding: 4px 14px; display: none; letter-spacing: .3px; }
@@ -2142,7 +2153,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 #set-drawer .dlink { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px;
   color: var(--txt2); text-decoration: none; font-size: 12.5px; font-weight: 600;
   border: 1px solid transparent; }
-#set-drawer .dlink:hover { background: var(--bg2); border-color: var(--bdr); color: var(--txt1); }
+#set-drawer .dlink:hover { background: var(--hov); border-color: var(--bdr); color: var(--txt1); }
 #set-drawer .dlink .ar { margin-left: auto; color: var(--txt3); }
 #set-drawer .nf-note { font-size: 10.5px; color: var(--txt3); line-height: 1.5; padding: 2px 2px 0; }
 #risk-drawer { display: none; }

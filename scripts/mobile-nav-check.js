@@ -941,6 +941,50 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      iOS gesture events. The check asks for the two that are observable, and separately that the
      CHART is still exempt — taking pinch away from the one surface where it is a feature would be
      a worse bug than the one being fixed. */
+  // == THE TRADER IS BLACK =================================================================
+  /* Jake, 2026-09-07: "trader needs to go dark. all that grayish background needs to go black ...
+     keep all the lines and headers on the analysis tab as is just make it black background."
+     Asserted as RENDERED colour, not as a token value — a token is only a promise until something
+     paints with it — and paired with the two things that had to SURVIVE the change: the borders
+     that do the framing, and a hover state that was sharing the token being blacked out. */
+  console.log('\nThe trader is black\n');
+  await B.goto(base + '/trader/live', 430, 900);
+  const dark = await B.evalIn(`(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const card = document.querySelector('.card');
+    const cc = card ? getComputedStyle(card) : null;
+    const bodyBg = getComputedStyle(document.body).backgroundColor;
+    /* Every element painting a visible surface, and the lightest one it paints. #09090b is the
+       ground; anything much above it is the grey Jake is pointing at. */
+    let worst = null, worstLum = -1;
+    document.querySelectorAll('.card, .kpi, .perf-kpi, .ledger-col, .inp-cell, .brain-col, #mobile-tabs')
+      .forEach((e) => {
+        const m = getComputedStyle(e).backgroundColor.match(/\\d+/g);
+        if (!m) return;
+        const lum = (+m[0] + +m[1] + +m[2]) / 3;
+        if (lum > worstLum) { worstLum = lum; worst = (e.className || e.id) + ' ' + getComputedStyle(e).backgroundColor; }
+      });
+    return {
+      bg1: cs.getPropertyValue('--bg1').trim(), bg2: cs.getPropertyValue('--bg2').trim(),
+      hov: cs.getPropertyValue('--hov').trim(),
+      cardBg: cc ? cc.backgroundColor : null, bodyBg: bodyBg,
+      cardBorder: cc ? parseFloat(cc.borderBottomWidth) : 0,
+      worst: worst, worstLum: worstLum,
+    }; })()`);
+
+  ok('the trader surfaces sit on the page ground, not a grey slab',
+    dark.cardBg === dark.bodyBg, JSON.stringify({ card: dark.cardBg, body: dark.bodyBg }));
+  /* 0x09 is 9. Anything averaging much above that is the grey. */
+  ok('...and nothing that paints a surface is still grey',
+    dark.worstLum >= 0 && dark.worstLum <= 12, JSON.stringify({ lightest: dark.worst, lum: dark.worstLum }));
+  /* "keep all the lines" — the framing was never the fill, and it has to still be there. */
+  ok('...with the lines that do the framing still drawn',
+    dark.cardBorder > 0, JSON.stringify({ cardBorderBottom: dark.cardBorder }));
+  /* --bg2 was a panel fill AND a hover state. Blacking the token without splitting it would have
+     silently removed the hover — a control that stopped answering, dressed as a theme change. */
+  ok('...and the hover state kept a colour of its own',
+    !!dark.hov && dark.hov !== dark.bg2, JSON.stringify({ hov: dark.hov, bg2: dark.bg2 }));
+
   console.log('\nThe page does not pinch-zoom\n');
   for (const app of ['trader', 'analyst', 'crypto']) {
     await B.goto(base + '/' + app + '/live', 430, 900);
