@@ -862,6 +862,40 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     ok(app + ': ...and the digest is managed HERE, with a way to stop it',
       panel.digest === true, JSON.stringify({ digest: panel.digest }));
 
+    /* ⚠ NO EXPAND, NO MINIMISE, WHEREVER THE TAB BAR IS. Both were gated at 720px while the bar
+       starts at 768, so between the two — a foldable, a small tablet, a phone in landscape — the
+       chat showed a tab bar AND an expand button AND a minimise chevron together. That is where
+       Jake found it, and 430px would never have. So it is asked at BOTH widths, and paired with a
+       desktop control so "not visible" cannot pass by the chat simply being shut. */
+    for (const w of [430, 760]) {
+      await B.resize(w, 900);
+      await new Promise((r) => setTimeout(r, 350));
+      const chrome = await B.evalIn(`(() => {
+        const vis = (sel) => { const e = document.querySelector(sel);
+          if (!e) return false; const r = e.getBoundingClientRect();
+          return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
+        return { bar: vis('#mobile-tabs'), mx: vis('#novo-ask .mx'), x: vis('#novo-ask .x'),
+                 chat: vis('#novo-ask') }; })()`);
+      ok(app + ' @' + w + ': the tab bar is up and neither expand nor minimise is',
+        chrome.bar === true && chrome.chat === true
+          && chrome.mx === false && chrome.x === false, JSON.stringify(chrome));
+    }
+    await B.resize(1600, 1000);
+    /* ⚠ THE TRADER OPENS ITS DESKTOP CHAT A DIFFERENT WAY. switchMobileTab(4) reveals #col-novo,
+       which is a MOBILE view — at 1600 it shows nothing, so the control failed reporting the chat
+       shut and looked like the change under test. The desk path is setView. */
+    await B.evalIn(app === 'trader' ? 'setView("novo")' : 'novoAskOpen(1)');
+    await new Promise((r) => setTimeout(r, 600));
+    const desk = await B.evalIn(`(() => {
+      const vis = (sel) => { const e = document.querySelector(sel);
+        if (!e) return false; const r = e.getBoundingClientRect();
+        return getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0; };
+      return { bar: vis('#mobile-tabs'), x: vis('#novo-ask .x'), chat: vis('#novo-ask') }; })()`);
+    ok(app + ' @1600: control — with no tab bar, the chat keeps its own way out',
+      desk.bar === false && desk.chat === true && desk.x === true, JSON.stringify(desk));
+    await B.resize(430, 900);
+    await new Promise((r) => setTimeout(r, 350));
+
     /* A row is only a feature if tapping it asks the thing it advertises. */
     const said = await B.evalIn(`(() => {
       window.__asked = null;

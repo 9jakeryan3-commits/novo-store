@@ -216,7 +216,16 @@
     border-radius:0;border:0}
   #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
   html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
-  @media (max-width:720px){ #novo-ask .mx{display:none} }
+  /* ⚠ 720 -> 768, AND THE MINIMISE CHEVRON GOES WITH IT. Jake, 2026-09-07, on a foldable:
+     "that minimize button shouldnt show on mobile and crypto and analyst both show the full page
+     button in chat also".
+     The mobile TAB BAR starts at 768px and these were gated at 720, so on any device between the
+     two -- a foldable, a small tablet, a phone in landscape -- the chat rendered a tab bar AND an
+     expand button AND a minimise chevron at the same time. 48px of width nobody tests on.
+     Both controls are meaningless once Dr. NoVo is a tab: the panel is already the whole screen so
+     there is nothing to expand into, and the bar is how you leave it so there is nothing to
+     minimise to. One number for "this is the phone layout", the same one the bar uses. */
+  @media (max-width:768px){ #novo-ask .mx, #novo-ask .x{display:none} }
 
 `;
 
