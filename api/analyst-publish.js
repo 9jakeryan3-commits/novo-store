@@ -800,7 +800,22 @@ export default async function handler(req, res) {
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
-  // ── NoVo's self-initiated predictions (the Eye, the crypto selector) ─────────────────────
+  // ── THE EYE'S RULE FIRES ─────────────────────────────────────────────────────────────────
+  // The instrument reports; NoVo decides. This used to arrive at ?pred=1 as a finished call,
+  // which made a threshold trip into a stated prediction with no judgement in between. The fire
+  // now arrives as a fire, with the rule's graded record attached, and onEquityFire applies the
+  // same bar the crypto side applies: earn it, or stay a private signal.
+  if (req.method === 'POST' && req.query && 'fire' in req.query) {
+    if (!_secretOk(req.headers['x-analyst-secret'])) return res.status(401).json({ error: 'unauthorized' });
+    try {
+      const b = (await _bodyOf(req)) || {};
+      if (!b.rule || !b.symbol) return res.status(400).json({ error: 'rule and symbol required' });
+      const out = await require('./_lib/predictions.js').onEquityFire({ ...b, ts: Date.now() });
+      return res.status(200).json({ ok: true, ...out });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+  }
+
+  // ── NoVo's self-initiated predictions (the crypto selector, and his own calls) ────────────
   // Engine-authed intake. Same secret as every other engine write; same makePrediction the chat
   // tool calls, so the Eye cannot record a shape the conversation could not.
   if (req.method === 'POST' && req.query && 'pred' in req.query) {
@@ -809,16 +824,10 @@ export default async function handler(req, res) {
       const b = (await _bodyOf(req)) || {};
       const P = require('./_lib/predictions.js');
       const out = await P.makePrediction({ ...b, source: 'novo' });
-      // An Eye fire that recorded is an edge found — it surfaces as one of Dr. NoVo's Alerts too.
-      if (out && out.ok) {
-        try {
-          await P.appendNovoFire({ asset_class: b.asset_class === 'crypto' ? 'crypto' : 'equity',
-            symbol: String(b.symbol || '').toUpperCase(), kind: 'eye_rule',
-            title: String(b.thesis || 'The Eye fired').slice(0, 200),
-            horizon_min: Number(b.horizon_min) || null,
-            receipts: String(b.basis || 'forward-registered rule').slice(0, 160) });
-        } catch (_) {}
-      }
+      /* Deliberately no longer auto-surfaces into Dr. NoVo's Alerts. Making a prediction and
+         approving an alert are two different judgements, and wiring them together meant anything
+         that recorded a call also earned a place on the alerts page — no edge test, no bar. The
+         alerts surface has one entrance now, and it is the edge gate. */
       return res.status(out && out.ok ? 200 : 400).json(out);
     } catch (e) { return res.status(500).json({ error: e.message }); }
   }

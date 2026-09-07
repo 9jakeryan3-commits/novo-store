@@ -326,6 +326,78 @@ async function curateChainFires(snap) {
   return { kept };
 }
 
+// ── NOVO'S EQUITY SELECTOR ───────────────────────────────────────────────────────────────────
+// Jake, 2026-09-07: "it is his not the eyes making predictions he uses the eye as a tool but its
+// novos predictions ... the eye gives live readings not predictions."
+//
+// The Eye reports that a forward-registered rule tripped, and hands over that rule's graded record
+// beside the record of every rule on the book. NOVO decides here, and the decision is the same one
+// he makes on the crypto side: a fire earns a call only when the rule behind it has beaten the
+// book's own baseline by a real margin on a real denominator.
+//
+//   * >= 30 resolutions   -- a hit rate over a handful of resolutions is not a rate
+//   * >= 5pp over base    -- the baseline is the empirical hit rate across ALL resolved equity
+//                            signals, i.e. what "no particular rule" actually achieves here. A
+//                            hit rate with no baseline flatters or slanders itself depending on
+//                            which way the market happened to go.
+//
+// TWO DECISIONS, ONE BAR. Clearing it makes the fire one of Dr. NoVo's Alerts AND makes it a
+// recorded prediction; failing it leaves the fire exactly where it was — in the private
+// hash-chained equity record, chat-pull only, waiting to earn its way up. That is Jake's rule
+// stated as code: "when an edge is found in those alerts it is approved for Dr. NoVo's Alerts ...
+// as long as it holds an edge."
+const EQ_MIN_RESOLUTIONS = 30;
+const EQ_MIN_EDGE_PP = 5;
+async function onEquityFire(fire) {
+  const r = kv();
+  if (!r || !fire || !fire.rule || !fire.symbol) return { surfaced: false, predicted: false };
+  const rec = fire.record || {};
+  const spot = Number(fire.spot_at);
+  const hm = Number(fire.horizon_min) >= 5 ? Number(fire.horizon_min) : 60;
+  const side = String(fire.direction || "").toLowerCase() === "up" ? "up" : "down";
+  const n = Number(rec.resolutions) || 0;
+  const hit = rec.hit_pct == null ? null : Number(rec.hit_pct);
+  const base = rec.base_hit_pct == null ? null : Number(rec.base_hit_pct);
+  const edge = (hit == null || base == null) ? null : hit - base;
+
+  // One fire, one decision, ever — a predicate that stays true across passes must not become a
+  // second call. The engine already holds a refire guard; this is the store's own, because two
+  // publishers with one guard between them is a guard that stops existing the day one is replaced.
+  const seenKey = "eqfire:seen:" + crypto.createHash("sha256")
+    .update(fire.symbol + "|" + fire.rule + "|" + String(fire.spot_at) + "|" + String(fire.ts || ""))
+    .digest("hex").slice(0, 24);
+  try { if (await r.get(seenKey)) return { surfaced: false, predicted: false, dup: true }; } catch (_) {}
+
+  const earned = n >= EQ_MIN_RESOLUTIONS && edge != null && edge >= EQ_MIN_EDGE_PP;
+  if (!earned) {
+    try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
+    // Not a failure — the ordinary state of a pre-registered rule that has not resolved enough
+    // yet. It stays a private fire, which is where it already is.
+    return { surfaced: false, predicted: false,
+             why: n < EQ_MIN_RESOLUTIONS ? "only " + n + " resolutions" : "edge " + edge + "pp" };
+  }
+
+  const receipts = hit + "% over " + n + " resolutions vs " + base + "% across the book";
+  let predicted = false;
+  if (isFinite(spot) && spot > 0) {
+    const out = await makePrediction({
+      source: "novo", asset_class: "equity", symbol: fire.symbol, kind: "direction", side,
+      spot_at: spot, horizon_min: hm,
+      thesis: fire.symbol + " " + side + " within "
+        + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m") + " — " + (fire.reading || fire.rule),
+      basis: fire.rule + " · " + receipts,
+    });
+    predicted = !!(out && out.ok);
+  }
+  await appendNovoFire({
+    asset_class: "equity", symbol: fire.symbol, kind: fire.rule,
+    title: fire.symbol + " " + side + " — " + (fire.reading || fire.rule),
+    horizon_min: hm, receipts: receipts,
+  });
+  try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
+  return { surfaced: true, predicted: predicted, edge: edge };
+}
+
 // ── THE CRYPTO SELECTOR ──────────────────────────────────────────────────────────────────────
 // Jake, 2026-09-07: "he is always watching the data flow the Eye and other alerts systems in
 // crypto and all to make his own predictions when he sees a fitting trade or moment."
@@ -400,5 +472,6 @@ async function selectCryptoPredictions(snap) {
 }
 
 module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+                   onEquityFire,
                    appendNovoFire, listNovoFires, curateChainFires,
                    evaluateEquityPredictions, evaluateCryptoPredictions };

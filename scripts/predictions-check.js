@@ -212,6 +212,55 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     eqOnly.length === 0 && cxOnly.length === 1,
     JSON.stringify({ equity: eqOnly.length, crypto: cxOnly.length }));
 
+  // ── 9. THE EYE IS A TOOL; NOVO DECIDES ────────────────────────────────────────────────────
+  // Jake, 2026-09-07: "it is his not the eyes making predictions he uses the eye as a tool but
+  // its novos predictions ... the eye gives live readings not predictions." A rule tripping a
+  // threshold is an observation. Whether it becomes a call, and whether it earns a place on the
+  // alerts page, is one judgement made HERE against the rule's own graded record.
+  const fire = (over) => ({
+    symbol: 'SPY', rule: 'eye_vix_inverted', era: 'eye_v1', direction: 'down',
+    spot_at: 770.19, horizon_min: 60, reading: 'd_vix_vix3m > 1 (reading 1.04)',
+    record: { resolutions: 120, hit_pct: 61.0, base_hit_pct: 50.4, base_n: 900 }, ...over,
+  });
+
+  reset();
+  const earned = await P.onEquityFire(fire({ ts: 1 }));
+  const feed1 = JSON.parse(S.get('novo:alerts:feed') || '[]');
+  ok('a fire from a rule that has BEATEN the book earns a call and a place in the alerts',
+    earned.surfaced === true && earned.predicted === true
+      && rows().length === 1 && feed1.length === 1,
+    JSON.stringify({ ...earned, rows: rows().length, feed: feed1.length }));
+  ok('...the prediction is NOVO\u2019s, sourced to him, with the Eye as the reason - not the author',
+    rows()[0].source === 'novo' && rows()[0].asset_class === 'equity'
+      && /d_vix_vix3m/.test(rows()[0].thesis || '')
+      && /61% over 120 resolutions vs 50.4% across the book/.test(rows()[0].basis || ''),
+    JSON.stringify({ source: rows()[0].source, basis: rows()[0].basis }));
+
+  reset();
+  const thin = await P.onEquityFire(fire({ ts: 2, record: { resolutions: 8, hit_pct: 75.0, base_hit_pct: 50.4, base_n: 900 } }));
+  ok('a rule with 8 resolutions earns nothing - a rate over a handful is not a rate',
+    thin.surfaced === false && thin.predicted === false && rows().length === 0
+      && JSON.parse(S.get('novo:alerts:feed') || '[]').length === 0,
+    JSON.stringify(thin));
+
+  reset();
+  const flat = await P.onEquityFire(fire({ ts: 3, record: { resolutions: 400, hit_pct: 52.0, base_hit_pct: 50.4, base_n: 900 } }));
+  ok('...and a 52% rule against a 50.4% book earns nothing either - that is not an edge',
+    flat.surfaced === false && flat.predicted === false && rows().length === 0,
+    JSON.stringify(flat));
+
+  reset();
+  const virgin = await P.onEquityFire(fire({ ts: 4, record: { resolutions: 0, hit_pct: null, base_hit_pct: null, base_n: 0 } }));
+  ok('...a rule with NO record yet earns nothing, and that is its ordinary state, not a failure',
+    virgin.surfaced === false && virgin.predicted === false && rows().length === 0,
+    JSON.stringify(virgin));
+
+  reset();
+  await P.onEquityFire(fire({ ts: 5 }));
+  const refire = await P.onEquityFire(fire({ ts: 5 }));
+  ok('...and the same fire can never become a second call, however many passes report it',
+    refire.dup === true && rows().length === 1, JSON.stringify({ refire, rows: rows().length }));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });
