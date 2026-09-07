@@ -486,6 +486,14 @@ const declarations = [
                 "gamma flipped', 'funding and liquidations only'. Steers emphasis only; it " +
                 "cannot add a number the facts do not contain.",
             },
+            time: {
+              type: "string",
+              description:
+                "WHEN it arrives, 24-hour ET as HH:MM — the time THEY asked for, converted to " +
+                "Eastern if they named another zone ('7am' -> '07:00', '6:30 pacific' -> " +
+                "'09:30'). Delivered on the half hour, so 7:15 lands at 7:00 — say so if they " +
+                "name an odd minute. Omit when they name no time; the default is 08:00 ET.",
+            },
           },
         },
         clear: { type: "boolean", description: "Erase everything on their request." },

@@ -1241,7 +1241,7 @@
     },
     {
       "path": "/api/daily-digest",
-      "schedule": "0 12 * * *"
+      "schedule": "0,30 * * * *"
     }
   ],
   "headers": [

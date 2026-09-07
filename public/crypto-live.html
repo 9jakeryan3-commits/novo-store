@@ -182,9 +182,9 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .dstat b{color:var(--txt1);font-family:var(--mono);font-weight:600}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px}
 .dot.stale{background:var(--amber)}
-/* #alerts-col is display:none at every width except its own mobile tab, so it never takes a
-   column here. Stated rather than left implicit: a fourth grid child with no track would otherwise
-   land in an implicit ROW and push the map down. */
+/* #alerts-col and #digest-col are display:none at every width except their own mobile tabs, so
+   they never take a column here. Stated rather than left implicit: a grid child with no track
+   would otherwise land in an implicit ROW and push the map down. */
 main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .col{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr) transparent}
 .col::-webkit-scrollbar{width:7px}.col::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
@@ -715,6 +715,7 @@ tr:last-child td{border-bottom:none}
     .mob-tab[data-mtab="map"]   { order: 3; }
     .mob-tab[data-mtab="novo"]  { order: 4; }
     .mob-tab[data-mtab="alerts"] { order: 5; }
+    .mob-tab[data-mtab="digest"] { order: 6; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -745,10 +746,13 @@ tr:last-child td{border-bottom:none}
        on it. Written as its own pair rather than folded into the Stats rules, because the two views
        hide different things: Stats keeps #center in the DOM for the chat to dock into, and Alerts
        has no such tenant. */
-    #alerts-col { display: none; }
+    #alerts-col, #digest-col { display: none; }
     body[data-mtab="alerts"] #alerts-col { display: block; padding: 14px 16px 28px; }
-    body[data-mtab="alerts"] #center,
-    body[data-mtab="alerts"] #side { display: none; }
+    body[data-mtab="digest"] #digest-col { display: block; padding: 14px 16px 28px; }
+    body[data-mtab="alerts"] #center, body[data-mtab="digest"] #center,
+    body[data-mtab="alerts"] #side, body[data-mtab="digest"] #side { display: none; }
+    body[data-mtab="digest"]:has(#novo-ask.on) #center { display: block; }
+    body[data-mtab="digest"]:has(#novo-ask.on) #digest-col { display: none; }
     /* Same exception as Stats: the chat panel lives inside #center, so opening it has to bring
        #center back or the panel is .on and invisible. */
     body[data-mtab="alerts"]:has(#novo-ask.on) #center { display: block; }
@@ -918,6 +922,7 @@ tr:last-child td{border-bottom:none}
          is "show one column, hide the others", and an alerts view that lived inside #center would
          have to be torn down and rebuilt every time drawCoin ran. -->
     <div class="col" id="alerts-col"></div>
+    <div class="col" id="digest-col"></div>
   </main>
 
 
@@ -973,6 +978,7 @@ tr:last-child td{border-bottom:none}
 <script src="/js/novo-desk.js?v=2c535f74"></script>
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
+<script src="/js/novo-digest.js?v=1"></script>
 
 <!-- ===== MOBILE TAB BAR =====  (inside #app on purpose: #app carries .hidden until the member is
      through the gate, so the login screen never shows a nav to nowhere.)
@@ -997,6 +1003,9 @@ tr:last-child td{border-bottom:none}
   <button class="mob-tab" type="button" data-mtab="alerts" onclick="cxMobTab('alerts')">
     <span class="mob-tab-icon" aria-hidden="true">&#9636;</span><span>Alerts</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="digest" onclick="cxMobTab('digest')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9788;</span><span>Digest</span>
+  </button>
 </nav>
 <script>
 (function(){
@@ -1019,6 +1028,15 @@ tr:last-child td{border-bottom:none}
     /* Mounted on FIRST arrival and refreshed on every one after. Alerts change when the member
        changes them or when one fires, both rare -- but a list that silently went stale while the
        tab sat open is the thing this surface exists to prevent. */
+    if (which === 'digest') {
+      try {
+        if (!window._cxDigestMounted && window.novoDigest) {
+          window._cxDigestMounted = window.novoDigest.mount('#digest-col',
+            { app: 'crypto', example: 'Send me a daily digest on BTC and SOL — funding and liquidations only.',
+              openChat: function(){ cxMobTab('novo'); } });
+        } else if (window.novoDigest) { window.novoDigest.load(); }
+      } catch (_e) {}
+    }
     if (which === 'alerts') {
       try {
         if (!window._cxAlertsMounted && window.novoAlerts) {

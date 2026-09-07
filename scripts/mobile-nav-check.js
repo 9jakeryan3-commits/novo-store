@@ -79,13 +79,18 @@ const PREFS = { email: true };
 const ALERTS = {
   mode: 'ok',
   delivery: null,
-  digest: { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1 },
+  digest: { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1757232000000, time: '06:30' },
   active: JSON.parse(JSON.stringify(SEED)),
 };
 function alertsBody() {
   return { ok: true, active: ALERTS.active, max_active: 10,
            devices_registered: ALERTS.delivery ? 1 : 0, discord_linked: false,
-           delivery: ALERTS.delivery, digest: ALERTS.digest };
+           delivery: ALERTS.delivery, digest: ALERTS.digest,
+           /* the mornings, newest first — the shape api/alerts.js now serves, gone with the digest */
+           digest_log: ALERTS.digest ? [
+             { ts: 1757232000000, text: 'SPY opens 0.1% under its flip with net GEX -$270M; the vise is 769-770.', symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped' },
+             { ts: 1757145600000, text: 'Quiet holiday tape. BTC funding -4.7 sigma on hyperliquid; shorts paying.', symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped' },
+           ] : [] };
 }
 
 const server = http.createServer((req, res) => {
@@ -138,7 +143,7 @@ const server = http.createServer((req, res) => {
        sections earlier -- a harness testing the residue of its own previous step. */
     ALERTS.active = JSON.parse(JSON.stringify(SEED));
     ALERTS.delivery = null; ALERTS.mode = 'ok';
-    ALERTS.digest = { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1 };
+    ALERTS.digest = { on: true, symbols: ['SPY', 'BTC'], focus: 'only if gamma flipped', set_utc: 1757232000000, time: '06:30' };
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, n: ALERTS.active.length })); return;
   }
@@ -312,9 +317,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     bar.position === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1, JSON.stringify({ bottom: bar.bottom, vh: bar.vh }));
   ok('it is the trader bar height (52px + safe area, 0 in the emulator)',
     bar.h === 52, String(bar.h));
-  ok('four tabs, in the order Jake asked for',
-    bar.tabs.length === 4 &&
-    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts',
+  ok('five tabs, in the order Jake asked for',
+    bar.tabs.length === 5 &&
+    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Alerts|Digest',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -617,8 +622,8 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   /* Jake, 2026-09-07: "crypto order / Stats / Coins / Map / Dr. NoVo". Read left-to-right off
      the rendered row, not out of the DOM — the row is arranged with CSS `order`, so reading the
      markup would report the source order and pass while the screen showed something else. */
-  ok('five tabs, Alerts appended', bar.tabs.length === 5 &&
-    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo|Alerts',
+  ok('six tabs, Digest appended', bar.tabs.length === 6 &&
+    bar.tabs.map((t) => t.label).join('|') === 'Stats|Coins|Map|Dr. NoVo|Alerts|Digest',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('every tab is wide enough to hit on a 430px phone',
     bar.tabs.every((t) => t.w >= 44), JSON.stringify(bar.tabs.map((t) => t.w)));
@@ -1028,6 +1033,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       JSON.stringify({ before: par.mailBefore, after: par.mailAfterReload }));
     ok(app + ': Dr. NoVo carries Help and Plain English, and the bar carries his tab and Alerts',
       par.helpBtn && par.lvlBtn && par.alertsTab && par.novoTab, JSON.stringify(par));
+    const hasDigestTab = await B.evalIn(`[...document.querySelectorAll('.mob-tab')]
+      .some((t) => /digest/i.test(t.textContent || ''))`);
+    ok(app + ': ...and the Digest tab', hasDigestTab === true, JSON.stringify(hasDigestTab));
     /* reset the stub's preference for the next app */
     await fetch(base + '/api/analyst-publish?prefs=1', { method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1040,6 +1048,58 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      wrong." The subscription always was per-scope; the localStorage FLAG was one shared key, so
      the toggles painted and acted on each other's state. Proven by the exact motion he described:
      turn push off on one dashboard, and the others' flags must not move. */
+  // == THE DAILY DIGEST SUITE ==============================================================
+  /* Jake, 2026-09-07: "a full custom Daily Digest suite where it displays and gets managed."
+     Displays: the mornings, from the log the cron now writes BEFORE sending — until today the push
+     was the whole artifact and there was nothing a page could show. Manages: the standing order,
+     stop, and change-via-chat. Per-dashboard like everything but the chat. */
+  console.log('\nThe Daily Digest suite\n');
+  const OPEN_DIGEST = { trader: 'switchMobileTab(6)',
+    analyst: `document.querySelector('.mob-tab[data-mtab="digest"]').click()`,
+    crypto: `document.querySelector('.mob-tab[data-mtab="digest"]').click()` };
+  for (const app of ['trader', 'analyst', 'crypto']) {
+    await fetch(base + '/__reset-alerts').catch(() => {});
+    await B.goto(base + '/' + app + '/live', 430, 900);
+    await B.evalIn(OPEN_DIGEST[app]);
+    await new Promise((r) => setTimeout(r, 900));
+    const dgv = await B.evalIn(`(() => {
+      const c = document.querySelector('.novo-digest');
+      if (!c) return { mounted: false };
+      const r = c.getBoundingClientRect();
+      return { mounted: true,
+               visible: getComputedStyle(c).display !== 'none' && r.width > 0 && r.height > 0,
+               syms: [...c.querySelectorAll('.dg-sym')].map((e) => e.textContent),
+               days: c.querySelectorAll('.dg-day').length,
+               text: (c.textContent || '').replace(/\\s+/g, ' ').trim(),
+               stop: !!c.querySelector('[data-dg-stop]'),
+               change: !!c.querySelector('[data-dg-change]') }; })()`);
+    ok(app + ': the Digest tab mounts the suite',
+      dgv.mounted && dgv.visible, JSON.stringify(dgv).slice(0, 160));
+    ok(app + ': ...the standing order shows what it covers, at THEIR time',
+      dgv.syms.join(',') === 'SPY,BTC' && dgv.text.indexOf('only if gamma flipped') >= 0
+        /* the member asked for 6:30 — a suite printing 8:00 over it is the hardcoding Jake
+           removed, one layer up */
+        && dgv.text.indexOf('6:30 AM ET') >= 0 && dgv.text.indexOf('8:00') < 0,
+      JSON.stringify({ syms: dgv.syms, text: dgv.text.slice(0, 120) }));
+    ok(app + ': ...the mornings themselves display, newest first',
+      dgv.days === 2 && dgv.text.indexOf('under its flip') >= 0
+        && dgv.text.indexOf('under its flip') < dgv.text.indexOf('Quiet holiday tape'),
+      JSON.stringify({ days: dgv.days, text: dgv.text.slice(0, 300) }));
+    ok(app + ': ...with Stop and change-via-chat',
+      dgv.stop && dgv.change, JSON.stringify({ stop: dgv.stop, change: dgv.change }));
+  }
+  /* Stopping it, once — the module is shared, so one dashboard proves the wiring. Re-rendered from
+     the store's answer; the empty state must invite, not dead-end. */
+  await B.evalIn(`document.querySelector('.novo-digest [data-dg-stop]').click()`);
+  await new Promise((r) => setTimeout(r, 700));
+  const stopped = await B.evalIn(`(() => {
+    const c = document.querySelector('.novo-digest');
+    return { days: c.querySelectorAll('.dg-day').length,
+             ask: !!c.querySelector('[data-dg-ask]'),
+             text: (c.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 200) }; })()`);
+  ok('stopping the digest clears the suite from the store’s answer, and offers the way back',
+    stopped.days === 0 && stopped.ask === true, JSON.stringify(stopped));
+
   console.log('\nThe push toggles are independent\n');
   await B.goto(base + '/crypto/live', 430, 900);
   const cross = await B.evalIn(`(async () => {
@@ -1170,6 +1230,10 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
       ['analyst-live.html', `novoAskOpen(1)`],
       ['crypto-live.html', `novoAskOpen(1)`]]) {
     const app = page.split('-')[0];
+    /* An earlier section legitimately STOPS the stub's digest (that is its test). This section
+       asserts the desk shows one, so it restores the fixture first — the harness was reading the
+       residue of its own earlier step again. */
+    await fetch(base + '/__reset-alerts').catch(() => {});
     await B.goto(base + '/' + page, 430, 900);
     await B.evalIn(openChat);
     await new Promise((r) => setTimeout(r, 700));

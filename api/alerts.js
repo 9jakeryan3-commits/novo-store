@@ -25,6 +25,8 @@ const { listAlerts, cancelAlert } = require("./_lib/alerts.js");
 // be visible and stoppable. It is stored with the reader's memory rather than with alerts,
 // which is why it is a second read.
 const { getMemory, updateMemory } = require("./_lib/member-memory.js");
+const { kv } = require("./_kv.js");
+const { eh } = require("./_lib/alerts.js");
 
 function verifyToken(token) {
   try {
@@ -63,14 +65,27 @@ module.exports = async (req, res) => {
       // rendering "no alerts" over a dead store tells a member their alerts are gone.
       if (out && out.error) return res.status(503).json(out);
       // Best-effort and separate: a digest read that fails must not take the alerts list with it.
-      let digest = null;
+      let digest = null, digest_log = [];
       try {
         const m = await getMemory(email);
         const dg = (m && m.digest) || null;
         // Same rule as the alerts: a digest asked for on one dashboard is managed there.
         digest = (dg && (!app || !dg.app || dg.app === app)) ? dg : null;
+        /* The mornings themselves, for the Digest tab. Served only where the digest is managed —
+           the same per-app gate — and only when one is standing: a stopped digest's history dies
+           with it rather than lingering as a page about nothing. Newest first, capped at 7 on the
+           wire; the store keeps 14. */
+        if (digest) {
+          const r2 = kv();
+          if (r2) {
+            let log = null;
+            try { log = await r2.get("digest:log:" + eh(email)); } catch (_) { log = null; }
+            if (typeof log === "string") { try { log = JSON.parse(log); } catch (_) { log = null; } }
+            if (Array.isArray(log)) digest_log = log.slice(-7).reverse();
+          }
+        }
       } catch (_) {}
-      return res.status(200).json({ ok: true, ...out, digest });
+      return res.status(200).json({ ok: true, ...out, digest, digest_log });
     }
 
     if (req.method === "POST") {

@@ -73,8 +73,8 @@
     ['Standing arrangements', [
       ['Watch a level for me', 'A one-off ping when a level breaks. Lands on the Alerts tab.',
        'Ping me if SPY crosses its flip.'],
-      ['Brief me every morning', 'A short personal digest at 08:00 ET on what you name. Managed here.',
-       'Send me a daily digest on SPY and BTC — just tell me if gamma flipped.'],
+      ['Brief me every morning', 'A short personal digest, at the time you pick, on what you name.',
+       'Send me a daily digest on SPY and BTC at 7:30am — just tell me if gamma flipped.'],
     ]],
     ['How he talks to you', [
       ['Plain English', 'Every term defined as he goes. Same read, smaller vocabulary.',
@@ -159,7 +159,10 @@
     var dg = d && d.digest;
     if (!dg) { slot.innerHTML = ''; return; }
     slot.innerHTML = '<div class="nd-grp">Your daily digest</div>'
-      + '<div class="nd-card"><b>Every morning at 08:00 ET</b>'
+      + '<div class="nd-card"><b>Every morning at ' + esc((function (t) {
+          var m = /^(\d{2}):(\d{2})$/.exec(t || ''); if (!m) return '8:00 AM';
+          var hh = +m[1]; var ap = hh >= 12 ? 'PM' : 'AM'; hh = hh % 12 || 12;
+          return hh + ':' + m[2] + ' ' + ap; })(dg.time)) + ' ET</b>'
       + '<span class="nd-meta">' + esc((dg.symbols || []).join(' · ')) + '</span>'
       + (dg.focus ? '<span class="nd-note">“' + esc(dg.focus) + '”</span>' : '')
       + '<button class="nd-stop" type="button" data-nd-stop="1">Stop the digest</button></div>';

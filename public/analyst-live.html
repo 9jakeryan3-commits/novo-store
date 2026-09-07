@@ -668,6 +668,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          here, because three inline copies of it is exactly the shape of the chat's three-copy
          problem this codebase already pays for. -->
     <div class="lv-card lv-alerts" id="alerts-card"></div>
+    <!-- THE DAILY DIGEST SUITE (Jake, 2026-09-07). Mounted from /js/novo-digest.js — the mornings
+         themselves, and the standing order. -->
+    <div class="lv-card lv-digest" id="digest-card"></div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
   </div>
 
@@ -1768,6 +1771,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab[data-mtab="map"]    { order: 2; }
     .mob-tab[data-mtab="novo"]   { order: 3; }
     .mob-tab[data-mtab="alerts"] { order: 4; }
+    .mob-tab[data-mtab="digest"] { order: 5; }
     .mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 3px; background: none; border: none;
       border-top: 2px solid transparent; color: var(--txt3); font-family: var(--sans);
@@ -1800,12 +1804,15 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
        "not financial advice" line, and that line does not get a tab it can be missing from. */
     body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot) { display: none; }
     body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
+    body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
     body[data-mtab="map"]  #dash > .lv-read,
-    body[data-mtab="map"]  #dash > .lv-alerts { display: none; }
+    body[data-mtab="map"]  #dash > .lv-alerts,
+    body[data-mtab="map"]  #dash > .lv-digest { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
     body[data-mtab="alerts"] .lv-alerts { margin-top: 0; }
+    body[data-mtab="digest"] .lv-digest { margin-top: 0; }
     /* Four labels now. "Dealer Map" is the widest and it is what forces this: at 390px four tabs
        get ~97px each and the label was already set to the width of three. */
     .mob-tab { font-size: 9px; letter-spacing: 0; }
@@ -1847,6 +1854,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script src="/js/novo-desk.js?v=2c535f74"></script>
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
+<script src="/js/novo-digest.js?v=1"></script>
 <div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
   <header>
     <div>
@@ -1916,6 +1924,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     <span class="mob-tab-icon" aria-hidden="true">&#9673;</span>
     <span>Alerts</span>
   </button>
+  <button class="mob-tab" type="button" data-mtab="digest" onclick="lvMobTab('digest')">
+    <span class="mob-tab-icon" aria-hidden="true">&#9788;</span>
+    <span>Digest</span>
+  </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
     <span>Dr. NoVo</span>
@@ -1931,7 +1943,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      without this you leave the map halfway down, read the note, come back and land in the middle of
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
-  var scrollAt = { map: 0, read: 0, alerts: 0 };
+  var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0 };
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
     /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
@@ -1953,7 +1965,19 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       /* Refreshed on ARRIVAL rather than polled: alerts change when the member changes them or
          when one fires, both rare, and a list that silently went stale while the tab sat open is
          the thing this surface exists to prevent. */
-      if (which === 'alerts') { try { window.lvAlerts.load(); } catch (_e) {} }
+      /* ⚠ THIS SAID window.lvAlerts, which stopped existing when the card moved into
+         /js/novo-alerts.js — the call threw into its catch on every arrival and the list silently
+         never refreshed after the first mount. The catch that made the page resilient also made
+         the regression invisible. */
+      if (which === 'alerts') { try { window.novoAlerts.load(); } catch (_e) {} }
+      if (which === 'digest') {
+        try {
+          if (!window._lvDigestMounted && window.novoDigest) {
+            window._lvDigestMounted = window.novoDigest.mount('#digest-card',
+              { app: 'analyst', openChat: function(){ lvMobTab('novo'); } });
+          } else if (window.novoDigest) { window.novoDigest.load(); }
+        } catch (_e) {}
+      }
     });
   };
   /* Reads the panel and the body, never remembers a click. See the note in the stylesheet.

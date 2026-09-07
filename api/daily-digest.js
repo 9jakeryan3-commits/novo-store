@@ -179,6 +179,22 @@ module.exports = async (req, res) => {
       // partial state that leaks a send.
       const dg = mem && mem.digest;
       if (!dg) { skipped++; continue; }
+      /* ⚠ THE MEMBER'S OWN TIME, on the half hour (Jake, 2026-09-07: "the digest is set to
+         whatever time the user asks not hardcoded to 8am"). The cron fires every 30 minutes now;
+         each run serves only the members whose chosen ET wall-clock rounds to this bucket, and a
+         sent-stamp makes the bucket idempotent — a retried run or a DST wobble must not deliver
+         the same morning twice. Wall-clock ET via Intl so DST is the formatter's problem. */
+      const _fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
+        hour12: false, hour: "2-digit", minute: "2-digit" });
+      const _parts = _fmt.format(new Date());
+      const _nowMin = parseInt(_parts.slice(0, 2), 10) * 60 + parseInt(_parts.slice(3, 5), 10);
+      const _tm = /^\d{2}:\d{2}$/.test(dg.time || "") ? dg.time : "08:00";
+      const _wantMin = parseInt(_tm.slice(0, 2), 10) * 60 + parseInt(_tm.slice(3, 5), 10);
+      if (Math.floor(_nowMin / 30) !== Math.floor(_wantMin / 30)) { skipped++; continue; }
+      const _day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+      let _sentDay = null;
+      try { _sentDay = await r.get("digest:sent:" + h); } catch (_) {}
+      if (_sentDay === _day) { skipped++; continue; }
       const interests = dg.symbols;
 
       // Assemble ONLY their interests' facts — the model narrates, it never invents.
@@ -233,6 +249,25 @@ module.exports = async (req, res) => {
       }
       if (guard) console.log(`[DIGEST] grounding guard: ${guard}`);
       if (!text) { errors++; continue; }
+      /* ⚠ THE BRIEF IS STORED BEFORE IT IS SENT (Jake, 2026-09-07: "a digest tab/page where you
+         can manage your daily digest ... where it displays"). Until now the push notification WAS
+         the entire artifact — 320 characters, dismissed once, gone permanently — which is how Jake
+         met this feature: a message from nothing, findable nowhere. The Digest tab renders from
+         this log. Stored before the send loop, deliberately: a brief that failed to deliver is
+         still that morning's brief, and the page is where a member goes when the ping did not
+         arrive. Last 14 mornings, 30-day expiry, keyed like everything else member-owned. */
+      try { await r.set("digest:sent:" + h, _day, { ex: 3 * 24 * 3600 }); } catch (_) {}
+      try {
+        const lk = "digest:log:" + h;
+        let log = null;
+        try { log = await r.get(lk); } catch (_) { log = null; }
+        if (typeof log === "string") { try { log = JSON.parse(log); } catch (_) { log = null; } }
+        log = Array.isArray(log) ? log : [];
+        log.push({ ts: Date.now(), text, symbols: dg.symbols, focus: dg.focus || null,
+                   guard: guard || null });
+        await r.set(lk, JSON.stringify(log.slice(-14)), { ex: 30 * 24 * 3600 });
+      } catch (_) { /* the log is display; delivery does not wait on it */ }
+
       /* Only the dashboard the digest was asked for on — same rule, same function, as a fired
          alert. See pushTargets in api/_lib/alerts.js. */
       for (const s of pushTargets(subs, dg.app)) {

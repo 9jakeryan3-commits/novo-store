@@ -33,6 +33,13 @@ const TTL_S = 270 * 24 * 3600;
 // it can never introduce a number, which is why free text is safe here at all.
 const MAX_DIGEST_SYMBOLS = 6;
 const MAX_FOCUS_LEN = 160;
+// WHEN IT ARRIVES (Jake, 2026-09-07: "the digest is set to whatever time the user asks not
+// hardcoded to 8am"). Stored as ET wall-clock "HH:MM" and honoured on the half hour — the cron
+// runs every 30 minutes and rounds both clocks to the same bucket, so 7:15 lands at 7:00 and
+// nobody is silently skipped for naming an odd minute. ET because every schedule in this product
+// speaks ET; the model is told to convert.
+const DIGEST_TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+const DEFAULT_DIGEST_TIME = "08:00";
 
 // HOW MUCH VOCABULARY THIS READER WANTS. Its own field rather than a free-text note, because the
 // prompt has to branch on it deterministically and a note that happens to say "keep it simple" is
@@ -75,7 +82,8 @@ async function getMemory(email) {
            level: LEVELS.includes(m.level) ? m.level : null,
            digest: (m.digest && m.digest.on && Array.isArray(m.digest.symbols) && m.digest.symbols.length)
              ? { on: true, symbols: m.digest.symbols, focus: m.digest.focus || null,
-                 set_utc: m.digest.set_utc || null, app: m.digest.app || null }
+                 set_utc: m.digest.set_utc || null, app: m.digest.app || null,
+                 time: DIGEST_TIME_RE.test(m.digest.time || "") ? m.digest.time : DEFAULT_DIGEST_TIME }
              : null,
            updated: m.updated || null };
 }
@@ -143,8 +151,15 @@ async function updateMemory(email, { add_interests, remove_interests, note, leve
         // WHICH DASHBOARD ASKED FOR IT. Same rule as an alert: a digest set on the crypto map
         // pings from the crypto app, not from every app the member has a device on.
         const DAPPS = ["analyst", "crypto", "trader"];
+        // The time THEY asked for. A malformed one is refused by name rather than silently
+        // becoming 08:00 — "6.30" saved as the default would be a digest arriving at a time the
+        // member never chose, from a request they watched succeed.
+        let tm = String(digest.time || "").trim();
+        if (tm && !DIGEST_TIME_RE.test(tm)) { refused.push("time must be HH:MM, 24-hour, ET"); tm = ""; }
+        if (tm) tm = tm.length === 4 ? "0" + tm : tm;
         cur.digest = { on: true, symbols: syms, focus: focus, set_utc: Date.now(),
-                       app: DAPPS.includes(digest.app) ? digest.app : null };
+                       app: DAPPS.includes(digest.app) ? digest.app : null,
+                       time: tm || DEFAULT_DIGEST_TIME };
       }
     }
   }
