@@ -86,7 +86,18 @@ module.exports = async (req, res) => {
       rules: Array.isArray(b.rules) ? b.rules.slice(0, 40) : [],
       n: Number(b.n) || b.readings.length,
     }), { ex: 6 * 3600 });
-    return res.status(200).json({ ok: true, stored: b.readings.length });
+    /* READ IT BACK BEFORE CLAIMING IT LANDED. A 200 here has meant "the write call returned",
+       which is not the same as "a member can now fetch this" — different serialisation, a TTL
+       that did not take, a key written to a store the read path does not share, all look like
+       success from the write side. The response reports what the GET path would actually find,
+       so the engine log carries an end-to-end fact instead of a local one. */
+    let readable = null;
+    try {
+      let back = await w.get('eye:readings:live');
+      if (typeof back === 'string') back = JSON.parse(back);
+      readable = (back && Array.isArray(back.readings)) ? back.readings.length : -1;
+    } catch (_) { readable = -1; }
+    return res.status(200).json({ ok: true, stored: b.readings.length, readable: readable });
   }
 
   const email = verifyToken(
