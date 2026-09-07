@@ -1942,7 +1942,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
            order rules re-sorted it above the chart - measured at y=353 with the chart at y=928.
            Appending it to the card puts it under the chart itself, which is what was asked for
            and what no ordering rule can undo. */
-        if (fear.parentElement !== chartCard) chartCard.appendChild(fear);
+        /* Before the gamma profile, not at the end of the card - appending put it under the
+           profile, which is one block too low. The profile heading is the marker. */
+        var gp = chartCard.querySelectorAll('h2')[1];
+        if (gp) { if (fear.nextElementSibling !== gp) chartCard.insertBefore(fear, gp); }
+        else if (fear.parentElement !== chartCard) chartCard.appendChild(fear);
       } else if (fear.parentElement !== home) {
         if (after && after.parentElement === home) home.insertBefore(fear, after);
         else home.appendChild(fear);
