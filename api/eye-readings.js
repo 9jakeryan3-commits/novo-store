@@ -122,7 +122,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, live: false,
         note: "No rundown published yet today." });
     }
-    return res.status(200).json({ ok: true, live: true, read: rd,
+    /* ⚠ live USED TO MEAN "the key exists", AND THE KEY LIVES FOR 60 DAYS. So the first day the
+       writer failed, the page would have gone on showing the last one that worked as though it
+       were today's - the reader printed rd.day in the subtitle but nothing compared it to
+       anything, and a date in small type is not a warning.
+       Keyed on the UTC date here because that is what crypto-rundown.js:92 writes
+       (`new Date().toISOString().slice(0, 10)`) - deliberately UTC, since crypto has no close to
+       key on. Comparing against an Eastern date would mark every read stale for part of the day. */
+    const today = new Date().toISOString().slice(0, 10);
+    const stale = !!(rd.day && rd.day !== today);
+    return res.status(200).json({ ok: true, live: true, read: rd, stale, today,
       // The score for BTC direction calls — the family this read's bias belongs to, so the page
       // can show the record without computing one of its own.
       score: pred && pred.score ? pred.score : null,

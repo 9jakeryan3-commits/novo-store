@@ -59,6 +59,11 @@
     '.novo-readings .rd-armed{color:var(--txt3,#6e6e6e);font-weight:800}',
     '.novo-readings .rd-unknown{color:#fbbf24;font-weight:800}',
     '.novo-readings .rd-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
+    /* A fault notice, not decoration - amber and above the read, because the thing it is warning
+       about is that what follows is NOT today's. Hairline on one side only, like every other
+       separator on these surfaces. */
+    '.novo-readings .rd-stale{font-size:12.5px;line-height:1.6;color:var(--amber,#f59e0b);'
+      + 'padding:9px 0 10px;border-bottom:1px solid var(--bdr2,#242424);margin-bottom:12px}',
     '.novo-readings .rd-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:16px;'
       + 'padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
   ].join('');
@@ -250,7 +255,13 @@
         }
         var rd = d.read || {};
         var b = rd.bias || '';
+        /* The read is still shown - it is real, it was written, and yesterday's structure is worth
+           reading. What changes is that the page stops implying it is today's. */
         var h = '<h2>Daily rundown <span class="rd-sub">Dr. NoVo · ' + esc(rd.day || '') + '</span></h2>'
+          + (d.stale ? '<div class="rd-stale"><b>This is not today\u2019s rundown.</b> It was '
+              + 'written on ' + esc(rd.day || 'an earlier day') + ' and today\u2019s has not run. '
+              + 'The read below still stands as of that date &mdash; it is the schedule that '
+              + 'failed, not the analysis.</div>' : '')
           + '<div class="rd-grp">BTC bias'
           + (b ? '<span class="rd-bias" style="color:' + (BIAS_C[b] || 'var(--txt3)') + '">'
                  + esc(b) + '</span>' : '') + '</div>'

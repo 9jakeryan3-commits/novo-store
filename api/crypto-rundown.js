@@ -32,9 +32,23 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const KEY = 'crypto:read:daily';
 const LOG = 'crypto:read:log';
 
-// Vercel cron calls arrive with this header; a manual run needs the publish secret. Either way
-// nothing unauthenticated can make NoVo speak.
+/* ⚠ THIS ENDPOINT HAD NEVER ONCE AUTHENTICATED ITS OWN CRON. Measured, not reasoned:
+   Vercel's runtime log for the first scheduled run this feature ever had reads
+       12:15:22  GET /api/crypto-rundown  403
+   It fired exactly on schedule and its own gate turned it away, so the Daily Crypto Rundown has
+   never published and crypto:read:daily has never existed.
+   The cause was the single line `if (req.headers['x-vercel-cron']) return true;`. That header is
+   not what a Vercel cron presents here. What it presents is `Authorization: Bearer $CRON_SECRET`,
+   which is exactly what api/daily-digest.js:132-133 checks - and daily-digest, on the same cron
+   system in the same deployment, returns 200. That 200 is the positive control: it proves
+   CRON_SECRET is set and the Bearer header arrives, so this is a wrong check and not a missing
+   secret.
+   The x-vercel-cron branch stays because it costs nothing and Vercel does document it - but it is
+   NOT what lets the cron in, and it must never again be the only thing standing there. A check
+   that cannot succeed looks exactly like a check that is passing. */
 function authed(req) {
+  const auth = String(req.headers['authorization'] || '');
+  if (process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`) return true;
   if (req.headers['x-vercel-cron']) return true;
   const want = process.env.ANALYST_PUBLISH_SECRET || '';
   const got = String(req.headers['x-analyst-secret'] || '');

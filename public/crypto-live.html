@@ -2026,7 +2026,13 @@ function drawRail(filter=''){
       try{window.cxTabHome();}catch(_e){}});
   document.querySelectorAll('.coin[data-tok]').forEach(el=>
     el.onclick=()=>{FEED=false;SCREEN=false;TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
-      document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
+      document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();
+      /* Same idea as picking a coin - it was the one rail handler that set no tab at all - but
+         'map' explicitly rather than cxTabHome(). cxTabHome PRESERVES a coin tab, and Flow,
+         Positioning and History are sections of a coin's OPTIONS BOOK: an on-chain token has no
+         chain, no venues and no expiry ladder, so leaving the bar on Flow would name a section
+         this view can never show. Its own render is the map for that token. */
+      try{document.body.setAttribute('data-mtab','map');}catch(_e){}});
 }
 
 /* ---------------- the read strip ----------------
@@ -3995,11 +4001,21 @@ window.cxLive = (function(){
 })();
 
 /* The coin name is the picker trigger on a phone. Bound once, and a no-op on desktop where
-   the rail is always visible - the CSS decides which world we are in, not the JS. */
+   the rail is always visible - the CSS decides which world we are in, not the JS.
+
+   ⚠ ...WHICH IS EXACTLY WHAT THIS LINE STOPPED DOING. The gate said 720px while the CSS that
+   creates this whole world - the rail becoming a fixed overlay, and #sym growing a chevron and
+   cursor:pointer - is one @media (max-width:768px) block. Between 721 and 768px the coin name
+   therefore LOOKED like the picker, took the pointer, and did nothing: the rail was an overlay,
+   hidden, and this was its only door. No coin picker at all across a 48px band that covers real
+   small laptops and a landscape tablet.
+   Measured, not inferred: at 750x900 a probe found #sym visible with cursor:pointer, clicked it,
+   and body.rail-open stayed false. Two numbers for one breakpoint is the bug; the comment above
+   already stated the rule that the code broke. */
 (function(){
   var sym=document.getElementById('sym');
   if(sym) sym.addEventListener('click', function(){
-    if(!window.matchMedia('(max-width:720px)').matches) return;
+    if(!window.matchMedia('(max-width:768px)').matches) return;
     /* ⚠ CLOSE THE CHAT ON THE WAY IN. The Coins TAB used to be the other door and it went through
        cxMobTab, which closes the chat; this one toggled a class and nothing else. With the tab
        gone this is the ONLY door, so the behaviour it never had to carry is now its job - without
