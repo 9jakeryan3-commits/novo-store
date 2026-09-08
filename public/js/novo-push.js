@@ -124,5 +124,20 @@
   window.novoEnablePush = enable;
   window.novoPushOn = on;
 
+  /* RE-STAMP THIS DEVICE ON LOAD (2026-09-08).
+     The subscribe handler records WHICH dashboard a device registered from, and the broadcast
+     fan-out now uses it so an equities read never lands on a crypto-only device. Both server
+     comments said a legacy record would be fixed by "the next refresh() on any dashboard" -
+     and refresh() had NO CALLER anywhere in the site, so that healing never happened and every
+     device subscribed before today would have kept the old behaviour permanently. A migration
+     that nothing triggers is not a migration.
+     Only for devices already opted in: refresh() returns early unless on() is true, and
+     enable() reuses the existing subscription, so this re-POSTs the same endpoint with its app
+     tag and cannot prompt anyone or change what they signed up for. Deferred a few seconds so
+     it never competes with the dashboard's own first paint. */
+  try {
+    if (SUPPORTED && on()) setTimeout(function () { try { refresh(); } catch (_) {} }, 4000);
+  } catch (_) {}
+
   window.addEventListener('load', function () { setTimeout(refresh, 1400); });
 })();

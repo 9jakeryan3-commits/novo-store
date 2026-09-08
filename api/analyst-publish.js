@@ -752,7 +752,14 @@ export default async function handler(req, res) {
     try { _tier = await _memberTier(_pEmail); } catch (_) {}
     try {
       const key = 'analyst-push/' + crypto.createHash('sha256').update(String(sub.endpoint)).digest('hex').slice(0, 40) + '.json';
-      await put(key, JSON.stringify({ sub, at: Date.now(), tier: _tier }),
+      // WHICH DASHBOARD THIS DEVICE IS, on the BROADCAST record too. It was only ever stamped on
+      // the person-addressed KV copy below - and that assignment runs AFTER this put, so the blob
+      // never carried it at all. The fan-out therefore had nothing to filter on and sent every
+      // equities read to every device that had ever subscribed, including crypto-only ones, which
+      // then rendered it under the crypto PWA's name and icon. Allowlisted at the top of the
+      // handler; absent means legacy, and the next refresh() on any dashboard stamps it.
+      const _appTag = ['analyst', 'crypto', 'trader'].includes(_app) ? _app : null;
+      await put(key, JSON.stringify({ sub, at: Date.now(), tier: _tier, app: _appTag }),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
       // ALSO index the subscription by MEMBER, so the reader's own alerts and digests can
       // reach the reader — the blob store above is the broadcast fan-out, this is the
@@ -1323,6 +1330,13 @@ async function _promotePublicLevels(state) {
           const rec = await fetch(b.url).then(r => r.json());
           if (rec && rec.sub) {
             if (alertKind === 'squeeze' && rec.tier === 'trader') return;   // Trader gets it from their own engine
+            // NOT TO CRYPTO-ONLY DEVICES. This payload is the EQUITIES desk - 'The Line' and the
+            // SPY/QQQ/IWM reads - and its url is /analyst/live, which the comment on the
+            // subscribe path already calls "a dead end for a crypto-only subscriber". A crypto
+            // device also renders it under the crypto PWA's name, so the member is told NoVo
+            // Crypto is briefing them on SPY. Legacy records carry no app and still receive it;
+            // the next refresh() on any dashboard stamps them.
+            if (rec.app === 'crypto') return;
             await webpush.sendNotification(rec.sub, payload);
           }
         } catch (err) {
