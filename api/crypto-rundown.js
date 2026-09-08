@@ -17,10 +17,12 @@
 // call he makes. Building a second scoring path for this one read would be a second definition
 // of "was he right", and two definitions drift.
 //
-// ⚠ A NEUTRAL BIAS IS NOT RECORDED, AND THE PAGE SAYS SO. Grading a neutral needs a BAND — how
-// flat is flat — and the equity side only has one because it was measured first. There is no
-// measured band for BTC yet, so a neutral read publishes ungraded rather than inventing a
-// threshold and scoring against it. The honest gap is visible; a made-up number would not be.
+// ⚠ A NEUTRAL BIAS IS GRADED TOO, against a MEASURED band. It shipped ungraded for exactly as
+// long as the band was unmeasured — which was one commit. The band is 0.73%: the 33.3rd
+// percentile of |24h return| over 1,825 BTC daily closes, chosen at that percentile so that being
+// right about "flat" is exactly as hard as being right about "up" (the split is 33.4/33.9/32.7).
+// Full provenance sits on BTC_NEUTRAL_PCT in _lib/predictions.js. Nothing here picks a threshold;
+// it uses the one that was measured.
 const crypto = require('crypto');
 const { kv } = require('./_kv');
 const { vertex, answerText } = require('./_vertex.js');
@@ -139,11 +141,11 @@ module.exports = async (req, res) => {
 
   // The bias becomes an ordinary NoVo prediction — same record, same evaluator, same Predict tab.
   let predicted = null;
-  if (bias === 'BULLISH' || bias === 'BEARISH') {
+  if (bias) {
     try {
       const out = await require('./_lib/predictions.js').makePrediction({
         source: 'novo', asset_class: 'crypto', symbol: 'BTC', kind: 'direction',
-        side: bias === 'BULLISH' ? 'up' : 'down',
+        side: bias === 'BULLISH' ? 'up' : bias === 'BEARISH' ? 'down' : 'flat',
         spot_at: spot, horizon_min: 1440,
         thesis: 'Daily Crypto Rundown — BTC ' + (bias === 'BULLISH' ? 'up' : 'down') + ' over the next 24h',
         basis: 'the day\'s rundown, ' + (facts.as_of || 'today'),

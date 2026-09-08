@@ -60,7 +60,25 @@ function isTradingDayEt(ms) {
   if (p.weekday === "Sat" || p.weekday === "Sun") return false;
   return !MKT_HOLIDAYS.has(p.year + "-" + p.month + "-" + p.day);
 }
-const SIDES = new Set(["up", "down", "buy", "sell", "touch"]);
+const SIDES = new Set(["up", "down", "buy", "sell", "touch", "flat"]);
+
+// ── THE BTC NEUTRAL BAND, MEASURED ───────────────────────────────────────────────────────────
+// Jake, 2026-09-07: "measure it its needs to be done now."
+// A neutral call cannot be graded without a band - "how flat is flat" - and a band that is picked
+// rather than measured turns NEUTRAL into whatever the picker wanted it to be. So it was measured,
+// and the measurement lives here rather than in a commit message:
+//
+//   0.73%  = the 33.3rd percentile of |24h return| on BTC-USD daily closes
+//   n      = 1,825 daily returns, 2021-09-08 to 2026-09-08 (five years)
+//   at this band the outcomes split 33.4% flat / 33.9% up / 32.7% down
+//
+// THE PERCENTILE IS THE WHOLE POINT. At the 33.3rd, the three calls are equally hard: being right
+// about "flat" is worth exactly what being right about "up" is worth. A wider band makes NEUTRAL
+// the easy call and quietly inflates the record of anyone who leans on it; a narrower one punishes
+// honest uncertainty. Re-measure if BTC's volatility regime shifts materially - and when it moves,
+// the published number moves with it, because the band IS the published number.
+const BTC_NEUTRAL_PCT = 0.73;
+const BTC_NEUTRAL_PROV = "33.3rd pct of |24h return|, n=1825 daily closes, 2021-09-08..2026-09-08";
 
 async function _load(r) {
   let l = null;
@@ -143,6 +161,8 @@ async function makePrediction(args = {}) {
     asset_class: args.asset_class === "crypto" ? "crypto" : "equity",
     symbol, kind,
     side: side || (kind === "close_at" || kind === "open_at" ? (value >= spot_at ? "up" : "down") : (kind === "level_touch" ? "touch" : null)),
+    // Stamped on the row so a future re-measure cannot silently re-grade history.
+    ...(side === "flat" ? { neutral_band_pct: BTC_NEUTRAL_PCT, band_prov: BTC_NEUTRAL_PROV } : {}),
     value: isFinite(value) ? value : null,
     spot_at,
     horizon_utc,
@@ -165,6 +185,15 @@ function _grade(p, actual) {
     out.hit = (p.value >= p.spot_at) === (moved >= 0);
   } else if (p.kind === "level_touch") {
     out.hit = false;      // set true only by the touch path
+  } else if (p.side === "flat") {
+    /* A neutral is right when the move STAYS INSIDE the band - graded on the same tick as every
+       other call, against a number measured before it was published. The band is read off the ROW,
+       not off the constant: re-measuring must never re-grade calls made under the old one. */
+    const bandPct = p.neutral_band_pct || BTC_NEUTRAL_PCT;
+    const movePct = (moved / p.spot_at) * 100;
+    out.hit = Math.abs(movePct) <= bandPct;
+    out.move_pct = +movePct.toFixed(3);
+    out.band_pct = bandPct;
   } else {
     out.hit = dirUp ? moved > 0 : moved < 0;
   }
@@ -472,6 +501,7 @@ async function selectCryptoPredictions(snap) {
 }
 
 module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+                   BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
                    appendNovoFire, listNovoFires, curateChainFires,
                    evaluateEquityPredictions, evaluateCryptoPredictions };

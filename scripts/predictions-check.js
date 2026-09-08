@@ -261,6 +261,37 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   ok('...and the same fire can never become a second call, however many passes report it',
     refire.dup === true && rows().length === 1, JSON.stringify({ refire, rows: rows().length }));
 
+  // ── 10. THE NEUTRAL BAND: measured, stamped, and not a free pass ──────────────────────────
+  reset();
+  const P0 = 100000;
+  const neutralAt = async (movePct) => {
+    reset();
+    await P.makePrediction({ source: 'novo', asset_class: 'crypto', symbol: 'BTC',
+      kind: 'direction', side: 'flat', spot_at: P0, horizon_min: 10 });
+    const row = rows()[0];
+    row.horizon_utc = Date.now() - 1000;
+    S.set('pred:log', JSON.stringify([row]));
+    await P.evaluateCryptoPredictions({ coins: { BTC: { price: P0 * (1 + movePct / 100) } } });
+    return rows()[0];
+  };
+  const inside = await neutralAt(0.5);
+  ok('a neutral HITS when BTC stays inside the measured band',
+    inside.status === 'graded' && inside.outcome.hit === true && inside.outcome.band_pct === 0.73,
+    JSON.stringify(inside.outcome));
+  const outside = await neutralAt(1.4);
+  ok('...and MISSES when it does not \u2014 flat is a real call, not a free pass',
+    outside.outcome.hit === false, JSON.stringify(outside.outcome));
+  const edge = await neutralAt(-0.72);
+  ok('...symmetric on the downside, at the band edge',
+    edge.outcome.hit === true, JSON.stringify(edge.outcome));
+
+  reset();
+  await P.makePrediction({ source: 'novo', asset_class: 'crypto', symbol: 'BTC',
+    kind: 'direction', side: 'flat', spot_at: P0, horizon_min: 10 });
+  ok('...and the band is STAMPED on the row, so re-measuring cannot re-grade old calls',
+    rows()[0].neutral_band_pct === 0.73 && /1825 daily closes/.test(rows()[0].band_prov || ''),
+    JSON.stringify({ band: rows()[0].neutral_band_pct, prov: rows()[0].band_prov }));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

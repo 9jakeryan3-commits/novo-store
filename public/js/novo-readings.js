@@ -258,10 +258,11 @@
         var dirScore = d.score && d.score.direction;
         h += '<div class="rd-rec">';
         if (b === 'NEUTRAL') {
-          /* Stated, not hidden. Grading a neutral needs a measured band and crypto has none yet;
-             pretending otherwise would put an unscored call in a scored column. */
-          h += 'A neutral call is published but not scored: grading one needs a measured '
-            + '"how flat is flat" band, and there is no measured band for BTC yet. ';
+          /* The band is MEASURED and stated, because a neutral graded against an unstated
+             threshold is a call the reader cannot check. */
+          h += 'A neutral is graded too: it is right if BTC stays inside \u00b10.73% over 24 '
+            + 'hours \u2014 the 33.3rd percentile of its own daily moves over five years, set '
+            + 'there so being right about flat is exactly as hard as being right about up. ';
         } else if (b) {
           h += 'This bias was recorded as a prediction the moment it was written, and grades '
             + 'against BTC 24 hours later. ';
