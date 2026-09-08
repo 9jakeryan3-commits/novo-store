@@ -807,8 +807,22 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   padding: 4px 7px; cursor: pointer; line-height: 1.35;
   transition: color .12s ease, background .12s ease, border-color .12s ease; }
 .ctb-btn:hover { color: var(--txt1); background: rgba(255,255,255,.06); }
-.ctb-btn.on { color: #22d3ee; background: rgba(34,211,238,.13); }
+/* SELECTED IS GREY, NOT BLUE (Jake, 2026-09-08: "get rid off the blue tint on selected tools
+   are timeframe grey is cleanest"). The cyan tint made every active timeframe and overlay compete
+   with the chart's own colour vocabulary - where cyan already means a level. A neutral lift reads
+   as "this one is on" without claiming to mean anything about the market. ARMED keeps its amber:
+   that is a state with consequences, not a selection. */
+.ctb-btn.on { color: var(--txt1); background: rgba(255,255,255,.10); }
 .ctb-btn.armed { color: #f59e0b; background: rgba(245,158,11,.16); }
+/* The collapse chevron: a full-width hit area with nothing in it but the glyph. No box, no rule -
+   the toolbar above and the chart below already separate themselves. */
+#ctb-collapse { display: block; width: 100%; background: none; color: var(--txt3);
+  font-size: 9px; line-height: 1; padding: 2px 0 6px; margin: 0; cursor: pointer;
+  transition: color .12s ease; }
+#ctb-collapse::before { content: '\25B4'; }
+body.ctb-collapsed #ctb-collapse::before { content: '\25BE'; }
+#ctb-collapse:hover { color: var(--txt1); }
+body.ctb-collapsed #chart-toolbar { display: none !important; }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
 /* THE CHART IS NOT A CARD, ON ANY SCREEN. First put inside the phone media block, which left the
    frame on every desktop — and Jake's objection was to the box, not to the box on small screens. */
@@ -2635,6 +2649,16 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         </div>
         <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
       </div>
+      <!-- COLLAPSE THE TOOLBAR (Jake, 2026-09-08, drawing a chevron here on two screenshots:
+           "can we add a arrow there and map the tool/chart header collapsible"). The toolbar is
+           two rows once TOOLS is open, and a trader who has set their timeframe and overlays
+           wants that height back for the chart. Collapses the TOOLBAR only - the ticker pills and
+           the live price stay, because hiding the price to gain 30px is a bad trade on a trading
+           screen. The chart re-measures after the toggle: it sizes itself from the space it has,
+           and a chart that gained 60px without being told draws into a box it no longer occupies.
+           The choice sticks per viewer. -->
+      <button type="button" id="ctb-collapse" aria-expanded="true" aria-controls="chart-toolbar"
+              title="Hide the toolbar" onclick="toggleChartHeader()"></button>
       <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
 
       <style>
@@ -3873,6 +3897,24 @@ addEventListener('DOMContentLoaded', function(){
     var brain = document.getElementById('card-brain');
     var hist = document.getElementById('col-history');
     if (brain && hist && !hist.contains(brain)) hist.appendChild(brain);
+  } catch (_e) {}
+});
+/* Toolbar collapse. The resize is the part that matters: the chart measures the space it has,
+   so gaining the toolbar's height without being told leaves it drawing into the old box. */
+window.toggleChartHeader = function(){
+  var on = document.body.classList.toggle('ctb-collapsed');
+  var b = document.getElementById('ctb-collapse');
+  if (b) { b.setAttribute('aria-expanded', String(!on));
+           b.title = on ? 'Show the toolbar' : 'Hide the toolbar'; }
+  try { localStorage.setItem('novo_ctb', on ? '1' : ''); } catch (_e) {}
+  setTimeout(function(){ try { window.dispatchEvent(new Event('resize')); } catch (_e) {} }, 200);
+};
+addEventListener('load', function(){
+  try {
+    if (!localStorage.getItem('novo_ctb')) return;
+    document.body.classList.add('ctb-collapsed');
+    var b = document.getElementById('ctb-collapse');
+    if (b) { b.setAttribute('aria-expanded', 'false'); b.title = 'Show the toolbar'; }
   } catch (_e) {}
 });
 window.deskOpen = function(name){
