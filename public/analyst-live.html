@@ -521,7 +521,9 @@ which Jake explicitly carved out. */
   /* MOBILE-ONLY FOR NOW (Jake, 2026-09-08: "added in the analyst dashboard on mobile first").
      Nothing else hides them, so without this they would simply appear inline on the desktop
      analyst as two extra panels nobody asked for. The mobile block below switches them on. */
-  .lv-futures, .lv-history { display: none; }
+  .lv-futures, .lv-history, .lv-afeed { display: none; }
+  .afeed-body { white-space: pre-wrap; word-break: break-word; font-family: var(--mono, ui-monospace), monospace;
+    font-size: 12px; line-height: 1.75; color: var(--txt2); margin: 10px 0 0; }
   /* THE SECTION BAR. Written in the dashboard's OWN voice - the same small uppercase letterspaced
      treatment as "SWITCH TICKER - THE OTHER TWO INDICES" and "DR. NOVO'S BIAS" - rather than a row
      of pills borrowed from somewhere else. One hairline under it, the active tab brighter with a
@@ -627,6 +629,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          own bar and two navigations on one screen is one too many. -->
     <nav id="lv-tabs" class="lv-tabs" aria-label="Sections">
       <button type="button" data-lvtab="map" onclick="lvMobTab('map')">Dealer Map</button>
+      <button type="button" data-lvtab="afeed" onclick="lvMobTab('afeed')">Analysis feed</button>
       <button type="button" data-lvtab="readings" onclick="lvMobTab('readings')">Live Reads</button>
       <button type="button" data-lvtab="futures" onclick="lvMobTab('futures')">Futures</button>
       <button type="button" data-lvtab="read" onclick="lvMobTab('read')">Desk Note</button>
@@ -748,6 +751,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          the SAME shared modules the Trader mounts - novo-futures.js and novo-tape.js - rather
          than a second implementation, because "if its displaying in one place putting it in
          another is basically the same". Two copies of one panel is two panels that drift. -->
+    <!-- ANALYSIS FEED. The engine's own running commentary - the hourly structural audit, the
+         overnight ES brief, the status matrix - all of which write to c2_intel_stream, which is
+         what the Trader's websocket frame carries as intel_text. Published in this payload now,
+         so both dashboards show one feed rather than two. -->
+    <div class="lv-card lv-afeed" id="afeed-card"></div>
     <div class="lv-card lv-futures" id="futures-card"></div>
     <div class="lv-card lv-history" id="history-card"></div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
@@ -1275,6 +1283,21 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions</div>';
   }
 
+  /* The feed is plain text the engine wrote; it is escaped and shown as written. No parsing,
+     because inventing structure in someone else's prose is how a summary starts disagreeing with
+     the thing it summarises. */
+  function renderAnalysisFeed(d){
+    var el = document.getElementById('afeed-card'); if (!el) return;
+    var t = d && d.intel;
+    el.innerHTML = '<h2>Analysis feed <span style="font-size:11px;color:var(--txt3);font-weight:400;">'
+      + 'what the engine is saying, as it says it</span></h2>'
+      + (t ? '<pre class="afeed-body">' + _escH(String(t)) + '</pre>'
+           : '<div style="color:var(--txt3);font-size:13px;line-height:1.6;">Nothing on the feed '
+             + 'right now. The hourly structural audit and the overnight ES brief land here as '
+             + 'they are written &mdash; an empty feed means none has been written since the last '
+             + 'restart, not that the engine is quiet.</div>');
+  }
+
   function renderTapeFlow(d){
     var card=$('tape-card'); if(!card) return;
     var t = d && d.tape_flow;
@@ -1502,6 +1525,19 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (_tk.length && _tk.indexOf(CUR) < 0) CUR = _tk.indexOf('SPY') >= 0 ? 'SPY' : _tk[0];
     if (_tk.length) rememberTick(CUR);
     renderDealer(); renderStrip(); renderMeta(); renderAnalogues(); renderBias();
+    /* ⚠ STATE, NOT `d`. The first version hung these off renderTapeFlow(d) - which lives inside
+       renderDealer(), where `d` is ONE TICKER'S index entry, not the payload. d.intel and d.feed
+       were never going to exist there, and both panels rendered their empty state while looking
+       perfectly healthy. The whole payload is only in scope here.
+       THE OVERNIGHT ES READS: novo-futures.js reads window._abFeed, the name the TRADER sets from
+       GET /api/analysis-board - an endpoint this page never calls, which is why the panel said
+       "OVERNIGHT ES READS · 0" and read as "the night was quiet" rather than "this dashboard was
+       never given them". The engine now publishes the same analysis_feed() rows in this payload. */
+    try {
+      window._abFeed = STATE.feed || [];
+      if (window.novoFutures && window._lvFutMounted) window.novoFutures.render();
+    } catch (_e) {}
+    renderAnalysisFeed(STATE);
     if (STATE.chat_drop && window.novoChatDrop) window.novoChatDrop(STATE.chat_drop);
     liveChip();
     // First real payload has landed: drop the skeleton. From here a "—" means the value is genuinely
@@ -1855,7 +1891,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      it is open, which is honest — there is no tab. The strip itself stays visible so the way
      back out is never a dead end. */
   body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-readings):not(.lv-foot):not(#eye-readbar) { display: none; }
-  body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-futures):not(.lv-foot) { display: none; }
+  body[data-mtab="afeed"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-afeed):not(.lv-foot) { display: none; }
+body[data-mtab="afeed"] #dash > .lv-afeed { display: block; }
+body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-futures):not(.lv-foot) { display: none; }
   body[data-mtab="history"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-history):not(.lv-foot) { display: none; }
   /* ...and switched back on for their own tab, against the desktop default above. */
   body[data-mtab="futures"] #dash > .lv-futures { display: block; }
@@ -1866,7 +1904,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   body[data-mtab="map"]  #dash > .lv-predict,
   body[data-mtab="map"]  #dash > .lv-readings,
   body[data-mtab="map"]  #dash > .lv-futures,
-  body[data-mtab="map"]  #dash > .lv-history { display: none; }
+  body[data-mtab="map"]  #dash > .lv-history,
+body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
   /* ── INLINE display BEATS EVERY FILTER, SO THESE NEED !important (2026-09-08) ────────────
      Jake: "sweeps and blocks literally landing in everything page and both history panels
      still show in the main map". Three panels set their own display from JS - renderTapeFlow
@@ -2190,6 +2229,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <div id="more-menu" hidden>
   <!-- NAMES MATCH THE TRADER (Jake, 2026-09-08: "names should match Trader's"). The same surface
        called two things on two dashboards is two surfaces as far as a member is concerned. -->
+  <button type="button" data-mtab="afeed" onclick="pickMore('afeed')"><span aria-hidden="true">&#9635;</span>Analysis feed</button>
   <button type="button" data-mtab="readings" onclick="pickMore('readings')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
   <button type="button" data-mtab="futures" onclick="pickMore('futures')"><span aria-hidden="true">&#9650;</span>Futures</button>
   <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Desk Note</button>
@@ -2219,9 +2259,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
   var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0,
-                   readings: 0, futures: 0, history: 0 };
+                   readings: 0, futures: 0, history: 0, afeed: 0 };
   /* ── THE MORE MENU ─────────────────────────────────────────────────────────────────────── */
-  var MORE_TABS = ['read', 'predict', 'readings', 'futures', 'history'];
+  var MORE_TABS = ['read', 'predict', 'readings', 'futures', 'history', 'afeed'];
   window.toggleMoreMenu = function(force){
     var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
     if (!m || !b) return;
@@ -2343,6 +2383,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   window.addEventListener('load', function () {
     /* The bar button is display:none for everyone now; the MENU row is what a comp seat reaches. */
     try { window.novoPredict.reveal('#more-menu button[data-mtab="predict"]'); } catch (_e) {}
+    /* ...and the header bar's own button, which reveal() knew nothing about: it was written when
+       the More menu was the only door to this tab, and it keys on data-mtab. The bar uses
+       data-lvtab, so a comp seat saw Predictions in the menu and not in the bar. */
+    try { window.novoPredict.reveal('#lv-tabs button[data-lvtab="predict"]'); } catch (_e) {}
   });
   /* The morning digest push points at /analyst/live#alerts, so the hash has to mean something or
      the notification lands on the map again -- which is the whole complaint it was meant to fix.
