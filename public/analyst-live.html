@@ -522,6 +522,7 @@ which Jake explicitly carved out. */
      Nothing else hides them, so without this they would simply appear inline on the desktop
      analyst as two extra panels nobody asked for. The mobile block below switches them on. */
   .lv-futures, .lv-history { display: none; }
+
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
   /* market ribbon */
@@ -1788,6 +1789,24 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      panel's class instead, so it reports what IS rather than what this file last asked for. */
   #mobile-tabs { display: none; }
   @media (max-width: 768px) {
+    /* ── INLINE display BEATS EVERY FILTER, SO THESE NEED !important (2026-09-08) ────────────
+       Jake: "sweeps and blocks literally landing in everything page and both history panels
+       still show in the main map". Three panels set their own display from JS - renderTapeFlow
+       does card.style.display='block', and the analogue and base-rate panels do the same - and
+       an INLINE style outranks any stylesheet rule that is not !important. The tab filters are
+       plain rules against #dash's children, so they could never hide these: the moment the tape
+       had data it appeared on Alerts, Digest, Desk Note, every view. Reproduced by forcing the
+       inline value a live tape sets, then fixed against that.
+       MOBILE-SCOPED ON PURPOSE. body carries data-mtab="map" at every width, so writing these
+       against that attribute alone would have pulled the same panels off the DESKTOP analyst,
+       which has no tabs to reach them from since the header bar was reverted. Tabs exist here;
+       the hiding belongs here. */
+    /* Sweeps belongs to the Dealer Map on this dashboard - it was not among the tabs Jake asked
+       to bring over - so it shows there and on no other view. */
+    body:not([data-mtab="map"]) #tape-card { display: none !important; }
+    /* The analogue table and the base-rate line are what the History TAB now says. Two copies of
+       one answer on one phone is the redundancy Jake asked to remove; History owns it. */
+    #anlg-card, .d-br { display: none !important; }
     :root { --navh: calc(52px + env(safe-area-inset-bottom, 0px)); }
     /* INSET, NOT bottom/left/right, AND THREE EXPLICIT RESETS. This dashboard links
        /journal/blog.css, which styles the SITE header with a bare element selector:
