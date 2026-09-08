@@ -1794,7 +1794,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     /* Jake, 2026-09-07, numbered on a screenshot: The Read | Dealer Map | Dr. NoVo | Alerts.
        Still every child named — a flex row where SOME children carry an order puts every unnamed
        one in front of the rest. */
-    .mob-tab[data-mtab="read"]   { order: 1; }
+    /* Matching trader's bar exactly (Jake, 2026-09-07): More, the main surface, Dr. NoVo, the
+       digest, Alerts. Alerts earns the thumb slot because it is the thing that PINGS you; The
+       Read joins Predictions in the menu, which is where things you go to read belong. */
+    #mob-more                    { order: 1; }
     .mob-tab[data-mtab="map"]    { order: 2; }
     .mob-tab[data-mtab="novo"]   { order: 3; }
     /* FOUR MAIN, THEN MORE — the same shape Jake set on trader, and the same four roles:
@@ -1806,8 +1809,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .lv-grid-top .bias-col { order: -1; }
     .lv-grid-top #strip { order: 0; }
     .mob-tab[data-mtab="digest"] { order: 4; }
-    #mob-more { order: 5; }
-    .mob-tab[data-mtab="alerts"], .mob-tab[data-mtab="predict"] { display: none !important; }
+    .mob-tab[data-mtab="alerts"] { order: 5; }
+    .mob-tab[data-mtab="read"], .mob-tab[data-mtab="predict"] { display: none !important; }
     /* The More menu. Hairlines and type; the box ban applies here as everywhere. */
     #more-menu { position: fixed; left: 0; right: 0; z-index: 1001;
       bottom: calc(var(--navh) + env(safe-area-inset-bottom, 0px));
@@ -2066,7 +2069,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   </button>
   <button class="mob-tab" type="button" data-mtab="predict" onclick="lvMobTab('predict')" hidden>
     <span class="mob-tab-icon" aria-hidden="true">&#9670;</span>
-    <span>Predict</span>
+    <span>Predictions</span>
   </button>
   <button class="mob-tab mob-tab-novo" type="button" data-mtab="novo" onclick="lvMobTab('novo')">
     <span class="mob-tab-icon" aria-hidden="true">&#10022;</span>
@@ -2083,8 +2086,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      absent: on the analyst the STRIP is its door (Jake, 2026-09-07), and a second door in here
      would contradict that. -->
 <div id="more-menu" hidden>
-  <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
-  <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predict</button>
+  <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>The Read</button>
+  <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predictions</button>
 </div>
 <script>
 (function(){
@@ -2098,7 +2101,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
   var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0 };
   /* ── THE MORE MENU ─────────────────────────────────────────────────────────────────────── */
-  var MORE_TABS = ['alerts', 'predict'];
+  var MORE_TABS = ['read', 'predict'];
   window.toggleMoreMenu = function(force){
     var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
     if (!m || !b) return;

@@ -410,9 +410,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
      feed is. This assertion is what stops it, or anything else, quietly reappearing on the bar. */
   /* Four mains and More, matching the shape Jake set on trader. Readings stays off the bar -
      the strip is its door - and Alerts moved behind More. */
-  ok('five tabs: the four mains Jake numbered, then More',
+  ok('five tabs: More, Dealer Map, Dr. NoVo, Digest, Alerts',
     bar.tabs.length === 5 &&
-    bar.tabs.map((t) => t.label).join('|') === 'The Read|Dealer Map|Dr. NoVo|Digest|More',
+    bar.tabs.map((t) => t.label).join('|') === 'More|Dealer Map|Dr. NoVo|Digest|Alerts',
     JSON.stringify(bar.tabs.map((t) => t.label)));
   ok('Dr. NoVo carries the same four-pointed mark as the trader tab',
     (tabNamed(bar, 'novo').icon || '').indexOf('\u2726') >= 0,
@@ -448,12 +448,14 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   ok('the map tab does NOT carry the read any more — that is the point of the tab',
     v.read === false && v.ribbon === true && v.flow === true, JSON.stringify(v));
 
-  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="read"]').click()`);
+  await B.evalIn(`pickMore('read')`);
   await new Promise((r) => setTimeout(r, 420));
   v = await seen();
   bar = await B.evalIn(READ_BAR);
+  /* The Read moved into the More menu, so no bar tab lights for it - More does. Asserting
+     litTab==='read' would now be asserting a button that deliberately does not exist. */
   ok('The Read shows the read and nothing else from the dashboard',
-    v.read === true && v.ribbon === false && v.flow === false && litTab(bar) === 'read',
+    v.read === true && v.ribbon === false && v.flow === false && v.mtab === 'read',
     JSON.stringify({ v, lit: litTab(bar) }));
   ok('control: there is real prose on that tab, not an empty card',
     v.readText > 40, JSON.stringify({ chars: v.readText }));
@@ -475,7 +477,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   bar = await B.evalIn(READ_BAR);
   v = await seen();
   ok('...and closing it comes back to The Read, not to the map',
-    litTab(bar) === 'read' && v.read === true && v.ribbon === false,
+    v.read === true && v.ribbon === false,
     JSON.stringify({ lit: litTab(bar), v }));
 
   /* Scroll memory. This page is one document scroll, so without it you leave the map halfway down
@@ -485,7 +487,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await B.evalIn(`window.scrollTo(0, 900)`);
   await new Promise((r) => setTimeout(r, 250));
   const wasAt = await B.evalIn(`Math.round(window.scrollY)`);
-  await B.evalIn(`document.querySelector('.mob-tab[data-mtab="read"]').click()`);
+  await B.evalIn(`pickMore('read')`);
   await new Promise((r) => setTimeout(r, 420));
   const readTop = await B.evalIn(`Math.round(window.scrollY)`);
   await B.evalIn(`document.querySelector('.mob-tab[data-mtab="map"]').click()`);
@@ -527,14 +529,13 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
              ribbon: on(document.querySelector('#mkt-ribbon')) }; })()`);
 
   // Reached through the More menu now, which is the path a member actually takes.
-  await B.evalIn(`pickMore('alerts')`);
+  await B.evalIn(`lvMobTab('alerts')`);
   await new Promise((r) => setTimeout(r, 700));
   let al = await alertsView();
   bar = await B.evalIn(READ_BAR);
-  const moreLit = await B.evalIn(`document.getElementById('mob-more').classList.contains('mob-active')`);
-  ok('Alerts is its own view, reached from More, showing only the alerts',
-    moreLit === true && al.cardShown === true && al.ribbon === false,
-    JSON.stringify({ moreLit: moreLit, card: al.cardShown, ribbon: al.ribbon }));
+  ok('Alerts is its own view on the bar, showing only the alerts',
+    litTab(bar) === 'alerts' && al.cardShown === true && al.ribbon === false,
+    JSON.stringify({ lit: litTab(bar), card: al.cardShown, ribbon: al.ribbon }));
   ok('...it lists what is actually being watched',
     al.rows === 2 && al.count.indexOf('2 of 10') >= 0, JSON.stringify(al).slice(0, 220));
   /* The sentence has to be the SERVER'S. If the page ever starts composing its own, the chat and
@@ -972,7 +973,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   console.log('\nThe Alerts tab, on all three dashboards\n');
   for (const [page, open] of [
       ['trader-live.html', `switchMobileTab(5)`],
-      ['analyst-live.html', `pickMore('alerts')`],
+      ['analyst-live.html', `lvMobTab('alerts')`],
       ['crypto-live.html', `pickMore('alerts')`]]) {
     const app = page.split('-')[0];
     await B.goto(base + '/' + page, 430, 900);
@@ -988,7 +989,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
        everywhere would either fail on trader or have to be loosened until it proved nothing. */
     /* Trader put Alerts back on the BAR (Jake swapped it with Analysis - a thing that pings you
        earns a thumb slot). Analyst and crypto still reach it through More. */
-    if (app === 'analyst' || app === 'crypto') {
+    /* Trader AND analyst put Alerts back on the bar - a thing that pings you earns a thumb
+       slot on both. Crypto still reaches it through More. */
+    if (app === 'crypto') {
       const row = await B.evalIn(`(() => {
         const r = document.querySelector('#more-menu button[data-tab="5"], #more-menu button[data-mtab="alerts"]');
         if (!r) return { missing: true };
@@ -1732,8 +1735,8 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
       .map((sp) => sp.textContent).join(' ').trim();
     return { labels: vis.map(label),
              widths: vis.map((t) => Math.round(t.getBoundingClientRect().width)) }; })()`);
-  ok('the analyst bar shows five: The Read, Dealer Map, Dr. NoVo, Digest, More',
-    aBar.labels.join('|') === 'The Read|Dealer Map|Dr. NoVo|Digest|More',
+  ok('the analyst bar: More, Dealer Map, Dr. NoVo, Digest, Alerts',
+    aBar.labels.join('|') === 'More|Dealer Map|Dr. NoVo|Digest|Alerts',
     JSON.stringify(aBar.labels));
 
   const aMenu = await B.evalIn(`(() => {
@@ -1743,18 +1746,18 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
       .map((r) => [...r.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim());
     return { open: !m.hasAttribute('hidden'), rows: rows,
              readingsRow: !!m.querySelector('[data-mtab="readings"]') }; })()`);
-  ok('...More holds Alerts and Predict',
-    aMenu.open === true && aMenu.rows.join('|') === 'Alerts|Predict', JSON.stringify(aMenu.rows));
+  ok('...More holds The Read and Predictions',
+    aMenu.open === true && aMenu.rows.join('|') === 'The Read|Predictions', JSON.stringify(aMenu.rows));
   ok('...and Readings is NOT duplicated in there — the strip is its door',
     aMenu.readingsRow === false, JSON.stringify(aMenu.readingsRow));
 
-  const aPick = await B.evalIn(`(() => { pickMore('alerts');
+  const aPick = await B.evalIn(`(() => { pickMore('read');
     return new Promise((r) => setTimeout(() => r({
       closed: document.getElementById('more-menu').hasAttribute('hidden'),
       onTab: document.body.getAttribute('data-mtab'),
       moreLit: document.getElementById('mob-more').classList.contains('mob-active') }), 500)); })()`);
-  ok('...picking Alerts switches to it, closes the menu, and lights More',
-    aPick.closed === true && aPick.onTab === 'alerts' && aPick.moreLit === true,
+  ok('...picking The Read switches to it, closes the menu, and lights More',
+    aPick.closed === true && aPick.onTab === 'read' && aPick.moreLit === true,
     JSON.stringify(aPick));
 
   /* ══ THE TRADER BAR: FOUR MAIN + MORE ════════════════════════════════════════════════════
@@ -1797,7 +1800,7 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     return { open: open, rows: rows, sides: sides.length,
              radius: parseFloat(c.borderTopLeftRadius) || 0 }; })()`);
   ok('...tapping More opens it with every overflow tab, Predict included',
-    menu.open === true && menu.rows.join('|') === 'Analysis|Predict|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
+    menu.open === true && menu.rows.join('|') === 'Analysis|Predictions|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
   ok('...and the menu is hairlines, not a box',
     menu.sides === 1 && menu.radius === 0, JSON.stringify({ sides: menu.sides, r: menu.radius }));
 
