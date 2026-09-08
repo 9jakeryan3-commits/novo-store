@@ -78,6 +78,9 @@
     '.novo-tape .tf-n{font-family:var(--mono,ui-monospace),monospace;font-size:13px;'
       + 'font-weight:800;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums;text-align:right}',
     '.novo-tape .tf-raw .tf-s{font-weight:500}',
+    /* the gauge now leads the tab, so its group label carries no rule above it */
+    '.novo-tape .tp-grp-first{margin-top:2px;padding-top:0;border-top:0}',
+    '.novo-tape .tp-sub-tight{margin:4px 0 10px}',
     /* the historical strip reads as prose, because it is a sentence about a sample */
     '.novo-tape .tp-claim{font-size:13.5px;color:var(--txt1,#f0f0ee);line-height:1.6;padding:12px 0;'
       + 'border-top:1px solid var(--bdr2,#242428)}',
@@ -350,24 +353,14 @@
   function drawRead(el, state) {
     var tk = ticker(state);
     var r = state && state.read;
-    var h = '<h2>' + esc(tk) + ' · The read</h2>';
-    if (r && r.text) {
-      /* STALE IS LABELLED, NOT HIDDEN. When the payload falls back to the most recent archived
-         read rather than today's, the analyst says so in the heading - and a read presented as
-         today's when it is Friday's is the kind of quiet lie this product does not ship. */
-      h += '<span class="tp-sub">' + (r.stale
-            ? 'Latest read' + (r.dateLabel ? ' \u00b7 ' + esc(r.dateLabel) : '')
-              + ' \u2014 today\u2019s has not published yet.'
-            : 'Published today.') + '</span>'
-        + '<div class="tp-grp">' + esc(r.title || 'Latest read') + '</div>'
-        + '<div class="tp-read">' + esc(r.text) + '</div>';
-    } else {
-      h += '<span class="tp-sub">The Open, The Close and the Sunday Week Ahead land here as they '
-        + 'publish.</span><div class="tp-empty">Next read publishes before the bell.</div>';
-    }
+    var h = '<h2>' + esc(tk) + ' &middot; The read</h2>';
 
-    /* The gauge: value, percentile, and a marker on a calm-to-fear scale. Colour follows the
-       SERVER's own bands so the pill text and its colour can never imply different severities. */
+    /* THE GAUGE GOES FIRST (Jake, 2026-09-08: "move the fear guage to the top of the read tab
+       where it belongs"). It was last, under a read that can run to several hundred words - so
+       the one number that frames everything below it sat off the bottom of the screen and you
+       had to scroll past the whole argument to reach the conditions the argument was made in.
+       Colour follows the SERVER's own bands, so the pill text and its colour can never imply
+       two different severities. */
     var fd = (state && state.vol_env_by && state.vol_env_by[tk]) || null;
     var sym, val, pct, tag;
     if (fd && fd.value != null && fd.pct != null) {
@@ -382,12 +375,29 @@
     if (isFinite(val) && isFinite(pct)) {
       pct = Math.max(0, Math.min(100, pct));
       var col = pct <= 35 ? '#10b981' : pct <= 65 ? '#f59e0b' : '#f43f5e';
-      h += '<div class="tp-grp">Fear gauge \u00b7 ' + esc(sym) + '</div>'
+      h += '<div class="tp-grp tp-grp-first">Fear gauge &middot; ' + esc(sym) + '</div>'
         + '<div class="tp-fear"><span class="tp-fv">' + esc(sym) + ' ' + val.toFixed(1) + '</span>'
-        + '<span class="tp-fp">' + pct + 'th pct \u00b7 1yr</span>'
+        + '<span class="tp-fp">' + pct + 'th pct &middot; 1yr</span>'
         + '<span class="tp-ft" style="color:' + col + '">' + esc(tag) + '</span></div>'
         + '<div class="tp-meter"><i style="left:' + pct + '%"></i></div>'
         + '<div class="tp-scale"><span>calm</span><span>fear</span></div>';
+    }
+
+    if (r && r.text) {
+      /* STALE IS LABELLED, NOT HIDDEN. When the payload falls back to the most recent archived
+         read rather than today's, the analyst says so in the heading - and a read presented as
+         today's when it is Friday's is the kind of quiet lie this product does not ship. */
+      h += '<div class="tp-grp">' + esc(r.title || 'Latest read') + '</div>'
+        + '<span class="tp-sub tp-sub-tight">' + (r.stale
+            ? 'Latest read' + (r.dateLabel ? ' &middot; ' + esc(r.dateLabel) : '')
+              + ' &mdash; today&rsquo;s has not published yet.'
+            : 'Published today.') + '</span>'
+        + '<div class="tp-read">' + esc(r.text) + '</div>';
+    } else {
+      h += '<div class="tp-grp">Latest read</div>'
+        + '<span class="tp-sub tp-sub-tight">The Open, The Close and the Sunday Week Ahead land '
+        + 'here as they publish.</span>'
+        + '<div class="tp-empty">Next read publishes before the bell.</div>';
     }
     el.innerHTML = h;
   }

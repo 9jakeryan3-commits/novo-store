@@ -119,8 +119,8 @@
   #novo-ask .src{font-size:11px;color:var(--txt3,#6f8bab);line-height:1.6;border-top:1px solid var(--bdr,#22303f);padding-top:7px}
   #novo-ask .intro{font-size:13px;color:var(--txt2,#9fb6d1);line-height:1.65}
   #novo-ask .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
-  #novo-ask .chips button{background:rgba(255,255,255,.04);border:1px solid var(--bdr,#22303f);color:var(--txt2,#9fb6d1);
-    font-size:11.5px;padding:7px 10px;border-radius:9px;cursor:pointer;text-align:left}
+  #novo-ask .chips button{background:rgba(255,255,255,.04);color:var(--txt2,#9fb6d1);
+ font-size:11.5px;padding:7px 10px;border-radius:9px;cursor:pointer;text-align:left}
   /* Quick asks. The intro's suggestions go with the intro, leaving a bare input for the rest of the
      conversation. These persist. ONE scrolling line, not a wrapping block: the rail is wide but the
      log is the thing that should own the height. */
@@ -129,12 +129,12 @@
   #novo-ask .quick.on{display:flex}
   /* The one chip that is not canned. Accented so it is legible as a reading of the tape rather than
      a seventh stock question, and it always leads the row. */
-  #novo-ask .quick button.live{border-color:rgba(var(--askacc-rgb),.5);color:#cfefff;
-    background:rgba(var(--askacc-rgb),.08)}
-  #novo-ask .quick button.live:hover{border-color:var(--askacc);color:#eaf3ff}
-  #novo-ask .quick button{flex:0 0 auto;background:rgba(var(--askacc-rgb),.07);border:1px solid rgba(var(--askacc-rgb),.28);
-    color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
-  #novo-ask .quick button:hover{border-color:var(--askacc);color:#eaf3ff}
+  #novo-ask .quick button.live{color:#cfefff;
+ background:rgba(var(--askacc-rgb),.08)}
+  #novo-ask .quick button.live:hover{color:#eaf3ff}
+  #novo-ask .quick button{flex:0 0 auto;background:rgba(var(--askacc-rgb),.07);
+ color:#9fd8e6;font-size:11.5px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  #novo-ask .quick button:hover{color:#eaf3ff}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,#22303f)}
   #novo-ask input{flex:1;background:var(--navy2,#111c2b);border:1px solid var(--bdr,#22303f);border-radius:10px;
     padding:10px 12px;color:#eaf3ff;font-size:13.5px;outline:none}
@@ -173,9 +173,9 @@
     color:#eaf3ff;letter-spacing:-.01em;margin-bottom:7px}
   #novo-ask .chips{gap:8px;margin-top:14px}
   #novo-ask .chips button{border-radius:999px;padding:8px 13px;font-size:12px;
-    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035);color:var(--txt2,#9fb6d1);
-    transition:border-color .15s,color .15s}
-  #novo-ask .chips button:hover{border-color:var(--askacc);color:#eaf3ff}
+ background:rgba(255,255,255,.035);color:var(--txt2,#9fb6d1);
+ transition:border-color .15s,color .15s}
+  #novo-ask .chips button:hover{color:#eaf3ff}
   /* Mobile: the chat IS the screen. No sheet floating over a half-visible page — inset zero,
      square corners, the composer padded clear of the home bar, and one chevron to minimize. */
   @media (max-width:720px){

@@ -35,9 +35,9 @@
     '.novo-digest .dg-focus{font-size:12.5px;color:var(--txt2,#a8a8a8);font-style:italic;margin:0 0 7px}',
     '.novo-digest .dg-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
     '.novo-digest .dg-actions{display:flex;gap:8px;margin-top:11px}',
-    '.novo-digest .dg-btn{background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt2,#a8a8a8);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:8px 12px;cursor:pointer;min-height:36px}',
+    '.novo-digest .dg-btn{background:none;color:var(--txt2,#a8a8a8);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:8px 12px;cursor:pointer;min-height:36px}',
     '.novo-digest .dg-btn:hover{color:var(--txt1,#f0f0ee)}',
-    '.novo-digest .dg-btn.stop:hover{border-color:#f43f5e;color:#f43f5e}',
+    '.novo-digest .dg-btn.stop:hover{color:#f43f5e}',
     '.novo-digest .dg-btn[disabled]{opacity:.5;cursor:default}',
     /* the mornings — hairlines, never boxes */
     '.novo-digest .dg-day{padding:13px 0;border-top:1px solid var(--bdr2,#242428)}',

@@ -173,9 +173,9 @@
          control. Clicking does exactly what the key does. */
       '#novo-keys-hint{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}',
       '.nvk-hint-btn{display:inline-flex;align-items:center;gap:5px;background:none;cursor:pointer;',
-      'border:1px solid var(--bdr2,#2e3036);border-radius:8px;padding:3px 8px;color:#7d97b8;',
-      'font:600 11px/1.5 inherit;letter-spacing:.02em;transition:border-color .15s,color .15s}',
-      '.nvk-hint-btn:hover,.nvk-hint-btn:focus-visible{border-color:' + A + ';color:#eaf3ff;outline:none}',
+ 'border-radius:8px;padding:3px 8px;color:#7d97b8;',
+ 'font:600 11px/1.5 inherit;letter-spacing:.02em;transition:border-color .15s,color .15s}',
+      '.nvk-hint-btn:hover,.nvk-hint-btn:focus-visible{color:#eaf3ff;outline:none}',
       '.nvk-hint-btn kbd{display:inline-block;background:#22242a;border:1px solid #33363d;',
       'border-radius:4px;padding:0 5px;font:600 10.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;',
       'color:#eaf3ff;min-width:8px;text-align:center}',
