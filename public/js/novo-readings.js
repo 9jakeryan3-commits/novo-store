@@ -121,7 +121,7 @@
 
   function drawPage(el, d) {
     var rs = (d && d.readings) || [], rules = (d && d.rules) || [];
-    var h = '<h2>Live readings <span class="rd-sub">what the Eye is seeing · descriptive, not calls</span></h2>';
+    var h = '<h2>Live Reads <span class="rd-sub">what the Eye is seeing · descriptive, not calls</span></h2>';
     if (!d || !d.live) {
       // The distinction the endpoint fought to keep: a dead publisher and a quiet market look
       // identical on screen unless the page says which one it is.
@@ -167,7 +167,7 @@
           + '</span></div>';
       }).join('');
     }
-    h += '<div class="rd-how">Readings describe what the dealer book is doing right now, with the '
+    h += '<div class="rd-how">Live Reads describe what the dealer book is doing right now, with the '
       + 'measurement and the sample each one rests on. They are not predictions and they are not '
       + 'calls — nothing here is graded. The Eye’s registered rules are pre-declared: a '
       + 'rule is written down before it fires, so its record starts the day it was registered '
@@ -196,7 +196,7 @@
     if (!el) return;
     el.classList.add('novo-readings');
     PAGES.push(el);
-    el.innerHTML = '<h2>Live readings</h2><div class="rd-empty">Reading the Eye…</div>';
+    el.innerHTML = '<h2>Live Reads</h2><div class="rd-empty">Reading the Eye…</div>';
     load().then(function (d) { drawPage(el, d); });
   }
 
