@@ -59,7 +59,21 @@
       + 'border-top:1px solid var(--bdr2,#242428);font-variant-numeric:tabular-nums}',
     '.novo-tape .tp-wrap{overflow-x:auto}',
     '.novo-tape .tp-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:10px 0 2px}',
-    '.novo-tape .tp-warn{font-size:12.5px;color:#fbbf24;line-height:1.6;padding:10px 0 2px}'
+    '.novo-tape .tp-warn{font-size:12.5px;color:#fbbf24;line-height:1.6;padding:10px 0 2px}',
+    '.novo-tape .tp-read{font-size:13.5px;color:var(--txt2,#a8a8a8);line-height:1.7;'
+      + 'white-space:pre-wrap;overflow-wrap:anywhere;padding:10px 0 2px}',
+    '.novo-tape .tp-fear{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 0 6px}',
+    '.novo-tape .tp-fv{font-family:var(--mono,ui-monospace),monospace;font-size:21px;font-weight:800;'
+      + 'color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums}',
+    '.novo-tape .tp-fp{font-family:var(--mono,ui-monospace),monospace;font-size:11px;color:var(--txt3,#6e6e6e);'
+      + 'letter-spacing:.06em;text-transform:uppercase}',
+    '.novo-tape .tp-ft{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-left:auto}',
+    '.novo-tape .tp-meter{position:relative;height:6px;border-radius:3px;'
+      + 'background:linear-gradient(90deg,#10b981,#84cc16,#f59e0b,#f43f5e)}',
+    '.novo-tape .tp-meter i{position:absolute;top:-3px;width:3px;height:12px;background:var(--txt1,#f0f0ee);'
+      + 'border-radius:2px;transform:translateX(-1px)}',
+    '.novo-tape .tp-scale{display:flex;justify-content:space-between;font-family:var(--mono,ui-monospace),monospace;'
+      + 'font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-top:5px}'
   ].join('');
 
   function styles() {
@@ -262,7 +276,59 @@
     el.innerHTML = h;
   }
 
-  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps };
+  /* ── THE READ + THE FEAR GAUGE ────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "the idea is trader subscribers dont need analyst if they dont want to use
+     it, nobody wants to have to use two apps." That makes self-sufficiency the standard, not
+     tidiness of the split - so the Analyst's flagship artifact, the published read, belongs here
+     too. The fear gauge rides along because it is the same one number a trader checks beside it,
+     and Trader carried the VIX value without the percentile that gives it meaning: 15.3 means
+     nothing until you know it is the 13th percentile of its own year. */
+  function drawRead(el, state) {
+    var tk = ticker(state);
+    var r = state && state.read;
+    var h = '<h2>' + esc(tk) + ' · The read</h2>';
+    if (r && r.text) {
+      /* STALE IS LABELLED, NOT HIDDEN. When the payload falls back to the most recent archived
+         read rather than today's, the analyst says so in the heading - and a read presented as
+         today's when it is Friday's is the kind of quiet lie this product does not ship. */
+      h += '<span class="tp-sub">' + (r.stale
+            ? 'Latest read' + (r.dateLabel ? ' \u00b7 ' + esc(r.dateLabel) : '')
+              + ' \u2014 today\u2019s has not published yet.'
+            : 'Published today.') + '</span>'
+        + '<div class="tp-grp">' + esc(r.title || 'Latest read') + '</div>'
+        + '<div class="tp-read">' + esc(r.text) + '</div>';
+    } else {
+      h += '<span class="tp-sub">The Open, The Close and the Sunday Week Ahead land here as they '
+        + 'publish.</span><div class="tp-empty">Next read publishes before the bell.</div>';
+    }
+
+    /* The gauge: value, percentile, and a marker on a calm-to-fear scale. Colour follows the
+       SERVER's own bands so the pill text and its colour can never imply different severities. */
+    var fd = (state && state.vol_env_by && state.vol_env_by[tk]) || null;
+    var sym, val, pct, tag;
+    if (fd && fd.value != null && fd.pct != null) {
+      sym = fd.sym || 'VIX'; val = Number(fd.value); pct = parseInt(fd.pct, 10); tag = fd.tag || '';
+    } else {
+      var t = (state && state.vol_env) || '';
+      var vm = t.match(/(VIX|VXN|RVX)\s+([\d.]+)/i);
+      var pm = t.match(/(\d+)\s*(?:st|nd|rd|th)?\s*percentile/i);
+      var gm = t.match(/\(([^)]+)\)/);
+      if (vm && pm) { sym = vm[1].toUpperCase(); val = Number(vm[2]); pct = parseInt(pm[1], 10); tag = gm ? gm[1] : ''; }
+    }
+    if (isFinite(val) && isFinite(pct)) {
+      pct = Math.max(0, Math.min(100, pct));
+      var col = pct <= 35 ? '#10b981' : pct <= 65 ? '#f59e0b' : '#f43f5e';
+      h += '<div class="tp-grp">Fear gauge \u00b7 ' + esc(sym) + '</div>'
+        + '<div class="tp-fear"><span class="tp-fv">' + esc(sym) + ' ' + val.toFixed(1) + '</span>'
+        + '<span class="tp-fp">' + pct + 'th pct \u00b7 1yr</span>'
+        + '<span class="tp-ft" style="color:' + col + '">' + esc(tag) + '</span></div>'
+        + '<div class="tp-meter"><i style="left:' + pct + '%"></i></div>'
+        + '<div class="tp-scale"><span>calm</span><span>fear</span></div>';
+    }
+    el.innerHTML = h;
+  }
+
+  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead };
 
   function mount(sel, kind) {
     styles();

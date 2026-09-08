@@ -1779,7 +1779,7 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     return { open: open, rows: rows, sides: sides.length,
              radius: parseFloat(c.borderTopLeftRadius) || 0 }; })()`);
   ok('...tapping More opens it with the overflow tabs (Predict hidden for a free seat)',
-    menu.open === true && menu.rows.join('|') === 'Alerts|Readings|Futures|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
+    menu.open === true && menu.rows.join('|') === 'Alerts|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
   ok('...and the menu is hairlines, not a box',
     menu.sides === 1 && menu.radius === 0, JSON.stringify({ sides: menu.sides, r: menu.radius }));
 
