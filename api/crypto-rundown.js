@@ -144,7 +144,7 @@ module.exports = async (req, res) => {
   if (bias) {
     try {
       const out = await require('./_lib/predictions.js').makePrediction({
-        source: 'novo', asset_class: 'crypto', symbol: 'BTC', kind: 'direction',
+        source: 'read', asset_class: 'crypto', symbol: 'BTC', kind: 'direction',
         side: bias === 'BULLISH' ? 'up' : bias === 'BEARISH' ? 'down' : 'flat',
         spot_at: spot, horizon_min: 1440,
         thesis: 'Daily Crypto Rundown — BTC ' + (bias === 'BULLISH' ? 'up' : 'down') + ' over the next 24h',

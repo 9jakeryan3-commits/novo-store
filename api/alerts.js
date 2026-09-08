@@ -99,8 +99,19 @@ module.exports = async (req, res) => {
         try { novo_alerts = await require("./_lib/predictions.js")
           .listNovoFires(app === "crypto" ? "crypto" : "equity", 20); } catch (_) {}
       }
+      /* READS ARE FOR EVERYONE (Jake, 2026-09-07): "predictions tab is viewable to all but only
+         the reads predictions are viewable and predictions are not usable outside comp seat".
+         So a non-comp seat gets the read-authored calls and nothing else - it can follow what he
+         published and is scored on, but his self-initiated and conversational calls stay behind
+         the seat, and the tools that make one are comp-gated server-side anyway. */
+      if (!comp) {
+        try {
+          predictions = await require("./_lib/predictions.js")
+            .listPredictions(40, app === "crypto" ? "crypto" : "equity", true);
+        } catch (_) { predictions = null; }
+      }
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
-                                    ...(comp && predictions && !predictions.error ? { predictions } : {}),
+                                    ...(predictions && !predictions.error ? { predictions } : {}),
                                     ...(comp && Array.isArray(novo_alerts) ? { novo_alerts } : {}) });
     }
 

@@ -157,7 +157,14 @@ async function makePrediction(args = {}) {
   const p = {
     id: crypto.randomBytes(4).toString("hex"),
     made_utc: Date.now(),
-    source: args.source === "novo" ? "novo" : "conversation",
+    /* THREE SOURCES, AND THE DIFFERENCE IS A GATE (Jake, 2026-09-07):
+         "read"         a bias NoVo published in a read - visible to EVERY member, because the
+                        read itself already is
+         "novo"         a call he initiated himself off the data - comp seats only
+         "conversation" a call he made when asked - comp seats only, and the tools that make one
+                        are comp-gated server-side, so a non-comp seat cannot produce one at all
+       The tab is open to everyone now; what varies is WHICH rows come back. */
+    source: args.source === "read" ? "read" : args.source === "novo" ? "novo" : "conversation",
     asset_class: args.asset_class === "crypto" ? "crypto" : "equity",
     symbol, kind,
     side: side || (kind === "close_at" || kind === "open_at" ? (value >= spot_at ? "up" : "down") : (kind === "level_touch" ? "touch" : null)),
@@ -253,13 +260,17 @@ async function evaluateCryptoPredictions(snap) {
 }
 
 // ── the read, with the score attached ────────────────────────────────────────────────────────
-async function listPredictions(limit, assetClass) {
+async function listPredictions(limit, assetClass, readsOnly) {
   const r = kv();
   if (!r) return { error: "predictions unavailable" };
   let list = await _load(r);
   // PER DESK (Jake): "hes make crypto predictions at his crypto desk and equities on the equities
   // side." One log; each dashboard reads its own asset class of it.
   if (assetClass) list = list.filter((p) => p.asset_class === assetClass);
+  /* THE SEAT FILTER, APPLIED HERE rather than in the page. A non-comp seat gets the reads and
+     nothing else - filtering in the browser would ship his private calls to a client that was
+     merely asked not to draw them. */
+  if (readsOnly) list = list.filter((p) => p.source === "read");
   const graded = list.filter((p) => p.status === "graded" && p.outcome);
   const by = {};
   for (const p of graded) {

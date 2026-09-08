@@ -292,6 +292,34 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     rows()[0].neutral_band_pct === 0.73 && /1825 daily closes/.test(rows()[0].band_prov || ''),
     JSON.stringify({ band: rows()[0].neutral_band_pct, prov: rows()[0].band_prov }));
 
+  // ── 11. THE SEAT FILTER: reads for everyone, his own calls for comp only ──────────────────
+  // Jake, 2026-09-07: "predictions tab is viewable to all but only the reads predictions are
+  // viewable and predictions are not usable outside comp seat". The filter is SERVER-side; a
+  // check that only proved the page hides them would be proving the wrong thing entirely.
+  reset();
+  await P.makePrediction({ source: 'read', asset_class: 'crypto', symbol: 'BTC',
+    kind: 'direction', side: 'up', spot_at: 100000, horizon_min: 1440,
+    thesis: 'Daily rundown bias' });
+  await P.makePrediction({ source: 'novo', asset_class: 'crypto', symbol: 'ETH',
+    kind: 'direction', side: 'down', spot_at: 3000, horizon_min: 240,
+    thesis: 'his own selector call' });
+  await P.makePrediction({ source: 'conversation', asset_class: 'crypto', symbol: 'SOL',
+    kind: 'direction', side: 'up', spot_at: 100, horizon_min: 240,
+    thesis: 'asked in chat' });
+
+  const anySeat = await P.listPredictions(40, 'crypto', true);
+  const compSeat = await P.listPredictions(40, 'crypto');
+  ok('a non-comp seat sees the READ calls and nothing else',
+    anySeat.open.length === 1 && anySeat.open[0].source === 'read'
+      && anySeat.open[0].symbol === 'BTC',
+    JSON.stringify(anySeat.open.map((p) => p.source + ':' + p.symbol)));
+  ok('...while a comp seat sees all three',
+    compSeat.open.length === 3,
+    JSON.stringify(compSeat.open.map((p) => p.source + ':' + p.symbol)));
+  ok('...and the filter is on SOURCE, not on which desk or kind it came from',
+    anySeat.open.every((p) => p.source === 'read'),
+    JSON.stringify(anySeat.open.map((p) => p.source)));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

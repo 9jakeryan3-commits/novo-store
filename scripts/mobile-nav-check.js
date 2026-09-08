@@ -1207,9 +1207,25 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
   await fetch(base + '/__set-comp?c=0').catch(() => {});
   await B.goto(base + '/analyst/live', 430, 900);
   await new Promise((r) => setTimeout(r, 1200));
+  /* ⚠ THE GATE MOVED, AND SO DID THE ASSERTION (Jake, 2026-09-07): "predictions tab is
+     viewable to all but only the reads predictions are viewable and predictions are not usable
+     outside comp seat". So the tab EXISTING is no longer the thing to test - what matters is that
+     a free seat's payload carries only his published reads. That gate is server-side, which is
+     the only place it can be: a page that merely declines to draw his private calls has already
+     received them. */
   const noComp = await predTabProbe(PRED_TAB.analyst);
-  ok('non-comp: the Predictions tab does not exist on screen',
-    noComp.there && noComp.hidden === true && noComp.visible === false, JSON.stringify(noComp));
+  ok('non-comp: the Predictions tab is there for every member now',
+    noComp.there === true, JSON.stringify(noComp));
+  const freeRows = await B.evalIn(`(async () => {
+    const r = await fetch('/api/alerts?t=' + encodeURIComponent(localStorage.getItem('novo_live_t') || ''),
+                          { cache: 'no-store' });
+    const d = r.ok ? await r.json() : null;
+    const p = d && d.predictions;
+    const rows = p ? [].concat(p.open || [], p.graded || []) : [];
+    return { has: !!p, sources: Array.from(new Set(rows.map((x) => x.source))) }; })()`);
+  ok('non-comp: ...and the payload carries ONLY read-authored calls, never his own',
+    !freeRows.has || freeRows.sources.every((v) => v === 'read'),
+    JSON.stringify(freeRows));
 
   await fetch(base + '/__set-comp?c=1').catch(() => {});
   for (const app of ['trader', 'analyst', 'crypto']) {
@@ -1727,8 +1743,8 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
       .map((r) => [...r.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim());
     return { open: !m.hasAttribute('hidden'), rows: rows,
              readingsRow: !!m.querySelector('[data-mtab="readings"]') }; })()`);
-  ok('...More holds Alerts (Predict hidden for a free seat)',
-    aMenu.open === true && aMenu.rows.join('|') === 'Alerts', JSON.stringify(aMenu.rows));
+  ok('...More holds Alerts and Predict',
+    aMenu.open === true && aMenu.rows.join('|') === 'Alerts|Predict', JSON.stringify(aMenu.rows));
   ok('...and Readings is NOT duplicated in there — the strip is its door',
     aMenu.readingsRow === false, JSON.stringify(aMenu.readingsRow));
 
@@ -1780,8 +1796,8 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
       parseFloat(c['border'+k+'Width']) > 0 && c['border'+k+'Style'] !== 'none');
     return { open: open, rows: rows, sides: sides.length,
              radius: parseFloat(c.borderTopLeftRadius) || 0 }; })()`);
-  ok('...tapping More opens it with the overflow tabs (Predict hidden for a free seat)',
-    menu.open === true && menu.rows.join('|') === 'Analysis|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
+  ok('...tapping More opens it with every overflow tab, Predict included',
+    menu.open === true && menu.rows.join('|') === 'Analysis|Predict|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
   ok('...and the menu is hairlines, not a box',
     menu.sides === 1 && menu.radius === 0, JSON.stringify({ sides: menu.sides, r: menu.radius }));
 

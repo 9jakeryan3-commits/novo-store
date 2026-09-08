@@ -163,18 +163,18 @@
   /* ── the tab reveal: hidden until the server says comp ────────────────────────────────────
      One cheap GET on load. The page never decides who is comp; it renders what the server admits
      to, and a non-comp member simply never sees the tab exist. */
+  /* THE TAB IS OPEN TO EVERY SEAT NOW (Jake, 2026-09-07). What differs is the CONTENT: the
+     endpoint hands a non-comp seat only the read-authored calls. Revealing on any answer rather
+     than on comp:true is deliberate - the gate that matters is server-side, and a tab that hides
+     itself was never the thing protecting his private calls. */
   async function reveal(selector) {
-    var t = tok(); if (!t) return;
     try {
-      var r = await fetch('/api/alerts?t=' + encodeURIComponent(t)
-        + (APP ? '&app=' + encodeURIComponent(APP) : ''), { cache: 'no-store' });
-      if (!r.ok) return;
-      var d = await r.json();
-      if (d && d.comp === true) {
-        var b = document.querySelector(selector);
-        if (b) b.hidden = false;
-      }
-    } catch (_e) {}
+      const r = await fetch('/api/alerts?t=' + encodeURIComponent(tok()), { cache: 'no-store' });
+      const d = r.ok ? await r.json() : null;
+      if (!d || !d.ok) return false;
+      document.querySelectorAll(selector).forEach((el) => el.removeAttribute('hidden'));
+      return true;
+    } catch (_) { return false; }
   }
 
   window.novoPredict = { mount: mount, load: load, reveal: reveal };
