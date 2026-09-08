@@ -340,6 +340,9 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   /* ── Features ── */
   .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .feature { display: flex; gap: 14px; border-radius: 8px; padding: 20px; }
+  /* three phones side by side get too small to read below this; two then one. */
+  @media (max-width: 700px) { .ss-phones { grid-template-columns: repeat(2, minmax(0,1fr)) !important; } }
+  @media (max-width: 440px) { .ss-phones { grid-template-columns: 1fr !important; } }
   /* Ask Dr. NoVo showcase — a paragraph describing an analyst sells worse than the analyst answering.
      Styled to look like the real panel on the dashboard, so what is promised here is recognisably
      what arrives after signup. */
@@ -743,19 +746,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="ss-fan">
         <figure class="ss-fan-card ss-fan-1" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-1.webp?v=6" width="1528" height="1059" alt="Analyst dashboard &mdash; the 24/5 futures ribbon, the QQQ and IWM switcher cards, Dr. NoVo&rsquo;s premarket and hourly bias with the hit rate behind each, the SPY session chart with the zero-gamma line, call wall, put wall and gravity drawn on the candles, and the dealer-positioning ladder: net GEX in a short-gamma regime, the gamma-squeeze gauge, every level with its distance from spot, what this same setup resolved to historically, and the expected move for the day and the week" decoding="async" loading="eager" fetchpriority="high">
+          <img src="/screenshots/analyst-dash-1.webp?v=7" width="1528" height="1052" alt="Analyst dashboard &mdash; the Dealer Map: the 24/5 futures ribbon, the Eye&rsquo;s live readings across the top, the QQQ and IWM switcher, Dr. NoVo&rsquo;s premarket and hourly bias with the hit rate behind each, the SPY session chart with the zero-gamma line, call wall, gravity and put wall drawn on the candles, and the dealer-positioning ladder with the gamma-squeeze gauge and the expected move" decoding="async" loading="eager" fetchpriority="high">
         </figure>
         <figure class="ss-fan-card ss-fan-2" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-2.webp?v=5" width="1528" height="1059" alt="Analyst dashboard &mdash; the gamma profile by strike, the expected move, put/call skew and near-versus-far skew, the vanna and charm exposure tiles, the VIX fear gauge ranked against its own year, gamma by strike through the whole session as it built and drained, and the live options-flow read with the day&rsquo;s unusual-volume strikes" decoding="async" loading="lazy">
+          <img src="/screenshots/analyst-dash-2.webp?v=6" width="1528" height="1052" alt="Analyst dashboard &mdash; the gamma profile by strike, the expected move, put/call skew and near-versus-far skew, vanna and charm exposure, the VIX fear gauge ranked against its own year, gamma by strike through the whole session as it built and drained, and the live options-flow read with the day&rsquo;s unusual-volume strikes" decoding="async" loading="lazy">
         </figure>
         <figure class="ss-fan-card ss-fan-3" tabindex="0">
           <div class="ss-bar"><span class="ss-dot" style="background:#ff5f57"></span><span class="ss-dot" style="background:#febc2e"></span><span class="ss-dot" style="background:#28c840"></span><span class="ss-label">Analyst &middot; live dealer map</span></div>
-          <img src="/screenshots/analyst-dash-3.webp?v=6" width="1528" height="1059" alt="Analyst dashboard &mdash; &lsquo;today looks like&hellip;&rsquo;, the closest historical SPY dealer setups with their match score and how each resolved at 15 minutes, 60 minutes and into the close; &lsquo;The Line&rsquo; level-break playbooks; and Today&rsquo;s Read, the full written outlook with the bottom line, the week ahead, the catalysts, and the dealer-positioning map across SPY, QQQ and IWM" decoding="async" loading="lazy">
+          <img src="/screenshots/analyst-dash-3.webp?v=7" width="1528" height="1052" alt="Analyst dashboard &mdash; Live Reads: what the Eye is seeing, stated descriptively rather than as calls, each reading carrying its measurement, its percentile and the sample behind it &mdash; above the forward register of the rules it is watching, each marked armed, firing or no reading" decoding="async" loading="lazy">
         </figure>
         
       </div>
-      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart, the full dealer read with vanna &amp; charm, gamma by strike through the session, the options flow, the analogues and the written read. Installs like an app on desktop &amp; mobile.</p>
+      <p class="ss-mobile-cap">The live dealer map &mdash; the session chart and the dealer ladder, the gamma profile with skew, vanna and charm, and the Eye&rsquo;s live readings.</p>
+      <!-- THE PHONE ROW (2026-09-08). The page claimed "installs like an app on desktop
+           & mobile" and showed three desktop captures. These are the same dashboard on a
+           phone. Elevation rather than frames — the box ban applies here too. -->
+      <div class="ss-phones" style="max-width:860px;margin:30px auto 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;">
+        <div style="border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.28);line-height:0;"><img src="/screenshots/analyst-phone-feed.webp?v=1" width="501" height="1044" alt="Analyst on a phone &mdash; the analysis feed carrying the top-of-hour structural audit: its structural bias, the levels it identified, the patterns it observed and the written thesis behind them" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"></div>
+        <div style="border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.28);line-height:0;"><img src="/screenshots/analyst-phone-read.webp?v=1" width="501" height="1044" alt="Analyst on a phone &mdash; Today&rsquo;s Read, the pre-market primer with its bottom line, the setup, and the dealer-positioning section" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"></div>
+        <div style="border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.28);line-height:0;"><img src="/screenshots/analyst-phone-novo.webp?v=1" width="501" height="1044" alt="Analyst on a phone &mdash; Dr. NoVo answering what is on the week&rsquo;s calendar and how the last prints landed against consensus, print by print" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"></div>
+      </div>
+      <p class="ss-mobile-cap">The same desk on a phone &mdash; the hourly audit, today&rsquo;s read, and Dr. NoVo.</p>
     </div>
     <script>(function(){var c=document.querySelectorAll('.ss-fan-card');c.forEach(function(el){el.addEventListener('click',function(){c.forEach(function(x){x.classList.remove('front');});el.classList.add('front');});});})();</script>
   </div>
