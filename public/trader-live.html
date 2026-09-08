@@ -425,20 +425,32 @@ body {
   gap: 0;
   overflow: hidden;
 }
+/* ⚠ THESE MUST BE !important, AND THE REASON IS ONE LINE FURTHER DOWN THIS FILE.
+   The desktop terminal flattens every column with `.col { display: contents !important; }` so
+   their cards become direct grid items. A plain `#col-x { display: none }` LOSES to it - class
+   plus !important beats a bare id - so all nine panel columns were pouring their contents into
+   the desktop grid: Daily Digest, Predictions and Live Readings stacked down the page with the
+   workspace nowhere to be seen. It was never that desktop was behind; it was actively broken,
+   and had been since Alerts/Digest/Predict were added. I then added six more the same way.
+   display:contents is the trap here: the element vanishes but its CHILDREN stay, so the usual
+   "is it hidden" glance at the element itself says yes while the page says otherwise. */
+#col-alerts, #col-digest, #col-predict, #col-readings, #col-futures,
+#col-history, #col-flow, #col-sweeps, #col-read { display: none !important; }
+
 #col-capital { order: 1; }
 #col-feed    { order: 2; border-right: 1px solid var(--bdr); }
 #col-intel   { order: 3; border-right: none; }
 /* The alerts view is a phone tab, not a desk column. Hidden by default at every width; the
    #col-alerts.mob-active rule inside the mobile block is the only thing that shows it. */
-#col-alerts { display: none; }
-#col-digest { display: none; }
-#col-predict { display: none; }
-#col-readings { display: none; }
-#col-futures { display: none; }
-#col-history { display: none; }
-#col-flow { display: none; }
-#col-sweeps { display: none; }
-#col-read { display: none; }
+
+
+
+
+
+
+
+
+
 @media (min-width: 769px) {
   /* ── THE DESK PANEL (Jake, 2026-09-07) ────────────────────────────────────────────────────
      "the dashboards desktop views are wayy behind" - and worse than behind: every surface added

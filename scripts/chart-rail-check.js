@@ -290,6 +290,25 @@ server.listen(8795, async () => {
      deskShut.rail === true && deskShut.buttons === 9, JSON.stringify(deskShut));
   ok('...and it starts CLOSED — the chart keeps its width until you ask',
      deskShut.open === false && deskShut.chartW > 300, JSON.stringify(deskShut));
+  /* ⚠ THE CHECK THAT WOULD HAVE CAUGHT IT. The first version asserted the chart's width and
+     nothing else, and passed while nine panel columns poured their contents into the desktop
+     grid - the desktop terminal flattens .col with `display: contents !important`, so a plain
+     `#col-x { display: none }` lost to it and the element vanished while its CHILDREN stayed.
+     "Is it hidden" asked of the element says yes; the page says otherwise. So ask for RENDERED
+     BOXES instead: with the panel closed, none of the nine may occupy any space at all. */
+  const leak = await evalIn(`(() => {
+    const names = ['alerts','digest','predict','readings','futures','history','flow','sweeps','read'];
+    const bad = [];
+    names.forEach((n) => {
+      const c = document.getElementById('col-' + n);
+      if (!c) return;
+      const boxes = [c, ...c.querySelectorAll('*')]
+        .filter((e) => e.getBoundingClientRect().height > 4).length;
+      if (boxes) bad.push(n + ':' + boxes);
+    });
+    return { leaking: bad }; })()`);
+  ok('...and NOTHING from the nine renders while it is closed',
+     leak.leaking.length === 0, JSON.stringify(leak));
 
   const deskOpen = await evalIn(`(() => {
     deskOpen('futures');
