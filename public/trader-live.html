@@ -476,10 +476,19 @@ body {
     white-space: nowrap; transition: color .12s ease; }
   #desk-rail button:hover { color: var(--txt1); }
   #desk-rail button.on { color: #22d3ee; }
-  #desk-panel { position: fixed; top: 48px; right: 44px; bottom: 0; width: 400px; z-index: 39;
-    background: var(--bg); border-left: 1px solid var(--bdr); overflow-y: auto;
-    padding: 14px 16px 24px; display: none; }
-  body[data-desk] #desk-panel { display: block; }
+  /* THERE IS NO #desk-panel. It was an empty div holding the panel's frame, from a first
+     design where the columns would be moved INTO it. They never were - reparenting them would
+     have broken the mobile tabs that share the same nodes - so each column positions itself into
+     that box instead and paints its own background and border.
+     The empty div stayed behind with the SAME fixed geometry, the SAME z-index: 39, and an opaque
+     background, sitting AFTER #workspace in the DOM. Equal z-index means the later element wins,
+     so it covered every surface it was supposed to frame: the desk opened, the content mounted,
+     and the member saw a blank rectangle. Mobile was unaffected because these rules live inside
+     @media (min-width: 769px), which is exactly why it read as "works on the phone, dead on the
+     desktop" rather than as a paint bug.
+     It also defeated the check: a probe that asks the DOM "did it mount" gets 6 children and 634
+     characters and says yes. Mounted and visible are different questions, and only the second one
+     is the product. Verified now with elementFromPoint. */
   /* The workspace gives up exactly what the panel takes, so nothing ends up underneath it. */
   #workspace { padding-right: 44px; }
   body[data-desk] #workspace { padding-right: 444px; }
@@ -2909,7 +2918,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <button type="button" data-desk="digest" onclick="deskOpen('digest')">Digest</button>
   <button type="button" data-desk="predict" onclick="deskOpen('predict')">Predictions</button>
 </div>
-<div id="desk-panel" hidden></div>
 <nav id="mobile-tabs">
   <!-- Indices 2 and 3 are deliberate: the CSS and the Analysis poll both gate on data-mtab,
        so renumbering to 0/1 would break them silently. data-tab drives the active styling now
