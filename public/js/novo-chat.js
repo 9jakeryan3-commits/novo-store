@@ -30,15 +30,15 @@
   window.__novoChatPanel = true;
 
   var CSS = `  #novo-ask-bubble{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;
-    padding:11px 12px 11px 14px;border-radius:10px;border:1px solid rgba(var(--askacc-rgb),.42);cursor:pointer;
-    /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
-       against and the button goes soft; the same glow over the page's own dark reads as
-       an outline. Same treatment as the crypto map's bubble. */
-    background:linear-gradient(180deg,var(--navy2),#0b0b0d);color:var(--txt1);font-weight:600;font-size:13.5px;
-    min-width:264px;text-align:left;
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(var(--askacc-rgb),.45),inset 0 1px 0 rgba(255,255,255,.05)}
-  #novo-ask-bubble:hover{border-color:var(--askacc);color:var(--txt1);
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(var(--askacc-rgb),.62),inset 0 1px 0 rgba(255,255,255,.07)}
+ padding:11px 12px 11px 14px;border-radius:10px;cursor:pointer;
+ /* Neutral fill, cyan edge. A cyan glow over a blue-tinted fill has no edge to read
+ against and the button goes soft; the same glow over the page's own dark reads as
+ an outline. Same treatment as the crypto map's bubble. */
+ background:linear-gradient(180deg,var(--navy2),#0b0b0d);color:var(--txt1);font-weight:600;font-size:13.5px;
+ min-width:264px;text-align:left;
+ box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(var(--askacc-rgb),.45),inset 0 1px 0 rgba(255,255,255,.05)}
+  #novo-ask-bubble:hover{color:var(--txt1);
+ box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(var(--askacc-rgb),.62),inset 0 1px 0 rgba(255,255,255,.07)}
   #novo-ask-bubble .caret{color:var(--askacc);font-weight:800;text-shadow:0 0 10px rgba(var(--askacc-rgb),.75)}
   #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
     color:var(--txt3);border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;
@@ -50,8 +50,8 @@
   @media (pointer:coarse){ #novo-ask-bubble kbd{display:none} }
   /* NoVo left something. The bubble is the only place it can show, since the drop lands in a panel
      that is closed by default -- so the dot has to survive until the panel is actually opened. */
-  #novo-ask-bubble.has-drop{border-color:var(--askacc);color:var(--txt1);
-    box-shadow:0 0 0 1px rgba(var(--askacc-rgb),.35), 0 0 24px rgba(var(--askacc-rgb),.26)}
+  #novo-ask-bubble.has-drop{color:var(--txt1);
+ box-shadow:0 0 0 1px rgba(var(--askacc-rgb),.35), 0 0 24px rgba(var(--askacc-rgb),.26)}
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
     background:var(--askacc);box-shadow:0 0 9px rgba(var(--askacc-rgb),.9)}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
@@ -88,10 +88,10 @@
   #novo-ask header{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--bdr,#22303f)}
   #novo-ask header b{color:#eaf3ff;font-size:15px}
   #novo-ask header span{color:var(--txt2,#9fb6d1);font-size:11.5px;display:block;margin-top:1px}
-  #novo-ask .clr{margin-left:auto;background:none;border:1px solid var(--bdr,#22303f);border-radius:999px;
-    color:var(--txt2,#9fb6d1);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    padding:5px 11px;cursor:pointer}
-  #novo-ask .clr:hover{color:#eaf3ff;border-color:var(--askacc)}
+  #novo-ask .clr{margin-left:auto;background:none;border-radius:999px;
+ color:var(--txt2,#9fb6d1);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+ padding:5px 11px;cursor:pointer}
+  #novo-ask .clr:hover{color:#eaf3ff;}
   #novo-ask .x{background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
   #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
     position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
@@ -189,16 +189,16 @@
 
   /* Desktop expand: the same full-screen chat, one keystroke of intent away. The floating
      panel stays the default; .max takes the whole viewport and remembers the choice. */
-  #novo-ask .mx{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
-    color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
-  #novo-ask .mx:hover{color:#eaf3ff;border-color:var(--askacc)}
+  #novo-ask .mx{background:none;border-radius:9px;
+ color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
+  #novo-ask .mx:hover{color:#eaf3ff;}
   /* Plain English: a setting a new trader can find without asking for it. Lit when on, because
      a toggle whose state you cannot see is a toggle people press twice. */
-  #novo-ask .lvl{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
-    color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
-    margin-right:6px;white-space:nowrap}
-  #novo-ask .lvl:hover{color:#eaf3ff;border-color:var(--askacc)}
-  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;background:var(--askacc);border-color:var(--askacc)}
+  #novo-ask .lvl{background:none;border-radius:9px;
+ color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
+ margin-right:6px;white-space:nowrap}
+  #novo-ask .lvl:hover{color:#eaf3ff;}
+  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;background:var(--askacc);}
   /* Go deeper: the answer is short by default now, so the way back to the desk report has to be
      one tap rather than knowing the phrase "deep read". */
   #novo-ask .deeper{background:none;border:1px solid var(--bdr,#22303f);border-radius:8px;

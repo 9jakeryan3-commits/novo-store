@@ -353,7 +353,7 @@
   function drawRead(el, state) {
     var tk = ticker(state);
     var r = state && state.read;
-    var h = '<h2>' + esc(tk) + ' &middot; The read</h2>';
+    var h = '<h2>' + esc(tk) + ' &middot; Desk note</h2>';
 
     /* THE GAUGE GOES FIRST (Jake, 2026-09-08: "move the fear guage to the top of the read tab
        where it belongs"). It was last, under a read that can run to several hundred words - so

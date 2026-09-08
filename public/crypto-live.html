@@ -25,6 +25,18 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
      Weights matched to the marketing pages so the same text renders identically on both. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
+/* ── BUTTONS CARRY NO OUTLINE, AND THAT NEEDS SAYING EXPLICITLY (2026-09-08) ────────────────
+   Jake: "zero boarder around then you should only see the text NO BORDER its now massive silver
+   borders around all 3". That was my bug, and an instructive one: the de-border sweep DELETED
+   `border: 1px solid var(--bdr)` from each button rule instead of setting it to zero. Removing
+   an author declaration does not remove the border - it uncovers the USER-AGENT default, which
+   for <button> is `2px outset ButtonBorder`: a thick silver 3D box, heavier than what was there
+   before. Deleting a property and setting it to none are opposite outcomes when the UA has an
+   opinion, and <button>, <input>, <select> and <fieldset> all do.
+   One base rule, so no future button can inherit the default by omission. kbd keycaps are not
+   buttons and keep their outline. */
+button { border: 0; }
+
 :root{
   --navy:#0e0e10; --navy2:#17171a; --panel:#111113; --sunk:#0b0b0d;
   --bdr:#2c2c30; --bdr2:#242428;
@@ -147,9 +159,9 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
    on a phone the header wraps and neither should be pushed anywhere. */
 #novo-keys-hint { margin-left: auto; }
 .lv-gear{margin-left:0;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;
-  border:1px solid var(--bdr);color:var(--txt2);font:inherit;font-size:12px;font-weight:700;
-  padding:7px 12px;border-radius:var(--r-2);cursor:pointer}
-.lv-gear:hover{border-color:var(--cx);color:var(--txt1);background:rgba(167,139,250,.07)}
+ color:var(--txt2);font:inherit;font-size:12px;font-weight:700;
+ padding:7px 12px;border-radius:var(--r-2);cursor:pointer}
+.lv-gear:hover{color:var(--txt1);background:rgba(167,139,250,.07)}
 @media (pointer:coarse){.lv-gear{margin-left:auto}}
 /* Settings drawer */
 .lv-scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;
@@ -440,9 +452,9 @@ tr:last-child td{border-bottom:none}
     #railclose{display:block}
   }
   #railclose{display:none;position:sticky;top:0;z-index:2;width:100%;
-    background:var(--navy2);border:1px solid var(--bdr);color:var(--txt2);
-    border-radius:var(--r-2);padding:11px;font-family:var(--mono);font-size:12px;
-    letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;cursor:pointer}
+ background:var(--navy2);color:var(--txt2);
+ border-radius:var(--r-2);padding:11px;font-family:var(--mono);font-size:12px;
+ letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;cursor:pointer}
   .tt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
   .tt th{text-align:left;font-weight:600;color:var(--txt4);padding:4px 6px;border-bottom:1px solid var(--bdr2);
     font-size:10px;letter-spacing:.08em;text-transform:uppercase}
@@ -529,21 +541,21 @@ tr:last-child td{border-bottom:none}
   .cx-install:hover{filter:brightness(1.07)}
   @media (max-width:640px){ .cx-install{bottom:70px;left:12px} }
   /* In-flow header control, not a floating dock. */
-  #novo-ask-bubble.open{border-color:var(--cx);color:#eaf3ff}
+  #novo-ask-bubble.open{color:#eaf3ff}
   #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
-    padding:8px 12px;/* explicit line-height on all three: the button inherits a different font-family per
-       dashboard, and the font's own line box was making trader 2px taller than the other two
-       at identical padding and font-size. A fixed line-height takes the metric out of it. */
-    line-height:1.4;border-radius:10px;border:1px solid rgba(167,139,250,.42);cursor:pointer;
-    background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
-    /* ⚠ NO min-width. 264px was left over from when this was styled as a SEARCH FIELD with a
-       placeholder in it; the label is now three short words and the box was 2.3x the width and
-       1.5x the height of the same control on the trader dashboard. The width is whatever the
-       words need. */
-    text-align:left;
-    box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 22px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
-  #novo-ask-bubble:hover{border-color:#a78bfa;color:var(--txt1);
-    box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.62),inset 0 1px 0 rgba(255,255,255,.07)}
+ padding:8px 12px;/* explicit line-height on all three: the button inherits a different font-family per
+ dashboard, and the font's own line box was making trader 2px taller than the other two
+ at identical padding and font-size. A fixed line-height takes the metric out of it. */
+ line-height:1.4;border-radius:10px;cursor:pointer;
+ background:linear-gradient(180deg,var(--navy2),var(--sunk));color:var(--txt1);font-weight:600;font-size:13.5px;
+ /* ⚠ NO min-width. 264px was left over from when this was styled as a SEARCH FIELD with a
+ placeholder in it; the label is now three short words and the box was 2.3x the width and
+ 1.5x the height of the same control on the trader dashboard. The width is whatever the
+ words need. */
+ text-align:left;
+ box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 22px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+  #novo-ask-bubble:hover{color:var(--txt1);
+ box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.62),inset 0 1px 0 rgba(255,255,255,.07)}
   #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
   /* margin-left was auto, which pinned the key to the far edge and stretched the label across
      the whole button. With the box no longer forced wide there is nothing to stretch to, and an
@@ -551,8 +563,8 @@ tr:last-child td{border-bottom:none}
   #novo-ask-bubble kbd{margin-left:0;font-family:inherit;font-size:11px;font-weight:700;
     color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
-  #novo-ask-bubble.has-drop{border-color:#a78bfa;color:var(--txt1);
-    box-shadow:0 0 0 1px rgba(167,139,250,.35), 0 0 24px rgba(167,139,250,.26)}
+  #novo-ask-bubble.has-drop{color:var(--txt1);
+ box-shadow:0 0 0 1px rgba(167,139,250,.35), 0 0 24px rgba(167,139,250,.26)}
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
     background:#a78bfa;box-shadow:0 0 9px rgba(167,139,250,.9)}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
@@ -574,10 +586,10 @@ tr:last-child td{border-bottom:none}
   #novo-ask header{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--bdr,var(--bdr))}
   #novo-ask header b{color:var(--txt1);font-size:15px}
   #novo-ask header span{color:var(--txt2,var(--txt2));font-size:11.5px;display:block;margin-top:1px}
-  #novo-ask .clr{margin-left:auto;background:none;border:1px solid var(--bdr,var(--bdr));border-radius:999px;
-    color:var(--txt2,var(--txt2));font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    padding:5px 11px;cursor:pointer}
-  #novo-ask .clr:hover{color:var(--txt1);border-color:#a78bfa}
+  #novo-ask .clr{margin-left:auto;background:none;border-radius:999px;
+ color:var(--txt2,var(--txt2));font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+ padding:5px 11px;cursor:pointer}
+  #novo-ask .clr:hover{color:var(--txt1);}
   #novo-ask .x{background:none;border:0;color:var(--txt2,var(--txt2));font-size:20px;cursor:pointer;line-height:1}
   #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
     position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
@@ -659,16 +671,16 @@ tr:last-child td{border-bottom:none}
 
   /* Desktop expand: the same full-screen chat, one keystroke of intent away. The floating
      panel stays the default; .max takes the whole viewport and remembers the choice. */
-  #novo-ask .mx{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
-    color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
-  #novo-ask .mx:hover{color:#eaf3ff;border-color:var(--askacc)}
+  #novo-ask .mx{background:none;border-radius:9px;
+ color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
+  #novo-ask .mx:hover{color:#eaf3ff;}
   /* Plain English: a setting a new trader can find without asking for it. Lit when on, because
      a toggle whose state you cannot see is a toggle people press twice. */
-  #novo-ask .lvl{background:none;border:1px solid var(--bdr,#22303f);border-radius:9px;
-    color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
-    margin-right:6px;white-space:nowrap}
-  #novo-ask .lvl:hover{color:#eaf3ff;border-color:var(--askacc)}
-  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;background:var(--askacc);border-color:var(--askacc)}
+  #novo-ask .lvl{background:none;border-radius:9px;
+ color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
+ margin-right:6px;white-space:nowrap}
+  #novo-ask .lvl:hover{color:#eaf3ff;}
+  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;background:var(--askacc);}
   /* Go deeper: the answer is short by default now, so the way back to the desk report has to be
      one tap rather than knowing the phrase "deep read". */
   #novo-ask .deeper{background:none;border:1px solid var(--bdr,#22303f);border-radius:8px;

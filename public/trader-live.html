@@ -196,6 +196,18 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
 </script>
 <title>NoVo Trader</title>
 <style>
+/* ── BUTTONS CARRY NO OUTLINE, AND THAT NEEDS SAYING EXPLICITLY (2026-09-08) ────────────────
+   Jake: "zero boarder around then you should only see the text NO BORDER its now massive silver
+   borders around all 3". That was my bug, and an instructive one: the de-border sweep DELETED
+   `border: 1px solid var(--bdr)` from each button rule instead of setting it to zero. Removing
+   an author declaration does not remove the border - it uncovers the USER-AGENT default, which
+   for <button> is `2px outset ButtonBorder`: a thick silver 3D box, heavier than what was there
+   before. Deleting a property and setting it to none are opposite outcomes when the UA has an
+   opinion, and <button>, <input>, <select> and <fieldset> all do.
+   One base rule, so no future button can inherit the default by omission. kbd keycaps are not
+   buttons and keep their outline. */
+button { border: 0; }
+
 /* ── PARKED ON THE TRADER DASHBOARD (Jake, 2026-09-06) ─────────────────────────────────────────
    Gamma Squeeze and Analyst Score are pulled from Market Intel here. They STAY on the Analyst
    dashboard, which is a different file and is untouched — this is a parking, not a deletion.
@@ -863,16 +875,28 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 .lf-m b  { color: var(--txt2); font-weight: 700; }
 .lf-empty{ padding: 16px 2px; font-size: 11.5px; color: var(--txt3); line-height: 1.6; }
 .b3-wrap { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 2px 10px 10px; }
-.b3      { width: 100%; border-collapse: collapse; }
-.b3 td, .b3 th { padding: 4px 6px; font-family: var(--font); font-size: 11.5px; text-align: right;
-  border-bottom: 1px solid var(--bdr2); white-space: nowrap; }
-.b3 tr:last-child td { border-bottom: 0; }
-.b3 .b3-lbl { text-align: left; font-family: var(--sans); font-size: 9.5px; letter-spacing: 1.2px;
-  text-transform: uppercase; color: var(--txt3); }
-.b3 th { font-size: 10.5px; font-weight: 900; letter-spacing: 1.5px; color: var(--txt1); border-bottom: 1px solid var(--bdr); }
-.b3 .b3-v { color: var(--txt1); font-weight: 700; }
-.b3 .b3-d { font-size: 9.5px; color: var(--txt3); font-weight: 400; }
-.b3 .pos { color: var(--grn); } .b3 .neg { color: var(--red); }
+/* ONE TICKER PER BLOCK. Hairlines only: a rule above every row, a stronger one opening each
+   ticker. No boxes, no cell walls - the grouping is done by the heading and the spacing. */
+.b3-tk   { margin-top: 14px; }
+.b3-tk:first-child { margin-top: 4px; }
+.b3-hd   { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+           padding: 7px 0 8px; border-top: 1px solid var(--bdr); }
+.b3-tk:first-child .b3-hd { border-top: 0; }
+.b3-tkn  { font-family: var(--sans); font-size: 11px; font-weight: 900; letter-spacing: 1.6px;
+           color: var(--txt1); }
+.b3-spot { font-family: var(--font); font-size: 14px; font-weight: 800; color: var(--txt1);
+           font-variant-numeric: tabular-nums; }
+.b3-r    { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+           padding: 5px 0; border-top: 1px solid var(--bdr2); }
+.b3-k    { font-family: var(--sans); font-size: 9.5px; letter-spacing: 1.2px;
+           text-transform: uppercase; color: var(--txt3); white-space: nowrap; }
+.b3-val  { font-family: var(--font); font-size: 11.5px; text-align: right;
+           font-variant-numeric: tabular-nums; }
+.b3-v    { color: var(--txt1); font-weight: 700; }
+.b3-d    { font-size: 9.5px; color: var(--txt3); font-weight: 400; }
+.b3-none { color: var(--txt3); font-size: 11px; justify-content: flex-start; }
+.b3 .pos, .b3-val .pos, .pos.b3-v { color: var(--grn); }
+.b3 .neg, .b3-val .neg, .neg.b3-v { color: var(--red); }
 .read2-body { flex: 1 1 0; min-height: 0; max-height: 170px; overflow-y: auto; padding: 10px 16px 14px;
   font-size: 12px; line-height: 1.7; color: var(--txt2); white-space: pre-wrap; }
 #card-read { display: none; }
@@ -2927,7 +2951,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
           <span class="ch-title">The Three Books &mdash; live dealer structure</span>
           <span id="board-stamp" class="ch-badge" style="cursor:default;">&mdash;</span>
         </div>
-        <div class="b3-wrap"><table class="b3" id="b3-table"><tbody></tbody></table></div>
+        <div class="b3-wrap"><div id="b3-list"></div></div>
       </div>
     </div>
     <!-- NoVo's own history. The read above says what the map IS; this says what the map has DONE. -->
@@ -2956,7 +2980,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 <div id="desk-rail" aria-label="Desk panels">
   <button type="button" data-desk="afeed" onclick="deskOpen('afeed')">Analysis feed</button>
   <button type="button" data-desk="books" onclick="deskOpen('books')">Three books</button>
-  <button type="button" data-desk="read" onclick="deskOpen('read')">The Read</button>
+  <button type="button" data-desk="read" onclick="deskOpen('read')">Desk Note</button>
   <button type="button" data-desk="readings" onclick="deskOpen('readings')">Live Reads</button>
   <button type="button" data-desk="futures" onclick="deskOpen('futures')">Futures</button>
   <button type="button" data-desk="history" onclick="deskOpen('history')">History</button>
@@ -3016,7 +3040,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <button type="button" data-tab="7" onclick="pickMore(7)" hidden><span class="mm-ico">&#9670;</span>Predictions</button>
   <button type="button" data-tab="8" onclick="pickMore(8)"><span class="mm-ico">&#9672;</span>Live Reads</button>
   <button type="button" data-tab="9" onclick="pickMore(9)"><span class="mm-ico">&#9650;</span>Futures</button>
-  <button type="button" data-tab="13" onclick="pickMore(13)"><span class="mm-ico">&#9636;</span>The Read</button>
+  <button type="button" data-tab="13" onclick="pickMore(13)"><span class="mm-ico">&#9636;</span>Desk Note</button>
   <button type="button" data-tab="10" onclick="pickMore(10)"><span class="mm-ico">&#9203;</span>History</button>
   <button type="button" data-tab="11" onclick="pickMore(11)"><span class="mm-ico">&#9878;</span>Options flow</button>
   <button type="button" data-tab="12" onclick="pickMore(12)"><span class="mm-ico">&#9889;</span>Sweeps &amp; blocks</button>
@@ -4247,39 +4271,55 @@ function _vixSpark(){
 }
 function _renderBoard(){
   _gexSpark(); _vixSpark();
-  var tb=document.querySelector('#b3-table tbody'); if(!tb||!_abData) return;
+  /* STACKED PER TICKER, not a 4-column table (Jake, 2026-09-08: "the 3 books needs to be a
+     vertical stacked so it fits the tab better both desktop and phone"). The table was built for
+     a full-width analysis view; this panel is 400px on the desktop rail and narrower on a phone,
+     so three value columns plus a label column left every number truncated or wrapped. One
+     ticker per block, its rows underneath, is the same data in the width that actually exists.
+     Hairlines only - a rule above each row, a heavier one above each ticker. */
+  var tb=document.getElementById('b3-list'); if(!tb||!_abData) return;
   var B=_abData.board||{}, TKS=['SPY','QQQ','IWM'];
-  function cell(tk,fn){ var b=B[tk]; return b?fn(b):'<td class="b3-d">&mdash;</td>'; }
-  function lvl(b,k){
-    var v=b[k]; if(!v) return '<td class="b3-d">&mdash;</td>';
-    var d=(b.spot>0)?((v-b.spot)/b.spot*100):null;
-    return '<td><span class="b3-v">'+v.toFixed(2)+'</span> <span class="b3-d">'+
-      (d===null?'':(d>=0?'+':'')+d.toFixed(1)+'%')+'</span></td>';
+  function pctOf(b,v){ return (b.spot>0)? ((v-b.spot)/b.spot*100) : null; }
+  function row(k,v,extra){
+    return '<div class="b3-r"><span class="b3-k">'+k+'</span>'
+         + '<span class="b3-val">'+v+(extra?' <span class="b3-d">'+extra+'</span>':'')+'</span></div>';
   }
-  var rows='<tr><th class="b3-lbl">'+''+'</th>'+TKS.map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr>';
-  rows+='<tr><td class="b3-lbl">Spot</td>'+TKS.map(function(t){return cell(t,function(b){
-    return '<td class="b3-v">'+(b.spot?b.spot.toFixed(2):'&mdash;')+'</td>';});}).join('')+'</tr>';
-  rows+='<tr><td class="b3-lbl">Net GEX /1%</td>'+TKS.map(function(t){return cell(t,function(b){
-    var g=_fmtGex(b.net_gex,b.spot); if(g===null) return '<td class="b3-d">&mdash;</td>';
-    return '<td class="b3-v '+(b.net_gex>=0?'pos':'neg')+'">'+g+'</td>';});}).join('')+'</tr>';
-  [['flip','Gamma flip'],['call_wall','Call wall'],['put_wall','Put wall'],['gravity','Gravity']]
-    .forEach(function(rk){
-      rows+='<tr><td class="b3-lbl">'+rk[1]+'</td>'+TKS.map(function(t){return cell(t,function(b){return lvl(b,rk[0]);});}).join('')+'</tr>';
-    });
-  rows+='<tr><td class="b3-lbl">Exp. move</td>'+TKS.map(function(t){return cell(t,function(b){
-    if(!b.em_low||!b.em_high) return '<td class="b3-d">&mdash;</td>';
-    return '<td class="b3-d"><span class="b3-v">'+b.em_low.toFixed(2)+'</span> &ndash; <span class="b3-v">'+b.em_high.toFixed(2)+'</span></td>';});}).join('')+'</tr>';
-  // Skew + the MM hedging split — the engine's own IV work, per ticker. Positive skew (puts
-  // over calls) reads red: the crowd is paying up for downside.
-  rows+='<tr><td class="b3-lbl">Skew put&minus;call</td>'+TKS.map(function(t){return cell(t,function(b){
-    var sk=b.skew||{}; if(sk.skew_pts===undefined) return '<td class="b3-d">&mdash;</td>';
-    var sp=+sk.skew_pts;
-    return '<td><span class="b3-v '+(sp>=0?'neg':'pos')+'">'+(sp>=0?'+':'')+sp.toFixed(1)+'</span> <span class="b3-d">'+(+sk.put_iv).toFixed(1)+'/'+(+sk.call_iv).toFixed(1)+'</span></td>';});}).join('')+'</tr>';
-  rows+='<tr><td class="b3-lbl">MM fast/slow</td>'+TKS.map(function(t){return cell(t,function(b){
-    var sk=b.skew||{}; if(sk.mm_fast===undefined) return '<td class="b3-d">&mdash;</td>';
-    var d2=+(sk.mm_spread||0);
-    return '<td><span class="b3-v">'+(+sk.mm_fast).toFixed(1)+'/'+(+sk.mm_slow).toFixed(1)+'</span> <span class="b3-d">'+(d2>=0?'+':'')+d2.toFixed(1)+'</span></td>';});}).join('')+'</tr>';
-  tb.innerHTML=rows;
+  function lvlRow(b,key,label){
+    var v=b[key]; if(!v) return row(label,'<span class="b3-d">&mdash;</span>','');
+    var d=pctOf(b,v);
+    return row(label,'<span class="b3-v">'+v.toFixed(2)+'</span>',
+               d===null?'':((d>=0?'+':'')+d.toFixed(1)+'%'));
+  }
+  var out='';
+  TKS.forEach(function(t){
+    var b=B[t];
+    out+='<div class="b3-tk"><div class="b3-hd"><span class="b3-tkn">'+t+'</span>'
+       + '<span class="b3-spot">'+((b&&b.spot)?b.spot.toFixed(2):'&mdash;')+'</span></div>';
+    if(!b){ out+='<div class="b3-r b3-none">no book published for this ticker yet</div></div>'; return; }
+    var g=_fmtGex(b.net_gex,b.spot);
+    out+= row('Net GEX /1%', g===null?'<span class="b3-d">&mdash;</span>'
+              :'<span class="b3-v '+(b.net_gex>=0?'pos':'neg')+'">'+g+'</span>','');
+    out+= lvlRow(b,'flip','Gamma flip');
+    out+= lvlRow(b,'call_wall','Call wall');
+    out+= lvlRow(b,'put_wall','Put wall');
+    out+= lvlRow(b,'gravity','Gravity');
+    out+= row('Exp. move', (b.em_low&&b.em_high)
+              ? '<span class="b3-v">'+b.em_low.toFixed(2)+'</span> &ndash; <span class="b3-v">'+b.em_high.toFixed(2)+'</span>'
+              : '<span class="b3-d">&mdash;</span>','');
+    var sk=b.skew||{};
+    /* Positive skew (puts over calls) reads RED: the crowd is paying up for downside. */
+    out+= row('Skew put&minus;call', (sk.skew_pts===undefined)
+              ? '<span class="b3-d">&mdash;</span>'
+              : '<span class="b3-v '+((+sk.skew_pts)>=0?'neg':'pos')+'">'
+                + ((+sk.skew_pts)>=0?'+':'')+(+sk.skew_pts).toFixed(1)+'</span>',
+              (sk.skew_pts===undefined)?'':((+sk.put_iv).toFixed(1)+'/'+(+sk.call_iv).toFixed(1)));
+    out+= row('MM fast/slow', (sk.mm_fast===undefined)
+              ? '<span class="b3-d">&mdash;</span>'
+              : '<span class="b3-v">'+(+sk.mm_fast).toFixed(1)+'/'+(+sk.mm_slow).toFixed(1)+'</span>',
+              (sk.mm_fast===undefined)?'':(((+(sk.mm_spread||0))>=0?'+':'')+(+(sk.mm_spread||0)).toFixed(1)));
+    out+='</div>';
+  });
+  tb.innerHTML=out;
     // The GEX tile for a non-engine selection: the selected ticker's own book off the board hash,
   // same per-1% convention as the ws lane. Everything else on the strip is engine-scoped
   // computation and stays so — the labels grow an engine-ticker tag instead (see _paintTkrUI).
