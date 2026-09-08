@@ -522,6 +522,22 @@ which Jake explicitly carved out. */
      Nothing else hides them, so without this they would simply appear inline on the desktop
      analyst as two extra panels nobody asked for. The mobile block below switches them on. */
   .lv-futures, .lv-history { display: none; }
+  /* THE SECTION BAR. Written in the dashboard's OWN voice - the same small uppercase letterspaced
+     treatment as "SWITCH TICKER - THE OTHER TWO INDICES" and "DR. NOVO'S BIAS" - rather than a row
+     of pills borrowed from somewhere else. One hairline under it, the active tab brighter with a
+     2px underline: the same device the SPY/QQQ/IWM ticker pills already use, so the page has one
+     way of saying "this is the selected one". No boxes, no fills. */
+  .lv-tabs { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0;
+    margin: 4px 0 16px; border-bottom: 1px solid var(--bdr2); }
+  .lv-tabs button { background: none; color: var(--txt3);
+    font-family: var(--sans); font-size: 10px; font-weight: 800; letter-spacing: 1.6px;
+    text-transform: uppercase; padding: 9px 15px 8px; margin-bottom: -1px;
+    border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
+    transition: color .12s ease, border-color .12s ease; }
+  .lv-tabs button:first-child { padding-left: 0; }
+  .lv-tabs button:hover { color: var(--txt2); }
+  .lv-tabs button.on { color: var(--txt1); border-bottom-color: var(--txt1); }
+  .lv-tabs button[hidden] { display: none; }
 
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
@@ -605,6 +621,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="novo-keys-hint"></div>
       <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
     </div>
+    <!-- THE SECTION BAR. Under the brand row and above the futures strip - where Jake drew the
+         line, and where the first attempt did NOT put it (it went above the brand, which is why
+         he marked it NO three times). It drives the same lvMobTab the phone's bottom bar drives,
+         so a tab has one definition and one behaviour on both. The phone hides this: it has its
+         own bar and two navigations on one screen is one too many. -->
+    <nav id="lv-tabs" class="lv-tabs" aria-label="Sections">
+      <button type="button" data-lvtab="map" onclick="lvMobTab('map')">Dealer Map</button>
+      <button type="button" data-lvtab="readings" onclick="lvMobTab('readings')">Live Reads</button>
+      <button type="button" data-lvtab="futures" onclick="lvMobTab('futures')">Futures</button>
+      <button type="button" data-lvtab="read" onclick="lvMobTab('read')">Desk Note</button>
+      <button type="button" data-lvtab="history" onclick="lvMobTab('history')">History</button>
+      <button type="button" data-lvtab="alerts" onclick="lvMobTab('alerts')">Alerts</button>
+      <button type="button" data-lvtab="digest" onclick="lvMobTab('digest')">Digest</button>
+      <button type="button" data-lvtab="predict" onclick="lvMobTab('predict')" hidden>Predictions</button>
+    </nav>
 
     <!-- market ribbon -->
     <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt3);margin:2px 0 9px;">Futures &middot; <span style="color:#34d399;">Live 24/5</span></div>
@@ -1788,25 +1819,77 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      the first time any of the other callers ran, and it would go stale SILENTLY. It watches the
      panel's class instead, so it reports what IS rather than what this file last asked for. */
   #mobile-tabs { display: none; }
+
+/* ── ONE VIEW AT A TIME, ON EVERY WIDTH (Jake, 2026-09-08) ──────────────────────────────────
+   Written for the phone, hoisted here rather than copied: a second set for desktop is a second
+   answer to "what does the Futures tab show", and the two drift the first time a panel moves.
+   Dealer Map is home; every other tab replaces it.
+   Each filter spares .lv-tabs - a bar hidden by the switch it performs is a bar you use once.
+   The !important block below travels with them for the same reason it exists: those three panels
+   set their display inline from JS, so a plain rule cannot touch them at any width. */
+  /* ── THE READ IS ITS OWN TAB (Jake, 2026-09-07: "lets give Today's Read its own tab
+     'The Read' on mobile"). It is a thousand words of prose sitting at the very bottom of a
+     document whose other ten sections are dense numeric panels — on a phone, reaching the one
+     part of this dashboard you READ rather than scan meant scrolling past all of it.
+     Stated as "what each tab hides", against #dash's DIRECT children only, so a panel added to
+     the dashboard later joins the map tab automatically instead of appearing on both. The header
+     and the footer are on every tab: one is the brand and the live badge, the other is the
+     "not financial advice" line, and that line does not get a tab it can be missing from. */
+  body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-read):not(.lv-foot):not(#eye-readbar) { display: none; }
+  /* THE LINE BELONGS WITH THE ALERTS (Jake, 2026-09-07): it fires when a mapped level
+     breaks, which is an alert, not a piece of analysis. It is moved to sit beside the alerts
+     card in the DOM, so the view filter keeps it too. */
+  /* `:not(.b-line)` is CORRECT here and I nearly broke it. .b-line is authored inside
+     .lv-bottom, so it looks like it could never match `#dash > *` - but a script further down
+     MOVES it out of the bottom grid to sit beside the alerts card, which makes it a direct
+     child by the time this rule is evaluated. Reading the stylesheet alone said the exclusion
+     was dead; the DOM says it is load-bearing. Check where an element ENDS UP, not where it
+     was written. */
+  body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-alerts):not(.b-line):not(.lv-foot) { display: none; }
+  /* ...and off the Dealer Map, because it lives in the Alerts tab now (Jake, 2026-09-08).
+     Live Reads and the futures strip are the two he kept on the map; everything else that
+     became a tab leaves it. Matched at the same depth the mover leaves it at. */
+  body[data-mtab="map"] #dash > .b-line { display: none; }
+  body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-digest):not(.lv-foot) { display: none; }
+  body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-predict):not(.lv-foot) { display: none; }
+  /* The readings view: reached from the strip, left by tapping any tab. No tab lights up while
+     it is open, which is honest — there is no tab. The strip itself stays visible so the way
+     back out is never a dead end. */
+  body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-readings):not(.lv-foot):not(#eye-readbar) { display: none; }
+  body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-futures):not(.lv-foot) { display: none; }
+  body[data-mtab="history"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-history):not(.lv-foot) { display: none; }
+  /* ...and switched back on for their own tab, against the desktop default above. */
+  body[data-mtab="futures"] #dash > .lv-futures { display: block; }
+  body[data-mtab="history"] #dash > .lv-history { display: block; }
+  body[data-mtab="map"]  #dash > .lv-read,
+  body[data-mtab="map"]  #dash > .lv-alerts,
+  body[data-mtab="map"]  #dash > .lv-digest,
+  body[data-mtab="map"]  #dash > .lv-predict,
+  body[data-mtab="map"]  #dash > .lv-readings,
+  body[data-mtab="map"]  #dash > .lv-futures,
+  body[data-mtab="map"]  #dash > .lv-history { display: none; }
+  /* ── INLINE display BEATS EVERY FILTER, SO THESE NEED !important (2026-09-08) ────────────
+     Jake: "sweeps and blocks literally landing in everything page and both history panels
+     still show in the main map". Three panels set their own display from JS - renderTapeFlow
+     does card.style.display='block', and the analogue and base-rate panels do the same - and
+     an INLINE style outranks any stylesheet rule that is not !important. The tab filters are
+     plain rules against #dash's children, so they could never hide these: the moment the tape
+     had data it appeared on Alerts, Digest, Desk Note, every view. Reproduced by forcing the
+     inline value a live tape sets, then fixed against that.
+     MOBILE-SCOPED ON PURPOSE. body carries data-mtab="map" at every width, so writing these
+     against that attribute alone would have pulled the same panels off the DESKTOP analyst,
+     which has no tabs to reach them from since the header bar was reverted. Tabs exist here;
+     the hiding belongs here. */
+  /* Sweeps belongs to the Dealer Map on this dashboard - it was not among the tabs Jake asked
+     to bring over - so it shows there and on no other view. */
+  body:not([data-mtab="map"]) #tape-card { display: none !important; }
+  /* The analogue table and the base-rate line are what the History TAB now says. Two copies of
+     one answer on one phone is the redundancy Jake asked to remove; History owns it. */
+  #anlg-card, .d-br { display: none !important; }
+
   @media (max-width: 768px) {
-    /* ── INLINE display BEATS EVERY FILTER, SO THESE NEED !important (2026-09-08) ────────────
-       Jake: "sweeps and blocks literally landing in everything page and both history panels
-       still show in the main map". Three panels set their own display from JS - renderTapeFlow
-       does card.style.display='block', and the analogue and base-rate panels do the same - and
-       an INLINE style outranks any stylesheet rule that is not !important. The tab filters are
-       plain rules against #dash's children, so they could never hide these: the moment the tape
-       had data it appeared on Alerts, Digest, Desk Note, every view. Reproduced by forcing the
-       inline value a live tape sets, then fixed against that.
-       MOBILE-SCOPED ON PURPOSE. body carries data-mtab="map" at every width, so writing these
-       against that attribute alone would have pulled the same panels off the DESKTOP analyst,
-       which has no tabs to reach them from since the header bar was reverted. Tabs exist here;
-       the hiding belongs here. */
-    /* Sweeps belongs to the Dealer Map on this dashboard - it was not among the tabs Jake asked
-       to bring over - so it shows there and on no other view. */
-    body:not([data-mtab="map"]) #tape-card { display: none !important; }
-    /* The analogue table and the base-rate line are what the History TAB now says. Two copies of
-       one answer on one phone is the redundancy Jake asked to remove; History owns it. */
-    #anlg-card, .d-br { display: none !important; }
+    /* The phone has the bottom bar and the More menu. */
+    .lv-tabs { display: none; }
     :root { --navh: calc(52px + env(safe-area-inset-bottom, 0px)); }
     /* INSET, NOT bottom/left/right, AND THREE EXPLICIT RESETS. This dashboard links
        /journal/blog.css, which styles the SITE header with a bare element selector:
@@ -1892,47 +1975,6 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     .mob-tab-novo { color: #22d3ee; }
     .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(34,211,238,.85); }
     .mob-tab-novo.mob-active { color: #67e8f9; border-top-color: #22d3ee; }
-    /* ── THE READ IS ITS OWN TAB (Jake, 2026-09-07: "lets give Today's Read its own tab
-       'The Read' on mobile"). It is a thousand words of prose sitting at the very bottom of a
-       document whose other ten sections are dense numeric panels — on a phone, reaching the one
-       part of this dashboard you READ rather than scan meant scrolling past all of it.
-       Stated as "what each tab hides", against #dash's DIRECT children only, so a panel added to
-       the dashboard later joins the map tab automatically instead of appearing on both. The header
-       and the footer are on every tab: one is the brand and the live badge, the other is the
-       "not financial advice" line, and that line does not get a tab it can be missing from. */
-    body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot):not(#eye-readbar) { display: none; }
-    /* THE LINE BELONGS WITH THE ALERTS (Jake, 2026-09-07): it fires when a mapped level
-       breaks, which is an alert, not a piece of analysis. It is moved to sit beside the alerts
-       card in the DOM, so the view filter keeps it too. */
-    /* `:not(.b-line)` is CORRECT here and I nearly broke it. .b-line is authored inside
-       .lv-bottom, so it looks like it could never match `#dash > *` - but a script further down
-       MOVES it out of the bottom grid to sit beside the alerts card, which makes it a direct
-       child by the time this rule is evaluated. Reading the stylesheet alone said the exclusion
-       was dead; the DOM says it is load-bearing. Check where an element ENDS UP, not where it
-       was written. */
-    body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.b-line):not(.lv-foot) { display: none; }
-    /* ...and off the Dealer Map, because it lives in the Alerts tab now (Jake, 2026-09-08).
-       Live Reads and the futures strip are the two he kept on the map; everything else that
-       became a tab leaves it. Matched at the same depth the mover leaves it at. */
-    body[data-mtab="map"] #dash > .b-line { display: none; }
-    body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
-    body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
-    /* The readings view: reached from the strip, left by tapping any tab. No tab lights up while
-       it is open, which is honest — there is no tab. The strip itself stays visible so the way
-       back out is never a dead end. */
-    body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-readings):not(.lv-foot):not(#eye-readbar) { display: none; }
-    body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-futures):not(.lv-foot) { display: none; }
-    body[data-mtab="history"] #dash > *:not(.lv-top):not(.lv-history):not(.lv-foot) { display: none; }
-    /* ...and switched back on for their own tab, against the desktop default above. */
-    body[data-mtab="futures"] #dash > .lv-futures { display: block; }
-    body[data-mtab="history"] #dash > .lv-history { display: block; }
-    body[data-mtab="map"]  #dash > .lv-read,
-    body[data-mtab="map"]  #dash > .lv-alerts,
-    body[data-mtab="map"]  #dash > .lv-digest,
-    body[data-mtab="map"]  #dash > .lv-predict,
-    body[data-mtab="map"]  #dash > .lv-readings,
-    body[data-mtab="map"]  #dash > .lv-futures,
-    body[data-mtab="map"]  #dash > .lv-history { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
@@ -2193,6 +2235,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
     if (which === 'novo') return;
     document.body.setAttribute('data-mtab', which);
+    /* The bar reflects the view whichever control changed it - itself, the phone's bottom bar,
+       the More menu, or the readings strip. One writer, so they cannot disagree. */
+    try {
+      document.querySelectorAll('#lv-tabs button').forEach(function(b){
+        b.classList.toggle('on', b.dataset.lvtab === which); });
+    } catch (_e) {}
     requestAnimationFrame(function(){
       window.scrollTo(0, scrollAt[which] || 0);
       /* ⚠ CANVASES SIZED WHILE HIDDEN MEASURE ZERO. If a data refresh lands while The Read is
