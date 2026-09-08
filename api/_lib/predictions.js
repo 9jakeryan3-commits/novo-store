@@ -249,6 +249,46 @@ function _grade(p, actual) {
   return out;
 }
 
+/* ── A TOUCH IS A PROPERTY OF THE PATH, NOT OF A SAMPLE ────────────────────────────────────
+   Jake, 2026-09-08: "SPY touches 768 -> MISS ... ACTUAL 768.8" while the session low was 767.52.
+   The call was right and the record said it was wrong.
+
+   The old check compared the CURRENT spot on each publish and, at the horizon, wrote whatever
+   spot happened to be at that instant as "ACTUAL". Two things follow, and both are wrong:
+
+     1. A touch that happens BETWEEN polls is never seen. The evaluator runs on the publish tick;
+        price does not. Anything that dips through the level and recovers inside the gap is graded
+        a miss - and on 2026-09-08 the engine was down for eight hours, so the gap was the whole
+        overnight session.
+     2. The number printed as ACTUAL is a sampled instant with no relationship to the claim. For
+        "does it reach 768", the only number that can support or refute it is the FURTHEST the
+        price actually got. 768.8 was neither the extreme nor evidence of anything.
+
+   So the row now carries its own running extreme, updated from every spot this evaluator has
+   ever seen, and the verdict reads off that. ACTUAL becomes the extreme in the direction of the
+   claim: on a hit it is where it got to, on a miss it is how close it came - which is auditable
+   either way. Still poll-bound (nothing here sees between two ticks), but a running extreme
+   cannot un-see a touch it has already observed, and the old one could. */
+function _touchStep(p, spot, now) {
+  const up = p.spot_at < p.value;                 // reaching UP to the level, or DOWN to it
+  if (!isFinite(p.path_hi) || spot > p.path_hi) p.path_hi = spot;
+  if (!isFinite(p.path_lo) || spot < p.path_lo) p.path_lo = spot;
+  const reach = up ? p.path_hi : p.path_lo;       // the furthest it has come toward the level
+  const reached = up ? (reach >= p.value) : (reach <= p.value);
+  if (reached) {
+    p.status = "graded";
+    p.outcome = { actual: reach, hit: true, graded_utc: now, basis: "session extreme" };
+    return true;
+  }
+  if (now >= p.horizon_utc) {
+    p.status = "graded";
+    p.outcome = { actual: reach, hit: false, graded_utc: now, basis: "session extreme",
+                  missed_by: +Math.abs(reach - p.value).toFixed(2) };
+    return true;
+  }
+  return false;                                   // still open, extreme carried on the row
+}
+
 async function evaluate(getSpot) {
   const r = kv();
   if (!r) return { graded: 0 };
@@ -273,9 +313,7 @@ async function evaluate(getSpot) {
     const spot = getSpot(p);
     if (!isFinite(spot)) continue;
     if (p.kind === "level_touch") {
-      const crossed = (p.spot_at < p.value && spot >= p.value) || (p.spot_at > p.value && spot <= p.value);
-      if (crossed) { p.status = "graded"; p.outcome = { actual: spot, hit: true, graded_utc: now }; changed++; continue; }
-      if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = { actual: spot, hit: false, graded_utc: now }; changed++; }
+      if (_touchStep(p, spot, now)) changed++;
       continue;
     }
     if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = _grade(p, spot); changed++; }
@@ -302,9 +340,7 @@ async function evaluate(getSpot) {
         const spot = getSpot(p);
         if (!isFinite(spot)) continue;
         if (p.kind === "level_touch") {
-          const crossed = (p.spot_at < p.value && spot >= p.value) || (p.spot_at > p.value && spot <= p.value);
-          if (crossed) { p.status = "graded"; p.outcome = { actual: spot, hit: true, graded_utc: now }; ch++; continue; }
-          if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = { actual: spot, hit: false, graded_utc: now }; ch++; }
+          if (_touchStep(p, spot, now)) ch++;
           continue;
         }
         if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = _grade(p, spot); ch++; }

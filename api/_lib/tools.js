@@ -425,8 +425,16 @@ const declarations = [
           description: "Named horizons resolve to the NEXT SESSION THAT EXISTS - today_close on " +
             "a holiday or after the bell becomes the next trading day's close, so a prediction " +
             "can never be graded against a market that did not trade." },
-        horizon_min: { type: "number", description: "Or minutes from now (5 to 20160)." },
-        thesis: { type: "string", description: "One line: the alignment you saw. Their words appear on the record." },
+        horizon_min: { type: "number", description: "Or minutes from now (5 to 20160). USE THIS " +
+          "when the window you state is not one of the three named ones - 'by lunch', 'within the " +
+          "hour', 'by 2pm'. Picking a named horizon that is merely CLOSE to what you said puts a " +
+          "different claim on the record than the one you made." },
+        thesis: { type: "string", description: "One line: the alignment you saw. Their words appear on the record. " +
+          "THE WINDOW IN THIS SENTENCE MUST BE THE WINDOW YOU RECORDED. On 2026-09-08 a thesis " +
+          "read 'a touch of $768 by lunch' while the horizon recorded was the opening bell; the " +
+          "call was graded at 9:30 against a level SPY reached at 9:40, and the row showed the " +
+          "prose beside a MISS with nothing to reveal they disagreed. If you say lunch, set " +
+          "horizon_min to lunch." },
         basis: { type: "string", description: "The specific numbers it rests on, e.g. 'GEX -270M, 0.15% under flip'." },
       },
       required: ["symbol", "kind", "spot_at"],

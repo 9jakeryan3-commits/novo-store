@@ -132,7 +132,15 @@
         return '<div class="pd-row"><span class="pd-what">' + esc(describe(p)) + ' → '
           + '<span class="' + (o.hit ? 'pd-hit' : 'pd-miss') + '">' + (o.hit ? 'HIT' : 'MISS') + '</span></span>'
           + '<span class="pd-meta">made ' + esc(when(p.made_utc)) + ' at ' + esc(p.spot_at)
-          + ' · actual ' + esc(o.actual)
+          /* THE HORIZON IT WAS ACTUALLY GRADED AT (2026-09-08). Open rows have always shown
+             "grades <when>"; graded rows dropped it, so the row displayed only the THESIS - and
+             a thesis is prose. A call whose thesis said "a touch of $768 by lunch" while the
+             recorded horizon was the opening bell rendered as a plain MISS with no way to see
+             the two disagreed, which reads as a broken grader rather than a call graded early.
+             The record has to state the window it was judged on, or the verdict is unauditable. */
+          + ' · horizon ' + esc(when(p.horizon_utc))
+          + ' · ' + (o.basis === 'session extreme' ? 'reached ' : 'actual ') + esc(o.actual)
+          + (o.missed_by != null ? ' · missed by ' + esc(o.missed_by) : '')
           + (o.error_pct != null ? ' · off by ' + esc(Math.abs(o.error_pct)) + '%' : '') + '</span>'
           + (p.thesis ? '<span class="pd-thesis">' + esc(p.thesis) + '</span>' : '')
           + '</div>';
