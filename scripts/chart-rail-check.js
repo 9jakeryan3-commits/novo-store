@@ -274,6 +274,72 @@ server.listen(8795, async () => {
 
   ok('...and the chart did NOT get swept into it',
      !!phone.sheet && phone.sheet.chartInside === false, JSON.stringify(phone.sheet && phone.sheet.chartInside));
+  /* ══ THE DESK PANEL ══════════════════════════════════════════════════════════════════════
+     Jake, 2026-09-07: option 2 "if its collapsible..not interested in permanently losing chart
+     view." So the assertions are about the COST: the chart's width with the panel closed must be
+     what it was before the panel existed, and every surface must actually be reachable. */
+  await goto(1600, 1000, false);
+  const deskShut = await evalIn(`(() => {
+    const rail = document.getElementById('desk-rail');
+    const chart = document.getElementById('novo-chart');
+    return { rail: !!rail && rail.getBoundingClientRect().width > 20,
+             buttons: document.querySelectorAll('#desk-rail button').length,
+             open: !!document.body.getAttribute('data-desk'),
+             chartW: chart ? Math.round(chart.getBoundingClientRect().width) : 0 }; })()`);
+  ok('the desk rail is there on desktop, one button per surface',
+     deskShut.rail === true && deskShut.buttons === 9, JSON.stringify(deskShut));
+  ok('...and it starts CLOSED — the chart keeps its width until you ask',
+     deskShut.open === false && deskShut.chartW > 300, JSON.stringify(deskShut));
+
+  const deskOpen = await evalIn(`(() => {
+    deskOpen('futures');
+    return new Promise((r) => setTimeout(() => {
+      const col = document.getElementById('col-futures');
+      const chart = document.getElementById('novo-chart');
+      r({ open: document.body.getAttribute('data-desk'),
+          shown: col ? getComputedStyle(col).display !== 'none' : false,
+          panelW: col ? Math.round(col.getBoundingClientRect().width) : 0,
+          // Assert real CONTENT, not a class: mount() adds its class to the target itself, so
+          // the descendant selector I first wrote could never match even on a perfect mount.
+          hasContent: (document.querySelector('#col-futures-body') || {}).textContent
+            ? document.querySelector('#col-futures-body').textContent.trim().length > 40 : false,
+          chartW: chart ? Math.round(chart.getBoundingClientRect().width) : 0 }); }, 500)); })()`);
+  ok('...opening one shows that surface, with its content mounted',
+     deskOpen.open === 'futures' && deskOpen.shown === true && deskOpen.panelW > 300
+       && deskOpen.hasContent === true,
+     JSON.stringify(deskOpen));
+  ok('...and the chart gives up room rather than being covered by it',
+     deskOpen.chartW < deskShut.chartW,
+     JSON.stringify({ closed: deskShut.chartW, open: deskOpen.chartW }));
+
+  const deskShut2 = await evalIn(`(() => {
+    deskOpen('futures');
+    return new Promise((r) => setTimeout(() => {
+      const chart = document.getElementById('novo-chart');
+      r({ open: document.body.getAttribute('data-desk'),
+          chartW: chart ? Math.round(chart.getBoundingClientRect().width) : 0 }); }, 500)); })()`);
+  /* THE WHOLE CONDITION HE SET. If closing does not return the width exactly, the panel is a
+     permanent cost dressed as a toggle. */
+  ok('...and clicking it again closes it, giving the chart back every pixel',
+     !deskShut2.open && deskShut2.chartW === deskShut.chartW,
+     JSON.stringify({ before: deskShut.chartW, after: deskShut2.chartW }));
+
+  const reach = await evalIn(`(async () => {
+    const names = [...document.querySelectorAll('#desk-rail button')].map((b) => b.dataset.desk);
+    const bad = [];
+    for (const n of names) {
+      deskOpen(n);
+      await new Promise((r) => setTimeout(r, 260));
+      const col = document.getElementById('col-' + n);
+      if (!col || getComputedStyle(col).display === 'none') bad.push(n);
+      deskOpen(n);
+      await new Promise((r) => setTimeout(r, 120));
+    }
+    return { names: names.length, unreachable: bad }; })()`);
+  ok('...every one of the nine surfaces is actually reachable on desktop',
+     reach.unreachable.length === 0, JSON.stringify(reach));
+
+
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
   try { proc.kill(); } catch (_) {}
   server.close();
