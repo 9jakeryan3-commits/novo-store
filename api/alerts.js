@@ -110,7 +110,13 @@ module.exports = async (req, res) => {
             .listPredictions(40, app === "crypto" ? "crypto" : "equity", true);
         } catch (_) { predictions = null; }
       }
+      /* THE MEMBER'S OWN BOOK, on every seat. Theirs is not gated by anything - it is their
+         record of their own calls, and the point of the feature is that they can watch it. */
+      let mine = null;
+      try { mine = await require("./_lib/predictions.js").listUserPredictions(email, 40); } catch (_) {}
+
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
+                                    ...(mine ? { my_predictions: mine } : {}),
                                     ...(predictions && !predictions.error ? { predictions } : {}),
                                     ...(comp && Array.isArray(novo_alerts) ? { novo_alerts } : {}) });
     }

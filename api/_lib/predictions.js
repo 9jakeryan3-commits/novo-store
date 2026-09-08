@@ -30,6 +30,47 @@ const crypto = require("crypto");
 const { kv } = require("./../_kv.js");
 
 const KEY = "pred:log";
+
+// ── TRADER PREDICTIONS (Jake, 2026-09-07): "if the user says a prediction of any kind to Dr.
+// NoVo he logs it the same way and it gets scored inside the predictions tab. Definitely a cool
+// almost paper trading feature."
+//
+// A MEMBER'S CALLS ARE THEIRS, AND THEY LIVE IN THEIR OWN BOOK. Not in pred:log with an owner
+// column: NoVo's record is capped, so a busy member would evict his rows, and one bad filter
+// anywhere would put a member's guess into the published track record. Separate keys make that
+// mistake impossible rather than merely unlikely.
+//
+// Everything else is deliberately IDENTICAL: same row shape, same makePrediction validation, same
+// _grade, same evaluator tick. One definition of "was this right" for everyone on the platform -
+// a member is scored exactly as strictly as NoVo is, on the same numbers, at the same moment.
+const UKEY = (h) => "pred:user:" + h;
+const UINDEX = "pred:users";          // who currently has something open, so grading knows where to look
+function _uhash(email) {
+  return crypto.createHash("sha256").update(String(email || "").trim().toLowerCase())
+    .digest("hex").slice(0, 24);
+}
+async function _uload(r, h) {
+  let l = null;
+  try { l = await r.get(UKEY(h)); } catch (_) { l = null; }
+  if (typeof l === "string") { try { l = JSON.parse(l); } catch (_) { l = null; } }
+  return Array.isArray(l) ? l : [];
+}
+async function _usave(r, h, list) {
+  const open = list.filter((p) => p.status === "open");
+  const done = list.filter((p) => p.status !== "open").slice(-200);
+  await r.set(UKEY(h), JSON.stringify([...done, ...open]), { ex: 365 * 24 * 3600 });
+  /* The index carries only members with something OPEN. A member who stops predicting stops
+     being walked, and their graded history stays exactly where it is. */
+  let idx = null;
+  try { idx = await r.get(UINDEX); } catch (_) {}
+  if (typeof idx === "string") { try { idx = JSON.parse(idx); } catch (_) { idx = null; } }
+  idx = Array.isArray(idx) ? idx : [];
+  const has = idx.includes(h);
+  if (open.length && !has) idx.push(h);
+  else if (!open.length && has) idx = idx.filter((x) => x !== h);
+  else return;
+  await r.set(UINDEX, JSON.stringify(idx.slice(-5000)), { ex: 365 * 24 * 3600 });
+}
 const MAX_KEPT = 400;          // graded history kept for the score; oldest graded rows fall off
 const MAX_OPEN = 40;           // a runaway prompt cannot flood the record
 const KINDS = new Set(["close_at", "open_at", "direction", "trade_call", "level_touch"]);
@@ -164,7 +205,8 @@ async function makePrediction(args = {}) {
          "conversation" a call he made when asked - comp seats only, and the tools that make one
                         are comp-gated server-side, so a non-comp seat cannot produce one at all
        The tab is open to everyone now; what varies is WHICH rows come back. */
-    source: args.source === "read" ? "read" : args.source === "novo" ? "novo" : "conversation",
+    source: args.source === "read" ? "read" : args.source === "novo" ? "novo"
+          : args.source === "user" ? "user" : "conversation",
     asset_class: args.asset_class === "crypto" ? "crypto" : "equity",
     symbol, kind,
     side: side || (kind === "close_at" || kind === "open_at" ? (value >= spot_at ? "up" : "down") : (kind === "level_touch" ? "touch" : null)),
@@ -239,6 +281,37 @@ async function evaluate(getSpot) {
     if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = _grade(p, spot); changed++; }
   }
   if (changed) await _save(r, list);
+
+  /* MEMBERS GRADE ON THE SAME TICK, through the same _grade. A separate schedule would mean a
+     member's call and NoVo's identical call could resolve against different prices. */
+  let uidx = null;
+  try { uidx = await r.get(UINDEX); } catch (_) {}
+  if (typeof uidx === "string") { try { uidx = JSON.parse(uidx); } catch (_) { uidx = null; } }
+  for (const h of (Array.isArray(uidx) ? uidx : [])) {
+    try {
+      const mine = await _uload(r, h);
+      let ch = 0;
+      for (const p of mine) {
+        if (p.status !== "open") continue;
+        if (p.asset_class === "equity" && Date.now() >= p.horizon_utc && !isTradingDayEt(p.horizon_utc)) {
+          p.status = "void";
+          p.outcome = { reason: "horizon fell on a market holiday — nothing traded, nothing to grade",
+                        graded_utc: Date.now() };
+          ch++; continue;
+        }
+        const spot = getSpot(p);
+        if (!isFinite(spot)) continue;
+        if (p.kind === "level_touch") {
+          const crossed = (p.spot_at < p.value && spot >= p.value) || (p.spot_at > p.value && spot <= p.value);
+          if (crossed) { p.status = "graded"; p.outcome = { actual: spot, hit: true, graded_utc: now }; ch++; continue; }
+          if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = { actual: spot, hit: false, graded_utc: now }; ch++; }
+          continue;
+        }
+        if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = _grade(p, spot); ch++; }
+      }
+      if (ch) await _usave(r, h, mine);
+    } catch (_) { /* one member's book must not stop the rest */ }
+  }
   return { graded: changed };
 }
 
@@ -260,6 +333,48 @@ async function evaluateCryptoPredictions(snap) {
 }
 
 // ── the read, with the score attached ────────────────────────────────────────────────────────
+/* A member's prediction goes through makePrediction for VALIDATION and then lands in their own
+   book. Reusing the validator is the point: a member cannot log something NoVo would be refused
+   for - no spot, no horizon, a horizon too short to be falsifiable - so the two records mean the
+   same thing and can be compared without an asterisk. */
+async function makeUserPrediction(email, args = {}) {
+  const r = kv();
+  if (!r) return { error: "predictions unavailable" };
+  const h = _uhash(email);
+  if (!h) return { error: "who?" };
+  const mine = await _uload(r, h);
+  if (mine.filter((p) => p.status === "open").length >= 20) {
+    return { error: "you have 20 open calls already — let some resolve first" };
+  }
+  /* Validate through the shared path, then move the row into the member's book. The global log is
+     restored byte-for-byte: a member's call must not touch NoVo's record even for an instant. */
+  const before = await _load(r);
+  const made = await makePrediction({ ...args, source: "user" });
+  if (!made || !made.ok) { await _save(r, before); return made || { error: "refused" }; }
+  const after = await _load(r);
+  const row = after.find((p) => p.id === made.id);
+  await _save(r, before);
+  if (!row) return { error: "not recorded" };
+  row.owner = h;
+  mine.push(row);
+  await _usave(r, h, mine);
+  return { ok: true, id: row.id, watching: row.thesis || row.kind, runs_until: "its horizon" };
+}
+
+async function listUserPredictions(email, limit) {
+  const r = kv();
+  if (!r) return null;
+  const mine = await _uload(r, _uhash(email));
+  const graded = mine.filter((p) => p.status === "graded" && p.outcome);
+  const hits = graded.filter((p) => p.outcome.hit).length;
+  return {
+    open: mine.filter((p) => p.status === "open").sort((a, b) => a.horizon_utc - b.horizon_utc),
+    graded: graded.slice(-(limit || 40)).reverse(),
+    overall: { n: graded.length, hits: hits,
+               hit_rate: graded.length ? Math.round((hits / graded.length) * 1000) / 10 : null },
+  };
+}
+
 async function listPredictions(limit, assetClass, readsOnly) {
   const r = kv();
   if (!r) return { error: "predictions unavailable" };
@@ -512,6 +627,7 @@ async function selectCryptoPredictions(snap) {
 }
 
 module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+                   makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
                    appendNovoFire, listNovoFires, curateChainFires,

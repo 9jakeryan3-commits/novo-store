@@ -357,6 +357,37 @@ const declarations = [
     },
   },
   {
+    name: "log_trader_prediction",
+    description:
+      "THE MEMBER'S OWN CALL, not yours. When they state a prediction to you - 'I think SPY " +
+      "closes green', 'BTC hits 82k by Friday', 'I'm calling a bounce off the put wall' - log it " +
+      "here in the same turn, then tell them it is on their record and when it grades. It scores " +
+      "on their Predictions tab beside yours, on the same numbers at the same moment, which is " +
+      "the whole point: they can see how their read did.\n" +
+      "AVAILABLE ON EVERY SEAT - this is theirs, not the private desk.\n" +
+      "ONLY when they actually commit to something falsifiable. A question ('where do you think " +
+      "it closes?'), a musing ('feels heavy'), or a conditional ('if it breaks 770 I'd short it') " +
+      "is NOT a call - do not log those, and do not ask them to make one. spot_at is the price " +
+      "you just read from a tool, never a number you assumed. If they gave no horizon, ask which " +
+      "one they mean rather than choosing for them: a call with the wrong clock on it is not the " +
+      "call they made.",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "SPY/QQQ/IWM, or a mapped coin." },
+        asset_class: { type: "string", enum: ["equity", "crypto"] },
+        kind: { type: "string", enum: ["close_at", "open_at", "direction", "trade_call", "level_touch"] },
+        side: { type: "string", enum: ["up", "down", "buy", "sell", "flat"] },
+        value: { type: "number", description: "The level, for close_at / open_at / level_touch." },
+        spot_at: { type: "number", description: "The price on screen when they said it. Required." },
+        horizon: { type: "string", enum: ["today_close", "tomorrow_open", "tomorrow_close"] },
+        horizon_min: { type: "number", description: "Minutes, if they named a window instead." },
+        thesis: { type: "string", description: "Their reasoning, in their words - not yours." },
+      },
+      required: ["symbol", "kind", "spot_at"],
+    },
+  },
+  {
     name: "make_prediction",
     description:
       "COMP SEATS ONLY - NoVo Unleashed. Record a REAL prediction the moment you state one. Any " +
@@ -1358,6 +1389,21 @@ function makeExecutors(ctx = {}) {
     } catch (e) { return { error: "could not log: " + e.message }; }
   }
 
+  /* The member's book. NOT comp-gated: it is their call, not NoVo's edge - the comp gate on
+     make_prediction exists because a NoVo prediction is the paid product, and a member's own
+     guess is not. Their email is taken from the SESSION, never from the model's arguments, so a
+     prompt cannot write into someone else's record. */
+  async function log_trader_prediction(args = {}) {
+    if (!ctx || !ctx.email) return { error: "sign in to keep a record" };
+    const out = await require("./predictions.js").makeUserPrediction(ctx.email, args);
+    if (out && out.ok) {
+      return { ok: true, id: out.id,
+               note: "Logged to their Predictions tab. It grades itself at the horizon on the " +
+                     "same numbers everything else is graded on - tell them when that is." };
+    }
+    return out;
+  }
+
   async function make_prediction(args = {}) {
     /* ⚠ THE GATE IS HERE, SERVER-SIDE, not in the prompt. A prompt-only gate is a paywall made of
        suggestion. Non-comp seats get a refusal that tells the model what to say instead. */
@@ -1736,7 +1782,8 @@ function makeExecutors(ctx = {}) {
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
     describe_archive, query_archive, update_reader_memory, log_forecast,
-    set_alert, list_alerts, cancel_alert, make_prediction, list_predictions, get_live_chain,
+    set_alert, list_alerts, cancel_alert, make_prediction, list_predictions, log_trader_prediction,
+    get_live_chain,
   };
 }
 

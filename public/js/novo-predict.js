@@ -34,7 +34,15 @@
     '.novo-predict .pd-hit{color:#34d399;font-weight:800}',
     '.novo-predict .pd-miss{color:#f43f5e;font-weight:800}',
     '.novo-predict .pd-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
-    '.novo-predict .pd-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
+    '.novo-predict .pd-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
+    /* the head-to-head: two columns and one hairline. No boxes. */
+    '.novo-predict .pd-vs{display:flex;align-items:flex-end;gap:14px;padding:2px 0 14px;border-bottom:1px solid var(--bdr2,#242428)}',
+    '.novo-predict .pd-vs-side{display:flex;flex-direction:column;gap:2px;flex:1 1 0}',
+    '.novo-predict .pd-vs-k{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+    '.novo-predict .pd-vs-v{font-family:var(--mono,ui-monospace),monospace;font-size:26px;font-weight:800;color:var(--txt1,#f0f0ee);line-height:1;font-variant-numeric:tabular-nums}',
+    '.novo-predict .pd-vs-n{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+    '.novo-predict .pd-vs-mid{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4,#555);padding-bottom:4px}',
+    '.novo-predict .pd-vs-note{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.55;padding:10px 0 0}'
   ].join('');
 
   function styles() {
@@ -72,7 +80,26 @@
       return;
     }
     var ov = pr.overall || {};
-    var h = '<h2>NoVo’s predictions <span class="pd-sub">self-scored · graded at the horizon</span></h2>'
+    /* ── TRADER vs DR. NOVO (Jake, 2026-09-07: "for a nice Trader vs Dr. NoVo setup"). The
+       two records are only comparable because they are produced the same way: same validator,
+       same grader, same tick, same published numbers. If a member's call were scored more
+       leniently than his, this line would be a scoreboard of nothing. */
+    var mineTop = d && d.my_predictions, mineOv = (mineTop && mineTop.overall) || {};
+    var h = '<h2>Predictions <span class="pd-sub">you vs Dr. NoVo \u00b7 graded at the horizon</span></h2>'
+      + '<div class="pd-vs">'
+      + '<span class="pd-vs-side"><span class="pd-vs-k">You</span><span class="pd-vs-v">'
+      + (mineOv.hit_rate != null ? esc(mineOv.hit_rate) + '%' : '\u2014')
+      + '</span><span class="pd-vs-n">' + (mineOv.n || 0) + ' graded</span></span>'
+      + '<span class="pd-vs-mid">vs</span>'
+      + '<span class="pd-vs-side"><span class="pd-vs-k">Dr. NoVo</span><span class="pd-vs-v">'
+      + (ov.hit_rate != null ? esc(ov.hit_rate) + '%' : '\u2014')
+      + '</span><span class="pd-vs-n">' + (ov.n || 0) + ' graded</span></span></div>'
+      /* Said once, plainly: a hit rate over four calls is not a hit rate. Without this the
+         scoreboard flatters whichever side has made the fewest. */
+      + (((mineOv.n || 0) < 10 || (ov.n || 0) < 10)
+         ? '<div class="pd-vs-note">Early \u2014 neither side has enough graded calls for this '
+           + 'to mean much yet. Ten each is where it starts being a comparison.</div>' : '')
+      + '<div class="pd-grp">Dr. NoVo\u2019s calls</div>'
       + '<div class="pd-score">'
       + '<span class="pd-cell"><span class="v">' + (ov.hit_rate != null ? esc(ov.hit_rate) + '%' : '—')
       + '</span><span class="k">hit rate</span></span>'
@@ -111,6 +138,36 @@
           + '</div>';
       }).join('');
     }
+    /* ── THE MEMBER'S OWN BOOK (Jake, 2026-09-07: "almost paper trading"). Their calls sit
+       beside NoVo's, scored the same way at the same moment - which is the comparison that makes
+       the feature interesting. Their section renders even with nothing in it, because an empty
+       record with an invitation is what tells them the feature exists at all. */
+    var mine = d && d.my_predictions;
+    var mineHtml = '';
+    if (mine) {
+      var mo = mine.open || [], mg = mine.graded || [], ov = mine.overall || {};
+      mineHtml += '<div class="pd-grp">Your calls'
+        + (ov.n ? ' · ' + esc(ov.hit_rate) + '% over ' + esc(ov.n) + ' graded' : '') + '</div>';
+      if (mo.length || mg.length) {
+        mineHtml += mo.map(function (p) {
+          return '<div class="pd-row"><span class="pd-what">' + esc(describe(p)) + '</span>'
+            + '<span class="pd-meta">made ' + esc(when(p.made_utc)) + ' at ' + esc(p.spot_at)
+            + ' · grades ' + esc(when(p.horizon_utc)) + '</span>'
+            + (p.thesis ? '<span class="pd-thesis">' + esc(p.thesis) + '</span>' : '') + '</div>';
+        }).join('') + mg.map(function (p) {
+          var o = p.outcome || {};
+          return '<div class="pd-row"><span class="pd-what">' + esc(describe(p)) + ' → '
+            + '<span class="' + (o.hit ? 'pd-hit' : 'pd-miss') + '">' + (o.hit ? 'HIT' : 'MISS')
+            + '</span></span><span class="pd-meta">made ' + esc(when(p.made_utc)) + ' at '
+            + esc(p.spot_at) + ' · actual ' + esc(o.actual) + '</span></div>';
+        }).join('');
+      } else {
+        mineHtml += '<div class="pd-empty">Nothing on your record yet. Tell Dr. NoVo a call — '
+          + '“I think SPY closes green” — and he logs it here, graded at its horizon '
+          + 'on the same numbers his own calls are graded on.</div>';
+      }
+    }
+
     var voided = pr.void || [];
     if (voided.length) {
       h += '<div class="pd-grp">Void — could not be graded</div>';
@@ -124,6 +181,7 @@
       h += '<div class="pd-empty">Nothing on the record yet. Ask him what he thinks — any real '
         + 'prediction he makes goes on the record the moment he says it.</div>';
     }
+    h += mineHtml;
     h += '<div class="pd-how">His own record, graded against the same published numbers everything '
       + 'else is graded on. Self-scored, and it says so. A stated prediction that is not recorded '
       + 'does not exist.</div>';

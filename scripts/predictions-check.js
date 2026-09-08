@@ -320,6 +320,51 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     anySeat.open.every((p) => p.source === 'read'),
     JSON.stringify(anySeat.open.map((p) => p.source)));
 
+  // ── 12. TRADER PREDICTIONS: the member's book is THEIRS, and never NoVo's ─────────────────
+  // Jake, 2026-09-07: "if the user says a prediction of any kind to Dr. NoVo he logs it the same
+  // way and it gets scored inside the predictions tab." The thing that must be impossible is a
+  // member's guess leaking into the published track record - so that is what these check.
+  reset();
+  await P.makePrediction({ source: 'novo', asset_class: 'crypto', symbol: 'BTC',
+    kind: 'direction', side: 'up', spot_at: 100000, horizon_min: 240, thesis: "NoVo's own" });
+  const mineOut = await P.makeUserPrediction('member@example.com', {
+    asset_class: 'crypto', symbol: 'BTC', kind: 'direction', side: 'down',
+    spot_at: 100000, horizon_min: 240, thesis: 'my own read' });
+  ok('a member can log a call of their own', mineOut && mineOut.ok === true, JSON.stringify(mineOut));
+
+  const novoBook = await P.listPredictions(40, 'crypto');
+  const myBook = await P.listUserPredictions('member@example.com', 40);
+  ok('...and it does NOT appear in NoVo\u2019s record',
+    novoBook.open.length === 1 && novoBook.open[0].thesis === "NoVo's own",
+    JSON.stringify(novoBook.open.map((p) => p.source + ':' + p.thesis)));
+  ok('...it appears in THEIR book, marked as theirs',
+    myBook.open.length === 1 && myBook.open[0].source === 'user'
+      && myBook.open[0].thesis === 'my own read',
+    JSON.stringify(myBook.open.map((p) => p.source + ':' + p.thesis)));
+
+  const other = await P.listUserPredictions('someone.else@example.com', 40);
+  ok('...and another member sees none of it \u2014 books are per member',
+    other.open.length === 0 && other.graded.length === 0, JSON.stringify(other));
+
+  // The member is held to the SAME validator: no free pass for a call that cannot be graded.
+  const badUser = await P.makeUserPrediction('member@example.com', {
+    asset_class: 'crypto', symbol: 'BTC', kind: 'direction', side: 'up', horizon_min: 240 });
+  ok('...a member call with no spot is refused, exactly as NoVo\u2019s would be',
+    !badUser.ok && /spot_at required/.test(badUser.error || ''), JSON.stringify(badUser));
+
+  // And it grades on the same tick, through the same _grade.
+  const book = JSON.parse(S.get('pred:user:' + require('crypto').createHash('sha256')
+    .update('member@example.com').digest('hex').slice(0, 24)));
+  book[0].horizon_utc = Date.now() - 1000;
+  S.set('pred:user:' + require('crypto').createHash('sha256')
+    .update('member@example.com').digest('hex').slice(0, 24), JSON.stringify(book));
+  await P.evaluateCryptoPredictions({ coins: { BTC: { price: 99000 } } });
+  const graded = await P.listUserPredictions('member@example.com', 40);
+  ok('...and it grades on the same tick as his \u2014 a down call, price fell, HIT',
+    graded.graded.length === 1 && graded.graded[0].outcome.hit === true
+      && graded.overall.hit_rate === 100,
+    JSON.stringify({ graded: graded.graded.length, overall: graded.overall }));
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });
