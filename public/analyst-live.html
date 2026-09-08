@@ -518,6 +518,10 @@ which Jake explicitly carved out. */
      .lv-card box — only .lv-alerts had this override, so Digest and Predict shipped boxed, which
      is exactly what got the rule written down. */
   .lv-alerts, .lv-digest, .lv-predict, .lv-readings { margin-top: 16px; padding: 0; border: 0; background: none; border-radius: 0; }
+  /* MOBILE-ONLY FOR NOW (Jake, 2026-09-08: "added in the analyst dashboard on mobile first").
+     Nothing else hides them, so without this they would simply appear inline on the desktop
+     analyst as two extra panels nobody asked for. The mobile block below switches them on. */
+  .lv-futures, .lv-history { display: none; }
   .lv-foot { color: var(--txt3); font-size: 11.5px; line-height: 1.6; text-align: center; margin-top: 26px; }
   .lv-foot a { color: #22d3ee; }
   /* market ribbon */
@@ -709,6 +713,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- LIVE READINGS, the full list plus the Eye's forward register. Descriptive readouts, not
          calls: the tickets stay comp-gated in Dr. NoVo's Alerts and the prediction record. -->
     <div class="lv-card lv-readings" id="readings-card"></div>
+    <!-- FUTURES and HISTORY, brought over from the Trader (Jake, 2026-09-08). Both render from
+         the SAME shared modules the Trader mounts - novo-futures.js and novo-tape.js - rather
+         than a second implementation, because "if its displaying in one place putting it in
+         another is basically the same". Two copies of one panel is two panels that drift. -->
+    <div class="lv-card lv-futures" id="futures-card"></div>
+    <div class="lv-card lv-history" id="history-card"></div>
     <div class="lv-foot">Updated <span id="upd">—</span> · Analyst is market analysis &amp; education only — not financial advice. <a href="/analyst/methodology">Methodology</a></div>
   </div>
 
@@ -1875,18 +1885,35 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     /* THE LINE BELONGS WITH THE ALERTS (Jake, 2026-09-07): it fires when a mapped level
        breaks, which is an alert, not a piece of analysis. It is moved to sit beside the alerts
        card in the DOM, so the view filter keeps it too. */
+    /* `:not(.b-line)` is CORRECT here and I nearly broke it. .b-line is authored inside
+       .lv-bottom, so it looks like it could never match `#dash > *` - but a script further down
+       MOVES it out of the bottom grid to sit beside the alerts card, which makes it a direct
+       child by the time this rule is evaluated. Reading the stylesheet alone said the exclusion
+       was dead; the DOM says it is load-bearing. Check where an element ENDS UP, not where it
+       was written. */
     body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.b-line):not(.lv-foot) { display: none; }
+    /* ...and off the Dealer Map, because it lives in the Alerts tab now (Jake, 2026-09-08).
+       Live Reads and the futures strip are the two he kept on the map; everything else that
+       became a tab leaves it. Matched at the same depth the mover leaves it at. */
+    body[data-mtab="map"] #dash > .b-line { display: none; }
     body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
     body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
     /* The readings view: reached from the strip, left by tapping any tab. No tab lights up while
        it is open, which is honest — there is no tab. The strip itself stays visible so the way
        back out is never a dead end. */
     body[data-mtab="readings"] #dash > *:not(.lv-top):not(.lv-readings):not(.lv-foot):not(#eye-readbar) { display: none; }
+    body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-futures):not(.lv-foot) { display: none; }
+    body[data-mtab="history"] #dash > *:not(.lv-top):not(.lv-history):not(.lv-foot) { display: none; }
+    /* ...and switched back on for their own tab, against the desktop default above. */
+    body[data-mtab="futures"] #dash > .lv-futures { display: block; }
+    body[data-mtab="history"] #dash > .lv-history { display: block; }
     body[data-mtab="map"]  #dash > .lv-read,
     body[data-mtab="map"]  #dash > .lv-alerts,
     body[data-mtab="map"]  #dash > .lv-digest,
     body[data-mtab="map"]  #dash > .lv-predict,
-    body[data-mtab="map"]  #dash > .lv-readings { display: none; }
+    body[data-mtab="map"]  #dash > .lv-readings,
+    body[data-mtab="map"]  #dash > .lv-futures,
+    body[data-mtab="map"]  #dash > .lv-history { display: none; }
     /* First thing under the header on its own tab, so it does not need the gap it needed when it
        followed The Line. */
     body[data-mtab="read"] .lv-read { margin-top: 0; }
@@ -1938,6 +1965,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 <script src="/js/novo-predict.js?v=659cb6c5"></script>
 <!-- LIVE READINGS: the strip and the tab, both fed by one fetch of the Eye's published readings. -->
 <script src="/js/novo-readings.js?v=11dfea8e"></script>
+<!-- The Trader's own Futures and tape modules, unchanged. Same code, same payload, same panel. -->
+<script src="/js/novo-futures.js"></script>
+<script src="/js/novo-tape.js"></script>
 <script>
   /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip
      calls when tapped — defined here rather than in the module because only the page knows how it
@@ -2069,7 +2099,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   </button>
   <button class="mob-tab" type="button" data-mtab="read" onclick="lvMobTab('read')">
     <span class="mob-tab-icon" aria-hidden="true">&#9636;</span>
-    <span>The Read</span>
+    <span>Desk Note</span>
   </button>
   <button class="mob-tab" type="button" data-mtab="alerts" onclick="lvMobTab('alerts')">
     <span class="mob-tab-icon" aria-hidden="true">&#9673;</span>
@@ -2098,7 +2128,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      absent: on the analyst the STRIP is its door (Jake, 2026-09-07), and a second door in here
      would contradict that. -->
 <div id="more-menu" hidden>
-  <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>The Read</button>
+  <!-- NAMES MATCH THE TRADER (Jake, 2026-09-08: "names should match Trader's"). The same surface
+       called two things on two dashboards is two surfaces as far as a member is concerned. -->
+  <button type="button" data-mtab="readings" onclick="pickMore('readings')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
+  <button type="button" data-mtab="futures" onclick="pickMore('futures')"><span aria-hidden="true">&#9650;</span>Futures</button>
+  <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Desk Note</button>
+  <button type="button" data-mtab="history" onclick="pickMore('history')"><span aria-hidden="true">&#9203;</span>History</button>
   <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predictions</button>
 </div>
 <script>
@@ -2111,9 +2146,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      without this you leave the map halfway down, read the note, come back and land in the middle of
      the gamma card. Saved on the way out, restored after layout — the document is a different
      height on each tab, so a synchronous scrollTo would be clamped to the old one. */
-  var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0 };
+  var scrollAt = { map: 0, read: 0, alerts: 0, digest: 0, predict: 0,
+                   readings: 0, futures: 0, history: 0 };
   /* ── THE MORE MENU ─────────────────────────────────────────────────────────────────────── */
-  var MORE_TABS = ['read', 'predict'];
+  var MORE_TABS = ['read', 'predict', 'readings', 'futures', 'history'];
   window.toggleMoreMenu = function(force){
     var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
     if (!m || !b) return;
@@ -2155,6 +2191,23 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
          never refreshed after the first mount. The catch that made the page resilient also made
          the regression invisible. */
       if (which === 'alerts') { try { window.novoAlerts.load(); } catch (_e) {} }
+      /* Mounted on FIRST OPEN, not at load: these panels measure their container, and a panel
+         that mounts while its card is display:none comes back sized to nothing. Same reason the
+         readings tab below mounts here rather than on the page's own load. */
+      if (which === 'futures') {
+        try {
+          if (!window._lvFutMounted && window.novoFutures) {
+            window.novoFutures.mount('#futures-card'); window._lvFutMounted = 1;
+          } else if (window.novoFutures) { window.novoFutures.refresh(); }
+        } catch (_e) {}
+      }
+      if (which === 'history') {
+        try {
+          if (!window._lvHistMounted && window.novoTape) {
+            window.novoTape.mount('#history-card', 'history'); window._lvHistMounted = 1;
+          } else if (window.novoTape) { window.novoTape.refresh(); }
+        } catch (_e) {}
+      }
       if (which === 'readings') {
         try {
           if (!window._lvReadMounted && window.novoReadings) {
