@@ -189,44 +189,9 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Hero ── */
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
-  /* ── THE HERO IS BROKEN IN TWO AND USES THE PAGE ────────────────────────────────────────────
-     Jake, 2026-09-08: "what dont we set the hero side by side like and use the whole page on
-     desktop" - looking at a 900px column of centred text on a 1920px screen, with the ecosystem
-     band running edge to edge underneath it. The narrow hero read as a phone layout stretched.
-     What that means is the COPY gets laid out across the width: the statement (badge, headline,
-     tagline) on the left, the argument (the three paragraphs that justify it) on the right. No
-     picture is added - the words themselves are what fills the page.
-     The hero takes its own container width, 1560, the house wide-shell figure. Every other
-     section keeps 900. Below 1080 it collapses to the original single centred column, which is
-     also the width at which two text columns stop being readable side by side. */
-  .hero .container { max-width: 1560px; }
-  @media (min-width: 1080px) {
-    .hero { padding: 78px 0 84px; }
-    /* ⚠ CENTRED INSIDE EACH COLUMN, NOT LEFT-ALIGNED (Jake, 2026-09-08: "instead of being left
-       oriented into their columns center them in their columns"). The hero already centres
-       everything - .hero sets text-align:center - so the columns simply inherit it, and the
-       inline `margin:0 auto` these elements carry does the horizontal centring for free. An
-       earlier pass fought that with margin-left:0 !important; deleting those rules is what makes
-       this work rather than adding more. */
-    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
-      gap: 72px; align-items: start; }
-    /* More room means the headline can be the size it wants to be. */
-    .hero-grid h1 { font-size: clamp(56px, 4.9vw, 88px); letter-spacing: -2.6px; }
-    .hero-say .hero-tagline { max-width: 34ch; }
-    .hero-say .hero-tagline { margin-left: auto; margin-right: auto; }
-    .hero-arg p { max-width: 62ch; margin-left: auto; margin-right: auto; }
-    .hero-arg p:first-child { margin-top: 6px; }
-    /* the glow was drawn for a 1050px centred column; it now has a 1560px row to cover */
-    .hero::before { width: 1560px; height: 660px; top: -200px; }
-    /* The chips and the doors stay full width under both columns - they belong to the whole
-       hero, not to either half. A hairline separates them from the argument above. */
-    .hero-say .hero-chips { justify-content: center; margin: 30px auto 26px;
-      max-width: 48ch; }
-    .hero-say .hero-ask { margin: 0 auto !important; max-width: 48ch; }
-    /* The doors band gets the hairline the chips used to carry, so the CTAs still read as a
-       separate step rather than more of the hero. */
-    .hero-cta { margin-top: 52px; padding-top: 38px; border-top: 1px solid var(--bdr); }
-  }
+  /* The hero's two-column layout lives in polish.css now - it is shared by every marketing page
+     with a hero, and this site's per-page <style> blocks are copies of each other by construction.
+     polish.css loads AFTER this block, so its rules win on equal specificity. */
   .hero::before { content: ''; position: absolute; top: -160px; left: 50%; transform: translateX(-50%); width: 1050px; height: 580px; background: radial-gradient(ellipse at center, rgba(59,130,246,0.22), rgba(34,211,238,0.08) 42%, transparent 72%); pointer-events: none; z-index: 0; }
   .hero .container { position: relative; z-index: 1; }
   /* NOT FLATTENED, and not containers. Both are PILLS -- a badge and a row of
