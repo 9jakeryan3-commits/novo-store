@@ -352,31 +352,17 @@ body {
 .tb-right { margin-left: auto; display: flex; align-items: stretch; height: 48px; }
 .ts {
   display: flex; flex-direction: column; justify-content: center; align-items: flex-end;
-  padding: 0 16px; border-left: 1px solid var(--bdr);
+  padding: 0 16px;
 }
 .ts-k { font-size: 7px; letter-spacing: 2px; color: var(--txt3); text-transform: uppercase; font-family: var(--sans); }
 .ts-v { font-size: 14px; font-weight: 800; letter-spacing: .5px; }
 #hdr-pnl { font-size: 20px; letter-spacing: -0.5px; }
 
-.tb-conn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 16px; border-left: 1px solid var(--bdr);
-}
-.conn-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--amb); box-shadow: 0 0 8px var(--amb);
-  transition: background .3s, box-shadow .3s;
-}
-#hdr-conn-text {
-  font-size: 9px; font-weight: 900; letter-spacing: 2px;
-  color: var(--amb); transition: color .3s;
-}
-
 .hdr-menu-wrap { position: relative; flex-shrink: 0; }
 .hdr-menu-btn {
   display: flex; align-items: center; justify-content: center;
   width: 44px; height: 48px;
-  background: none; border: none; border-left: 1px solid var(--bdr);
+  background: none; border: none;
   color: var(--txt2); font-size: 22px; cursor: pointer;
   transition: color .15s, background .15s;
 }
@@ -1450,7 +1436,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #hdr-session-ts { display: flex; justify-content: center; padding: 0 10px; }
   #hdr-session-ts .ts-k { display: none; }
   #hdr-session-ts .ts-v { font-size: 11px; letter-spacing: 1.5px; }
-  #hdr-conn-text  { display: none; }
   .ts { padding: 0 8px; }
   .ts-v { font-size: 12px; }
 
@@ -2248,8 +2233,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
  background: linear-gradient(180deg,#17171a,#0b0b0d) !important;
  color: var(--txt1) !important; text-align: left;
  box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 22px -6px rgba(52,211,153,.45), inset 0 1px 0 rgba(255,255,255,.05); }
-  .navbtn-novo:hover, .navbtn-novo.on { border-color: #34d399 !important; color: var(--txt1) !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 30px -4px rgba(52,211,153,.62), inset 0 1px 0 rgba(255,255,255,.07); }
+  .navbtn-novo:hover, .navbtn-novo.on { color: var(--txt1) !important;
+ box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 30px -4px rgba(52,211,153,.62), inset 0 1px 0 rgba(255,255,255,.07); }
   .navbtn-novo .caret { color: #34d399; font-weight: 800; text-shadow: 0 0 10px rgba(52,211,153,.75); }
   /* The shortcut printed ON the control it triggers. A key listed only in a help sheet is a key
      you have to go looking for; a key on the button is one you notice while using the mouse. */
@@ -2262,24 +2247,24 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      could use it. Matched to them. */
   @media (pointer:coarse){ .navbtn-kbd { display: none; } }
 
-  .navbtn-run { border-color: rgba(34,211,238,.45) !important; color: var(--cyn) !important; }
+  .navbtn-run { color: var(--cyn) !important; }
   /* the same action, in the bottom bar */
   .mob-tab-run { color: var(--cyn); }
   .mob-tab-run[data-state="busy"] { opacity: .6; pointer-events: none; }
   .mob-tab-run[data-state="ok"]   { color: #34d399; }
   .mob-tab-run[data-state="err"]  { color: #f43f5e; }
-  .navbtn-run:hover { border-color: var(--cyn) !important; background: rgba(34,211,238,.08) !important; }
+  .navbtn-run:hover { background: rgba(34,211,238,.08) !important; }
   .navbtn-run[data-state="busy"] { opacity: .6; pointer-events: none; }
-  .navbtn-run[data-state="ok"]   { border-color: rgba(52,211,153,.6) !important; color: #34d399 !important; }
-  .navbtn-run[data-state="err"]  { border-color: rgba(244,63,94,.6)  !important; color: #f43f5e !important; }
+  .navbtn-run[data-state="ok"]   { color: #34d399 !important; }
+  .navbtn-run[data-state="err"]  { color: #f43f5e !important; }
   .navbtn {
-    background: rgba(255,255,255,.03); border: 1px solid var(--bdr); border-radius: 6px;
-    color: var(--txt3); font-family: var(--sans); font-size: 9.5px; font-weight: 700;
-    letter-spacing: .8px; text-transform: uppercase; padding: 7px 13px; cursor: pointer;
-    transition: .12s;
-  }
-  .navbtn:hover { color: var(--txt1); border-color: rgba(255,255,255,.18); }
-  .navbtn.on { background: rgba(34,211,238,.12); border-color: rgba(34,211,238,.45); color: var(--cyn); }
+ background: rgba(255,255,255,.03); border-radius: 6px;
+ color: var(--txt3); font-family: var(--sans); font-size: 9.5px; font-weight: 700;
+ letter-spacing: .8px; text-transform: uppercase; padding: 7px 13px; cursor: pointer;
+ transition: .12s;
+ }
+  .navbtn:hover { color: var(--txt1); }
+  .navbtn.on { background: rgba(34,211,238,.12); color: var(--cyn); }
 
   /* ARMED row, relocated into the topbar — compact, no big glow (keeps the
      armed/live/halted BORDER colour those classes set; only kills the bloom). */
@@ -2502,10 +2487,12 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <span class="ts-k">Eastern</span>
       <span id="hdr-clock" class="ts-v" style="color:var(--cyn)">--:--:--</span>
     </div>
-    <div class="tb-conn">
-      <span id="hdr-conn-dot" class="conn-dot"></span>
-      <span id="hdr-conn-text">LINKING</span>
-    </div>
+    <!-- LINKED / LINKING PULLED (Jake, 2026-09-08: "LINKED IS DEAD PULL THAT ITS FROM OLD
+         HOSTED EXECUTION BUILD"). It reported the execution socket's state, and the execution
+         layer left with the box - so it sat in the topbar reporting on something that no longer
+         exists. Same defect as the 7-Day P&L removed just above: a readout with no source reads
+         as a broken product, not an empty one. Its two writers now no-op instead of throwing on
+         the missing elements. -->
     <div class="hdr-menu-wrap">
       <button class="hdr-menu-btn" onclick="traderSettings(1)" title="Settings" aria-label="Settings">&#8942;</button>
     </div>
@@ -3368,6 +3355,7 @@ function connectTelemetry(){
     document.getElementById('t-status').textContent='ONLINE';
     document.getElementById('t-status').className='dv cgreen';
     const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
+    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else
     dot.style.background='var(--grn)'; dot.style.boxShadow='0 0 8px var(--grn)';
     txt.textContent='LINKED'; txt.style.color='var(--grn)';
   };
@@ -3770,6 +3758,7 @@ function connectTelemetry(){
     document.getElementById('t-status').textContent='OFFLINE';
     document.getElementById('t-status').className='dv cred';
     const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
+    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else
     dot.style.background='var(--red)'; dot.style.boxShadow='0 0 8px var(--red)';
     txt.textContent='OFFLINE'; txt.style.color='var(--red)';
     // Three straight failures = the ticket is dead, not the network. novoReconnect re-handshakes
