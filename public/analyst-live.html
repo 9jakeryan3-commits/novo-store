@@ -527,14 +527,13 @@ which Jake explicitly carved out. */
      of pills borrowed from somewhere else. One hairline under it, the active tab brighter with a
      2px underline: the same device the SPY/QQQ/IWM ticker pills already use, so the page has one
      way of saying "this is the selected one". No boxes, no fills. */
-  .lv-tabs { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0;
-    margin: 4px 0 16px; border-bottom: 1px solid var(--bdr2); }
+  .lv-tabs { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center;
+    gap: 0; margin: 4px 0 16px; border-bottom: 1px solid var(--bdr2); }
   .lv-tabs button { background: none; color: var(--txt3);
     font-family: var(--sans); font-size: 10px; font-weight: 800; letter-spacing: 1.6px;
     text-transform: uppercase; padding: 9px 15px 8px; margin-bottom: -1px;
     border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
     transition: color .12s ease, border-color .12s ease; }
-  .lv-tabs button:first-child { padding-left: 0; }
   .lv-tabs button:hover { color: var(--txt2); }
   .lv-tabs button.on { color: var(--txt1); border-bottom-color: var(--txt1); }
   .lv-tabs button[hidden] { display: none; }
@@ -2203,6 +2202,18 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   var panel = document.getElementById('novo-ask');
   if (!bar || !panel) return;
   if (!document.body.getAttribute('data-mtab')) document.body.setAttribute('data-mtab', 'map');
+  /* PAINT THE ACTIVE TAB ON LOAD, not only on click. lvMobTab is what applies `.on`, and nothing
+     calls it at startup - the default view is set by writing the attribute directly. So the bar
+     opened with every tab grey and nothing looking selected, which is exactly what Jake saw:
+     "its grey". The state has to be painted from the attribute, not only from the event that
+     changes it. */
+  (function(){
+    try {
+      var cur = document.body.getAttribute('data-mtab') || 'map';
+      document.querySelectorAll('#lv-tabs button').forEach(function(b){
+        b.classList.toggle('on', b.dataset.lvtab === cur); });
+    } catch (_e) {}
+  })();
   /* One scroll position per tab. This page is a single document scroll, not a column per view, so
      without this you leave the map halfway down, read the note, come back and land in the middle of
      the gamma card. Saved on the way out, restored after layout — the document is a different
