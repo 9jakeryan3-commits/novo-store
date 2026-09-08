@@ -439,6 +439,15 @@ body {
 
 #col-capital { order: 1; }
 #col-feed    { order: 2; border-right: 1px solid var(--bdr); }
+/* THE DESK RAIL IS DESKTOP-ONLY, AND HAD NO DEFAULT SAYING SO (found 2026-09-08).
+   Every rule for it lives inside @media (min-width: 769px) - including its display:flex and its
+   position:fixed. Below that width NONE of them applied, so a bare <div> fell back to
+   display:block IN NORMAL FLOW and rendered as a strip across the bottom of every phone: 390x40,
+   growing to 390x60 the moment two more surfaces were added. It sat under the fixed mobile tab
+   bar, which is the only reason it was never noticed - it was consuming layout the whole time and
+   would have surfaced the day a tab bar moved. A component whose every rule is inside a media
+   query needs a default OUTSIDE it, or the other side of the breakpoint gets the raw element. */
+#desk-rail   { display: none; }
 #col-intel   { order: 3; border-right: none; }
 /* The alerts view is a phone tab, not a desk column. Hidden by default at every width; the
    #col-alerts.mob-active rule inside the mobile block is the only thing that shows it. */
@@ -513,6 +522,35 @@ body {
   body[data-desk="alerts"] #col-alerts { display: block !important; }
   body[data-desk="digest"] #col-digest { display: block !important; }
   body[data-desk="predict"] #col-predict { display: block !important; }
+  /* ── THE ANALYSIS VIEW, DISSOLVED INTO THE RAIL (Jake, 2026-09-08) ────────────────────────
+     "the analysis tab needs to be broken up and put into sidebar tabs where it all belongs, the
+     Analysis feed atleast gets its own tab." Feed and Three Books each get one; The Line folds
+     into Alerts (it IS level-break alerts) and What Dr. NoVo Knows folds into History (it IS the
+     base rate for this setup). The CHART|ANALYSIS toggle goes with it.
+     PROJECTED, NOT MOVED. Both cards stay exactly where they are in #col-feed; the desk shows
+     that column as its panel and reveals one card. Reparenting them would have rescoped ~12
+     "#col-feed <card>" rules onto nothing and taken the mobile Analysis tab with it - the same
+     shared-node trap that stopped the columns being moved into a panel in the first place. */
+  body:not([data-desk="afeed"]):not([data-desk="books"]) #col-feed { display: none !important; }
+  body[data-desk="afeed"] #col-feed,
+  body[data-desk="books"] #col-feed {
+    display: block !important; position: fixed !important;
+    top: var(--desk-top, 48px); right: 44px; bottom: 0; width: 400px;
+    height: auto !important; overflow-y: auto; z-index: 39;
+    background: var(--bg); border-left: 1px solid var(--bdr);
+    grid-template-rows: none !important; padding: 0 !important; }
+  body[data-desk="afeed"] #col-feed > *,
+  body[data-desk="books"] #col-feed > * { display: none !important; }
+  body[data-desk="afeed"] #col-feed #card-intel {
+    display: flex !important; height: auto !important; flex: 0 0 auto !important;
+    border-bottom: none !important; }
+  body[data-desk="afeed"] #col-feed #card-intel .log-area {
+    height: auto !important; max-height: none !important; }
+  body[data-desk="books"] #col-feed #row-unique {
+    display: block !important; grid-template-columns: none !important; }
+  body[data-desk="books"] #col-feed #row-unique > #card-line { display: none !important; }
+  body[data-desk="books"] #col-feed #card-board {
+    display: flex !important; border-right: 0 !important; }
   /* Inside the panel the columns are plain blocks, not grid children. */
   body[data-desk="read"] #col-read { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
@@ -2433,7 +2471,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            clusters doing two jobs, not one cluster cut in half. -->
     <div id="saas-nav">
       <button class="navbtn on" data-v="overview" onclick="setView('overview')">Chart</button>
-      <button class="navbtn" data-v="feeds" onclick="setView('feeds')">Analysis</button>
     </div>
     <!-- ARMED / LIVE / HALTED row, RELOCATED into the topbar-right (2026-07-14).
          Pre-placed on purpose: every creator in the JS does
@@ -2920,6 +2957,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 <!-- THE DESK RAIL — desktop only (CSS hides it under 769px). One button per surface; the
      panel it opens is the SAME column the mobile tab shows, never a copy. -->
 <div id="desk-rail" aria-label="Desk panels">
+  <button type="button" data-desk="afeed" onclick="deskOpen('afeed')">Analysis feed</button>
+  <button type="button" data-desk="books" onclick="deskOpen('books')">Three books</button>
   <button type="button" data-desk="read" onclick="deskOpen('read')">The Read</button>
   <button type="button" data-desk="readings" onclick="deskOpen('readings')">Readings</button>
   <button type="button" data-desk="futures" onclick="deskOpen('futures')">Futures</button>
@@ -3756,6 +3795,10 @@ document.addEventListener('click', function(e){
    One name -> the column it shows and the mount it needs. The SAME table the mobile tabs use,
    written once: a second mapping would be a second answer to "what is on the Futures surface". */
 var DESK = {
+  /* Feed and Books carry NO mount function - unlike the other nine, their content is markup the
+     page already renders and keeps updated. The desk only decides which one is on screen. */
+  afeed:    [3,  '#card-intel',        function(){}],
+  books:    [3,  '#card-board',        function(){}],
   read:     [13, '#col-read-body',     function(){ window.novoTape && window.novoTape.mount('#col-read-body', 'read'); }],
   readings: [8,  '#col-readings-body', function(){ window.novoReadings && window.novoReadings.mount('#col-readings-body'); }],
   futures:  [9,  '#col-futures-body',  function(){ window.novoFutures && window.novoFutures.mount('#col-futures-body'); }],
@@ -3782,6 +3825,23 @@ function deskTop(){
 }
 addEventListener('resize', deskTop);
 addEventListener('load', function(){ deskTop(); setTimeout(deskTop, 400); });
+/* THE LINE -> ALERTS, WHAT DR. NOVO KNOWS -> HISTORY (Jake's call, 2026-09-08).
+   A one-time move into the column each belongs to, done once at load rather than per view: The
+   Line is a level-break ALERT feed, and What Dr. NoVo Knows is the base rate for the setup, which
+   is what History already answers. Ids travel with the nodes, so every getElementById that fills
+   them keeps working; only their parent changes. Moved rather than projected because a projection
+   can only reveal a card inside the panel it already lives in, and these two now belong to a
+   different panel entirely. Runs on both desktop and mobile - the fold is the same on each. */
+addEventListener('DOMContentLoaded', function(){
+  try {
+    var line = document.getElementById('card-line');
+    var alerts = document.getElementById('col-alerts');
+    if (line && alerts && !alerts.contains(line)) alerts.appendChild(line);
+    var brain = document.getElementById('card-brain');
+    var hist = document.getElementById('col-history');
+    if (brain && hist && !hist.contains(brain)) hist.appendChild(brain);
+  } catch (_e) {}
+});
 window.deskOpen = function(name){
   deskTop();                                   // re-measure before showing anything
   var cur = document.body.getAttribute('data-desk');
