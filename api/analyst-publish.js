@@ -1354,6 +1354,27 @@ async function _promotePublicLevels(state) {
       const readObj = { slug, title, text, bias, biasLabel, levels, chartUrl, label, dateLabel: etDate, publishAfter, createdAt: nowMs };
       await put(`analyst-archive/reads/${slug}.json`, JSON.stringify(readObj),
         { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json', token: BT });
+
+      /* CATCH A PREDICTION STATED INSIDE THE READ (Jake, 2026-09-07). The BIAS is untouched - it
+         stays graded where it already is. This looks only for a separate, specific call in the
+         prose, and defaults to finding nothing. Best-effort: a publish must never fail because
+         the catcher did. */
+      try {
+        /* ⚠ THE LIVE STATE IS A BLOB, NOT A KV KEY. The first version of this read
+           kv().get('analyst:live') - a key that does not exist - so spots came back empty, the
+           guard below skipped, and the catcher would have been a no-op that never once ran and
+           never once said so. _loadJson(_liveBlobKey()) is what every other reader in this file
+           uses. */
+        const spots = {};
+        try {
+          const st = await _loadJson(_liveBlobKey(), process.env.BLOB_READ_WRITE_TOKEN);
+          ((st && st.indices) || []).forEach(function (x) { if (x && x.ticker) spots[x.ticker] = x.spot; });
+        } catch (_) {}
+        if (Object.keys(spots).length) {
+          const caught = await require('./_lib/read-predictions.js').catchReadPrediction(readObj, { spots });
+          if (caught && caught.has) console.log('[read-prediction] caught', caught.symbol, caught.kind, caught.id);
+        }
+      } catch (_e) {}
       // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N.
       // idxLoaded guard (mirrors the DELETE path, 2026-07-11): only rewrite the index if we GENUINELY loaded it
       // (or it genuinely doesn't exist). A transient blob list/fetch failure must NOT overwrite the archive with
