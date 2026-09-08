@@ -1360,8 +1360,16 @@ tr:last-child td{border-bottom:none}
          lit itself where it was clicked shows nothing at all until the first click - which is
          exactly how the analyst's shipped grey on load. This runs at load and on every data-mtab
          change, whoever made it. */
+      /* ⚠ 'novo' and 'coins' ARE PHONE-BAR STATES AND THIS BAR HAS NO BUTTON FOR EITHER.
+         Dr. NoVo and the coin picker are header controls up here, so feeding those two values
+         into this row matched nothing and turned the ENTIRE bar off - open the chat on a desktop
+         and you lost every trace of which section you were reading. And it is not even true:
+         the chat docks INTO #center over the current section and closing it puts you back on
+         that section, so the section is still selected the whole time it is open. */
+      var barLive = (live === 'novo' || live === 'coins')
+        ? (document.body.getAttribute('data-mtab') || 'map') : live;
       Array.prototype.forEach.call(document.querySelectorAll('#cx-tabs button'), function(b){
-        b.classList.toggle('on', b.getAttribute('data-cxtab') === live); });
+        b.classList.toggle('on', b.getAttribute('data-cxtab') === barLive); });
       Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
         r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
     } catch (_e) {}
@@ -4091,10 +4099,23 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
   }]);
 
   K.register([
+    /* ⚠ THESE TWO DID NOTHING. Both picked a rail row that is emitted inside the `if (false) {`
+       block in drawRail, so the NodeList was always empty and the command was a no-op - it had
+       been that way since those rows were retired. Both surfaces are now tabs with their own
+       entry in the bar and the More menu, so the palette goes to the tab like every other view
+       command, and there is one way in rather than a dead one and a live one. */
     { label: 'Screener — every coin, sortable', group: 'View',
-      run: function () { pick('.coin[data-screen]'); } },
+      run: function () { try { window.cxMobTab('screener'); } catch (_e) {} } },
     { label: 'Live reads — what the rules fired', group: 'View',
-      run: function () { pick('.coin[data-feed]'); } },
+      run: function () { try { window.cxMobTab('reads'); } catch (_e) {} } },
+    { label: 'Flow — tape, blocks, carry', group: 'View',
+      run: function () { try { window.cxMobTab('flow'); } catch (_e) {} } },
+    { label: 'Positioning — funding, OI, venues', group: 'View',
+      run: function () { try { window.cxMobTab('pos'); } catch (_e) {} } },
+    { label: 'History — base rates and scored claims', group: 'View',
+      run: function () { try { window.cxMobTab('hist'); } catch (_e) {} } },
+    { label: 'Daily rundown', group: 'View',
+      run: function () { try { window.cxMobTab('read'); } catch (_e) {} } },
     { label: 'Settings', group: 'Page', run: function () { window.lvSettings(1); } },
     { label: 'Refresh the map now', group: 'Page',
       run: function () { try { window.load(); } catch (_e) {} } },
