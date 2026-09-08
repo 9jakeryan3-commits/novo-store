@@ -189,6 +189,44 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Hero ── */
   .hero { position: relative; padding: 60px 0 72px; text-align: center; overflow: hidden; }
+  /* ── THE HERO IS BROKEN IN TWO AND USES THE PAGE ────────────────────────────────────────────
+     Jake, 2026-09-08: "what dont we set the hero side by side like and use the whole page on
+     desktop" - looking at a 900px column of centred text on a 1920px screen, with the ecosystem
+     band running edge to edge underneath it. The narrow hero read as a phone layout stretched.
+     What that means is the COPY gets laid out across the width: the statement (badge, headline,
+     tagline) on the left, the argument (the three paragraphs that justify it) on the right. No
+     picture is added - the words themselves are what fills the page.
+     The hero takes its own container width, 1560, the house wide-shell figure. Every other
+     section keeps 900. Below 1080 it collapses to the original single centred column, which is
+     also the width at which two text columns stop being readable side by side. */
+  .hero .container { max-width: 1560px; }
+  @media (min-width: 1080px) {
+    .hero { padding: 78px 0 84px; }
+    /* ⚠ CENTRED INSIDE EACH COLUMN, NOT LEFT-ALIGNED (Jake, 2026-09-08: "instead of being left
+       oriented into their columns center them in their columns"). The hero already centres
+       everything - .hero sets text-align:center - so the columns simply inherit it, and the
+       inline `margin:0 auto` these elements carry does the horizontal centring for free. An
+       earlier pass fought that with margin-left:0 !important; deleting those rules is what makes
+       this work rather than adding more. */
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
+      gap: 72px; align-items: start; }
+    /* More room means the headline can be the size it wants to be. */
+    .hero-grid h1 { font-size: clamp(56px, 4.9vw, 88px); letter-spacing: -2.6px; }
+    .hero-say .hero-tagline { max-width: 34ch; }
+    .hero-say .hero-tagline { margin-left: auto; margin-right: auto; }
+    .hero-arg p { max-width: 62ch; margin-left: auto; margin-right: auto; }
+    .hero-arg p:first-child { margin-top: 6px; }
+    /* the glow was drawn for a 1050px centred column; it now has a 1560px row to cover */
+    .hero::before { width: 1560px; height: 660px; top: -200px; }
+    /* The chips and the doors stay full width under both columns - they belong to the whole
+       hero, not to either half. A hairline separates them from the argument above. */
+    .hero-say .hero-chips { justify-content: center; margin: 30px auto 26px;
+      max-width: 48ch; }
+    .hero-say .hero-ask { margin: 0 auto !important; max-width: 48ch; }
+    /* The doors band gets the hairline the chips used to carry, so the CTAs still read as a
+       separate step rather than more of the hero. */
+    .hero-cta { margin-top: 52px; padding-top: 38px; border-top: 1px solid var(--bdr); }
+  }
   .hero::before { content: ''; position: absolute; top: -160px; left: 50%; transform: translateX(-50%); width: 1050px; height: 580px; background: radial-gradient(ellipse at center, rgba(59,130,246,0.22), rgba(34,211,238,0.08) 42%, transparent 72%); pointer-events: none; z-index: 0; }
   .hero .container { position: relative; z-index: 1; }
   /* NOT FLATTENED, and not containers. Both are PILLS -- a badge and a row of
@@ -589,15 +627,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- HERO -->
 <section class="hero">
   <div class="container">
+   <div class="hero-grid">
+
+    <!-- THE STATEMENT. What the product claims, in the largest type on the site. -->
+    <div class="hero-say">
     <div class="hero-badge">NoVo Options Trading &nbsp;&middot;&nbsp; SPY / QQQ / IWM &nbsp;&middot;&nbsp; Crypto &nbsp;&middot;&nbsp; 0DTE &amp; intraday</div>
     <h1>Stop guessing.<br><span>Read the dealers.</span></h1>
     <p class="hero-tagline">Two dealer maps &mdash; <b style="color:#22d3ee;">equities</b> and <b style="color:#a78bfa;">crypto</b> &mdash; with <b style="color:var(--txt1);">Dr. NoVo, the AI market analyst</b>, reading both.</p>
+
+      <!-- ⚠ CHIPS AND THE PILL LIVE IN THE STATEMENT COLUMN, NOT IN A CELL OF THEIR OWN. As a
+           separate grid child the chips were auto-placed into row two - which begins below the
+           WHOLE of row one, and row one's height is set by the argument column beside them. That
+           left a 300px hole under the headline and dropped the chips almost to the fold. Inside
+           this column they simply follow the tagline.
+           Jake, 2026-09-08: "put the dr. novo pill up with the left hand side". -->
+<div class="hero-chips" aria-label="What NoVo Options Trading covers"><span class="hero-chip">Live dealer map</span><span class="hero-chip">Gamma flip</span><span class="hero-chip">Call / Put walls</span><span class="hero-chip">Expected move</span><span class="hero-chip">Hourly audit</span><span class="hero-chip">Dr. NoVo the AI analyst</span><span class="hero-chip"><span data-tr-scored>1,042</span> sessions scored &middot; <span data-tr-live>34</span> live</span><span class="hero-chip">SPY / QQQ / IWM</span><span class="hero-chip" style="border-color:rgba(167,139,250,.4);">Crypto dealer map</span><span class="hero-chip">Deep reads on demand</span></div>
+<a href="#ask-novo" class="hero-ask" style="display:inline-flex;align-items:center;gap:9px;margin:0 auto 26px;padding:11px 20px;border-radius:999px;text-decoration:none;border:1px solid rgba(34,211,238,.38);background:linear-gradient(180deg,rgba(34,211,238,.10),rgba(34,211,238,.03));color:var(--txt1);font-size:14px;font-weight:600;line-height:1.35;max-width:640px;text-align:left;box-shadow:0 0 26px -10px rgba(34,211,238,.55);"><span style="font-size:17px;line-height:1;color:#22d3ee;">&#10022;</span><span><b style="color:#22d3ee;">Dr. NoVo</b> &mdash; the AI market analyst in your pocket. The answers you can&rsquo;t find in a search engine.</span></a>
+    </div>
+
+    <!-- THE ARGUMENT. Why the claim is true. It reads as a column beside the statement
+         rather than a narrow ribbon underneath it, which is what "use the whole page"
+         actually buys: the same words, at a measure people read at, filling the width. -->
+    <div class="hero-arg">
     <p>Someone is on the other side of every option you buy, and <b style="color:var(--txt1);">they hedge</b>. That hedging is mechanical, it is enormous, and it leaves a footprint you can read <b style="color:#22d3ee;">before the move rather than after it</b> &mdash; the gamma flip, the walls, the expected move.</p>
     <p>That map redraws on SPY, QQQ and IWM for as long as the session runs &mdash; and the same math runs on crypto, where the options book expires every single day. Every session gets a written read in plain English &mdash; next to <b style="color:var(--txt1);">what a setup like today&rsquo;s resolved to before</b>.</p>
     <p style="max-width:700px;margin:20px auto 30px;font-size:clamp(16px,2.3vw,21px);font-weight:600;color:var(--txt1);line-height:1.55;">Three ways in. <b style="color:#22d3ee;">Analyst</b> is the map and the read, recomputed <b style="color:#22d3ee;">every 60 seconds</b>. <b style="color:var(--green);">Trader</b> redraws that same map <b style="color:var(--green);">every ~5 seconds</b> on a live scalping chart, <b style="color:var(--green);">every price tick landing within ~50 milliseconds</b>, with an hourly structural audit. The <b style="color:#a78bfa;">Crypto Market Map</b> draws the same dealer map on crypto, on a book that expires every day at 08:00 UTC. All three come with Dr. NoVo, the AI market analyst.</p>
+    </div>
 
-    <div class="hero-chips" aria-label="What NoVo Options Trading covers"><span class="hero-chip">Live dealer map</span><span class="hero-chip">Gamma flip</span><span class="hero-chip">Call / Put walls</span><span class="hero-chip">Expected move</span><span class="hero-chip">Hourly audit</span><span class="hero-chip">Dr. NoVo the AI analyst</span><span class="hero-chip"><span data-tr-scored>1,042</span> sessions scored &middot; <span data-tr-live>34</span> live</span><span class="hero-chip">SPY / QQQ / IWM</span><span class="hero-chip" style="border-color:rgba(167,139,250,.4);">Crypto dealer map</span><span class="hero-chip">Deep reads on demand</span></div>
-    <a href="#ask-novo" class="hero-ask" style="display:inline-flex;align-items:center;gap:9px;margin:0 auto 26px;padding:11px 20px;border-radius:999px;text-decoration:none;border:1px solid rgba(34,211,238,.38);background:linear-gradient(180deg,rgba(34,211,238,.10),rgba(34,211,238,.03));color:var(--txt1);font-size:14px;font-weight:600;line-height:1.35;max-width:640px;text-align:left;box-shadow:0 0 26px -10px rgba(34,211,238,.55);"><span style="font-size:17px;line-height:1;color:#22d3ee;">&#10022;</span><span><b style="color:#22d3ee;">Dr. NoVo</b> &mdash; the AI market analyst in your pocket. The answers you can&rsquo;t find in a search engine.</span></a>
+
+   </div>
+
     <div class="hero-cta">
       <a href="/crypto" class="btn-secondary crypto-glow" style="border-color:#a78bfa;color:#a78bfa;text-decoration:none;">Crypto &mdash; <span data-mappedcount>91</span> coins + <span data-chaincount>250+</span> on-chain, $79/mo &rarr;</a>
       <a href="/analyst" class="btn-secondary analyst-glow" style="border-color:#22d3ee;color:#22d3ee;text-decoration:none;">Analyst &mdash; the map and the read, $129/mo &rarr;</a>
