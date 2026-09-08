@@ -108,7 +108,12 @@ a{color:var(--cyan)}
 .lv-msg{margin-top:16px;font-size:12.5px;color:var(--red);min-height:18px}
 
 /* shell */
-#app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+/* THREE ROWS, AND main IS PINNED TO THE THIRD. The bar is display:none on a phone, and a
+   display:none grid child takes no track - so with `auto 1fr` and the bar hidden, main would land
+   in the `auto` row and the whole app would collapse to its content height. Naming the rows is
+   what makes the bar's absence free. */
+#app{display:grid;grid-template-rows:auto auto 1fr;height:100vh}
+#app > main{grid-row:3}
 header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid var(--bdr2);background:var(--panel)}
 /* Brand, live status and settings gear: the Analyst dashboard's header, sized for this
    page's compact app bar. */
@@ -265,6 +270,34 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
    they are separated by a hairline and spacing now, like every other surface. */
 .panel{background:none;border:0;border-top:1px solid var(--bdr2);border-radius:0;
   padding-top:4px;margin-bottom:18px}
+/* -- THE COIN'S TABS ARE PANELS, NOT COLUMNS -----------------------------------------------
+   Gamma / Flow / Positioning / History are four views of ONE render. drawCoin writes every panel
+   once and stamps each with its section; these rules decide which are on screen. Nothing is
+   re-fetched, re-rendered or duplicated when you change tab.
+   Gated on data-view="coin" so the screener, the live-reads feed and a chain token - which write
+   #body with no sections at all - are never filtered into a blank page by a coin's tabs. */
+#body[data-view="coin"] > .panel { display: none; }
+body[data-mtab="map"]  #body[data-view="coin"] > .panel[data-sec="gamma"],
+body[data-mtab="flow"] #body[data-view="coin"] > .panel[data-sec="flow"],
+body[data-mtab="pos"]  #body[data-view="coin"] > .panel[data-sec="pos"],
+body[data-mtab="hist"] #body[data-view="coin"] > .panel[data-sec="hist"] { display: block; }
+
+/* -- THE SECTION BAR -----------------------------------------------------------------------
+   The same treatment as the analyst's, deliberately: small uppercase letterspaced type, one
+   hairline under the row, the active tab brighter with a 2px underline. No pills, no fills, no
+   boxes. Neutral rather than this page's purple - purple is Dr. NoVo's, and an active tab wearing
+   his colour would make the two indistinguishable. */
+#cx-tabs { grid-row: 2; display: flex; flex-wrap: wrap; align-items: stretch;
+  justify-content: center; gap: 0; padding: 0 14px;
+  border-bottom: 1px solid var(--bdr2); background: var(--panel); }
+#cx-tabs button { background: none; border: 0; color: var(--txt3);
+  font-family: var(--sans); font-size: 10px; font-weight: 800; letter-spacing: 1.6px;
+  text-transform: uppercase; padding: 9px 14px 8px; margin-bottom: -1px;
+  border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
+  transition: color .12s ease, border-color .12s ease; }
+#cx-tabs button:hover { color: var(--txt2); }
+#cx-tabs button.on { color: var(--txt1); border-bottom-color: var(--txt1); }
+#cx-tabs button[hidden] { display: none; }
 .rdn{font-family:var(--mono);font-size:9.5px;color:var(--txt4);margin-top:5px;letter-spacing:.04em}
 .ph{display:flex;align-items:baseline;gap:9px;padding:8px 12px;border-bottom:1px solid var(--bdr2);flex-wrap:wrap}
 .ph h2{margin:0;font-size:10.5px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);font-weight:700}
@@ -820,6 +853,8 @@ tr:last-child td{border-bottom:none}
     body[data-mtab="alerts"]:has(#novo-ask.on) #alerts-col { display: none; }
     /* Five labels now; "Dr. NoVo" is the widest and sets the floor. */
     .mob-tab { font-size: 9px; letter-spacing: 0; }
+    /* The phone has its own bar at the bottom. Two navigations on one screen is one too many. */
+    #cx-tabs { display: none; }
     body[data-mtab="stats"] #center { display: none; }
     body[data-mtab="stats"] #side { display: block; border-left: 0; background: transparent;
       padding: 14px 16px 28px; }
@@ -894,6 +929,70 @@ tr:last-child td{border-bottom:none}
   #novo-ask-bubble{padding-top:13px;padding-bottom:13px}
   .cx-install{min-height:44px;padding-top:15px;padding-bottom:15px}
 }
+
+/* == DESKTOP =================================================================================
+   Jake, 2026-09-08: "then work on desktop view".
+   WHAT THIS FIXES, MEASURED BEFORE IT WAS WRITTEN. Every rule governing #alerts-col,
+   #digest-col, #predict-col and #read-col lived inside @media (max-width:768px) - both the
+   display:none AND the per-tab show. Above 768px they were therefore display:block empty grid
+   children, landing in IMPLICIT ROWS under the map (probed at 1600x1000: 206x280 at y=915 and
+   y=1195), and there was no control of any kind that reached them: no bar, no More menu, nothing
+   in the command palette. Alerts, the Digest, Predictions and the Daily Crypto Rundown were
+   unreachable on a laptop, and invoking the tab machinery at that width APPENDED the column under
+   the map instead of switching to it.
+   The comment at the grid declaration says these columns are "display:none at every width" and
+   explains exactly why they must be. The reasoning was right; the rule was only ever written on
+   one side of the breakpoint. */
+@media (min-width: 769px) {
+  #cx-tabs { display: flex; }
+  /* Now true at every width, as the grid's own comment always claimed. */
+  #alerts-col, #digest-col, #predict-col, #read-col { display: none; }
+
+  /* The member surfaces are full-width documents, not a third column beside a map. The rail is a
+     coin picker and #side is a coin's numbers - neither has anything to say about your alert list,
+     so both stand down and the column takes the whole shell. */
+  body[data-mtab="alerts"] main, body[data-mtab="digest"] main,
+  body[data-mtab="predict"] main, body[data-mtab="read"] main { grid-template-columns: 1fr; }
+  body[data-mtab="alerts"] #rail, body[data-mtab="alerts"] #center, body[data-mtab="alerts"] #side,
+  body[data-mtab="digest"] #rail, body[data-mtab="digest"] #center, body[data-mtab="digest"] #side,
+  body[data-mtab="predict"] #rail, body[data-mtab="predict"] #center, body[data-mtab="predict"] #side,
+  body[data-mtab="read"] #rail, body[data-mtab="read"] #center, body[data-mtab="read"] #side { display: none; }
+  body[data-mtab="alerts"] #alerts-col, body[data-mtab="digest"] #digest-col,
+  body[data-mtab="predict"] #predict-col, body[data-mtab="read"] #read-col {
+    display: block; padding: 22px 24px 40px; max-width: 940px; margin: 0 auto; width: 100%; }
+
+  /* SAME EXCEPTION THE MOBILE RULES MAKE, AND FOR THE SAME REASON: the chat panel lives inside
+     #center on this page. Hiding #center for these views would hide the chat with it, invisibly -
+     the panel would still carry .on while the screen showed something else. The chat answers to
+     the "n" key and the command palette, not just the bar, so the guard belongs in CSS where it
+     covers every caller. */
+  body[data-mtab="alerts"]:has(#novo-ask.on) #center,
+  body[data-mtab="digest"]:has(#novo-ask.on) #center,
+  body[data-mtab="predict"]:has(#novo-ask.on) #center,
+  body[data-mtab="read"]:has(#novo-ask.on) #center { display: block; }
+  body[data-mtab="alerts"]:has(#novo-ask.on) #alerts-col,
+  body[data-mtab="digest"]:has(#novo-ask.on) #digest-col,
+  body[data-mtab="predict"]:has(#novo-ask.on) #predict-col,
+  body[data-mtab="read"]:has(#novo-ask.on) #read-col { display: none; }
+  body[data-mtab="alerts"]:has(#novo-ask.on) main, body[data-mtab="digest"]:has(#novo-ask.on) main,
+  body[data-mtab="predict"]:has(#novo-ask.on) main,
+  body[data-mtab="read"]:has(#novo-ask.on) main { grid-template-columns: 1fr; }
+}
+
+/* Between 769 and 1100 the stats column is display:none (the 1100px rule) and, before the bar,
+   nothing brought it back - so a small laptop could not see a coin's cost, funding, liquidations
+   or the record at all. Its tab exists in exactly the band where the column does not. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  body[data-mtab="stats"] #center { display: none; }
+  body[data-mtab="stats"] #side { display: block; border-left: 0; background: transparent;
+    padding: 18px 20px 40px; }
+  body[data-mtab="stats"] main { grid-template-columns: 170px 1fr; }
+  body[data-mtab="stats"]:has(#novo-ask.on) #center { display: block; }
+  body[data-mtab="stats"]:has(#novo-ask.on) #side { display: none; }
+}
+/* ...and above it the column is permanently on screen, so a tab that opens it would do nothing.
+   A control that visibly does nothing is worse than an absent one. */
+@media (min-width: 1101px) { #cx-tabs button[data-cxtab="stats"] { display: none; } }
 </style>
 </head>
 <body>
@@ -924,6 +1023,26 @@ tr:last-child td{border-bottom:none}
     <div id="novo-keys-hint"></div>
       <button class="lv-gear" type="button" onclick="lvSettings(1)" aria-label="Settings">&#9881;<span class="gl">Settings</span></button>
   </header>
+  <!-- THE SECTION BAR. Under the brand row - where the analyst's sits, and where Jake drew the
+       line when he asked for that one. It drives the SAME cxMobTab the phone's bottom bar and the
+       More menu drive, so a tab has one definition and one behaviour on every width. The phone
+       hides it: it has its own bar down the bottom.
+       Stats is here because between 769 and 1100px the column it opens is display:none and nothing
+       else brings it back; above 1101px the column is always on screen and the button hides
+       itself. -->
+  <nav id="cx-tabs" aria-label="Sections">
+    <button type="button" data-cxtab="map" onclick="cxMobTab('map')">Map</button>
+    <button type="button" data-cxtab="flow" onclick="cxMobTab('flow')">Flow</button>
+    <button type="button" data-cxtab="pos" onclick="cxMobTab('pos')">Positioning</button>
+    <button type="button" data-cxtab="hist" onclick="cxMobTab('hist')">History</button>
+    <button type="button" data-cxtab="reads" onclick="cxMobTab('reads')">Live Reads</button>
+    <button type="button" data-cxtab="screener" onclick="cxMobTab('screener')">Screener</button>
+    <button type="button" data-cxtab="stats" onclick="cxMobTab('stats')">Stats</button>
+    <button type="button" data-cxtab="read" onclick="cxMobTab('read')">Daily Rundown</button>
+    <button type="button" data-cxtab="alerts" onclick="cxMobTab('alerts')">Alerts</button>
+    <button type="button" data-cxtab="digest" onclick="cxMobTab('digest')">Digest</button>
+    <button type="button" data-cxtab="predict" onclick="cxMobTab('predict')" hidden>Predictions</button>
+  </nav>
   <main>
     <div class="col" id="rail"></div>
     <div class="col" id="center">
@@ -1089,6 +1208,10 @@ tr:last-child td{border-bottom:none}
 </nav>
 <!-- The overflow. Rows call cxMobTab by the same name the hidden bar buttons use. -->
 <div id="more-menu" hidden>
+  <button type="button" data-mtab="flow" onclick="pickMore('flow')"><span aria-hidden="true">&#8644;</span>Flow</button>
+  <button type="button" data-mtab="pos" onclick="pickMore('pos')"><span aria-hidden="true">&#9707;</span>Positioning</button>
+  <button type="button" data-mtab="hist" onclick="pickMore('hist')"><span aria-hidden="true">&#8986;</span>History</button>
+  <button type="button" data-mtab="reads" onclick="pickMore('reads')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
   <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Daily rundown</button>
   <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
   <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
@@ -1115,6 +1238,20 @@ tr:last-child td{border-bottom:none}
     window.toggleMoreMenu(false);
   });
 
+  /* The four views of one coin render. Named once; the reset above, the home rule below and the
+     CSS filter all read from this list rather than each carrying its own copy. */
+  var CX_COIN_TABS = ['map', 'flow', 'pos', 'hist'];
+  /* Picking a coin means "show me this coin". Arriving from the screener, the reads feed or a
+     member surface, the tab showing names no section OF a coin - and the panel filter would then
+     match nothing and paint a blank page. This puts the view back on the map in exactly that case
+     and leaves it alone in every other, so a background refresh never moves you off your tab. */
+  window.cxTabHome = function(){
+    try {
+      var cur = document.body.getAttribute('data-mtab') || 'map';
+      if (CX_COIN_TABS.indexOf(cur) < 0) document.body.setAttribute('data-mtab', 'map');
+    } catch (_e) {}
+  };
+
   window.cxMobTab = function(which){
     try { window.novoAskOpen(which === 'novo' ? 1 : 0); } catch (_e) {}
     if (which === 'novo') return;
@@ -1126,8 +1263,18 @@ tr:last-child td{border-bottom:none}
       SCREEN = true; FEED = false; TOK = null;
       document.body.classList.remove('rail-open');
       try { drawRail(''); drawScreener(); } catch (_e) {}
-    } else if (which === 'map' || which === 'stats') {
-      if (SCREEN) { SCREEN = false; try { draw(); } catch (_e) {} }
+    } else if (which === 'reads') {
+      /* "What just fired" was reachable only by finding its row inside the coin picker. It is the
+         same surface the trader and analyst both call Live Reads, so it takes that name and a tab
+         of its own. Still ONE renderer - drawFeed, the one that rail row already called. */
+      FEED = true; SCREEN = false; TOK = null;
+      document.body.classList.remove('rail-open');
+      try { drawRail(''); drawFeed(); } catch (_e) {}
+    } else if (CX_COIN_TABS.indexOf(which) >= 0 || which === 'stats') {
+      /* Gamma, Flow, Positioning, History and Stats are all views OF A COIN, so arriving on one
+         from the screener or the reads feed has to put the coin back. draw() picks the renderer
+         off the same flags, so there is no second code path deciding what "the coin" means. */
+      if (SCREEN || FEED) { SCREEN = false; FEED = false; try { draw(); } catch (_e) {} }
     }
     /* rail-open is the picker's OWN state, already toggled by the coin name in the header and
        cleared by every pick handler in drawRail. Reusing it means the bar and the header chip
@@ -1137,6 +1284,12 @@ tr:last-child td{border-bottom:none}
        underneath back on Map. Otherwise picking a coin while Stats is showing lands you on the new
        coin's numbers with its map never shown, which is not what tapping a coin means. */
     document.body.setAttribute('data-mtab', coins ? 'map' : which);
+    /* A CANVAS SIZED WHILE HIDDEN MEASURES ZERO. drawGamma takes its width from cv.clientWidth, so
+       a coin picked while Flow was showing painted its gamma chart at 0px. Coming back to Map is
+       the moment it gets a real width for the first time. The page already redraws on resize for
+       this reason; a tab switch is a resize as far as a canvas is concerned. */
+    if (which === 'map') requestAnimationFrame(function(){
+      try { if (window._cxRepaint) window._cxRepaint(); } catch (_e) {} });
     /* Mounted on FIRST arrival and refreshed on every one after. Alerts change when the member
        changes them or when one fires, both rare -- but a list that silently went stale while the
        tab sat open is the thing this surface exists to prevent. */
@@ -1183,6 +1336,9 @@ tr:last-child td{border-bottom:none}
     // SCREEN is a view flag rather than a tab attribute, so the bar has to ask it directly or the
     // screener would light nothing - the same "nothing selected" bug the More button fixes.
     try { if (live !== 'novo' && typeof SCREEN !== 'undefined' && SCREEN) live = 'screener'; } catch (_e) {}
+    /* FEED is the same kind of flag, and the reads feed is still reachable from its row inside the
+       coin picker - so the bar has to ask it directly too, or arriving that way lights nothing. */
+    try { if (live !== 'novo' && typeof FEED !== 'undefined' && FEED) live = 'reads'; } catch (_e) {}
     Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
       var on = t.getAttribute('data-mtab') === live;
       t.classList.toggle('mob-active', on);
@@ -1191,7 +1347,14 @@ tr:last-child td{border-bottom:none}
     });
     try {
       var mb = document.getElementById('mob-more');
-      if (mb) mb.classList.toggle('mob-active', ['screener', 'alerts', 'predict', 'read'].indexOf(live) >= 0);
+      if (mb) mb.classList.toggle('mob-active',
+        ['screener', 'alerts', 'predict', 'read', 'flow', 'pos', 'hist', 'reads'].indexOf(live) >= 0);
+      /* THE DESKTOP BAR IS PAINTED BY THE SAME OBSERVER, not by its own click handler. A bar that
+         lit itself where it was clicked shows nothing at all until the first click - which is
+         exactly how the analyst's shipped grey on load. This runs at load and on every data-mtab
+         change, whoever made it. */
+      Array.prototype.forEach.call(document.querySelectorAll('#cx-tabs button'), function(b){
+        b.classList.toggle('on', b.getAttribute('data-cxtab') === live); });
       Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
         r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
     } catch (_e) {}
@@ -1202,6 +1365,9 @@ tr:last-child td{border-bottom:none}
   sync();
   window.addEventListener('load', function () {
     try { window.novoPredict.reveal('#more-menu button[data-mtab="predict"]'); } catch (_e) {}
+    /* ...and the bar's, which keys on data-cxtab. reveal() was written when the More menu was the
+       only door to this tab; a comp seat on a laptop would otherwise see Predictions nowhere. */
+    try { window.novoPredict.reveal('#cx-tabs button[data-cxtab="predict"]'); } catch (_e) {}
   });
   /* ⚠ THE PUSH LANDS HERE NOW. A notification opens the dashboard its DEVICE registered from, so a
      crypto device's digest opens /crypto/live#novo and a fired alert opens /crypto/live#alerts.
@@ -1698,6 +1864,19 @@ function heatPanel(g){
     +`</div></div>`;
 }
 
+/* ---------------- section tagging ---------------- */
+/* Jake, 2026-09-08: split the map scroll into Gamma / Flow / Positioning / History. Twenty panels
+   in one column is the same overload the trader and analyst already had broken up.
+   The panels are NOT re-rendered per tab and no renderer is duplicated - "if its displaying in one
+   place putting it in another is basically the same". Every panel function already returns its own
+   top-level <div class="panel"> (or '' when the coin has no data for it), so the section a panel
+   belongs to is stamped HERE, at the one call site that assembles them. One place says what belongs
+   where; CSS does the showing. */
+function _sec(name, frag){
+  if (!frag) return '';
+  return frag.split('<div class="panel"').join('<div data-sec="' + name + '" class="panel"');
+}
+
 /* ---------------- gamma chart ---------------- */
 function drawGamma(g){
   const cv=$('#gamma'); if(!cv||!g||!g.strikes||!g.strikes.length) return;
@@ -1826,7 +2005,8 @@ function drawRail(filter=''){
   document.querySelectorAll('.coin[data-feed]').forEach(el=>
     el.onclick=()=>{FEED=true;SCREEN=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();});
   document.querySelectorAll('.coin[data-c]').forEach(el=>
-    el.onclick=()=>{FEED=false;SCREEN=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();});
+    el.onclick=()=>{FEED=false;SCREEN=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();
+      try{window.cxTabHome();}catch(_e){}});
   document.querySelectorAll('.coin[data-tok]').forEach(el=>
     el.onclick=()=>{FEED=false;SCREEN=false;TOK=(SNAP.chain||[]).find(t=>t.address===el.dataset.tok&&t.network===el.dataset.net)||null;
       document.body.classList.remove('rail-open');drawRail(filter);drawChainToken();});
@@ -1945,6 +2125,7 @@ function drawFeed(){
     h += `</div></div>`;
   }
   $('#body').innerHTML = h;
+  $('#body').setAttribute('data-view', 'reads');
   const side=$('#side'); if(side) side.innerHTML='';
 }
 
@@ -2045,6 +2226,7 @@ function drawScreener(){
       <td class="num ${r.gex==null?'':(r.gex>=0?'up':'dn')}">${r.gex==null?'—':money(r.gex)}</td></tr>`;
   }).join('');
   const bandBtn = (v,l)=>`<button type="button" data-band="${v}" class="scrb${SCR_BAND===v?' on':''}">${l}</button>`;
+  $('#body').setAttribute('data-view', 'screener');
   $('#body').innerHTML = `<div class="panel"><div class="ph"><h2>The whole book, ranked</h2>
     <span class="sub">every column measured &middot; click a heading to sort</span></div><div class="pb">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">
@@ -2128,6 +2310,7 @@ function drawChainToken(){
       'the board on a figure nothing corroborates.':''}
     </div></div>`;
   $('#body').innerHTML=h;
+  $('#body').setAttribute('data-view', 'token');
   const side=$('#side'); if(side) side.innerHTML='';
 }
 
@@ -2395,9 +2578,6 @@ function drawCoin(){
           })()}
         </div>
       </div>
-      ${turnoverPanel(g)}
-      ${takerFlowPanel(d,g)}${tapePanel(d)}
-      ${basisPanel(d)}
       ${gauge(g)}
       ${volRow(d,g)}
       <canvas id="gamma"></canvas>
@@ -2405,8 +2585,13 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h += venuePanel(g) + exposures(g) + clockPanel(g,d) + histPanel() + termPanel(g) + skewPanel(g) + heatPanel(g);
+    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g) + heatPanel(g));
   }
+  /* Flow reads the PERP payload (d), not the options book (g) - a coin with no chain can still
+     have a tape, so this sits outside the if(g) that used to bury it. */
+  h += _sec('flow', turnoverPanel(g) + takerFlowPanel(d,g) + tapePanel(d) + basisPanel(d));
+  h += _sec('pos',  venuePanel(g) + exposures(g));
+  h += _sec('hist', histPanel());
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     // CROWDING LADDER (2026-09-01). The percentile columns are MEASURED: history.py ranks each
     // reading against that coin's own sample history and publishes pct + n every pass. They were
@@ -2423,21 +2608,22 @@ function drawCoin(){
       const tip=`${o.n} live samples`+(o.lt?`; long lens: ${o.lt.n} ${o.lt.cadence} prints over ${ltSpan(o.lt)} from the venue's own archive`:'');
       return `<td class="nu"${hot?' style="color:var(--amber)"':''} title="${tip}">${o.pct.toFixed(0)}th${lt}</td>`;
     };
-    h+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
+    let _lev='';
+    _lev+=`<div class="panel"><div class="ph"><h2>Leverage positioning</h2>
       <span class="sub">per venue · never blended · trusted rows only</span></div><div class="pb">
       <table><thead><tr><th>Venue</th><th>Funding</th><th>vs own history</th><th>Annualised</th><th>Open interest</th></tr></thead><tbody>`;
     const oi=Object.fromEntries(pos.open_interest.map(o=>[o.venue,o.oi_usd]));
     const vs=[...new Set([...pos.funding.map(f=>f.venue),...pos.open_interest.map(o=>o.venue)])].sort();
     for(const v of vs){
       const f=pos.funding.find(z=>z.venue===v);
-      h+=`<tr><td>${v}</td>
+      _lev+=`<tr><td>${v}</td>
         <td class="${f?(f.rate>0?'up':f.rate<0?'dn':''):''}">${f?(f.rate*100).toFixed(5)+'%':'—'}</td>
         ${pctCell(HP&&HP.funding&&HP.funding[v])}
         <td class="${f&&f.annualized_pct!=null?(f.annualized_pct>0?'up':f.annualized_pct<0?'dn':''):''}">${f&&f.annualized_pct!=null?f.annualized_pct.toFixed(1)+'%':'—'}</td>
         <td>${oi[v]?money(oi[v]):'—'}</td></tr>`;
     }
     const oiP=HP&&HP.oi;
-    h+=`</tbody></table><div class="kv" style="margin-top:9px"><span class="k">Total open interest</span>
+    _lev+=`</tbody></table><div class="kv" style="margin-top:9px"><span class="k">Total open interest</span>
       <span class="v nu">${money(pos.total_oi_usd)}</span></div>
       ${oiP&&oiP.pct!=null?`<div class="kv"><span class="k">Book size vs its own history</span>
       <span class="v ${oiP.pct>=90||oiP.pct<=10?'am':'nu'}">${oiP.pct.toFixed(0)}th percentile</span></div>
@@ -2446,8 +2632,10 @@ function drawCoin(){
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
         Measured against this coin's own ${oiP.n} logged readings${oiP.lt?`; the OKX line ranks the newest daily row of the venue's own archive (${oiP.lt.n} rows, perp + dated futures combined) inside that same series - like against like, never blended`:''}. How crowded, not which way.</div>`:''}
       </div></div>`;
+    h += _sec('pos', _lev);
   }
-  h+=`<div class="panel"><div class="ph"><h2>What Dr. NoVo said</h2>
+  let _said='';
+  _said+=`<div class="panel"><div class="ph"><h2>What Dr. NoVo said</h2>
     <span class="sub">claims, scored when the horizon passes</span></div><div class="pb">`;
   // A standing observation is re-emitted every pass, so four rows could be one claim with
   // its countdown decremented. Collapse a RUN of the same unscored kind to its newest and
@@ -2461,13 +2649,38 @@ function drawCoin(){
       prev.n++; prev.since=r.ts_utc;          // readings run newest-first
     } else _runs.push({r:r, n:1, since:r.ts_utc});
   });
-  h+=_runs.length?_runs.map(({r,n,since})=>`<div class="rd"><div class="rdh">
+  _said+=_runs.length?_runs.map(({r,n,since})=>`<div class="rd"><div class="rdh">
       <span class="rdk">${r.kind.replace(/_/g,' ')}</span>
       ${r.correct==null?'<span class="tag t-n">open</span>':(r.correct?'<span class="tag t-hi">correct</span>':'<span class="tag t-lo">wrong</span>')}
       <span class="rdt">${String(r.ts_utc).slice(11,16)} UTC · ${r.horizon_min}m</span></div>
       <div class="rdc">${r.claim}</div>${n>1?`<div class="rdn">standing since ${String(since).slice(11,16)} UTC · restated ${n}&times;</div>`:''}</div>`).join('')
     :`<div class="empty">no readings yet for ${CUR}</div>`;
-  h+=`</div></div>`;
+  _said+=`</div></div>`;
+  h += _sec('hist', _said);
+
+  /* ⚠ AN EMPTY TAB MUST SAY WHY IT IS EMPTY. Every panel function returns '' when this coin has no
+     data for it, so a coin with no options chain lands on Flow and sees a blank page - which reads
+     as "the dashboard is broken" and not as "this coin has no options tape". A tab that cannot
+     distinguish those two is the [[a-null-result-must-earn-its-meaning]] shape, one screen up. */
+  const _EMPTY = {
+    gamma: 'no options chain in the book for this coin yet',
+    flow:  'no options tape, block prints or dated futures carrying this coin',
+    pos:   'no funding or open-interest rows cleared the trust filter',
+    hist:  'nothing scored for this coin yet' };
+  for (const _k in _EMPTY) {
+    if (h.indexOf('data-sec="' + _k + '"') >= 0) continue;
+    h += '<div data-sec="' + _k + '" class="panel"><div class="pb"><div class="empty">'
+       + 'Nothing on this tab for ' + CUR + ' &mdash; ' + _EMPTY[_k]
+       + '. The other tabs still have data.</div></div></div>';
+  }
+  /* Which renderer wrote #body. The per-tab panel filter keys on it, so the screener, the reads
+     feed and a chain token - none of which carry sections - are never filtered by a coin's tabs. */
+  $('#body').setAttribute('data-view', 'coin');
+  /* ⚠ A CANVAS SIZED WHILE HIDDEN MEASURES ZERO. drawGamma takes its width from cv.clientWidth, so
+     if the member picks a coin while Flow is showing, the gamma chart paints at 0px and switching
+     back to Map shows a blank chart. The page already redraws on resize for exactly this reason;
+     a tab switch is a resize as far as a canvas is concerned. */
+  window._cxRepaint = function(){ try { drawGamma(g); } catch (_e) {} };
   $('#body').innerHTML=h;
   // The entrance is a response to PICKING a coin. load() also lands here every 90s from its
   // own interval, and replaying the stagger for a background refresh - usually of the same
