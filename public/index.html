@@ -151,6 +151,12 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
   section { padding: 80px 0; }
   hr.divider { border: none; border-top: 1px solid var(--bdr); margin: 0; }
+  /* The ecosystem sheet under the hero. Edge to edge, no side padding, no frame - the sheet has
+     its own black ground so it meets the page seamlessly and the two dividers read as its rules. */
+  .eco-band { margin: 0; padding: 0; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .eco-band img { display: block; width: 100%; min-width: 860px; height: auto; }
+  @media (max-width: 860px) { .eco-band img { min-width: 780px; } }
 
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
@@ -618,6 +624,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <hr class="divider">
+
+<!-- ═══ THE ECOSYSTEM SHEET ══════════════════════════════════════════════════════════════════
+     Full-bleed on purpose: it sits OUTSIDE .container (900px), so it runs edge to edge under the
+     hero the way Jake asked. Its hairlines are the two <hr class="divider"> that were already
+     stacked here - no new borders, and it inherits whatever the divider colour becomes.
+     ⚠ THE SCROLLER IS NOT DECORATION. This is a three-column sheet 2,600px wide; at 390px it is a
+     legible-looking smear. min-width keeps it at a readable size and the container takes the
+     overflow, so a phone swipes across it and the PAGE never scrolls sideways.
+     Not a mockup: every screen in it is a real capture and every word is set type, so nothing here
+     claims a number the product does not produce. -->
+<figure class="eco-band">
+  <img src="/screenshots/novo-ecosystem.webp?v=1" width="2600" height="2234" loading="lazy"
+       decoding="async"
+       alt="The NoVo ecosystem: the Trader dashboard, the Analyst dealer map and the Crypto Market Map side by side, with Dr. NoVo answering on all three.">
+</figure>
 
 <hr class="divider">
 
