@@ -467,9 +467,21 @@ body {
      NOTHING IS REPARENTED. The columns stay exactly where they are in the DOM; desktop simply
      shows one of them in a fixed panel. Moving them would have broken the mobile tabs that share
      them, and two copies of a surface is two surfaces that drift. */
-  #desk-rail { position: fixed; top: 48px; right: 0; bottom: 0; width: 44px; z-index: 40;
-    display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 8px 0;
-    background: var(--bg); border-left: 1px solid var(--bdr); overflow: hidden; }
+  /* THE RAIL SITS UNDER THE MARKET INTEL STRIP AND SCROLLS (Jake, 2026-09-08).
+     Two defects, both visible on a short window: at top:48px the rail started at the BOTTOM OF
+     THE TOPBAR, which is above the intel strip - so it covered the strip's right end and ate VIX
+     and half of CHARM/DAY. And `overflow: hidden` meant that on any window short enough, the last
+     surface was simply cut in half: PREDICTIONS rendered as "PREDICTIO" with no way to reach it.
+     A navigation rail that silently drops its own entries is worse than a short one.
+     --desk-top is measured from the strip's real bottom edge rather than hardcoded, because that
+     block's height changes with the window (the strip wraps, and the topbar is not a fixed 48
+     everywhere). Measured on load and on resize; 48px only ever applies before the first measure. */
+  #desk-rail { position: fixed; top: var(--desk-top, 48px); right: 0; bottom: 0; width: 44px;
+    z-index: 40; display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+    padding: 8px 0; background: var(--bg); border-left: 1px solid var(--bdr);
+    overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+  #desk-rail::-webkit-scrollbar { display: none; }
+  #desk-rail button { flex: 0 0 auto; }
   #desk-rail button { writing-mode: vertical-rl; text-orientation: mixed; background: none;
     border: 0; color: var(--txt3); font-family: var(--font); font-size: 10.5px; font-weight: 700;
     letter-spacing: .12em; text-transform: uppercase; padding: 10px 0; cursor: pointer;
@@ -502,31 +514,31 @@ body {
   body[data-desk="digest"] #col-digest { display: block !important; }
   body[data-desk="predict"] #col-predict { display: block !important; }
   /* Inside the panel the columns are plain blocks, not grid children. */
-  body[data-desk="read"] #col-read { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="read"] #col-read { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="readings"] #col-readings { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="readings"] #col-readings { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="futures"] #col-futures { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="futures"] #col-futures { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="history"] #col-history { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="history"] #col-history { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="flow"] #col-flow { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="flow"] #col-flow { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="sweeps"] #col-sweeps { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="sweeps"] #col-sweeps { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="alerts"] #col-alerts { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="alerts"] #col-alerts { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="digest"] #col-digest { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="digest"] #col-digest { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
-  body[data-desk="predict"] #col-predict { position: fixed; top: 48px; right: 44px; bottom: 0;
+  body[data-desk="predict"] #col-predict { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
   /* No sheet on desktop — the wrapper stays in the flow and the column reads as it always has. */
@@ -3754,7 +3766,24 @@ var DESK = {
   digest:   [6,  '#col-digest-body',   function(){ window.novoDigest && window.novoDigest.mount('#col-digest-body', { app: 'trader', example: 'Send me a daily digest on SPY.', openChat: function(){ switchMobileTab(4); } }); }],
   predict:  [7,  '#col-predict-body',  function(){ window.novoPredict && window.novoPredict.mount('#col-predict-body', { app: 'trader' }); }],
 };
+/* WHERE THE DESK STARTS, measured rather than assumed. The rail and every desk column hang off
+   --desk-top, which is the real bottom edge of the header block (topbar + the market intel strip).
+   Hardcoding 48px put them under the topbar but OVER the strip, so the rail covered VIX and the
+   right end of CHARM/DAY. The strip wraps at narrow widths and the topbar is not a constant
+   height, so this has to be read from the box itself and re-read whenever the window changes. */
+function deskTop(){
+  try {
+    var strip = document.getElementById('saas-header');
+    var bar = document.getElementById('topbar');
+    var el = (strip && strip.offsetParent !== null) ? strip : bar;   // strip is desktop-only
+    var b = el ? Math.round(el.getBoundingClientRect().bottom) : 48;
+    if (b > 0) document.documentElement.style.setProperty('--desk-top', b + 'px');
+  } catch (_e) {}
+}
+addEventListener('resize', deskTop);
+addEventListener('load', function(){ deskTop(); setTimeout(deskTop, 400); });
 window.deskOpen = function(name){
+  deskTop();                                   // re-measure before showing anything
   var cur = document.body.getAttribute('data-desk');
   var next = (cur === name) ? null : name;      // a second click on the open one closes it
   if (next) document.body.setAttribute('data-desk', next);
