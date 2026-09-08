@@ -1536,6 +1536,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      doesn't know about the mobile tab bar, so force it to match
      #workspace's already-correct calculation. */
   #col-feed { flex-direction: column !important; height: 100% !important; overflow-y: auto !important; padding-bottom: 0 !important; }
+  /* THE SAME SPLIT THE RAIL DOES, ON THE PHONE (Jake, 2026-09-08: "mobile the same ... no drift
+     at this point"). Desktop reveals one card of #col-feed per desk surface; here the More menu
+     sets data-mfeed and the same column shows the same one card. Identical mechanism, so the two
+     cannot describe different things. With no attribute set, everything shows - which is what a
+     deep link or a restored tab lands on, and it is the old behaviour, not a broken one. */
+  body[data-mfeed="afeed"] #col-feed > *:not(#card-intel) { display: none !important; }
+  body[data-mfeed="books"] #col-feed > *:not(#row-unique) { display: none !important; }
+  body[data-mfeed="books"] #col-feed #row-unique > #card-line { display: none !important; }
+  body[data-mfeed="books"] #col-feed #row-unique { display: flex !important; flex-direction: column; }
   /* The Line + Three Books stack on a phone; the row wrapper stops being a 2-col grid. */
     /* row-unique is NOT a .card, so it missed the flex:0 0 auto below and flex-shrink crushed it
      to 0px while its children painted over What NoVo Knows — the garbled-headers mangle (Jake,
@@ -3030,7 +3039,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 <!-- The overflow tabs. Each row simply calls switchMobileTab with the same index its hidden bar
      button uses, so there is no second definition of what a tab does. -->
 <div id="more-menu" hidden>
-  <button type="button" data-tab="3" onclick="pickMore(3)"><span class="mm-ico">&#9635;</span>Analysis</button>
+  <button type="button" data-tab="3" onclick="pickFeed('afeed')"><span class="mm-ico">&#9635;</span>Analysis feed</button>
+  <button type="button" data-tab="3" onclick="pickFeed('books')"><span class="mm-ico">&#9636;</span>Three books</button>
   <button type="button" data-tab="7" onclick="pickMore(7)" hidden><span class="mm-ico">&#9670;</span>Predictions</button>
   <button type="button" data-tab="8" onclick="pickMore(8)"><span class="mm-ico">&#9672;</span>Live Reads</button>
   <button type="button" data-tab="9" onclick="pickMore(9)"><span class="mm-ico">&#9650;</span>Futures</button>
@@ -3799,7 +3809,16 @@ function toggleMoreMenu(force){
   if (open) m.removeAttribute('hidden'); else m.setAttribute('hidden', '');
   b.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
-function pickMore(idx){ toggleMoreMenu(false); switchMobileTab(idx); }
+function pickMore(idx){ toggleMoreMenu(false); document.body.removeAttribute('data-mfeed'); switchMobileTab(idx); }
+/* Both rows open tab 3 (#col-feed) and differ only in which card it reveals - the phone's version
+   of the rail's Analysis feed / Three books, driven by the same one column so the two surfaces
+   cannot drift apart. */
+function pickFeed(which){
+  toggleMoreMenu(false);
+  switchMobileTab(3);                                // both rows open the same column...
+  document.body.setAttribute('data-mfeed', which);   // ...this picks which card it reveals.
+}   // Every OTHER More row goes through pickMore, which clears data-mfeed - so leaving this
+    // surface and coming back to a different one cannot inherit the previous selection.
 document.addEventListener('click', function(e){
   var m = document.getElementById('more-menu');
   if (!m || m.hasAttribute('hidden')) return;

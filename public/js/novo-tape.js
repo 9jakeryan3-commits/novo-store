@@ -43,6 +43,41 @@
       + 'color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums}',
     '.novo-tape .tp-s{display:block;font-size:11px;color:var(--txt3,#6e6e6e);margin-top:3px;line-height:1.45}',
     '.novo-tape .grn{color:#34d399}.novo-tape .red{color:#f43f5e}',
+    /* 2-up stat block: hairline above each cell, one hairline between the columns, no boxes */
+    '.novo-tape .tp-grid{display:grid;grid-template-columns:1fr 1fr}',
+    '.novo-tape .tp-c{padding:13px 0 14px;border-top:1px solid var(--bdr2,#242428);min-width:0}',
+    '.novo-tape .tp-c:nth-child(odd){padding-right:16px}',
+    '.novo-tape .tp-c:nth-child(even){padding-left:16px;border-left:1px solid var(--bdr2,#242428)}',
+    '.novo-tape .tp-ck{font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
+      + 'letter-spacing:.14em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+    '.novo-tape .tp-cv{font-family:var(--mono,ui-monospace),monospace;font-size:19px;'
+      + 'font-weight:800;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums;'
+      + 'margin-top:5px;line-height:1.15;overflow-wrap:anywhere}',
+    '.novo-tape .tp-cs{font-size:10.5px;color:var(--txt3,#6e6e6e);margin-top:5px;line-height:1.45}',
+    /* unusual volume: a scaled bar, so the row is a comparison and not four loose numbers */
+    '.novo-tape .tp-uv{display:grid;grid-template-columns:88px 1fr auto;gap:10px;'
+      + 'align-items:center;padding:8px 0;border-top:1px solid var(--bdr2,#242428)}',
+    '.novo-tape .tp-grp + .tp-uv{border-top:0}',
+    '.novo-tape .tp-uk{font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
+      + 'letter-spacing:.06em;text-transform:uppercase}',
+    '.novo-tape .tp-ubar{display:block;height:3px;background:var(--bdr2,#242428);border-radius:2px}',
+    '.novo-tape .tp-ubar i{display:block;height:3px;border-radius:2px}',
+    '.novo-tape .tp-ubar i.gb{background:#34d399}.novo-tape .tp-ubar i.rb{background:#f43f5e}',
+    '.novo-tape .tp-un{font-family:var(--mono,ui-monospace),monospace;font-size:12.5px;'
+      + 'font-weight:700;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums}',
+    /* the print tape: time | side (+ venues) | size, size right-aligned on tabular numerals */
+    '.novo-tape .tf-row{display:grid;grid-template-columns:46px 1fr auto;gap:10px;'
+      + 'align-items:baseline;padding:8px 0;border-top:1px solid var(--bdr2,#242428)}',
+    '.novo-tape .tp-grp + .tf-row{border-top:0}',
+    '.novo-tape .tf-ts{font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
+      + 'color:var(--txt3,#6e6e6e);font-variant-numeric:tabular-nums}',
+    '.novo-tape .tf-s{font-family:var(--mono,ui-monospace),monospace;font-size:12.5px;'
+      + 'font-weight:700;color:var(--txt2,#a8a8a8);min-width:0;overflow-wrap:anywhere}',
+    '.novo-tape .tf-v{display:block;font-family:var(--font,inherit);font-size:10px;'
+      + 'font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.02em;margin-top:2px}',
+    '.novo-tape .tf-n{font-family:var(--mono,ui-monospace),monospace;font-size:13px;'
+      + 'font-weight:800;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums;text-align:right}',
+    '.novo-tape .tf-raw .tf-s{font-weight:500}',
     /* the historical strip reads as prose, because it is a sentence about a sample */
     '.novo-tape .tp-claim{font-size:13.5px;color:var(--txt1,#f0f0ee);line-height:1.6;padding:12px 0;'
       + 'border-top:1px solid var(--bdr2,#242428)}',
@@ -180,11 +215,23 @@
   }
 
   /* ── OPTIONS FLOW ─────────────────────────────────────────────────────────────────────────── */
+  /* A 2-UP STAT BLOCK. Four numbers that answer one question belong side by side on tabular
+     numerals, not stacked as four full-width rows - stacked, the eye reads them as a list of
+     unrelated facts and has to scroll to compare two of them. Hairlines only: a rule above each
+     cell and one between the columns. No boxes. */
+  function cells(items) {
+    return '<div class="tp-grid">' + items.map(function (c) {
+      return '<div class="tp-c"><div class="tp-ck">' + esc(c.k) + '</div>'
+           + '<div class="tp-cv ' + (c.cls || '') + '">' + c.v + '</div>'
+           + (c.s ? '<div class="tp-cs">' + c.s + '</div>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+
   function drawFlow(el, state) {
     var d = forTicker(state), tk = ticker(state);
     var fl = d && d.flow;
-    var h = '<h2>' + esc(tk) + ' · Options flow</h2>'
-          + '<span class="tp-sub">Volume-based — call vs put DEMAND, not buy/sell prints. '
+    var h = '<h2>' + esc(tk) + ' &middot; Options flow</h2>'
+          + '<span class="tp-sub">Volume-based &mdash; call vs put DEMAND, not buy/sell prints. '
           + 'Chain volume does not say which side initiated, so this is crowding, never direction.</span>';
     if (!fl || fl.status !== 'ok') {
       h += '<div class="tp-empty">No flow read yet for ' + esc(tk) + '. This builds through the '
@@ -194,95 +241,112 @@
     var lp = fl.lean_pct, lean = fl.lean;
     var leanTxt = lean === 'calls' ? ('Calls' + (lp != null ? ' ' + lp + '%' : ''))
                 : lean === 'puts' ? ('Puts' + (lp != null ? ' ' + (100 - lp) + '%' : ''))
-                : lean === 'balanced' ? 'Balanced' : 'Building…';
-    var leanCls = lean === 'calls' ? 'grn' : lean === 'puts' ? 'red' : '';
-    h += '<div class="tp-grp">Now</div>'
-       + '<div class="tp-r"><span class="tp-k">Live lean<span class="tp-s">'
-       + (lp != null ? 'flow, last ~60s' : 'first read — no delta yet') + '</span></span>'
-       + '<span class="tp-v ' + leanCls + '">' + esc(leanTxt) + '</span></div>';
+                : lean === 'balanced' ? 'Balanced' : 'Building...';
     var pc = fl.pc_ratio;
-    h += '<div class="tp-r"><span class="tp-k">Put / call volume<span class="tp-s">day cumulative ratio</span></span>'
-       + '<span class="tp-v ' + (pc != null ? (pc >= 1.2 ? 'red' : pc <= 0.7 ? 'grn' : '') : '') + '">'
-       + (pc != null ? Number(pc).toFixed(2) : '—') + '</span></div>'
-       + '<div class="tp-r"><span class="tp-k">Call volume<span class="tp-s">contracts today</span></span>'
-       + '<span class="tp-v grn">' + num(fl.call_vol) + '</span></div>'
-       + '<div class="tp-r"><span class="tp-k">Put volume<span class="tp-s">contracts today</span></span>'
-       + '<span class="tp-v red">' + num(fl.put_vol) + '</span></div>';
-    var w = fl.whales || [];
+    h += cells([
+      { k: 'Live lean', v: esc(leanTxt),
+        cls: lean === 'calls' ? 'grn' : lean === 'puts' ? 'red' : '',
+        s: lp != null ? 'flow, last ~60s' : 'first read &mdash; no delta yet' },
+      { k: 'Put / call vol', v: (pc != null ? Number(pc).toFixed(2) : '&mdash;'),
+        cls: pc != null ? (pc >= 1.2 ? 'red' : pc <= 0.7 ? 'grn' : '') : '',
+        s: 'day cumulative ratio' },
+      { k: 'Call volume', v: num(fl.call_vol), cls: 'grn', s: 'contracts today' },
+      { k: 'Put volume', v: num(fl.put_vol), cls: 'red', s: 'contracts today' }
+    ]);
+    /* UNUSUAL VOLUME AS A COMPARISON, not four numbers in a column. The question here is "which
+       strike is crowded, and by how much against the others", so each bar is scaled to the
+       largest of the set and the strike carries its side's colour. */
+    var w = (fl.whales || []).slice(0, 6);
     if (w.length) {
+      var top = 0;
+      w.forEach(function (x) { var v = Number(x.vol || x.volume) || 0; if (v > top) top = v; });
       h += '<div class="tp-grp">Unusual volume</div>'
          + w.map(function (x) {
-             return '<div class="tp-r"><span class="tp-k">' + esc(x.side || '') + ' '
-                  + esc(x.strike != null ? x.strike : '') + '</span><span class="tp-v '
-                  + (x.side === 'CALL' ? 'grn' : 'red') + '">' + num(x.vol || x.volume) + '</span></div>';
+             var v = Number(x.vol || x.volume) || 0;
+             var isCall = String(x.side || '').toUpperCase() === 'CALL';
+             var pct = top ? Math.max(3, Math.round((v / top) * 100)) : 0;
+             return '<div class="tp-uv"><span class="tp-uk ' + (isCall ? 'grn' : 'red') + '">'
+                  + esc(String(x.side || '').toLowerCase()) + ' '
+                  + esc(x.strike != null ? x.strike : '') + '</span>'
+                  + '<span class="tp-ubar"><i class="' + (isCall ? 'gb' : 'rb')
+                  + '" style="width:' + pct + '%"></i></span>'
+                  + '<span class="tp-un">' + num(v) + '</span></div>';
            }).join('');
     }
     el.innerHTML = h;
   }
 
-  /* ── SWEEPS & BLOCKS ──────────────────────────────────────────────────────────────────────── */
   function drawSweeps(el, state) {
     var d = forTicker(state), tk = ticker(state);
     var t = d && d.tape_flow;
-    var h = '<h2>' + esc(tk) + ' · Sweeps &amp; blocks</h2>'
-          + '<span class="tp-sub">Live prints — aggressive multi-exchange sweeps and large block '
-          + 'trades. Unlike the flow tab, these carry an aggressor side.</span>';
+    var sess = String((state && state.session) || '').toLowerCase();
+    var h = '<h2>' + esc(tk) + ' &middot; Sweeps &amp; blocks</h2>'
+          + '<span class="tp-sub">Live prints &mdash; aggressive multi-exchange sweeps and large '
+          + 'block trades. Unlike the flow tab, these carry an aggressor side.</span>';
     if (!t) {
-      /* THE ANALYST HIDES THIS PANEL WHEN THE TAPE IS ABSENT. A tab cannot hide itself, so it has
-         to say WHICH absence this is - no feed at all, versus a feed that stopped. */
-      h += '<div class="tp-warn">No print tape for ' + esc(tk) + '. This feed comes from a single '
-         + 'venue and is not always present — an empty tab here means no feed, not a quiet tape.</div>';
+      /* WHICH ABSENCE THIS IS. The old copy asserted "an empty tab here means no feed, not a
+         quiet tape" - which the panel cannot know, and which was wrong every morning: pre-market
+         the feed is connected and streaming and the options market simply has not opened. Saying
+         "no feed" while 1,051 symbols are subscribed tells the member something false about their
+         own data. The session is in the payload, so use it. */
+      h += (sess === 'open')
+         ? '<div class="tp-warn">No print tape for ' + esc(tk) + ' right now. This feed comes from '
+           + 'a single venue and is not always present &mdash; an empty tab during the session '
+           + 'means no feed, not a quiet tape.</div>'
+         : '<div class="tp-empty">Options prints start at the 9:30 open. The tape is subscribed '
+           + 'and waiting &mdash; nothing has traded yet, which is not the same as a feed being '
+           + 'down.</div>';
       el.innerHTML = h; return;
     }
     if (t.stale) {
-      h += '<div class="tp-warn">The print tape has stopped updating. What follows is the last thing '
-         + 'it said, and it is old — a stale tape and a quiet tape are different facts.</div>';
+      h += '<div class="tp-warn">The print tape has stopped updating. What follows is the last '
+         + 'thing it said, and it is old &mdash; a stale tape and a quiet tape are different '
+         + 'facts.</div>';
     }
     var bias = t.sweep_bias || 'balanced', sc = Number(t.sweep_count) || 0;
-    h += '<div class="tp-grp">Sweeps · last ~45m</div>'
-       + '<div class="tp-r"><span class="tp-k">Sweep bias<span class="tp-s">'
-       + (sc ? sc + ' sweep' + (sc === 1 ? '' : 's') : 'no sweeps yet') + '</span></span>'
-       + '<span class="tp-v ' + (bias === 'bullish' ? 'grn' : bias === 'bearish' ? 'red' : '') + '">'
-       + esc(bias.charAt(0).toUpperCase() + bias.slice(1)) + '</span></div>'
-       + '<div class="tp-r"><span class="tp-k">Bullish<span class="tp-s">call-buys + put-sells</span></span>'
-       + '<span class="tp-v grn">' + usd(t.call_sweep_prem) + '</span></div>'
-       + '<div class="tp-r"><span class="tp-k">Bearish<span class="tp-s">put-buys + call-sells</span></span>'
-       + '<span class="tp-v red">' + usd(t.put_sweep_prem) + '</span></div>';
-    /* OPTION blocks and SHARE blocks are kept apart, exactly as the analyst keeps them: a $50K
-       option block summed with a $2M share block is a number about nothing. */
     var bc = Number(t.block_count) || 0, ubc = Number(t.und_block_count) || 0;
-    h += '<div class="tp-grp">Blocks</div>'
-       + '<div class="tp-r"><span class="tp-k">Option blocks<span class="tp-s">'
-       + (bc ? usd(t.block_notional) + ' premium' : 'large option prints') + '</span></span>'
-       + '<span class="tp-v">' + (bc ? bc : '—') + '</span></div>'
-       + '<div class="tp-r"><span class="tp-k">Share blocks<span class="tp-s">'
-       + (ubc ? usd(t.und_block_notional) + ' notional' : 'large share prints') + '</span></span>'
-       + '<span class="tp-v">' + (ubc ? ubc : '—') + '</span></div>';
-
-    var prints = t.prints || t.rows || [];
-    if (prints.length) {
-      h += '<div class="tp-grp">The tape</div><div class="tp-wrap"><table><thead><tr>'
-         + '<th>Time</th><th>Kind</th><th>Side</th><th>Size</th></tr></thead><tbody>'
-         + prints.slice(0, 30).map(function (p) {
-             var side = String(p.side || p.aggressor || '').toLowerCase();
-             return '<tr><td>' + esc(p.time || p.t || '') + '</td>'
-                  + '<td>' + esc(p.kind || p.type || '') + '</td>'
-                  + '<td class="' + (side.indexOf('bull') >= 0 || side === 'buy' ? 'grn'
-                                   : side.indexOf('bear') >= 0 || side === 'sell' ? 'red' : '') + '">'
-                  + esc(p.side || p.aggressor || '—') + '</td>'
-                  + '<td>' + esc(p.size != null ? num(p.size) : (p.prem != null ? usd(p.prem) : '—')) + '</td></tr>';
-           }).join('') + '</tbody></table></div>';
+    /* OPTION blocks and SHARE blocks stay apart, exactly as the analyst keeps them: a $50K option
+       block summed with a $2M share block is a number about nothing. */
+    var blockSub = (bc ? usd(t.block_notional) + ' opt premium' : 'large option prints');
+    if (ubc) blockSub += ' &middot; ' + ubc + ' share block' + (ubc === 1 ? '' : 's')
+                       + ' ' + usd(t.und_block_notional);
+    h += cells([
+      { k: 'Sweep bias', v: esc(bias.charAt(0).toUpperCase() + bias.slice(1)),
+        cls: bias === 'bullish' ? 'grn' : bias === 'bearish' ? 'red' : '',
+        s: sc ? (sc + ' sweep' + (sc === 1 ? '' : 's') + ' &middot; last ~45m') : 'no sweeps yet' },
+      { k: 'Bullish sweeps', v: usd(t.call_sweep_prem), cls: 'grn', s: 'call-buys + put-sells' },
+      { k: 'Bearish sweeps', v: usd(t.put_sweep_prem), cls: 'red', s: 'put-buys + call-sells' },
+      { k: 'Blocks', v: ((bc || ubc) ? String(bc) : '&mdash;'), s: blockSub }
+    ]);
+    /* THE PRINTS. This read t.prints || t.rows, and the engine has always published them as
+       t.feed - so the one thing this tab exists for, the tape itself, never rendered once. Each
+       row arrives as a sentence ("Sweep - put-sell $14K across 3 venues") and is split into
+       columns, because the reason to watch a tape is spotting the big one, and a size buried
+       mid-sentence at a different offset on every line is exactly what stops you seeing it. */
+    var feed = t.feed || t.prints || t.rows || [];
+    if (feed.length) {
+      h += '<div class="tp-grp">The tape</div>'
+         + feed.slice(0, 40).map(function (x) {
+             var txt = String(x.text || '');
+             var cls = /call-buy|put-sell|bull/i.test(txt) ? 'grn'
+                     : /put-buy|call-sell|bear/i.test(txt) ? 'red' : '';
+             var ts = '<span class="tf-ts">' + esc(String(x.ts || x.time || '')) + '</span>';
+             var m = txt.match(/^\s*([A-Za-z-]+)\s*[·:-]\s*([A-Za-z-]+)\s+(\$[\d.,]+\s*[KMBT]?)\s+across\s+(\d+)\s+venues?\s*$/i);
+             if (!m) return '<div class="tf-row tf-raw">' + ts
+                          + '<span class="tf-s ' + cls + '">' + esc(txt) + '</span></div>';
+             return '<div class="tf-row">' + ts
+                  + '<span class="tf-s ' + cls + '">' + esc(m[2])
+                  + '<span class="tf-v">' + esc(m[1].toLowerCase()) + ' &middot; '
+                  + esc(m[4]) + ' venues</span></span>'
+                  + '<span class="tf-n">' + esc(m[3].replace(/\s+/g, '')) + '</span></div>';
+           }).join('');
+    } else {
+      h += '<div class="tp-grp">The tape</div><div class="tp-empty">Watching the tape &mdash; '
+         + 'sweeps and block prints appear here as they hit.</div>';
     }
     el.innerHTML = h;
   }
 
-  /* ── THE READ + THE FEAR GAUGE ────────────────────────────────────────────────────────────
-     Jake, 2026-09-07: "the idea is trader subscribers dont need analyst if they dont want to use
-     it, nobody wants to have to use two apps." That makes self-sufficiency the standard, not
-     tidiness of the split - so the Analyst's flagship artifact, the published read, belongs here
-     too. The fear gauge rides along because it is the same one number a trader checks beside it,
-     and Trader carried the VIX value without the percentile that gives it meaning: 15.3 means
-     nothing until you know it is the 13th percentile of its own year. */
   function drawRead(el, state) {
     var tk = ticker(state);
     var r = state && state.read;
