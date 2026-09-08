@@ -9,7 +9,10 @@ self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => n
 self.addEventListener('push', function (e) {
   let d = {}; try { d = e.data.json(); } catch (_) { d = { title: 'NoVo Analyst', body: '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'NoVo Analyst', {
-    body: d.body || '', tag: d.tag || 'novo-analyst', renotify: true,
+    body: d.body || '', /* NAMESPACED: a tag REPLACES a notification with the same tag, and all three apps
+       receive the same 'novo-analyst-line'. Unprefixed, one app's alert can take the
+       place of another's on the same device. */
+    tag: 'analyst:' + (d.tag || 'novo-analyst'), renotify: true,
     icon: '/icon-192.png?v=8', badge: '/icon-192.png?v=8', data: { url: d.url || '/analyst/live' }
   }));
 });

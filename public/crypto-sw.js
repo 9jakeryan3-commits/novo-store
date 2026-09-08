@@ -11,7 +11,10 @@ self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => n
 self.addEventListener('push', function (e) {
   let d = {}; try { d = e.data.json(); } catch (_) { d = { title: 'NoVo Crypto', body: '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'NoVo Crypto', {
-    body: d.body || '', tag: d.tag || 'novo-crypto', renotify: true,
+    body: d.body || '', /* NAMESPACED: a tag REPLACES a notification with the same tag, and all three apps
+       receive the same 'novo-analyst-line'. Unprefixed, one app's alert can take the
+       place of another's on the same device. */
+    tag: 'crypto:' + (d.tag || 'novo-crypto'), renotify: true,
     /* THE CRYPTO COIN, not the options one. crypto-live.webmanifest ships
        /icon-crypto-192.png, so Android drew the manifest icon as the app badge and THIS icon as
        the large one - two different NoVo coins in a single notification. Same asset for both

@@ -203,11 +203,21 @@
 
     var a = (state && state.analogues_by && state.analogues_by[tk])
          || (tk === 'SPY' ? (state && state.analogues) : null);
-    var rows = (a && a.rows) || (Array.isArray(a) ? a : []);
+    /* `.analogues` IS THE LIST. `.rows` is the corpus row COUNT, and reading it here was the bug:
+       find_analogues returns {status, rows: <integer>, analogues: [...]}, so `a.rows` handed back
+       a number like 1547. A number is truthy, its .length is undefined, and the empty branch ran
+       every single time - the trader said "No close analogues for today's shape yet" while the
+       analyst, reading a.analogues off the same payload, listed three. Worse than a rename: the
+       wrong name is a REAL field that means something else, so nothing ever threw. */
+    var rows = (a && Array.isArray(a.analogues)) ? a.analogues : (Array.isArray(a) ? a : []);
     h += '<div class="tp-grp">Today looks like…</div>';
     if (rows.length) {
-      h += '<div class="tp-wrap"><table><thead><tr><th>Date</th><th>Match</th><th>Regime</th>'
-         + '<th>15m</th><th>60m</th><th>Close</th></tr></thead><tbody>'
+      /* The SAME field names the analyst renders, because it is the same payload: date, tod,
+         similarity, regime, and the three forward moves nested under outcome. Every one of these
+         was read from a different name before, so even a populated list would have drawn a table
+         of dashes. */
+      h += '<div class="tp-wrap"><table><thead><tr><th>Date</th><th>Time</th><th>Match</th>'
+         + '<th>Regime</th><th>15m</th><th>60m</th><th>Close</th></tr></thead><tbody>'
          + rows.slice(0, 12).map(function (r) {
              var cell = function (v) {
                if (v == null || v === '') return '<td>—</td>';
@@ -216,13 +226,25 @@
                return '<td class="' + (n > 0 ? 'grn' : n < 0 ? 'red' : '') + '">'
                     + (n > 0 ? '+' : '') + n.toFixed(2) + '%</td>';
              };
-             return '<tr><td>' + esc(r.date || r.d || '') + '</td>'
-                  + '<td>' + (r.match != null ? esc(r.match) + '%' : '—') + '</td>'
+             var oc = r.outcome || {};
+             var dl = r.date;
+             try {
+               var dd = new Date(r.date + 'T00:00:00');
+               if (!isNaN(dd.getTime())) dl = dd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+             } catch (_e) {}
+             return '<tr><td>' + esc(dl || '') + '</td>'
+                  + '<td>' + esc(r.tod || '') + '</td>'
+                  + '<td>' + (r.similarity != null ? Math.round(Number(r.similarity)) + '%' : '—') + '</td>'
                   + '<td>' + esc(r.regime || '') + '</td>'
-                  + cell(r.m15 != null ? r.m15 : r.fwd15)
-                  + cell(r.m60 != null ? r.m60 : r.fwd60)
-                  + cell(r.close != null ? r.close : r.into_close) + '</tr>';
+                  + cell(oc.fwd15) + cell(oc.fwd60) + cell(oc.into_close) + '</tr>';
            }).join('') + '</tbody></table></div>';
+    } else if (a && a.status === 'accruing') {
+      /* ACCRUING IS NOT "NOTHING MATCHED". The corpus has not banked enough shape for this ticker
+         yet; saying "no close analogues" there reads as a verdict on today rather than on the
+         sample, which is the distinction this whole panel exists to keep. */
+      h += '<div class="tp-empty">The analogue corpus is still accruing for ' + esc(tk)
+         + '. Not enough banked shape to match against yet — this is sample depth, not a verdict '
+         + 'on today.</div>';
     } else {
       h += '<div class="tp-empty">No close analogues for today’s shape yet.</div>';
     }
