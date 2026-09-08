@@ -741,6 +741,7 @@ tr:last-child td{border-bottom:none}
     .mob-tab[data-mtab="digest"] { order: 4; }
     #mob-more                    { order: 5; }
     .mob-tab[data-mtab="coins"],
+    .mob-tab[data-mtab="read"],
     .mob-tab[data-mtab="screener"],
     .mob-tab[data-mtab="alerts"],
     .mob-tab[data-mtab="predict"] { display: none !important; }
@@ -791,6 +792,9 @@ tr:last-child td{border-bottom:none}
     body[data-mtab="predict"] #predict-col { display: block; padding: 14px 16px 28px; }
     body[data-mtab="predict"] #center, body[data-mtab="predict"] #side { display: none; }
     body[data-mtab="predict"]:has(#novo-ask.on) #center { display: block; }
+    body[data-mtab="read"] #read-col { display: block; padding: 14px 16px 28px; }
+    body[data-mtab="read"] #center, body[data-mtab="read"] #side { display: none; }
+    body[data-mtab="read"]:has(#novo-ask.on) #center { display: block; }
     body[data-mtab="predict"]:has(#novo-ask.on) #predict-col { display: none; }
     body[data-mtab="alerts"] #alerts-col { display: block; padding: 14px 16px 28px; }
     body[data-mtab="digest"] #digest-col { display: block; padding: 14px 16px 28px; }
@@ -969,6 +973,8 @@ tr:last-child td{border-bottom:none}
     <div class="col" id="alerts-col"></div>
     <div class="col" id="digest-col"></div>
     <div class="col" id="predict-col"></div>
+    <!-- The Daily Crypto Rundown (Jake, 2026-09-07). Dr. NoVo's one read a day for crypto. -->
+    <div class="col" id="read-col"></div>
   </main>
 
 
@@ -1025,6 +1031,7 @@ tr:last-child td{border-bottom:none}
 <script src="/js/novo-appfeel.js?v=5ff472d2"></script>
 <script src="/js/novo-settings.js?v=7c7e5460"></script>
 <script src="/js/novo-digest.js?v=833b5090"></script>
+<script src="/js/novo-readings.js?v=1"></script>
 <script src="/js/novo-predict.js?v=830bc7a9"></script>
 
 <!-- ===== MOBILE TAB BAR =====  (inside #app on purpose: #app carries .hidden until the member is
@@ -1070,6 +1077,7 @@ tr:last-child td{border-bottom:none}
 </nav>
 <!-- The overflow. Rows call cxMobTab by the same name the hidden bar buttons use. -->
 <div id="more-menu" hidden>
+  <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Daily rundown</button>
   <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
   <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
   <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predict</button>
@@ -1120,6 +1128,13 @@ tr:last-child td{border-bottom:none}
     /* Mounted on FIRST arrival and refreshed on every one after. Alerts change when the member
        changes them or when one fires, both rare -- but a list that silently went stale while the
        tab sat open is the thing this surface exists to prevent. */
+    if (which === 'read') {
+      try {
+        if (!window._cxReadMounted && window.novoReadings && window.novoReadings.mountCrypto) {
+          window._cxReadMounted = window.novoReadings.mountCrypto('#read-col');
+        }
+      } catch (_e) {}
+    }
     if (which === 'predict') {
       try {
         if (!window._cxPredMounted && window.novoPredict) {
@@ -1164,7 +1179,7 @@ tr:last-child td{border-bottom:none}
     });
     try {
       var mb = document.getElementById('mob-more');
-      if (mb) mb.classList.toggle('mob-active', ['screener', 'alerts', 'predict'].indexOf(live) >= 0);
+      if (mb) mb.classList.toggle('mob-active', ['screener', 'alerts', 'predict', 'read'].indexOf(live) >= 0);
       Array.prototype.forEach.call(document.querySelectorAll('#more-menu button'), function(r){
         r.classList.toggle('on', r.getAttribute('data-mtab') === live); });
     } catch (_e) {}

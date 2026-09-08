@@ -106,6 +106,29 @@ module.exports = async (req, res) => {
 
   const r = kv();
   if (!r) return res.status(503).json({ error: "store unavailable" });
+
+  /* THE DAILY CRYPTO RUNDOWN rides this endpoint rather than getting one of its own: it is the
+     same shape of thing (a member-gated read of something the system published on a schedule)
+     and the auth above is already the right auth. ?crypto=1 selects it. */
+  if (req.query && "crypto" in req.query) {
+    let rd = null;
+    try { rd = await r.get("crypto:read:daily"); } catch (_) { rd = null; }
+    if (typeof rd === "string") { try { rd = JSON.parse(rd); } catch (_) { rd = null; } }
+    let pred = null;
+    try {
+      pred = await require("./_lib/predictions.js").listPredictions(40, "crypto");
+    } catch (_) { pred = null; }
+    if (!rd || !rd.text) {
+      return res.status(200).json({ ok: true, live: false,
+        note: "No rundown published yet today." });
+    }
+    return res.status(200).json({ ok: true, live: true, read: rd,
+      // The score for BTC direction calls — the family this read's bias belongs to, so the page
+      // can show the record without computing one of its own.
+      score: pred && pred.score ? pred.score : null,
+      overall: pred && pred.overall ? pred.overall : null });
+  }
+
   let snap = null;
   try { snap = await r.get("eye:readings:live"); } catch (_) { snap = null; }
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }

@@ -208,5 +208,77 @@
     });
   }
 
-  window.novoReadings = { bar: bar, mount: mount, refresh: refresh, load: load };
+  /* ── THE DAILY CRYPTO RUNDOWN ─────────────────────────────────────────────────────────────
+     Jake, 2026-09-07: "crypto gets one a day every day a Daily Crypto Rundown with a
+     bitcoin/crypto market bias for the day. thats another thing we can grade and score."
+     Authored by Dr. NoVo through the same brain as every other analysis output, and its bias is
+     recorded as an ordinary prediction — so the record shown here is the SAME record the Predict
+     tab shows, not a second tally that could disagree with it. */
+  var CRYPTO_CSS = [
+    '.novo-rundown .rd-bias{font-family:var(--mono,ui-monospace),monospace;font-size:12px;'
+      + 'font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-left:10px}',
+    '.novo-rundown .rd-body{font-size:14px;color:var(--txt1,#f0f0ee);line-height:1.75;'
+      + 'white-space:pre-wrap;overflow-wrap:anywhere;padding:12px 0 2px}',
+    '.novo-rundown .rd-rec{font-size:12px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:16px;'
+      + 'padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
+  ].join('');
+  var BIAS_C = { BULLISH: '#34d399', BEARISH: '#f43f5e', NEUTRAL: 'var(--txt3,#6e6e6e)' };
+
+  function mountCrypto(sel) {
+    styles();
+    if (!document.querySelector('style[data-novo-rundown]')) {
+      var st = document.createElement('style');
+      st.setAttribute('data-novo-rundown', '1');
+      st.textContent = CRYPTO_CSS;
+      document.head.appendChild(st);
+    }
+    var el = typeof sel === 'string' ? document.querySelector(sel) : sel;
+    if (!el) return;
+    el.classList.add('novo-readings', 'novo-rundown');
+    el.innerHTML = '<h2>Daily rundown</h2><div class="rd-empty">Reading…</div>';
+    fetch('/api/eye-readings?crypto=1&t=' + encodeURIComponent(tok()), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (d) {
+        if (!d || !d.live) {
+          /* A day with no rundown is a FAULT, not a quiet market - it runs on a schedule. Saying
+             which one it is costs a sentence and saves an hour of wondering. */
+          el.innerHTML = '<h2>Daily rundown</h2><div class="rd-empty">No rundown published yet '
+            + 'today. This is written once a day on a schedule, so an empty page late in the day '
+            + 'means it did not run — not that there was nothing to say.</div>';
+          return;
+        }
+        var rd = d.read || {};
+        var b = rd.bias || '';
+        var h = '<h2>Daily rundown <span class="rd-sub">Dr. NoVo · ' + esc(rd.day || '') + '</span></h2>'
+          + '<div class="rd-grp">BTC bias'
+          + (b ? '<span class="rd-bias" style="color:' + (BIAS_C[b] || 'var(--txt3)') + '">'
+                 + esc(b) + '</span>' : '') + '</div>'
+          + '<div class="rd-body">' + esc(rd.text || '') + '</div>';
+        var dirScore = d.score && d.score.direction;
+        h += '<div class="rd-rec">';
+        if (b === 'NEUTRAL') {
+          /* Stated, not hidden. Grading a neutral needs a measured band and crypto has none yet;
+             pretending otherwise would put an unscored call in a scored column. */
+          h += 'A neutral call is published but not scored: grading one needs a measured '
+            + '"how flat is flat" band, and there is no measured band for BTC yet. ';
+        } else if (b) {
+          h += 'This bias was recorded as a prediction the moment it was written, and grades '
+            + 'against BTC 24 hours later. ';
+        }
+        if (dirScore) {
+          h += 'His directional crypto calls: <b>' + esc(dirScore.hit_rate) + '%</b> over '
+            + esc(dirScore.n) + ' graded.';
+        } else {
+          h += 'No graded directional crypto calls yet — the record starts with the first one to '
+            + 'reach its horizon.';
+        }
+        h += '</div>';
+        el.innerHTML = h;
+      });
+    return true;
+  }
+
+  window.novoReadings = { bar: bar, mount: mount, refresh: refresh, load: load,
+                          mountCrypto: mountCrypto };
 })();
