@@ -29,7 +29,7 @@
   s.id = 'nvk-src';
   // ?v= is rewritten to a content hash by scripts/stamp-assets.js on every deploy. Without it this
   // file is served `immutable` for a year and no future fix would ever reach a returning visitor.
-  s.src = '/js/novo-keys.js?v=e6fe7d13';
+  s.src = '/js/novo-keys.js?v=c706ae3b';
   s.defer = true;
   document.head.appendChild(s);
 })();
