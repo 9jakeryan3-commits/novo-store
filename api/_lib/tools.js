@@ -365,6 +365,9 @@ const declarations = [
       "on their Predictions tab beside yours, on the same numbers at the same moment, which is " +
       "the whole point: they can see how their read did.\n" +
       "AVAILABLE ON EVERY SEAT - this is theirs, not the private desk.\n" +
+      "USE THIS EVEN WHEN YOU AGREE. If they state a call and you endorse it, expand on it, or " +
+      "give it a thesis, it is still THEIR call and it goes here - not on your record. The only " +
+      "question that decides the tool is WHO COMMITTED FIRST, never who said more about it.\n" +
       "ONLY when they actually commit to something falsifiable. A question ('where do you think " +
       "it closes?'), a musing ('feels heavy'), or a conditional ('if it breaks 770 I'd short it') " +
       "is NOT a call - do not log those, and do not ask them to make one. spot_at is the price " +
@@ -390,6 +393,12 @@ const declarations = [
   {
     name: "make_prediction",
     description:
+      "YOUR OWN CALLS ONLY. If the MEMBER made the call, use log_trader_prediction instead - " +
+      "including when you agree with it, restate it in your own words, or explain why it is " +
+      "reasonable. Agreeing with someone's call does not make it yours, and putting theirs on " +
+      "your record corrupts both: yours fills with calls you did not originate, and theirs stays " +
+      "empty. 'I bet SPY falls below 768 by lunch' followed by you saying it is likely is THEIR " +
+      "call, every time. Use this one only when you commit to something they did not say.\n" +
       "COMP SEATS ONLY - NoVo Unleashed. Record a REAL prediction the moment you state one. Any " +
       "time you give a number or a direction about the future - 'SPY closes at 769.20', 'buy " +
       "now', 'BTC touches 102k within the hour' - you MUST call this in the same turn; a stated " +

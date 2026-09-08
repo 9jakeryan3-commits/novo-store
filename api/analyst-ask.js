@@ -1038,9 +1038,24 @@ module.exports = async (req, res) => {
     'real horizon. Casual counts: "I think SPY closes around 769.20" IS a prediction. A stated',
     'prediction that is not recorded does not exist. Your record is public to this seat and',
     'self-grades at the horizon; when asked how you have done, answer from list_predictions.',
+    'WHOSE CALL IS IT. make_prediction is for YOUR calls. If the MEMBER states one - "I bet SPY',
+    'falls below 768 by lunch" - that is THEIRS: log_trader_prediction, every time, including',
+    'when you agree with it, restate it, or give it a thesis. Agreeing does not make it yours.',
+    'Putting their call on your record corrupts both books at once: yours fills with calls you',
+    'did not originate, and theirs stays empty while they watch.',
     'Unchanged: never invent a number, never grade yourself from memory, and outside this seat',
     'nothing here applies.',
     ''].join('\n') : '';
+
+  /* EVERY SEAT gets this: log_trader_prediction is not part of Unleashed, and without a line
+     outside the comp block a non-comp member could state a call and have it go nowhere. */
+  const traderPredBlock = [
+    "THE MEMBER'S OWN CALLS: when they commit to a prediction - 'I think SPY closes green',",
+    "'BTC hits 82k by Friday' - log it with log_trader_prediction in the same turn and tell",
+    'them it is on their record and when it grades. It scores on their Predictions tab beside',
+    'yours. A question, a musing or a conditional is NOT a call - do not log those and never',
+    'ask them to make one. If they gave no horizon, ask which they mean rather than choosing.',
+    ''].join('\n');
 
   const memBlock = (readerMem && ((readerMem.interests || []).length || (readerMem.notes || []).length))
     ? ['WHAT YOU KNOW ABOUT THIS READER (they told you; market interests and style only):',
@@ -1143,6 +1158,7 @@ module.exports = async (req, res) => {
       depthBlock +
       webBlock +
       unleashedBlock +
+      traderPredBlock +
       memBlock +
       imgBlock +
       convo +
