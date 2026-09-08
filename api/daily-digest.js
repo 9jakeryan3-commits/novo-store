@@ -142,16 +142,28 @@ module.exports = async (req, res) => {
   const { pushUrl, pushTargets } = require("./_lib/alerts.js");
   const { vertex } = require("./_vertex.js");
   const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
+  // How late a delayed cron tick may still deliver. See the matcher below for why it is small.
+  const DIGEST_CATCHUP_MIN = 10;
 
   let idx = [];
   try { idx = await r.smembers("mem:index"); } catch (_) { idx = []; }
   idx = (idx || []).slice(0, 100);
 
-  let snap = null, live = null;
-  try { snap = await r.get("crypto:map:live"); } catch (_) {}
-  try { live = await r.get("analyst:live_levels"); } catch (_) {}
-  if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
-  if (typeof live === "string") { try { live = JSON.parse(live); } catch (_) { live = null; } }
+  /* ⚠ LOADED ONLY ONCE SOMEONE IS ACTUALLY DUE. These two are the largest reads in the handler -
+     the whole crypto map and the whole live-levels object - and they used to happen on every
+     invocation, before anything had checked whether a single member wanted a digest this minute.
+     At the old half-hourly cadence that was 96 needless big reads a day. At once a minute it would
+     be 2,880. The due-time check is the cheap part, so it goes first and these come after it.
+     A tick with nobody due now costs one smembers and nothing else. */
+  let snap = null, live = null, _marketLoaded = false;
+  const loadMarket = async () => {
+    if (_marketLoaded) return;
+    _marketLoaded = true;
+    try { snap = await r.get("crypto:map:live"); } catch (_) {}
+    try { live = await r.get("analyst:live_levels"); } catch (_) {}
+    if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
+    if (typeof live === "string") { try { live = JSON.parse(live); } catch (_) { live = null; } }
+  };
 
   const webpush = require("web-push");
   const canPush = process.env.ANALYST_VAPID_PUBLIC && process.env.ANALYST_VAPID_PRIVATE;
@@ -179,22 +191,44 @@ module.exports = async (req, res) => {
       // partial state that leaks a send.
       const dg = mem && mem.digest;
       if (!dg) { skipped++; continue; }
-      /* ⚠ THE MEMBER'S OWN TIME, on the half hour (Jake, 2026-09-07: "the digest is set to
-         whatever time the user asks not hardcoded to 8am"). The cron fires every 30 minutes now;
-         each run serves only the members whose chosen ET wall-clock rounds to this bucket, and a
-         sent-stamp makes the bucket idempotent — a retried run or a DST wobble must not deliver
-         the same morning twice. Wall-clock ET via Intl so DST is the formatter's problem. */
+      /* ⚠ THE MEMBER'S OWN MINUTE. Jake, 2026-09-08: "if someone wants a digest at 8:17am then
+         it sends at 8:17am only way it can be."
+         It used to compare 30-MINUTE BUCKETS (Math.floor(min / 30)), which meant 08:17 was served
+         by the 08:00 run - up to 29 minutes EARLY, and early is the one direction a scheduled
+         brief must never go: it is assembled from whatever the market looked like when it ran, so
+         arriving early means arriving with staler numbers than the member asked for. The times are
+         stored free-form (DIGEST_TIME_RE in _lib/member-memory.js accepts any minute), so the
+         bucket was silently overriding a choice the member watched succeed. The cron runs once a
+         minute now and this matches the minute.
+
+         CATCH-UP, and why it is small. Vercel does not fire a cron to the second - the observed
+         delay is tens of seconds, but a tick can be missed outright. _lateBy lets a delayed run
+         still deliver, while `_lateBy < 0` guarantees it is NEVER early. Ten minutes is deliberate:
+         wide enough for infrastructure hiccups, narrow enough that a digest which turns up is still
+         recognisably the one that was asked for. Miss the whole window and the member gets nothing
+         that day, which is the honest outcome - a market brief 40 minutes late is not the brief
+         they asked for.
+
+         DST is the formatter's problem, via ET wall-clock. Two consequences, both stated rather
+         than discovered later: on the spring-forward Sunday 02:00-02:59 does not exist, so a
+         member who picked a time in that hour gets nothing that one day; on the fall-back Sunday
+         01:00-01:59 happens twice, and the sent-stamp below - keyed on the ET DATE - is what stops
+         the second pass delivering a duplicate. */
       const _fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
-        hour12: false, hour: "2-digit", minute: "2-digit" });
+        hourCycle: "h23", hour: "2-digit", minute: "2-digit" });
       const _parts = _fmt.format(new Date());
       const _nowMin = parseInt(_parts.slice(0, 2), 10) * 60 + parseInt(_parts.slice(3, 5), 10);
       const _tm = /^\d{2}:\d{2}$/.test(dg.time || "") ? dg.time : "08:00";
       const _wantMin = parseInt(_tm.slice(0, 2), 10) * 60 + parseInt(_tm.slice(3, 5), 10);
-      if (Math.floor(_nowMin / 30) !== Math.floor(_wantMin / 30)) { skipped++; continue; }
+      const _lateBy = _nowMin - _wantMin;
+      if (_lateBy < 0 || _lateBy > DIGEST_CATCHUP_MIN) { skipped++; continue; }
       const _day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
       let _sentDay = null;
       try { _sentDay = await r.get("digest:sent:" + h); } catch (_) {}
       if (_sentDay === _day) { skipped++; continue; }
+      // Confirmed due, unsent, and subscribed - the first point at which the market payloads are
+      // worth fetching. Loads once per invocation however many members are due.
+      await loadMarket();
       const interests = dg.symbols;
 
       // Assemble ONLY their interests' facts — the model narrates, it never invents.
