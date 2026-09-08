@@ -3755,8 +3755,19 @@ window.deskOpen = function(name){
     b.classList.toggle('on', b.dataset.desk === next); });
   try { localStorage.setItem('novo_desk', next || ''); } catch (_e) {}
   if (next && DESK[next]) {
+    /* ⚠ ONLY REMEMBER IT AS MOUNTED IF SOMETHING ACTUALLY RENDERED.
+       This set the flag unconditionally, and every mount reads `window.novoX && window.novoX.mount()`
+       - so when the module was not loaded yet that expression is simply undefined, no throw, and
+       the panel was marked mounted having rendered nothing. It then never retried, because the
+       flag said it was done. A blank panel, permanently, from a guard that recorded success
+       without checking for any. The restore-on-load path hits this every time, which is why it
+       looked fine when I clicked a button in a test and empty when Jake opened the page. */
     var k = '_deskMounted_' + next;
-    if (!window[k]) { try { DESK[next][2](); window[k] = 1; } catch (_e) {} }
+    if (!window[k]) {
+      try { DESK[next][2](); } catch (_e) {}
+      var body = document.querySelector(DESK[next][1]);
+      if (body && body.children.length) window[k] = 1;
+    }
   }
   /* THE CHART MUST RE-MEASURE. Opening or closing changes the workspace width by 400px, and a
      chart that measured itself before that is drawing into a box it no longer occupies. */
@@ -3768,7 +3779,12 @@ addEventListener('load', function(){
   try {
     if (!matchMedia('(min-width: 769px)').matches) return;
     var last = localStorage.getItem('novo_desk');
-    if (last && DESK[last]) window.deskOpen(last);
+    if (!last || !DESK[last]) return;
+    /* A beat after load: the panel modules are ordinary scripts at the end of the document and
+       `load` can win the race on a warm cache. Opening before they exist is what left the panel
+       blank - and with the flag fix above it would merely retry, but not retrying at all is
+       better than a panel that flickers empty first. */
+    setTimeout(function(){ window.deskOpen(last); }, 120);
   } catch (_e) {}
 });
 

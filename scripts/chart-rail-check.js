@@ -358,6 +358,24 @@ server.listen(8795, async () => {
   ok('...every one of the nine surfaces is actually reachable on desktop',
      reach.unreachable.length === 0, JSON.stringify(reach));
 
+  /* ⚠ THE PATH THAT ACTUALLY BROKE, AND THAT NO CHECK HERE EXERCISED. Everything above clicks a
+     rail button on a page that has been open for two seconds. A member arrives with a panel
+     already remembered, so deskOpen runs from the load handler - and there the mount ran before
+     its module existed, marked itself done, and left a permanently blank panel. Clicking works;
+     arriving did not. Reload with the panel remembered and assert CONTENT. */
+  await evalIn(`try{localStorage.setItem('novo_desk','futures')}catch(e){}`);
+  await goto(1600, 1000, false);
+  await new Promise((r) => setTimeout(r, 1800));
+  const restored = await evalIn(`(() => {
+    const body = document.getElementById('col-futures-body');
+    return { desk: document.body.getAttribute('data-desk'),
+             kids: body ? body.children.length : -1,
+             text: body ? body.textContent.trim().length : -1 }; })()`);
+  ok('...and a remembered panel comes back WITH ITS CONTENT after a reload',
+     restored.desk === 'futures' && restored.kids > 0 && restored.text > 40,
+     JSON.stringify(restored));
+  await evalIn(`try{localStorage.removeItem('novo_desk')}catch(e){}`);
+
 
   console.log('\n' + (bad ? 'FAIL ' + bad : 'OK') + '\n');
   try { proc.kill(); } catch (_) {}
