@@ -971,7 +971,7 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
   await fetch(base + '/__reset-alerts').catch(() => {});
   console.log('\nThe Alerts tab, on all three dashboards\n');
   for (const [page, open] of [
-      ['trader-live.html', `pickMore(5)`],
+      ['trader-live.html', `switchMobileTab(5)`],
       ['analyst-live.html', `pickMore('alerts')`],
       ['crypto-live.html', `pickMore('alerts')`]]) {
     const app = page.split('-')[0];
@@ -986,7 +986,9 @@ const vis = (sel) => `(() => { const e = document.querySelector(${JSON.stringify
     /* Trader moved Alerts behind More (Jake's 4-main bar), so "on the bar" is the wrong
        assertion THERE and still the right one on the other two. Asserting the same shape
        everywhere would either fail on trader or have to be loosened until it proved nothing. */
-    if (app === 'trader' || app === 'analyst' || app === 'crypto') {
+    /* Trader put Alerts back on the BAR (Jake swapped it with Analysis - a thing that pings you
+       earns a thumb slot). Analyst and crypto still reach it through More. */
+    if (app === 'analyst' || app === 'crypto') {
       const row = await B.evalIn(`(() => {
         const r = document.querySelector('#more-menu button[data-tab="5"], #more-menu button[data-mtab="alerts"]');
         if (!r) return { missing: true };
@@ -1216,7 +1218,7 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     /* Trader's row lives inside the More menu, so a closed menu makes it zero-sized whether
        the seat is comp or not. Open the menu first: what a comp seat is owed is that Predict is
        THERE when they look, not that a hidden container is hidden. */
-    if (app === 'trader' || app === 'analyst' || app === 'crypto') await B.evalIn('toggleMoreMenu(true)');
+    await B.evalIn('toggleMoreMenu(true)');
     const tabv = await predTabProbe(PRED_TAB[app]);
     ok(app + ': comp seat — the tab reveals itself from the server’s answer',
       tabv.visible === true, JSON.stringify(tabv));
@@ -1758,8 +1760,8 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
       .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
     return { labels: vis.map((t) => (t.textContent || '').replace(/\\s+/g, ' ').trim().split(' ').pop()),
              widths: vis.map((t) => Math.round(t.getBoundingClientRect().width)) }; })()`);
-  ok('the trader bar shows five: Jake\u2019s four mains, then More',
-    trBar.labels.join('|') === 'Analysis|Chart|NoVo|Digest|More',
+  ok('the trader bar: More, Chart, Dr. NoVo, Digest, Alerts',
+    trBar.labels.join('|') === 'More|Chart|NoVo|Digest|Alerts',
     JSON.stringify(trBar.labels));
   ok('...and every one is at least a fingertip wide on a 375px phone',
     trBar.widths.every((w) => w >= 60), JSON.stringify(trBar.widths));
@@ -1779,7 +1781,7 @@ const PRED_TAB = { trader: '#more-menu button[data-tab="7"]',
     return { open: open, rows: rows, sides: sides.length,
              radius: parseFloat(c.borderTopLeftRadius) || 0 }; })()`);
   ok('...tapping More opens it with the overflow tabs (Predict hidden for a free seat)',
-    menu.open === true && menu.rows.join('|') === 'Alerts|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
+    menu.open === true && menu.rows.join('|') === 'Analysis|Readings|Futures|The Read|History|Options flow|Sweeps & blocks', JSON.stringify(menu.rows));
   ok('...and the menu is hairlines, not a box',
     menu.sides === 1 && menu.radius === 0, JSON.stringify({ sides: menu.sides, r: menu.radius }));
 

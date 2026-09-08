@@ -1536,15 +1536,18 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      plan he set earlier: "The nav bar will be 4 main plus a more button once we get over 5 tabs
      we will work these one at a time starting in trader"). Seven tabs on a 375px phone gives each
      one 53px - narrower than a fingertip - so the bar was already past what it could carry. */
-  .mob-tab[data-tab="3"] { order: 1; }   /* Analysis */
+  /* Jake, 2026-09-07: "swap the alerts instead the main so its actually going to be
+     More / Chart / Dr. NoVo / Digest / Alerts". Alerts is a thing that PINGS you, so it earns a
+     thumb position; Analysis is a place you go to read, which is what a menu is for. */
+  #mob-more            { order: 1; }     /* More     */
   .mob-tab[data-tab="2"] { order: 2; }   /* Chart    */
   .mob-tab[data-tab="4"] { order: 3; }   /* Dr. NoVo */
   .mob-tab[data-tab="6"] { order: 4; }   /* Digest   */
-  #mob-more            { order: 5; }     /* More     */
+  .mob-tab[data-tab="5"] { order: 5; }   /* Alerts   */
   /* The overflow. display:none rather than removed from the DOM: switchMobileTab still toggles
      .mob-active on them, and the menu reads its rows from the same data-tab indices, so there is
      exactly one definition of what each tab IS. */
-  .mob-tab[data-tab="5"], .mob-tab[data-tab="7"], .mob-tab[data-tab="8"] { display: none !important; }
+  .mob-tab[data-tab="3"], .mob-tab[data-tab="7"], .mob-tab[data-tab="8"] { display: none !important; }
   /* ── THE MORE MENU. Hairlines and type, no card: the box ban applies here too. */
   #more-menu { position: fixed; left: 0; right: 0; z-index: 70;
     bottom: calc(52px + env(safe-area-inset-bottom, 0px));
@@ -2858,7 +2861,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 <!-- The overflow tabs. Each row simply calls switchMobileTab with the same index its hidden bar
      button uses, so there is no second definition of what a tab does. -->
 <div id="more-menu" hidden>
-  <button type="button" data-tab="5" onclick="pickMore(5)"><span class="mm-ico">&#9673;</span>Alerts</button>
+  <button type="button" data-tab="3" onclick="pickMore(3)"><span class="mm-ico">&#9635;</span>Analysis</button>
   <button type="button" data-tab="7" onclick="pickMore(7)" hidden><span class="mm-ico">&#9670;</span>Predict</button>
   <button type="button" data-tab="8" onclick="pickMore(8)"><span class="mm-ico">&#9672;</span>Readings</button>
   <button type="button" data-tab="9" onclick="pickMore(9)"><span class="mm-ico">&#9650;</span>Futures</button>
@@ -3619,7 +3622,7 @@ function connectTelemetry(){
    Opens over the bar, closes on a pick, on a second tap, or on any tap outside it. The More
    button lights up whenever the tab you are ON lives inside the menu — without that, choosing
    Readings leaves the whole bar looking unselected and the app looks like it lost your place. */
-var MORE_TABS = [5, 7, 8, 9, 10, 11, 12, 13];
+var MORE_TABS = [3, 7, 8, 9, 10, 11, 12, 13];
 function toggleMoreMenu(force){
   var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
   if (!m || !b) return;
@@ -4452,6 +4455,23 @@ function _paintCtb(){
       y0 = null;
     }, { passive: true });
   }
+  /* ── TWO BLOCKS LEAVE THE ANALYSIS TAB (Jake, 2026-09-07) ────────────────────────────────
+     "remove the daily read from the analysis tab now its redundant there and pull the line break
+     alerts from there and put them in the Alerts page where there belong."
+     The read is redundant the moment The Read tab exists - two copies of one artifact drift, and
+     the one nobody is looking at drifts silently. The Line is not analysis at all: it is an alert
+     that fires when a mapped level breaks, so it belongs with the alerts.
+     MOVED, not re-rendered: #line-feed keeps its id, so _renderLine() keeps working untouched. */
+  (function(){
+    try {
+      var rd = document.getElementById('card-read');
+      if (rd && rd.parentElement) rd.parentElement.removeChild(rd);
+      var ln = document.getElementById('card-line');
+      var al = document.getElementById('col-alerts');
+      if (ln && al && ln.parentElement !== al) al.insertBefore(ln, al.firstChild);
+    } catch (_e) {}
+  })();
+
   buildChartSheet();
 
   var CHART_PEEK = 0;       // the sheet handle IS the grab surface now, so nothing is reserved

@@ -1857,7 +1857,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
        and the footer are on every tab: one is the brand and the live badge, the other is the
        "not financial advice" line, and that line does not get a tab it can be missing from. */
     body[data-mtab="read"] #dash > *:not(.lv-top):not(.lv-read):not(.lv-foot):not(#eye-readbar) { display: none; }
-    body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.lv-foot) { display: none; }
+    /* THE LINE BELONGS WITH THE ALERTS (Jake, 2026-09-07): it fires when a mapped level
+       breaks, which is an alert, not a piece of analysis. It is moved to sit beside the alerts
+       card in the DOM, so the view filter keeps it too. */
+    body[data-mtab="alerts"] #dash > *:not(.lv-top):not(.lv-alerts):not(.b-line):not(.lv-foot) { display: none; }
     body[data-mtab="digest"] #dash > *:not(.lv-top):not(.lv-digest):not(.lv-foot) { display: none; }
     body[data-mtab="predict"] #dash > *:not(.lv-top):not(.lv-predict):not(.lv-foot) { display: none; }
     /* The readings view: reached from the strip, left by tapping any tab. No tab lights up while
@@ -1954,6 +1957,18 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     }
     place();
     addEventListener('resize', place);
+  })();
+
+  /* The Line moves out of the bottom grid and next to the alerts card. Moved rather than
+     duplicated: #ln-tk and the feed keep their ids, so the existing renderer is untouched. */
+  (function(){
+    try {
+      var ln = document.querySelector('.lv-card.b-line');
+      var al = document.getElementById('alerts-card');
+      if (ln && al && al.parentElement && ln.previousElementSibling !== al) {
+        al.insertAdjacentElement('afterend', ln);
+      }
+    } catch (_e) {}
   })();
 
   window.novoReadings && window.novoReadings.bar('#eye-readbar');
