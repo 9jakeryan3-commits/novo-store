@@ -822,7 +822,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 #ctb-collapse::before { content: '\25B4'; }
 body.ctb-collapsed #ctb-collapse::before { content: '\25BE'; }
 #ctb-collapse:hover { color: var(--txt1); }
-body.ctb-collapsed #chart-toolbar { display: none !important; }
+/* THE WHOLE HEADER, not just the toolbar (Jake, 2026-09-08: "nope it does not collapse.. you
+   forgot the price and ticker picker are included in that"). He is right, and the first version
+   was wrong for a reason worth writing down: the band's height is set by the PRICE block, which
+   is taller than the toolbar - so hiding the toolbar alone freed nothing on a single-line
+   toolbar and the band just sat there looking identical. I measured exactly that (chart 843px
+   before and after, card unchanged) and shipped it anyway, on the theory that keeping the price
+   visible was worth more. It was his call to make, not mine, and he had already made it. */
+body.ctb-collapsed #chart-header { display: none !important; }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
 /* THE CHART IS NOT A CARD, ON ANY SCREEN. First put inside the phone media block, which left the
    frame on every desktop — and Jake's objection was to the box, not to the box on small screens. */
@@ -2595,7 +2602,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 
     <!-- SPY headline + chart -->
     <div class="card" id="card-spy">
-      <div class="spy-hero">
+      <div class="spy-hero" id="chart-header">
         <!-- Ticker switcher (2026-08-30, Jake): click to flip the chart between the three mastered
              tickers, per-viewer, no restart. The selected pill is the chart you are looking at; the
              engine's own ticker still shows in the nav strip pill. Selection sticks in localStorage. -->
@@ -2657,8 +2664,8 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            screen. The chart re-measures after the toggle: it sizes itself from the space it has,
            and a chart that gained 60px without being told draws into a box it no longer occupies.
            The choice sticks per viewer. -->
-      <button type="button" id="ctb-collapse" aria-expanded="true" aria-controls="chart-toolbar"
-              title="Hide the toolbar" onclick="toggleChartHeader()"></button>
+      <button type="button" id="ctb-collapse" aria-expanded="true" aria-controls="chart-header"
+              title="Hide the chart header" onclick="toggleChartHeader()"></button>
       <span id="t-status" class="dv cgreen" style="display:none">ONLINE</span>
 
       <style>
@@ -3905,7 +3912,7 @@ window.toggleChartHeader = function(){
   var on = document.body.classList.toggle('ctb-collapsed');
   var b = document.getElementById('ctb-collapse');
   if (b) { b.setAttribute('aria-expanded', String(!on));
-           b.title = on ? 'Show the toolbar' : 'Hide the toolbar'; }
+           b.title = on ? 'Show the chart header' : 'Hide the chart header'; }
   try { localStorage.setItem('novo_ctb', on ? '1' : ''); } catch (_e) {}
   setTimeout(function(){ try { window.dispatchEvent(new Event('resize')); } catch (_e) {} }, 200);
 };
@@ -3914,7 +3921,7 @@ addEventListener('load', function(){
     if (!localStorage.getItem('novo_ctb')) return;
     document.body.classList.add('ctb-collapsed');
     var b = document.getElementById('ctb-collapse');
-    if (b) { b.setAttribute('aria-expanded', 'false'); b.title = 'Show the toolbar'; }
+    if (b) { b.setAttribute('aria-expanded', 'false'); b.title = 'Show the chart header'; }
   } catch (_e) {}
 });
 window.deskOpen = function(name){

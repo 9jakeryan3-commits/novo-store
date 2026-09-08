@@ -78,6 +78,18 @@
     '.novo-tape .tf-n{font-family:var(--mono,ui-monospace),monospace;font-size:13px;'
       + 'font-weight:800;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums;text-align:right}',
     '.novo-tape .tf-raw .tf-s{font-weight:500}',
+    /* COLOUR HAS TO WIN, AND IT WAS LOSING ON ORDER (2026-09-08). Jake: "this isnt page colored
+       like it should be" - every side label and every stat value rendered grey. `.novo-tape .grn`
+       and `.novo-tape .tf-s` are BOTH (0,0,2,0), so specificity cannot break the tie and the LAST
+       one declared wins. These component rules were appended after .grn/.red, which quietly made
+       them the winner and turned the whole tape monochrome. Same trap as two equal !important
+       rules: when specificity ties, source order decides, and appending is not neutral.
+       Two-class selectors (0,0,3,0) settle it outright rather than depending on where a future
+       rule gets added. */
+    '.novo-tape .tp-cv.grn,.novo-tape .tf-s.grn,.novo-tape .tp-uk.grn,'
+      + '.novo-tape .tp-val.grn,.novo-tape .b3-v.grn{color:#34d399}',
+    '.novo-tape .tp-cv.red,.novo-tape .tf-s.red,.novo-tape .tp-uk.red,'
+      + '.novo-tape .tp-val.red,.novo-tape .b3-v.red{color:#f43f5e}',
     /* the gauge now leads the tab, so its group label carries no rule above it */
     '.novo-tape .tp-grp-first{margin-top:2px;padding-top:0;border-top:0}',
     '.novo-tape .tp-sub-tight{margin:4px 0 10px}',
