@@ -1,4 +1,4 @@
-/* ⚠ THE WORDMARK'S FONT, AND ONLY THE WORDMARK'S.
+/* ⚠ THE WEBFONTS FOR EVERY PAGE THAT LOADS THIS FILE.
    The 1,291 pages that load this file - the whole Journal, plus /options-101, /0dte and
    /analyst-methodology - loaded NO webfont at all. .wm-1 below asks for 'Space Grotesk', the face
    was never fetched, and "NoVo" rendered in whatever the system had. Jake, 2026-09-08: "options
@@ -12,7 +12,7 @@
 
    @import rather than a <link>: one edit here reaches all 1,291 pages, where the tag would be
    1,291 edits and would drift the moment one page was generated from a stale template. */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 /* ============================================================
    THE NOVO JOURNAL — dark financial-news portal (Yahoo-Finance feel)
@@ -37,7 +37,7 @@
   --txt1:#eef5ff;
   --txt2:#9fb6d1;
   --txt3:#7d97b8;
-  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
 body{background:var(--navy);color:var(--txt2);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
