@@ -1272,9 +1272,12 @@ tr:last-child td{border-bottom:none}
       try { drawRail(''); drawFeed(); } catch (_e) {}
     } else if (CX_COIN_TABS.indexOf(which) >= 0 || which === 'stats') {
       /* Gamma, Flow, Positioning, History and Stats are all views OF A COIN, so arriving on one
-         from the screener or the reads feed has to put the coin back. draw() picks the renderer
-         off the same flags, so there is no second code path deciding what "the coin" means. */
-      if (SCREEN || FEED) { SCREEN = false; FEED = false; try { draw(); } catch (_e) {} }
+         from the screener, the reads feed or a chain token has to put the coin back. cxRender()
+         picks the renderer off the same flags the data refresh uses, so there is no second code
+         path deciding what "the coin" means. */
+      /* TOK is in here too: a chain token owns #body the same way the screener does, and Map
+         meant "the coin's map" while the token stayed on screen under a bar that said Map. */
+      if (SCREEN || FEED || TOK) { SCREEN = false; FEED = false; TOK = null; cxRender(); }
     }
     /* rail-open is the picker's OWN state, already toggled by the coin name in the header and
        cleared by every pick handler in drawRail. Reusing it means the bar and the header chip
@@ -1333,12 +1336,16 @@ tr:last-child td{border-bottom:none}
     var live = panel.classList.contains('on') ? 'novo'
              : document.body.classList.contains('rail-open') ? 'coins'
              : (document.body.getAttribute('data-mtab') || 'map');
-    // SCREEN is a view flag rather than a tab attribute, so the bar has to ask it directly or the
-    // screener would light nothing - the same "nothing selected" bug the More button fixes.
-    try { if (live !== 'novo' && typeof SCREEN !== 'undefined' && SCREEN) live = 'screener'; } catch (_e) {}
-    /* FEED is the same kind of flag, and the reads feed is still reachable from its row inside the
-       coin picker - so the bar has to ask it directly too, or arriving that way lights nothing. */
-    try { if (live !== 'novo' && typeof FEED !== 'undefined' && FEED) live = 'reads'; } catch (_e) {}
+    /* ⚠ THE FLAGS USED TO OVERRIDE data-mtab HERE, AND THAT IS THE BUG JAKE SAW: clicking Daily
+       Rundown switched the content and left SCREENER lit.
+       SCREEN and FEED answer "which renderer owns #body". data-mtab answers "which tab is
+       selected". Those are DIFFERENT QUESTIONS - Alerts, the Digest, Predictions and the Daily
+       Rundown are their own columns and do not touch #body at all, so they leave SCREEN exactly
+       as they found it and the override then spoke over them.
+       The override existed for a real reason: the screener and the reads feed can be entered from
+       rows inside the coin picker, which never set data-mtab. The fix is to make THOSE set it -
+       one writer, as the comment above this function already demands - rather than to have the bar
+       infer the answer from a flag that is only sometimes about the same thing. */
     Array.prototype.forEach.call(bar.querySelectorAll('.mob-tab'), function(t){
       var on = t.getAttribute('data-mtab') === live;
       t.classList.toggle('mob-active', on);
@@ -2001,9 +2008,11 @@ function drawRail(filter=''){
   $('#search').oninput=e=>{const v=e.target.value;drawRail(v);$('#search').focus();
     $('#search').setSelectionRange(v.length,v.length);};
   document.querySelectorAll('.coin[data-screen]').forEach(el=>
-    el.onclick=()=>{SCREEN=true;FEED=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawScreener();});
+    el.onclick=()=>{SCREEN=true;FEED=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawScreener();
+      document.body.setAttribute('data-mtab','screener');});
   document.querySelectorAll('.coin[data-feed]').forEach(el=>
-    el.onclick=()=>{FEED=true;SCREEN=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();});
+    el.onclick=()=>{FEED=true;SCREEN=false;TOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawFeed();
+      document.body.setAttribute('data-mtab','reads');});
   document.querySelectorAll('.coin[data-c]').forEach(el=>
     el.onclick=()=>{FEED=false;SCREEN=false;TOK=null;CUR=el.dataset.c;rememberCoin(CUR);BOOK=null;document.body.classList.remove('rail-open');drawRail(filter);drawCoin();
       try{window.cxTabHome();}catch(_e){}});
@@ -2033,7 +2042,8 @@ function drawReadStrip(){
        <span style="color:var(--txt4)">&middot; ${_ago(r.ts_utc)}</span></span>`).join('');
   el.innerHTML = `<span class="rs-ico">\u26a1</span><span class="rs-body">${rows}</span>`+
     `<span class="rs-more">${n0(_reads('last_24h', fd.length))} reads &rsaquo;</span>`;
-  el.onclick = () => { FEED = true; SCREEN = false; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed(); };
+  el.onclick = () => { FEED = true; SCREEN = false; TOK = null; drawRail($('#search')?$('#search').value:''); drawFeed();
+    document.body.setAttribute('data-mtab','reads'); };
 }
 
 /* ---------------- what just fired ----------------
@@ -2537,6 +2547,25 @@ function turnoverPanel(g){
       Volume, not flow &mdash; how much changed hands over 24 hours, ranked by premium. Which side
       lifted is not in this data, so it is not claimed.</div></div></div>`;
 }
+/* THE RENDER DISPATCHER, AND THE REASON IT IS NAMED.
+   Jake, 2026-09-08: "the tabs are buggy they do not switch like they should i have to click a new
+   coin to get back to the map."
+   cxMobTab called `draw()` to put the coin view back after the Screener or the reads feed. That
+   function has NEVER existed - `git log -S "function draw()"` on this file returns nothing across
+   its whole history. The call sat inside `try { } catch (_e) {}`, so the ReferenceError was
+   swallowed every time and #body kept whatever the previous renderer had written. Clicking a coin
+   was the only way back because the rail's handler calls drawCoin() directly.
+   The dispatcher itself was real, but it was one inline line inside _loadInner, reachable only by
+   a data refresh. Naming it is what makes it callable - and the same three lines now serve both
+   callers, so "which renderer owns #body" is decided in exactly one place.
+   The lesson for the next comment I write: I described draw() as "picking the renderer off the
+   same flags" without ever checking it resolved. A confident comment about an unverified symbol is
+   how a dead call survives for months. */
+function cxRender(){
+  drawRail();
+  if(SCREEN) drawScreener(); else if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
+}
+
 function drawCoin(){
   const d=SNAP.coins[CUR]; if(!d) return;
   const tc=d.true_cost, g=d.gamma, pos=d.positioning;
@@ -2953,7 +2982,7 @@ async function _loadInner(_mine){
   // object, so a refresh updates its numbers instead of freezing them.
   if(TOK) TOK=(SNAP.chain||[]).find(x=>x.address===TOK.address&&x.network===TOK.network)||null;
   drawReadStrip();
-  drawRail(); if(SCREEN) drawScreener(); else if(FEED) drawFeed(); else if(TOK) drawChainToken(); else drawCoin();
+  cxRender();
 }
 
 // Back, forward, or a pasted /crypto/live#SOL once the page is already open.
