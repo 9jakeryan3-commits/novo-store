@@ -592,11 +592,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- HERO -->
 <section class="hero">
   <div class="container">
+   <!-- Jake drew this stretched across the top of the hero, arrow pointing right. It sits ABOVE
+        the split rather than inside the left column, because it names the whole page and not the
+        statement half of it. Below 1080 it is an inline pill again - there is nothing to span. -->
+   <div class="hero-badge">NoVo Options Trading &nbsp;&middot;&nbsp; SPY / QQQ / IWM &nbsp;&middot;&nbsp; Crypto &nbsp;&middot;&nbsp; 0DTE &amp; intraday</div>
+
    <div class="hero-grid">
 
     <!-- THE STATEMENT. What the product claims, in the largest type on the site. -->
     <div class="hero-say">
-    <div class="hero-badge">NoVo Options Trading &nbsp;&middot;&nbsp; SPY / QQQ / IWM &nbsp;&middot;&nbsp; Crypto &nbsp;&middot;&nbsp; 0DTE &amp; intraday</div>
     <h1>Stop guessing.<br><span>Read the dealers.</span></h1>
     <p class="hero-tagline">Two dealer maps &mdash; <b style="color:#22d3ee;">equities</b> and <b style="color:#a78bfa;">crypto</b> &mdash; with <b style="color:var(--txt1);">Dr. NoVo, the AI market analyst</b>, reading both.</p>
 
@@ -642,6 +646,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;text-align:center;">
     <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">60s</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Map refresh &middot; 5s on Trader</div></div>
     <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">3</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Index ETFs, mastered</div></div>
+    <!-- ⚠ THE STRIP HAD NO CRYPTO IN IT (Jake, 2026-09-08, marked "NO CRYPTO" across it). Four
+         numbers - refresh rate, three index ETFs, sessions scored, $0 - and every one of them an
+         EQUITIES fact, on a page whose first CTA is the $79 crypto map. The one product with its
+         own price on this page was invisible in the only place the page states figures.
+         data-assetcount, not a typed number: scripts/sync-crypto-counts.js rewrites that slot from
+         what the collector publishes, so it cannot drift the way hand-typed counts have. -->
+    <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);"><span data-assetcount>350+</span></div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Crypto assets mapped</div></div>
     <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);"><span data-tr-scored>1,042</span></div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">Sessions scored &mdash; <span style="color:inherit" data-tr-live>34</span> live, the rest archive</div></div>
     <div><div class="stat" style="font-size:28px;font-weight:800;color:var(--txt1);">$0</div><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;">To start reading</div></div>
   </div>

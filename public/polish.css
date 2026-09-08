@@ -463,6 +463,12 @@ nav.is-scrolled {
    also the width at which two text columns stop being readable side by side. */
 .hero .container { max-width: 1560px; }
 @media (min-width: 1080px) {
+  /* THE BADGE SPANS THE HERO. Only when it is a direct child of the container - i.e. hoisted out
+     of .hero-say - so a page that leaves its badge inside the statement column is untouched.
+     The accent bar stays on the left edge where it has always been: it is a state carrier, not a
+     box side, which is why it survives the no-borders rule. */
+  .hero > .container > .hero-badge { display: block; width: 100%; margin-bottom: 30px; }
+
   .hero { padding: 78px 0 84px; }
   /* ⚠ CENTRED INSIDE EACH COLUMN, NOT LEFT-ALIGNED (Jake, 2026-09-08: "instead of being left
      oriented into their columns center them in their columns"). The hero already centres
