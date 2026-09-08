@@ -138,7 +138,9 @@ module.exports = async (req, res) => {
   const { kv: kvf } = require("./_kv.js");
   const r = kvf();
   if (!r) return res.status(200).json({ ok: false, note: "kv unavailable" });
-  const { getMemory } = require("./_lib/member-memory.js");
+  // getMemory is no longer called here - the roster arrives in one mget and digestOf applies the
+  // same gate getMemory would have. See the schedule pass below.
+  const { digestOf } = require("./_lib/member-memory.js");
   const { pushUrl, pushTargets } = require("./_lib/alerts.js");
   const { vertex } = require("./_vertex.js");
   const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
@@ -172,60 +174,96 @@ module.exports = async (req, res) => {
       process.env.ANALYST_VAPID_PUBLIC, process.env.ANALYST_VAPID_PRIVATE);
   }
 
-  let sent = 0, skipped = 0, errors = 0;
-  for (const h of idx) {
+  /* ══ WHO IS DUE THIS MINUTE ═══════════════════════════════════════════════════════════════
+     ⚠ THIS USED TO BE THREE KV ROUND-TRIPS PER MEMBER *BEFORE* ANYTHING CHECKED THE CLOCK -
+     get(mem:e:), get(push:u:) and getMemory() - with the due-time test underneath all of them. At
+     the old half-hourly cadence that was ~14k KV commands a day. Moving to a once-a-minute cron
+     without moving the check would have made it ~433,000 a day for a roster of 100, on the same
+     Upstash database that backs claimOnce and rateOk - both of which FAIL OPEN when it is
+     exhausted (_kv.js:48, :62), which health.js already names as the blast radius.
+     Deferring the two market payloads, which is what shipped first, recovered 2 commands out of
+     ~301. It was the right change against the wrong number, and the comment I wrote claiming a
+     quiet tick cost "one smembers and nothing else" was simply false - it described the code I
+     meant to write rather than the code underneath it.
+     A quiet tick now costs TWO commands: the smembers, and one mget for the whole roster. The
+     mem:index members ARE the mem:u: suffixes (member-memory.js:69, :191), so the roster comes
+     back in one call. mem:e: is not read at all any more - it was only ever there to feed
+     getMemory an address, and member-purge.js flags it as ⚠ PLAINTEXT EMAIL. */
+  const _fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
+    hourCycle: "h23", hour: "2-digit", minute: "2-digit" });
+  /* ONE CLOCK FOR THE WHOLE TICK. Read per-member, the wall clock drifted as the loop ran - which
+     a 30-minute bucket absorbed silently and an exact-minute match does not. */
+  const _at = new Date();
+  const _parts = _fmt.format(_at);
+  const _nowMin = parseInt(_parts.slice(0, 2), 10) * 60 + parseInt(_parts.slice(3, 5), 10);
+  const _etDay = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(d);
+  const _day = _etDay(_at);
+  const _prevDay = _etDay(new Date(_at.getTime() - 86400000));
+
+  let _recs = [];
+  if (idx.length) { try { _recs = await r.mget(...idx.map((h) => "mem:u:" + h)); } catch (_) { _recs = []; } }
+
+  const due = [];
+  idx.forEach((h, i) => {
+    let m = _recs[i];
+    if (typeof m === "string") { try { m = JSON.parse(m); } catch (_) { m = null; } }
+    const dg = digestOf(m);
+    if (!dg) return;
+    const _wantMin = parseInt(dg.time.slice(0, 2), 10) * 60 + parseInt(dg.time.slice(3, 5), 10);
+    /* ⚠ MODULO, OR THE WINDOW TRUNCATES AT MIDNIGHT. A raw `_nowMin - _wantMin` is -1435 at 00:00
+       for a 23:55 digest, which trips the never-early branch and silently cuts the advertised
+       ten-minute catch-up to five for every evening time. Wrapped, "one minute early" reads as
+       1439 late and is still refused, so NEVER-EARLY survives without a separate branch. */
+    const _lateBy = ((_nowMin - _wantMin) % 1440 + 1440) % 1440;
+    /* NEVER EARLY, AND ONLY A LITTLE LATE. Jake, 2026-09-08: "if someone wants a digest at 8:17am
+       then it sends at 8:17am only way it can be." This replaced a 30-minute bucket that served
+       08:17 from the 08:00 run - up to 29 minutes EARLY, which is the one direction a scheduled
+       brief must not go, since it is assembled from whatever the market looked like when it ran.
+       The catch-up is small on purpose: Vercel does not fire crons to the second and can drop a
+       tick, so a delayed run should still deliver - but a market brief forty minutes late is not
+       the brief that was asked for, and the honest outcome is nothing that day.
+       DST is the formatter's problem via ET wall-clock, with two consequences worth stating rather
+       than discovering: on the spring-forward Sunday 02:00-02:59 does not exist, so a member who
+       chose a time in that hour gets nothing that one day; on the fall-back Sunday 01:00-01:59
+       happens twice, and the per-day claim below - keyed on the ET date - is what stops the second
+       pass delivering a duplicate. */
+    if (_lateBy > DIGEST_CATCHUP_MIN) return;
+    /* ⚠ THE CLAIM BELONGS TO THE DAY THE DIGEST IS *FOR*, NOT THE DAY IT LANDS ON. These differ
+       only when the catch-up window crosses midnight: a 23:55 brief delivered at 00:02 belongs to
+       the day that just ended. Stamped with the new day instead, it would suppress that new day's
+       own 23:55 brief - turning one missed evening into two missed mornings, which is exactly the
+       cascade the window exists to prevent. */
+    due.push({ h, dg, forDay: _nowMin < _wantMin ? _prevDay : _day });
+  });
+  if (!due.length) {
+    return res.status(200).json({ ok: true, members: idx.length, sent: 0,
+                                  skipped: idx.length, errors: 0, at: _parts });
+  }
+
+  let sent = 0, skipped = idx.length - due.length, errors = 0;
+  for (const { h, dg, forDay } of due) {
     try {
-      let email = null;
-      try { email = await r.get("mem:e:" + h); } catch (_) {}
-      if (!email) { skipped++; continue; }
       let subs = null;
       try { subs = await r.get("push:u:" + h); } catch (_) {}
       if (typeof subs === "string") { try { subs = JSON.parse(subs); } catch (_) { subs = null; } }
       if (!Array.isArray(subs) || !subs.length || !canPush) { skipped++; continue; }
-      const mem = await getMemory(email);
-      // ⚠ THE GATE. A digest goes out ONLY to a member who asked for one and said what it should be
-      // about (Jake, 2026-09-07). This used to read `interests` — what NoVo had LEARNED about the
-      // reader — so a sentence like "I mostly trade SPY" enrolled them in a daily push they never
-      // requested, landing on a phone with nothing behind it to explain itself.
-      // getMemory returns digest:null unless on===true AND symbols is non-empty, so there is no
-      // partial state that leaks a send.
-      const dg = mem && mem.digest;
-      if (!dg) { skipped++; continue; }
-      /* ⚠ THE MEMBER'S OWN MINUTE. Jake, 2026-09-08: "if someone wants a digest at 8:17am then
-         it sends at 8:17am only way it can be."
-         It used to compare 30-MINUTE BUCKETS (Math.floor(min / 30)), which meant 08:17 was served
-         by the 08:00 run - up to 29 minutes EARLY, and early is the one direction a scheduled
-         brief must never go: it is assembled from whatever the market looked like when it ran, so
-         arriving early means arriving with staler numbers than the member asked for. The times are
-         stored free-form (DIGEST_TIME_RE in _lib/member-memory.js accepts any minute), so the
-         bucket was silently overriding a choice the member watched succeed. The cron runs once a
-         minute now and this matches the minute.
-
-         CATCH-UP, and why it is small. Vercel does not fire a cron to the second - the observed
-         delay is tens of seconds, but a tick can be missed outright. _lateBy lets a delayed run
-         still deliver, while `_lateBy < 0` guarantees it is NEVER early. Ten minutes is deliberate:
-         wide enough for infrastructure hiccups, narrow enough that a digest which turns up is still
-         recognisably the one that was asked for. Miss the whole window and the member gets nothing
-         that day, which is the honest outcome - a market brief 40 minutes late is not the brief
-         they asked for.
-
-         DST is the formatter's problem, via ET wall-clock. Two consequences, both stated rather
-         than discovered later: on the spring-forward Sunday 02:00-02:59 does not exist, so a
-         member who picked a time in that hour gets nothing that one day; on the fall-back Sunday
-         01:00-01:59 happens twice, and the sent-stamp below - keyed on the ET DATE - is what stops
-         the second pass delivering a duplicate. */
-      const _fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
-        hourCycle: "h23", hour: "2-digit", minute: "2-digit" });
-      const _parts = _fmt.format(new Date());
-      const _nowMin = parseInt(_parts.slice(0, 2), 10) * 60 + parseInt(_parts.slice(3, 5), 10);
-      const _tm = /^\d{2}:\d{2}$/.test(dg.time || "") ? dg.time : "08:00";
-      const _wantMin = parseInt(_tm.slice(0, 2), 10) * 60 + parseInt(_tm.slice(3, 5), 10);
-      const _lateBy = _nowMin - _wantMin;
-      if (_lateBy < 0 || _lateBy > DIGEST_CATCHUP_MIN) { skipped++; continue; }
-      const _day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
-      let _sentDay = null;
-      try { _sentDay = await r.get("digest:sent:" + h); } catch (_) {}
-      if (_sentDay === _day) { skipped++; continue; }
+      /* ⚠ CLAIM THE DAY ATOMICALLY, BEFORE GENERATING ANYTHING.
+         Under the old 30-minute bucket a member matched exactly ONE invocation per day, so two
+         runs could never be inside the same member at once - the design was structurally immune
+         to this and the plain read-then-write below it was safe.
+         It is not any more. With a once-a-minute cron and a ten-minute catch-up, a member matches
+         ELEVEN consecutive ticks, and the old guard read the stamp, then made one or two Vertex
+         calls with no timeout on them (_vertex.js uses a bare fetch, no AbortController), and only
+         then wrote the stamp. Tick N reads "unsent"; tick N+1 reads "unsent" sixty seconds later
+         while N is still waiting on the model; the phone gets two morning briefs. A faster cron
+         turned a safe sequence into a race.
+         THE DAY IS IN THE KEY, NOT THE VALUE - an `nx` against a day-VALUED key would be blocked
+         by yesterday's stamp for its whole TTL. Same idiom as _kv.js claimOnce. */
+      const _ck = "digest:sent:" + h + ":" + forDay;
+      let _claim = null;
+      try { _claim = await r.set(_ck, "1", { nx: true, ex: 36 * 3600 }); } catch (_) { _claim = null; }
+      if (!(_claim === "OK" || _claim === true)) { skipped++; continue; }
+      const _unclaim = async () => { try { await r.del(_ck); } catch (_) {} };
       // Confirmed due, unsent, and subscribed - the first point at which the market payloads are
       // worth fetching. Loads once per invocation however many members are due.
       await loadMarket();
@@ -244,7 +282,11 @@ module.exports = async (req, res) => {
                                                netGex: c.gamma.net_gex } : null,
                             dvol: c.dvol || null });
       }
-      if (!facts.length) { skipped++; continue; }
+      /* ⚠ RELEASE THE DAY ON EVERY FAILURE PATH. The claim above is taken BEFORE generating, so
+         a member whose facts or model call fall over would otherwise have their whole day burnt by
+         one bad minute - and the ten-minute window exists precisely so a bad minute is survivable.
+         Same move as _kv.js releaseClaim. */
+      if (!facts.length) { await _unclaim(); skipped++; continue; }
 
       const write = async (temp) => {
         const j = await vertex(`${MODEL}:generateContent`, {
@@ -282,7 +324,7 @@ module.exports = async (req, res) => {
         guard = "fallback";
       }
       if (guard) console.log(`[DIGEST] grounding guard: ${guard}`);
-      if (!text) { errors++; continue; }
+      if (!text) { await _unclaim(); errors++; continue; }
       /* ⚠ THE BRIEF IS STORED BEFORE IT IS SENT (Jake, 2026-09-07: "a digest tab/page where you
          can manage your daily digest ... where it displays"). Until now the push notification WAS
          the entire artifact — 320 characters, dismissed once, gone permanently — which is how Jake
@@ -290,7 +332,7 @@ module.exports = async (req, res) => {
          this log. Stored before the send loop, deliberately: a brief that failed to deliver is
          still that morning's brief, and the page is where a member goes when the ping did not
          arrive. Last 14 mornings, 30-day expiry, keyed like everything else member-owned. */
-      try { await r.set("digest:sent:" + h, _day, { ex: 3 * 24 * 3600 }); } catch (_) {}
+      /* The day was claimed before generation, so there is no stamp to write here. */
       try {
         const lk = "digest:log:" + h;
         let log = null;
@@ -315,7 +357,12 @@ module.exports = async (req, res) => {
         try { await webpush.sendNotification(s, JSON.stringify({ title: "NoVo — your morning read", body: text.slice(0, 320), tag: "novo-digest", url: pushUrl(s, "novo") })); sent++; }
         catch (_) {}
       }
-    } catch (_) { errors++; }
+    } catch (_) {
+      /* Anything that threw after the claim was taken gives the day back, for the same reason:
+         the window is the retry, and a burnt claim turns a transient failure into a missed morning. */
+      try { if (typeof _ck === "string") await r.del(_ck); } catch (_e) {}
+      errors++;
+    }
   }
   return res.status(200).json({ ok: true, members: idx.length, sent, skipped, errors });
 };

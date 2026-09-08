@@ -68,6 +68,21 @@ const eh = (email) =>
 
 const _key = (email) => "mem:u:" + eh(email);
 
+/* ⚠ THE DIGEST GATE, IN EXACTLY ONE PLACE. A digest goes out ONLY to a member who asked for one
+   and said what it should be about (Jake, 2026-09-07) - `on === true` AND a non-empty symbol list,
+   with no partial state in between. That predicate used to live inline in getMemory, which was
+   fine while getMemory was the only reader. It is not any more: daily-digest.js now pulls the
+   whole roster in a single mget rather than calling getMemory per member, and a SECOND copy of
+   "is this digest real" is precisely how someone gets enrolled in a push they never requested -
+   the bug this gate was written to stop. One function, both callers. */
+function digestOf(m) {
+  const d = m && m.digest;
+  if (!d || !d.on || !Array.isArray(d.symbols) || !d.symbols.length) return null;
+  return { on: true, symbols: d.symbols, focus: d.focus || null,
+           set_utc: d.set_utc || null, app: d.app || null,
+           time: DIGEST_TIME_RE.test(d.time || "") ? d.time : DEFAULT_DIGEST_TIME };
+}
+
 async function getMemory(email) {
   const r = kv();
   if (!r || !email) return null;
@@ -80,11 +95,7 @@ async function getMemory(email) {
   if (!m || (!Array.isArray(m.interests) && !Array.isArray(m.notes) && !m.level && !m.digest)) return null;
   return { interests: m.interests || [], notes: m.notes || [],
            level: LEVELS.includes(m.level) ? m.level : null,
-           digest: (m.digest && m.digest.on && Array.isArray(m.digest.symbols) && m.digest.symbols.length)
-             ? { on: true, symbols: m.digest.symbols, focus: m.digest.focus || null,
-                 set_utc: m.digest.set_utc || null, app: m.digest.app || null,
-                 time: DIGEST_TIME_RE.test(m.digest.time || "") ? m.digest.time : DEFAULT_DIGEST_TIME }
-             : null,
+           digest: digestOf(m),
            updated: m.updated || null };
 }
 
@@ -192,4 +203,4 @@ async function indexMember(email) {
   try { await r.set("mem:e:" + eh(email), String(email).trim().toLowerCase(), { ex: TTL_S }); } catch (_) {}
 }
 
-module.exports = { getMemory, updateMemory, indexMember, eh, LEVELS };
+module.exports = { getMemory, updateMemory, indexMember, eh, LEVELS, digestOf };
