@@ -707,12 +707,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <div class="hero-mashup">
-      <div class="hm-back"><img src="/screenshots/crypto-map-desk.webp?v=2" width="1920" height="1055" alt="The Crypto Market Map &mdash; dealer gamma by strike on BTC with the call wall, spot, max pain, gamma flip and put wall, and taker-flow gamma setting what makers actually took on against what the standing book says, beside what a round trip actually costs, 24-hour liquidations and where the flush landed" loading="lazy" decoding="async"></div>
+      <div class="hm-back"><img src="/screenshots/crypto-map-desk.webp?v=3" width="1920" height="1055" alt="The Crypto Market Map &mdash; SOL&rsquo;s dealer gamma by strike with net GEX and its regime, the call wall, gamma flip, max pain, spot and put wall each with its distance, the gamma-regime gauge, near-ATM skew and the 24-hour and 7-day moves, over the gamma histogram by strike &mdash; beside what a round trip actually costs and how that ranks against every coin, the 24-hour liquidations by venue, and where the flush landed price by price" loading="lazy" decoding="async"></div>
       <div class="hm-fan">
-        <div class="hm-card" style="transform:rotate(-13deg);z-index:4;"><img src="/screenshots/crypto-map-dealer.webp?v=1" width="498" height="1047" alt="The Crypto Market Map on a phone &mdash; XRP dealer gamma by strike with net GEX, the call wall, spot, gamma flip and put wall" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(-4deg) translateY(14px);z-index:3;margin-left:-48px;"><img src="/screenshots/crypto-map-history.webp?v=1" width="500" height="1049" alt="The Crypto Market Map on a phone &mdash; this setup historically, with the sample size on every line, and the term structure across thirteen expiries" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(6deg) translateY(14px);z-index:2;margin-left:-48px;"><img src="/screenshots/crypto-map-leverage.webp?v=1" width="497" height="1049" alt="The Crypto Market Map on a phone &mdash; the IV skew curve, the gamma heatmap by strike and expiry, and leverage positioning with funding per venue, never blended" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(15deg);z-index:1;margin-left:-48px;"><img src="/screenshots/crypto-map-fired.webp?v=1" width="498" height="1048" alt="The Crypto Market Map on a phone &mdash; live reads across the book, each one written down when it fired and scored when its horizon passes" loading="lazy" decoding="async"></div>
+        <div class="hm-card" style="transform:rotate(-11deg) translateY(14px);z-index:4;"><img src="/screenshots/crypto-phone-map.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC dealer gamma by strike: net GEX with its regime, the call wall, max pain, gamma flip, spot and put wall each with its distance, the chain open interest behind them, then DVOL against its own five years, the one-day expected move, implied versus realised, and near-ATM skew" loading="lazy" decoding="async"></div>
+        <div class="hm-card" style="transform:rotate(0deg);z-index:3;margin-left:-46px;"><img src="/screenshots/crypto-phone-flow.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC taker-flow gamma over 24 hours: what makers actually took on, measured from screen prints, against what the standing book says by convention &mdash; the two disagreeing, sized against net GEX, with what takers bought and sold, the number of prints measured, and the maker-short to maker-long ladder by strike" loading="lazy" decoding="async"></div>
+        <div class="hm-card" style="transform:rotate(11deg) translateY(14px);z-index:2;margin-left:-46px;"><img src="/screenshots/crypto-phone-positioning.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC across four books that disagree: OKX, the US-listed ETF, and Deribit coin-margined and USDC, each with its own net GEX, flip and max pain &mdash; then the book&rsquo;s dollar delta, vanna and charm, and funding per venue ranked against each venue&rsquo;s own history, never blended" loading="lazy" decoding="async"></div>
       </div>
     </div>
     <p style="font-size:11px;color:var(--txt3);text-align:center;margin:18px auto 34px;">The map on a desk and in a pocket &mdash; every book, every venue, and the on-chain surface beside them.</p>
@@ -874,6 +873,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="split-card paid"><h4>Claims that get scored</h4><p>NoVo states what he thinks, with a horizon, and the map keeps the result. Once a day he writes the <b style="color:var(--txt1);">Daily Rundown</b> &mdash; his bias for the crypto session, in plain English &mdash; and it is graded like every other call he makes. Crypto options expire at 08:00 UTC every single day, so a pinning study gets 365 samples a year instead of twelve. The crypto half of the <a href="/track-record" style="color:#a78bfa;">public track record</a> is live &mdash; every rate with its independent sample beside it, the unflattering ones included.</p></div>
       <div class="split-card paid"><h4>Coverage you can see</h4><p>Every panel is granted by measured inputs. One funding venue means no funding panel. A thin series gets no percentile. Nothing renders on data that is not there.</p></div>
       <div class="split-card paid"><h4>Ask, and get an answer</h4><p>NoVo has the live map in front of him while you talk to him &mdash; gamma, funding, liquidations, cost, and every call he has made with how it scored. Tell him the coins you follow and a short morning brief on exactly those names lands on your phone each day. &ldquo;Ping me if BTC breaks 80k&rdquo;, &ldquo;tell me if it loses its put wall&rdquo;, &ldquo;flag any block over $5M&rdquo; &mdash; each is a sentence, not a settings page, and it finds you as a push or a Discord DM.</p></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (max-width: 760px) { .tabstack-grid { grid-template-columns: 1fr !important; } }
+</style>
+<!-- THE TAB STACK, SHOWN (2026-09-08). The page named Flow, Positioning and the Screener
+     and showed none of them - the only exhibit was the hero. Three captures of the same
+     book from three tabs. Elevation rather than frames: boxes and borders are banned. -->
+<section style="padding:0;">
+  <div class="container">
+    <div style="max-width:1560px;margin:0 auto;padding:6px 0 42px;">
+      <div class="tabstack-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;">
+        <figure style="margin:0;">
+          <div class="hm-back" style="margin:0;transform:none;max-width:none;"><img src="/screenshots/crypto-flow-desk.webp?v=1" width="1920" height="1055" alt="The Crypto Market Map&rsquo;s Flow tab on BTC &mdash; options volume over 24 hours with the premium traded, the contracts, the open interest and every instrument listed, ranked by premium contract by contract &mdash; then taker-flow gamma: what makers actually took on, measured, against what the standing book says by convention, and the maker-short to maker-long ladder by strike" loading="lazy" decoding="async"></div>
+          <figcaption style="font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;">The flow</figcaption>
+        </figure>
+        <figure style="margin:0;">
+          <div class="hm-back" style="margin:0;transform:none;max-width:none;"><img src="/screenshots/crypto-positioning-desk.webp?v=1" width="1920" height="1055" alt="The Crypto Market Map&rsquo;s Positioning tab on ETH &mdash; four books that disagree on the sign, each with its own net GEX, flip, max pain and chain open interest &mdash; then the book&rsquo;s dollar delta, vanna, charm and put/call open interest, and funding per venue against each venue&rsquo;s own history with the book&rsquo;s size ranked against its own daily archive" loading="lazy" decoding="async"></div>
+          <figcaption style="font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;">The positioning</figcaption>
+        </figure>
+        <figure style="margin:0;grid-column:1/-1;">
+          <div class="hm-back" style="margin:0;transform:none;max-width:none;"><img src="/screenshots/crypto-screener-desk.webp?v=1" width="1920" height="1055" alt="The Crypto Market Map&rsquo;s Screener &mdash; every coin ranked in one sortable table: price, the 24-hour move, what a round trip costs, the funding spread across venues, open interest and how it ranks against the coin&rsquo;s own history, what was liquidated in 24 hours, and net GEX where there is a dealer map &mdash; beside the funding lean and the stablecoin supply arriving on the rails" loading="lazy" decoding="async"></div>
+          <figcaption style="font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;">The whole book</figcaption>
+        </figure>
+      </div>
+      <p style="font-size:11px;color:var(--txt3);text-align:center;margin:18px auto 0;">One book, three ways &mdash; what actually traded, who is positioned where, and every coin ranked beside each other.</p>
     </div>
   </div>
 </section>
