@@ -228,7 +228,23 @@ smoke() { # url  min_bytes  [needle-regex]
 !!   $u -> http=${code:-none} bytes=${#body}${needle:+ needle=$have}"
 }
 echo ".. smoke"
+# HEALTH IS ASSERTED ON ITS VALUE, NOT ON A KEY BEING PRESENT (2026-09-08).
+# This line was `smoke ... 50 '"sha"'` -- it passed whenever the endpoint RESPONDED, so every
+# deploy from 09-07 onward was told health was fine while it sat at ok:false on five unclassified
+# tools. And the obvious repair, needle '"ok":true', is ALSO a check that cannot fail: smoke()
+# greps the body flat and the body carries drift.price_sets.ok:true and drift.account_prices.ok:true
+# nested inside it, so the needle matches a red build. Grep cannot assert a TOP-LEVEL json key.
+# Anchoring to ^{"ok":true would work only because health.js happens to emit ok first and the body
+# happens to be one line -- both incidental, and a cosmetic reorder of that object literal would
+# silently turn this back into a check that cannot fail with no diff anywhere near this file.
+# So: parse it. Shown to fail on a real degraded body before being trusted (see the self-test in
+# health-assert.js). Order matters -- this must land only AFTER the tool sets are classified and
+# ok:true is confirmed live, or it fails every deploy including the one carrying the fix.
 smoke "https://novo-options.trade/api/health"       50   '"sha"'
+if ! node scripts/health-assert.js "https://novo-options.trade/api/health"; then
+  SMOKE_FAIL="${SMOKE_FAIL}
+!!   /api/health reports ok:false -- see the degraded list above"
+fi
 smoke "https://novo-options.trade/"                 5000
 smoke "https://novo-options.trade/plans"            5000
 smoke "https://novo-options.trade/analyst"          5000
