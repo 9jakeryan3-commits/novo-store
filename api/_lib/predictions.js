@@ -71,7 +71,48 @@ async function _usave(r, h, list) {
   else return;
   await r.set(UINDEX, JSON.stringify(idx.slice(-5000)), { ex: 365 * 24 * 3600 });
 }
-const MAX_KEPT = 400;          // graded history kept for the score; oldest graded rows fall off
+/* ── RETENTION ────────────────────────────────────────────────────────────────────────────────
+   Jake, 2026-09-09: "we keep ALL, thats what makes this whole thing work, we cannot delete useful
+   data none, at all anyway, thats imperative ... or we change it to The Analyst's Score a rolling
+   400 would make sense a little more but still need to keep all good data."
+
+   So both, and they are different things:
+     pred:log          the WORKING SET — every open row, plus the last MAX_KEPT graded. This is the
+                       rolling window: recent form. Bounded so a hot key stays small and fast.
+     pred:arch:YYYY-MM every graded row, appended once at the moment it is graded. NO TTL, NEVER
+                       trimmed. This is the data itself and it is never deleted.
+     pred:tally        running totals per source, incremented once per graded row. NO TTL. This is
+                       what an all-time score reads: O(1), and it cannot drift out of the window.
+
+   ⚠ THE TALLY IS INCREMENTED AT THE GRADING TRANSITION, not when a row falls off the cap. That is
+   what makes it exactly-once: a row becomes graded exactly once, whereas "about to be trimmed" is
+   a condition that can be evaluated twice for the same row across two saves.
+
+   ⚠ THE WORKING SET CARRIES A ONE-YEAR TTL (see _save) and always has. It is refreshed on every
+   save, so it only bites after a full year of silence — but it is a second deletion path on top of
+   the cap, and it is exactly why the archive and the tally below are written with NO expiry. */
+const ARCH = (ms) => "pred:arch:" + new Date(ms).toISOString().slice(0, 7);
+const TALLY = "pred:tally";
+
+/* Called once, at the moment a row stops being open. Failures here must never cost the grading
+   pass: the row is already graded in the working set, and a lost archive append is recoverable
+   from that; a thrown exception here would abort the whole evaluate() and lose the grade too. */
+async function _remember(r, p) {
+  if (!r || !p) return;
+  try {
+    const src = p.source === "user" ? "user" : (p.source || "conversation");
+    const hit = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
+    await r.rpush(ARCH(Date.now()), JSON.stringify(p));       // no TTL: this is the record
+    if (p.status === "void" || hit === null) {
+      await r.hincrby(TALLY, "void:" + src, 1);
+      return;
+    }
+    await r.hincrby(TALLY, "n:" + src, 1);
+    if (hit) await r.hincrby(TALLY, "hit:" + src, 1);
+  } catch (_) { /* never break a grading pass over bookkeeping */ }
+}
+
+const MAX_KEPT = 400;          // the ROLLING WINDOW only. Nothing is lost: see _remember above.
 const MAX_OPEN = 40;           // a runaway prompt cannot flood the record
 const KINDS = new Set(["close_at", "open_at", "direction", "trade_call", "level_touch"]);
 
@@ -319,6 +360,7 @@ async function evaluate(getSpot) {
       p.status = "void";
       p.outcome = { reason: "horizon fell on a market holiday — nothing traded, nothing to grade",
                     graded_utc: Date.now() };
+      await _remember(r, p);   // kept in the archive, counted as void, never scored
       changed++;
       continue;
     }
@@ -328,7 +370,11 @@ async function evaluate(getSpot) {
       if (_touchStep(p, spot, now)) changed++;
       continue;
     }
-    if (now >= p.horizon_utc) { p.status = "graded"; p.outcome = _grade(p, spot); changed++; }
+    if (now >= p.horizon_utc) {
+      p.status = "graded"; p.outcome = _grade(p, spot);
+      await _remember(r, p);   // the permanent record, written once, at the transition
+      changed++;
+    }
   }
   if (changed) await _save(r, list);
 
@@ -697,30 +743,86 @@ async function novoRecord() {
   const r = kv();
   // kv() returns null when the store is not configured. listPredictions guards this; so must we,
   // or a missing KV throws inside _load and the whole ops payload 500s over a panel.
-  if (!r) return { error: "predictions unavailable", by_source: {}, overall: null, open: 0, counted: 0, capped: MAX_KEPT };
+  if (!r) return { error: "predictions unavailable", by_source: {}, overall: null, window: null, open: 0, counted: 0, capped: MAX_KEPT };
+
+  /* ALL-TIME comes from the TALLY, not from the log. The log is a rolling window by design, so
+     counting it would silently mean "the last 400 and drifting" -- the exact thing Jake called
+     out. The tally is incremented once per graded row and never trimmed. */
+  let tally = null;
+  try { tally = await r.hgetall(TALLY); } catch (_) { tally = null; }
+
+  /* ONE-TIME SEED. The tally starts empty and only accrues from the moment it shipped, so every
+     row graded BEFORE that would be missing from an "all-time" number — history we already have,
+     dropped on the floor, which is the one thing Jake said must never happen. Seed it once from
+     the working set, then flag it so a second call cannot double-count.
+     The flag is claimed with SETNX BEFORE the increments: two lambdas can run this concurrently,
+     and claiming after would let both pass the check and tally the same rows twice. */
+  if (!tally || !Object.keys(tally).length) {
+    let claimed = false;
+    try { claimed = !!(await r.setnx(TALLY + ":seeded", String(Date.now()))); } catch (_) { claimed = false; }
+    if (claimed) {
+      try {
+        for (const p of await _load(r)) {
+          if (!p || p.status === "open") continue;
+          const src = p.source === "user" ? "user" : (p.source || "conversation");
+          const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
+          if (p.status === "void" || h === null) { await r.hincrby(TALLY, "void:" + src, 1); continue; }
+          await r.hincrby(TALLY, "n:" + src, 1);
+          if (h) await r.hincrby(TALLY, "hit:" + src, 1);
+        }
+        tally = await r.hgetall(TALLY);
+      } catch (_) { /* leave the tally as-is; the window still renders */ }
+    }
+  }
+  const by_source = {};
+  let n = 0, hit = 0, voided = 0;
+  for (const k of Object.keys(tally || {})) {
+    const v = Number(tally[k]); if (!Number.isFinite(v)) continue;
+    const [what, src] = k.split(":");
+    if (src === "user") continue;                 // the member's calls, not his
+    const t = (by_source[src] = by_source[src] || { n: 0, hit: 0, void: 0, rate: null });
+    if (what === "n") { t.n += v; n += v; }
+    else if (what === "hit") { t.hit += v; hit += v; }
+    else if (what === "void") { t.void += v; voided += v; }
+  }
+  for (const k of Object.keys(by_source)) {
+    const t = by_source[k];
+    t.rate = t.n ? +((100 * t.hit) / t.n).toFixed(1) : null;
+  }
+
+  /* THE ROLLING WINDOW — "The Analyst's Score", recent form. Read off the working set.
+     ⚠ THE GRADE LIVES ON p.outcome.hit, NOT p.hit. evaluate() writes `p.outcome = _grade(...)`.
+     The first version of this function read p.hit, which is undefined on every row, so it would
+     have counted zero and reported a confident empty record. Caught by reading evaluate() rather
+     than assuming the shape. */
   const list = await _load(r);
-  const out = { by_source: {}, overall: null, open: 0, capped: MAX_KEPT, counted: 0 };
-  const tally = {};
+  const win = { n: 0, hit: 0, rate: null, by_source: {} };
+  let open = 0;
   for (const p of list) {
     if (!p || p.source === "user") continue;
-    if (p.status === "open") { out.open++; continue; }
-    if (typeof p.hit !== "boolean") continue;      // resolved but ungradable -> not counted either way
-    const k = p.source || "conversation";
-    const t = (tally[k] = tally[k] || { n: 0, hit: 0, first: null, last: null });
-    t.n++; if (p.hit) t.hit++;
-    const ts = Number(p.graded_utc || p.made_utc || 0) || null;
-    if (ts) { if (!t.first || ts < t.first) t.first = ts; if (!t.last || ts > t.last) t.last = ts; }
+    if (p.status === "open") { open++; continue; }
+    if (p.status === "void") continue;            // kept and shown elsewhere, never scored
+    const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
+    if (h === null) continue;
+    const src = p.source || "conversation";
+    const t = (win.by_source[src] = win.by_source[src] || { n: 0, hit: 0, rate: null });
+    t.n++; win.n++; if (h) { t.hit++; win.hit++; }
   }
-  let n = 0, hit = 0;
-  for (const k of Object.keys(tally)) {
-    const t = tally[k];
-    out.by_source[k] = { n: t.n, hit: t.hit, rate: t.n ? +((100 * t.hit) / t.n).toFixed(1) : null,
-                         first: t.first, last: t.last };
-    n += t.n; hit += t.hit;
+  for (const k of Object.keys(win.by_source)) {
+    const t = win.by_source[k]; t.rate = t.n ? +((100 * t.hit) / t.n).toFixed(1) : null;
   }
-  out.counted = n;
-  out.overall = n ? { n, hit, rate: +((100 * hit) / n).toFixed(1) } : null;
-  return out;
+  win.rate = win.n ? +((100 * win.hit) / win.n).toFixed(1) : null;
+
+  return {
+    by_source,                                   // ALL-TIME, from the permanent tally
+    overall: n ? { n, hit, rate: +((100 * hit) / n).toFixed(1) } : null,
+    voided,
+    window: { ...win, size: MAX_KEPT },          // recent form, from the rolling working set
+    open,
+    counted: n,
+    capped: MAX_KEPT,
+    tallied: !!tally && Object.keys(tally).length > 0,
+  };
 }
 
 module.exports = { novoRecord, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
