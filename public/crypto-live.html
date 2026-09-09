@@ -780,15 +780,23 @@ tr:last-child td{border-bottom:none}
        Four main and a More, matching trader and analyst. */
     /* Jake, 2026-09-07: "screener goes in the more digest sits at 4" - which lands crypto on the
        identical four to trader and analyst: the overview, the main surface, NoVo, the digest. */
-    .mob-tab[data-mtab="stats"]  { order: 1; }
+    /* Jake, 2026-09-09, annotating a screenshot of this bar: More/1, Map/2, Dr. NoVo/3, Digest/4,
+       with Stats struck through - "need a reorder and swap stats with alerts". This lands crypto on
+       the SAME five as trader and analyst, which is the point: one muscle memory across all three.
+       It is his 09-07 trader ruling applied here - "swap the alerts instead the main so its actually
+       going to be More / Chart / Dr. NoVo / Digest / Alerts" - and for the same reason: Alerts PINGS
+       you, so it earns a thumb position; Stats is a place you go to read, which is what a menu is for.
+       NOT JUST A CSS SWAP. Alerts was in the More menu and Stats was not, so the two rows move with
+       the orders - otherwise Stats becomes unreachable and Alerts appears twice. */
+    #mob-more                    { order: 1; }
     .mob-tab[data-mtab="map"]    { order: 2; }
     .mob-tab[data-mtab="novo"]   { order: 3; }
     .mob-tab[data-mtab="digest"] { order: 4; }
-    #mob-more                    { order: 5; }
+    .mob-tab[data-mtab="alerts"] { order: 5; }
     .mob-tab[data-mtab="coins"],
     .mob-tab[data-mtab="read"],
     .mob-tab[data-mtab="screener"],
-    .mob-tab[data-mtab="alerts"],
+    .mob-tab[data-mtab="stats"],
     .mob-tab[data-mtab="predict"] { display: none !important; }
     /* The More menu — hairlines and type, like every other surface. */
     #more-menu { position: fixed; left: 0; right: 0; z-index: 1001;
@@ -1208,13 +1216,13 @@ tr:last-child td{border-bottom:none}
 </nav>
 <!-- The overflow. Rows call cxMobTab by the same name the hidden bar buttons use. -->
 <div id="more-menu" hidden>
+  <button type="button" data-mtab="stats" onclick="pickMore('stats')"><span aria-hidden="true">&#9637;</span>Stats</button>
   <button type="button" data-mtab="flow" onclick="pickMore('flow')"><span aria-hidden="true">&#8644;</span>Flow</button>
   <button type="button" data-mtab="pos" onclick="pickMore('pos')"><span aria-hidden="true">&#9707;</span>Positioning</button>
   <button type="button" data-mtab="hist" onclick="pickMore('hist')"><span aria-hidden="true">&#9719;</span>History</button>
   <button type="button" data-mtab="reads" onclick="pickMore('reads')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
   <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Daily rundown</button>
   <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
-  <button type="button" data-mtab="alerts" onclick="pickMore('alerts')"><span aria-hidden="true">&#9673;</span>Alerts</button>
   <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predictions</button>
 </div>
 <script>
