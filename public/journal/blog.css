@@ -479,7 +479,10 @@ nav { position: relative; }
     width: clamp(260px, calc(100vw - 780px), 620px);
     max-width: none; margin: 0; padding: 0; border-top: 0;
   }
-  nav .nvs-ss-wrap input { height: 44px; padding: 0 14px; font-size: 14px; }
+  nav .nvs-ss-wrap input { height: 44px; padding: 0 14px 0 25px; font-size: 14px; }
+  /* padding-left clears the magnifier. This rule OUTRANKS the widget's own
+     `.nvs-ss-wrap input` (nav + class + element beats class + element), so the icon gap has to
+     be set here or the text runs straight into the glass -- measured at -2px before this. */
   .nvs-ss-panel { left: 0; right: 0; top: calc(100% + 6px); }
 }
 

@@ -56,10 +56,23 @@
     // input itself is transparent with no border and no radius, and focus tints the hairline
     // instead of drawing an outline. Do not give this input a border, a fill or a radius.
     '.nvs-ss-wrap input{display:block;width:100%;box-sizing:border-box;background:transparent;',
-    'border:0;outline:0;padding:10px 2px;',
+    // A hairline UNDERLINE, not a box. Jake, 2026-09-09: "a hairline underline". It lives on
+    // the INPUT rather than the wrapper because the wrapper's top hairline is switched off at
+    // >=1025px (see the desktop block below), so a focus tint on that border is invisible on
+    // exactly the layout most people see.
+    'border:0;border-bottom:1px solid var(--bdr,#2e3036);outline:0;',
+    // padding-left clears the magnifier, which is absolutely positioned like the key badges.
+    'padding:9px 2px 8px 25px;transition:border-color .18s ease;',
     'color:var(--txt1,#eaf3ff);font-size:14px;font-family:inherit;}',
-    'nav .nvs-ss-wrap{transition:border-color .18s ease;}',
-    'nav .nvs-ss-wrap:focus-within{border-top-color:#22d3ee;}',
+    '.nvs-ss-wrap input:focus{border-bottom-color:#22d3ee;}',
+    /* THE MAGNIFIER. Same icon as the journal's .kb-box, same 2px round-cap stroke, and it
+       inherits currentColor so it tracks the placeholder rather than needing its own value.
+       Positioned absolutely for the same reason the key badges are: the input is measured at
+       runtime to pick a placeholder that fits, and making the wrapper a flex row would change
+       that box under the measuring code. */
+    '.nvs-ss-ico{position:absolute;left:22px;top:50%;transform:translateY(-50%);',
+    'width:16px;height:16px;color:var(--txt3,#7d97b8);pointer-events:none;}',
+    '.nvs-ss-wrap:focus-within .nvs-ss-ico{color:#22d3ee;}',
     '.nvs-ss-wrap input::-webkit-search-cancel-button{-webkit-appearance:none;}',
     '.nvs-ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
     // The panel hangs from the input and matches its width, so results line up with the box.
@@ -100,9 +113,12 @@
     '@media(min-width:1025px){.nvs-ss-wrap{width:auto;flex:1 1 300px;max-width:600px;',
     'margin:0 24px;padding:0;}',
     'nav .nvs-ss-wrap{border-top:0;padding-top:0;}',
-    '.nvs-ss-wrap input{padding:8px 13px;font-size:13.5px;}',
+    // desktop: the wrapper loses its gutter, so the icon rides at the field's own left edge
+    '.nvs-ss-ico{left:0;}',
+    '.nvs-ss-wrap input{padding:8px 13px 7px 24px;font-size:13.5px;}',
     '.nvs-ss-panel{left:0;right:0;top:calc(100% + 6px);}}',
     '@media(max-width:560px){.nvs-ss-wrap{padding:0 14px 10px;}',
+    '.nvs-ss-ico{left:14px;}',
     'nav .nvs-ss-wrap{padding-top:10px;}',
     '.nvs-ss-panel{left:14px;right:14px;}}'
   ].join('');
@@ -111,6 +127,9 @@
   var wrap = document.createElement('div');
   wrap.className = 'nvs-ss-wrap';
   wrap.innerHTML =
+    '<svg class="nvs-ss-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>' +
     '<input id="site-search-input" type="search" autocomplete="off" spellcheck="false" ' +
     'role="combobox" aria-expanded="false" aria-controls="site-search-results" ' +
     'aria-autocomplete="list" aria-label="Search the site">' +
