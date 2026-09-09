@@ -2003,7 +2003,17 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
        span the columns. Without this it renders right-aligned in column two. */
     .lv-grid-top .lv-status {
       grid-column: 1 / -1; margin: 0; justify-content: flex-start;
-      padding: 14px 0 2px; }
+      padding: 14px 0 2px;
+      /* ORDER IS THE ONE THAT ACTUALLY DECIDES, and it is why this landed in the wrong place
+         first time. `.lv-status { order: 4 }` is set for the desktop header row (see the header
+         media query above); grid-column and margin were overridden here and `order` was not, so
+         the element sat FIRST in the DOM and rendered LAST - below the ticker picker instead of
+         above the fear gauge. Jake: "it goes after the hairline under the readings bar".
+         All three are given explicit orders rather than relying on DOM position, because two of
+         them are moved at runtime and a tie broken by DOM order is a tie waiting to flip. */
+      order: -2; }
+    .lv-grid-top .lv-fear  { order: -1; }
+    .lv-grid-top #strip    { order: 0; }
     .bias-col { border-bottom: 1px solid var(--bdr2); padding-bottom: 16px; margin-bottom: 4px; }
     .mob-tab[data-mtab="digest"] { order: 4; }
     .mob-tab[data-mtab="alerts"] { order: 5; }
