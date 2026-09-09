@@ -50,15 +50,23 @@
     // separated by a hairline so it reads as part of the header rather than page content.
     '.nvs-ss-wrap{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:0 22px 11px;}',
     'nav .nvs-ss-wrap{border-top:1px solid var(--bdr,#2e3036);padding-top:11px;}',
-    '.nvs-ss-wrap input{display:block;width:100%;box-sizing:border-box;background:var(--navy2,#1c1d21);',
-    'border:1px solid var(--bdr,#2e3036);border-radius:10px;padding:10px 14px;',
-    'color:var(--txt1,#eaf3ff);font-size:14px;font-family:inherit;outline:none;',
-    'transition:border-color .18s ease;}',
-    '.nvs-ss-wrap input:focus{border-color:#22d3ee;}',
+    // NO BOX. Jake, 2026-09-09: "remove the box around the search bar ... the journal has one
+    // with no box i like that". This is the journal's .kb-box idiom, copied rather than
+    // reinvented: the WRAPPER already carries a top hairline (see the nav rule above), so the
+    // input itself is transparent with no border and no radius, and focus tints the hairline
+    // instead of drawing an outline. Do not give this input a border, a fill or a radius.
+    '.nvs-ss-wrap input{display:block;width:100%;box-sizing:border-box;background:transparent;',
+    'border:0;outline:0;padding:10px 2px;',
+    'color:var(--txt1,#eaf3ff);font-size:14px;font-family:inherit;}',
+    'nav .nvs-ss-wrap{transition:border-color .18s ease;}',
+    'nav .nvs-ss-wrap:focus-within{border-top-color:#22d3ee;}',
+    '.nvs-ss-wrap input::-webkit-search-cancel-button{-webkit-appearance:none;}',
     '.nvs-ss-wrap input::placeholder{color:var(--txt3,#7d97b8);}',
     // The panel hangs from the input and matches its width, so results line up with the box.
     '.nvs-ss-panel{display:none;position:absolute;top:calc(100% + 4px);left:22px;right:22px;',
-    'background:var(--navy2,#16171a);border:1px solid var(--bdr,#2e3036);border-radius:12px;',
+    // Fill stays -- it hangs over page content and has to stay readable -- but the outline and
+    // the radius go, same as the nav menu panels.
+    'background:var(--navy2,#16171a);border-top:1px solid var(--bdr,#2e3036);',
     'box-shadow:0 24px 60px rgba(0,0,0,.55);padding:6px;z-index:400;max-height:min(70vh,460px);',
     'overflow-y:auto;text-align:left;}',
     '.nvs-ss-panel.show{display:block;}',
