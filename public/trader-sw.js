@@ -51,7 +51,7 @@ self.addEventListener('push', function (e) {
   let d = {}; try { d = e.data.json(); } catch (_) { d = { title: 'NoVo Trader', body: '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'NoVo Trader', {
     body: d.body || '', tag: 'trader:' + (d.tag || 'novo-trader'), renotify: true,
-    icon: '/icon-192.png?v=10', badge: '/icon-192.png?v=10', data: { url: d.url || '/trader/live' }
+    icon: '/icon-192.png?v=8', badge: '/icon-192.png?v=8', data: { url: d.url || '/trader/live' }
   }));
 });
 self.addEventListener('notificationclick', function (e) {

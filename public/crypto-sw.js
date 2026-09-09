@@ -19,7 +19,7 @@ self.addEventListener('push', function (e) {
        /icon-crypto-192.png, so Android drew the manifest icon as the app badge and THIS icon as
        the large one - two different NoVo coins in a single notification. Same asset for both
        slots, and the same asset the installed app already uses. */
-    icon: '/icon-crypto-192.png?v=10', badge: '/icon-crypto-192.png?v=10',
+    icon: '/icon-crypto-192.png?v=1', badge: '/icon-crypto-192.png?v=1',
     data: { url: d.url || '/crypto/live' }
   }));
 });
