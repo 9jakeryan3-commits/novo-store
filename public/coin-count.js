@@ -18,7 +18,15 @@
   // band A + band B: coins with a book OR leverage positioning. A third number near 90,
   // with the opposite membership to `coins` - it has TRX and not USDG.
   var bands  = document.querySelectorAll('[data-bandcount]');
-  if (!els.length && !chain.length && !asset.length && !mapped.length && !bands.length) return;
+  // BAND A ALONE: the coins with a real options book, which is what every "gamma by strike on N
+  // coins" claim rests on. This marker shipped looking exactly like its five neighbours and was
+  // read by NOTHING until 2026-09-09 -- it only ever changed when someone deployed. It went
+  // unnoticed for so long because the baked value and the live value are both 7, so the page
+  // looked correct: the number could only be caught by baking a wrong value and watching whether
+  // anything corrected it. If you are reading this while auditing the counters, that is the test
+  // to run -- comparing the page against the feed CANNOT tell these apart.
+  var books  = document.querySelectorAll('[data-bookcount]');
+  if (!els.length && !chain.length && !asset.length && !mapped.length && !bands.length && !books.length) return;
   fetch('/api/crypto-free')
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
@@ -38,6 +46,9 @@
       }
       if (typeof j.bands === 'number' && j.bands > 0) {
         bands.forEach(function (el) { el.textContent = String(j.bands); });
+      }
+      if (typeof j.books === 'number' && j.books > 0) {
+        books.forEach(function (el) { el.textContent = String(j.books); });
       }
       els.forEach(function (el) {
         // data-coincount="words" wants "ninety" rather than "90" - the /plans copy reads
