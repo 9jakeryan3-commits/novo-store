@@ -674,7 +674,56 @@ async function selectCryptoPredictions(snap) {
   return { made };
 }
 
-module.exports = { makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+/* ── NOVO'S OWN RECORD ─────────────────────────────────────────────────────────────────────────
+   Jake, 2026-09-09: "every alert, prediction, report bias, audit bias, convo prediction every
+   single thing everything that comes from Dr. novo and gets graded must be included in the all
+   time grade. not engine math scores. Dr. novo scores."
+
+   This GRADES NOTHING. Every row it counts was already graded by _grade() at its horizon and
+   carries `hit` true/false. This only tallies them, so the owner dashboard can show the record
+   that already exists rather than a second opinion of it.
+
+   SOURCES ARE KEPT APART, because they are different acts and Jake names them separately:
+     novo          a call he initiated off the data — the alerts
+     read          a call the catcher pulled out of a published report
+     conversation  a call he made when asked
+   `user` is EXCLUDED: those are the member's own predictions, not his. Counting them would put
+   other people's calls in his grade.
+
+   ⚠ THE HISTORY ROLLS. _save() keeps only the last MAX_KEPT (400) graded rows, so this is "his
+   record as far back as storage goes", not literally all-time. `capped` says so, and the caller
+   is expected to surface it rather than let the number silently claim more than it has. */
+async function novoRecord() {
+  const r = kv();
+  // kv() returns null when the store is not configured. listPredictions guards this; so must we,
+  // or a missing KV throws inside _load and the whole ops payload 500s over a panel.
+  if (!r) return { error: "predictions unavailable", by_source: {}, overall: null, open: 0, counted: 0, capped: MAX_KEPT };
+  const list = await _load(r);
+  const out = { by_source: {}, overall: null, open: 0, capped: MAX_KEPT, counted: 0 };
+  const tally = {};
+  for (const p of list) {
+    if (!p || p.source === "user") continue;
+    if (p.status === "open") { out.open++; continue; }
+    if (typeof p.hit !== "boolean") continue;      // resolved but ungradable -> not counted either way
+    const k = p.source || "conversation";
+    const t = (tally[k] = tally[k] || { n: 0, hit: 0, first: null, last: null });
+    t.n++; if (p.hit) t.hit++;
+    const ts = Number(p.graded_utc || p.made_utc || 0) || null;
+    if (ts) { if (!t.first || ts < t.first) t.first = ts; if (!t.last || ts > t.last) t.last = ts; }
+  }
+  let n = 0, hit = 0;
+  for (const k of Object.keys(tally)) {
+    const t = tally[k];
+    out.by_source[k] = { n: t.n, hit: t.hit, rate: t.n ? +((100 * t.hit) / t.n).toFixed(1) : null,
+                         first: t.first, last: t.last };
+    n += t.n; hit += t.hit;
+  }
+  out.counted = n;
+  out.overall = n ? { n, hit, rate: +((100 * hit) / n).toFixed(1) } : null;
+  return out;
+}
+
+module.exports = { novoRecord, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
                    makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
