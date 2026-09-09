@@ -132,9 +132,9 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 .lv-brand{flex:0 0 auto}
 .lv-status{margin-left:auto;min-width:0;display:flex;align-items:center;gap:11px;justify-content:flex-end}
 .lv-live{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green)}
-.lv-live .dot{width:8px;height:8px;margin-right:0;box-shadow:0 0 8px var(--green);animation:lvpulse 2s infinite}
+.lv-live .dot{width:8px;height:8px;margin-right:0;animation:lvpulse 2s infinite}
 .lv-live.stale{color:var(--amber)}
-.lv-live.stale .dot{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:none}
+.lv-live.stale .dot{background:var(--amber);animation:none}
 @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.35}}
 /* A streamed tick used to change the number and say nothing about which way it went. The
    tint is the direction, held just long enough to catch peripherally. */
@@ -240,7 +240,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 #search{width:100%;background:var(--navy2);border:1px solid var(--bdr);color:var(--txt1);
   font-family:var(--mono);font-size:11px;padding:6px 9px;border-radius:var(--r-2);outline:none}
 #search:hover{border-color:var(--txt4)}
-#search:focus{border-color:var(--cx);box-shadow:0 0 0 3px rgba(167,139,250,.13)}
+#search:focus{border-color:var(--cx);}
 .bandhead{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--txt4);padding:11px 12px 5px}
 .coin{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 12px;cursor:pointer;
@@ -252,7 +252,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
 .coin:hover .c{color:var(--txt1)}
 .coin:hover .p{color:var(--txt2)}
 .coin.on{background:var(--navy2);border-left-color:var(--cx);
-  box-shadow:inset 0 0 22px -12px var(--cx)}
+  }
 .coin .c{font-family:var(--mono);font-size:11.5px;font-weight:600;
   transition:color var(--dur-1) var(--ease)}
 .coin.on .c{color:var(--cx)}
@@ -590,10 +590,10 @@ tr:last-child td{border-bottom:none}
  1.5x the height of the same control on the trader dashboard. The width is whatever the
  words need. */
  text-align:left;
- box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 22px -6px rgba(167,139,250,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+ box-shadow:0 8px 20px rgba(0,0,0,.5);}
   #novo-ask-bubble:hover{color:var(--txt1);
- box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(167,139,250,.62),inset 0 1px 0 rgba(255,255,255,.07)}
-  #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;text-shadow:0 0 10px rgba(167,139,250,.75)}
+ box-shadow:0 14px 34px rgba(0,0,0,.55);}
+  #novo-ask-bubble .caret{color:#a78bfa;font-weight:800;}
   /* margin-left was auto, which pinned the key to the far edge and stretched the label across
      the whole button. With the box no longer forced wide there is nothing to stretch to, and an
      auto margin here would now be the thing HOLDING it open. The flex gap does the spacing. */
@@ -601,9 +601,9 @@ tr:last-child td{border-bottom:none}
     color:var(--txt3,var(--txt3));border:1px solid var(--bdr,var(--bdr));border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
   #novo-ask-bubble.has-drop{color:var(--txt1);
- box-shadow:0 0 0 1px rgba(167,139,250,.35), 0 0 24px rgba(167,139,250,.26)}
+ }
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
-    background:#a78bfa;box-shadow:0 0 9px rgba(167,139,250,.9)}
+    background:#a78bfa;}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
   /* ⚠ THE CHAT SETS ITS OWN FACE, AND ITS CONTROLS SET IT AGAIN. A <button> or <input> does not
    inherit font-family -- it takes the browser's default, which is Arial. The chat carried exactly
@@ -678,7 +678,7 @@ tr:last-child td{border-bottom:none}
     max-width:min(94%,760px)}
   #novo-ask header{padding:13px 16px;gap:11px}
   #novo-ask header b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
-    background:var(--askacc);margin-right:8px;box-shadow:0 0 10px var(--askacc);vertical-align:1px}
+    background:var(--askacc);margin-right:8px;vertical-align:1px}
   #novo-ask .x{padding:5px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
   #novo-ask .x:hover{color:#eaf3ff;background:rgba(255,255,255,.06)}
   #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}
@@ -836,7 +836,7 @@ tr:last-child td{border-bottom:none}
     /* Tinted even when idle, and it keeps its colour when active — the other tabs go neutral, this
        one is the analyst and stays itself. */
     .mob-tab-novo { color: #a78bfa; }
-    .mob-tab-novo .mob-tab-icon { text-shadow: 0 0 9px rgba(167,139,250,.85); }
+    .mob-tab-novo .mob-tab-icon { }
     .mob-tab-novo.mob-active { color: #c4b5fd; border-top-color: #a78bfa; }
 
     /* STATS - the right-hand column, given a way in. The display:none it carries comes from the
@@ -1598,7 +1598,7 @@ function gauge(g){
   const col = damp ? 'var(--green2)' : 'var(--red)';
   return `<div class="gauge">
     <div class="gauge-h"><span class="gk">Gamma regime</span><span class="gv" style="color:${col}">${label}</span></div>
-    <div class="gauge-t"><span class="gauge-d" style="left:${pos}%;background:${col};box-shadow:0 0 10px ${col}"></span></div>
+    <div class="gauge-t"><span class="gauge-d" style="left:${pos}%;background:${col};}"></span></div>
     <div class="gauge-n">${damp
       ? 'dealers long gamma — hedging leans against the move, so ranges hold and breaks fail more often'
       : 'dealers short gamma — hedging leans with the move, so breaks extend'} &middot; 24/7 market, no close</div>

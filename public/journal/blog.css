@@ -60,7 +60,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .nav-actions{display:flex;gap:14px;align-items:center;}
 .nav-link{color:var(--txt2);font-weight:600;font-size:14px;letter-spacing:.02em;}
 .nav-link:hover{color:var(--txt1);}
-.nav-buy{background:linear-gradient(180deg,#34d399,#10b981);color:#0b0f18;border:0;padding:11px 22px;border-radius:9px;font-weight:800;font-size:14px;white-space:nowrap;box-shadow:0 4px 16px rgba(16,185,129,0.3);}
+.nav-buy{background:linear-gradient(180deg,#34d399,#10b981);color:#0b0f18;border:0;padding:11px 22px;border-radius:9px;font-weight:800;font-size:14px;white-space:nowrap;}
 .nav-buy:hover{opacity:.9;}
 .nav-portal{display:inline-flex;align-items:center;background:none;color:#3b82f6;border:0;padding:8px 4px;border-radius:6px;text-decoration:none;transition:all .15s;}
 .nav-portal:hover{border-color:#3b82f6;background:rgba(59,130,246,0.16);}
@@ -97,7 +97,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .tick .up{color:var(--green);} .tick .dn{color:var(--red);}
 .tick svg{width:46px;height:18px;display:block;}
 .ticker-tag{flex-shrink:0;padding:9px 14px;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);border-right:1px solid var(--bdr);display:flex;align-items:center;gap:6px;background:#0d0e10;}
-.ticker-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+.ticker-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
 
 /* ---------- SECTION NAV ---------- */
 .secnav{border-bottom:1px solid var(--bdr);background:var(--navy);}
@@ -198,7 +198,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 }
 .kb-wrap{max-width:720px;margin:2px auto 30px;padding:0 22px;}
 .kb-box{display:flex;align-items:center;gap:11px;border-top:1px solid var(--bdr2);padding:13px 0;transition:border-color .15s,box-shadow .15s;}
-.kb-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.13);}
+.kb-box:focus-within{border-color:var(--cyan);}
 .kb-box svg{width:20px;height:20px;color:var(--txt3);flex:0 0 auto;}
 .kb-box input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--txt1);font-size:16px;font-family:var(--sans);}
 .kb-box input::placeholder{color:var(--txt3);}
@@ -614,19 +614,14 @@ nav { position: relative; }
   color: #22d3ee !important;
   border: 1px solid rgba(34, 211, 238, 0.42) !important;
   box-sizing: border-box;
-  animation: navBuyGlow 2.6s ease-in-out infinite;
 }
 .nav-buy:hover {
   background: rgba(34, 211, 238, 0.16) !important;
   border-color: #22d3ee !important;
   color: #22d3ee !important;
 }
-@keyframes navBuyGlow {
-  0%, 100% { box-shadow: 0 0 14px rgba(34, 211, 238, 0.22); }
-  50%      { box-shadow: 0 0 30px rgba(34, 211, 238, 0.55); }
-}
 @media (prefers-reduced-motion: reduce) {
-  .nav-buy { animation: none; box-shadow: 0 0 22px rgba(34, 211, 238, 0.42) !important; }
+  .nav-buy { animation: none;  }
 }
 
 /* ── THE 09-08 DE-BORDER SWEEP LANDED IN polish.css AND MISSED THIS SHEET ──────────────────────
@@ -657,37 +652,20 @@ nav { position: relative; }
 .nav-portal:hover,
 .nav-buy:hover { background: none !important; box-shadow: none !important; }
 
-/* ── THE CTA TREATMENT ───────────────────────────────────────────────────────────────────────
-   Jake, 2026-09-09: "look at the buttons in the hero on the homepage those are it text link
-   pulsing gloww fucking match that". The hero's .analyst-glow / .trader-glow / .crypto-glow are
-   the reference: a 2.6s ease-in-out infinite pulse in the product's own accent. This is that,
-   for a text link rather than a box -- text-shadow instead of box-shadow.
-
-   DEFINED HERE, IN A SHARED STYLESHEET, DELIBERATELY. polish.css is linked by every non-journal
-   page and blog.css by every journal page, so between them they reach the whole estate. Three
-   passes on 2026-09-09 each re-invented a weaker static glow for whichever class list that pass
-   knew about, which is how the site ended up half-lit. Change it here, once.
-
-   currentColor is load-bearing: each CTA pulses in its own colour -- green Subscribe, amber
-   yearly, cyan Analyst, purple Crypto, indigo Discord -- so adding a new accent needs no new
-   rule. Never hand-pick a shadow colour per button here.
-
-   NOT in this list, on purpose: .hero-ask (the Dr. NoVo pill), .nvc-btn (Support), .skip-link,
-   the Monthly/Annual toggles and the nav. Jake: "this is not a fill wipe i point out buttons."
-   Keep the timing in step with the hero's @keyframes analystGlow if either is retuned. */
-@keyframes ctaPulse {
-  0%, 100% { text-shadow: 0 0 6px currentColor, 0 0 16px currentColor; }
-  50%      { text-shadow: 0 0 11px currentColor, 0 0 30px currentColor; }
-}
+/* THE CTA TREATMENT: colour only, no glow.
+   Jake, 2026-09-09: "glow has to go its tacky.... all glowing styles on the site gotta go
+   let the color of the text work." The pulsing text-shadow that lived here, and the hero's
+   analystGlow / traderGlow / cryptoGlow keyframes it was built to match, are all gone.
+   A CTA is now a coloured word with padding -- the accent alone carries it.
+   Do not reintroduce text-shadow or a coloured box-shadow on these. */
 .cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
 .btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
 .btn-crypto {
   background: none;
   border: 0;
-  animation: ctaPulse 2.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
 .btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
-.btn-crypto { animation: none; text-shadow: 0 0 9px currentColor, 0 0 22px currentColor; }
+.btn-crypto { animation: none; }
 }

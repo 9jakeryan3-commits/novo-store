@@ -39,7 +39,7 @@
  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px -6px rgba(var(--askacc-rgb),.45),inset 0 1px 0 rgba(255,255,255,.05)}
   #novo-ask-bubble:hover{color:var(--txt1);
  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 34px -4px rgba(var(--askacc-rgb),.62),inset 0 1px 0 rgba(255,255,255,.07)}
-  #novo-ask-bubble .caret{color:var(--askacc);font-weight:800;text-shadow:0 0 10px rgba(var(--askacc-rgb),.75)}
+  #novo-ask-bubble .caret{color:var(--askacc);font-weight:800}
   #novo-ask-bubble kbd{margin-left:auto;font-family:inherit;font-size:11px;font-weight:700;
     color:var(--txt3);border:1px solid var(--bdr);border-radius:6px;padding:2px 6px;
     background:rgba(255,255,255,.03)}
@@ -51,9 +51,9 @@
   /* NoVo left something. The bubble is the only place it can show, since the drop lands in a panel
      that is closed by default -- so the dot has to survive until the panel is actually opened. */
   #novo-ask-bubble.has-drop{color:var(--txt1);
- box-shadow:0 0 0 1px rgba(var(--askacc-rgb),.35), 0 0 24px rgba(var(--askacc-rgb),.26)}
+ }
   #novo-ask-bubble .dot{display:none;width:7px;height:7px;border-radius:50%;flex:0 0 auto;
-    background:var(--askacc);box-shadow:0 0 9px rgba(var(--askacc-rgb),.9)}
+    background:var(--askacc)}
   #novo-ask-bubble.has-drop .dot{display:block;animation:novoDrop 2.4s ease-in-out infinite}
   @keyframes novoDrop{0%,100%{opacity:1}50%{opacity:.3}}
   @media (prefers-reduced-motion:reduce){ #novo-ask-bubble.has-drop .dot{animation:none} }
@@ -159,7 +159,7 @@
     max-width:min(94%,760px)}
   #novo-ask header{padding:13px 16px;gap:11px}
   #novo-ask header b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
-    background:var(--askacc);margin-right:8px;box-shadow:0 0 10px var(--askacc);vertical-align:1px}
+    background:var(--askacc);margin-right:8px;vertical-align:1px}
   #novo-ask .x{padding:5px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
   #novo-ask .x:hover{color:#eaf3ff;background:rgba(255,255,255,.06)}
   #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}

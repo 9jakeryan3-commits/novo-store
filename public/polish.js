@@ -103,7 +103,7 @@
     'max-width:min(520px,calc(100vw - 32px));padding:13px 18px;border-radius:11px;font-size:14px;' +
     'line-height:1.5;font-weight:600;color:#eaf3ff;background:rgba(20,21,25,.96);backdrop-filter:blur(8px);' +
     'border:1px solid ' + (ok ? 'rgba(88,101,242,.55)' : 'rgba(245,158,11,.5)') + ';' +
-    'box-shadow:0 0 30px -8px ' + (ok ? 'rgba(88,101,242,.6)' : 'rgba(245,158,11,.45)') + ';';
+    '';
   el.textContent = msg;
   document.body.appendChild(el);
 

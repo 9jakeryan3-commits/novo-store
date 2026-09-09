@@ -408,19 +408,14 @@ nav.is-scrolled {
   color: #22d3ee !important;
   border: 1px solid rgba(34, 211, 238, 0.42) !important;
   box-sizing: border-box;
-  animation: navBuyGlow 2.6s ease-in-out infinite;
 }
 .nav-buy:hover {
   background: rgba(34, 211, 238, 0.16) !important;
   border-color: #22d3ee !important;
   color: #22d3ee !important;
 }
-@keyframes navBuyGlow {
-  0%, 100% { box-shadow: 0 0 14px rgba(34, 211, 238, 0.22); }
-  50%      { box-shadow: 0 0 30px rgba(34, 211, 238, 0.55); }
-}
 @media (prefers-reduced-motion: reduce) {
-  .nav-buy { animation: none; box-shadow: 0 0 22px rgba(34, 211, 238, 0.42) !important; }
+  .nav-buy { animation: none;  }
 }
 
 /* Stacked comparison cards on /crypto: the cards stay full-width and stacked, but their lists run
@@ -603,55 +598,31 @@ nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
   box-shadow: none !important;
   animation: none !important;
 }
-.btn-secondary.crypto-glow  { animation: cryptoTextGlow  2.6s ease-in-out infinite !important; }
-.btn-secondary.analyst-glow { animation: analystTextGlow 2.6s ease-in-out infinite !important; }
-.btn-secondary.trader-glow  { animation: traderTextGlow  2.6s ease-in-out infinite !important; }
-
-@keyframes cryptoTextGlow  { 0%,100% { text-shadow: 0 0 12px rgba(167,139,250,.40); }
-                             50%     { text-shadow: 0 0 24px rgba(167,139,250,.85); } }
-@keyframes analystTextGlow { 0%,100% { text-shadow: 0 0 12px rgba(34,211,238,.40); }
-                             50%     { text-shadow: 0 0 24px rgba(34,211,238,.85); } }
-@keyframes traderTextGlow  { 0%,100% { text-shadow: 0 0 12px rgba(16,185,129,.40); }
-                             50%     { text-shadow: 0 0 24px rgba(16,185,129,.85); } }
+.btn-secondary.crypto-glow  { }
+.btn-secondary.analyst-glow { }
+.btn-secondary.trader-glow  { }
 
 /* Someone who has asked for less motion gets the glow, not the pulse. */
 @media (prefers-reduced-motion: reduce) {
-  .btn-secondary.crypto-glow  { animation: none !important; text-shadow: 0 0 20px rgba(167,139,250,.7); }
-  .btn-secondary.analyst-glow { animation: none !important; text-shadow: 0 0 20px rgba(34,211,238,.7); }
-  .btn-secondary.trader-glow  { animation: none !important; text-shadow: 0 0 20px rgba(16,185,129,.7); }
+  .btn-secondary.crypto-glow  { animation: none !important; }
+  .btn-secondary.analyst-glow { animation: none !important; }
+  .btn-secondary.trader-glow  { animation: none !important; }
 }
 
-/* ── THE CTA TREATMENT ───────────────────────────────────────────────────────────────────────
-   Jake, 2026-09-09: "look at the buttons in the hero on the homepage those are it text link
-   pulsing gloww fucking match that". The hero's .analyst-glow / .trader-glow / .crypto-glow are
-   the reference: a 2.6s ease-in-out infinite pulse in the product's own accent. This is that,
-   for a text link rather than a box -- text-shadow instead of box-shadow.
-
-   DEFINED HERE, IN A SHARED STYLESHEET, DELIBERATELY. polish.css is linked by every non-journal
-   page and blog.css by every journal page, so between them they reach the whole estate. Three
-   passes on 2026-09-09 each re-invented a weaker static glow for whichever class list that pass
-   knew about, which is how the site ended up half-lit. Change it here, once.
-
-   currentColor is load-bearing: each CTA pulses in its own colour -- green Subscribe, amber
-   yearly, cyan Analyst, purple Crypto, indigo Discord -- so adding a new accent needs no new
-   rule. Never hand-pick a shadow colour per button here.
-
-   NOT in this list, on purpose: .hero-ask (the Dr. NoVo pill), .nvc-btn (Support), .skip-link,
-   the Monthly/Annual toggles and the nav. Jake: "this is not a fill wipe i point out buttons."
-   Keep the timing in step with the hero's @keyframes analystGlow if either is retuned. */
-@keyframes ctaPulse {
-  0%, 100% { text-shadow: 0 0 6px currentColor, 0 0 16px currentColor; }
-  50%      { text-shadow: 0 0 11px currentColor, 0 0 30px currentColor; }
-}
+/* THE CTA TREATMENT: colour only, no glow.
+   Jake, 2026-09-09: "glow has to go its tacky.... all glowing styles on the site gotta go
+   let the color of the text work." The pulsing text-shadow that lived here, and the hero's
+   analystGlow / traderGlow / cryptoGlow keyframes it was built to match, are all gone.
+   A CTA is now a coloured word with padding -- the accent alone carries it.
+   Do not reintroduce text-shadow or a coloured box-shadow on these. */
 .cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
 .btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
 .btn-crypto {
   background: none;
   border: 0;
-  animation: ctaPulse 2.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
 .btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
-.btn-crypto { animation: none; text-shadow: 0 0 9px currentColor, 0 0 22px currentColor; }
+.btn-crypto { animation: none; }
 }
