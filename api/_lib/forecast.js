@@ -34,6 +34,18 @@ const NYSE_HOLIDAYS = new Set([
   "2026-09-07", "2026-11-26", "2026-12-25",
   "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31",
   "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24",
+  /* EXTENDED to 2029 on 2026-09-08. The table ended 2027-12-24; from 2028-01-17 an unlisted
+     holiday would have resolved a "today_close" onto a closed market, graded against a frozen
+     spot, and appended a free HIT to an APPEND-ONLY record -- the exact bug the comment above
+     describes. Dates generated from _clock.js holidays(), which is rule-based, then validated:
+     its observed() emits an impossible "2028-01-00" for a Saturday New Year (string-decrement,
+     no date normalisation) and that entry was rejected. NYSE does not close when Jan 1 falls
+     on a Saturday, so the omission is correct -- reached by rejecting a bad string, not by the
+     rule. predictions-check.js now FAILS when this table drops under ~18 months of runway. */
+  "2028-01-17", "2028-02-21", "2028-04-14", "2028-05-29", "2028-06-19",
+  "2028-07-04", "2028-09-04", "2028-11-23", "2028-12-25",
+  "2029-01-01", "2029-01-15", "2029-02-19", "2029-03-30", "2029-05-28", "2029-06-19",
+  "2029-07-04", "2029-09-03", "2029-11-22", "2029-12-25",
 ]);
 
 function _etParts(ms) {

@@ -65,8 +65,15 @@
   }
 
   var _handshakeAt = 0;
+  /* WHY THE TOKEN IS GONE, so the second handshake does not overwrite the first one's answer.
+     The 401 path nulls TOKEN and paints "Your session expired"; any later novoHandshake()
+     -- from novoReauth, the poll, or the chart lane -- then hit the !TOKEN branch below and
+     repainted the GENERIC "Sign in to open" gate about 5s later, telling a member whose
+     subscription is live that they never had access. Measured 628ms -> 5522ms, 2026-09-08. */
+  var _sessionExpired = false;
   window.novoHandshake = async function(){
     if (!TOKEN) {
+      if (_sessionExpired) return false;   // the specific message is already on screen
       gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Sign in to open the Trader dashboard</div>'
          + '<a href="/portal" style="color:#22d3ee">Go to the member portal &rarr;</a></div>');
       return false;
@@ -89,6 +96,7 @@
       if (r.status === 401) {
         try { localStorage.removeItem('novo_live_t'); } catch(_){}
         TOKEN = null;
+        _sessionExpired = true;
         gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Your session expired</div>'
            + '<a href="/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
         return false;

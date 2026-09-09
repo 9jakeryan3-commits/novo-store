@@ -628,3 +628,31 @@ nav { position: relative; }
 @media (prefers-reduced-motion: reduce) {
   .nav-buy { animation: none; box-shadow: 0 0 22px rgba(34, 211, 238, 0.42) !important; }
 }
+
+/* ── THE 09-08 DE-BORDER SWEEP LANDED IN polish.css AND MISSED THIS SHEET ──────────────────────
+   Jake, 2026-09-08: "button borders need to go as well. in 2026 we click the link word button we
+   dont like borders only horizontal lines to seperate data."
+   polish.css carries this same block after its own .nav-buy rule, so the 143 pages on that sheet
+   were already correct. The journal loads blog.css ALONE (1,288 files) and the bordered .nav-buy
+   block was copy-pasted here without its override, so every journal page kept the border for two
+   days. Found by rendered-DOM measurement, not by grepping the declaration — the declaration is
+   present in BOTH sheets and only one of them paints it, which is why a source scan called this
+   1,433 pages when the real number is 1,288.
+   Mirrors polish.css exactly: no fill, no radius, no shadow, no pulse. PADDING STAYS - it is the
+   tap target, not decoration. The animation is killed at source because an animation outranks a
+   normal declaration and would put the glow straight back. */
+.nav-menu-btn,
+.nav-portal,
+.nav-buy {
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-buy { box-shadow: none !important; }
+}
+.nav-menu-btn:hover,
+.nav-portal:hover,
+.nav-buy:hover { background: none !important; box-shadow: none !important; }

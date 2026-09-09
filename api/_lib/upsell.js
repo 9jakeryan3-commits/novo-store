@@ -61,6 +61,9 @@ const EQUITY_TOOLS = new Set([
   "get_dealer_levels", "get_gamma_profile", "get_session_history", "get_market_internals",
   "get_live_chain", "get_market_breadth", "get_vol_history", "get_futures_positioning",
   "get_base_rates", "get_track_record",
+  // log_forecast is EQUITY: forecast.js:25 hard-limits it to TICKERS ["SPY","QQQ","IWM"] and
+  // returns null for anything else (:98), so using it always means an equity question. (2026-09-08)
+  "log_forecast",
 ]);
 
 function touchesEquities(question, ledger) {
@@ -165,6 +168,12 @@ const NEUTRAL_TOOLS = new Set([
   "search_journal", "search_news", "get_economic_calendar", "get_quote", "get_earnings_dates",
   "set_alert", "list_alerts", "cancel_alert", "update_reader_memory",
   "describe_archive", "query_archive", "get_recent_reads",
+  // ADDED 2026-09-08. These five shipped 09-07 unclassified, which pinned /api/health to ok:false.
+  // NEUTRAL, not EQUITY, on the same reasoning the comment above gives for keeping get_chain_history
+  // out: predictions.js is CROSS-ASSET (it carries a measured BTC neutral band at :106), so marking
+  // a prediction tool as an equity signal would fire the bundle advert on a pure crypto question --
+  // the exact failure this feature exists to avoid. search_x is general research, like search_news.
+  "search_x", "make_prediction", "list_predictions", "log_trader_prediction",
 ]);
 
 /**

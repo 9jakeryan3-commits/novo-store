@@ -365,6 +365,22 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
       && graded.overall.hit_rate === 100,
     JSON.stringify({ graded: graded.graded.length, overall: graded.overall }));
 
+  /* THE HOLIDAY TABLE IS A FUSE, SO FAIL WHILE THERE IS STILL TIME TO EXTEND IT (2026-09-08).
+     Every date this suite tests sits INSIDE MKT_HOLIDAYS, so it passes green forever -- including
+     on the day the table runs out and an unlisted holiday starts grading a free HIT into an
+     append-only record. Read the Set out of source: it is not exported, and importing it would be
+     a second copy of the thing whose duplication caused this. */
+  const _src = require('fs').readFileSync(
+    require('path').join(__dirname, '..', 'api', '_lib', 'predictions.js'), 'utf8');
+  const _tbl = (_src.match(/MKT_HOLIDAYS[\s\S]{0,2000}?\]\)/) || [''])[0];
+  const _days = [..._tbl.matchAll(/"(\d{4}-\d{2}-\d{2})"/g)].map((m) => m[1]).sort();
+  const _last = _days[_days.length - 1] || '';
+  const _need = new Date(Date.now() + 550 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+  ok('the holiday table still reaches ~18 months out (an unlisted holiday grades a free HIT)',
+    _days.length > 0 && _last >= _need,
+    'MKT_HOLIDAYS has ' + _days.length + ' entries ending ' + _last + '; must reach ' + _need +
+    ' -- extend it, or move to a rule-based calendar. See predictions.js:79-85.');
+
   console.log('\n' + (failures ? 'FAILED ' + failures + '/' + checks : 'OK ' + checks + '/' + checks) + '\n');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

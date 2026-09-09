@@ -43,6 +43,9 @@ const RULES =
   '- the overall bias itself, in any wording. That is already scored elsewhere.\n' +
   '- ranges, expected moves, or levels merely described as important\n' +
   '- anything without both a number and a time by which it resolves\n' +
+  '- any deadline you cannot state EXACTLY with the four horizons above. A mid-session time on\n' +
+  '  a FUTURE day ("by lunch tomorrow", "midday Thursday") has no horizon here. Do NOT round it\n' +
+  '  to tomorrow_open or tomorrow_close - that grades the call against a deadline it never made.\n' +
   'A wrong yes puts a claim on your record that you never made. A wrong no costs nothing.';
 
 async function catchReadPrediction(read, ctx) {

@@ -1387,6 +1387,13 @@ async function _promotePublicLevels(state) {
         if (Object.keys(spots).length) {
           const caught = await require('./_lib/read-predictions.js').catchReadPrediction(readObj, { spots });
           if (caught && caught.has) console.log('[read-prediction] caught', caught.symbol, caught.kind, caught.id);
+          /* LOG THE REFUSAL TOO (2026-09-08). Only the success branch logged, so "ran and correctly
+             found no prediction" and "never ran at all" produced identical output: silence. The
+             function already returns a reason on every path, so this costs one line and makes a
+             silent failure distinguishable from a quiet day. The first version of this feature read
+             a KV key that did not exist and would have shipped, passed review and done nothing --
+             nothing in the logging would have surfaced it. */
+          else console.log('[read-prediction] none:', (caught && caught.why) || 'no result');
         }
       } catch (_e) {}
       // maintain a lightweight index (title + excerpt + publishAfter) so the archive list is one fetch, not N.

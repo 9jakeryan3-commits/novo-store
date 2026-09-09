@@ -60,7 +60,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="/journal/blog.css?v=01abb7e3">
+<link rel="stylesheet" href="/journal/blog.css?v=a066235a">
 <style>
 /* ── BUTTONS CARRY NO OUTLINE, AND THAT NEEDS SAYING EXPLICITLY (2026-09-08) ────────────────
    Jake: "zero boarder around then you should only see the text NO BORDER its now massive silver
@@ -3160,13 +3160,22 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     return { label: label, group: 'Jump to', run: function () {
       var el = document.querySelector(sel);
       if (!el || !el.scrollIntoView) return;
-      /* ⚠ ON A PHONE THESE TARGETS NOW LIVE ON DIFFERENT TABS, and scrollIntoView on a
-         display:none element does nothing whatsoever — the command would light up, run, and go
-         nowhere. Reveal the tab first. Gated on the bar actually being on screen rather than on a
-         width, so nothing about the desktop palette changes. */
-      var bar = document.getElementById('mobile-tabs');
-      if (bar && getComputedStyle(bar).display !== 'none' && window.lvMobTab) {
-        window.lvMobTab(el.closest('.lv-read') ? 'read' : 'map');
+      /* ⚠ THESE TARGETS LIVE ON DIFFERENT TABS AT EVERY WIDTH, and scrollIntoView on a
+         display:none element does nothing whatsoever — the command lights up, runs, and goes
+         nowhere. Reveal the owning view first.
+         2026-09-08: this used to be gated on #mobile-tabs being on screen, which was correct when
+         only the phone had tabs. One-view-at-a-time was then hoisted to EVERY width and a desktop
+         section bar landed, so on desktop the gate was false, the bare scrollIntoView branch ran,
+         and every target living off the map view was unreachable from the palette. lvMobTab is not
+         width-scoped — it sets data-mtab and the bar follows — so the reveal is correct at all
+         widths and the gate is simply wrong now. */
+      if (window.lvMobTab) {
+        /* Which view OWNS the target. The Line is authored inside .lv-bottom but belongs to the
+           alerts view — see the :not(.b-line) carve-out in the alerts filter. */
+        var view = el.closest('.lv-read') ? 'read'
+                 : el.closest('.b-line')  ? 'alerts'
+                 : 'map';
+        window.lvMobTab(view);
         setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
         return;
       }
@@ -3194,7 +3203,6 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     jump('.gh-card', 'Gamma heat'),
     jump('#prof-wrap', 'Volume profile'),
     jump('#flow-card', 'Options flow'),
-    jump('#anlg-card', 'Analogues'),
     jump('#mkt-ribbon', 'Market ribbon'),
     { label: 'Settings', group: 'Page', run: function () { window.lvSettings(1); } },
     { label: 'Clear the conversation', group: 'Dr. NoVo',
