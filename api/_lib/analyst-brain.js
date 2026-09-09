@@ -298,12 +298,29 @@ function recordClaimAudit(answer, contents, marketJson) {
     return false;
   };
   const flagged = [];
-  for (const sen of String(answer).split(/(?<=[.!?])\s+/)) {
-    if (!ATTRIB_RE.test(sen)) continue;
-    for (const v of _numsIn(sen)) {
+  /* PARAGRAPH SCOPE, NOT SENTENCE SCOPE (2026-09-09, Jake's go).
+     This ran per SENTENCE: skip any sentence without ATTRIB_RE, then check only the numbers inside
+     that same sentence. It is blind to ordinary paragraph structure, and that is exactly how it
+     failed. Asked how a neutral is graded, NoVo attributed in sentence one ("in my record") and put
+     invented figures in sentence three -- "directional drift cannot exceed 0.15% to 0.20%", a
+     mechanism that does not exist -- so nothing was ever checked. He gave two different answers to
+     the same question in one session, contradicting each other AND the published /track-record
+     page, with recordGuard null both times.
+     A paragraph is the unit a claim is actually made in: if any sentence in it attributes to the
+     record, every number in it is speaking about the record.
+     THE ASYMMETRY FAVOURS WIDENING -- a flag costs one revise call and fails open, so over-flagging
+     is cheap. Under-flagging is what put an invented grading method in front of a subscriber. */
+  for (const para of String(answer).split(/\n\s*\n/)) {
+    if (!ATTRIB_RE.test(para)) continue;
+    for (const v of _numsIn(para)) {
       if (Number.isInteger(v) && v >= 1900 && v <= 2100) continue;   // years
       if (Number.isInteger(v) && v < 10) continue;                    // "4 rules", 0DTE scraps
-      if (!ok(v)) flagged.push({ value: v, sentence: sen.trim().slice(0, 220) });
+      if (!ok(v)) {
+        // Report the SENTENCE the number sits in, not the paragraph -- the revise prompt has to
+        // point at the claim, and a paragraph of context buries it.
+        const sen = para.split(/(?<=[.!?])\s+/).find((x) => _numsIn(x).has(v)) || para;
+        flagged.push({ value: v, sentence: sen.trim().slice(0, 220) });
+      }
     }
   }
   return flagged;
