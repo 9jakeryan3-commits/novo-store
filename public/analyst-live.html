@@ -1970,6 +1970,20 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
        children rather than moving markup keeps the desktop pair intact. */
     .lv-grid-top .bias-col { order: -1; }
     .lv-grid-top #strip { order: 0; }
+
+    /* LINE BREAKS (Jake, 2026-09-09, red X per hairline to remove, one mark to add).
+       Every section rule on this page is `.lv-card { border-top }`, so removing one means turning
+       that card's top border off at this breakpoint only - the desktop grid still needs them.
+       OFF: the ticker picker, the chart card, the bias block, and the session heat-map. Those four
+       sit in runs that read as one thought - the gauge and the tickers, the chart and its profile,
+       the bias and the map beneath it - and a rule between them was cutting a block in half.
+       ON: under the bias block, which had no separator once the bias moved down here on 09-09;
+       the bias and the gamma profile are two different subjects and ran together without one. */
+    .lv-grid-top #strip,
+    .lv-card:has(> #chart-h),
+    .lv-grid-top .bias-col, .lv-card:has(> .bias-col),
+    .lv-card.gh-card { border-top: 0; }
+    .bias-col { border-bottom: 1px solid var(--bdr2); padding-bottom: 16px; margin-bottom: 4px; }
     .mob-tab[data-mtab="digest"] { order: 4; }
     .mob-tab[data-mtab="alerts"] { order: 5; }
     .mob-tab[data-mtab="read"], .mob-tab[data-mtab="predict"] { display: none !important; }
@@ -2082,21 +2096,40 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     var chartCard = head.closest('.lv-card');
     if (!chartCard) return;
     var home = fear.parentElement, after = fear.nextElementSibling;
+    /* THEY SWAP (Jake, 2026-09-09: "swap the fear guage and Dr. Novo's bias positions", mobile).
+       The bias takes the slot under the chart that the gauge held since 09-07; the gauge goes up
+       to the top grid where the bias was, above the ticker picker.
+       ONE FUNCTION OWNS BOTH NODES ON PURPOSE. The first version of this was a SECOND mover added
+       alongside the one below, and the two fought over #d-fear on every resize - the bias landed
+       between the chart and the gamma profile because whichever ran last won. A node with two
+       owners has no defined position. If another placement rule is ever needed here, extend this
+       function; do not add a neighbour to it. */
+    var biasCol = document.querySelector('.lv-grid-top .bias-col');
+    var strip = document.getElementById('strip');
+    var biasHome = biasCol ? biasCol.parentElement : null;
+    var biasAfter = biasCol ? biasCol.nextElementSibling : null;
     function place(){
       var phone = window.matchMedia('(max-width: 768px)').matches;
+      /* Before the gamma profile, not at the end of the card - appending put it under the
+         profile, which is one block too low. The profile heading is the marker. */
+      var gp = chartCard.querySelectorAll('h2')[1];
       if (phone) {
-        /* INSIDE the chart card, not after it. As a sibling it is a GRID item, and the grid's
-           order rules re-sorted it above the chart - measured at y=353 with the chart at y=928.
-           Appending it to the card puts it under the chart itself, which is what was asked for
-           and what no ordering rule can undo. */
-        /* Before the gamma profile, not at the end of the card - appending put it under the
-           profile, which is one block too low. The profile heading is the marker. */
-        var gp = chartCard.querySelectorAll('h2')[1];
-        if (gp) { if (fear.nextElementSibling !== gp) chartCard.insertBefore(fear, gp); }
-        else if (fear.parentElement !== chartCard) chartCard.appendChild(fear);
-      } else if (fear.parentElement !== home) {
-        if (after && after.parentElement === home) home.insertBefore(fear, after);
-        else home.appendChild(fear);
+        /* INSIDE the chart card, not after it. As a sibling it is a GRID item and the grid's
+           order rules re-sort it above the chart - measured at y=353 with the chart at y=928. */
+        if (biasCol) {
+          if (gp) { if (biasCol.nextElementSibling !== gp) chartCard.insertBefore(biasCol, gp); }
+          else if (biasCol.parentElement !== chartCard) chartCard.appendChild(biasCol);
+        }
+        if (strip && fear.nextElementSibling !== strip) strip.parentElement.insertBefore(fear, strip);
+      } else {
+        if (fear.parentElement !== home) {
+          if (after && after.parentElement === home) home.insertBefore(fear, after);
+          else home.appendChild(fear);
+        }
+        if (biasCol && biasHome && biasCol.parentElement !== biasHome) {
+          if (biasAfter && biasAfter.parentElement === biasHome) biasHome.insertBefore(biasCol, biasAfter);
+          else biasHome.appendChild(biasCol);
+        }
       }
     }
     place();
@@ -2276,42 +2309,6 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     if (m.contains(e.target) || (e.target.closest && e.target.closest('#mob-more'))) return;
     window.toggleMoreMenu(false);
   });
-
-  /* FEAR GAUGE AND THE BIAS SWAP PLACES ON A PHONE (Jake, 2026-09-09: "on the analyst dashboard
-     mobile view. swap the fear guage and Dr. Novo's bias positions").
-     WHY THIS IS JS AND NOT `order:`, which is how every other mobile reorder on this page is done:
-     `order` only sorts SIBLINGS. #d-fear lives inside the dealer-positioning card in the lower
-     .lv-grid; .bias-col lives in .lv-grid-top. Different parents, different grids, so no amount of
-     ordering reaches across them. `display:contents` on the wrappers would flatten them into one
-     context and is exactly the trap recorded in the store - it re-lays-out every child and breaks
-     hardest of all the display values - so it is not used here.
-     Desktop is untouched: the nodes only move below the breakpoint and are put back above it, at
-     the anchors captured before the first move. Moving the ELEMENTS rather than cloning keeps one
-     #d-fear and one #bias-card in the document, so every writer that targets them by id keeps
-     working and there is no second copy to drift. */
-  (function(){
-    var mq = window.matchMedia('(max-width: 768px)');
-    var fear = document.getElementById('d-fear');
-    var biasCol = document.querySelector('.lv-grid-top .bias-col');
-    var strip = document.getElementById('strip');
-    if (!fear || !biasCol || !strip) return;            // layout changed - do nothing rather than guess
-    var fearHome = { parent: fear.parentNode, next: fear.nextSibling };
-    var biasHome = { parent: biasCol.parentNode, next: biasCol.nextSibling };
-    var swapped = false;
-    function apply(){
-      if (mq.matches && !swapped) {
-        fearHome.parent.insertBefore(biasCol, fear);    // bias takes the fear gauge's slot
-        biasHome.parent.insertBefore(fear, strip);      // fear takes the bias slot, above the ticker picker
-        swapped = true;
-      } else if (!mq.matches && swapped) {
-        biasHome.parent.insertBefore(biasCol, biasHome.next);
-        fearHome.parent.insertBefore(fear, fearHome.next);
-        swapped = false;
-      }
-    }
-    apply();
-    if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);
-  })();
 
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
