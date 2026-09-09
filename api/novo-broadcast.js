@@ -171,21 +171,45 @@ async function publicGrounding() {
   // calib:misses is a LIST (lpush/ltrim -> lrange). Every read isolated so one bad key
   // degrades one block instead of 500ing the endpoint.
   const g = (p) => p.catch(() => null);
-  // PUBLIC SLOT ONLY — analyst:live_levels is DELIBERATELY NOT READ HERE (Einstein's B-3,
-  // 2026-09-05). This endpoint used to prefer the paid live mirror and fall back to the public
-  // slot, while the file header promised "only public groundings" — a structural guarantee
-  // asserted where only a prompt instruction existed, on a surface whose output is PUBLIC.
-  // Jake's standing rule decides it: the public page SELLS the moat, it isn't the moat, and
-  // the store's own publisher delays the public slot 15-30min and strips net GEX / gravity /
-  // ATM IV precisely so undelayed dealer figures never reach a free reader. A StockTwits post
-  // is a free reader. The header's claim is now true by construction, not by instruction.
-  const [rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
-    g(r.get('public:levels')), g(r.get('analyst:context')),
+  /* LIVE LEVELS, PROJECTED THROUGH THE PUBLIC FIELD SET (Jake, 2026-09-09).
+     This read `public:levels` only — the 15-30 minute delayed slot — and the boundary note here
+     said that if it ever moved, it moved deliberately. Jake moved it: "I want live the moment I
+     hit generate ... whoever made posts 15mins stale is fired thats a terrible idea and makes
+     posts literally useless". He writes these on real accounts; a post that opens by admitting
+     its own numbers are stale is worse than no post.
+     THE LEAK GUARD IS KEPT, AND IT IS NOW A PROJECTION RATHER THAN A DIFFERENT SOURCE. What made
+     the public slot safe was never its staleness — it was the FIELD SET. `analyst:live_levels`
+     carries netGex, gravity, atmIV, netVanna and netCharm1d; those are the paid product and they
+     must not reach a StockTwits post. So the live mirror is mapped through exactly the whitelist
+     `_publicLevels` uses in analyst-publish.js: ticker, spot, flip, callWall, putWall,
+     expectedMove, regime. Same fields the anonymous site already gives away, at live freshness.
+     A new field appearing upstream cannot leak here, because this names what it keeps rather than
+     what it drops — a whitelist, not a blacklist. If that list ever needs to grow, it is a
+     pricing decision, not a refactor. */
+  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
+    g(r.get('analyst:live_levels')), g(r.get('public:levels')), g(r.get('analyst:context')),
     g(r.get('crypto:map:live')), g(r.get('novo:track_record')),
     g(r.hgetall('calib:cells')), g(r.lrange('calib:misses', 0, 4)),
   ]);
   const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
-  const live = J(rawPub), liveSrc = live ? 'delayed-public' : 'none';
+  const PUBLIC_FIELDS = (snap) => {
+    if (!snap || !Array.isArray(snap.tickers)) return null;
+    const num = (v) => { const n = Number(v); return Number.isFinite(n) && n !== 0 ? n : null; };
+    const tickers = snap.tickers.map((t) => ({
+      ticker: String((t && t.ticker) || '').toUpperCase(),
+      spot: num(t && t.spot),
+      flip: num(t && t.flip),
+      callWall: num(t && (t.call_wall != null ? t.call_wall : t.callWall)),
+      putWall: num(t && (t.put_wall != null ? t.put_wall : t.putWall)),
+      expectedMove: num(t && (t.em_daily != null ? t.em_daily
+                        : t.expected_move != null ? t.expected_move : t.expectedMove)),
+      regime: (t && t.regime) ? String(t.regime) : null,
+    })).filter((t) => t.ticker);
+    return tickers.length ? { asof: snap.asof || null, session: snap.session || null, tickers } : null;
+  };
+  const liveMirror = PUBLIC_FIELDS(J(rawLive));
+  const live = liveMirror || J(rawPub);
+  const liveSrc = liveMirror ? 'live' : (live ? 'delayed-public' : 'none');
   const ctx = J(rawCtx);
   const cs = J(rawCs);
   let cryptoInv = null;
@@ -236,10 +260,22 @@ module.exports = async (req, res) => {
     const marketJson = JSON.stringify({ live: g.live, history: g.ctx, crypto: g.cryptoInv,
                                         record: g.trackRec });
 
+    /* STALE WHILE THE MARKET IS OPEN IS A REFUSAL, NOT A CAVEAT (Jake, 2026-09-09).
+       This used to hand the model the delayed slot and tell it to SAY the levels were delayed.
+       The output was honest and useless: a post for a real account that opens by admitting its
+       own numbers are 15-30 minutes old. "do not give me delayed crap unless its in the
+       historical sense."
+       So: live is required while the session is open. With the market CLOSED the delayed slot is
+       fine and the framing is already past-tense - that IS the historical sense, and refusing
+       overnight would break the one time stale data is the correct data. */
+    if (g.liveSrc !== 'live' && String((g.live && g.live.session) || '').toLowerCase() === 'open') {
+      return res.status(503).json({
+        error: "My live dealer read is not there right now, and I will not write a live post off " +
+               "the delayed slot. Try again in a minute." });
+    }
     const stale = g.liveSrc === 'delayed-public'
-      ? 'THE DEALER NUMBERS BELOW ARE THE DELAYED PUBLIC SLOT — they run 15-30 minutes behind ' +
-        'and carry no net GEX, gravity or ATM IV. If you quote a level, say it is delayed; ' +
-        'never substitute a figure the data does not carry.\n\n'
+      ? 'THE DEALER NUMBERS BELOW ARE THE MOST RECENT SESSION, not a live tape — the market is ' +
+        'closed. Write in the past tense about that session; do not describe it as happening now.\n\n'
       : '';
 
     let now = '';
