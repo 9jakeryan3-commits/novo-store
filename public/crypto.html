@@ -55,20 +55,6 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 <script>if(!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('reveal-ready');}</script>
 
 <style>
-  /* THE CTAs ARE LIT WORDS, NOT SLABS. currentColor on purpose: each CTA keeps its own accent
-     -- green Subscribe, amber yearly, cyan Analyst, purple Crypto -- so one rule glows all of
-     them correctly instead of needing a hand-picked shadow colour per button. Not applied to
-     .nvc-btn or .hero-ask, which are chrome and keep their own treatment. */
-  .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary, .btn-crypto {
-    text-shadow: 0 0 9px currentColor, 0 0 24px currentColor;
-    transition: text-shadow .18s ease, transform .15s ease;
-  }
-  .price-btn:hover, .price-btn-secondary:hover, .btn-primary:hover, .btn-secondary:hover, .btn-crypto:hover {
-    text-shadow: 0 0 11px currentColor, 0 0 32px currentColor;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary, .btn-crypto { transition: none; }
-  }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

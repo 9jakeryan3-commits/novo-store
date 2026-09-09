@@ -656,3 +656,38 @@ nav { position: relative; }
 .nav-menu-btn:hover,
 .nav-portal:hover,
 .nav-buy:hover { background: none !important; box-shadow: none !important; }
+
+/* ── THE CTA TREATMENT ───────────────────────────────────────────────────────────────────────
+   Jake, 2026-09-09: "look at the buttons in the hero on the homepage those are it text link
+   pulsing gloww fucking match that". The hero's .analyst-glow / .trader-glow / .crypto-glow are
+   the reference: a 2.6s ease-in-out infinite pulse in the product's own accent. This is that,
+   for a text link rather than a box -- text-shadow instead of box-shadow.
+
+   DEFINED HERE, IN A SHARED STYLESHEET, DELIBERATELY. polish.css is linked by every non-journal
+   page and blog.css by every journal page, so between them they reach the whole estate. Three
+   passes on 2026-09-09 each re-invented a weaker static glow for whichever class list that pass
+   knew about, which is how the site ended up half-lit. Change it here, once.
+
+   currentColor is load-bearing: each CTA pulses in its own colour -- green Subscribe, amber
+   yearly, cyan Analyst, purple Crypto, indigo Discord -- so adding a new accent needs no new
+   rule. Never hand-pick a shadow colour per button here.
+
+   NOT in this list, on purpose: .hero-ask (the Dr. NoVo pill), .nvc-btn (Support), .skip-link,
+   the Monthly/Annual toggles and the nav. Jake: "this is not a fill wipe i point out buttons."
+   Keep the timing in step with the hero's @keyframes analystGlow if either is retuned. */
+@keyframes ctaPulse {
+  0%, 100% { text-shadow: 0 0 6px currentColor, 0 0 16px currentColor; }
+  50%      { text-shadow: 0 0 11px currentColor, 0 0 30px currentColor; }
+}
+.cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
+.btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
+.btn-crypto {
+  background: none;
+  border: 0;
+  animation: ctaPulse 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-lit, .btn-p, .btn-s, .btn-green, .btn-cyan, .btn-purple, .btn-notes,
+.btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
+.btn-crypto { animation: none; text-shadow: 0 0 9px currentColor, 0 0 22px currentColor; }
+}
