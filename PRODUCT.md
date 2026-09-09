@@ -149,6 +149,19 @@ layer underneath. Nothing in this section appears on any free page.
 - Every hourly audit and desk note is kept and scored. NoVo writes each read with the session's
   earlier calls and its own record in hand.
 
+**The Eye** — shipped 2026-09-06/07, live on both the Analyst and Crypto maps.
+- Hourly scan across every stream the corpus reaches, equities and crypto. Each feature is tested
+  both for being unusual in the 20 minutes BEFORE an abrupt or paying move **and** for how often it
+  is unusual when nothing follows. A detector that only inspects pre-move windows cannot fail; this
+  one is built so it can come back empty.
+- **Forward register** — a rule is an executable predicate (feature, op, threshold, direction,
+  horizon) registered *before* the data that judges it exists. Free-text operators, undirected
+  calls and thresholds like "unusually high" are refused, with the reason.
+- Registered rules are evaluated every pass and only off rows fresher than 20 minutes; a fire
+  becomes a dated prediction in the existing private equities spine, not a second one.
+- Surfaces to members as the **Live Reads** tab: descriptive, measured, ungraded, each reading
+  carrying its measurement, its percentile and the sample behind it.
+
 **Delivery**
 - Installable PWA + **push alerts** (The Line and each session's read), toggleable on the dashboard
 - Private Analyst Discord — the reads channel + the 'Trader Floor'
@@ -264,7 +277,8 @@ Two halves, and the copy should never describe it as one brokerage's product lis
   destroys and therefore something no competitor can print.
 
 **Free, and not a tier change:** `/api/mcp` exposes the ten free `/developers` endpoints as an MCP
-server — nine read-only tools, no key. Paid surfaces are absent from it rather than gated-and-erroring.
+server — eleven tools, no key: the ten read-only endpoints plus `ask_novo`, which reasons
+rather than reads and is rate-limited per IP. Verified against the live `tools/list`, not the doc. Paid surfaces are absent from it rather than gated-and-erroring.
 
 **Claims to avoid** (all were on the site and all are refutable): "every book that exists",
 "the gamma tools stop at four coins", and any competitor price band quoted as the market — one
