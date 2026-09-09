@@ -582,3 +582,41 @@ nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
 .btn-secondary.crypto-glow:hover,
 .btn-secondary.analyst-glow:hover,
 .btn-secondary.trader-glow:hover { border-color: transparent !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   THE GLOW MOVES FROM THE BOX TO THE WORDS (2026-09-08)
+
+   Jake: "I like the glow but dont like how you still see the box.."
+
+   Removing the border and the fill did not remove the rectangle, because the GLOW was drawing it.
+   box-shadow traces the element's border-box, so a soft coloured ring around a dark interior
+   reads as a box whether or not anything is filling it - the eye takes the halo's inner edge as
+   the shape. There was nothing left to delete; the light was in the wrong place.
+
+   So the glow becomes a text-shadow on the label. Same colour, same pulse, no geometry: the words
+   are the only thing lit, so there is no rectangle for the halo to outline. This is what "a
+   button is a word you click" looks like when the word still needs to stand out.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+.btn-secondary.crypto-glow,
+.btn-secondary.analyst-glow,
+.btn-secondary.trader-glow {
+  box-shadow: none !important;
+  animation: none !important;
+}
+.btn-secondary.crypto-glow  { animation: cryptoTextGlow  2.6s ease-in-out infinite !important; }
+.btn-secondary.analyst-glow { animation: analystTextGlow 2.6s ease-in-out infinite !important; }
+.btn-secondary.trader-glow  { animation: traderTextGlow  2.6s ease-in-out infinite !important; }
+
+@keyframes cryptoTextGlow  { 0%,100% { text-shadow: 0 0 12px rgba(167,139,250,.40); }
+                             50%     { text-shadow: 0 0 24px rgba(167,139,250,.85); } }
+@keyframes analystTextGlow { 0%,100% { text-shadow: 0 0 12px rgba(34,211,238,.40); }
+                             50%     { text-shadow: 0 0 24px rgba(34,211,238,.85); } }
+@keyframes traderTextGlow  { 0%,100% { text-shadow: 0 0 12px rgba(16,185,129,.40); }
+                             50%     { text-shadow: 0 0 24px rgba(16,185,129,.85); } }
+
+/* Someone who has asked for less motion gets the glow, not the pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-secondary.crypto-glow  { animation: none !important; text-shadow: 0 0 20px rgba(167,139,250,.7); }
+  .btn-secondary.analyst-glow { animation: none !important; text-shadow: 0 0 20px rgba(34,211,238,.7); }
+  .btn-secondary.trader-glow  { animation: none !important; text-shadow: 0 0 20px rgba(16,185,129,.7); }
+}
