@@ -499,3 +499,33 @@ nav.is-scrolled {
      separate step rather than more of the hero. */
   .hero-cta { margin-top: 52px; padding-top: 38px; border-top: 1px solid var(--bdr); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   THE HEADER LOSES ITS LINES (2026-09-08)
+
+   Jake, on a phone screenshot: "remove the borders around those 3 buttons, remove that break
+   line above the search bar, remove the vertical lines in between the tickers in the strip and
+   remove the word markets so you can see the data better."
+
+   This is the standing rule reaching the last surface that had not had it applied - hairlines
+   only, and a button is a word you click. The header was the densest remaining stack of boxes on
+   the site: three outlined buttons, a rule under the nav row, a rule under the search row, and a
+   vertical rule between every ticker.
+
+   Backgrounds and the Plans glow STAY. He asked for the borders, not for the buttons to stop
+   being findable, and Plans is the page's primary call to action.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+.nav-menu-btn,
+.nav-portal,
+.nav-buy { border: 0 !important; }
+
+/* The ticker reads as one continuous tape instead of a row of cells. The label keeps its dot -
+   that is a live indicator and carries state - but loses the rule that fenced it off. */
+.ticker-tag,
+.ticker .tick { border-right: 0 !important; }
+
+/* ⚠ !important IS LOAD-BEARING HERE. site-search.js injects its stylesheet at RUNTIME, so it
+   lands after this file and wins on source order at equal specificity. The rule it sets is
+   `nav .nvs-ss-wrap{border-top:1px solid ...}` - two selectors deep, so this matches it and takes
+   the override. */
+nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
