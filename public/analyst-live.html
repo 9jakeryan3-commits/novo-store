@@ -2277,6 +2277,42 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     window.toggleMoreMenu(false);
   });
 
+  /* FEAR GAUGE AND THE BIAS SWAP PLACES ON A PHONE (Jake, 2026-09-09: "on the analyst dashboard
+     mobile view. swap the fear guage and Dr. Novo's bias positions").
+     WHY THIS IS JS AND NOT `order:`, which is how every other mobile reorder on this page is done:
+     `order` only sorts SIBLINGS. #d-fear lives inside the dealer-positioning card in the lower
+     .lv-grid; .bias-col lives in .lv-grid-top. Different parents, different grids, so no amount of
+     ordering reaches across them. `display:contents` on the wrappers would flatten them into one
+     context and is exactly the trap recorded in the store - it re-lays-out every child and breaks
+     hardest of all the display values - so it is not used here.
+     Desktop is untouched: the nodes only move below the breakpoint and are put back above it, at
+     the anchors captured before the first move. Moving the ELEMENTS rather than cloning keeps one
+     #d-fear and one #bias-card in the document, so every writer that targets them by id keeps
+     working and there is no second copy to drift. */
+  (function(){
+    var mq = window.matchMedia('(max-width: 768px)');
+    var fear = document.getElementById('d-fear');
+    var biasCol = document.querySelector('.lv-grid-top .bias-col');
+    var strip = document.getElementById('strip');
+    if (!fear || !biasCol || !strip) return;            // layout changed - do nothing rather than guess
+    var fearHome = { parent: fear.parentNode, next: fear.nextSibling };
+    var biasHome = { parent: biasCol.parentNode, next: biasCol.nextSibling };
+    var swapped = false;
+    function apply(){
+      if (mq.matches && !swapped) {
+        fearHome.parent.insertBefore(biasCol, fear);    // bias takes the fear gauge's slot
+        biasHome.parent.insertBefore(fear, strip);      // fear takes the bias slot, above the ticker picker
+        swapped = true;
+      } else if (!mq.matches && swapped) {
+        biasHome.parent.insertBefore(biasCol, biasHome.next);
+        fearHome.parent.insertBefore(fear, fearHome.next);
+        swapped = false;
+      }
+    }
+    apply();
+    if (mq.addEventListener) mq.addEventListener('change', apply); else mq.addListener(apply);
+  })();
+
   window.lvMobTab = function(which){
     var from = document.body.getAttribute('data-mtab') || 'map';
     /* Not while the chat is open: html.novo-ask-lock sets overflow:hidden, so scrollY reads 0 and
