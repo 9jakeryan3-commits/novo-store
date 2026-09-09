@@ -130,6 +130,13 @@ module.exports = async (req, res) => {
     try { await require("./_lib/predictions.js").evaluateCryptoPredictions(b); } catch (_) {}
     // NoVo's own crypto calls: a new reading with demonstrated edge becomes a recorded prediction.
     try { await require("./_lib/predictions.js").selectCryptoPredictions(b); } catch (_) {}
+    /* DR. NOVO HIMSELF, on the WHOLE snapshot — not just the readings that fired.
+       Jake, 2026-09-09: "meanwhile Dr. NoVo is watching all the data to make predictions not
+       just those ALL data points". The line above is the edge GATE (correct as it stands, per
+       Jake) which promotes an alert that has earned its way up. This line is the analyst
+       reading the book and deciding for himself. Fire-and-forget and soft-failing: a declined
+       pass, a model error or a timeout must never cost the snapshot ingest. */
+    try { await require("./_lib/novo-calls.js").novoCryptoCalls(b); } catch (_) {}
     // Dr. NoVo's Alerts: chain tickets whose rule has proven edge, surfaced; the firehose stays put.
     try { await require("./_lib/predictions.js").curateChainFires(b); } catch (_) {}
     const shape = {};

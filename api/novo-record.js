@@ -21,7 +21,7 @@
  * ⚠ THE MEMBER'S OWN PREDICTIONS ARE EXCLUDED at the source (novoRecord skips source "user").
  * Those are other people's calls; counting them would put them in his grade.
  */
-const { novoRecord } = require("./_lib/predictions.js");
+const { novoRecord, migrateGateRows } = require("./_lib/predictions.js");
 
 module.exports = async (req, res) => {
   const want = process.env.OPS_SECRET || process.env.ANALYST_PUBLISH_SECRET || "";
@@ -36,7 +36,13 @@ module.exports = async (req, res) => {
   if (!ok) return res.status(401).json({ error: "unauthorized" });
 
   try {
+    /* ?migrate=1 re-attributes the rows the edge gate minted in his name (see migrateGateRows).
+       Behind the same secret as the read, and idempotent, so a repeat is a no-op rather than a
+       second pass over the same rows. */
+    let migrated = null;
+    if (String(req.query && req.query.migrate) === "1") migrated = await migrateGateRows();
     const rec = await novoRecord();
+    if (migrated) rec.migrated = migrated;
     res.setHeader("cache-control", "no-store");
     return res.status(200).json({ ok: true, ...rec, generated: Date.now() });
   } catch (e) {

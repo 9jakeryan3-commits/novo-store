@@ -100,7 +100,7 @@ const TALLY = "pred:tally";
 async function _remember(r, p) {
   if (!r || !p) return;
   try {
-    const src = p.source === "user" ? "user" : (p.source || "conversation");
+    const src = (p.source === "user" || p.source === "engine") ? p.source : (p.source || "conversation");
     const hit = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
     await r.rpush(ARCH(Date.now()), JSON.stringify(p));       // no TTL: this is the record
     if (p.status === "void" || hit === null) {
@@ -603,7 +603,16 @@ async function onEquityFire(fire) {
   const rec = fire.record || {};
   const spot = Number(fire.spot_at);
   const hm = Number(fire.horizon_min) >= 5 ? Number(fire.horizon_min) : 60;
-  const side = String(fire.direction || "").toLowerCase() === "up" ? "up" : "down";
+  /* Same fallback shape as the crypto path had: anything that is not literally "up" became a
+     DOWN call, including a missing field. The engine constrains it today
+     (equity_signals: CHECK(direction IN ('up','down'))), so this has never fired -- but a guard
+     that only holds because a different repo has a CHECK constraint is not a guard. Reject
+     instead of defaulting. */
+  const dirRaw = String(fire.direction || "").trim().toLowerCase();
+  if (dirRaw !== "up" && dirRaw !== "down") {
+    return { surfaced: false, predicted: false, why: "no direction on the fire" };
+  }
+  const side = dirRaw;
   const n = Number(rec.resolutions) || 0;
   const hit = rec.hit_pct == null ? null : Number(rec.hit_pct);
   const base = rec.base_hit_pct == null ? null : Number(rec.base_hit_pct);
@@ -627,17 +636,9 @@ async function onEquityFire(fire) {
   }
 
   const receipts = hit + "% over " + n + " resolutions vs " + base + "% across the book";
-  let predicted = false;
-  if (isFinite(spot) && spot > 0) {
-    const out = await makePrediction({
-      source: "novo", asset_class: "equity", symbol: fire.symbol, kind: "direction", side,
-      spot_at: spot, horizon_min: hm,
-      thesis: fire.symbol + " " + side + " within "
-        + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m") + " — " + (fire.reading || fire.rule),
-      basis: fire.rule + " · " + receipts,
-    });
-    predicted = !!(out && out.ok);
-  }
+  /* Same correction as the crypto gate above: this promotes an earned alert, it does not
+     author a prediction for him. See _lib/novo-calls.js for the calls that are actually his. */
+  const predicted = false;
   await appendNovoFire({
     asset_class: "equity", symbol: fire.symbol, kind: fire.rule,
     title: fire.symbol + " " + side + " — " + (fire.reading || fire.rule),
@@ -657,6 +658,11 @@ async function onEquityFire(fire) {
 //   * edge >= 5pp     -- hit_rate minus that side's own base share of outcomes
 //   * the reading is fresh (< 12 min) and not already taken (KV seen-key, 7d)
 // makePrediction's MAX_OPEN caps the flood; one reading = at most one prediction, ever.
+/* Kinds whose CLAIM is not directional. A base rate can still be computed for them -- and should
+   be, on their own terms -- but they must never be turned into an up/down call.
+   cost_anomaly: the claim is that a wide round trip is transient (signals.py:503). */
+const NO_DIRECTION = new Set(["cost_anomaly"]);
+
 async function selectCryptoPredictions(snap) {
   const r = kv();
   if (!r || !snap) return { made: 0 };
@@ -676,7 +682,24 @@ async function selectCryptoPredictions(snap) {
       const nUp = rate.n_up || 0, nDn = rate.n_down || 0;
       const total = nUp + nDn;
       if (!total) continue;
-      const side = (rate.avg_move != null && rate.avg_move < 0) ? "down" : "up";
+      /* ⚠ NO DIRECTION IN THE SIGNAL MEANS NO CALL. This line used to read
+             const side = (rate.avg_move != null && rate.avg_move < 0) ? "down" : "up";
+         so a NULL avg_move silently became a bullish call. Measured 2026-09-09: 94 of 94 graded
+         alerts were "up", every one from cost_anomaly, hitting 34%. That is not an analyst with a
+         bullish lean, it is a constant.
+
+         cost_anomaly has no directional content to begin with. signals.py:503 states its claim:
+         "an unusually wide round trip is TRANSIENT, so it is right when the cost comes back in."
+         That is a spread claim. Forcing it into a direction prediction and grading it as one is
+         the grading fault Jake's rule covers: "if something doesnt make sense grading or cant get
+         even a decent score its grading is pulled."
+
+         So: the side must be EARNED from a signed avg_move. Absent or flat, the fire stays a
+         public reading and makes no prediction. NO_DIRECTION lists kinds that can never earn one
+         regardless of what the base rate reports. */
+      if (NO_DIRECTION.has(f.kind)) continue;
+      if (rate.avg_move == null || !isFinite(Number(rate.avg_move)) || Number(rate.avg_move) === 0) continue;
+      const side = Number(rate.avg_move) < 0 ? "down" : "up";
       const baseShare = (side === "up" ? nUp : nDn) / total * 100;
       const edge = rate.hit_rate - baseShare;
       if (!(edge >= 5)) continue;                                       // no edge, no call
@@ -689,35 +712,66 @@ async function selectCryptoPredictions(snap) {
       const spot = coin && Number(coin.price || (coin.true_cost && coin.true_cost.price));
       if (!isFinite(spot) || spot <= 0) continue;
       const hm = Number(f.horizon_min) >= 5 ? Number(f.horizon_min) : 240;
-      const out = await makePrediction({
-        source: "novo", asset_class: "crypto", symbol: sym, kind: "direction", side,
-        spot_at: spot, horizon_min: hm,
-        /* ⚠ THE CALL LEADS, THE READING FOLLOWS (Jake, 2026-09-07: "his prediction on not just the
-           same raw alerts the crypto public already has... his predictions are direct calls").
-           The public reading is descriptive — "funding is -4.7 sigma, shorts paying". Copying that
-           verbatim made his prediction row read like the public alert wearing a new label. His
-           thesis now states the directed, falsifiable claim first, in his own voice, with the
-           reading as the why. */
-        thesis: (sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m")
-          + " — " + String(f.claim || (f.kind + " fired"))).slice(0, 200),
-        basis: f.kind + " \u00b7 " + rate.hit_rate + "% over " + rate.n_cells
-          + " coin-days vs " + baseShare.toFixed(1) + "% base",
-      });
-      if (out && out.ok) {
-        made++;
-        try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
-        // The same event, surfaced: a reading he turned into a call IS an edge found.
-        try {
-          await appendNovoFire({ asset_class: "crypto", symbol: sym, kind: f.kind,
-            title: sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m"),
-            horizon_min: hm,
-            receipts: rate.hit_rate + "% over " + rate.n_cells + " coin-days vs "
-              + baseShare.toFixed(1) + "% base" });
-        } catch (_) {}
-      }
+      /* ⚠ THE GATE PROMOTES AN ALERT. IT DOES NOT MAKE A PREDICTION IN HIS NAME.
+         Jake, 2026-09-09, on the gate: "correct here no issue" — promoting an edge-cleared alert
+         to the comp-seat feed is exactly right. What was wrong is that the same gate also wrote a
+         `source:"novo"` prediction row, which the crypto map then rendered as
+         "DR. NOVO'S CALLS · SELF-INITIATED" with the signal's own claim string as his thesis.
+         predictions.js has never contained a model call. 95 graded rows, every one "up", every one
+         cost_anomaly, 33.7% — a threshold cannot have a bad week, it has a number.
+         His own calls now come from _lib/novo-calls.js, where he actually reads the book. */
+      await appendNovoFire({ asset_class: "crypto", symbol: sym, kind: f.kind,
+        title: sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m"),
+        horizon_min: hm,
+        receipts: rate.hit_rate + "% over " + rate.n_cells + " coin-days vs "
+          + baseShare.toFixed(1) + "% base" });
+      made++;
+      try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
     } catch (_) { /* one bad reading must not stop the pass */ }
   }
   return { made };
+}
+
+/* ── MIGRATION: take the gate's rows out of his name ──────────────────────────────────────────
+   Jake, 2026-09-09: "The 16 open cost_anomaly calls — void. The 95 graded ones — move to an
+   engine record. The gate ... should stop minting a prediction under his name. Alert yes."
+
+   These rows were written by selectCryptoPredictions' threshold, not by Dr. NoVo, and the crypto
+   map rendered them as "DR. NOVO'S CALLS · SELF-INITIATED". They are not deleted — nothing is,
+   per the retention rule — they are RE-ATTRIBUTED to source "engine" so they leave his grade and
+   keep their history. Open ones are voided rather than graded, because a call nobody made should
+   not resolve into anyone's record.
+
+   Identified by BASIS, not by source: the basis string is written as "<rule> · <receipts>", so
+   rows whose rule is in NO_DIRECTION are exactly the ones the gate minted from a signal with no
+   direction in it. Keyed that way so a future non-directional rule is caught by the same test.
+
+   Idempotent: a row already on "engine" is skipped, so re-running cannot double-count. The tally
+   is rebuilt from scratch afterwards because its per-source counters were incremented under the
+   old attribution. */
+async function migrateGateRows() {
+  const r = kv();
+  if (!r) return { error: "predictions unavailable" };
+  const list = await _load(r);
+  let voided = 0, moved = 0;
+  for (const p of list) {
+    if (!p || p.source === "engine") continue;
+    const rule = p.basis ? String(p.basis).split(" · ")[0].trim() : "";
+    if (!NO_DIRECTION.has(rule)) continue;
+    if (p.status === "open") {
+      p.status = "void";
+      p.outcome = { reason: "written by the edge gate, not by Dr. NoVo — voided rather than graded",
+                    graded_utc: Date.now() };
+      voided++;
+    }
+    p.source = "engine";
+    moved++;
+  }
+  if (!moved) return { voided: 0, moved: 0, note: "nothing to migrate" };
+  await _save(r, list);
+  // The tally counted these under "novo". Rebuild it from the corrected rows.
+  try { await r.del(TALLY); await r.del(TALLY + ":seeded"); } catch (_) {}
+  return { voided, moved };
 }
 
 /* ── NOVO'S OWN RECORD ─────────────────────────────────────────────────────────────────────────
@@ -764,7 +818,7 @@ async function novoRecord() {
       try {
         for (const p of await _load(r)) {
           if (!p || p.status === "open") continue;
-          const src = p.source === "user" ? "user" : (p.source || "conversation");
+          const src = (p.source === "user" || p.source === "engine") ? p.source : (p.source || "conversation");
           const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
           if (p.status === "void" || h === null) { await r.hincrby(TALLY, "void:" + src, 1); continue; }
           await r.hincrby(TALLY, "n:" + src, 1);
@@ -779,7 +833,9 @@ async function novoRecord() {
   for (const k of Object.keys(tally || {})) {
     const v = Number(tally[k]); if (!Number.isFinite(v)) continue;
     const [what, src] = k.split(":");
-    if (src === "user") continue;                 // the member's calls, not his
+    // "user" = the member's own calls. "engine" = rows the edge gate minted before
+    // 2026-09-09; re-attributed, kept, and out of his grade. Neither is Dr. NoVo.
+    if (src === "user" || src === "engine") continue;
     const t = (by_source[src] = by_source[src] || { n: 0, hit: 0, void: 0, rate: null });
     if (what === "n") { t.n += v; n += v; }
     else if (what === "hit") { t.hit += v; hit += v; }
@@ -799,7 +855,7 @@ async function novoRecord() {
   const win = { n: 0, hit: 0, rate: null, by_source: {} };
   let open = 0;
   for (const p of list) {
-    if (!p || p.source === "user") continue;
+    if (!p || p.source === "user" || p.source === "engine") continue;
     if (p.status === "open") { open++; continue; }
     if (p.status === "void") continue;            // kept and shown elsewhere, never scored
     const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
@@ -827,7 +883,8 @@ async function novoRecord() {
     t.n++; if (hitv) t.hit++;
   };
   for (const p of list) {
-    if (!p || p.source === "user" || p.status === "open" || p.status === "void") continue;
+    if (!p || p.source === "user" || p.source === "engine") continue;
+    if (p.status === "open" || p.status === "void") continue;
     const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
     if (h === null) continue;
     bump("side", p.side, h);
@@ -858,7 +915,7 @@ async function novoRecord() {
   };
 }
 
-module.exports = { novoRecord, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+module.exports = { novoRecord, migrateGateRows, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
                    makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
