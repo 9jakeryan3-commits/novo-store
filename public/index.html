@@ -215,8 +215,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .btn-primary {background:none; color:#34d399; padding: 16px 42px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s;}
   .btn-primary:hover {transform: translateY(-2px);}
-  .btn-secondary { background: rgba(255,255,255,0.03); color: var(--txt1); border: 1px solid var(--bdr); padding: 16px 42px; border-radius: 11px; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; text-decoration: none; display: inline-block; }
-  .btn-secondary:hover { border-color: var(--blue); background: rgba(59,130,246,0.08); transform: translateY(-2px); }
+  .btn-secondary { border:0; color: var(--txt1); padding: 16px 42px; font-weight: 600; font-size: 16px; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; text-decoration: none; display: inline-block }
+  .btn-secondary:hover { border:0; background:none; transform: translateY(-2px) }
   /* Gentle cyan pulse to pull attention to the Analyst CTA (Trader owns the rest of the page) */
   @keyframes analystGlow { 0%,100% { box-shadow: 0 0 14px rgba(34,211,238,0.22); } 50% { box-shadow: 0 0 30px rgba(34,211,238,0.55); } }
   .analyst-glow { animation: analystGlow 2.6s ease-in-out infinite; }
@@ -376,8 +376,8 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .price-features li::before { content: '✓'; position: absolute; left: 0; top: 8px; color: var(--green); font-weight: 700; }
   .price-btn {width: 100%; background:none; color:#34d399; padding: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-bottom: 12px;}
   .price-btn:hover {transform: translateY(-2px);}
-  .price-btn-secondary { width: 100%; background: transparent; color: var(--amber); border: 1px solid var(--amber); padding: 15px; border-radius: 11px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .15s, transform .15s; margin-top: 10px; margin-bottom: 22px; }
-  .price-btn-secondary:hover { background: rgba(245,158,11,0.08); transform: translateY(-2px); }
+  .price-btn-secondary { border:0; width: 100%; color: var(--amber); padding: 15px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .15s, transform .15s; margin-top: 10px; margin-bottom: 22px }
+  .price-btn-secondary:hover { border:0; background:none; transform: translateY(-2px) }
   /* RECESSED PANEL -- keeps its --navy fill. This sits INSIDE .price-card, whose
      gradient has resolved to solid --navy2 by the time it reaches here, so --navy
      is DARKER than its ground: it reads as an inset well, not a raised box, and a
@@ -968,8 +968,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li>Its own scored record, with the sample size shown</li>
         <li>Guided setup + email support</li>
       </ul>
-      <button class="price-btn" style="background:linear-gradient(180deg,#34d399,#10b981);max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="subscribeNow()">Subscribe Now — $209/mo</button>
-      <button class="price-btn-secondary" style="max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="subscribeYearly()">Or pay yearly — $2,000/yr &nbsp;·&nbsp; save $42.33/mo</button>
+      <button class="price-btn" style="background:none;border:0;max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="subscribeNow()">Subscribe Now — $209/mo</button>
+      <button class="price-btn-secondary" style="background:none;border:0;max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="subscribeYearly()">Or pay yearly — $2,000/yr &nbsp;·&nbsp; save $42.33/mo</button>
       <div style="font-size:12.5px;font-weight:700;letter-spacing:0.2px;color:var(--green);text-align:center;margin:12px auto 0;">🔒 Lock in your price — your rate never rises while your subscription stays active</div>
       <div class="price-next-steps" style="max-width:560px;margin-left:auto;margin-right:auto;">
         <p>After subscribing</p>
@@ -1009,8 +1009,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><b>The public API</b> &mdash; every number on these pages as JSON, no key</li>
           <li><b>An MCP server</b> &mdash; eleven tools, and <b>ask NoVo himself</b> from Claude or Cursor</li>
         </ul>
-        <a href="/signup" class="price-btn" style="background:rgba(138,172,200,0.14);color:var(--txt1);border:1px solid #2c3a4e;box-shadow:none;display:block;text-align:center;text-decoration:none;margin-bottom:10px;">Create your free account</a>
-        <a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" class="price-btn" style="background:#5865F2;color:#fff;display:block;text-align:center;text-decoration:none;box-shadow:0 8px 26px rgba(88,101,242,0.28);margin-bottom:0;">Join the Discord &rarr;</a>
+        <a href="/signup" class="price-btn" style="background:none;border:0;color:var(--txt1);display:block;text-align:center;text-decoration:none;margin-bottom:10px;">Create your free account</a>
+        <a href="https://discord.gg/EfnPJ5gC5w" target="_blank" rel="noopener" class="price-btn" style="background:none;border:0;color:#fff;display:block;text-align:center;text-decoration:none;margin-bottom:0;">Join the Discord &rarr;</a>
       </div>
 
       <!-- Analyst card -->
@@ -1038,8 +1038,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><b>Push alerts</b> &mdash; &lsquo;The Line&rsquo; and each session&rsquo;s read, to your home screen</li>
           <li>Private Analyst Discord &mdash; reads + the &lsquo;Trader Floor&rsquo;</li>
         </ul>
-        <button class="price-btn" style="background:none;color:#22d3ee;box-shadow:0 8px 26px rgba(34,211,238,0.30);" onclick="startAnalystTrial('monthly')">Start free — 7-day trial</button>
-        <a href="/analyst" class="price-btn-secondary" style="display:block;text-align:center;text-decoration:none;border-color:#22d3ee;color:#22d3ee;">Start the 7-day free trial &mdash; $129/mo &rarr;</a>
+        <button class="price-btn" style="background:none;border:0;color:#22d3ee;" onclick="startAnalystTrial('monthly')">Start free — 7-day trial</button>
+        <a href="/analyst" class="price-btn-secondary" style="background:none;border:0;display:block;text-align:center;text-decoration:none;color:#22d3ee;">Start the 7-day free trial &mdash; $129/mo &rarr;</a>
         <div style="font-size:12px;font-weight:700;letter-spacing:0.2px;color:#22d3ee;text-align:center;margin:10px 0 0;">🔒 Lock in your price</div>
       </div>
 
@@ -1118,7 +1118,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><b>NoVo reads it</b> &mdash; the same analyst who reads the equity book, no second-string model</li>
         <li>The private members Discord &mdash; the same room Analyst and Trader get</li>
       </ul>
-      <button class="price-btn" style="background:none;color:#a78bfa;box-shadow:0 8px 26px rgba(167,139,250,0.30);max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="startCryptoTrial('monthly')">Start free &mdash; 7-day trial</button>
+      <button class="price-btn" style="background:none;border:0;color:#a78bfa;max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="startCryptoTrial('monthly')">Start free &mdash; 7-day trial</button>
       <a href="/crypto" class="crypto-textlink" style="margin:14px auto 0;">See everything on the crypto map &rarr;</a>
       <p class="price-secure">Secure checkout via Stripe &nbsp;&middot;&nbsp; Manage at <a href="/portal" style="color:var(--blue);">novo-options.trade/portal</a></p>
     </div>
@@ -1404,7 +1404,7 @@ document.addEventListener('keydown', (e) => {
     <div class="setup-modal-cta">
       <p>Step-by-step help lives in your portal, and support is always an email away at <strong>support@novo-options.trade</strong>.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn-primary" style="background:linear-gradient(180deg,#34d399,#10b981);" onclick="subscribeNow()">Subscribe — $209/mo</button>
+        <button class="btn-primary" style="background:none;border:0;" onclick="subscribeNow()">Subscribe — $209/mo</button>
         </div>
     </div>
   </div>
