@@ -813,11 +813,44 @@ async function novoRecord() {
   }
   win.rate = win.n ? +((100 * win.hit) / win.n).toFixed(1) : null;
 
+  /* ── DIAGNOSTICS ──────────────────────────────────────────────────────────────────────────
+     Jake, 2026-09-09: "everything is scored so Dr. NoVo can get better ... we give him
+     everything he needs to be the greatest, that is our job."
+     A single rate says he is wrong; it cannot say WHERE. These cuts can: a record that is fine
+     on one side and awful on the other is a sign or threshold fault, not a skill problem, and
+     the two need completely different fixes. Cut by side, kind, symbol, horizon and rule. */
+  const cut = {};
+  const bump = (dim, key, hitv) => {
+    if (key === null || key === undefined || key === "") return;
+    const d = (cut[dim] = cut[dim] || {});
+    const t = (d[key] = d[key] || { n: 0, hit: 0, rate: null });
+    t.n++; if (hitv) t.hit++;
+  };
+  for (const p of list) {
+    if (!p || p.source === "user" || p.status === "open" || p.status === "void") continue;
+    const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
+    if (h === null) continue;
+    bump("side", p.side, h);
+    bump("kind", p.kind, h);
+    bump("symbol", p.symbol, h);
+    bump("source_side", (p.source || "?") + ":" + (p.side || "?"), h);
+    const mins = p.horizon_utc && p.made_utc ? Math.round((p.horizon_utc - p.made_utc) / 60000) : null;
+    bump("horizon", mins === null ? null : mins <= 60 ? "<=60m" : mins <= 240 ? "1-4h" : mins <= 1440 ? "4-24h" : ">24h", h);
+    // the rule that fired it, off the basis string the selector writes: "<rule> · <receipts>"
+    bump("rule", p.basis ? String(p.basis).split(" · ")[0].slice(0, 40) : null, h);
+  }
+  for (const dim of Object.keys(cut)) {
+    for (const k of Object.keys(cut[dim])) {
+      const t = cut[dim][k]; t.rate = t.n ? +((100 * t.hit) / t.n).toFixed(1) : null;
+    }
+  }
+
   return {
     by_source,                                   // ALL-TIME, from the permanent tally
     overall: n ? { n, hit, rate: +((100 * hit) / n).toFixed(1) } : null,
     voided,
     window: { ...win, size: MAX_KEPT },          // recent form, from the rolling working set
+    cut,                                         // where he is losing, not just that he is
     open,
     counted: n,
     capped: MAX_KEPT,
