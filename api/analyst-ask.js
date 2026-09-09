@@ -1119,7 +1119,28 @@ module.exports = async (req, res) => {
   // for the alert record meant the one set of figures most worth checking was the least checkable.
   // equity_signals rides SECOND for the same reason: both private records stay ahead of the bulky
   // crypto inventory so a deep read can always check the owner's own numbers.
+  // THE RECORD RIDES IN THE EVIDENCE (2026-09-09). It was loaded above, used for the lessons block
+  // and the provenance audit, and then left OUT of the bundle the model is told is "every number
+  // you may state". Two failures fell out of that, and they look like opposite bugs:
+  //   1. Asked how his own record is graded, he had nothing to read it from and INVENTED - four
+  //      live probes across two seats, four different fabrications ("excluded from the directional
+  //      record", "a structural corridor", "expected move bounds", "drift of 0.15% to 0.20%"), all
+  //      with lookups:(none). SYSTEM now states the neutral bands, but a stated fact is one fact;
+  //      the record itself is the general answer.
+  //   2. recordClaimAudit is CLOSED-WORLD over this bundle, so every TRUE scored figure he cited
+  //      read as fabricated and the revise pass stripped exactly the citations that make his answer
+  //      worth reading. That is why the revised answers came back with fewer numbers AND still
+  //      wrong: the guard was deleting the correct ones.
+  // novo-broadcast.js already hit this and fixed it the same way - see the note above its own
+  // marketJson ("fixed by one key", z=23.9 / 2,109 sessions -> 2 flags). The chat never got it.
+  // Placed after the two private records, which ride first because the verify pass slices this
+  // bundle to its head and a field serialized last is the one that truncates out of view. The
+  // record costs ~700 bytes against VERIFY_MAX_EVIDENCE's 18,000, and what it displaces is the
+  // TAIL - crypto_live, the bulkiest block and the one whose figures the record guard does not
+  // audit anyway. That is the trade, stated rather than left to be discovered: the thing being
+  // audited is now inside the auditor's world, and the cost falls on the block that needs it least.
   const marketJson = JSON.stringify({ private_alerts: privateAlerts, equity_signals: equitySignals,
+                                      record: trackRec,
                                       live, history: ctx,
                                       crypto: cryptoInv, crypto_live: cryptoLead });
 
