@@ -262,7 +262,9 @@ button { border: 0; }
    surface. */
 .tb-brand .wm-2 { font-family: var(--sans); font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
   color: var(--txt3); margin-top: 3px; }
-@media (max-width: 900px) { .tb-brand .wm-2 { display: none; } .tb-brand img { height: 22px; } }
+@media (max-width: 900px) { .tb-brand /* The company line was hidden here and shown on the other two (Jake: "trader header is missing
+     the Options Trading under NoVo"). Same treatment as analyst so the three read as one product. */
+  .wm-2 { font-size: 9px; letter-spacing: 2.5px; } .tb-brand img { height: 22px; } }
 @font-face{font-family:'Geist Mono';src:url('/fonts/geist-mono.woff2') format('woff2');font-weight:100 900;font-display:swap}
 :root {
   /* ⚠ THE TRADER IS BLACK (Jake, 2026-09-07): "trader needs to go dark. all that grayish
@@ -1704,7 +1706,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
     /* Extend into iPhone home-bar safe area */
     padding-bottom: env(safe-area-inset-bottom, 0px);
     height: calc(52px + env(safe-area-inset-bottom, 0px));
-    background: var(--bg1);
+    /* The thumb bar is a PANEL, like analyst and crypto (Jake 2026-09-09: "the nav bar needs to be
+       the same color as the other two, grayish"). It was --bg1 #09090b, the page ground, so the bar
+       had no edge against the content above it. Both others compute to #111113. */
+    background: #111113;
     border-top: 1px solid var(--bdr);
     box-shadow: 0 -4px 20px rgba(0,0,0,.5);
     z-index: 1000;
@@ -2494,7 +2499,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        outlived the other two being done properly. -->
   <div class="brand tb-brand">
     <img src="/novo-coin.png?v=2" alt="" width="160" height="160" decoding="async">
-    <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Trading Dashboard</span></span>
+    <span class="wm"><span class="wm-1">NoVo</span><span class="wm-2">Options Trading</span></span>
   </div>
   <!-- LEFT cluster: the analyst and the keyboard, beside the wordmark (Jake, 2026-09-06, explicit
        and second time of asking). These two are not views of the tape — Dr. NoVo is who you ask,

@@ -1997,21 +1997,12 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
       font-size: 15px; line-height: 1; color: var(--txt3); opacity: .75; }
     .lv-card.lv-bias { border-top: 0; }
     .lv-bias .bias-row { border-top: 0; }
-    /* The live indicator, once the placement function drops it into the top grid. It is authored
-       for the desktop header row - margin-left:auto pushes it to the right end of a flex line, and
-       `flex: 0 0 100%` means nothing to a grid item - so both are undone here and it is made to
-       span the columns. Without this it renders right-aligned in column two. */
-    .lv-grid-top .lv-status {
-      grid-column: 1 / -1; margin: 0; justify-content: flex-start;
-      padding: 14px 0 2px;
-      /* ORDER IS THE ONE THAT ACTUALLY DECIDES, and it is why this landed in the wrong place
-         first time. `.lv-status { order: 4 }` is set for the desktop header row (see the header
-         media query above); grid-column and margin were overridden here and `order` was not, so
-         the element sat FIRST in the DOM and rendered LAST - below the ticker picker instead of
-         above the fear gauge. Jake: "it goes after the hairline under the readings bar".
-         All three are given explicit orders rather than relying on DOM position, because two of
-         them are moved at runtime and a tie broken by DOM order is a tie waiting to flip. */
-      order: -2; }
+    /* The live indicator STAYS IN THE HEADER at every width (Jake, 2026-09-09: "the live market
+       indicator needs to go back into the header to be uniform and matching in all 3"). It was
+       moved down here for one build; crypto and trader both carry it in the header, and three
+       dashboards that disagree about where their own status line lives is worse than any single
+       placement being ideal. The grid-placement rules and the third node on the placement
+       function are removed rather than disabled, so nothing is left half-wired. */
     .lv-grid-top .lv-fear  { order: -1; }
     .lv-grid-top #strip    { order: 0; }
     .bias-col { border-bottom: 1px solid var(--bdr2); padding-bottom: 16px; margin-bottom: 4px; }
@@ -2139,15 +2130,6 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     var strip = document.getElementById('strip');
     var biasHome = biasCol ? biasCol.parentElement : null;
     var biasAfter = biasCol ? biasCol.nextElementSibling : null;
-    /* THE LIVE MARKET INDICATOR COMES DOWN OUT OF THE HEADER ON A PHONE (Jake, 2026-09-09:
-       "move the live market indicator right in between those two hairlines"). It rides directly
-       above the fear gauge, which is the first block under the readings ribbon, so it lands in the
-       gap he marked. In the header it competed with the brand on a 390px row; here it reads as the
-       status of the data below it, which is what it actually describes.
-       Third node on this function rather than a fourth mover - see the note above. */
-    var status = document.querySelector('.lv-top .lv-status') || document.querySelector('.lv-status');
-    var statusHome = status ? status.parentElement : null;
-    var statusAfter = status ? status.nextElementSibling : null;
     function place(){
       var phone = window.matchMedia('(max-width: 768px)').matches;
       /* Before the gamma profile, not at the end of the card - appending put it under the
@@ -2161,7 +2143,6 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
           else if (biasCol.parentElement !== chartCard) chartCard.appendChild(biasCol);
         }
         if (strip && fear.nextElementSibling !== strip) strip.parentElement.insertBefore(fear, strip);
-        if (status && status.nextElementSibling !== fear) fear.parentElement.insertBefore(status, fear);
       } else {
         if (fear.parentElement !== home) {
           if (after && after.parentElement === home) home.insertBefore(fear, after);
@@ -2170,10 +2151,6 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
         if (biasCol && biasHome && biasCol.parentElement !== biasHome) {
           if (biasAfter && biasAfter.parentElement === biasHome) biasHome.insertBefore(biasCol, biasAfter);
           else biasHome.appendChild(biasCol);
-        }
-        if (status && statusHome && status.parentElement !== statusHome) {
-          if (statusAfter && statusAfter.parentElement === statusHome) statusHome.insertBefore(status, statusAfter);
-          else statusHome.appendChild(status);
         }
       }
     }

@@ -115,7 +115,10 @@ a{color:var(--cyan)}
    what makes the bar's absence free. */
 #app{display:grid;grid-template-rows:auto auto 1fr;height:100vh}
 #app > main{grid-row:3}
-header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid var(--bdr2);background:var(--panel)}
+/* Header is the PAGE ground, not a panel (Jake, 2026-09-09: "crypto header needs to be black").
+   It was var(--panel) #111113 while analyst and trader both sit on --bg #09090b, so crypto read as a
+   raised bar and the other two did not. The hairline underneath is what separates it. */
+header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1px solid var(--bdr2);background:var(--bg)}
 /* Brand, live status and settings gear: the Analyst dashboard's header, sized for this
    page's compact app bar. */
 .lv-brand{display:flex;align-items:center;gap:9px;text-decoration:none}
