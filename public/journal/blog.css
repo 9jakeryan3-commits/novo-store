@@ -258,7 +258,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 .btn-primary{background:var(--green);color:#111a14;border:0;padding:14px 32px;border-radius:6px;font-weight:800;font-size:15px;cursor:pointer;}
 .btn-primary:hover{opacity:.9;}
-.btn-ghost{background:none;color:var(--cyan);border:0;padding:14px 0;font-weight:800;font-size:15px;}
+.btn-ghost{background:transparent;color:var(--txt1);border:1px solid var(--bdr2);padding:14px 28px;border-radius:6px;font-weight:600;font-size:15px;}
 .btn-ghost:hover{border-color:var(--cyan);}
 /* Dual-product article CTA (Trader + Analyst) */
 .cta-2up{display:flex;gap:16px;margin-top:6px;text-align:left;flex-wrap:wrap;}
