@@ -1256,11 +1256,37 @@ tr:last-child td{border-bottom:none}
   /* Picking a coin means "show me this coin". Arriving from the screener, the reads feed or a
      member surface, the tab showing names no section OF a coin - and the panel filter would then
      match nothing and paint a blank page. This puts the view back on the map in exactly that case
-     and leaves it alone in every other, so a background refresh never moves you off your tab. */
+     and leaves it alone in every other, so a background refresh never moves you off your tab.
+
+     ⚠ AND THE TAB YOU ARE STANDING ON MAY BE EMPTY FOR THE COIN YOU JUST PICKED. A coin's home is
+     its map -- but only if it HAS one. 83 of 91 coins are band B with no options book, so since
+     the tab split (70b0b5ebd, 2026-09-08) they landed on a Map section that is empty BY
+     CONSTRUCTION while every panel they do have sat one tab over. Before that split all panels
+     shared one column, so picking a coin always showed something; after it, picking LINK showed
+     an apology and nothing else. Jake, 2026-09-09: "the entire band b is missing all its data
+     ... even LINK and UNI, AAVE" -- the data was never missing, it was one tab away and nothing
+     said so. Ask the RENDERED DOM which sections actually carry content for THIS coin rather
+     than keying on the band, so a coin that gains or loses a book follows automatically, and the
+     screener / reads-feed / chain-token views (which write no sections at all) are untouched. */
   window.cxTabHome = function(){
     try {
       var cur = document.body.getAttribute('data-mtab') || 'map';
-      if (CX_COIN_TABS.indexOf(cur) < 0) document.body.setAttribute('data-mtab', 'map');
+      var host = document.getElementById('body');
+      /* ⚠ THE TAB NAME IS NOT THE SECTION NAME. The Map tab renders the section called "gamma"
+         (see the CSS filter above: body[data-mtab="map"] reveals .panel[data-sec="gamma"]); the
+         other three happen to match. Using the tab name directly made filled('map') match nothing,
+         so BTC -- which has a gamma ladder -- was bounced off Map onto Flow. Caught by the band-A
+         control before this shipped; keep that control on any change here. */
+      var SEC = { map: 'gamma', flow: 'flow', pos: 'pos', hist: 'hist' };
+      /* :not([data-empty]) is what separates a real section from the placeholder. Testing for a
+         .empty child instead would misfire: a POPULATED section can legitimately contain one --
+         hist renders "no readings yet for X" inside a section that is otherwise real. */
+      var filled = function(k){
+        return !!(host && host.querySelector('.panel[data-sec="' + SEC[k] + '"]:not([data-empty])'));
+      };
+      if (CX_COIN_TABS.indexOf(cur) < 0 || !filled(cur)) {
+        document.body.setAttribute('data-mtab', CX_COIN_TABS.filter(filled)[0] || 'map');
+      }
     } catch (_e) {}
   };
 
@@ -2724,7 +2750,10 @@ function drawCoin(){
     hist:  'nothing scored for this coin yet' };
   for (const _k in _EMPTY) {
     if (h.indexOf('data-sec="' + _k + '"') >= 0) continue;
-    h += '<div data-sec="' + _k + '" class="panel"><div class="pb"><div class="empty">'
+    /* data-empty marks this as the PLACEHOLDER rather than a rendered section. cxTabHome reads it
+       to find a tab that actually has something for this coin, so the marker is load-bearing --
+       without it the placeholder counts as content and a band-B coin still lands on a blank Map. */
+    h += '<div data-sec="' + _k + '" data-empty="1" class="panel"><div class="pb"><div class="empty">'
        + 'Nothing on this tab for ' + CUR + ' &mdash; ' + _EMPTY[_k]
        + '. The other tabs still have data.</div></div></div>';
   }
@@ -2744,7 +2773,14 @@ function drawCoin(){
   // replay merely because its subject was replaced.
   const _bd=$('#body');
   _bd.classList.remove('swap');
-  if(_lastDrawn !== CUR){ void _bd.offsetWidth; _bd.classList.add('swap'); _lastDrawn = CUR; }
+  if(_lastDrawn !== CUR){ void _bd.offsetWidth; _bd.classList.add('swap'); _lastDrawn = CUR;
+    /* A NEW COIN MAY NOT HAVE THE TAB YOU ARE STANDING ON. Inside the coin-changed branch on
+       purpose, for the same reason the swap animation is: a background refresh of the SAME coin
+       must never move you off your tab. cxTabHome's only other caller is the rail click, which
+       does not fire on first paint - so without this line a member whose remembered coin is
+       band B lands on the empty Map before touching anything. #body was written just above, so
+       the sections exist by the time cxTabHome queries them. */
+    try { window.cxTabHome(); } catch (_e) {} }
   if(g) drawGamma(g);
   if(window.cxLive) window.cxLive.attach(CUR, g);   // stream spot for THIS coin; stops the previous socket
   if(window.cxLive && cxLive.resetTick) cxLive.resetTick();  // BTC -> SOL is not a tick
