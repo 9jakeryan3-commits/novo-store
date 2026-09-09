@@ -1983,6 +1983,20 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     .lv-card:has(> #chart-h),
     .lv-grid-top .bias-col, .lv-card:has(> .bias-col),
     .lv-card.gh-card { border-top: 0; }
+    /* ROUND TWO of the same pass (Jake, 2026-09-09, second marked screenshot).
+       OFF: the rule above each ticker cell, the one under the DR. NOVO'S BIAS heading, and the one
+       between the premarket and hourly rows. The bias block is two readings of one thing, so a rule
+       between them split a single statement; the tickers are two cells of one control.
+       AND THE TICKERS GET A CARET INSTEAD - "add the ^ thing under the tickers instead of a
+       hairline". A hairline says "these are separate data"; the caret points back up at the cell it
+       belongs to, which is what a tappable switch should say. It is a glyph, not a box, and it is
+       monochrome - no colour emoji anywhere on these surfaces. */
+    .lv-grid-top .lv-mini { border-top: 0; }
+    .lv-grid-top .lv-mini::after {
+      content: '\2303'; display: block; text-align: center; margin-top: 10px;
+      font-size: 15px; line-height: 1; color: var(--txt3); opacity: .75; }
+    .lv-card.lv-bias { border-top: 0; }
+    .lv-bias .bias-row { border-top: 0; }
     .bias-col { border-bottom: 1px solid var(--bdr2); padding-bottom: 16px; margin-bottom: 4px; }
     .mob-tab[data-mtab="digest"] { order: 4; }
     .mob-tab[data-mtab="alerts"] { order: 5; }
