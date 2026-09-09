@@ -1210,7 +1210,7 @@ tr:last-child td{border-bottom:none}
 <div id="more-menu" hidden>
   <button type="button" data-mtab="flow" onclick="pickMore('flow')"><span aria-hidden="true">&#8644;</span>Flow</button>
   <button type="button" data-mtab="pos" onclick="pickMore('pos')"><span aria-hidden="true">&#9707;</span>Positioning</button>
-  <button type="button" data-mtab="hist" onclick="pickMore('hist')"><span aria-hidden="true">&#8986;</span>History</button>
+  <button type="button" data-mtab="hist" onclick="pickMore('hist')"><span aria-hidden="true">&#9719;</span>History</button>
   <button type="button" data-mtab="reads" onclick="pickMore('reads')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
   <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Daily rundown</button>
   <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
@@ -3501,7 +3501,7 @@ window.addEventListener('hashchange', function(){
       ch.appendChild(pv);
     }
     var lb = document.createElement('span');
-    lb.textContent = PENDTHUMB ? 'attached ✕' : '📎 image attached ✕';
+    lb.textContent = PENDTHUMB ? 'attached ✕' : '⊕ image attached ✕';
     ch.appendChild(lb);
   }
   function ingestImage(file){
@@ -3538,7 +3538,7 @@ window.addEventListener('hashchange', function(){
     });
     var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
-    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
+    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '⊕';
     bt.title = 'Attach a chart image, or just paste one';
     bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
     bt.onclick = function(){ fi.click(); };

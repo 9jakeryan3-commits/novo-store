@@ -1604,9 +1604,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     async function unsubscribePush(){ if (window.novoPush) await window.novoPush.disable(); }
     function mkBtn(){
       if(document.getElementById('novoNotif'))return;
-      var b=document.createElement('button');b.id='novoNotif';b.textContent='🔔 Enable alerts';
+      var b=document.createElement('button');b.id='novoNotif';b.textContent='◉ Enable alerts';
       b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#17171a;color:#f0f0ee;border:1px solid #22d3ee;border-radius:9px;padding:9px 14px;font:700 13px var(--sans,system-ui);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
-      b.onclick=async function(){b.disabled=true;b.textContent='Enabling…';var ok=await subscribe();if(ok){b.textContent='🔔 Alerts on';setTimeout(function(){b.remove();},1800);}else{b.disabled=false;b.textContent='🔔 Enable alerts';}};
+      b.onclick=async function(){b.disabled=true;b.textContent='Enabling…';var ok=await subscribe();if(ok){b.textContent='◉ Alerts on';setTimeout(function(){b.remove();},1800);}else{b.disabled=false;b.textContent='◉ Enable alerts';}};
       document.body.appendChild(b);
     }
     /* novo-push.js re-registers an already-granted browser on load; nothing to do here. */
@@ -2233,7 +2233,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
   <button type="button" data-mtab="readings" onclick="pickMore('readings')"><span aria-hidden="true">&#9672;</span>Live Reads</button>
   <button type="button" data-mtab="futures" onclick="pickMore('futures')"><span aria-hidden="true">&#9650;</span>Futures</button>
   <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Desk Note</button>
-  <button type="button" data-mtab="history" onclick="pickMore('history')"><span aria-hidden="true">&#9203;</span>History</button>
+  <button type="button" data-mtab="history" onclick="pickMore('history')"><span aria-hidden="true">&#9719;</span>History</button>
   <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predictions</button>
 </div>
 <script>
@@ -2876,7 +2876,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
       ch.appendChild(pv);
     }
     var lb = document.createElement('span');
-    lb.textContent = PENDTHUMB ? 'attached ✕' : '📎 image attached ✕';
+    lb.textContent = PENDTHUMB ? 'attached ✕' : '⊕ image attached ✕';
     ch.appendChild(lb);
   }
   function ingestImage(file){
@@ -2913,7 +2913,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     });
     var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
-    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
+    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '⊕';
     bt.title = 'Attach a chart image, or just paste one';
     bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
     bt.onclick = function(){ fi.click(); };
