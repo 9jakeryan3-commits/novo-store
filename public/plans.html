@@ -190,7 +190,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   ul.feats li b { color: var(--txt1); font-weight: 700; }
 
   .card .cta-wrap { margin-top: auto; }
-  .btn { display: block; width: 100%; text-align: center; text-decoration: none; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; padding: 14px 18px; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+  .btn { display: block; width: 100%; text-align: center; text-decoration: none; border: none;  font-weight: 800; font-size: 15px; padding: 14px 18px; cursor: pointer; transition: transform .12s, box-shadow .12s; }
   .btn:hover { transform: translateY(-1px); }
   .btn-cyan { background: linear-gradient(180deg,#22d3ee,#3b82f6); color: #04121a; box-shadow: 0 8px 26px rgba(34,211,238,0.30); }
   .btn-green { background: linear-gradient(180deg,#34d399,#10b981); color: #111a14; box-shadow: 0 8px 26px rgba(16,185,129,0.30); }
@@ -330,7 +330,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="kicker">Data, tools &amp; the Journal</div>
       <h2>Free</h2>
       <div class="price"><span class="cur">$</span><span class="num">0</span><span class="per">/forever</span></div>
-      <div class="subnote">always free · no card</div><div style="font-size:12.5px;color:#8aacc8;margin:12px 0 0;"><b style="color:#eaf3ff;">The Week Ahead</b> (Sundays) + the <b style="color:#eaf3ff;">Mid-Day Tape Review</b> (every trading day), free by email:</div><form id="np-subscribe" style="display:flex;gap:8px;margin:14px 0 4px;"><input id="np-email" type="email" required placeholder="you@email.com" aria-label="Email address" style="flex:1;min-width:0;width:0;background:var(--navy2,#1c1d21);border:1px solid var(--bdr,#2e3036);border-radius:9px;padding:11px 13px;color:#eaf3ff;font-size:13.5px;font-family:inherit;"><button type="submit" style="background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;border:0;padding:11px 15px;border-radius:9px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap;">Subscribe</button></form><div id="np-sub-msg" aria-live="polite" style="font-size:12.5px;color:var(--txt3,#7d97b8);min-height:16px;margin-bottom:6px;"></div>
+      <div class="subnote">always free · no card</div><div style="font-size:12.5px;color:#8aacc8;margin:12px 0 0;"><b style="color:#eaf3ff;">The Week Ahead</b> (Sundays) + the <b style="color:#eaf3ff;">Mid-Day Tape Review</b> (every trading day), free by email:</div><form id="np-subscribe" style="display:flex;gap:8px;margin:14px 0 4px;"><input id="np-email" type="email" required placeholder="you@email.com" aria-label="Email address" style="flex:1;min-width:0;width:0;background:var(--navy2,#1c1d21);border:1px solid var(--bdr,#2e3036);border-radius:9px;padding:11px 13px;color:#eaf3ff;font-size:13.5px;font-family:inherit;"><button type="submit" style="background:none;color:#22d3ee;border:0;padding:11px 15px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap;">Subscribe</button></form><div id="np-sub-msg" aria-live="polite" style="font-size:12.5px;color:var(--txt3,#7d97b8);min-height:16px;margin-bottom:6px;"></div>
       <div class="roi">More than most tools charge for &mdash; free account, no card.</div>
       <ul class="feats">
         <li class="chk"><b><a href="/market-data" style="color:inherit;text-decoration:underline;text-underline-offset:2px;text-decoration-color:#22d3ee">Dealer levels, 15–30 minutes delayed</a></b> — gamma flip, call wall, put wall &amp; expected move on SPY, QQQ and IWM</li>
@@ -598,8 +598,8 @@ function requireTerms(fnName) {
       '<input type="checkbox" id="terms-check-input" style="margin-top:3px;width:17px;height:17px;flex-shrink:0;accent-color:#10b981;cursor:pointer;">' +
       '<span>I have read and agree to the <a href="/license" target="_blank" rel="noopener" style="color:#3b82f6;font-weight:600;">NoVo Options Trading Terms of Use &amp; Risk Disclosure</a>.</span></label>' +
       '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">' +
-      '<button type="button" onclick="closeTerms()" style="background:transparent;border:1px solid #2a3f60;color:#8aacc8;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Cancel</button>' +
-      '<button type="button" id="terms-continue" disabled onclick="acceptTerms()" style="background:#10b981;border:none;color:#111a14;padding:10px 22px;border-radius:8px;font-weight:800;cursor:pointer;font-size:14px;opacity:0.45;">Agree &amp; Continue</button></div></div>';
+      '<button type="button" onclick="closeTerms()" style="background:transparent;color:#8aacc8;padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px;">Cancel</button>' +
+      '<button type="button" id="terms-continue" disabled onclick="acceptTerms()" style="background:none;border:none;color:#111a14;padding:10px 22px;font-weight:800;cursor:pointer;font-size:14px;opacity:0.45;">Agree &amp; Continue</button></div></div>';
     document.body.appendChild(m);
     var cb = m.querySelector('#terms-check-input');
     var btn = m.querySelector('#terms-continue');
