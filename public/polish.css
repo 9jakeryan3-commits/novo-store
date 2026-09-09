@@ -515,9 +515,31 @@ nav.is-scrolled {
    Backgrounds and the Plans glow STAY. He asked for the borders, not for the buttons to stop
    being findable, and Plans is the page's primary call to action.
    ═══════════════════════════════════════════════════════════════════════════════════════════ */
+/* ⚠ THE "OUTLINE" JAKE COULD STILL SEE WAS THE FILL, NOT THE BORDER. Removing `border` left
+   three tinted, rounded, glowing rectangles - .nav-menu-btn on rgba(255,255,255,.04), .nav-portal
+   on a blue tint, .nav-buy on a cyan tint with a PULSING box-shadow animation. A background with
+   a border-radius reads as a button just as loudly as a stroke does.
+   "i only want to see the text". So: no fill, no radius, no shadow, no pulse. Colour is the only
+   thing left telling them apart, which is the whole point of "a button is a word you click".
+   PADDING STAYS - it is the tap target, not decoration, and these are the primary nav controls on
+   a phone. The animation is killed at the source rather than overridden, because an animation
+   outranks a normal declaration and would have put the glow straight back. */
 .nav-menu-btn,
 .nav-portal,
-.nav-buy { border: 0 !important; }
+.nav-buy {
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  animation: none !important;
+}
+/* the reduced-motion branch sets its own !important glow; it has to go too */
+@media (prefers-reduced-motion: reduce) {
+  .nav-buy { box-shadow: none !important; }
+}
+.nav-menu-btn:hover,
+.nav-portal:hover,
+.nav-buy:hover { background: none !important; box-shadow: none !important; }
 
 /* The ticker reads as one continuous tape instead of a row of cells. The label keeps its dot -
    that is a live indicator and carries state - but loses the rule that fenced it off. */
