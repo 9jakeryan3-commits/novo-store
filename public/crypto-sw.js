@@ -16,10 +16,10 @@ self.addEventListener('push', function (e) {
        place of another's on the same device. */
     tag: 'crypto:' + (d.tag || 'novo-crypto'), renotify: true,
     /* THE CRYPTO COIN, not the options one. crypto-live.webmanifest ships
-       /icon-crypto-192.png, so Android drew the manifest icon as the app badge and THIS icon as
+       /icon-crypto-192.png?v=4, so Android drew the manifest icon as the app badge and THIS icon as
        the large one - two different NoVo coins in a single notification. Same asset for both
        slots, and the same asset the installed app already uses. */
-    icon: '/icon-crypto-192.png?v=1', badge: '/icon-crypto-192.png?v=1',
+    icon: '/icon-crypto-192.png?v=4', badge: '/icon-crypto-192.png?v=4',
     data: { url: d.url || '/crypto/live' }
   }));
 });
