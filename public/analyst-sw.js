@@ -13,7 +13,7 @@ self.addEventListener('push', function (e) {
        receive the same 'novo-analyst-line'. Unprefixed, one app's alert can take the
        place of another's on the same device. */
     tag: 'analyst:' + (d.tag || 'novo-analyst'), renotify: true,
-    icon: '/icon-192.png?v=8', badge: '/icon-192.png?v=8', data: { url: d.url || '/analyst/live' }
+    icon: '/icon-192.png?v=10', badge: '/icon-192.png?v=10', data: { url: d.url || '/analyst/live' }
   }));
 });
 self.addEventListener('notificationclick', function (e) {
