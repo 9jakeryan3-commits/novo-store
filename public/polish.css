@@ -551,3 +551,34 @@ nav.is-scrolled {
    `nav .nvs-ss-wrap{border-top:1px solid ...}` - two selectors deep, so this matches it and takes
    the override. */
 nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   THE THREE DOORS: HALO, NO EDGE (2026-09-08)
+
+   Jake: "remove just the neon border around these wont that give it a subtle lifted glowing
+   look?" It does, and the two are already separate things - which is why this works at all:
+
+     the hard edge   .btn-secondary { border: 1px solid var(--bdr) } + an inline border-color
+     the halo        .crypto-glow / .analyst-glow / .trader-glow, an ANIMATED box-shadow
+
+   Drop the first, keep the second, and the button stops being a rectangle with a stroke and
+   becomes coloured text sitting on its own light. Same move as the header buttons, except these
+   keep their glow because it is doing the work the border was doing - telling you where the
+   target is - without drawing a box to do it.
+
+   ⚠ THE INLINE border-color IS WHY THIS NEEDS !important. Each of these carries
+   style="border-color:#a78bfa" in the markup, and an inline declaration beats any normal
+   stylesheet rule. The shorthand with !important overrides width, style and colour together.
+   The background tint goes too: a fill has a hard edge of its own at the radius.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+.btn-secondary.crypto-glow,
+.btn-secondary.analyst-glow,
+.btn-secondary.trader-glow {
+  border: 0 !important;
+  background: none !important;
+}
+/* hover re-asserts a border-color with !important of its own; neutralise it and let the fill
+   alone carry the hover state, which is what a borderless control has left to say it with. */
+.btn-secondary.crypto-glow:hover,
+.btn-secondary.analyst-glow:hover,
+.btn-secondary.trader-glow:hover { border-color: transparent !important; }
