@@ -227,6 +227,15 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   .trader-glow { animation: traderGlow 2.6s ease-in-out infinite; }
   .crypto-glow { animation: cryptoGlow 2.6s ease-in-out infinite; }
   .crypto-glow:hover { border-color: #a78bfa !important; background: rgba(167,139,250,0.08) !important; }
+  /* The crypto section's secondary CTA. A lit word, not an outlined button: it sits directly
+     under a filled purple button, and a second outline there would read as two equal asks. */
+  .crypto-textlink { display:block; text-align:center; background:none; border:0; padding:0;
+    color:#c4b5fd; font-weight:800; font-size:14px; text-decoration:none;
+    text-shadow:0 0 10px rgba(167,139,250,.45), 0 0 26px rgba(167,139,250,.18);
+    transition:color .18s ease, text-shadow .18s ease; }
+  .crypto-textlink:hover, .crypto-textlink:focus-visible { color:#ddd6fe;
+    text-shadow:0 0 12px rgba(167,139,250,.75), 0 0 34px rgba(167,139,250,.32); }
+  @media (prefers-reduced-motion: reduce) { .crypto-textlink { transition:none; } }
   @keyframes cryptoGlow { 0%,100% { box-shadow: 0 0 14px rgba(167,139,250,0.22); } 50% { box-shadow: 0 0 30px rgba(167,139,250,0.55); } }
   .trader-glow:hover { border-color: #10b981 !important; background: rgba(16,185,129,0.08) !important; }
   @media (prefers-reduced-motion: reduce) { .trader-glow { animation: none; box-shadow: 0 0 22px rgba(16,185,129,0.42); } }
@@ -349,6 +358,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
 
   /* ── Pricing ── */
   #pricing { text-align: center; }
+#crypto-map { text-align: center; }
   .price-card { min-width: 0; overflow-wrap: break-word; background: linear-gradient(180deg, rgba(16,185,129,0.05), var(--navy2) 42%); border: 1px solid rgba(16,185,129,0.28); border-radius: 16px; max-width: 480px; margin: 0 auto; padding: 40px; position: relative; box-shadow: 0 24px 70px rgba(0,0,0,0.5), 0 0 44px rgba(16,185,129,0.07); }
   .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-bar, linear-gradient(90deg, #34d399, #10b981)); border-radius: 16px 16px 0 0; }
   .price-name { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
@@ -1062,6 +1072,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <hr class="divider">
 
+<!-- CRYPTO MARKET MAP -- its own band, deliberately NOT a fourth card in the pricing grid above.
+     Trader / Free / Analyst are one ladder reading one book (SPY, QQQ, IWM); you climb it.
+     Crypto Market Map reads a DIFFERENT book, so dropping it into that grid would have implied
+     an upgrade path that does not exist and invited "is this included in Trader?". It is not.
+     Every count here carries a data-*count span so sync-crypto-counts.js keeps it honest --
+     hardcoded coin counts are exactly how the old "89 coins" line went stale for weeks. -->
+<section id="crypto-map">
+  <div class="container">
+    <div class="section-label" style="color:#a78bfa;">The other book</div>
+    <h2 class="section-title" style="text-align:center;">Crypto has a dealer map. You just couldn&rsquo;t see all of it.</h2>
+    <p class="section-sub" style="margin:0 auto 40px;text-align:center;">The same positioning read NoVo runs on the equity book, drawn on crypto &mdash; dealer gamma by strike on the <span data-bookcount>7</span> coins with a real options book, funding split across five venues, and an expiry ladder that resets every single day at 08:00&nbsp;UTC.</p>
+
+    <div class="price-card" style="--accent-bar:linear-gradient(90deg,#a78bfa,#7c3aed);border-top-color:#a78bfa;background:linear-gradient(180deg,rgba(167,139,250,0.05),var(--navy2) 42%);border-color:rgba(167,139,250,0.28);position:relative;max-width:1180px;margin:0 auto;">
+      <div class="price-name" style="color:#a78bfa;">Crypto Market Map</div>
+      <div style="font-size:12px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;"><span data-mappedcount>91</span> coins &middot; 5 venues &middot; Members Discord included</div>
+      <div class="price-amount"><sup>$</sup>79<span style="font-size:28px;color:var(--txt3);font-weight:700;letter-spacing:0;">/mo</span></div>
+      <div class="price-once">per month &nbsp;&middot;&nbsp; or $790/yr &nbsp;&middot;&nbsp; cancel any time</div>
+      <div class="price-roi" style="color:#a78bfa;">&starf; 7-day free trial, card required</div>
+      <ul class="price-features" style="column-count:2;column-gap:44px;max-width:1100px;margin-left:auto;margin-right:auto;text-align:left;">
+        <li><b>Dealer gamma by strike</b> &mdash; the <span data-bookcount>7</span> coins with meaningful open interest: BTC, ETH, SOL, XRP, AVAX, HYPE and TRX</li>
+        <li>The call wall, the put wall and the gamma flip &mdash; where hedging turns from damping to amplifying</li>
+        <li><b>The 08:00 UTC expiry ladder</b> &mdash; crypto expires daily, so pinning repeats 365 times a year</li>
+        <li><b>Funding per venue</b> &mdash; five venues, never blended into one number that describes no market</li>
+        <li>24-hour liquidation flow &mdash; longs and shorts split, per coin</li>
+        <li>DVOL and the expected move &mdash; the crypto VIX, and the daily move it implies</li>
+        <li>Near-ATM skew, max pain, term structure and the gamma heatmap</li>
+        <li><b>The block tape</b> &mdash; negotiated option trades the venue itself tagged, with premium, leg count and the exchange&rsquo;s own structure names</li>
+        <li>The carry curve &mdash; annualised basis on every dated future carrying real open interest</li>
+        <li><b>The screener</b> &mdash; all <span data-mappedcount>91</span> coins ranked on every measured column at once, including the funding spread a blended number hides</li>
+        <li>What a round trip actually costs &mdash; the venue&rsquo;s own disclosed retail markup, all <span data-coincount>90</span> ranked</li>
+        <li><b>The map checks its own math</b> &mdash; once a day every published figure is re-derived from the corpus, and a mismatch fails the check</li>
+        <li>Private alerts that reach you as a push or a Discord DM &mdash; each one a sentence, not a settings page</li>
+        <li><b>NoVo reads it</b> &mdash; the same analyst, on this book and the equity one</li>
+        <li>The private members Discord &mdash; the same room Analyst and Trader get</li>
+      </ul>
+      <button class="price-btn" style="background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;box-shadow:0 8px 26px rgba(167,139,250,0.30);max-width:460px;margin-left:auto;margin-right:auto;display:block;" onclick="startCryptoTrial('monthly')">Start free &mdash; 7-day trial</button>
+      <a href="/crypto" class="crypto-textlink" style="margin:14px auto 0;">See everything on the crypto map &rarr;</a>
+      <p class="price-secure">Secure checkout via Stripe &nbsp;&middot;&nbsp; Manage at <a href="/portal" style="color:var(--blue);">novo-options.trade/portal</a></p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
 <section>
   <div class="container">
     <div class="section-label">Getting started</div>
@@ -1253,6 +1307,28 @@ async function startAnalystTrial(plan) {
     const res = await fetch('/api/checkout-analyst', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: p }) });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; } else { throw new Error('No checkout URL'); }
+  } catch (err) {
+    buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
+    alert('Something went wrong. Please try again or contact support.');
+  }
+}
+
+/* Crypto checkout. Deliberately a copy of startAnalystTrial's SHAPE rather than a call into
+   crypto.html's cryptoCheckout(): that one reaches for a [data-ckt-msg] element and a
+   .price-card ancestor that only exist on /crypto, so lifting it here would have failed
+   silently at the point of sale. The plan is parked on window because acceptTerms() retries
+   with NO arguments after the terms gate -- the same reason _analystPlan exists. */
+async function startCryptoTrial(plan) {
+  if (plan) window._cryptoPlan = plan;
+  if (SALES_PAUSED) { alert(SALES_PAUSED_MESSAGE); return; }
+  if (!requireTerms('startCryptoTrial')) return;
+  const p = (window._cryptoPlan === 'yearly') ? 'yearly' : 'monthly';
+  const buttons = document.querySelectorAll('[onclick^="startCryptoTrial"]');
+  buttons.forEach(b => { b.dataset.orig = b.textContent; b.textContent = 'Redirecting...'; b.disabled = true; });
+  try {
+    const res = await fetch('/api/checkout-crypto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: p }) });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; } else { throw new Error(data.error || 'No checkout URL'); }
   } catch (err) {
     buttons.forEach(b => { b.textContent = b.dataset.orig || 'Try Again'; b.disabled = false; });
     alert('Something went wrong. Please try again or contact support.');
