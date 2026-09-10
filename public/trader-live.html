@@ -1645,6 +1645,15 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #col-feed #card-read { display: flex !important; flex-direction: column; }
   #col-feed #card-read .read2-body { flex: 0 0 auto !important; height: auto; max-height: 240px; overflow-y: auto; }
   #col-feed .card          { flex: 0 0 auto !important; border-right: none !important; border-bottom: 1px solid var(--bdr) !important; }
+  /* ⚠ THE THREE BOOKS SCROLLS THE PAGE, NOT ITSELF, ON MOBILE. .b3-wrap is flex:1 1 0 with
+     overflow-y:auto for the 400px desktop rail; on a phone that trapped the panel in a short
+     internal scroll box with dead space below. Jake, 2026-09-10: "the three books is stuck in a
+     small scrolling box on mobile it should just display it and scroll the page." The card and its
+     wrap grow to content here and #col-feed (already overflow-y:auto on mobile) does the scrolling.
+     #card-board carries an inline overflow:hidden, so these need !important. */
+  #col-feed #card-board { overflow: visible !important; }
+  #col-feed #card-board .b3-wrap { flex: 0 0 auto !important; overflow: visible !important;
+    height: auto !important; min-height: 0; }
   #col-feed .log-area      { height: 180px; max-height: 240px; flex: none; overflow-y: auto; }
   /* Mobile has an Analysis tab too -- it is this column. The panel is a base display:none, so it
      needs turning on here as well, and the three columns stack. */
