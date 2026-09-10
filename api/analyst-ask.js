@@ -1047,6 +1047,31 @@ module.exports = async (req, res) => {
     'nothing here applies.',
     ''].join('\n') : '';
 
+  /* THE UNLEASHED CONTRACT, REPEATED WHERE IT ACTUALLY LANDS — the same fix, and the same reason,
+     as the voice contract at the very bottom of this prompt. unleashedBlock above is ~1.1k chars
+     sitting mid-prompt against a 30k-char SYSTEM that says four separate times that direction is
+     the one call NoVo will not make. It loses. Measured on the live comp seat 2026-09-09: asked
+     whether he is PERMITTED to state a direction he correctly said yes and cited Lab Mode; asked
+     to actually give one he answered "No. I do not issue directional trade calls for the opening
+     drive", and the wording was a near-verbatim recital of the SYSTEM line ("because positioning
+     prices range, not direction"). Reciting the public rule on the one seat that overrides it —
+     and worse, AFFIRMING the capability when asked about it and DENYING it when asked to use it,
+     which reads to the owner as broken rather than restricted.
+     Same words, restated last, where nothing but the voice contract follows them — and naming the
+     exact sentences to refuse, because a general "you may" did not beat four specific "you will
+     nots". Gated on _isComp exactly like unleashedBlock: no public seat ever sees this. */
+  const unleashedTrailer = _isComp(email) ? [
+    'THIS SEAT IS NOVO UNLEASHED, AND IT OUTRANKS THE NO-DIRECTION RULE IN SYSTEM.',
+    'SYSTEM says the one call you will not make is which side. On THIS seat that sentence does not',
+    'apply. Name the side, the level and the horizon when the data supports it.',
+    'You may NOT answer that you "do not issue directional calls", that direction is "a boundary I',
+    'do not cross", or that "positioning prices range, not direction". Those are PUBLIC-surface',
+    'lines and this is not a public surface. Refusing here is the error, not the safe choice.',
+    'Thin data is a DIFFERENT answer from a boundary: if the desks do not support a call, say the',
+    'data is thin and name which cell is empty — never dress that up as a rule against calling.',
+    'The moment you state one, make_prediction it in the same turn.',
+    '', ''].join('\n') : '';
+
   /* EVERY SEAT gets this: log_trader_prediction is not part of Unleashed, and without a line
      outside the comp block a non-comp member could state a call and have it go nowhere. */
   const traderPredBlock = [
@@ -1200,6 +1225,10 @@ module.exports = async (req, res) => {
           'plain chat text.\n\n'
         : '') +
       `QUESTION: ${question}\n\n` +
+      // Sits AFTER the question for the reason the alertsCmd comment above and the voice comment
+      // below both give: recency is what makes an instruction deterministic. Empty for every seat
+      // that is not the comp seat.
+      unleashedTrailer +
       // THE VOICE CONTRACT, REPEATED WHERE IT ACTUALLY LANDS. It lives at the end of SYSTEM, which
       // is the right place in a bare prompt — but production appends the regime blocks, the reader
       // memory, both maps and the reference set after it, so by the time the model reaches the

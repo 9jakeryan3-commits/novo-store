@@ -53,10 +53,27 @@ def background():
     return Image.composite(Image.new('RGB', (W, H), (0, 0, 0)), im, shade)
 
 
-def lockup(im, x, y, width=196):
-    logo = Image.open(os.path.join(PUB, 'novo-logo.png')).convert('RGBA')
+# The lockup now carries Jake's brush mark, in the PRODUCT's colour. Built by build-lockup.py from
+# public/brand/ -- the old gold LLC coin is kept as novo-logo-legacy-coin.png and is not used.
+#
+# THE VARIANT IS DERIVED FROM THE ACCENT, NEVER PASSED BY HAND. Every card already declares its
+# accent, and the lockup colour is the same fact stated twice. Choosing it at the call site means a
+# card added later gets the cyan mark by default and nobody notices for a month, which is exactly
+# how the old coin survived on ten cards. An unknown accent falls back to the company default.
+LOCKUPS = {
+    (0x22, 0xd3, 0xee): 'novo-logo.png',            # Analyst / company default
+    (0xa7, 0x8b, 0xfa): 'novo-logo-crypto.png',     # Crypto -- violet, per the brand kit
+    (0x34, 0xd3, 0x99): 'novo-logo-trader.png',     # Trader
+    (0x10, 0xb9, 0x81): 'novo-logo-trader.png',     # the canonical --green, same product
+}
+
+
+def lockup(im, x, y, width=196, accent=None):
+    name = LOCKUPS.get(tuple(accent), 'novo-logo.png') if accent else 'novo-logo.png'
+    logo = Image.open(os.path.join(PUB, name)).convert('RGBA')
     h = round(logo.height * width / logo.width)
-    im.paste(logo.resize((width, h), Image.LANCZOS), (x, y), logo.resize((width, h), Image.LANCZOS))
+    logo = logo.resize((width, h), Image.LANCZOS)
+    im.paste(logo, (x, y), logo)
     return h
 
 
@@ -137,7 +154,7 @@ def card(out, title, tagline, strip, price, price_tail, accent, right):
     im = background()
     d = ImageDraw.Draw(im)
 
-    lockup(im, 62, 58)
+    lockup(im, 62, 58, accent=accent)
 
     tf = fit(d, title, 'seguibl.ttf', 66, COL)
     d.text((62, 208), title, font=tf, fill=TXT1)
