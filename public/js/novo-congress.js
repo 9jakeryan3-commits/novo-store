@@ -14,7 +14,7 @@
  * panel could put someone in a position on a misunderstanding, and it is designed against.
  *
  * ⚠ AMOUNTS ARE BANDS AND ARE NEVER SUMMED.
- * Members disclose "$1,001 - $15,000", never a figure. Adding those up would produce a total
+ * Members usually disclose "$1,001 - $15,000" rather than a figure. Adding bands up would produce a total
  * nobody filed and hand it the authority of a measurement. The band is printed as filed and the
  * tally counts FILINGS, not dollars.
  *
@@ -125,7 +125,7 @@
       + '<b>45 days</b> to disclose under the STOCK Act'
       + (lag ? ', and in this window the median gap between the trade and its disclosure is <b>'
           + lag.median + ' days</b> (p90 ' + lag.p90 + ', longest ' + lag.max + ')' : '')
-      + '. Amounts are the ranges members file, never exact figures.</div>');
+      + '. Amounts are the ranges members file &mdash; a few file an exact figure instead.</div>');
 
     // filters
     h.push('<div class="cg-filters">'
@@ -149,9 +149,14 @@
       h.push('<div class="cg-empty">No disclosures match this filter.</div>');
     } else {
       h.push(rows.map(function (r) {
+        /* A NEGATIVE LAG IS REAL AND MUST NOT READ AS "filed -18d later". Some members file a
+           notification date earlier than the trade date; that is their filing, not our arithmetic,
+           so the row says the dates disagree rather than printing nonsense or hiding it. */
         var lagTxt = r.lag_days == null ? ''
-          : '<span class="' + (r.lag_days > 45 ? 'cg-stale' : 'cg-lagpill') + '">filed '
-            + r.lag_days + 'd later</span> · ';
+          : r.lag_days < 0
+            ? '<span class="cg-stale">filing dates disagree</span> · '
+            : '<span class="' + (r.lag_days > 45 ? 'cg-stale' : 'cg-lagpill') + '">filed '
+              + r.lag_days + 'd later</span> · ';
         return '<div class="cg-row">'
           + '<div class="cg-tk' + (r.ticker ? '' : ' none') + '">' + esc(r.ticker || 'no ticker') + '</div>'
           + '<div class="cg-who">' + esc(r.member || 'Unknown')

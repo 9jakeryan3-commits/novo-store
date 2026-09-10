@@ -52,10 +52,19 @@ module.exports = async function handler(req, res) {
   // The lag distribution is computed over EVERYTHING held, before any filter, so a reader who
   // narrows to one ticker still sees the honest shape of the feed rather than a lag summary of
   // three rows.
-  const lags = rows.map((x) => x.lag_days).filter((n) => Number.isFinite(n)).sort((a, b) => a - b);
+  /* ⚠ SOME FILINGS CARRY A NEGATIVE LAG, AND THAT IS THE SOURCE, NOT THE PARSER.
+     Rep. Adrian Smith's PTR reads "P 07/31/2026 07/13/2026" — notified eighteen days BEFORE the
+     transaction it discloses. Verified against the PDF text itself rather than assumed. The dates
+     stay exactly as filed, because silently repairing a member's disclosure would be inventing a
+     record; but they are excluded from the distribution, where a negative would drag the median
+     and make "min" meaningless. */
+  const lags = rows.map((x) => x.lag_days)
+    .filter((n) => Number.isFinite(n) && n >= 0).sort((a, b) => a - b);
+  const inconsistent = rows.filter((x) => Number.isFinite(x.lag_days) && x.lag_days < 0).length;
   const at = (p) => (lags.length ? lags[Math.min(lags.length - 1, Math.floor(lags.length * p))] : null);
   const lag = lags.length
-    ? { n: lags.length, median: at(0.5), p90: at(0.9), max: lags[lags.length - 1], statutory_limit: 45 }
+    ? { n: lags.length, median: at(0.5), p90: at(0.9), max: lags[lags.length - 1],
+        statutory_limit: 45, dates_inconsistent: inconsistent }
     : null;
 
   let out = rows;
@@ -68,13 +77,17 @@ module.exports = async function handler(req, res) {
                   || String(b.transaction_date || '').localeCompare(String(a.transaction_date || '')));
 
   const total = out.length;
+  /* ⚠ THE TALLY IS COMPUTED BEFORE THE SLICE. Computing it after meant the "top names" strip
+     described only the rows on the current page — ask for 4 rows and every ticker showed "1
+     filing", which is a true statement about the page and a false one about the data. */
+  const forTally = out;
   out = out.slice(0, limit);
 
   // A plain count of the names appearing most often in the window. Deliberately not called
   // "most bought" or given a rank score: the disclosed amount is a BAND, so the size of any of
   // these is unknown and summing them would invent a number nobody filed.
   const tally = {};
-  for (const x of out) {
+  for (const x of forTally) {
     if (!x.ticker) continue;
     const t = (tally[x.ticker] = tally[x.ticker] || { ticker: x.ticker, buys: 0, sells: 0, filings: 0 });
     if (x.type === 'buy') t.buys++; else if (x.type === 'sell') t.sells++;
@@ -86,7 +99,10 @@ module.exports = async function handler(req, res) {
     source: 'Clerk of the U.S. House of Representatives — Periodic Transaction Reports',
     source_url: 'https://disclosures-clerk.house.gov/',
     chamber: 'house',
-    disclaimer: 'Disclosures, not trades in real time. Members have up to 45 days to file under the STOCK Act, and amounts are disclosed as ranges, never exact figures.',
+    // ⚠ THIS SENTENCE USED TO SAY "never exact figures" AND THAT WAS FALSE. Most members file a
+    // range; some file a precise amount, and one of them is why the parser broke. Correct code with
+    // wrong copy still ships a wrong claim.
+    disclaimer: 'Disclosures, not trades in real time. Members have up to 45 days to file under the STOCK Act, and amounts are usually disclosed as ranges rather than exact figures.',
     lag,
     unreadable_filings: unreadable,
     unreadable_note: unreadable
