@@ -136,9 +136,11 @@
 
     if (!list.length) {
       box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>' + nvHtml;
+      try { window.novoSubtabs && window.novoSubtabs.apply(box, { marker: '.al-grp', key: 'alerts' }); } catch (_e) {}
       return;
     }
     box.innerHTML = list.map(function (a) {
+    try { window.novoSubtabs && window.novoSubtabs.apply(box, { marker: '.al-grp', key: 'alerts' }); } catch (_e) {}
       var bits = [];
       if (a.recurring) bits.push(a.armed === false ? 'recurring · re-arming' : 'recurring');
       else if (a.kind !== 'crypto_block') bits.push('one-shot');

@@ -249,6 +249,7 @@
       h += '<div class="tp-empty">No close analogues for today’s shape yet.</div>';
     }
     el.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
   /* ── OPTIONS FLOW ─────────────────────────────────────────────────────────────────────────── */
@@ -311,6 +312,7 @@
            }).join('');
     }
     el.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
   function drawSweeps(el, state) {
@@ -382,6 +384,7 @@
          + 'sweeps and block prints appear here as they hit.</div>';
     }
     el.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
   function drawRead(el, state) {

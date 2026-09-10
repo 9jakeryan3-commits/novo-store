@@ -194,6 +194,7 @@
       + 'else is graded on. Self-scored, and it says so. A stated prediction that is not recorded '
       + 'does not exist.</div>';
     root.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(root, { marker: '.pd-grp', key: 'predict' }); } catch (_e) {}
   }
 
   function fail(msg) {

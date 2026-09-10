@@ -133,6 +133,7 @@
       h += '<div class="rd-empty">The Eye has not published readings recently. This is a gap in the '
         + 'feed, not a quiet market — the difference matters, so the page says which.</div>';
       el.innerHTML = h;
+      try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.rd-grp', key: 'readings' }); } catch (_e) {}
       return;
     }
     if (rs.length) {
@@ -179,6 +180,7 @@
       + 'rather than the day it looked good.'
       + (d.as_of ? ' Published ' + esc(ago(d.as_of)) + '.' : '') + '</div>';
     el.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.rd-grp', key: 'readings' }); } catch (_e) {}
   }
 
   function bar(sel) {
