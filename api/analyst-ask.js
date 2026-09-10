@@ -384,7 +384,7 @@ function surfaceBlock(surface, focus) {
   return L.join('\n') + '\n\n';
 }
 
-const { SYSTEM, ATTRIB_RE, _numsIn, recordClaimAudit, missBlock, calibBlock,
+const { SYSTEM, ATTRIB_RE, _numsIn, recordClaimAudit, caveatAudit, missBlock, calibBlock,
         provenanceAudit } = require('./_lib/analyst-brain.js');
 // ^ moved verbatim to _lib/analyst-brain.js (2026-09-05) so /api/novo-broadcast and this
 //   handler share ONE brain — see that file's header for why a copy was not acceptable.
@@ -1495,7 +1495,11 @@ module.exports = async (req, res) => {
       try {
         const fabricated = recordClaimAudit(answer, contents, marketJson);
         const mislabeled = provenanceAudit(answer, trackRec, contents);
-        if (fabricated.length || mislabeled.length) {
+        /* THIRD FAILURE MODE: real figure, right cell, right denominator, PROHIBITION DROPPED.
+           The other two ask whether a number exists and whether its provenance word is right.
+           Neither can see a number that must not travel alone. See caveatAudit's header. */
+        const uncaveated = caveatAudit(answer, marketJson);
+        if (fabricated.length || mislabeled.length || uncaveated.length) {
           // Two failure modes, two instructions in one revise. FABRICATED figures come out (they
           // are in no record). MISLABELED figures STAY -- they are real -- but their provenance is
           // corrected, which is the fix the remove-only guard could not make and the reason it
@@ -1516,6 +1520,12 @@ module.exports = async (req, res) => {
             'FIGURES THAT ARE REAL BUT MISLABELED (keep the NUMBER, fix only the provenance word so ' +
             'it tells the truth about where it came from -- a backtest is never "live", a snapshot ' +
             'count is never "sessions"):\n' + misList);
+          if (uncaveated.length) parts.push(
+            'FIGURES THAT ARE REAL BUT MUST NOT TRAVEL ALONE (keep the NUMBER and keep the point ' +
+            'you were making — add the caveat the record ships with it, in your own words, in the ' +
+            'same sentence. The caveat is part of the figure, not optional context):\n' +
+            uncaveated.map((f, i) => (i + 1) + '. ' + f.value + ' (' + f.field + ') — the record says: "' +
+              f.note + '"').join('\n'));
           parts.push('TEXT:\n' + answer);
           const rres = await Promise.race([
             callModel(MODEL + ':generateContent', { contents: [{ role: 'user', parts: [{ text: parts.join('\n\n') }] }],
@@ -1527,10 +1537,10 @@ module.exports = async (req, res) => {
           const revised = rparts.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
           if (revised && revised.length > answer.length * 0.5) {
             answer = revised;
-            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, revised: true };
+            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, uncaveated: uncaveated.length, revised: true };
             console.log('[ASK] record-guard: ' + fabricated.length + ' fabricated removed, ' + mislabeled.length + ' relabeled');
           } else {
-            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, revised: false };
+            recordGuard = { fabricated: fabricated.length, mislabeled: mislabeled.length, uncaveated: uncaveated.length, revised: false };
             console.log('[ASK] record-guard: ' + (fabricated.length + mislabeled.length) + ' flagged, revision failed - draft kept');
           }
           modelCalls++;

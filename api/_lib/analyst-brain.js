@@ -339,6 +339,64 @@ function recordClaimAudit(answer, contents, marketJson) {
   return flagged;
 }
 
+/* ── THE CAVEAT AUDIT ──────────────────────────────────────────────────────────────────────────
+   Some cells in the payload ship a PROHIBITION alongside their number. cost_anomaly's note reads
+   "Near-mechanical: an anomalously wide spread narrows mostly by construction. The alert's value
+   is the timing; this rate must never be quoted as edge." SYSTEM already says a mandatory caveat
+   travels WITH its number and names this exact cell — and on 2026-09-09 a live deep read on the
+   comp seat quoted "a 93.9% hit rate across 280 independent coin-day cells" as the corpus his
+   engine calls fell short of, with the words mechanical, construction and timing absent from all
+   3,793 characters. Right number, right cell, right denominator, prohibition dropped.
+
+   recordClaimAudit cannot catch it: 93.9 IS in the evidence, so it passes as grounded. A guard
+   that checks whether a figure EXISTS has no concept of a figure that must not travel alone —
+   and 93.9% quoted bare reads as a spectacular edge, which is precisely the framing the data
+   forbids. Self-flattering, and the number is real, so nothing else would ever flag it.
+
+   Payload-driven, not a hardcoded cell: any object carrying note/caveat text with a prohibition
+   is audited. Distinctive figures only (a decimal, or >= 100) because a bare small integer
+   collides with ordinary prose. Fails open and empty on anything unparseable. */
+const CAVEAT_STOP = new Set(['never','should','always','because','quoted','rather','across','their',
+  'these','those','which','while','value','rates','rate','alert','alerts','number','numbers']);
+const CAVEAT_PROHIBITION = /\bnever\b|\bmust not\b|\bdo not\b|\bdon't\b|\bnot be quoted\b/i;
+function caveatAudit(answer, marketJson) {
+  let payload = null;
+  try { payload = JSON.parse(String(marketJson || '')); } catch (_) { return []; }
+  const text = String(answer || '');
+  const low = text.toLowerCase();
+  const inAnswer = _numsIn(text);
+  const flagged = [];
+  const walk = (o) => {
+    if (!o || typeof o !== 'object') return;
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    const note = ['note', 'caveat'].map((k) => (typeof o[k] === 'string' ? o[k] : '')).join(' ').trim();
+    if (note && CAVEAT_PROHIBITION.test(note)) {
+      // The words that would show the caveat survived into the answer.
+      const terms = [...new Set((note.toLowerCase().match(/[a-z]{6,}/g) || []))]
+        .filter((w) => !CAVEAT_STOP.has(w));
+      const carried = terms.some((w) => low.includes(w));
+      if (!carried) {
+        /* THE RATE FIRST, NOT WHATEVER KEY ORDER PUTS FIRST. The sabotage suite caught this:
+           on the real answer, n_claims/n_cells are scanned before `rate` and 280 flagged while
+           93.9 did not, so the revise instruction would have pointed at the denominator instead
+           of the figure that actually misleads. Both are the same violation; only one is worth
+           naming to the model. */
+        const entries = Object.entries(o).filter(([, v]) => typeof v === 'number' && isFinite(v));
+        entries.sort((a, b) => (/rate|pct|percent/i.test(b[0]) ? 1 : 0) - (/rate|pct|percent/i.test(a[0]) ? 1 : 0));
+        for (const [k, v] of entries) {
+          const distinctive = String(v).includes('.') || Math.abs(v) >= 100;
+          if (!distinctive || !inAnswer.has(v)) continue;
+          flagged.push({ value: v, field: k, note });
+          break;                        // one flag per cell is enough to trigger the revise
+        }
+      }
+    }
+    for (const v of Object.values(o)) walk(v);
+  };
+  walk(payload);
+  return flagged;
+}
+
 function missBlock(misses) {
   if (!Array.isArray(misses) || !misses.length) return '';
   const lines = [];
@@ -432,5 +490,5 @@ function provenanceAudit(answer, trackRec, contents) {
   return flags;
 }
 
-module.exports = { SYSTEM, ATTRIB_RE, _numsIn, recordClaimAudit, missBlock, calibBlock,
+module.exports = { SYSTEM, ATTRIB_RE, _numsIn, recordClaimAudit, caveatAudit, missBlock, calibBlock,
                    _walkProvenance, provenanceAudit };
