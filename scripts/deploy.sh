@@ -21,6 +21,13 @@ BRANCH=$(git branch --show-current)
 # missing file) before it was wired here; env overrides PARITY_JS / PARITY_PY re-run those tests.
 node scripts/threshold-parity-check.js
 
+# A Trader desk panel is wired in SIX separate lists in one file, and four of the six fail
+# SILENTLY: the markup looks complete, the JS throws nothing, and the defect only exists on the
+# rendered page at the right breakpoint. The Congress panel shipped missing three of them and the
+# worst one put a full-width panel permanently across the workspace, over the chart, which no
+# amount of reading the diff would have caught. Asserted here instead.
+node scripts/desk-columns-check.js
+
 # Regenerate the derived artefacts BEFORE the clean-tree check, so a stale sitemap
 # or a stale asset hash becomes a loud failure instead of silent drift.
 #   - the sitemap was hand-maintained and reached 2,149 entries for 1,067 URLs
