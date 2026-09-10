@@ -108,7 +108,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(18,19,22,.94);backdrop-fil
 /* ---------- brand strip (masthead line) ---------- */
 .brandline{max-width:1200px;margin:0 auto;padding:20px 22px 4px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
 .brandline h1{font-size:26px;font-weight:900;color:var(--txt1);letter-spacing:-.5px;}
-.brandline h1 .accent{color:var(--cyan);}
+.brandline h1 .accent{color:inherit;}   /* "The NoVo Journal" is one title, one colour - Jake 09-09 */
 .brandline .tag{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
 
 /* ============================================================
@@ -612,16 +612,25 @@ nav { position: relative; }
    paint properties because 1,426 pages carry a solid gradient in a style="" attribute.
    box-shadow is deliberately NOT !important: an animation outranks a normal inline
    declaration but loses to !important, so this is what lets the pulse both win and run. */
+/* Plans is a nav word, the same as every other nav word. Jake, 2026-09-09: "change the damn
+   plans link button in the header to white" / "plans and journal both blue for no reason".
+
+   WHY THE INLINE STYLE DID NOT FIX THIS. 1,418 pages carry style="...color:#eaf3ff" on this
+   anchor and it lost on every one of them, because `!important` in a stylesheet outranks a normal
+   inline declaration. A source grep read #eaf3ff and reported the fix landed; the browser painted
+   #22d3ee. The colour has to be corrected HERE, where the !important is, or nowhere.
+   Kept !important for the same reason it was needed originally - a solid gradient still sits in
+   the style="" attribute on the pages that were never de-slabbed. */
 .nav-buy {
   background: rgba(34, 211, 238, 0.07) !important;
-  color: #22d3ee !important;
+  color: #eaf3ff !important;
   border: 1px solid rgba(34, 211, 238, 0.42) !important;
   box-sizing: border-box;
 }
 .nav-buy:hover {
   background: rgba(34, 211, 238, 0.16) !important;
   border-color: #22d3ee !important;
-  color: #22d3ee !important;
+  color: #ffffff !important;
 }
 @media (prefers-reduced-motion: reduce) {
   .nav-buy { animation: none;  }
