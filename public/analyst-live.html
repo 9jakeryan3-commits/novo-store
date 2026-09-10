@@ -2521,6 +2521,20 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
        560px column over a dealer map is neither reading the map nor reading the answer. `.max` is
        the same class the expand button already used, so nothing new renders — it just starts there. */
     _p.classList.toggle('max', !!on);
+    /* ⚠ AND TELL THE BUTTON. The panel opens maximised by design (Jake, 2026-09-06: on this
+       dashboard "the chat IS the task once you are in it"), but nothing updated the expand
+       control, so it opened saying "Expand to full screen" while already full screen — the first
+       click did the opposite of what the button promised. novoAskMax() sets this label correctly
+       on every later toggle, which is why the state only ever looked wrong at open. */
+    try {
+      var _mx = document.getElementById('novo-ask-mx');
+      if (_mx) {
+        var _isMax = _p.classList.contains('max');
+        _mx.innerHTML = _isMax ? '&#x2921;' : '&#x2922;';
+        _mx.title = _isMax ? 'Restore the panel' : 'Expand to full screen';
+        _mx.setAttribute('aria-label', _mx.title);
+      }
+    } catch (_e) {}
     // Full-screen on mobile means the page behind must not scroll underneath.
     try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
     try { document.documentElement.classList.toggle('novo-ask-lock-x', !!on && document.getElementById('novo-ask').classList.contains('max')); } catch(_){}

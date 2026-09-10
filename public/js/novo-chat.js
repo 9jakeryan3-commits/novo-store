@@ -351,6 +351,20 @@
   }
   window.novoAskOpen = function(on){
     document.getElementById('novo-ask').classList.toggle('on', !!on);
+    /* ⚠ AND TELL THE BUTTON. Whatever decided the max state above, the expand control has to agree
+       with it. Without this the panel could open already maximised while the button still read
+       "Expand to full screen", so the first click did the opposite of what it promised.
+       novoAskMax() gets this right on every later toggle, which is why it only ever looked wrong
+       at open. */
+    try {
+      var _mx = document.getElementById('novo-ask-mx');
+      if (_mx) {
+        var _isMax = _p.classList.contains('max');
+        _mx.innerHTML = _isMax ? '&#x2921;' : '&#x2922;';
+        _mx.title = _isMax ? 'Restore the panel' : 'Expand to full screen';
+        _mx.setAttribute('aria-label', _mx.title);
+      }
+    } catch (_e) {}
     // Full-screen on mobile means the page behind must not scroll underneath.
     try { document.documentElement.classList.toggle('novo-ask-lock', !!on); } catch(_){}
     try { document.documentElement.classList.toggle('novo-ask-lock-x', !!on && document.getElementById('novo-ask').classList.contains('max')); } catch(_){}
