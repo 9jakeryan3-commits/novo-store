@@ -592,6 +592,10 @@
       "destination": "/positioning.html"
     },
     {
+      "source": "/congress",
+      "destination": "/congress.html"
+    },
+    {
       "source": "/crypto",
       "destination": "/crypto.html"
     },
