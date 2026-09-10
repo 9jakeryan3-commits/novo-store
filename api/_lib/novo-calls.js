@@ -38,6 +38,7 @@ const { vertex, answerText } = require('../_vertex.js');
 const { SYSTEM } = require('./analyst-brain.js');
 const { makePrediction, listPredictions } = require('./predictions.js');
 const { kv } = require('../_kv.js');
+const { bump } = require('./funnel.js');
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
@@ -137,7 +138,7 @@ async function novoCryptoCalls(snap) {
   const print = decisionPrint(rows, snap.feed);
   try {
     const last = await r.get('novo:print');
-    if (last && String(last) === print) return { made: 0, declined: true, why: 'book unchanged since last pass' };
+    if (last && String(last) === print) { await bump('skipped', 1); return { made: 0, declined: true, why: 'book unchanged since last pass' }; }
   } catch (_) {}
   try { await r.set('novo:print', print, { ex: 6 * 3600 }); } catch (_) {}
 
@@ -161,6 +162,7 @@ async function novoCryptoCalls(snap) {
     '\n\nREADINGS THAT FIRED THIS PASS (context only — a fire is not a reason on its own):\n' +
     JSON.stringify((Array.isArray(snap.feed) ? snap.feed : []).slice(0, 40)).slice(0, 3000);
 
+  await bump('asked', 1);   // he was actually put the question — the denominator for 'declined'
   let out = '';
   try {
     const resp = await vertex(`${MODEL}:generateContent`, {
@@ -177,7 +179,7 @@ async function novoCryptoCalls(snap) {
   // becomes a permissive one — the same note read-predictions.js carries, for the same reason.
   try { j = JSON.parse(out); } catch (_) { return { made: 0, declined: true, why: 'unparseable' }; }
   const calls = j && Array.isArray(j.calls) ? j.calls : [];
-  if (!calls.length) return { made: 0, declined: true, why: 'he declined' };
+  if (!calls.length) { await bump('declined', 1); return { made: 0, declined: true, why: 'he declined' }; }
 
   const ids = [];
   for (const c of calls) {
@@ -196,7 +198,7 @@ async function novoCryptoCalls(snap) {
       thesis: String(c.thesis || '').slice(0, 280) || (sym + ' ' + side),
       basis: String(c.basis || '').slice(0, 200) || 'his own read of the book',
     });
-    if (made && made.ok) ids.push(made.id);
+    if (made && made.ok) { ids.push(made.id); await bump('calls', 1); }
   }
   return { made: ids.length, declined: ids.length === 0, ids };
 }

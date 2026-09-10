@@ -28,6 +28,7 @@
 
 const crypto = require("crypto");
 const { kv } = require("./../_kv.js");
+const { bump } = require("./funnel.js");
 
 const KEY = "pred:log";
 
@@ -516,7 +517,11 @@ async function listPredictions(limit, assetClass, readsOnly) {
 // out-of-sample edge at or above its own floor. The raw firehose stays where it is (the map's
 // feed, the chat tools); this list is only what cleared the bar.
 const FEED_KEY = "novo:alerts:feed";
+/* Every fire that reaches this function has cleared the edge gate and is being shown to comp
+   seats — that is Jake's "released comp seat alerts" stage, counted at the moment of release
+   rather than inferred later from a list length. */
 async function appendNovoFire(entry) {
+  try { await bump("released", 1); } catch (_) {}
   const r = kv();
   if (!r) return;
   let l = null;

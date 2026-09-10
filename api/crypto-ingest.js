@@ -129,6 +129,16 @@ module.exports = async (req, res) => {
     try { await require("./_lib/alerts.js").evaluateCrypto(b); } catch (_) {}
     try { await require("./_lib/predictions.js").evaluateCryptoPredictions(b); } catch (_) {}
     // NoVo's own crypto calls: a new reading with demonstrated edge becomes a recorded prediction.
+    /* THE FUNNEL'S TOP TWO STAGES, counted where they arrive. `b.feed` is what the collector
+       READ this pass; the subset carrying a kind is what it raised as an ALERT. Counting here
+       rather than inside the selector means a pass that the selector skips is still counted as
+       having been read — otherwise the ratio would silently measure the selector, not the Eye. */
+    try {
+      const feed = Array.isArray(b.feed) ? b.feed : [];
+      const { bump } = require("./_lib/funnel.js");
+      await bump("reads", Object.keys(b.coins || {}).length || feed.length);
+      await bump("alerts", feed.length);
+    } catch (_) {}
     try { await require("./_lib/predictions.js").selectCryptoPredictions(b); } catch (_) {}
     /* DR. NOVO HIMSELF, on the WHOLE snapshot — not just the readings that fired.
        Jake, 2026-09-09: "meanwhile Dr. NoVo is watching all the data to make predictions not

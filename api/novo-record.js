@@ -22,6 +22,7 @@
  * Those are other people's calls; counting them would put them in his grade.
  */
 const { novoRecord, migrateGateRows } = require("./_lib/predictions.js");
+const { funnel } = require("./_lib/funnel.js");
 
 module.exports = async (req, res) => {
   const want = process.env.OPS_SECRET || process.env.ANALYST_PUBLISH_SECRET || "";
@@ -43,6 +44,9 @@ module.exports = async (req, res) => {
     if (String(req.query && req.query.migrate) === "1") migrated = await migrateGateRows();
     const rec = await novoRecord();
     if (migrated) rec.migrated = migrated;
+    /* The funnel rides along on the same authenticated read. Jake's expected shape is a
+       RATIO between stages, so the two only mean something side by side. */
+    try { rec.funnel = await funnel(14); } catch (_) { rec.funnel = null; }
     res.setHeader("cache-control", "no-store");
     return res.status(200).json({ ok: true, ...rec, generated: Date.now() });
   } catch (e) {
