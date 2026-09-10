@@ -1814,7 +1814,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     border:1px solid var(--askacc,#22d3ee);border-radius:10px;padding:9px 11px;font-size:13px;
     line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.55)}
   @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px;background:none;border:0} }
-  #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
+  #novo-ask.max{z-index:101;left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
   #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
   html.novo-ask-lock-x, html.novo-ask-lock-x body{overflow:hidden;overscroll-behavior:none}
