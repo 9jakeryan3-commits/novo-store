@@ -63,6 +63,40 @@ module.exports = async function handler(req, res) {
   const r = kv();
   if (!r) return res.status(503).json({ error: 'kv unavailable' });
 
+  /* ?dedupe=1 — rewrite a year's list with exact duplicates collapsed.
+     Needed once because the seen-set bug above re-ingested the same filings three times. This is
+     NOT deletion of useful data: a duplicate row is the same disclosure banked twice, carries no
+     information the first copy does not, and would inflate every filing count on the panel. The
+     identity is the whole disclosure — filing, ticker, side, both dates and the band — so two
+     genuinely separate trades a member made in one asset on one day at one band still both
+     survive, because they are indistinguishable in the source too and dropping one would be
+     inventing a fact. */
+  if (req.query.dedupe === '1') {
+    const y = parseInt(req.query.year || '', 10) || new Date().getUTCFullYear();
+    const key = `congress:tx:${y}`;
+    const raw = await r.lrange(key, 0, -1).catch(() => []);
+    const seenRow = new Set();
+    const keep = [];
+    for (const item of raw || []) {
+      let o = item;
+      if (typeof o === 'string') { try { o = JSON.parse(o); } catch (_) { continue; } }
+      const id = [o.doc_id, o.ticker, o.type, o.transaction_date, o.notification_date,
+                  o.amount, o.asset].join('|');
+      if (seenRow.has(id)) continue;
+      seenRow.add(id);
+      keep.push(JSON.stringify(o));
+    }
+    const before = (raw || []).length;
+    if (keep.length && keep.length < before) {
+      await r.del(key).catch(() => {});
+      for (let i = 0; i < keep.length; i += 500) {
+        await r.rpush(key, ...keep.slice(i, i + 500)).catch(() => {});
+      }
+    }
+    const after = Number(await r.llen(key).catch(() => 0)) || 0;
+    return res.status(200).json({ dedupe: true, year: y, before, kept: keep.length, after });
+  }
+
   const year = parseInt(req.query.year || '', 10) || new Date().getUTCFullYear();
   // A cron run only has a handful of new filings; a backfill is explicit and bounded.
   const budget = Math.max(1, Math.min(parseInt(req.query.max || '', 10) || 25, 200));
@@ -77,7 +111,15 @@ module.exports = async function handler(req, res) {
 
   const ptrs = index.filter((x) => x.FilingType === 'P');
   const seenKey = `congress:seen:${year}`;
-  const seen = new Set(await r.smembers(seenKey).catch(() => []));
+  /* ⚠ NORMALISE TO STRINGS. @upstash/redis runs with automaticDeserialization on by default, so a
+     DocID stored as the string "20035401" comes back from smembers as the NUMBER 20035401. The
+     lookup below is `seen.has(String(id))`, which then misses every single time — the set fills up
+     correctly and is never once consulted successfully.
+     What that looked like: three consecutive backfill runs each reported `added 1000, remaining
+     231`. Identical numbers, no error, no failure — and 3,000 duplicate rows banked. A dedupe that
+     silently never dedupes reads exactly like a dedupe that had nothing to do. */
+  const seen = new Set((await r.smembers(seenKey).catch(() => [])).map(String));
+  const seenBefore = seen.size;
 
   const todo = ptrs.filter((x) => !seen.has(String(x.DocID)));
   // newest first: if the budget runs out, the panel is still current at the recent end
@@ -136,9 +178,15 @@ module.exports = async function handler(req, res) {
     // append-only, newest last; the read endpoint sorts and slices
     await r.rpush(`congress:tx:${year}`, ...fresh.map((x) => JSON.stringify(x))).catch(() => {});
   }
+  /* The instrument has to be able to answer "did the dedupe work?". Reporting only `added` and
+     `remaining` cannot distinguish real progress from reprocessing the same filings forever. */
+  const seenAfter = Number(await r.scard(seenKey).catch(() => 0)) || 0;
   const meta = {
     last_run: new Date().toISOString(),
     year,
+    seen_before: seenBefore,
+    seen_after: seenAfter,
+    seen_delta: seenAfter - seenBefore,
     ptrs_in_index: ptrs.length,
     remaining: Math.max(0, todo.length - processed),
     added: fresh.length,
