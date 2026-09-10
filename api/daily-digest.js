@@ -147,6 +147,24 @@ module.exports = async (req, res) => {
   // How late a delayed cron tick may still deliver. See the matcher below for why it is small.
   const DIGEST_CATCHUP_MIN = 10;
 
+  /* ⚠ THE COMP GATE, BY HASH, BECAUSE THIS LOOP NEVER SEES AN EMAIL. Reader memory is keyed on
+     sha256(email).slice(0,16) and a hash is one-way, so isComp(email) cannot be called here the
+     way every other surface calls it. Instead the SAME list is hashed the SAME way and compared —
+     one implementation of the list (comp.js's parsing, copied exactly: split, trim, lowercase,
+     filter), one implementation of the hash (member-memory.js's eh, copied exactly). Built per
+     call, not at module load, for comp.js's stated reason: an env change should wait on a
+     redeploy, never on a warm lambda's memory.
+     ⚠ If member-memory.js's eh() ever changes, this silently stops matching and the comp seat
+     quietly drops back to the public digest — a gate that fails CLOSED, which is the right
+     direction, but it fails SILENTLY, so the header of eh() cross-points here. */
+  const _compHashes = () => {
+    const _c = require("crypto");
+    return new Set(String(process.env.COMP_EMAILS || "")
+      .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
+      .map((e) => _c.createHash("sha256").update(e).digest("hex").slice(0, 16)));
+  };
+  const COMP_H = _compHashes();
+
   let idx = [];
   try { idx = await r.smembers("mem:index"); } catch (_) { idx = []; }
   idx = (idx || []).slice(0, 100);
@@ -288,21 +306,68 @@ module.exports = async (req, res) => {
          Same move as _kv.js releaseClaim. */
       if (!facts.length) { await _unclaim(); skipped++; continue; }
 
+      /* THE PRIVATE DESK, COMP SEATS ONLY (Jake, 2026-09-09, direct: "fix the digest now").
+         The chat has run NoVo Unleashed on this seat since 08a9a7f08 while the digest — a wholly
+         separate handler — had NO comp awareness at all: no gate, no desk data, no directional
+         posture. So the owner asked for a 9:25 brief with a direct opening call, was told in chat
+         that the call is "a boundary I do not cross", and the real reason was that this file had
+         never heard of him. Additive and fail-open: any failure here leaves `desk` null and the
+         member gets the ordinary public brief, byte-identical to before. */
+      const isCompSeat = COMP_H.has(h);
+      let desk = null;
+      if (isCompSeat) {
+        try {
+          let es = await r.get("equity:signals:live");
+          if (typeof es === "string") { try { es = JSON.parse(es); } catch (_) { es = null; } }
+          if (es && (es.record || es.open)) {
+            desk = { open: (es.open || []).slice(0, 6), record: es.record || null };
+            facts.push({ desk_open: desk.open, desk_record: desk.record });
+          }
+        } catch (_) { desk = null; }
+      }
+
+      /* THE CALL THE MODEL MAY MAKE, AND WHY IT IS A SIDE AND NOT A LEVEL. On the comp seat the
+         brief may carry a direct opening call — but `direction` is the only kind asked for here,
+         so the call carries NO price of its own. Every number still has to come from DATA, and a
+         kind that needs a target would hand the model a figure to invent on the one path with no
+         tool loop to check it against. Side + horizon is fully gradable and cannot be fabricated. */
+      let pendingCall = null;
       const write = async (temp) => {
+        const compRules = isCompSeat ? (
+          "THIS IS THE PRIVATE DESK SEAT. You MAY and SHOULD open with a direct call for the " +
+          "session ahead — the side, and what would void it — when the desk data or the dealer " +
+          "map supports one. Do not answer that direction is a boundary you do not cross; that " +
+          "is the public rule and this is not the public digest. If the data does not support a " +
+          "call, say so plainly and give the levels instead — thin data is a different answer " +
+          "from a refusal on principle.\n" +
+          "Reply as STRICT JSON, no other text: {\"brief\":\"<the brief>\",\"call\":" +
+          "{\"symbol\":\"SPY\",\"side\":\"up\"|\"down\",\"horizon_min\":<15-390>," +
+          "\"thesis\":\"<one short line>\"}}  — and \"call\":null when you are not making one.\n"
+        ) : "";
         const j = await vertex(`${MODEL}:generateContent`, {
           contents: [{ role: "user", parts: [{ text:
-            "You are NoVo, the AI market analyst — first person, dry, precise, no advice, no " +
-            "predictions, no emoji. Write a push-notification-sized personal brief (max 55 words) " +
+            "You are NoVo, the AI market analyst — first person, dry, precise, no advice, " +
+            (isCompSeat ? "" : "no predictions, ") + "no emoji. Write a push-notification-sized " +
+            "personal brief (max 55 words) " +
             "for a reader who follows these, using ONLY the numbers given. Every figure you write " +
             "must appear in DATA or be a percentage distance between two of its values — do not " +
             "round to a friendlier number and do not add a figure that is not there. Lead with " +
-            "the most interesting fact.\nDATA: " + JSON.stringify(facts) }] }],
+            "the most interesting fact.\n" + compRules + "DATA: " + JSON.stringify(facts) }] }],
           generationConfig: { temperature: temp, maxOutputTokens: 200,
+                              ...(isCompSeat ? { responseMimeType: "application/json" } : {}),
                               thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
         }, "digest");
-        return (j && j.candidates && j.candidates[0] && j.candidates[0].content &&
+        const raw = (j && j.candidates && j.candidates[0] && j.candidates[0].content &&
                 (j.candidates[0].content.parts || []).filter((p) => p.text && !p.thought)
                   .map((p) => p.text).join("").trim()) || null;
+        if (!isCompSeat || !raw) return raw;
+        /* An unparseable answer is NOT salvaged into a brief — same rule as read-predictions.js.
+           Returning null here drops to the retry, then to the deterministic template. */
+        let parsed = null;
+        try { parsed = JSON.parse(raw); } catch (_) { return null; }
+        if (!parsed || typeof parsed.brief !== "string" || !parsed.brief.trim()) return null;
+        pendingCall = parsed.call || null;
+        return parsed.brief.trim();
       };
 
       let text = await write(0.4);
@@ -325,6 +390,42 @@ module.exports = async (req, res) => {
       }
       if (guard) console.log(`[DIGEST] grounding guard: ${guard}`);
       if (!text) { await _unclaim(); errors++; continue; }
+
+      /* ⚠ A STATED PREDICTION THAT IS NOT RECORDED DOES NOT EXIST — the Iron Rule from
+         analyst-ask.js's unleashed block, which this path could not honour on its own: the digest
+         is ONE generateContent call with no tool loop, so the model cannot invoke make_prediction
+         the way it does in chat. Shipping a directional brief without this would put an ungraded
+         call in front of the owner every morning and quietly build the one thing the whole record
+         exists to prevent — a claim with no denominator.
+         NOT ON THE FALLBACK. `guard === "fallback"` means the model's draft was rejected and the
+         text is the deterministic template; the call belonged to prose nobody sent, and recording
+         it would grade NoVo on a sentence he did not publish.
+         Failure to record is not failure to deliver: the brief still goes out. */
+      if (isCompSeat && pendingCall && guard !== "fallback") {
+        try {
+          const sym = String(pendingCall.symbol || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+          const side = pendingCall.side === "down" ? "down" : "up";
+          const hz = Math.round(Number(pendingCall.horizon_min));
+          const tk = live && (live.tickers || []).find((x) => x.ticker === sym);
+          const spot = tk && Number(tk.spot);
+          /* No spot, no prediction — the same refusal read-predictions.js makes, for the same
+             reason: a call with no starting price cannot be graded, and inventing one would score
+             him against a number he never committed to. */
+          if (sym && spot > 0 && isFinite(hz) && hz >= 15 && hz <= 390) {
+            const { makePrediction } = require("./_lib/predictions.js");
+            const made = await makePrediction({
+              kind: "direction", asset_class: "equity", symbol: sym, side, spot_at: spot,
+              horizon_min: hz, source: "digest",
+              thesis: String(pendingCall.thesis || "").slice(0, 200) || "stated in the morning digest",
+              basis: "the " + (dg.time || "morning") + " digest",
+            });
+            console.log(`[DIGEST] call ${sym} ${side} ${hz}m -> ` +
+                        (made && made.ok ? made.id : "REFUSED: " + ((made && made.error) || "unknown")));
+          } else {
+            console.log(`[DIGEST] call dropped: unusable shape ${sym}/${hz}/${spot}`);
+          }
+        } catch (e) { console.error("[DIGEST] call not recorded:", e.message); }
+      }
       /* ⚠ THE BRIEF IS STORED BEFORE IT IS SENT (Jake, 2026-09-07: "a digest tab/page where you
          can manage your daily digest ... where it displays"). Until now the push notification WAS
          the entire artifact — 320 characters, dismissed once, gone permanently — which is how Jake
