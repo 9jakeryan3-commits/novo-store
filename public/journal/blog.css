@@ -672,3 +672,24 @@ nav { position: relative; }
 .btn-discord, .price-btn, .price-btn-secondary, .btn-primary, .btn-secondary,
 .btn-crypto { animation: none; }
 }
+
+/* The market strip is ONE continuous tape, not a row of boxes. `.tick` carries
+   `border-right:1px solid #2e3036` inline on every page; polish.css has killed it site-wide since
+   the box ban, but blog.css — the only stylesheet the journal loads — never got the same rule, so
+   the journal alone showed vertical dividers between S&P, Nasdaq and the rest. Jake, 2026-09-09:
+   "the journal header does not match the rest is has the market strip split lines". Matching
+   polish.css exactly, !important included, because the inline rule outranks a plain selector. */
+.ticker-tag,
+.ticker .tick { border-right: 0 !important; }
+
+/* THE SECOND HALF OF THE SAME REPORT — "and an extra hairline on mobile". Same root cause: an
+   override polish.css has and blog.css does not. site-search.js injects
+   `nav .nvs-ss-wrap{border-top:1px solid ...}` at RUNTIME, so on every non-journal page
+   polish.css:551 cancels it and on the journal nothing did. The rendered header carried one more
+   rule than every other page in the estate.
+
+   ⚠ !important IS LOAD-BEARING. The injected sheet lands after this file and wins on source order
+   at equal specificity, so a plain `nav .nvs-ss-wrap` here would lose. Two selectors deep to match
+   what it sets. Copied from polish.css verbatim — these two files are meant to agree, and the bug
+   both halves of tonight's report share is that they had drifted. */
+nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
