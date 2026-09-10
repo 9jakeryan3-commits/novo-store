@@ -2953,6 +2953,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
        get their own. All three render from the SAME live-state fetch, so they cannot disagree
        about which session they are describing. -->
   <div id="col-history" class="col"><div id="col-history-body"></div></div>
+  <!-- CONGRESS (14). House periodic transaction reports. Same js/novo-congress.js the Analyst
+       mounts - one module, two dashboards, so the two cannot drift apart. -->
+  <div id="col-congress" class="col"><div id="col-congress-body"></div></div>
   <div id="col-flow" class="col"><div id="col-flow-body"></div></div>
   <div id="col-sweeps" class="col"><div id="col-sweeps-body"></div></div>
   <div id="col-read" class="col"><div id="col-read-body"></div></div>
@@ -3089,6 +3092,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <button type="button" data-tab="11" onclick="pickMore(11)"><span class="mm-ico">&#8644;</span>Options flow</button>
       <button type="button" data-tab="12" onclick="pickMore(12)"><span class="mm-ico">&#8649;</span>Sweeps &amp; blocks</button>
       <button type="button" data-tab="9" onclick="pickMore(9)"><span class="mm-ico">&#9650;</span>Futures</button>
+      <button type="button" data-tab="14" onclick="pickMore(14)"><span aria-hidden="true">&#9638;</span>Congress</button>
       <button type="button" data-tab="10" onclick="pickMore(10)"><span class="mm-ico">&#9719;</span>History</button>
 </div>
 
@@ -3845,7 +3849,7 @@ function connectTelemetry(){
    Opens over the bar, closes on a pick, on a second tap, or on any tap outside it. The More
    button lights up whenever the tab you are ON lives inside the menu — without that, choosing
    Readings leaves the whole bar looking unselected and the app looks like it lost your place. */
-var MORE_TABS = [3, 7, 8, 9, 10, 11, 12, 13];
+var MORE_TABS = [3, 7, 8, 9, 10, 11, 12, 13, 14];
 function toggleMoreMenu(force){
   var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
   if (!m || !b) return;
@@ -3887,6 +3891,7 @@ var DESK = {
   alerts:   [5,  '#col-alerts-body',   function(){ window.novoAlerts && window.novoAlerts.mount('#col-alerts-body', { app: 'trader', example: 'ping me if SPY breaks its call wall' }); }],
   digest:   [6,  '#col-digest-body',   function(){ window.novoDigest && window.novoDigest.mount('#col-digest-body', { app: 'trader', example: 'Send me a daily digest on SPY.', openChat: function(){ switchMobileTab(4); } }); }],
   predict:  [7,  '#col-predict-body',  function(){ window.novoPredict && window.novoPredict.mount('#col-predict-body', { app: 'trader' }); }],
+  congress: [14, '#col-congress-body', function(){ window.novoCongress && window.novoCongress.mount('#col-congress-body'); }],
 };
 /* WHERE THE DESK STARTS, measured rather than assumed. The rail and every desk column hang off
    --desk-top, which is the real bottom edge of the header block (topbar + the market intel strip).
@@ -3997,7 +4002,8 @@ function switchMobileTab(idx) {
     document.getElementById('col-history'),  // 10 HISTORY (base rate + analogues)
     document.getElementById('col-flow'),     // 11 OPTIONS FLOW (volume, undirected)
     document.getElementById('col-sweeps'),   // 12 SWEEPS & BLOCKS (the print tape)
-    document.getElementById('col-read')      // 13 THE READ (published read + fear gauge)
+    document.getElementById('col-read'),     // 13 THE READ (published read + fear gauge)
+    document.getElementById('col-congress')  // 14 CONGRESS (House disclosures, filed not live)
   ];
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
@@ -4033,6 +4039,13 @@ function switchMobileTab(idx) {
       } catch (e) {}
     }, 60);
   });
+  if (idx === 14) setTimeout(function(){
+    try {
+      if (!window._trCongMounted && window.novoCongress) {
+        window.novoCongress.mount('#col-congress-body'); window._trCongMounted = 1;
+      } else if (window.novoCongress) { window.novoCongress.refresh(); }
+    } catch (e) {}
+  }, 60);
   if (idx === 9) setTimeout(function(){
     try {
       if (!window._trFutMounted && window.novoFutures) {
@@ -8256,6 +8269,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-readings.js?v=d612f191"></script>
 <script src="/js/novo-futures.js?v=3e879719"></script>
 <script src="/js/novo-tape.js?v=55c02a7f"></script>
+<script src="/js/novo-congress.js?v=1"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.

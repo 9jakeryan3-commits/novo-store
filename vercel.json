@@ -1246,6 +1246,10 @@
     {
       "path": "/api/crypto-rundown",
       "schedule": "15 12 * * *"
+    },
+    {
+      "path": "/api/congress-ingest",
+      "schedule": "10 12 * * *"
     }
   ],
   "headers": [
