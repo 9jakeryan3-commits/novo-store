@@ -1404,8 +1404,23 @@ module.exports = async (req, res) => {
          call succeeds in an earlier turn and only the final narration is rate-limited, so the
          member is told nothing happened and asks again — which sets a second alert.
          The ledger already knows. Anything with a side effect that came back ok is named. */
+      /* ⚠ THE PREDICTION TOOLS WERE MISSING FROM THIS MAP AND THEY ARE THE WORST OMISSION IN IT.
+         This map was written 09-07 for alerts and memory; make_prediction / log_trader_prediction /
+         log_forecast shipped the same week and were never added, so the exact failure the note
+         above describes applies to them with a heavier cost. An alert asked for twice is a
+         duplicate alert someone can cancel. A PREDICTION asked for twice is a duplicate row on an
+         APPEND-ONLY record that nobody can take back, and the member re-asks precisely because we
+         told them nothing happened.
+         Found live 2026-09-09: the comp seat 502s on member-prediction turns (3/3 comp, 0/1
+         public) with "I came back with nothing there — ask me again" — an invitation to duplicate,
+         printed over a write that may already have landed. The 502 body also carries no ledger, so
+         neither the member NOR the logs can tell whether it was recorded. Naming it is the whole
+         fix for that half. */
       const DID = { set_alert: 'your alert is set', cancel_alert: 'the alert was cancelled',
-                    update_reader_memory: 'what you asked me to remember is saved' };
+                    update_reader_memory: 'what you asked me to remember is saved',
+                    make_prediction: 'my call is on my record and grades itself at the horizon',
+                    log_trader_prediction: 'your call is on your record — do not ask twice or it lands twice',
+                    log_forecast: 'the forecast is logged' };
       const done = [...new Set((ledger || []).filter((l) => l && l.ok && DID[l.tool])
                                              .map((l) => DID[l.tool]))];
       const emsg = (done.length ? 'Done — ' + done.join(', ') + '. ' : '') + (upstream
