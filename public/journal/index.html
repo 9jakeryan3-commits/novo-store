@@ -115,7 +115,13 @@
      "move up under the 0DTE Options Pillar"). Moved out of .main-col so it reads as the
      lead feature of the page, and its cover is now the signed founder-cover, matching the
      article — the hub had been showing the old journal-cover (the retired coin). -->
-    <a class="lead2" href="/journal/why-i-built-novo">
+<style>/* Founder feature: under the pillar on a phone (Jake wanted the mobile order),
+   in the main column on desktop where it has always been. Two copies, one shown per
+   breakpoint - CSS cannot move an element across container boundaries, and desktop must
+   stay EXACTLY as it was. */
+@media (min-width:769px){ .nv-fdr-m{display:none!important} }
+@media (max-width:768px){ .nv-fdr-d{display:none!important} }</style>
+    <a class="lead2 nv-fdr-m" href="/journal/why-i-built-novo">
       <div class="cover founder">
         <img class="coverimg" src="/journal/covers/founder-cover.png?v=1" alt="Why I Built NoVo — the founder story, signed">
         <span class="clabel">The Founder</span>
@@ -158,6 +164,15 @@
   <!-- ===== MAIN COLUMN ===== -->
   <div class="main-col">
 
+    <a class="lead2 nv-fdr-d" href="/journal/why-i-built-novo">
+      <div class="cover founder">
+        <img class="coverimg" src="/journal/covers/founder-cover.png?v=1" alt="Why I Built NoVo — the founder story, signed">
+        <span class="clabel">The Founder</span>
+      </div>
+      <div class="kicker">Start Here · Feature</div>
+      <h2>Why I Built NoVo</h2>
+      <p class="deck">The honest founder story. Not a magic strategy — an admission that the strategy was never the problem. The hesitation, the moved stop, the revenge trade after a red morning were. So I built the thing I actually needed: every dealer level drawn live on the chart, and an honest score on what each setup has done before.</p>
+      <div class="meta">The NoVo Desk · 7 min read</div></a>
 
     <!-- THE NOVO ANGLE — the simplicity / one-house cluster (lead feature) -->
     <section id="angle"><div class="secrow"><span class="bar"></span><h3>The NoVo Angle</h3></div>
