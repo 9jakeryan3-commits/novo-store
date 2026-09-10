@@ -1704,7 +1704,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask header span{color:var(--txt2,#9fb6d1);font-size:11.5px;display:block;margin-top:1px}
   #novo-ask .clr{margin-left:auto;background:none;border-radius:999px;
  color:var(--txt2,#9fb6d1);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
- padding:5px 11px;cursor:pointer}
+ padding:5px 11px;cursor:pointer;border:0}
   #novo-ask .clr:hover{color:#eaf3ff;}
   #novo-ask .x{background:none;border:0;color:var(--txt2,#9fb6d1);font-size:20px;cursor:pointer;line-height:1}
   #novo-ask .log{flex:1;overflow-y:auto;padding:14px 15px;display:flex;flex-direction:column;gap:12px;
@@ -1730,7 +1730,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask .src{font-size:11px;color:var(--txt3,#6f8bab);line-height:1.6;border-top:1px solid var(--bdr,#22303f);padding-top:7px}
   #novo-ask .intro{font-size:13px;color:var(--txt2,#9fb6d1);line-height:1.65}
   #novo-ask .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
-  #novo-ask .chips button{color:var(--txt2,#9fb6d1); font-size:11.5px;padding:7px 10px;cursor:pointer;text-align:left}
+  #novo-ask .chips button{color:var(--txt2,#9fb6d1); font-size:11.5px;padding:7px 10px;cursor:pointer;text-align:left;background:none;border:0}
   /* Quick asks. The intro's suggestions go with the intro, leaving a bare input for the rest of the
      conversation. These persist. ONE scrolling line, not a wrapping block: the rail is wide but the
      log is the thing that should own the height. */
@@ -1741,7 +1741,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      a seventh stock question, and it always leads the row. */
   #novo-ask .quick button.live{color:#cfefff}
   #novo-ask .quick button.live:hover{color:#eaf3ff}
-  #novo-ask .quick button{flex:0 0 auto; color:#9fd8e6;font-size:11.5px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+  #novo-ask .quick button{flex:0 0 auto; color:#9fd8e6;font-size:11.5px;padding:6px 11px;cursor:pointer;white-space:nowrap;background:none;border:0}
   #novo-ask .quick button:hover{color:#eaf3ff}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,#22303f)}
   #novo-ask input{flex:1; padding:10px 12px;color:#eaf3ff;font-size:13.5px;outline:none;background:transparent;border:0;border-bottom:1px solid var(--bdr,#22303f);outline:0;border-radius:0}
@@ -1765,7 +1765,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask header{padding:13px 16px;gap:11px}
   #novo-ask header b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
     background:var(--askacc);margin-right:8px;vertical-align:1px}
-  #novo-ask .x{padding:5px;display:inline-flex;align-items:center;justify-content:center}
+  #novo-ask .x{padding:5px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0}
   #novo-ask .x:hover{color:#eaf3ff}
   #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}
   #novo-ask input{padding:11px 13px;font-size:14px;background:transparent;border:0;border-bottom:1px solid var(--bdr,#22303f);outline:0;border-radius:0}
@@ -1777,7 +1777,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask .intro::before{content:'Ask the desk.';display:block;font-size:15px;font-weight:800;
     color:#eaf3ff;letter-spacing:-.01em;margin-bottom:7px}
   #novo-ask .chips{gap:8px;margin-top:14px}
-  #novo-ask .chips button{padding:8px 13px;font-size:12px; color:var(--txt2,#9fb6d1); transition:border-color .15s,color .15s}
+  #novo-ask .chips button{padding:8px 13px;font-size:12px; color:var(--txt2,#9fb6d1); transition:border-color .15s,color .15s;background:none;border:0}
   #novo-ask .chips button:hover{color:#eaf3ff}
   /* Mobile: the chat IS the screen. No sheet floating over a half-visible page — inset zero,
      square corners, the composer padded clear of the home bar, and one chevron to minimize. */
@@ -1793,18 +1793,18 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   /* Desktop expand: the same full-screen chat, one keystroke of intent away. The floating
      panel stays the default; .max takes the whole viewport and remembers the choice. */
   #novo-ask .mx{background:none;border-radius:9px;
- color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px}
+ color:var(--txt2,#9fb6d1);font-size:13px;line-height:1;cursor:pointer;padding:6px 9px;border:0}
   #novo-ask .mx:hover{color:#eaf3ff;}
   /* Plain English: a setting a new trader can find without asking for it. Lit when on, because
      a toggle whose state you cannot see is a toggle people press twice. */
   #novo-ask .lvl{background:none;border-radius:9px;
  color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
- margin-right:6px;white-space:nowrap}
+ margin-right:6px;white-space:nowrap;border:0}
   #novo-ask .lvl:hover{color:#eaf3ff;}
   #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;color:var(--askacc,#22d3ee)}
   /* Go deeper: the answer is short by default now, so the way back to the desk report has to be
      one tap rather than knowing the phrase "deep read". */
-  #novo-ask .deeper{background:none; color:var(--txt2,#9fb6d1);font-size:11.5px;cursor:pointer;padding:4px 9px;margin:2px 0 0}
+  #novo-ask .deeper{background:none; color:var(--txt2,#9fb6d1);font-size:11.5px;cursor:pointer;padding:4px 9px;margin:2px 0 0;border:0}
   #novo-ask .deeper:hover{color:#eaf3ff}
   /* A term you can tap. Underlined faintly rather than coloured like a link -- it is a
      definition, not a navigation, and a paragraph of blue words is unreadable. */
@@ -1813,7 +1813,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   .termpop{position:fixed;z-index:2147483647;background:#0d1620;color:#dce9f7;
     border:1px solid var(--askacc,#22d3ee);border-radius:10px;padding:9px 11px;font-size:13px;
     line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.55)}
-  @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px} }
+  @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px;background:none;border:0} }
   #novo-ask.max{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
   #novo-ask.max .m:not(.you):not(.think){max-width:min(94%,860px)}
