@@ -174,6 +174,14 @@ const NEUTRAL_TOOLS = new Set([
   // a prediction tool as an equity signal would fire the bundle advert on a pure crypto question --
   // the exact failure this feature exists to avoid. search_x is general research, like search_news.
   "search_x", "make_prediction", "list_predictions", "log_trader_prediction",
+  // ADDED 2026-09-10 with get_congress_trades, which shipped unclassified and pinned /api/health
+  // to ok:false within one deploy — this audit works, and it caught the omission before a human did.
+  // NEUTRAL rather than EQUITY even though the disclosures are US equity names, on the same
+  // reasoning as search_news and search_x: it is general public-record research, it publishes no
+  // signal, and it is explicitly not actionable (a filing is weeks old by the time it is readable).
+  // Someone asking what a member bought is not asking for the dealer map, and firing the $169
+  // bundle advert at that question is the exact failure the classification exists to prevent.
+  "get_congress_trades",
 ]);
 
 /**
