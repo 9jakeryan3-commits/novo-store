@@ -545,6 +545,12 @@ async function listNovoFires(assetClass, limit) {
 // Chain tickets, curated by their own gate math: a kind enters only when its out-of-sample edge
 // clears its own floor — the exact bar chain_alerts' ACT gate uses, computed from the levels the
 // snapshot already publishes so this can never disagree with the lab.
+/* The actions that carry a measured claim. WATCH is deliberately absent: chain_alerts.py defines
+   it as "no measurable edge", so it can never belong in a feed headed "edge-cleared only". MOVE
+   stays - it is not directional, but "both sides are elevated" IS a measurement, and it says so
+   in its own words rather than dressing a coin flip as a call. */
+const ACTIONABLE = new Set(["BUY", "AVOID", "MOVE"]);
+
 async function curateChainFires(snap) {
   const r = kv();
   const a = snap && snap.alerts;
@@ -556,6 +562,22 @@ async function curateChainFires(snap) {
       if (!t || !t.kind) continue;
       const madeTs = Date.parse(t.ts_utc || "") || 0;
       if (!madeTs || Date.now() - madeTs > 12 * 60 * 1000) continue;
+      /* ⚠ A "WATCH" IS NOT AN EDGE-CLEARED ALERT, AND THE FEED IS LABELLED "EDGE-CLEARED ONLY".
+         chain_alerts.py:25-29 defines the four actions, and it could not be plainer:
+           BUY    reaching target beats reaching stop AND beats the baseline
+           AVOID  the reverse
+           MOVE   both sides elevated, no directional winner - "something is coming, I do not
+                  know which way", said plainly because a coin flip presented as a call is the
+                  most expensive kind of wrong
+           WATCH  "when there is no measurable edge: tracked and graded the same, NEVER presented
+                  as something to put money on"
+         Jake's screenshots, 2026-09-09: twenty-odd tickets in ten minutes under "DR. NOVO'S
+         ALERTS - EDGE-CLEARED ONLY", most of them WATCH rows whose own text ends "so I am not
+         calling it" - with an edge receipt stapled underneath. The header asserted exactly what
+         the body denied. WATCH is tracked and graded elsewhere; it does not belong here. */
+      const action = String(t.action || "").toUpperCase();
+      if (!ACTIONABLE.has(action)) continue;
+
       const lv = levels[t.kind];
       const edge = lv && lv.oos_trig_target != null && lv.oos_base_target != null
         ? lv.oos_trig_target - lv.oos_base_target : null;
@@ -571,7 +593,13 @@ async function curateChainFires(snap) {
         asset_class: "crypto", symbol: String(t.asset_code || "").toUpperCase(),
         kind: t.kind, title: String(t.claim || (t.kind + " fired")).slice(0, 200),
         horizon_min: Number(t.horizon_min) || null,
-        receipts: "oos edge +" + edge.toFixed(1) + "pp over its own floor " + floor,
+        /* ⚠ SAY WHAT WAS ACTUALLY MEASURED. `edge` comes from levels[t.kind] - it is the
+           KIND's out-of-sample record, not this ticket's. The old wording, "oos edge +15.0pp
+           over its own floor 5", printed identically under every ticket and read as though DESK
+           and RPEPE had each been measured at +15pp. Nothing was measured about either. Name the
+           kind so the receipt is a true sentence. */
+        receipts: t.kind + ": +" + edge.toFixed(1) + "pp out-of-sample over its floor of "
+          + floor + "pp (the rule's record, not this ticket's)",
       });
       try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
       kept++;
