@@ -14,7 +14,7 @@
      reads every tick is a cost worth avoiding. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
 
 <script>
 /* ── /trader/live bootstrap ──────────────────────────────────────────────────────────────────────
@@ -301,7 +301,8 @@ button { border: 0; }
   /* ⚠ --font IS THE MONO BODY AND IT STAYS. Jake, explicitly: "dont change traders mono body."
      A trading terminal reading in a monospace face is this product's identity, not drift. It is
      expressed through the shared --mono token so the three dashboards name the same face. */
-  --mono:  'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+  /* ⚠ NO LONGER MONOSPACE. Jake, 2026-09-10, after comparing against Robinhood: "drop it. all 3. NoVo needs a font that stands out." The terminal body and every panel label used to render in self-hosted Geist Mono; they now render in Space Grotesk, the face already carrying the NoVo wordmark - so the whole dashboard speaks in one distinctive voice. The token keeps the name --mono because 64 rules and nine panel modules reference it and a rename is a sweep with no upside; its VALUE is what changed. Space Grotesk's digits are tabular by construction (it descends from Space Mono), so number columns still line up without font-variant-numeric. This reverses the earlier "dont change traders mono body" on Jake's explicit new instruction. */
+  --mono: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --font:  var(--mono);
   /* --sans was system-ui, i.e. whatever the operating system supplies -- Segoe UI on Windows, SF on
      a Mac. That is why this dashboard's UI text never matched the site's. */

@@ -59,7 +59,7 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      cannot exist. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/journal/blog.css?v=87adba7b">
 <style>
 /* ── BUTTONS CARRY NO OUTLINE, AND THAT NEEDS SAYING EXPLICITLY (2026-09-08) ────────────────
@@ -88,7 +88,8 @@ button { border: 0; }
        three dashboards; change them together. */
     --sans: 'Inter', system-ui, -apple-system, sans-serif;
     --display: 'Space Grotesk', 'Inter', sans-serif;
-    --mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+    /* ⚠ NO LONGER MONOSPACE. Jake, 2026-09-10, after comparing against Robinhood: "drop it. all 3. NoVo needs a font that stands out." The terminal body and every panel label used to render in self-hosted Geist Mono; they now render in Space Grotesk, the face already carrying the NoVo wordmark - so the whole dashboard speaks in one distinctive voice. The token keeps the name --mono because 64 rules and nine panel modules reference it and a rename is a sweep with no upside; its VALUE is what changed. Space Grotesk's digits are tabular by construction (it descends from Space Mono), so number columns still line up without font-variant-numeric. This reverses the earlier "dont change traders mono body" on Jake's explicit new instruction. */
+    --mono: 'Space Grotesk', 'Inter', system-ui, sans-serif;
     --navy:  #0e0e10;   /* nested tile / inset bg */
     --navy2: #17171a;   /* raised chrome: inputs, rings, the ask bar -- NOT cards any more */
     /* CARD SURFACES (2026-08-31, Jake: "darken the analyst dashboard cards like the crypto, they

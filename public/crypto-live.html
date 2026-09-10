@@ -24,7 +24,7 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
 <!-- Space Grotesk added: this dashboard had Inter and Geist Mono but not the display face, so
      its headings and big values rendered in Inter while the site's rendered in Space Grotesk.
      Weights matched to the marketing pages so the same text renders identically on both. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
 <style>
 /* ── BUTTONS CARRY NO OUTLINE, AND THAT NEEDS SAYING EXPLICITLY (2026-09-08) ────────────────
    Jake: "zero boarder around then you should only see the text NO BORDER its now massive silver
@@ -46,7 +46,8 @@ button { border: 0; }
   /* purple is this product's accent. --amber stays semantic (medium confidence / warn). */
   --cx:#a78bfa; --cx-deep:#7c3aed; --cx-line:rgba(167,139,250,.30);
   /* Same three names and values as the other two dashboards. */
-  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  /* ⚠ NO LONGER MONOSPACE. Jake, 2026-09-10, after comparing against Robinhood: "drop it. all 3. NoVo needs a font that stands out." The terminal body and every panel label used to render in self-hosted Geist Mono; they now render in Space Grotesk, the face already carrying the NoVo wordmark - so the whole dashboard speaks in one distinctive voice. The token keeps the name --mono because 64 rules and nine panel modules reference it and a rename is a sweep with no upside; its VALUE is what changed. Space Grotesk's digits are tabular by construction (it descends from Space Mono), so number columns still line up without font-variant-numeric. This reverses the earlier "dont change traders mono body" on Jake's explicit new instruction. */
+  --mono: 'Space Grotesk', 'Inter', system-ui, sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
   --display:'Space Grotesk','Inter',sans-serif;
   /* Motion. Two durations only: --dur-1 for a state a finger is holding (press, hover),
      --dur-2 for something that travels (a drawer, a panel arriving). One easing curve, so
@@ -1956,7 +1957,7 @@ function drawGamma(g){
     x.fillStyle=s.dg>=0?'rgba(16,185,129,.78)':'rgba(244,63,94,.78)';
     if(s.dg>=0) x.fillRect(zero,y,w,barH); else x.fillRect(zero-w,y,w,barH);
   }
-  x.font='9px "Geist Mono",monospace'; x.textAlign='right'; x.fillStyle='#565660';
+  x.font='9px "Space Grotesk",sans-serif'; x.textAlign='right'; x.fillStyle='#565660';
   const step=Math.max(1,Math.ceil(band.length/18));
   band.forEach((s,i)=>{if(i%step)return;
     x.fillText(s.k>=1000?Math.round(s.k).toLocaleString():s.k.toPrecision(4),padL-8,yOf(s.k)+3);});
@@ -1972,7 +1973,7 @@ function drawGamma(g){
     x.save(); x.setLineDash(l.d); x.strokeStyle=l.c; x.lineWidth=1.25; x.globalAlpha=.85;
     x.beginPath(); x.moveTo(padL,y); x.lineTo(W-padR,y); x.stroke(); x.restore();
     const ly=Math.max(y-4,lastY+11); lastY=ly;
-    x.font='600 9px "Geist Mono",monospace'; x.textAlign='left';
+    x.font='600 9px "Space Grotesk",sans-serif'; x.textAlign='left';
     const w=x.measureText(l.t).width;
     x.fillStyle='rgba(14,14,16,.82)'; x.fillRect(padL+3,ly-8,w+6,10);
     x.fillStyle=l.c; x.fillText(l.t,padL+6,ly);
