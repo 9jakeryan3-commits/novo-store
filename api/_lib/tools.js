@@ -229,6 +229,30 @@ const declarations = [
     },
   },
   {
+    name: "get_congress_trades",
+    description:
+      "Congressional stock trade disclosures — House Periodic Transaction Reports, read straight " +
+      "from the Clerk of the House. Use it for 'what has Congress been buying', for a named " +
+      "member, or to check whether a ticker has been disclosed recently. " +
+      "⚠ THESE ARE FILINGS, NOT FLOW, AND YOU MUST SAY SO. The STOCK Act allows 45 days to " +
+      "disclose; the measured median gap is 18 days and the longest in the corpus is 476. A " +
+      "disclosure that lands today usually describes a trade from weeks ago, so it is never a " +
+      "reason to act now and must never be framed as one. Every row carries lag_days — quote it. " +
+      "Amounts are usually RANGES, not figures, so a total cannot be computed and must not be " +
+      "asserted; count filings instead. About 12% of filings are paper scans this cannot read, so " +
+      "silence about a member is never evidence they did not trade. House only — no Senate.",
+    parameters: {
+      type: "object",
+      properties: {
+        ticker: { type: "string", description: "Filter to one symbol, e.g. NVDA." },
+        member: { type: "string", description: "Filter by member surname, e.g. Pelosi." },
+        side: { type: "string", description: "buy or sell." },
+        days: { type: "integer", description: "Only disclosures filed in the last N days (default 90, max 400)." },
+        limit: { type: "integer", description: "Rows to return, default 40, max 150." },
+      },
+    },
+  },
+  {
     name: "get_earnings_dates",
     description: "The next scheduled earnings date for a ticker. Relevant to IV and skew questions.",
     parameters: {
@@ -960,6 +984,78 @@ function makeExecutors(ctx = {}) {
         marketState: m.marketState || null,
       };
     } catch (e) { return { error: `quote lookup failed for ${sym}` }; }
+  }
+
+  /* The same rows api/congress.js serves the dashboards, read from KV directly rather than by
+     calling our own endpoint over HTTP — one store, one answer, no self-fetch inside a tool loop.
+
+     ⚠ WHAT THIS RETURNS IS SHAPED TO STOP A PARTICULAR MISTAKE. It carries `lag` and a `caveat`
+     string on every single response, because the model is being handed something that reads like
+     flow and is not. A row here can be six weeks old and still be the newest thing in the file. */
+  async function get_congress_trades({ ticker, member, side, days, limit } = {}) {
+    const r = kv();
+    if (!r) return { error: "congress store unavailable" };
+    const yr = new Date().getUTCFullYear();
+    let rows = [];
+    let unreadable = 0;
+    for (const y of [yr, yr - 1]) {
+      const raw = await r.lrange(`congress:tx:${y}`, -4000, -1).catch(() => []);
+      for (const it of raw || []) {
+        try { rows.push(typeof it === "string" ? JSON.parse(it) : it); } catch (_) { /* skip */ }
+      }
+      unreadable += Number(await r.scard(`congress:unparsed:${y}`).catch(() => 0)) || 0;
+    }
+    if (!rows.length) return { error: "no congressional disclosures held yet" };
+
+    const lagOf = (x) => {
+      const a = Date.parse(String(x.transaction_date) + "T00:00:00Z");
+      const b = Date.parse(String(x.notification_date) + "T00:00:00Z");
+      return Number.isFinite(a) && Number.isFinite(b) ? Math.round((b - a) / 86400000) : null;
+    };
+    rows.forEach((x) => { x.lag_days = lagOf(x); });
+
+    const lags = rows.map((x) => x.lag_days).filter((n) => Number.isFinite(n) && n >= 0).sort((a, b) => a - b);
+    const at = (p) => (lags.length ? lags[Math.min(lags.length - 1, Math.floor(lags.length * p))] : null);
+
+    const back = Math.min(Math.max(Number(days) || 90, 1), 400);
+    const cutoff = new Date(Date.now() - back * 86400000).toISOString().slice(0, 10);
+    let out = rows.filter((x) => String(x.notification_date || "") >= cutoff);
+    if (ticker) {
+      const t = String(ticker).toUpperCase();
+      out = out.filter((x) => String(x.ticker || "").toUpperCase() === t);
+    }
+    if (member) {
+      const m = String(member).toLowerCase();
+      out = out.filter((x) => String(x.member || "").toLowerCase().includes(m));
+    }
+    if (side === "buy" || side === "sell") out = out.filter((x) => x.type === side);
+    out.sort((a, b) => String(b.notification_date || "").localeCompare(String(a.notification_date || "")));
+
+    const tally = {};
+    for (const x of out) {
+      if (!x.ticker) continue;
+      const t = (tally[x.ticker] = tally[x.ticker] || { ticker: x.ticker, buys: 0, sells: 0, filings: 0 });
+      if (x.type === "buy") t.buys++; else if (x.type === "sell") t.sells++;
+      t.filings++;
+    }
+
+    const n = Math.min(Math.max(Number(limit) || 40, 1), 150);
+    return {
+      source: "Clerk of the U.S. House of Representatives, Periodic Transaction Reports",
+      caveat: "Disclosures, not live trades. Members have up to 45 days to file, amounts are " +
+              "usually ranges rather than figures, and about 12% of filings are paper scans that " +
+              "cannot be read. Absence is not evidence a member did not trade. House only.",
+      lag: lags.length ? { median: at(0.5), p90: at(0.9), max: lags[lags.length - 1], statutory_limit: 45 } : null,
+      unreadable_filings: unreadable,
+      window_days: back,
+      matching: out.length,
+      most_filed: Object.values(tally).sort((a, b) => b.filings - a.filings).slice(0, 12),
+      rows: out.slice(0, n).map((x) => ({
+        ticker: x.ticker, asset: x.asset, side: x.type, member: x.member,
+        state_district: x.state_district, traded: x.transaction_date,
+        disclosed: x.notification_date, lag_days: x.lag_days, amount: x.amount,
+      })),
+    };
   }
 
   async function get_economic_calendar({ days_ahead, days_back } = {}) {
@@ -1795,6 +1891,7 @@ function makeExecutors(ctx = {}) {
     get_chain_alerts,
     get_dealer_levels, get_gamma_profile, get_session_history, search_journal,
     get_quote, get_economic_calendar, get_earnings_dates, get_track_record, search_news, search_x,
+    get_congress_trades,
     get_base_rates, get_recent_reads, get_market_internals,
     get_vol_history, get_futures_positioning, get_market_breadth,
     get_crypto_map, get_crypto_breadth, get_crypto_history, get_chain_history,
