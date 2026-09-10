@@ -242,7 +242,7 @@
      always laid out — otherwise it would measure zero and the log could never scroll to bottom. */
   #novo-ask.docked:not(.on){display:flex}
   /* Full-screen expand is meaningless in a tab that is already full width. */
-  #novo-ask.docked .mx{display:none}
+  
   #novo-ask.docked.max{position:static;width:100%;height:100%}
   `;
 
@@ -757,7 +757,7 @@
       ch.appendChild(pv);
     }
     var lb = document.createElement('span');
-    lb.textContent = PENDTHUMB ? 'attached ✕' : '📎 image attached ✕';
+    lb.textContent = PENDTHUMB ? 'attached ✕' : 'image attached ✕';
     ch.appendChild(lb);
   }
   function ingestImage(file){
@@ -794,9 +794,9 @@
     });
     var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
-    var bt = document.createElement('button'); bt.type = 'button'; bt.textContent = '📎';
+    var bt = document.createElement('button'); bt.type = 'button'; bt.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'; bt.setAttribute('aria-label','Attach an image');
     bt.title = 'Attach a chart image, or just paste one';
-    bt.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:0 6px;opacity:.7;';
+    bt.style.cssText = 'background:none;border:0;cursor:pointer;padding:0 8px;color:var(--askacc,#22d3ee);display:inline-flex;align-items:center;';
     bt.onclick = function(){ fi.click(); };
     qi.form.insertBefore(bt, qi);
     qi.form.appendChild(fi);
