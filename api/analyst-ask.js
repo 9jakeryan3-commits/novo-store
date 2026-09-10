@@ -1307,6 +1307,17 @@ module.exports = async (req, res) => {
     const roundBudget = deep ? DEEP.ROUND_BUDGET_MS : ROUND_BUDGET_MS;
 
     let upstream = null;                 // why the model call died, if it did
+    /* ⚠ WHY THE MODEL RETURNED NOTHING, WHICH NOTHING HAS EVER RECORDED. `finishReason` is not
+       read anywhere in api/ — verified by grep, zero hits — so an empty candidate produces
+       "I came back with nothing there" on screen and SILENCE in the logs. The two cases that
+       matter are opposite problems and looked identical: MAX_TOKENS (the answer was squeezed out
+       by a prompt that grew) versus SAFETY/RECITATION (the model refused). Live on the comp seat
+       2026-09-09 this fires on member-prediction turns, 3/3, ~27-30s, while the same sentence on
+       a public seat returns 200 in 6s — and there is currently no way to tell which cause it is.
+       Logged with the prompt size because the comp path is the heavy one (private desks, equity
+       desk, lab, unleashed, trailer) and "the prompt outgrew the output budget" is the leading
+       hypothesis this line exists to confirm or kill. */
+    let finishReason = null, lastParts = 0;
     for (let round = 0; round < rounds; round++) {
       modelCalls++;
       const reqBody = {
@@ -1350,6 +1361,8 @@ module.exports = async (req, res) => {
         break;
       }
       const parts = j?.candidates?.[0]?.content?.parts || [];
+      finishReason = j?.candidates?.[0]?.finishReason || null;
+      lastParts = parts.length;
       const calls = parts.filter((p) => p && p.functionCall).slice(0, callsCap);
       toolCalls += calls.length;
 
@@ -1430,6 +1443,14 @@ module.exports = async (req, res) => {
                 : 'I am rate limited right now — give it a moment and ask again.')
             : 'I could not reach my model just then. Ask again.')
         : 'I came back with nothing there — ask me again.');
+      /* The one line that makes this failure diagnosable at all. Everything else about an empty
+         answer is invisible: upstream is null, the ledger is not in the response body, and the
+         success summary at the bottom of the handler never runs. */
+      console.error('[ASK] EMPTY ANSWER — finishReason=' + finishReason + ' parts=' + lastParts +
+                    ' promptChars=' + (prompt ? prompt.length : -1) + ' rounds=' + modelCalls +
+                    ' toolCalls=' + toolCalls + ' comp=' + _isComp(email) + ' deep=' + !!deep +
+                    ' upstream=' + (upstream ? (upstream.status || upstream.message) : 'none') +
+                    ' did=[' + done.join('; ') + ']');
       if (sse) { sse({ type: 'error', error: emsg }); return res.end(); }
       return res.status(502).json({ error: emsg });
     }
