@@ -41,9 +41,23 @@ const { kv } = require('../_kv.js');
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
-// One pass may not flood the record. The cap is deliberately small: a session where he sees five
-// worthwhile calls is a session where his bar is too low.
-const MAX_PER_PASS = 2;
+/* ⚠ NO OUTPUT CAP, DELIBERATELY. Jake, 2026-09-09: "its not that we want to limit anything with
+   a max number, we want the code dialed in to work and find the best of everything we dont want
+   to restrict it with a max output."
+
+   He is right and a cap would have been a lie. Capping at N/day means the FIRST setup of the day
+   wins rather than the best one, and it hides how often he would actually have fired — the number
+   you most need in order to tune the bar. The volume has to EMERGE from the bar, not be clipped.
+
+   So the two things that shape volume here are both about whether there is anything new to judge:
+
+   1. HE IS ASKED WHEN THE BOOK CHANGES, NOT ON A TIMER. The collector pushes every ~5 minutes;
+      288 near-identical snapshots a day is not 288 decisions, it is one decision asked 288 times.
+      A material-change fingerprint (below) skips the pass when nothing moved. That is not a
+      restriction on him — it is refusing to ask the same question again.
+   2. THE BAR IS EVIDENTIAL. He must name the measurements, and the direction must be supported by
+      a base rate with a real denominator. A setup that clears that is worth a call however many
+      times it happens. */
 
 const RULES =
   'You are looking at the complete current data picture for your own desk. Decide whether there ' +
@@ -53,7 +67,9 @@ const RULES =
   'A call: {"calls":[{"symbol":"BTC","side":"up"|"down","horizon_min":<15..1440>,' +
   '"thesis":"<the claim, one sentence, in your own voice>",' +
   '"basis":"<the specific measurements that support it, with their numbers>"}]}\n\n' +
-  'AT MOST ' + MAX_PER_PASS + ' calls. Fewer is better. An empty list is the correct answer most ' +
+  'List every call that clears the bar - there is no quota, in either direction. Most passes '  +
+  'clear nothing, and an empty list is the right answer then. Do not reach for one because the '  +
+  'list looks empty, and do not stop at one if a second genuinely clears. '  +
   'of the time and costs you nothing.\n\n' +
   'DECLINE unless ALL of these hold:\n' +
   '- you can name the specific measurements that support it, with their numbers, from the data below\n' +
@@ -90,12 +106,40 @@ function crypto_picture(snap) {
  *                       not just the ones that fired.
  * @returns {{made:number, declined:boolean, why?:string, ids?:string[]}}
  */
+/* The fingerprint of a DECISION, not of a snapshot. Prices tick every pass; that is not new
+   information. What changes the answer is which coins sit at an extreme and which readings fired
+   — so the print is built from those, with prices bucketed coarsely enough that noise does not
+   register as change. Same picture, same answer: do not spend a model call re-deriving it. */
+function decisionPrint(rows, feed) {
+  const parts = [];
+  for (const x of rows) {
+    const ch = x.ch24 == null ? '-' : Math.round(Number(x.ch24) / 2);      // 2% buckets
+    const fd = x.fund == null ? '-' : Math.round(Number(x.fund) * 2000);   // ~5bp buckets
+    if (ch === 0 && fd === 0) continue;                                    // quiet coin, no signal
+    parts.push(x.s + ':' + ch + ':' + fd);
+  }
+  for (const f of (Array.isArray(feed) ? feed : [])) {
+    if (f && f.kind && (f.asset_code || f.asset)) parts.push('f:' + f.kind + ':' + (f.asset_code || f.asset));
+  }
+  return require('crypto').createHash('sha256').update(parts.sort().join('|')).digest('hex').slice(0, 24);
+}
+
 async function novoCryptoCalls(snap) {
   const r = kv();
   if (!r || !snap) return { made: 0, declined: true, why: 'no snapshot' };
 
   const rows = crypto_picture(snap);
   if (!rows.length) return { made: 0, declined: true, why: 'no priced coins in the snapshot' };
+
+  /* Nothing material moved since the last pass, so there is no new question to put to him.
+     Soft-fails OPEN: if KV cannot answer, he gets asked. Failing closed here would silence him
+     invisibly on a Redis blip, which is the worse of the two errors. */
+  const print = decisionPrint(rows, snap.feed);
+  try {
+    const last = await r.get('novo:print');
+    if (last && String(last) === print) return { made: 0, declined: true, why: 'book unchanged since last pass' };
+  } catch (_) {}
+  try { await r.set('novo:print', print, { ex: 6 * 3600 }); } catch (_) {}
 
   const rates = ((snap.health || {}).base_rates) || [];
   // His own open calls, so he does not stack the same bet twice. Reads only.
@@ -132,7 +176,7 @@ async function novoCryptoCalls(snap) {
   // Unparseable is a DECLINE. Salvaging JSON out of prose is how a strict selector quietly
   // becomes a permissive one — the same note read-predictions.js carries, for the same reason.
   try { j = JSON.parse(out); } catch (_) { return { made: 0, declined: true, why: 'unparseable' }; }
-  const calls = j && Array.isArray(j.calls) ? j.calls.slice(0, MAX_PER_PASS) : [];
+  const calls = j && Array.isArray(j.calls) ? j.calls : [];
   if (!calls.length) return { made: 0, declined: true, why: 'he declined' };
 
   const ids = [];
