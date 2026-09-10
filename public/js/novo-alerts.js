@@ -135,12 +135,17 @@
     }
 
     if (!list.length) {
-      box.innerHTML = '<div class="al-empty">Nothing being watched right now.</div>' + nvHtml;
+      box.innerHTML = '<div class="al-grp">Your alerts</div>'
+        + '<div class="al-empty">Nothing being watched right now.</div>' + nvHtml;
       try { window.novoSubtabs && window.novoSubtabs.apply(box, { marker: '.al-grp', key: 'alerts' }); } catch (_e) {}
       return;
     }
-    box.innerHTML = list.map(function (a) {
-    try { window.novoSubtabs && window.novoSubtabs.apply(box, { marker: '.al-grp', key: 'alerts' }); } catch (_e) {}
+    /* ⚠ TWO MARKERS OR NO TABS. novoSubtabs needs at least two .al-grp headings to build a strip.
+       "Dr. NoVo's alerts" was the only one; the member's own alerts sat under the panel's <h2> with
+       no marker, so the panel had one group and got no sub-tabs — "you forgot to add internal tab
+       to the alerts pages". A "Your alerts" marker leads the member's rows, giving the two tabs.
+       (A non-comp seat has no Dr. NoVo group, so it stays one marker and correctly shows no tabs.) */
+    box.innerHTML = '<div class="al-grp">Your alerts</div>' + list.map(function (a) {
       var bits = [];
       if (a.recurring) bits.push(a.armed === false ? 'recurring · re-arming' : 'recurring');
       else if (a.kind !== 'crypto_block') bits.push('one-shot');
@@ -153,6 +158,7 @@
         + '<button class="al-x" type="button" data-cancel="' + esc(a.id) + '" '
         + 'aria-label="Stop watching ' + esc(a.alert) + '">Stop</button></div>';
     }).join('') + nvHtml;
+    try { window.novoSubtabs && window.novoSubtabs.apply(box, { marker: '.al-grp', key: 'alerts' }); } catch (_e) {}
     Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
       b.onclick = function () { cancel(b.getAttribute('data-cancel'), b); };
     });
@@ -213,7 +219,7 @@
     APP = opts.app || null;
     el.classList.add('novo-alerts');
     el.innerHTML =
-      '<h2>Your alerts <span class="al-n"></span></h2>'
+      '<h2>Alerts <span class="al-n"></span></h2>'
       + '<div class="al-route" hidden></div>'
       + '<div class="al-body"><div class="al-empty">Loading…</div></div>'
       + '<div class="al-how">Set one in a sentence — ask ' + esc(opts.who || 'Dr. NoVo')

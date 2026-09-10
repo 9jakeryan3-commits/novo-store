@@ -834,7 +834,11 @@ tr:last-child td{border-bottom:none}
        on it. Written as its own pair rather than folded into the Stats rules, because the two views
        hide different things: Stats keeps #center in the DOM for the chat to dock into, and Alerts
        has no such tenant. */
-    #alerts-col, #digest-col, #predict-col { display: none; }
+    /* ⚠ #read-col BELONGS IN THIS LIST. It was omitted here (mobile) while the desktop copy at
+       min-width:769px includes it, so on a phone the Daily Rundown had no base-hide and rendered
+       under every tab — "the rundown is landing in all the tabs on crypto". It is shown only by
+       body[data-mtab="read"] #read-col below, exactly like the other three columns. */
+    #alerts-col, #digest-col, #predict-col, #read-col { display: none; }
     body[data-mtab="predict"] #predict-col { display: block; padding: 14px 16px 28px; }
     body[data-mtab="predict"] #center, body[data-mtab="predict"] #side { display: none; }
     body[data-mtab="predict"]:has(#novo-ask.on) #center { display: block; }
