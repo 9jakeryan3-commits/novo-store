@@ -241,9 +241,16 @@
   /* The floating shell hides itself until opened. Docked, the tab owns visibility, so the panel is
      always laid out — otherwise it would measure zero and the log could never scroll to bottom. */
   #novo-ask.docked:not(.on){display:flex}
-  /* Full-screen expand is meaningless in a tab that is already full width. */
-  
-  #novo-ask.docked.max{position:static;width:100%;height:100%}
+  /* ⚠ THIS USED TO MAKE THE EXPAND BUTTON A NO-OP. The rule read
+     "#novo-ask.docked.max{position:static}" on the reasoning that "full screen expand is
+     meaningless in a tab that is already full width" — but the button is still
+     rendered, still says "Expand to full screen", and toggling it changed nothing you could see.
+     A control that visibly does nothing is worse than one that is not there. Jake: "the restore
+     panel button does not work like the other two it should."
+     Docked now escapes its column and takes the viewport, exactly like the floating panel does, so
+     expand and restore mean the same thing on all three surfaces. */
+  #novo-ask.docked.max{position:fixed;left:0;right:0;top:0;bottom:0;width:100vw;height:100dvh;
+    z-index:101;border-radius:0;margin:0}
   `;
 
   var MARKUP = `<div id="novo-ask" role="dialog" aria-label="Dr. NoVo, the AI market analyst">
@@ -320,6 +327,9 @@
     // AFTER insertion: novoChatInit reads innerHTML off the MOUNTED log and restores the saved
     // transcript into it.
     try { window.novoChatInit(); } catch (_e) {}
+    // The panel exists NOW. Anything that needs to find #novo-ask-q has to run here, not at load.
+    try { wireAttach(); } catch (_e) {}
+    try { applyRememberedMax(); } catch (_e) {}
     return panel;
   };
   var busy = false;
@@ -387,16 +397,21 @@
     // the geometry just changed; put the pinned message back at the top of the view
     if (PINNED) setTimeout(function(){ pinTop(PINNED, 1); }, 30);
   };
-  (function(){
+  /* Restoring the remembered expand state has the SAME init-order problem as the attach button,
+     with the failure hidden even better: `p.classList.add` on a null p throws, the try/catch eats
+     it, and the panel silently opens un-maximised having promised to remember. Also run at mount. */
+  function applyRememberedMax(){
     try {
+      var p = document.getElementById('novo-ask');
+      if (!p) return;
       if (localStorage.getItem('novo_ask_max') === '1'){
-        var p = document.getElementById('novo-ask');
         p.classList.add('max');
         var b = document.getElementById('novo-ask-mx');
         if (b){ b.innerHTML = '&#x2921;'; b.title = 'Restore the panel'; }
       }
     } catch(_){}
-  })();
+  }
+  applyRememberedMax();
   document.addEventListener('keydown', function(e){
     var panel = document.getElementById('novo-ask');
     if (!panel) return;
@@ -784,8 +799,18 @@
     };
     img.src = url;
   }
-  (function(){
+  /* ⚠ THIS RUNS AT MOUNT, NOT AT MODULE LOAD, AND THAT IS THE WHOLE POINT.
+     It used to be an IIFE opening with `if (!qi || !qi.form) return;`. On the Analyst and Crypto
+     the composer markup is INLINE in the page, so the element exists when the script runs and the
+     attach button appears. The Trader has no chat markup at all — this module INJECTS the panel in
+     novoChatMount() — so at module-load time #novo-ask-q does not exist, the guard returned, and
+     the Trader silently never got an attach button or a file input. Jake, twice: "trader does not
+     have a attatchment button i told you this last night."
+     The guard was doing its job; the call site was wrong. Idempotent, so mounting twice cannot
+     produce two buttons. */
+  function wireAttach(){
     var qi = document.getElementById('novo-ask-q'); if (!qi || !qi.form) return;
+    if (qi.form.querySelector('input[type=file]')) return;   // already wired
     qi.addEventListener('paste', function(ev){
       var its = (ev.clipboardData || {}).items || [];
       for (var i = 0; i < its.length; i++){
@@ -800,7 +825,9 @@
     bt.onclick = function(){ fi.click(); };
     qi.form.insertBefore(bt, qi);
     qi.form.appendChild(fi);
-  })();
+  }
+  // Surfaces whose markup is inline get it now; injected surfaces get it from novoChatMount.
+  wireAttach();
 
   // The transcript lived only in the DOM, so a reload erased what you asked and what it answered.
   // localStorage keeps it on the device -- nothing transits, no server state, no cost. It expires
