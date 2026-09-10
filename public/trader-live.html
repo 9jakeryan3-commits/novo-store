@@ -8001,6 +8001,19 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
   window.setView=function(v){
     try{
       var b=document.body;
+      /* ⚠ NOVO TOGGLES. Jake, 2026-09-09: "when I click it to open i can't close it the chevron
+         doesnt work like it should I had to refresh to get back to the chart on desktop."
+         Every other view is a destination you switch between, so re-clicking its button is a
+         no-op and that reads fine. NoVo is the one that behaves like a PANEL - you open it over
+         your work and expect to shut it - and clicking its button again just re-applied v-novo,
+         leaving no way back to the chart except a reload. Second press returns to whichever view
+         you came from. Remembered rather than hardcoded to 'overview' so it puts you back where
+         you actually were. */
+      if(v==='novo' && b.classList.contains('v-novo')){ v = window._viewBeforeNovo || 'overview'; }
+      else if(v==='novo'){
+        var cur=['overview','feeds','journal'].filter(function(x){return b.classList.contains('v-'+x);})[0];
+        window._viewBeforeNovo = cur || 'overview';
+      }
       b.classList.remove('v-overview','v-feeds','v-journal','v-novo');
       b.classList.add('v-'+v);
       var btns=document.querySelectorAll('.navbtn');
@@ -8246,6 +8259,25 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
   // at load would build it inside a display:none column, where every measurement reads zero.
+  /* ⚠ "n" HAS TO GO THROUGH setView, NOT novoAskOpen. The nav button's own tooltip advertises
+     "(n)", and the shared keyboard layer binds it -- but js/novo-keys.js opens NoVo by calling
+     window.novoAskOpen, which novo-chat.js defines as soon as it loads and which operates on
+     #novo-ask. On the analyst and crypto dashboards that panel is in the document from the start,
+     so it works. On TRADER the chat is mounted lazily into #col-novo-body on first reveal, and
+     #col-novo carries an id-level display:none, so before the first reveal #novo-ask does not
+     exist at all: novoAskOpen ran, found nothing, swallowed it, and the key did nothing. Measured
+     in a headless load -- typeof novoAskOpen "function", #novo-ask false, class unchanged after
+     the keypress. Exporting novoAskOpen here routes the shortcut to the button's own path, so
+     both openers agree and both toggle. */
+  window.novoAskOpen = function (on) {
+    try {
+      var wantOpen = (on === undefined) ? !document.body.classList.contains('v-novo') : !!on;
+      if (wantOpen) { if (!document.body.classList.contains('v-novo')) window.setView('novo'); }
+      else if (document.body.classList.contains('v-novo')) window.setView('novo');   // toggles back
+      return true;
+    } catch (_e) { return false; }
+  };
+
   window._novoChatReveal = function () {
     try {
       if (typeof window.novoChatMount !== 'function') return;
