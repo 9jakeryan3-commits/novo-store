@@ -467,6 +467,25 @@ nav { position: relative; }
   </div>
 </div>
 
+<!-- FEAR, BY INDEX + OVER TIME, moved above "By ticker" (Jake, 2026-09-10). The two are a
+     pair — the history sits directly under the three index fear cards — so they move together. -->
+<div class="container sec" id="fear">
+  <div class="lbl">Fear · by index</div>
+  <h2 class="h2">S&amp;P, Nasdaq &amp; Russell — each on its own volatility</h2>
+  <p class="sub">A single "VIX" hides that tech and small-caps carry their own fear. VXN (Nasdaq) and RVX (Russell) often diverge hard from the S&amp;P — here they're each ranked against their own trailing year.</p>
+  <div class="fear-row" id="fear-row">
+    <!-- cards injected -->
+  </div>
+  <p class="muted" style="margin-top:12px;">VIX/VXN/RVX are ~15-min delayed. Percentile = where today's level sits vs the past year of daily closes.</p>
+</div>
+
+<!-- FEAR HISTORY (directly under the 3 index fear cards) -->
+<div class="container sec">
+  <div class="lbl">Fear · over time</div>
+  <h2 class="h2">Where fear was</h2>
+  <div class="hist" id="hist-row"></div>
+</div>
+
 <!-- PER-TICKER DEEP DIVES -->
 <div class="container sec" id="tickers">
   <div class="lbl">By ticker &middot; today</div>
@@ -533,22 +552,7 @@ nav { position: relative; }
   </div>
 </div>
 
-<div class="container sec" id="fear">
-  <div class="lbl">Fear · by index</div>
-  <h2 class="h2">S&amp;P, Nasdaq &amp; Russell — each on its own volatility</h2>
-  <p class="sub">A single "VIX" hides that tech and small-caps carry their own fear. VXN (Nasdaq) and RVX (Russell) often diverge hard from the S&amp;P — here they're each ranked against their own trailing year.</p>
-  <div class="fear-row" id="fear-row">
-    <!-- cards injected -->
-  </div>
-  <p class="muted" style="margin-top:12px;">VIX/VXN/RVX are ~15-min delayed. Percentile = where today's level sits vs the past year of daily closes.</p>
-</div>
 
-<!-- FEAR HISTORY (directly under the 3 index fear cards) -->
-<div class="container sec">
-  <div class="lbl">Fear · over time</div>
-  <h2 class="h2">Where fear was</h2>
-  <div class="hist" id="hist-row"></div>
-</div>
 
 <!-- EXPLORE (tools / compare / reference / learn) -->
 <div class="container sec" style="padding-top:6px;">
@@ -560,11 +564,8 @@ nav { position: relative; }
   <p style="margin-top:6px;font-size:14px;">Learn: <a href="/learn/gamma-gex-dealer-positioning">Gamma &amp; GEX</a> &nbsp;·&nbsp; <a href="/learn/0dte-options">0DTE</a> &nbsp;·&nbsp; <a href="/learn/options-basics-greeks">Greeks</a> &nbsp;·&nbsp; <a href="/learn/risk-management">Risk</a> &nbsp;·&nbsp; <a href="/learn/volatility-market-structure">Volatility</a>.</p>
 </div>
 
-
-
 <!-- ad slot 1 (shelved — re-add the display <ins> unit here, slot 5131852801) -->
 
-<!-- fear history moved up, directly under the 3 index fear cards -->
 
 <!-- SECTOR HEATMAP -->
 <div class="container sec" id="heatmap">
