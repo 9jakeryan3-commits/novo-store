@@ -1546,7 +1546,15 @@ module.exports = async (req, res) => {
                     ' toolCalls=' + toolCalls + ' comp=' + _isComp(email) + ' deep=' + !!deep +
                     ' upstream=' + (upstream ? (upstream.status || upstream.message) : 'none') +
                     ' did=[' + done.join('; ') + ']');
-      await logTurn({ app, seat: _lc.seat, userHash: _lc.userHash, deep, status: 'empty',
+      /* ⚠ AN UPSTREAM FAILURE IS NOT AN EMPTY ANSWER.
+         These are different failures with different owners: 'empty' means the model was reached
+         and produced no text — a product defect. 'error' means we never reached it — quota, or a
+         dead upstream. They shared one status, so empty_rate_pct could not tell them apart, and on
+         2026-09-11 it read 27.2% when the true figure was 9.9%: 14 of 22 "empties" were Vertex
+         429s from a peer's test battery. The one number built to answer "is he bugging out" was
+         reporting someone else's rate limit. Same defect class the panel exists to catch. */
+      await logTurn({ app, seat: _lc.seat, userHash: _lc.userHash, deep,
+        status: upstream ? 'error' : 'empty',
         question, answer: null, tools: ledger, modelCalls, toolCalls, finishReason,
         parts: lastParts,
         error: upstream ? ('upstream ' + (upstream.status || upstream.message)) : 'no answer produced',
