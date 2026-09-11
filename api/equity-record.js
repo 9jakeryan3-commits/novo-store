@@ -76,7 +76,15 @@ module.exports = async (req, res) => {
     else verdict = 'clears the bar (' + edge + 'pp over ' + nGraded + ' resolutions)';
 
     return {
+      /* ⚠ THE ROW KEY IS (rule, horizon_min, era), NOT rule. equity_signals.py:426 groups by all
+         three, so one rule name legitimately appears once per horizon — my first read of this
+         endpoint showed seven rows all called "flip_cross_down" and looked like duplicate data.
+         Naming the horizon is the difference between a record and a confusing list. */
       rule: x.rule || x.kind || null,
+      horizon_min: num(x.horizon_min),
+      era: x.era || null,
+      key: [x.rule || x.kind || '?', num(x.horizon_min) != null ? num(x.horizon_min) + 'm' : '?',
+            x.era || '?'].join(' · '),
       n_graded: nGraded, n_cells: cells,
       hits: num(x.hits), misses: num(x.misses), flats: num(x.flats), no_data: num(x.no_data),
       hit_rate_all: num(x.hit_rate_all), decisive_rate: num(x.decisive_rate),
