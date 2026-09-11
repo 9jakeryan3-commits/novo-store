@@ -870,6 +870,25 @@ async function selectCryptoPredictions(snap) {
    ⚠ THE HISTORY ROLLS. _save() keeps only the last MAX_KEPT (400) graded rows, so this is "his
    record as far back as storage goes", not literally all-time. `capped` says so, and the caller
    is expected to surface it rather than let the number silently claim more than it has. */
+/* THE RULE A PREDICTION CAME FROM, or nothing. The `rule` cut exists to show WHICH SIGNAL is
+   losing, which only works if rows sharing a rule share a bucket.
+   It read `basis.split(" · ")[0].slice(0, 40)` on EVERY row. That is right for the signal
+   selector, which writes "<rule> · <receipts>" — and wrong for every other source, because
+   nothing else writes that shape: novo-calls lets the model supply free prose, read-predictions
+   writes "caught in <title>", the digest writes "the 09:25 digest", and the chat writes whatever
+   it likes. A free-text basis has no " · ", so the split returns the whole sentence and the slice
+   makes a 40-character prose fragment into a bucket key — one bucket per prediction, forever, so
+   the cut can never aggregate and the dimension is decoration.
+   Seen live 2026-09-11 on build 568711e3: rule = "SPY spot 764.90 sits above flip 761.79 i".
+   A conversation prediction has no rule that fired it. The honest key is NONE — bump() already
+   drops null, so an unruled row simply does not enter the dimension. */
+function ruleOf(basis) {
+  const s = String(basis || "");
+  if (!s.includes(" · ")) return null;          // no rule/receipts shape, so no rule
+  const rule = s.split(" · ")[0].trim();
+  return rule ? rule.slice(0, 40) : null;
+}
+
 async function novoRecord() {
   const r = kv();
   // kv() returns null when the store is not configured. listPredictions guards this; so must we,
@@ -970,7 +989,7 @@ async function novoRecord() {
     const mins = p.horizon_utc && p.made_utc ? Math.round((p.horizon_utc - p.made_utc) / 60000) : null;
     bump("horizon", mins === null ? null : mins <= 60 ? "<=60m" : mins <= 240 ? "1-4h" : mins <= 1440 ? "4-24h" : ">24h", h);
     // the rule that fired it, off the basis string the selector writes: "<rule> · <receipts>"
-    bump("rule", p.basis ? String(p.basis).split(" · ")[0].slice(0, 40) : null, h);
+    bump("rule", ruleOf(p.basis), h);
   }
   for (const dim of Object.keys(cut)) {
     for (const k of Object.keys(cut[dim])) {
@@ -991,7 +1010,7 @@ async function novoRecord() {
   };
 }
 
-module.exports = { novoRecord, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+module.exports = { novoRecord, ruleOf, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
                    makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
