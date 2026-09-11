@@ -532,6 +532,16 @@ which Jake explicitly carved out. */
      way of saying "this is the selected one". No boxes, no fills. */
   .lv-tabs { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center;
     gap: 0; margin: 4px 0 16px; border-bottom: 1px solid var(--bdr2); }
+  /* ⚠ UNDER THE CHAT, ALWAYS. This page links journal/blog.css, whose bare `nav` type-selector
+     hands every <nav> journal chrome — position:sticky/relative and z-index:100. The maximised
+     chat (#novo-ask) sits at z-index:61, so the section bar was PAINTING OVER the full-screen
+     conversation and winning the hit test: clicking mid-chat switched sections (Junie's find,
+     verified 2026-09-11, builds 0b5060e68 and 6e4b6ca18; Jake hit it live). The id rule outranks
+     the type rule, so this pins the bar below the chat on exactly this surface. #mobile-tabs is
+     NOT included: its z-index:1000 is deliberate — the mobile chat is sized to stop above it
+     (bottom: var(--navh)) — and "fixing" it would break that layering. The class-level fix
+     (scoping blog.css's bare nav) is a separate decision on the 1,400-page journal surface. */
+  #lv-tabs { position: relative; z-index: 1; }
   .lv-tabs button { background: none; color: var(--txt3);
     font-family: var(--sans); font-size: 10px; font-weight: 800; letter-spacing: 1.6px;
     text-transform: uppercase; padding: 9px 15px 8px; margin-bottom: -1px;
