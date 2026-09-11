@@ -108,7 +108,7 @@ module.exports = async (req, res) => {
     q: x.q, a: x.a,
     tools: (x.tl || []).map((l) => l.n + (l.ok ? '' : l.e ? '·empty' : '·fail')),
     finish: x.fr, guard: x.gd || null, verified: x.vf, model_calls: x.mc, tool_calls: x.tc,
-    latency_ms: x.ms, error: x.err || null, who: x.u || null,
+    latency_ms: x.ms, error: x.err || null, who: x.u || null, parts: (x.pt != null ? x.pt : null),
   }));
 
   return res.status(200).json({

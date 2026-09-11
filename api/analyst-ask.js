@@ -1491,6 +1491,7 @@ module.exports = async (req, res) => {
                     ' did=[' + done.join('; ') + ']');
       await logTurn({ app, seat: _lc.seat, userHash: _lc.userHash, deep, status: 'empty',
         question, answer: null, tools: ledger, modelCalls, toolCalls, finishReason,
+        parts: lastParts,
         error: upstream ? ('upstream ' + (upstream.status || upstream.message)) : 'no answer produced',
         ms: Date.now() - _t0 });
       if (sse) { sse({ type: 'error', error: emsg }); return res.end(); }

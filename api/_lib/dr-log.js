@@ -83,6 +83,10 @@ async function logTurn(r) {
       mc: r.modelCalls | 0, tc: r.toolCalls | 0,
       fr: r.finishReason || null, gd: guard, vf: (r.verified != null ? (r.verified | 0) : null),
       ms: r.ms | 0, err: r.error ? clip(r.error, 300) : null,
+      /* parts the FINAL model round returned. An empty answer with parts>0 means the model spoke
+         and we filtered it all out; parts===0 means it said nothing at all. Those are different
+         bugs and the console line that used to be the only witness is unreadable after the fact. */
+      pt: (r.parts != null ? (r.parts | 0) : null),
     };
     const line = JSON.stringify(rec);
 
