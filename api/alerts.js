@@ -86,7 +86,14 @@ module.exports = async (req, res) => {
                existed carries no app, so it is kept rather than vanishing from the history. */
             if (Array.isArray(log)) {
               digest_log = log.filter(function (e) {
-                return !app || !digest.app || !e || !e.app || e.app === digest.app;
+                /* ⚠ FAIL CLOSED. This line shipped with `!e.app ||` in it, to keep pre-stamp
+                   history visible — and Temi measured the consequence the same day: a $79 crypto
+                   subscriber opened Digest and the second entry was a full SPY dealer-map read
+                   from Sep 10, because rows written before the stamp carry no app and were let
+                   through. The log holds 14 entries on a 30-day TTL, so "it ages out" meant a
+                   month of wrong-desk content. An unstamped row cannot be shown to belong here,
+                   and on a per-app surface that is reason to withhold it, not to pass it. */
+                return !app || !digest.app || (!!e && e.app === digest.app);
               }).slice(-7).reverse();
             }
           }
@@ -120,7 +127,10 @@ module.exports = async (req, res) => {
       /* THE MEMBER'S OWN BOOK, on every seat. Theirs is not gated by anything - it is their
          record of their own calls, and the point of the feature is that they can watch it. */
       let mine = null;
-      try { mine = await require("./_lib/predictions.js").listUserPredictions(email, 40); } catch (_) {}
+      /* Same desk the rest of this response is scoped to. app is analyst|trader|crypto; the book
+         is keyed by asset class, so crypto maps to crypto and both equity desks to equity. */
+      const _desk = app === "crypto" ? "crypto" : (app ? "equity" : null);
+      try { mine = await require("./_lib/predictions.js").listUserPredictions(email, 40, _desk); } catch (_) {}
 
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
                                     ...(mine ? { my_predictions: mine } : {}),

@@ -523,10 +523,19 @@ async function makeUserPrediction(email, args = {}) {
   return { ok: true, id: row.id, watching: row.thesis || row.kind, runs_until: "its horizon" };
 }
 
-async function listUserPredictions(email, limit) {
+/* ⚠ FILTERED PER DESK, BECAUSE THE PANEL BESIDE IT ALREADY IS.
+   Temi, 2026-09-11, measured the crypto map's Predictions tab showing five EQUITY tickers and no
+   crypto at all: "SPY closes at 770 ... QQQ closes at 720 → MISS ...". Not a leak — they are the
+   member's own calls — but listPredictions() filters NOVO's book by asset_class while this one
+   returned everything, so a single panel filtered one book and not the other. The crypto desk
+   showed his crypto calls and the member's equity ones side by side.
+   A member's calls still live in ONE book; this only decides which desk displays them, exactly as
+   it already works for his. */
+async function listUserPredictions(email, limit, assetClass) {
   const r = kv();
   if (!r) return null;
-  const mine = await _uload(r, _uhash(email));
+  let mine = await _uload(r, _uhash(email));
+  if (assetClass) mine = mine.filter((p) => p.asset_class === assetClass);
   const graded = mine.filter((p) => p.status === "graded" && p.outcome);
   const hits = graded.filter((p) => p.outcome.hit).length;
   return {
