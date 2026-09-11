@@ -441,7 +441,30 @@ async function scoreboard() {
   } catch (_) { return null; }
 }
 
+/**
+ * How a rule's RELEASED alerts have actually done. The feedback the release gate never had.
+ *
+ * ⚠ THIS IS THE RULE'S OWN RECORD, NOT THE ENGINE'S. The engine's edge number says how the rule's
+ * POPULATION behaves; this says how the tickets we actually put in front of the seat behaved.
+ * Those can disagree, and on 2026-09-11 they did: chain_pump_buyers cleared its out-of-sample floor
+ * and released 43 alerts a day, and those alerts came back 21-26.
+ *
+ * Returns { decisive, win, hitRate } — hitRate null until anything has decided.
+ */
+async function ruleStanding(kind) {
+  try {
+    const r = kv();
+    if (!r || !kind) return { decisive: 0, win: 0, hitRate: null };
+    const k = String(kind).slice(0, 60).replace(/:/g, "_");
+    let t = {};
+    try { t = (await r.hgetall(TALLY)) || {}; } catch (_) { t = {}; }
+    const dec = Number(t["k:" + k + ":decisive"] || 0);
+    const win = Number(t["k:" + k + ":win"] || 0);
+    return { decisive: dec, win, hitRate: dec ? +(100 * win / dec).toFixed(1) : null };
+  } catch (_) { return { decisive: 0, win: 0, hitRate: null }; }
+}
+
 module.exports = {
-  recordRelease, joinCryptoResolutions, joinEquityResolutions, reconcile, scoreboard,
+  recordRelease, ruleStanding, joinCryptoResolutions, joinEquityResolutions, reconcile, scoreboard,
   alertId, normalize, KEY, TALLY,
 };

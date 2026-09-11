@@ -274,6 +274,35 @@ async function main() {
   }
 
   // ══════════════════════════════════════════════════════════════════════════════════════════════
+  console.log("");
+  console.log("-- 11. the rule's own released alerts get a vote --------------------------");
+  /* The release gate now asks a second question: not "does this rule's population show edge" but
+     "did the tickets we actually released work". On 2026-09-11 those disagreed -- chain_pump_buyers
+     cleared its out-of-sample floor and its released alerts came back 21 win / 26 loss. */
+  await reset();
+  {
+    const now = Date.now();
+    for (let i2 = 0; i2 < 47; i2++) {
+      const ts = iso(now - (100 - i2) * 60000);
+      await AR.recordRelease({ asset_class: "crypto", symbol: "C" + i2, eng_code: "c" + i2,
+        kind: "chain_pump_buyers", eng_ts: ts, deadline: iso(now - 60000), horizon_min: 60 });
+      await AR.joinCryptoResolutions([{ asset_code: "c" + i2, kind: "chain_pump_buyers", ts_utc: ts,
+        result: i2 < 21 ? "target" : "stop", outcome: 1, correct: i2 < 21, resolved_utc: iso(now) }]);
+    }
+    const st = await AR.ruleStanding("chain_pump_buyers");
+    eq("decisive counted", st.decisive, 47);
+    eq("win counted", st.win, 21);
+    eq("hit rate is 44.7%", st.hitRate, 44.7);
+    ok("...below the 50% bar on a 30+ sample -- the gate suppresses it",
+       st.decisive >= 30 && st.hitRate < 50);
+
+    const fresh = await AR.ruleStanding("a_kind_that_never_released");
+    eq("an unproven kind has no decisive sample", fresh.decisive, 0);
+    eq("...and a NULL rate, not a zero", fresh.hitRate, null);
+    ok("...so it is NOT suppressed -- a new rule releases until it has spoken",
+       !(fresh.decisive >= 30 && fresh.hitRate != null && fresh.hitRate < 50));
+  }
+
   console.log("\n── NEGATIVE CONTROLS: prove the checks above can actually go red ────────────");
   /* Each of these SHOULD fail. If any prints "control PASSED", the corresponding assertion above
      is not measuring what it claims to measure. */

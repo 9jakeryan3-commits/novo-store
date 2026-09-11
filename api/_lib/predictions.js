@@ -665,6 +665,32 @@ async function curateChainFires(snap) {
         ? lv.oos_trig_target - lv.oos_base_target : null;
       const floor = lv && lv.edge_floor_pp != null ? lv.edge_floor_pp : 5;
       if (edge == null || !(edge >= floor)) continue;         // no proven edge, no surface
+
+      /* ── PROVE IT OR STOP: THE RULE'S OWN RELEASED ALERTS GET A VOTE ────────────────────────
+         Jake, 2026-09-11: "<100 alerts, <10 released comp seat alerts ... anything else and the
+         system/Dr. NoVo is fire hosing and not getting anywhere." Measured that day: 513 released
+         over three days — 43/day against a bar of 10 — and EVERY ONE of them from a single rule,
+         chain_pump_buyers, whose released alerts came back 21 win / 26 loss.
+
+         The gate above only ever asked the ENGINE's question: does this rule's POPULATION show
+         out-of-sample edge. It never asked the one that matters to a seat: did the tickets we
+         actually put in front of him work. Those are different questions and here they disagreed.
+
+         So a kind releases freely until its released alerts have decided enough to speak for
+         themselves, and after that it has to be winning. MIN_DECISIVE is the same 30 the rest of
+         this file uses for "enough to mean something", and the bar is 50% because a BUY that wins
+         less than half its decided tickets is not an edge-cleared alert, whatever the population
+         says. A rule silenced here is not retired: it keeps being graded by the engine, and it
+         starts releasing again the moment its own record clears the bar. */
+      const STANDING_MIN_DECISIVE = 30;
+      const STANDING_MIN_RATE = 50;
+      try {
+        const st = await require("./alert-record.js").ruleStanding(t.kind);
+        if (st.decisive >= STANDING_MIN_DECISIVE && st.hitRate != null
+            && st.hitRate < STANDING_MIN_RATE) {
+          continue;   // its own released alerts say no
+        }
+      } catch (_) { /* no record yet, or KV down: fall through to the engine's edge alone */ }
       const seenKey = "novofeed:seen:" + crypto.createHash("sha256")
         .update((t.asset_code || "") + "|" + t.kind + "|" + (t.ts_utc || ""))
         .digest("hex").slice(0, 24);
