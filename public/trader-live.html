@@ -3445,9 +3445,11 @@ function connectTelemetry(){
     document.getElementById('t-status').textContent='ONLINE';
     document.getElementById('t-status').className='dv cgreen';
     const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
-    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else
-    dot.style.background='var(--grn)'; dot.style.boxShadow='0 0 8px var(--grn)';
-    txt.textContent='LINKED'; txt.style.color='var(--grn)';
+    /* ⚠ BRACED. The `else` used to be bare, so it governed ONLY the next STATEMENT -- dot.style.background -- and the three after it ran unconditionally. With the execution layer pulled, dot and txt are null, so dot.style.boxShadow threw TypeError and everything BELOW this block never ran. Yuri (65a79700) measured the cost on the close path, 2026-09-11 build 3bc7a3047c2c: window._wsFails stayed 0 across a real close and the primary 3s reconnect never fired -- the socket was recovered ~8s later by the lane supervisor instead, and the 3-strikes-re-handshake escalation can never trigger because its counter is never reached. Two layers of defence collapsed to one, silently, and it threw on EVERY open too. */
+    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else {
+      dot.style.background='var(--grn)'; dot.style.boxShadow='0 0 8px var(--grn)';
+      txt.textContent='LINKED'; txt.style.color='var(--grn)';
+    }
   };
 
   // Live-price applier (2026-07-30): shared by the heavy telemetry frame AND the fast {type:'px'} tick lane so
@@ -3848,9 +3850,11 @@ function connectTelemetry(){
     document.getElementById('t-status').textContent='OFFLINE';
     document.getElementById('t-status').className='dv cred';
     const dot=document.getElementById('hdr-conn-dot'),txt=document.getElementById('hdr-conn-text');
-    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else
-    dot.style.background='var(--red)'; dot.style.boxShadow='0 0 8px var(--red)';
-    txt.textContent='OFFLINE'; txt.style.color='var(--red)';
+    /* ⚠ BRACED. The `else` used to be bare, so it governed ONLY the next STATEMENT -- dot.style.background -- and the three after it ran unconditionally. With the execution layer pulled, dot and txt are null, so dot.style.boxShadow threw TypeError and everything BELOW this block never ran. Yuri (65a79700) measured the cost on the close path, 2026-09-11 build 3bc7a3047c2c: window._wsFails stayed 0 across a real close and the primary 3s reconnect never fired -- the socket was recovered ~8s later by the lane supervisor instead, and the 3-strikes-re-handshake escalation can never trigger because its counter is never reached. Two layers of defence collapsed to one, silently, and it threw on EVERY open too. */
+    if(!dot||!txt){ /* LINKED was pulled with the execution layer - nothing to paint */ } else {
+      dot.style.background='var(--red)'; dot.style.boxShadow='0 0 8px var(--red)';
+      txt.textContent='OFFLINE'; txt.style.color='var(--red)';
+    }
     // Three straight failures = the ticket is dead, not the network. novoReconnect re-handshakes
     // and reconnects; retrying the old NOVO_WS URL forever just bounced off the server every 3s
     // (novoReconnect existed exactly for this and was never wired in).
