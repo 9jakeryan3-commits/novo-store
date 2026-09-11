@@ -1763,7 +1763,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,#22303f)}
   #novo-ask input{flex:1; padding:10px 12px;color:#eaf3ff;font-size:13.5px;outline:none;background:transparent;border:0;border-bottom:1px solid var(--bdr,#22303f);outline:0;border-radius:0}
   #novo-ask input:focus{border-bottom-color:var(--askacc,#22d3ee)}
-  #novo-ask button.go{color:#04121a;font-weight:800;padding:0 15px;cursor:pointer;background:none;border:0;color:var(--askacc,#22d3ee);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+  /* Dropped a vestigial color:#04121a from the rule below - it was the text colour for a fill
+     this button no longer has, and it sat before a later color:var(--askacc) that overrides it.
+     Harmless today, and exactly the shape that becomes an invisible control the moment someone
+     tidies the winning declaration away. 1.02:1 on this background if it ever won. */
+  #novo-ask button.go{font-weight:800;padding:0 15px;cursor:pointer;background:none;border:0;color:var(--askacc,#22d3ee);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
 
 
