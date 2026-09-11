@@ -19,6 +19,7 @@ const { kv, rateOk } = require('./_kv.js');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { declarations, makeExecutors } = require('./_lib/tools.js');
+const { logTurn } = require('./_lib/dr-log.js');   // save every turn for tuning (Jake 2026-09-10)
 const { getMemory, eh } = require('./_lib/member-memory.js');
 const { nowBlock } = require('./_clock.js');
 // The crypto→bundle pitch. Decision and copy both live in _lib/upsell.js; this file only asks
@@ -668,8 +669,14 @@ const { validateForecast: validForecast, resolveAt: forecastResolveAt } = requir
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  // Every conversation with Dr. NoVo is saved for tuning. `_lc` is filled in as the handler learns
+  // the seat, question and app, so even a turn that throws early still logs what it knew. See
+  // api/_lib/dr-log.js — it is best-effort and never blocks the reply.
+  const _t0 = Date.now();
+  const _lc = { app: 'analyst', seat: 'anon', userHash: null, deep: false, question: null, ledger: [] };
   const email = verifyToken((req.body && req.body.t) || (req.query && req.query.t));
   if (!email) return res.status(401).json({ error: 'sign in on the dashboard to ask NoVo' });
+  try { _lc.userHash = eh(email); _lc.seat = _isComp(email) ? 'comp' : 'member'; } catch (_) {}
 
   // Volume caps. This endpoint was subscriber-gated but UNCAPPED, while the free support bot has run
   // 20/hour since day one -- the cheap surface was limited and the expensive one was not. A question
@@ -689,6 +696,7 @@ module.exports = async (req, res) => {
 
   const question = String((req.body && req.body.question) || '').trim().slice(0, 600);
   if (!question) return res.status(400).json({ error: 'no question' });
+  _lc.question = question;
 
   // The deep lane costs several times a fast answer, so it carries its own cap on top of the
   // shared ones. Over the cap it DOWNGRADES to the fast lane rather than erroring — a subscriber
@@ -716,6 +724,7 @@ module.exports = async (req, res) => {
   const APP_SET = new Set(['analyst', 'crypto', 'trader']);
   const app = APP_SET.has((req.body && req.body.app) || '') ? req.body.app
             : (surface === 'crypto' ? 'crypto' : 'analyst');
+  _lc.app = app; _lc.deep = deep;
   const focus = _focus(req.body && req.body.focus);
 
   // AN ATTACHED IMAGE — a chart or screenshot the reader wants read. Bounded hard: type-checked
@@ -1284,6 +1293,7 @@ module.exports = async (req, res) => {
     if (image) userParts.push({ inlineData: image });
     const contents = [{ role: 'user', parts: userParts }];
     const ledger = [];
+    _lc.ledger = ledger;   // same reference — the catch sees whatever was gathered
     let answer = '';
 
     // ── streaming plumbing ───────────────────────────────────────────────────────
@@ -1451,6 +1461,10 @@ module.exports = async (req, res) => {
                     ' toolCalls=' + toolCalls + ' comp=' + _isComp(email) + ' deep=' + !!deep +
                     ' upstream=' + (upstream ? (upstream.status || upstream.message) : 'none') +
                     ' did=[' + done.join('; ') + ']');
+      await logTurn({ app, seat: _lc.seat, userHash: _lc.userHash, deep, status: 'empty',
+        question, answer: null, tools: ledger, modelCalls, toolCalls, finishReason,
+        error: upstream ? ('upstream ' + (upstream.status || upstream.message)) : 'no answer produced',
+        ms: Date.now() - _t0 });
       if (sse) { sse({ type: 'error', error: emsg }); return res.end(); }
       return res.status(502).json({ error: emsg });
     }
@@ -1625,6 +1639,10 @@ module.exports = async (req, res) => {
       upsell = await bundlePitch({ email, question, ledger, kv: kv(), commit: true });
     } catch (_) { upsell = null; }
 
+    await logTurn({ app, seat: _lc.seat, userHash: _lc.userHash, deep, status: 'ok',
+      question, answer: clean, tools: ledger, modelCalls, toolCalls, finishReason,
+      verified: verified ? verified.corrected : null, guard: recordGuard, ms: Date.now() - _t0 });
+
     if (sse) {
       sse({
         type: 'done', ok: true, mode: deep ? 'deep' : 'fast', answer: clean,
@@ -1657,6 +1675,9 @@ module.exports = async (req, res) => {
     });
   } catch (e) {
     console.error('[analyst-ask]', e);
+    logTurn({ app: _lc.app, seat: _lc.seat, userHash: _lc.userHash, deep: _lc.deep, status: 'error',
+      question: _lc.question, answer: null, tools: _lc.ledger, error: (e && e.message) || 'exception',
+      ms: Date.now() - _t0 });
     if (res.headersSent) {
       try { res.write('data: ' + JSON.stringify({ type: 'error', error: 'analyst unavailable' }) + '\n\n'); } catch (_) {}
       return res.end();
