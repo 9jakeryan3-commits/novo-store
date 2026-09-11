@@ -170,8 +170,14 @@
             + esc(p.spot_at) + ' · actual ' + esc(o.actual) + '</span></div>';
         }).join('');
       } else {
+        /* ⚠ THE EXAMPLE HAS TO BE A CALL THIS DESK CAN ACTUALLY TAKE. This hardcoded SPY, so the
+           one instructional sentence on the $79 CRYPTO map taught an equity call (Temi, be5c30b4,
+           2026-09-11). Not wrong -- a crypto seat may ask about equities -- but the worked example
+           on a product should be of that product, and BTC is on the coin map, so the suggestion is
+           one Dr. NoVo will actually record rather than refuse at the catcher. */
+        var eg = (APP === 'crypto') ? '“I think BTC closes green”' : '“I think SPY closes green”';
         mineHtml += '<div class="pd-empty">Nothing on your record yet. Tell Dr. NoVo a call — '
-          + '“I think SPY closes green” — and he logs it here, graded at its horizon '
+          + eg + ' — and he logs it here, graded at its horizon '
           + 'on the same numbers his own calls are graded on.</div>';
       }
     }
