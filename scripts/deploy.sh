@@ -102,7 +102,18 @@ if [ -n "$(git status --porcelain)" ] && node scripts/count-churn-only.js; then
   # journal/index.html carries a count too (the hub, not the 1,000+ articles). It joined the sync
   # script's file list on 2026-08-31; without it here a synced hub would sit dirty and halt the
   # NEXT deploy instead of riding along with the other generated count edits.
-  git add public/crypto.html public/faq.html public/index.html public/plans.html           public/crypto-live.html public/compare-best-gamma-gex-tools.html           public/journal/index.html           public/analyst.html public/trader.html public/ai.html           public/compare-novo-vs-spotgamma.html public/compare-novo-vs-menthorq.html           public/compare-novo-vs-option-alpha.html public/compare-novo-vs-unusual-whales.html 2>/dev/null || true
+  # ⚠ STAGE WHAT THE GATE VALIDATED, NOT A HAND-KEPT LIST.
+  # This used to `git add` an explicit set of paths. count-churn-only.js checks EVERY dirty file
+  # and returns non-zero if any of them is more than a moved figure -- so by the time we are
+  # inside this branch, the whole dirty tree has already been proved count-only. The hardcoded
+  # list was therefore both redundant and wrong: on 2026-09-11 the gate cleared nine files and
+  # this line staged eight, leaving public/changelog.html dirty and halting the deploy it had
+  # just cleared. Two lists that must agree and are maintained separately will disagree, and the
+  # tempting unblock -- committing the tree by hand -- is how 3bad09216 swept another session's
+  # unfinished file into a release on 09-09.
+  # -u stages tracked modifications only: never an untracked file, never another session's new
+  # work, and only after the gate above has vouched for every path.
+  git add -u
   git commit -q -m "generated: crypto counts synced to the live sweep"
   git push -q
   echo ".. crypto counts refreshed and pushed"
