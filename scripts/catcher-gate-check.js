@@ -126,6 +126,35 @@ async function main() {
     ok("...so a real SPY call still records", !after.error, JSON.stringify(after.error));
   }
 
+
+  console.log("");
+  console.log("-- 5. an equity horizon on a shut market is refused, not patched up --");
+  /* Jake, 2026-09-11: "Dr. NoVo shouldn't make a prediction that cant be scored ... he has all the
+     data why would he make an unreal prediction." A named horizon already walks to the next real
+     session; horizon_min never did. Refused rather than silently re-dated, because moving his
+     window puts a claim on the record he did not make. */
+  KV = makeKv(); seedCoinMap({ BTC: {} });
+  {
+    // minutes from now that land on a Saturday
+    const now = new Date();
+    const day = now.getUTCDay();                   // 0 Sun .. 6 Sat
+    const toSat = ((6 - day) + 7) % 7 || 7;
+    const mins = toSat * 24 * 60 + 12 * 60;        // Saturday, midday-ish
+    const sat = await P.makePrediction({ ...GOOD_EQ, horizon: undefined, horizon_min: mins });
+    ok("a weekend equity horizon is refused", !!sat.error, JSON.stringify(sat));
+    ok("...and the refusal names the next real close",
+       /next close is/i.test(String(sat.error)), String(sat.error));
+
+    // the SAME call with a named horizon still records - the gate must not block real work
+    const named = await P.makePrediction({ ...GOOD_EQ, horizon: "tomorrow_close", horizon_min: undefined });
+    ok("...while a named horizon still records", !named.error, JSON.stringify(named.error));
+
+    // crypto never closes, so the rule must not apply there
+    const cx = await P.makePrediction({ kind: "direction", asset_class: "crypto", symbol: "BTC",
+      side: "up", spot_at: 77000, horizon_min: mins, source: "conversation" });
+    ok("...and crypto is untouched by it (the market never shuts)", !cx.error, JSON.stringify(cx.error));
+  }
+
   console.log("\n── NEGATIVE CONTROLS ────────────────────────────────────────────────────────");
   let controls = 0, caught = 0;
   // (a) the gate must not be rejecting everything

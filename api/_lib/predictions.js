@@ -286,6 +286,27 @@ async function makePrediction(args = {}) {
   if (!horizon_utc || horizon_utc > Date.now() + 366 * 24 * 3600 * 1000)
     return { error: "horizon must be today_close / tomorrow_open / tomorrow_close, or horizon_min (5 minutes to a year)" };
 
+  /* ── AN EQUITY CALL MUST EXPIRE ON A DAY THE MARKET TRADES ──────────────────────────────────
+     Jake, 2026-09-11: "Dr. NoVo shouldn't make a prediction that cant be scored ... he has all
+     the data why would he make an unreal prediction."
+
+     Exactly so, and this is the door it used to come through. A NAMED horizon already walks
+     forward to the next real session (resolveHorizon), and the tool says so. horizon_min did not:
+     its description was "minutes from now (5 to 20160)" and said nothing about a calendar, so a
+     window landing on a Saturday or a holiday was a perfectly reasonable thing to ask for. There
+     is no print at such a horizon, only the last one — grading against it compares a frozen price
+     to itself and mints a free hit.
+
+     Refused rather than quietly moved: silently re-dating his call would put a claim on the record
+     he did not make, which is the same defect as grading it wrong. The next real close is named in
+     the message so he can restate it as the call he actually means. */
+  if ((args.asset_class === "crypto" ? "crypto" : "equity") === "equity" && !isTradingDayEt(horizon_utc)) {
+    const next = resolveHorizon("tomorrow_close", horizon_utc);
+    return { error: "that horizon lands when the market is shut, so nothing could grade it. "
+      + "The next close is " + (next ? new Date(next).toISOString() : "the next session")
+      + " — state the window you actually mean, or use a named horizon." };
+  }
+
   const list = await _load(r);
   if (list.filter((p) => p.status === "open").length >= MAX_OPEN)
     return { error: "too many open predictions — let some resolve first" };

@@ -452,7 +452,12 @@ const declarations = [
         horizon_min: { type: "number", description: "Or minutes from now (5 to 20160). USE THIS " +
           "when the window you state is not one of the three named ones - 'by lunch', 'within the " +
           "hour', 'by 2pm'. Picking a named horizon that is merely CLOSE to what you said puts a " +
-          "different claim on the record than the one you made." },
+          "different claim on the record than the one you made. " +
+          "ON EQUITIES IT MUST LAND WHILE THE MARKET IS OPEN. You know the calendar - use it. A " +
+          "window that expires after the bell, at a weekend or on a holiday cannot be graded: there " +
+          "is no print at the horizon, only the last one, and scoring against that compares a frozen " +
+          "price to itself. If the window you mean ends outside a session, say the close you actually " +
+          "mean and use a named horizon instead. Crypto never closes, so this does not apply there." },
         thesis: { type: "string", description: "One line: the alignment you saw. Their words appear on the record. " +
           "THE WINDOW IN THIS SENTENCE MUST BE THE WINDOW YOU RECORDED. On 2026-09-08 a thesis " +
           "read 'a touch of $768 by lunch' while the horizon recorded was the opening bell; the " +
