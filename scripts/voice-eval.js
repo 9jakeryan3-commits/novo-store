@@ -32,6 +32,17 @@
 const path = require('path');
 const LOCAL = process.argv.includes('--local');
 
+/* ⚠ ONE RUN CANNOT TELL A REGRESSION FROM THE MODEL HAVING A MOOD. Measured 2026-09-11 against
+   the same unchanged prompt, four local runs scored 4, 4, 6 and 7 — a spread of three against a
+   documented baseline of 5, and "treat a jump to ten as a regression" sits barely outside that.
+   A single sample nearly had me report my own SYSTEM change as a voice regression; the A/B said
+   otherwise (6 with the change, 7 without, both inside the band).
+   So: run it N times and report the SPREAD. A median moves for a reason; one number moves because
+   temperature is not zero. Default 1 to keep the old behaviour for anyone calling it casually —
+   but anyone deciding whether voice regressed should pass --runs 3 or more, and the summary says
+   so when they have not. */
+const RUNS = Math.max(1, Number((process.argv.find((a) => a.startsWith('--runs=')) || '').split('=')[1]) || 1);
+
 // Short questions must get short answers; the beginner one must not turn into a lecture; the
 // casual one is where "answer the person before the tape" either happens or does not.
 const CASES = [
@@ -129,7 +140,7 @@ async function askLocal(q) {
     .map((p) => p.text).join('').trim();
 }
 
-(async () => {
+const once = async () => {
   console.log(`voice eval — ${LOCAL ? 'LOCAL prompt (unshipped)' : 'PRODUCTION'}\n`);
   let failed = 0, total = 0, errors = 0;
   for (const c of CASES) {
@@ -159,4 +170,27 @@ async function askLocal(q) {
   }
   console.log(failed ? `${failed}/${total} checks missed` : `all ${total} checks passed`);
   process.exitCode = failed ? 1 : 0;
+  return { failed, total };
+};
+
+(async () => {
+  const scores = [];
+  for (let i = 1; i <= RUNS; i++) {
+    if (RUNS > 1) console.log(`\n───────── run ${i}/${RUNS} ─────────`);
+    const r = await once();
+    if (!r) { console.log('run aborted (unanswered cases) — not counted'); continue; }
+    scores.push(r.failed);
+  }
+  if (RUNS > 1 && scores.length) {
+    const s = [...scores].sort((a, b) => a - b);
+    const med = s[Math.floor(s.length / 2)];
+    console.log(`\n══ ${scores.length} runs: ${scores.join(', ')} missed ` +
+                `· median ${med} · range ${s[0]}-${s[s.length - 1]}`);
+    console.log('Compare the MEDIAN to the baseline, never a single run — the spread on an ' +
+                'unchanged prompt has been measured at 3 checks wide.');
+    process.exitCode = med >= 10 ? 1 : 0;
+  } else if (RUNS === 1) {
+    console.log('\n(one run — the spread on an unchanged prompt is ~3 checks wide, so this number ' +
+                'cannot establish a regression on its own. Use --runs=3 before concluding.)');
+  }
 })();
