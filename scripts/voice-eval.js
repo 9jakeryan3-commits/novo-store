@@ -184,8 +184,19 @@ const once = async () => {
   if (RUNS > 1 && scores.length) {
     const s = [...scores].sort((a, b) => a - b);
     const med = s[Math.floor(s.length / 2)];
-    console.log(`\n══ ${scores.length} runs: ${scores.join(', ')} missed ` +
+    const dropped = RUNS - scores.length;
+    console.log(`\n══ ${scores.length} of ${RUNS} runs: ${scores.join(', ')} missed ` +
                 `· median ${med} · range ${s[0]}-${s[s.length - 1]}`);
+    /* ⚠ A MEDIAN OF ONE IS A SAMPLE WEARING A DISTRIBUTION'S CLOTHES. Asked for 3 runs against
+       production, two aborted on rate-limited cases and the summary still printed "median 4 ·
+       range 4-4" — the surviving sample, in the language of a spread, which is the precise thing
+       --runs was added to prevent. Say what was lost. */
+    if (dropped) {
+      console.log(`⚠ ${dropped} of ${RUNS} runs were DROPPED (unanswered cases). ` +
+                  (scores.length < 2
+                    ? 'One surviving run is a SAMPLE, not a spread — the median above is that single number. Re-run before concluding anything.'
+                    : 'The median above rests on fewer runs than requested.'));
+    }
     console.log('Compare the MEDIAN to the baseline, never a single run — the spread on an ' +
                 'unchanged prompt has been measured at 3 checks wide.');
     process.exitCode = med >= 10 ? 1 : 0;
