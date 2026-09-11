@@ -172,12 +172,15 @@ async function novoCryptoCalls(snap) {
                           thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
     });
     out = resp ? String(answerText(resp) || '').trim() : '';
-  } catch (e) { return { made: 0, declined: true, why: 'model error: ' + e.message }; }
+  /* ERRORED, NOT DECLINED. Both of these are after bump('asked'), so without their own counter the
+     ask is spent and nothing records where it went — the funnel reads as if he considered it and
+     said no. He never saw the question. */
+  } catch (e) { await bump('errored', 1); return { made: 0, declined: true, why: 'model error: ' + e.message }; }
 
   let j = null;
   // Unparseable is a DECLINE. Salvaging JSON out of prose is how a strict selector quietly
   // becomes a permissive one — the same note read-predictions.js carries, for the same reason.
-  try { j = JSON.parse(out); } catch (_) { return { made: 0, declined: true, why: 'unparseable' }; }
+  try { j = JSON.parse(out); } catch (_) { await bump('errored', 1); return { made: 0, declined: true, why: 'unparseable' }; }
   const calls = j && Array.isArray(j.calls) ? j.calls : [];
   if (!calls.length) { await bump('declined', 1); return { made: 0, declined: true, why: 'he declined' }; }
 

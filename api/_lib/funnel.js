@@ -25,7 +25,16 @@
 const { kv } = require('../_kv.js');
 
 // The stages, in order. Named for what Jake called them.
-const STAGES = ['reads', 'alerts', 'released', 'calls', 'asked', 'skipped', 'declined'];
+/* `errored` added 2026-09-11. After bump('asked') there are FOUR possible outcomes and only two
+   were counted: a considered no (declined) and a call (calls). A model error and an unparseable
+   response both returned declined:true and incremented NOTHING, so an outage vanished from the
+   funnel instead of appearing in it. Measured live: asked 254, declined 253, calls 0 — one ask
+   already lost, and a day of Vertex failures would have read "asked 86, declined 0, calls 0",
+   which nobody can distinguish from an analyst who simply said no 86 times.
+   ITS OWN STAGE, NOT FOLDED INTO declined, because a crashed model call and a considered no are
+   OPPOSITE problems: one is an outage to fix, the other is a bar to tune. Sharing a counter is
+   how the tuning number hides the outage. */
+const STAGES = ['reads', 'alerts', 'released', 'calls', 'asked', 'skipped', 'declined', 'errored'];
 
 /** ET calendar day — the same clock the trading day and the record already use. */
 function etDay(ms) {
