@@ -1463,22 +1463,14 @@ module.exports = async (req, res) => {
           let body;
           try { body = JSON.stringify(t.out); } catch (_) { body = String(t.out); }
           if (body && body.length > CAP) body = body.slice(0, CAP) + '…[truncated]';
-          return '### ' + t.name + '
-' + body;
-        }).join('
-
-');
+          return '### ' + t.name + '\n' + body;
+        }).join('\n\n');
         const j2 = await callModel(`${MODEL}:generateContent`, {
           systemInstruction: { parts: [{ text: SYSTEM }] },
           contents: [{ role: 'user', parts: [{ text:
             'You already ran these lookups for this question. Answer it now, in your own voice, '
             + 'from these results alone. Do not mention the lookups as a process and do not ask '
-            + 'for anything further.
-
-QUESTION: ' + question + '
-
-RESULTS:
-' + facts }] }],
+            + 'for anything further.\n\nQUESTION: ' + question + '\n\nRESULTS:\n' + facts }] }],
           generationConfig: {
             temperature: 0.25,
             maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
