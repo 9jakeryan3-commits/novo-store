@@ -286,6 +286,26 @@ which Jake explicitly carved out. */
   .lv-card h2 { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--txt3); margin: 0 0 12px; }
   .lv-card img.chart { width: 100%; border-radius: 0; border: 0; display: block; }
   /* dealer tiles */
+  /* Ranked strikes & blind spots. Hairlines and colour only -- no boxes, no fills, per the
+     standing CTA/border rule. The bar is a bare span, not a filled control. */
+  .gex-rank{margin-top:4px}
+  .gr-empty{color:var(--txt3);font-size:12px;padding:6px 0}
+  .gr-list{display:flex;flex-direction:column}
+  .gr-row{display:grid;grid-template-columns:18px 54px 1fr 92px 62px;align-items:center;gap:8px;
+          padding:5px 0;border-top:1px solid var(--bdr2,#242428);font-size:12px}
+  .gr-row:first-child{border-top:0}
+  .gr-n{color:var(--txt3);font-size:10.5px;text-align:right}
+  .gr-k{font-weight:800;color:var(--txt1);font-variant-numeric:tabular-nums}
+  .gr-bar{height:6px;position:relative}
+  .gr-bar i{position:absolute;left:0;top:0;height:6px;display:block;opacity:.75}
+  .gr-g{text-align:right;font-variant-numeric:tabular-nums;color:var(--txt2)}
+  .gr-d{text-align:right;font-variant-numeric:tabular-nums;color:var(--txt3);font-size:11px}
+  .gr-sub{color:var(--txt3);font-size:11px;line-height:1.5;padding:6px 0 2px}
+  .gr-gaps{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;padding-top:8px;
+           border-top:1px solid var(--bdr2,#242428);margin-top:6px}
+  .gr-gk{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3)}
+  .gr-gap{font-size:12px;font-weight:700;color:var(--txt1);font-variant-numeric:tabular-nums}
+  .gr-gap em{font-style:normal;font-weight:400;color:var(--txt3);font-size:11px;margin-left:5px}
   .lv-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   /* ⚠ NO FILL. --navy against the .lv-card it sits in measures 1.022 -- no separation at all -- while
      its hairline runs 1.387. The border carries ~17x the signal, so the fill was the redundant
@@ -686,6 +706,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
         <h2 style="padding-top:18px;">Gamma profile by strike</h2>
         <div id="prof-wrap" style="position:relative;flex:1;min-height:210px;"><canvas id="profile" height="200" style="position:absolute;inset:0;width:100%;height:100%;"></canvas></div>
+        <!-- RANKED GEX + BLIND SPOTS. Both read the ladder the profile canvas already draws, so
+             this adds no payload and no request: `profile` ships as [{k,g}] per strike and until now
+             was only ever painted as a shape. A shape shows you WHERE the mass is; it cannot tell you
+             that strike 3 carries four times strike 4, or that there is a hole between two walls with
+             nothing to hedge against. Those are the two readings a trader actually acts on. -->
+        <h2 style="padding-top:18px;">Ranked strikes &amp; blind spots</h2>
+        <div id="gex-rank" class="gex-rank"><div class="gr-empty">—</div></div>
       </div>
       <div class="lv-card">
         <h2 id="dealer-h">SPY · Dealer positioning</h2>
@@ -957,6 +984,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     else { $('chart').style.display='none'; }
     renderFear();
     drawProfile(d);
+    renderGexRank(d);   // same ladder, read as rankings and gaps rather than as a shape
     if(CUR !== GHIST_TK) loadGammaHeat(CUR); else drawGammaHeat();
   }
 
@@ -1044,6 +1072,83 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     }
   }
   window.addEventListener('resize', function(){ if(GHIST) drawGammaHeat(); });
+
+  /* ── RANKED STRIKES AND BLIND SPOTS ────────────────────────────────────────────────────
+     Both readings come out of `d.profile`, the [{k,g}] ladder the canvas above already draws, so
+     this costs no payload and no request. The canvas shows a SHAPE; a shape cannot tell you that
+     the top strike carries four times the next one, nor that there is a hole between two walls
+     with nothing to hedge against. Those are the two things a trader acts on.
+
+     ⚠ RANKED BY ABSOLUTE GAMMA, AND THE SIGN IS SHOWN SEPARATELY. A -197,211 strike and a +197,211
+     strike are equally important to hedging and mean opposite things for the move, so ranking by
+     the raw value would bury every short-gamma strike at the bottom of the list and quietly make
+     the panel a long-gamma-only view.
+
+     ⚠ A BLIND SPOT IS A GAP BETWEEN TWO STRIKES THAT CARRY MASS, not merely a small strike. The
+     test is the distance to the next LISTED strike holding at least a tenth of the ladder's median
+     weight - a run of empty strikes is where a move has nothing to lean on and travels fastest. If
+     the ladder is too short to have a median worth the name it says so rather than inventing one. */
+  function renderGexRank(d){
+    var box = $('gex-rank'); if(!box) return;
+    var rows = (d && d.profile) ? d.profile.filter(function(r){ return r && isFinite(r.k) && isFinite(r.g); }) : [];
+    if(rows.length < 5){ box.innerHTML = '<div class="gr-empty">No strike ladder in this payload.</div>'; return; }
+    var spot = Number(d.spot) || 0;
+
+    var ranked = rows.slice().sort(function(a,b){ return Math.abs(b.g) - Math.abs(a.g); }).slice(0,10);
+    var top = Math.abs(ranked[0].g) || 1;
+
+    var mags = rows.map(function(r){ return Math.abs(r.g); }).sort(function(a,b){ return a-b; });
+    var med = mags[Math.floor(mags.length/2)] || 0;
+    var floorMag = med * 0.10;
+    var heavy = rows.filter(function(r){ return Math.abs(r.g) >= floorMag; })
+                    .sort(function(a,b){ return a.k - b.k; });
+    /* ⚠ THE BAR IS THE LADDER'S OWN STRIKE SPACING, NOT A PERCENTAGE OF SPOT. A fixed 0.4%
+       of spot is ~3 points on SPY, and SPY strikes are listed 5 apart -- so every ordinary
+       adjacent pair scored as a blind spot and the panel flagged the entire ladder. A gap only
+       means something relative to how far apart this book's strikes normally sit, which differs
+       per ticker and per price level. Two times the median spacing: one missing strike is noise,
+       a run of them is somewhere a move has nothing to lean on. */
+    var steps = [];
+    for(var s1=1;s1<heavy.length;s1++) steps.push(heavy[s1].k - heavy[s1-1].k);
+    steps.sort(function(a,b){ return a-b; });
+    var medStep = steps.length ? steps[Math.floor(steps.length/2)] : 0;
+    var gaps = [];
+    if(medStep > 0){
+      for(var i=1;i<heavy.length;i++){
+        var lo = heavy[i-1].k, hi = heavy[i].k, w = hi - lo;
+        if(w >= medStep * 2) gaps.push({ lo: lo, hi: hi, w: w, mid: (lo+hi)/2, x: w/medStep });
+      }
+    }
+    gaps.sort(function(a,b){ return Math.abs(a.mid-spot) - Math.abs(b.mid-spot); });
+
+    var h = '<div class="gr-list">';
+    ranked.forEach(function(r,i){
+      var pct = spot ? ((r.k/spot - 1) * 100) : null;
+      h += '<div class="gr-row">'
+        +  '<span class="gr-n">' + (i+1) + '</span>'
+        +  '<span class="gr-k">' + r.k + '</span>'
+        +  '<span class="gr-bar"><i style="width:' + Math.max(2, Math.abs(r.g)/top*100).toFixed(1) + '%;'
+        +  'background:' + (r.g < 0 ? 'var(--red,#f43f5e)' : 'var(--grn,#10b981)') + '"></i></span>'
+        +  '<span class="gr-g">' + (r.g < 0 ? '−' : '+') + Math.round(Math.abs(r.g)).toLocaleString() + '</span>'
+        +  '<span class="gr-d">' + (pct == null ? '' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%') + '</span>'
+        +  '</div>';
+    });
+    h += '</div>';
+    h += '<div class="gr-sub">ranked by absolute gamma — sign shown, because a short-gamma strike '
+      +  'matters as much as a long one and means the opposite</div>';
+    if(gaps.length){
+      h += '<div class="gr-gaps"><span class="gr-gk">Blind spots</span>';
+      gaps.slice(0,3).forEach(function(g){
+        h += '<span class="gr-gap">' + g.lo + '–' + g.hi
+          +  '<em>' + g.x.toFixed(1) + '× the usual strike gap</em></span>';
+      });
+      h += '</div><div class="gr-sub">runs between strikes carrying real weight — a move through one '
+        +  'has little to lean on</div>';
+    } else {
+      h += '<div class="gr-sub">No gap wider than twice this book's usual strike spacing.</div>';
+    }
+    box.innerHTML = h;
+  }
 
   function drawProfile(d){
     var cv = $('profile');
