@@ -121,7 +121,7 @@
 
     /* THE LAG SENTENCE COMES FIRST, BEFORE ANY ROW. It is the difference between a feed a reader
        understands and one that reads like flow. */
-    h.push('<div class="cg-lag">These are <b>filings, not live trades</b>. Members have up to '
+    h.push('<div class="cg-lag">Members have up to '
       + '<b>45 days</b> to disclose under the STOCK Act'
       + (lag ? ', and in this window the median gap between the trade and its disclosure is <b>'
           + lag.median + ' days</b> (p90 ' + lag.p90 + ', longest ' + lag.max + ')' : '')
