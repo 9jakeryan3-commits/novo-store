@@ -583,8 +583,8 @@ const declarations = [
         digest: {
           type: "object",
           description:
-            "THE DAILY DIGEST — a short personal brief pushed to their phone each morning at " +
-            "08:00 ET. ONLY EVER SET THIS WHEN THEY ASK FOR IT IN SO MANY WORDS ('send me a " +
+            "THE DAILY DIGEST — a short personal brief pushed to their phone every market morning at " +
+            "a time THEY choose (08:00 ET if they name none). ONLY EVER SET THIS WHEN THEY ASK FOR IT IN SO MANY WORDS ('send me a " +
             "daily digest', 'brief me every morning'). Never infer it from interest in a " +
             "ticker, never offer to switch it on as a favour, and never set it in the same " +
             "breath as remembering an interest - wanting to follow SPY is not asking to be " +
@@ -612,8 +612,10 @@ const declarations = [
               description:
                 "WHEN it arrives, 24-hour ET as HH:MM — the time THEY asked for, converted to " +
                 "Eastern if they named another zone ('7am' -> '07:00', '6:30 pacific' -> " +
-                "'09:30'). Delivered on the half hour, so 7:15 lands at 7:00 — say so if they " +
-                "name an odd minute. Omit when they name no time; the default is 08:00 ET.",
+                "'09:30'). PASS THE EXACT MINUTE THEY NAMED. It is delivered at that minute and " +
+                "never early; 9:37 means 09:37, not 09:30. Do not round it, do not snap it to the " +
+                "hour or half hour, and do not tell them an odd minute is unavailable — it is. " +
+                "Omit when they name no time; the default is 08:00 ET.",
             },
           },
         },

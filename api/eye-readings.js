@@ -42,6 +42,31 @@ function verifyToken(token) {
   } catch (_) { return null; }
 }
 
+/* Is the rundown that SHOULD be on screen missing?
+ *
+ * Pure and exported so it can be tested across a whole day rather than whenever someone happens to
+ * look. Takes the stored read and a clock; returns true only when the run that was due has not
+ * landed. See the note at the call site for why this is not a date comparison.
+ */
+function rundownStale(rd, nowMs) {
+  if (!rd) return false;
+  const RUN_UTC_MIN = 12 * 60 + 15;      // the cron: "15 12 * * *"
+  const GRACE_MIN = 45;                  // Vercel does not fire to the second, and writing takes time
+  const now = new Date(nowMs);
+  const due = new Date(now);
+  due.setUTCHours(12, 15, 0, 0);
+  // Before today's run is due, the run that SHOULD have landed is yesterday's.
+  if (now.getUTCHours() * 60 + now.getUTCMinutes() < RUN_UTC_MIN + GRACE_MIN) {
+    due.setUTCDate(due.getUTCDate() - 1);
+  }
+  const wrote = Date.parse(rd.as_of || '') || 0;
+  /* as_of has been written on every read since this endpoint existed; the day-string fallback is
+     for anything older, and compares against the DUE day rather than the wall date. */
+  return wrote ? wrote < due.getTime()
+               : !!(rd.day && rd.day < due.toISOString().slice(0, 10));
+}
+
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
 
@@ -126,11 +151,21 @@ module.exports = async (req, res) => {
        writer failed, the page would have gone on showing the last one that worked as though it
        were today's - the reader printed rd.day in the subtitle but nothing compared it to
        anything, and a date in small type is not a warning.
-       Keyed on the UTC date here because that is what crypto-rundown.js:92 writes
-       (`new Date().toISOString().slice(0, 10)`) - deliberately UTC, since crypto has no close to
-       key on. Comparing against an Eastern date would mark every read stale for part of the day. */
+       ⚠ STALE MEANS "THE RUN THAT WAS DUE HAS NOT LANDED" — AN ELAPSED-TIME QUESTION, NOT A
+       CALENDAR ONE. The old test compared two UTC calendar labels, and a calendar rolls at 00:00
+       UTC while this cron does not fire until 12:15 UTC ("15 12 * * *"). So from 00:00 until the
+       run landed — 8:00 PM to 8:15 AM Eastern, TWELVE HOURS of every day — a perfectly current
+       rundown declared itself "not today's". Jake caught it at 9:59 PM ET on 2026-09-10, reading
+       "This is not today's rundown. It was written on 2026-09-10".
+       The comment that used to sit here worried that an EASTERN comparison "would mark every read
+       stale for part of the day". True, and the UTC one it chose did exactly that instead. Neither
+       zone can fix it, because the bug is not the zone — it is using date equality as a proxy for
+       "did the scheduled job run". That is the real answer to "crypto has no close to key on":
+       don't key the read on a calendar at all. Elapsed time has no timezone.
+       The writer's UTC `day` stamp stays exactly as it is — it is load-bearing for the re-run
+       guard in crypto-rundown.js and is correct for that job. */
     const today = new Date().toISOString().slice(0, 10);
-    const stale = !!(rd.day && rd.day !== today);
+    const stale = rundownStale(rd, Date.now());
     return res.status(200).json({ ok: true, live: true, read: rd, stale, today,
       // The score for BTC direction calls — the family this read's bias belongs to, so the page
       // can show the record without computing one of its own.
@@ -156,3 +191,6 @@ module.exports = async (req, res) => {
     n: snap.n != null ? snap.n : snap.readings.length,
   });
 };
+
+// exported for scripts/rundown-stale-check.js
+module.exports.rundownStale = rundownStale;

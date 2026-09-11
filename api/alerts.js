@@ -81,7 +81,14 @@ module.exports = async (req, res) => {
             let log = null;
             try { log = await r2.get("digest:log:" + eh(email)); } catch (_) { log = null; }
             if (typeof log === "string") { try { log = JSON.parse(log); } catch (_) { log = null; } }
-            if (Array.isArray(log)) digest_log = log.slice(-7).reverse();
+            /* Filtered by the same tolerance the ORDER above uses: no app on the order means it
+               shows everywhere, so its mornings must too — and an entry written before this stamp
+               existed carries no app, so it is kept rather than vanishing from the history. */
+            if (Array.isArray(log)) {
+              digest_log = log.filter(function (e) {
+                return !app || !digest.app || !e || !e.app || e.app === digest.app;
+              }).slice(-7).reverse();
+            }
           }
         }
       } catch (_) {}

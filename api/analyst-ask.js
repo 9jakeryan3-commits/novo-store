@@ -168,7 +168,13 @@ async function vertexStream(path, body, onDelta) {
   }
   const reader = r.body.getReader();
   const dec = new TextDecoder();
-  let buf = '', full = '';
+  /* ⚠ THE STREAM MUST REPORT ITS OWN finishReason, OR THE EMPTY-ANSWER LOG DESCRIBES THE WRONG
+     ROUND. This function used to return only the text. The streamed round is the LAST one, so on
+     an empty answer the handler's `finishReason` still held the value from the previous
+     tool-calling round (typically STOP) and the one console.error written to diagnose exactly
+     this failure reported it. An instrument that renders only the successful round cannot answer
+     the question it exists for. */
+  let buf = '', full = '', finish = null, sawParts = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -181,12 +187,17 @@ async function vertexStream(path, body, onDelta) {
       let j = null;
       try { j = JSON.parse(line.slice(5).trim()); } catch (_) { continue; }
       const parts = j?.candidates?.[0]?.content?.parts || [];
+      sawParts += parts.length;
+      /* Keep the LAST non-null reason the stream reports: it arrives on a late frame, and frames
+         before it legitimately carry null. */
+      const fr = j?.candidates?.[0]?.finishReason;
+      if (fr) finish = fr;
       for (const p of parts) {
         if (p && p.text && !p.thought) { full += p.text; try { onDelta(p.text); } catch (_) {} }
       }
     }
   }
-  return full;
+  return { text: full, finishReason: finish, parts: sawParts };
 }
 
 // The local copy is GONE -- this is the shared _lib/vertex.js client with the same contract it
@@ -1355,8 +1366,12 @@ module.exports = async (req, res) => {
       // cannot arrive in pieces, so only the round that is guaranteed prose gets tokens-as-written.
       if (sse && round === rounds - 1) {
         try {
-          answer = (await vertexStream(`${MODEL}:streamGenerateContent`, reqBody,
-            (t) => sse({ type: 'delta', text: t }))).trim();
+          const st = await vertexStream(`${MODEL}:streamGenerateContent`, reqBody,
+            (t) => sse({ type: 'delta', text: t }));
+          answer = (st.text || '').trim();
+          // the streamed round IS the final round, so its verdict is the one worth logging
+          finishReason = st.finishReason || null;
+          lastParts = st.parts;
         } catch (e) { upstream = e; }
         break;
       }
@@ -1452,7 +1467,20 @@ module.exports = async (req, res) => {
                 ? 'I am rate limited so I cannot write it up right now, but it is saved — no need to ask twice.'
                 : 'I am rate limited right now — give it a moment and ask again.')
             : 'I could not reach my model just then. Ask again.')
-        : 'I came back with nothing there — ask me again.');
+        /* ⚠ NEVER SAY "ASK ME AGAIN" WHEN A WRITE ALREADY LANDED.
+           `done` is built from the TOOL LEDGER — it is a receipt for side effects that succeeded,
+           and it is completely independent of whether the model then produced prose. So a turn can
+           reach here having genuinely recorded a prediction or a memory, and the old tail told the
+           member to ask again anyway: "Done — my call is on my record... I came back with nothing
+           there — ask me again." On an append-only record that instruction lands the row TWICE.
+           The rate-limit branch above already makes this distinction ("...but it is saved — no need
+           to ask twice"); this branch was simply never given the same split. The DID table itself
+           spells the hazard out on log_trader_prediction and was still being contradicted one line
+           later. */
+        : (done.length
+            ? 'That is all that landed — I could not write the rest up just then. Do not ask again; '
+              + 'it is already recorded.'
+            : 'I came back with nothing there — ask me again.'));
       /* The one line that makes this failure diagnosable at all. Everything else about an empty
          answer is invisible: upstream is null, the ledger is not in the response body, and the
          success summary at the bottom of the handler never runs. */

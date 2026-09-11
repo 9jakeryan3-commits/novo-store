@@ -440,8 +440,14 @@ module.exports = async (req, res) => {
         try { log = await r.get(lk); } catch (_) { log = null; }
         if (typeof log === "string") { try { log = JSON.parse(log); } catch (_) { log = null; } }
         log = Array.isArray(log) ? log : [];
+        /* ⚠ STAMP THE APP, OR EVERY DASHBOARD SHOWS EVERY DASHBOARD'S MORNINGS.
+           A member has ONE digest order and setting a new one OVERWRITES it, but this log keeps
+           the last 14 entries — so switching the order from the equity desk to the crypto map
+           left yesterday's SPY write-up in the log, and the crypto Digest tab rendered it under a
+           BTC heading. The order has always carried `app`; the log it produces never did, so the
+           per-app gate on the read had nothing to filter by. */
         log.push({ ts: Date.now(), text, symbols: dg.symbols, focus: dg.focus || null,
-                   guard: guard || null });
+                   app: dg.app || null, guard: guard || null });
         await r.set(lk, JSON.stringify(log.slice(-14)), { ex: 30 * 24 * 3600 });
       } catch (_) { /* the log is display; delivery does not wait on it */ }
 
