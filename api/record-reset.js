@@ -50,14 +50,26 @@ module.exports = async (req, res) => {
     /* KEYS, not `keys`: that is built below this branch, and referencing it here threw a
        ReferenceError on every GET. node --check cannot see it -- only running it can. */
     return res.status(405).json({ error: 'POST only', keys: KEYS,
-      note: 'add ?tally=drlog to also clear the dr-log health counters' });
+      note: '?only=drlog clears just the health counters; ?only=record just the records; omitted clears both' });
   }
   const r = kv();
   if (!r) return res.status(503).json({ error: 'kv unavailable' });
 
-  /* Opt-in, because clearing a health COUNTER is a different act from clearing a RECORD. */
-  const keys = KEYS.slice();
-  if (String((req.query && req.query.tally) || '') === 'drlog') keys.push('dr:log:tally');
+  /* ⚠ ?only= SCOPES THE WIPE. IT DOES NOT ADD TO IT.
+     The first version of this flag APPENDED dr:log:tally to the full list, so asking to clear a
+     health counter also destroyed the prediction and alert records. I did exactly that on
+     2026-09-11 — went to reset a polluted 26.5% empty-rate counter and took a 128-alert record
+     with it. Recoverable, because the engines republish, but the shape was the error: a flag whose
+     name says "also this" on an endpoint whose default is "everything" is a foot-gun, and the
+     blast radius should shrink when you name a target, never grow.
+     ?only=drlog   the dr-log health counters alone
+     ?only=record  the prediction + alert records alone
+     (omitted)     everything, as before */
+  const only = String((req.query && req.query.only) || (req.query && req.query.tally) || '');
+  const DRLOG = ['dr:log:tally'];
+  const keys = only === 'drlog' ? DRLOG.slice()
+             : only === 'record' ? KEYS.slice()
+             : KEYS.concat(DRLOG);
 
   const deleted = [];
   const failed = [];
