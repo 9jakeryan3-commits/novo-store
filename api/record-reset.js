@@ -23,6 +23,14 @@ function authed(req) {
 /* Everything that holds a SCORE. Enumerated, not pattern-matched: a KEYS scan is at the mercy of
    whatever else shares a prefix, and this is the one place a wrong match cannot be undone.
    The archive months are the only ones that can exist — the record started 2026-09-07. */
+/* ⚠ THE DR-LOG TALLY IS A SEPARATE DECISION AND IS NOT IN THE DEFAULT WIPE.
+   ?tally=drlog adds `dr:log:tally` — the health counters, not the transcripts. It exists because
+   that counter is HISTORICALLY POLLUTED and cannot self-correct: until 2026-09-11 an upstream 429
+   was recorded as status 'empty', so 14 of 22 all-time "empty" turns were a peer's rate-limited
+   test battery. The panel read 27.2% when the true figure was 9.9%. The row labels were fixed
+   forward, but a counter only ever increments, so the old mislabelled increments stay until the
+   hash is cleared. The CONVERSATIONS are never touched by this — dr:log:<month> and the rolling
+   window are the corpus the tuning runs on, and Jake's rule is that useful data is never deleted. */
 const KEYS = [
   'pred:log',          // NoVo's working set
   'pred:tally',        // the all-time counters the score reads
@@ -39,21 +47,28 @@ module.exports = async (req, res) => {
   if (!authed(req)) return res.status(403).json({ error: 'forbidden' });
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POST only', keys: KEYS });
+    /* KEYS, not `keys`: that is built below this branch, and referencing it here threw a
+       ReferenceError on every GET. node --check cannot see it -- only running it can. */
+    return res.status(405).json({ error: 'POST only', keys: KEYS,
+      note: 'add ?tally=drlog to also clear the dr-log health counters' });
   }
   const r = kv();
   if (!r) return res.status(503).json({ error: 'kv unavailable' });
 
+  /* Opt-in, because clearing a health COUNTER is a different act from clearing a RECORD. */
+  const keys = KEYS.slice();
+  if (String((req.query && req.query.tally) || '') === 'drlog') keys.push('dr:log:tally');
+
   const deleted = [];
   const failed = [];
-  for (const k of KEYS) {
+  for (const k of keys) {
     try { await r.del(k); deleted.push(k); } catch (_) { failed.push(k); }
   }
 
   /* Read back rather than trust the DELs — "I issued a delete" and "it is gone" are different
      claims, and only one of them is worth reporting. */
   const left = [];
-  for (const k of KEYS) {
+  for (const k of keys) {
     try {
       const v = await r.get(k);
       if (v !== null && v !== undefined) { left.push(k); continue; }
