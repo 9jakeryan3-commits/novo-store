@@ -109,6 +109,11 @@ module.exports = async (req, res) => {
       as_of: b.as_of || new Date().toISOString(),
       readings: b.readings.slice(0, 60),
       rules: Array.isArray(b.rules) ? b.rules.slice(0, 40) : [],
+      /* ⚠ WHITELISTED EXPLICITLY, because this object IS a whitelist and a field that is not named
+         here is dropped silently at the door. `skips` is the evaluator saying WHY each registered
+         rule did not fire — the answer to "the Eye has never fired", which was undiagnosable from
+         outside because six `continue`s in evaluate_rules_once said nothing at all. */
+      skips: Array.isArray(b.skips) ? b.skips.slice(0, 12) : [],
       n: Number(b.n) || b.readings.length,
     }), { ex: 6 * 3600 });
     /* READ IT BACK BEFORE CLAIMING IT LANDED. A 200 here has meant "the write call returned",
