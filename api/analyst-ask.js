@@ -1341,14 +1341,23 @@ module.exports = async (req, res) => {
     let finishReason = null, lastParts = 0;
     for (let round = 0; round < rounds; round++) {
       modelCalls++;
+      /* ⚠ THE LAST ROUND IS HANDED NO TOOLS AT ALL, BECAUSE mode:'NONE' DOES NOT STOP THIS MODEL.
+         The intent below was always right — end the loop in prose — but declaring the tools and
+         then asking for them not to be used does not hold. Measured 2026-09-11 against live
+         gemini-3.6-flash: on the final round, with mode NONE, the model still returned a
+         functionCall. The loop dutifully ran it, pushed the response, and then ran out of rounds
+         with `answer` still empty, so the turn died as "I came back with nothing there".
+         Every empty answer in the log was this: 4 of 4 recorded, both of my reproductions,
+         streamed and non-streamed alike, all finishReason STOP with one part that was a call.
+         A model cannot call a function it has not been given. */
+      const lastRound = round === rounds - 1;
       const reqBody = {
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents,
-        tools: [{ functionDeclarations: declarations }],
-        // The final round is forced to NONE so the loop always ends in prose. Left on AUTO, the
-        // model can keep asking for one more lookup until the function is killed mid-chain, which
-        // a subscriber sees as the analyst simply never answering.
-        toolConfig: { functionCallingConfig: { mode: round < rounds - 1 ? 'AUTO' : 'NONE' } },
+        ...(lastRound ? {} : {
+          tools: [{ functionDeclarations: declarations }],
+          toolConfig: { functionCallingConfig: { mode: 'AUTO' } },
+        }),
         generationConfig: {
           temperature: 0.25,
           maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
@@ -1431,6 +1440,34 @@ module.exports = async (req, res) => {
       }));
       contents.push({ role: 'user', parts: responses });
       if (sse) sse({ type: 'lookups', lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })) });
+    }
+
+    /* ⚠ THE BACKSTOP. Above is the fix; this is the guard that stops the whole CLASS of failure
+       coming back silently. The loop can only end two ways: with prose, or having spent its last
+       round on something that was not prose. In the second case there is still a full transcript
+       of tool results sitting in `contents` — everything needed to write the answer — and the old
+       code threw it away and told the member to ask again. One more call, with no tools in the
+       body at all, turns that transcript into the reply it already earned.
+       This runs only when the loop failed to produce prose AND the model is actually reachable
+       (an upstream error has its own message and must not be retried into). */
+    if (!answer && !upstream && contents.length > 1) {
+      try {
+        modelCalls++;
+        const j2 = await callModel(`${MODEL}:generateContent`, {
+          systemInstruction: { parts: [{ text: SYSTEM }] },
+          contents,
+          generationConfig: {
+            temperature: 0.25,
+            maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
+            thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+          },
+        });
+        const p2 = j2?.candidates?.[0]?.content?.parts || [];
+        finishReason = j2?.candidates?.[0]?.finishReason || finishReason;
+        lastParts = p2.length;
+        answer = p2.filter((p) => p && p.text && !p.thought).map((p) => p.text).join('').trim();
+        if (sse && answer) sse({ type: 'delta', text: answer });
+      } catch (_) { /* the empty-answer branch below is the honest outcome if even this fails */ }
     }
 
     if (!answer) {
