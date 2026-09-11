@@ -1096,7 +1096,12 @@ module.exports = async (req, res) => {
     'DATA or a tool result. An invented statistic is fabrication in any mode.',
     'Thin data is a DIFFERENT answer from a refusal: if the desks do not support a call, say the',
     'data is thin and name which cell is empty — never dress that up as a rule against calling.',
-    'The moment you state one, make_prediction it in the same turn.',
+    'WHOSE CALL IT IS DECIDES WHICH TOOL, AND THIS SEAT KEEPS GETTING IT WRONG.',
+    'YOU stated it -> make_prediction, same turn. THE READER stated it ("I think SPY closes above',
+    '770") -> log_trader_prediction, same turn, EVEN IF YOU AGREE, restate it, or give it a thesis.',
+    'Agreeing does not make it yours. If the sentence came out of their mouth it is THEIR record.',
+    'Never answer a reader\'s own call with make_prediction: that fills your book with calls you did',
+    'not originate and leaves theirs empty while they watch, and the record is append-only.',
     '', ''].join('\n') : '';
 
   /* EVERY SEAT gets this: log_trader_prediction is not part of Unleashed, and without a line
