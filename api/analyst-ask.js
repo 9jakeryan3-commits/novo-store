@@ -1303,6 +1303,7 @@ module.exports = async (req, res) => {
     const userParts = [{ text: prompt }];
     if (image) userParts.push({ inlineData: image });
     const contents = [{ role: 'user', parts: userParts }];
+    const toolOut = [];   // {name, out} for the synthesis pass below
     const ledger = [];
     _lc.ledger = ledger;   // same reference — the catch sees whatever was gathered
     let answer = '';
@@ -1341,23 +1342,21 @@ module.exports = async (req, res) => {
     let finishReason = null, lastParts = 0;
     for (let round = 0; round < rounds; round++) {
       modelCalls++;
-      /* ⚠ THE LAST ROUND IS HANDED NO TOOLS AT ALL, BECAUSE mode:'NONE' DOES NOT STOP THIS MODEL.
-         The intent below was always right — end the loop in prose — but declaring the tools and
-         then asking for them not to be used does not hold. Measured 2026-09-11 against live
-         gemini-3.6-flash: on the final round, with mode NONE, the model still returned a
-         functionCall. The loop dutifully ran it, pushed the response, and then ran out of rounds
-         with `answer` still empty, so the turn died as "I came back with nothing there".
-         Every empty answer in the log was this: 4 of 4 recorded, both of my reproductions,
-         streamed and non-streamed alike, all finishReason STOP with one part that was a call.
-         A model cannot call a function it has not been given. */
-      const lastRound = round === rounds - 1;
+      /* ⚠ NEITHER mode:'NONE' NOR WITHHOLDING THE TOOLS ENDS THE LOOP IN PROSE. Both were tried
+         against live gemini-3.6-flash on 2026-09-11 and both failed, in different ways:
+           mode NONE, tools declared  -> the model returns a functionCall anyway. The loop runs it,
+                                         runs out of rounds, and dies with an empty answer.
+           no tools declared          -> no call, but the transcript still contains functionCall
+                                         and functionResponse parts whose declarations are now
+                                         missing, and the model returns one unusable part.
+         So the tools stay declared on every round — the history REFERS to them and has to parse —
+         and ending in prose is handled after the loop by synthesising from a flattened transcript,
+         which needs no declarations because it contains no call parts. See the synthesis below. */
       const reqBody = {
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents,
-        ...(lastRound ? {} : {
-          tools: [{ functionDeclarations: declarations }],
-          toolConfig: { functionCallingConfig: { mode: 'AUTO' } },
-        }),
+        tools: [{ functionDeclarations: declarations }],
+        toolConfig: { functionCallingConfig: { mode: 'AUTO' } },
         generationConfig: {
           temperature: 0.25,
           maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
@@ -1436,26 +1435,50 @@ module.exports = async (req, res) => {
            (Array.isArray(out.rows) && out.rows.length === 0));
         ledger.push({ tool: name, args, ok: !(out && out.error) && !_empty,
                       empty: !!_empty || undefined });
+        /* Kept for the synthesis pass: if the loop ends mid-chain, these results are the whole
+           answer and throwing them away is what produced "I came back with nothing there" on a
+           turn that had already done every lookup it needed. */
+        try { toolOut.push({ name, out }); } catch (_) {}
         return { functionResponse: { name, response: (out && typeof out === 'object') ? out : { value: out } } };
       }));
       contents.push({ role: 'user', parts: responses });
       if (sse) sse({ type: 'lookups', lookups: ledger.map((l) => ({ tool: l.tool, args: l.args, ok: l.ok })) });
     }
 
-    /* ⚠ THE BACKSTOP. Above is the fix; this is the guard that stops the whole CLASS of failure
-       coming back silently. The loop can only end two ways: with prose, or having spent its last
-       round on something that was not prose. In the second case there is still a full transcript
-       of tool results sitting in `contents` — everything needed to write the answer — and the old
-       code threw it away and told the member to ask again. One more call, with no tools in the
-       body at all, turns that transcript into the reply it already earned.
-       This runs only when the loop failed to produce prose AND the model is actually reachable
-       (an upstream error has its own message and must not be retried into). */
-    if (!answer && !upstream && contents.length > 1) {
+    /* ⚠ THE SYNTHESIS PASS — this is what actually ends the loop in prose.
+       The loop can finish two ways: with an answer, or having spent its last round on a tool call.
+       In the second case every lookup the answer needs has already run and is sitting in toolOut;
+       the old code threw all of it away and told the member to ask again — which, on an
+       append-only record, lands their prediction a second time.
+       FLATTENED TO TEXT ON PURPOSE. Replaying `contents` does not work: it contains functionCall
+       and functionResponse parts, so either the tools stay declared and the model calls one again,
+       or they are withheld and the history references declarations that are not there. Rendering
+       the same results as plain text removes both horns — there is nothing left to call, and
+       nothing dangling to resolve. Measured against live gemini-3.6-flash, 2026-09-11. */
+    if (!answer && !upstream && toolOut.length) {
       try {
         modelCalls++;
+        const CAP = 6000;   // per lookup; a 200-row archive query must not crowd out the others
+        const facts = toolOut.map((t) => {
+          let body;
+          try { body = JSON.stringify(t.out); } catch (_) { body = String(t.out); }
+          if (body && body.length > CAP) body = body.slice(0, CAP) + '…[truncated]';
+          return '### ' + t.name + '
+' + body;
+        }).join('
+
+');
         const j2 = await callModel(`${MODEL}:generateContent`, {
           systemInstruction: { parts: [{ text: SYSTEM }] },
-          contents,
+          contents: [{ role: 'user', parts: [{ text:
+            'You already ran these lookups for this question. Answer it now, in your own voice, '
+            + 'from these results alone. Do not mention the lookups as a process and do not ask '
+            + 'for anything further.
+
+QUESTION: ' + question + '
+
+RESULTS:
+' + facts }] }],
           generationConfig: {
             temperature: 0.25,
             maxOutputTokens: deep ? DEEP.MAX_OUTPUT_TOKENS : 1600,
