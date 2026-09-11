@@ -21,7 +21,7 @@
  * ⚠ THE MEMBER'S OWN PREDICTIONS ARE EXCLUDED at the source (novoRecord skips source "user").
  * Those are other people's calls; counting them would put them in his grade.
  */
-const { novoRecord, migrateGateRows } = require("./_lib/predictions.js");
+const { novoRecord } = require("./_lib/predictions.js");
 const { funnel } = require("./_lib/funnel.js");
 
 module.exports = async (req, res) => {
@@ -37,13 +37,7 @@ module.exports = async (req, res) => {
   if (!ok) return res.status(401).json({ error: "unauthorized" });
 
   try {
-    /* ?migrate=1 re-attributes the rows the edge gate minted in his name (see migrateGateRows).
-       Behind the same secret as the read, and idempotent, so a repeat is a no-op rather than a
-       second pass over the same rows. */
-    let migrated = null;
-    if (String(req.query && req.query.migrate) === "1") migrated = await migrateGateRows();
     const rec = await novoRecord();
-    if (migrated) rec.migrated = migrated;
     /* The funnel rides along on the same authenticated read. Jake's expected shape is a
        RATIO between stages, so the two only mean something side by side. */
     try { rec.funnel = await funnel(14); } catch (_) { rec.funnel = null; }

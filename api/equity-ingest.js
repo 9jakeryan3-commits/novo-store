@@ -44,6 +44,14 @@ module.exports = async (req, res) => {
     // 7d TTL for the same reason crypto:map:live carries it: the feed self-describes its
     // freshness (as_of/received) and a labelled old record beats a vanished one.
     await r.set("equity:signals:live", payload, { ex: 604800 });
+    /* Same grade join as the crypto side. recent_resolved carries the per-signal outcome the
+       engine's resolver wrote (hit / miss / flat / no_data); this attaches it to the equity alerts
+       Dr. NoVo actually released. */
+    try {
+      const AR = require("./_lib/alert-record.js");
+      await AR.joinEquityResolutions(b.recent_resolved || []);
+      await AR.reconcile();
+    } catch (_) {}
     return res.status(200).json({ ok: true, bytes: payload.length,
                                   open: (b.open || []).length, record: (b.record || []).length });
   } catch (e) {

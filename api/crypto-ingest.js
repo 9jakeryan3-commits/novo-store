@@ -149,6 +149,15 @@ module.exports = async (req, res) => {
     try { await require("./_lib/novo-calls.js").novoCryptoCalls(b); } catch (_) {}
     // Dr. NoVo's Alerts: chain tickets whose rule has proven edge, surfaced; the firehose stays put.
     try { await require("./_lib/predictions.js").curateChainFires(b); } catch (_) {}
+    /* THE GRADE JOIN. The engine already resolved these tickets against the price path; this
+       attaches its verdict to the alerts we actually released. reconcile() then writes off any
+       alert whose verdict never arrived, so the scoreboard's denominator stays honest rather than
+       quietly shrinking to only the ones we managed to catch. */
+    try {
+      const AR = require("./_lib/alert-record.js");
+      await AR.joinCryptoResolutions((b.alerts && b.alerts.recent) || []);
+      await AR.reconcile();
+    } catch (_) {}
     const shape = {};
     for (const k of Object.keys(b)) {
       const v = b[k];

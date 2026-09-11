@@ -104,8 +104,8 @@ async function _remember(r, p) {
     const src = (p.source === "user" || p.source === "engine") ? p.source : (p.source || "conversation");
     const hit = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
     await r.rpush(ARCH(Date.now()), JSON.stringify(p));       // no TTL: this is the record
-    if (p.status === "void" || hit === null) {
-      await r.hincrby(TALLY, "void:" + src, 1);
+    if (hit === null) {
+      await r.hincrby(TALLY, "ungraded:" + src, 1);
       return;
     }
     await r.hincrby(TALLY, "n:" + src, 1);
@@ -115,6 +115,10 @@ async function _remember(r, p) {
 
 const MAX_KEPT = 400;          // the ROLLING WINDOW only. Nothing is lost: see _remember above.
 const MAX_OPEN = 40;           // a runaway prompt cannot flood the record
+/* The equity universe the evaluator can actually price: evaluateEquityPredictions reads spots out
+   of the published state's `indices`, which the engine builds for these three. Same set alerts.js
+   enforces (alerts.js:32) — one answer to "what can this platform grade", not two. */
+const EQ_RESOLVABLE = new Set(["SPY", "QQQ", "IWM"]);
 const KINDS = new Set(["close_at", "open_at", "direction", "trade_call", "level_touch"]);
 
 // ── THE EQUITY CALENDAR ──────────────────────────────────────────────────────────────────────
@@ -220,6 +224,43 @@ async function makePrediction(args = {}) {
   if (!KINDS.has(kind)) return { error: "kind must be close_at, direction, trade_call or level_touch" };
   const symbol = String(args.symbol || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (!symbol) return { error: "symbol required" };
+
+  /* ── RESOLVABILITY AT CAPTURE, NOT AT GRADE ────────────────────────────────────────────────
+     Jake, 2026-09-11: "he doesnt necessarily deny any prediction, the catcher should just not
+     catch a prediction unless its data backed."
+
+     ⚠ THIS IS NOT CENSORSHIP AND IT IS NOT NEW DOCTRINE. Dr. NoVo may still SAY anything he
+     likes about FOMC, a merger, or a ticker we do not price — the gate decides only what enters
+     the graded BOOK. forecast.js:100 already states the rule in those words ("a forecast that
+     cannot be machine-graded later never enters the ledger"), and alerts.js:155 already enforces
+     exactly this at entry. It had simply never been applied here.
+
+     ⚠ WHAT IT PREVENTS, CONCRETELY. The evaluator prices equity off state.indices and crypto off
+     the snapshot's coin map; anything else hits `if (!isFinite(spot)) continue` on every tick
+     FOREVER — there is no timeout, no force-resolve and no reaper in this file. Since MAX_OPEN
+     caps the book at 40 open rows, forty ungradeable predictions permanently block every real one.
+     An unresolvable row is not a harmless row.
+
+     ⚠ UNKNOWN ≠ UNRESOLVABLE. When the snapshot cannot be read we do NOT reject: a KV hiccup must
+     not silently stop Dr. NoVo recording. Same shape as alerts.js — reject only on a map we
+     actually hold. */
+  const assetClass = args.asset_class === "crypto" ? "crypto" : "equity";
+  if (assetClass === "equity") {
+    if (!EQ_RESOLVABLE.has(symbol)) {
+      return { error: symbol + " cannot be graded automatically — the equity record prices "
+        + [...EQ_RESOLVABLE].join(", ") + " only. Say it freely; it just is not recorded." };
+    }
+  } else {
+    let snap = null;
+    try {
+      snap = await r.get("crypto:map:live");
+      if (typeof snap === "string") snap = JSON.parse(snap);
+    } catch (_) { snap = null; }
+    if (snap && snap.coins && !snap.coins[symbol]) {
+      return { error: symbol + " is not on the coin map, so nothing can grade it later. "
+        + "Say it freely; it just is not recorded." };
+    }
+  }
   const side = String(args.side || "").trim().toLowerCase();
   if ((kind === "direction" || kind === "trade_call") && !SIDES.has(side))
     return { error: "side must be up/down (direction) or buy/sell (trade_call)" };
@@ -351,19 +392,24 @@ async function evaluate(getSpot) {
   let changed = 0;
   for (const p of list) {
     if (p.status !== "open") continue;
-    /* ⚠ VOID, NOT GRADED, when an equity horizon fell on a day no market traded. This is the
-       migration guard for rows recorded before the calendar existed — one is live right now,
-       "today_close" stamped on Labor Day — and the permanent backstop for anything that slips
-       past creation. Grading it would compare a frozen spot to itself and mint a free HIT; a
-       record with free hits in it is not a record. Voided rows are kept, shown, and excluded
-       from the score, with the reason on the row. */
+    /* ⚠ AN EQUITY HORIZON ON A CLOSED MARKET ROLLS FORWARD. IT IS NOT VOIDED, AND IT IS NEVER
+       GRADED WHERE IT LANDED.
+       Jake, 2026-09-11: "'voided' is not a feature ... remove it." It is gone as a status — but
+       the hazard it was covering is real and stays covered, because the alternative is worse than
+       either: grading a holiday horizon compares a frozen spot to itself and mints a FREE HIT, and
+       a record with free hits in it is not a record.
+       resolveHorizon already refuses to put a NAMED horizon on a non-trading day, so only a
+       horizon_min call can land here (a Friday afternoon +4320m, say). Rolling it to the next
+       session's close is strictly better than voiding: the call still gets a real grade against a
+       real print, nothing is excused, and there is no third bucket in the score. */
     if (p.asset_class === "equity" && Date.now() >= p.horizon_utc && !isTradingDayEt(p.horizon_utc)) {
-      p.status = "void";
-      p.outcome = { reason: "horizon fell on a market holiday — nothing traded, nothing to grade",
-                    graded_utc: Date.now() };
-      await _remember(r, p);   // kept in the archive, counted as void, never scored
-      changed++;
-      continue;
+      const nextClose = resolveHorizon("tomorrow_close", p.horizon_utc);
+      if (nextClose && nextClose > p.horizon_utc) {
+        p.horizon_utc = nextClose;
+        p.rolled = (p.rolled || 0) + 1;
+        changed++;
+        continue;                      // still open; it grades at the next real close
+      }
     }
     const spot = getSpot(p);
     if (!isFinite(spot)) continue;
@@ -390,11 +436,11 @@ async function evaluate(getSpot) {
       let ch = 0;
       for (const p of mine) {
         if (p.status !== "open") continue;
+        /* Members are scored exactly as strictly as NoVo is, on the same rule — so their
+           holiday-horizon calls roll forward too, rather than being quietly excused. */
         if (p.asset_class === "equity" && Date.now() >= p.horizon_utc && !isTradingDayEt(p.horizon_utc)) {
-          p.status = "void";
-          p.outcome = { reason: "horizon fell on a market holiday — nothing traded, nothing to grade",
-                        graded_utc: Date.now() };
-          ch++; continue;
+          const nc = resolveHorizon("tomorrow_close", p.horizon_utc);
+          if (nc && nc > p.horizon_utc) { p.horizon_utc = nc; p.rolled = (p.rolled || 0) + 1; ch++; continue; }
         }
         const spot = getSpot(p);
         if (!isFinite(spot)) continue;
@@ -504,7 +550,6 @@ async function listPredictions(limit, assetClass, readsOnly) {
   return {
     open: list.filter((p) => p.status === "open").sort((a, b) => a.horizon_utc - b.horizon_utc),
     graded: graded.slice(-(limit || 40)).reverse(),
-    void: list.filter((p) => p.status === "void").slice(-10).reverse(),
     score, overall,
   };
 }
@@ -520,8 +565,15 @@ const FEED_KEY = "novo:alerts:feed";
 /* Every fire that reaches this function has cleared the edge gate and is being shown to comp
    seats — that is Jake's "released comp seat alerts" stage, counted at the moment of release
    rather than inferred later from a list length. */
-async function appendNovoFire(entry) {
+async function appendNovoFire(entry, grade) {
   try { await bump("released", 1); } catch (_) {}
+  /* THE ALERT IS ALSO RECORDED AS A GRADEABLE ALERT (Jake, 2026-09-11: alerts "should be graded
+     alone as an alert not a prediction"). The feed row below stays exactly what it was — prose for
+     the panel — while the numbers the engines grade against go to the alert book. Best-effort:
+     a bookkeeping failure must never cost a seat its alert. */
+  try {
+    await require("./alert-record.js").recordRelease(Object.assign({}, entry, grade || {}));
+  } catch (_) {}
   const r = kv();
   if (!r) return;
   let l = null;
@@ -600,6 +652,13 @@ async function curateChainFires(snap) {
            kind so the receipt is a true sentence. */
         receipts: t.kind + ": +" + edge.toFixed(1) + "pp out-of-sample over its floor of "
           + floor + "pp (the rule's record, not this ticket's)",
+      }, {
+        /* The join key and the barriers, carried as NUMBERS. The claim string above says the same
+           thing in prose, and prose spanning $80,000 to $0.0000000004 cannot be parsed back. */
+        eng_ts: t.ts_utc, eng_code: t.asset_code, action: action,
+        entry_px: t.entry != null ? t.entry : t.spot,
+        target_px: t.target_px, stop_px: t.stop_px,
+        target_pct: t.target_pct, stop_pct: t.stop_pct, deadline: t.deadline,
       });
       try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
       kept++;
@@ -676,6 +735,11 @@ async function onEquityFire(fire) {
     asset_class: "equity", symbol: fire.symbol, kind: fire.rule,
     title: fire.symbol + " " + side + " — " + (fire.reading || fire.rule),
     horizon_min: hm, receipts: receipts,
+  }, {
+    /* eng_ts is whatever the engine sent; today's eye_fire payload carries none, so the equity
+       join falls back to (ticker, rule) + time proximity. See joinEquityResolutions. */
+    eng_ts: fire.ts_utc || null, eng_code: fire.symbol,
+    direction: side, entry_px: isFinite(spot) ? spot : null,
   });
   try { await r.set(seenKey, "1", { ex: 7 * 24 * 3600 }); } catch (_) {}
   return { surfaced: true, predicted: predicted, edge: edge };
@@ -765,47 +829,6 @@ async function selectCryptoPredictions(snap) {
   return { made };
 }
 
-/* ── MIGRATION: take the gate's rows out of his name ──────────────────────────────────────────
-   Jake, 2026-09-09: "The 16 open cost_anomaly calls — void. The 95 graded ones — move to an
-   engine record. The gate ... should stop minting a prediction under his name. Alert yes."
-
-   These rows were written by selectCryptoPredictions' threshold, not by Dr. NoVo, and the crypto
-   map rendered them as "DR. NOVO'S CALLS · SELF-INITIATED". They are not deleted — nothing is,
-   per the retention rule — they are RE-ATTRIBUTED to source "engine" so they leave his grade and
-   keep their history. Open ones are voided rather than graded, because a call nobody made should
-   not resolve into anyone's record.
-
-   Identified by BASIS, not by source: the basis string is written as "<rule> · <receipts>", so
-   rows whose rule is in NO_DIRECTION are exactly the ones the gate minted from a signal with no
-   direction in it. Keyed that way so a future non-directional rule is caught by the same test.
-
-   Idempotent: a row already on "engine" is skipped, so re-running cannot double-count. The tally
-   is rebuilt from scratch afterwards because its per-source counters were incremented under the
-   old attribution. */
-async function migrateGateRows() {
-  const r = kv();
-  if (!r) return { error: "predictions unavailable" };
-  const list = await _load(r);
-  let voided = 0, moved = 0;
-  for (const p of list) {
-    if (!p || p.source === "engine") continue;
-    const rule = p.basis ? String(p.basis).split(" · ")[0].trim() : "";
-    if (!NO_DIRECTION.has(rule)) continue;
-    if (p.status === "open") {
-      p.status = "void";
-      p.outcome = { reason: "written by the edge gate, not by Dr. NoVo — voided rather than graded",
-                    graded_utc: Date.now() };
-      voided++;
-    }
-    p.source = "engine";
-    moved++;
-  }
-  if (!moved) return { voided: 0, moved: 0, note: "nothing to migrate" };
-  await _save(r, list);
-  // The tally counted these under "novo". Rebuild it from the corrected rows.
-  try { await r.del(TALLY); await r.del(TALLY + ":seeded"); } catch (_) {}
-  return { voided, moved };
-}
 
 /* ── NOVO'S OWN RECORD ─────────────────────────────────────────────────────────────────────────
    Jake, 2026-09-09: "every alert, prediction, report bias, audit bias, convo prediction every
@@ -853,7 +876,7 @@ async function novoRecord() {
           if (!p || p.status === "open") continue;
           const src = (p.source === "user" || p.source === "engine") ? p.source : (p.source || "conversation");
           const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
-          if (p.status === "void" || h === null) { await r.hincrby(TALLY, "void:" + src, 1); continue; }
+          if (h === null) { await r.hincrby(TALLY, "ungraded:" + src, 1); continue; }
           await r.hincrby(TALLY, "n:" + src, 1);
           if (h) await r.hincrby(TALLY, "hit:" + src, 1);
         }
@@ -862,17 +885,17 @@ async function novoRecord() {
     }
   }
   const by_source = {};
-  let n = 0, hit = 0, voided = 0;
+  let n = 0, hit = 0, ungraded = 0;
   for (const k of Object.keys(tally || {})) {
     const v = Number(tally[k]); if (!Number.isFinite(v)) continue;
     const [what, src] = k.split(":");
     // "user" = the member's own calls. "engine" = rows the edge gate minted before
     // 2026-09-09; re-attributed, kept, and out of his grade. Neither is Dr. NoVo.
     if (src === "user" || src === "engine") continue;
-    const t = (by_source[src] = by_source[src] || { n: 0, hit: 0, void: 0, rate: null });
+    const t = (by_source[src] = by_source[src] || { n: 0, hit: 0, ungraded: 0, rate: null });
     if (what === "n") { t.n += v; n += v; }
     else if (what === "hit") { t.hit += v; hit += v; }
-    else if (what === "void") { t.void += v; voided += v; }
+    else if (what === "ungraded") { t.ungraded += v; ungraded += v; }
   }
   for (const k of Object.keys(by_source)) {
     const t = by_source[k];
@@ -890,7 +913,6 @@ async function novoRecord() {
   for (const p of list) {
     if (!p || p.source === "user" || p.source === "engine") continue;
     if (p.status === "open") { open++; continue; }
-    if (p.status === "void") continue;            // kept and shown elsewhere, never scored
     const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
     if (h === null) continue;
     const src = p.source || "conversation";
@@ -917,7 +939,7 @@ async function novoRecord() {
   };
   for (const p of list) {
     if (!p || p.source === "user" || p.source === "engine") continue;
-    if (p.status === "open" || p.status === "void") continue;
+    if (p.status === "open") continue;
     const h = p.outcome && typeof p.outcome.hit === "boolean" ? p.outcome.hit : null;
     if (h === null) continue;
     bump("side", p.side, h);
@@ -938,7 +960,7 @@ async function novoRecord() {
   return {
     by_source,                                   // ALL-TIME, from the permanent tally
     overall: n ? { n, hit, rate: +((100 * hit) / n).toFixed(1) } : null,
-    voided,
+    ungraded,
     window: { ...win, size: MAX_KEPT },          // recent form, from the rolling working set
     cut,                                         // where he is losing, not just that he is
     open,
@@ -948,7 +970,7 @@ async function novoRecord() {
   };
 }
 
-module.exports = { novoRecord, migrateGateRows, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
+module.exports = { novoRecord, makePrediction, listPredictions, evaluate, selectCryptoPredictions,
                    makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,

@@ -12,9 +12,15 @@
 const path = require('path');
 const KV_PATH = require.resolve(path.join(__dirname, '..', 'api', '_kv.js'));
 const S = new Map();
+const H = new Map();   // lists (archives)
+const T = new Map();   // hashes (tallies)
 require.cache[KV_PATH] = { id: KV_PATH, filename: KV_PATH, loaded: true,
   exports: { kv: () => ({ async get(k) { return S.has(k) ? S.get(k) : null; },
-                          async set(k, v) { S.set(k, v); } }) } };
+                          async set(k, v) { S.set(k, v); },
+                          // the alert record (api/_lib/alert-record.js) rides appendNovoFire
+                          async rpush(k, v) { const l = H.get(k) || []; l.push(v); H.set(k, l); return l.length; },
+                          async hincrby(k, f, by) { const h = T.get(k) || {}; h[f] = Number(h[f] || 0) + by; T.set(k, h); return h[f]; },
+                          async hgetall(k) { return T.get(k) || null; } }) } };
 const P = require(path.join(__dirname, '..', 'api', '_lib', 'predictions.js'));
 
 let failures = 0, checks = 0;
@@ -82,13 +88,23 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   S.set('pred:log', JSON.stringify([bad]));
   await P.evaluateEquityPredictions({ indices: [{ ticker: 'SPY', spot: 770.19 }] });
   const voided = rows()[0];
-  ok('the Labor Day row is VOIDED, not graded — no hit on a market that never traded',
-    voided.status === 'void' && !voided.outcome.hit && /holiday/.test(voided.outcome.reason || ''),
-    JSON.stringify(voided.status) + ' ' + JSON.stringify(voided.outcome));
+  /* ⚠ THE GUARD IS NOW A ROLL-FORWARD, NOT A VOID (Jake, 2026-09-11: "'voided' is not a
+     feature ... remove it"). The hazard it covers has not changed and this is what actually
+     matters: a holiday horizon must NEVER be graded where it landed, because comparing a frozen
+     spot to itself mints a free HIT. So the row stays open, its horizon moves to the next real
+     close, and the score stays empty until something actually trades. */
+  const rolled = rows()[0];
+  ok('a holiday horizon is NOT graded where it landed - no free hit off a frozen spot',
+    rolled.status === 'open' && !(rolled.outcome && rolled.outcome.hit),
+    JSON.stringify({ status: rolled.status, outcome: rolled.outcome }));
+  ok('...it rolls forward to the next real trading close instead of being excused',
+    rolled.rolled >= 1 && rolled.horizon_utc > Date.UTC(2026, 6, 3, 20, 0, 0)
+      && new Date(rolled.horizon_utc).getUTCDay() !== 0 && new Date(rolled.horizon_utc).getUTCDay() !== 6,
+    JSON.stringify({ rolled: rolled.rolled, horizon: new Date(rolled.horizon_utc).toISOString() }));
   const listed = await P.listPredictions();
-  ok('...it is excluded from the score and shown under void',
-    listed.overall.n === 0 && listed.void.length === 1,
-    JSON.stringify({ overall: listed.overall, voids: listed.void.length }));
+  ok('...and nothing enters the score, and there is no void bucket at all',
+    listed.overall.n === 0 && listed.void === undefined,
+    JSON.stringify({ overall: listed.overall, hasVoidBucket: 'void' in listed }));
 
   // ── 4. a real grade still works, both directions ───────────────────────────────────────────
   reset();
@@ -142,23 +158,36 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
         ts_utc: '2026-09-07T01:00:00Z', horizon_min: 240, claim: 'HOURS-OLD reading' },
     ],
   };
+  /* ⚠ THIS BLOCK ASSERTED BEHAVIOUR THAT WAS DELIBERATELY REMOVED, AND FAILED FOR IT.
+     Until 2026-09-09 the selector wrote a `source:"novo"` prediction row, and the crypto map
+     rendered it as "DR. NOVO'S CALLS - SELF-INITIATED". Jake pulled that: "The gate ... should
+     stop minting a prediction under his name. Alert yes." The gate now promotes an ALERT and
+     writes NO prediction, so the old assertions (a pred:log row with source 'novo' and kind
+     'direction') could never pass again. Rewritten to check what the gate is now FOR: the right
+     reading becomes an alert, the wrong ones become nothing, and his prediction book is untouched. */
   const sel = await P.selectCryptoPredictions(SNAP);
-  const after = rows();
-  ok('the selector takes ONLY the reading with real edge on a real denominator',
-    sel.made === 1 && after.length === 1 && after[0].symbol === 'BTC'
-      && after[0].source === 'novo' && after[0].kind === 'direction',
-    JSON.stringify({ made: sel.made, rows: after.map((p) => p.symbol + ':' + p.kind) }));
+  const fires = await P.listNovoFires('crypto', 25);
+  ok('the selector promotes ONLY the reading with real edge on a real denominator',
+    sel.made === 1 && fires.length === 1 && fires[0].symbol === 'BTC',
+    JSON.stringify({ made: sel.made, fires: fires.map((f) => f.symbol + ':' + f.kind) }));
+  ok('...and it writes NO prediction in his name (the 2026-09-09 rule)',
+    rows().length === 0, JSON.stringify(rows().map((p) => p.symbol + ':' + p.source)));
   ok('...a coin-flip rate, a thin denominator and a stale reading are all refused',
-    !after.some((p) => p.symbol === 'DOGE') && after.length === 1,
-    JSON.stringify(after.map((p) => p.symbol)));
-  ok('...and the call carries its receipts — the rate, the cells and the base it beat',
-    /61% over 120 coin-days vs 52.0% base/.test(after[0].basis || ''),
-    JSON.stringify(after[0].basis));
+    !fires.some((f) => f.symbol === 'DOGE') && fires.length === 1,
+    JSON.stringify(fires.map((f) => f.symbol)));
+  ok('...and the alert carries its receipts — the rate, the cells and the base it beat',
+    /61% over 120 coin-days vs 52.0% base/.test(fires[0].receipts || ''),
+    JSON.stringify(fires[0].receipts));
   const again = await P.selectCryptoPredictions(SNAP);
-  ok('...and the same reading can never become a second prediction',
-    again.made === 0 && rows().length === 1, JSON.stringify(again));
+  ok('...and the same reading can never become a second alert',
+    again.made === 0 && (await P.listNovoFires('crypto', 25)).length === 1, JSON.stringify(again));
 
   // ── 7. per-desk: crypto calls at the crypto desk, equities on the equity side ──────────────
+  /* This used to lean on the selector having written a crypto row. It no longer writes any (the
+     2026-09-09 rule above), so the split is tested with a prediction that is actually one. */
+  const cxMade = await P.makePrediction({ kind: 'direction', asset_class: 'crypto', symbol: 'BTC',
+    side: 'up', spot_at: 77000, horizon_min: 240, source: 'conversation' });
+  ok('a crypto prediction records', !cxMade.error, JSON.stringify(cxMade.error));
   const eqList = await P.listPredictions(40, 'equity');
   const cxList = await P.listPredictions(40, 'crypto');
   ok('the record splits per desk — the equity side does not show crypto calls',
@@ -172,17 +201,20 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     alerts: {
       open: [
         // rule with proven oos edge over its own floor → surfaces
-        { ts_utc: NOWTS, asset_code: 'PNUT', kind: 'chain_pump_buyers',
+        { ts_utc: NOWTS, asset_code: 'PNUT', kind: 'chain_pump_buyers', action: 'BUY',
           claim: 'Ten separate wallets bid PNUT in one pass.', horizon_min: 240 },
         // rule BELOW its own floor → firehose stays put
-        { ts_utc: NOWTS, asset_code: 'MEW', kind: 'chain_holds_bid',
+        { ts_utc: NOWTS, asset_code: 'MEW', kind: 'chain_holds_bid', action: 'BUY',
           claim: 'Turnover above its own normal.', horizon_min: 240 },
         // negative out of sample → never
-        { ts_utc: NOWTS, asset_code: 'WOFI', kind: 'chain_pump_sellers',
+        { ts_utc: NOWTS, asset_code: 'WOFI', kind: 'chain_pump_sellers', action: 'AVOID',
           claim: 'Sellers into buyers.', horizon_min: 240 },
+        // a WATCH clears the edge bar but is still not something to put money on
+        { ts_utc: NOWTS, asset_code: 'BONK', kind: 'chain_pump_buyers', action: 'WATCH',
+          claim: 'No measurable edge; not calling it.', horizon_min: 240 },
         // stale → not a moment
         { ts_utc: '2026-09-07T01:00:00Z', asset_code: 'PNUT', kind: 'chain_pump_buyers',
-          claim: 'HOURS OLD.', horizon_min: 240 },
+          action: 'BUY', claim: 'HOURS OLD.', horizon_min: 240 },
       ],
       levels: {
         chain_pump_buyers:  { oos_trig_target: 61.2, oos_base_target: 40.0, edge_floor_pp: 5.0 },
@@ -199,8 +231,10 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   ok('...below-floor, negative-oos and stale tickets all stay in the firehose',
     !feed.some((x) => ['MEW', 'WOFI'].includes(x.symbol)),
     JSON.stringify(feed.map((x) => x.symbol)));
+  ok('...and a WATCH never surfaces, even on a rule whose edge clears the floor',
+    !feed.some((x) => x.symbol === 'BONK'), JSON.stringify(feed.map((x) => x.symbol)));
   ok('...and the surfaced row carries its receipts — the edge and the floor it beat',
-    /oos edge \+21\.2pp over its own floor 5/.test(feed[0].receipts || ''),
+    /chain_pump_buyers: \+21\.2pp out-of-sample over its floor of 5pp/.test(feed[0].receipts || ''),
     JSON.stringify(feed[0].receipts));
   const cur2 = await P.curateChainFires(CHAIN_SNAP);
   ok('...and the same ticket can never surface twice',
@@ -226,15 +260,21 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   reset();
   const earned = await P.onEquityFire(fire({ ts: 1 }));
   const feed1 = JSON.parse(S.get('novo:alerts:feed') || '[]');
-  ok('a fire from a rule that has BEATEN the book earns a call and a place in the alerts',
-    earned.surfaced === true && earned.predicted === true
-      && rows().length === 1 && feed1.length === 1,
+  /* ⚠ SAME 2026-09-09 CORRECTION AS THE CRYPTO GATE, AND THIS BLOCK STILL ASSERTED THE OLD SHAPE.
+     onEquityFire hardcodes `predicted = false`: clearing the bar promotes an EARNED ALERT, it does
+     not author a prediction in his name (predictions.js has never contained a model call; his own
+     calls come from _lib/novo-calls.js). So there is no pred:log row to inspect — the receipts
+     live on the alert, which is the thing that was actually published. */
+  ok('a fire from a rule that has BEATEN the book earns a place in the alerts',
+    earned.surfaced === true && feed1.length === 1,
     JSON.stringify({ ...earned, rows: rows().length, feed: feed1.length }));
-  ok('...the prediction is NOVO\u2019s, sourced to him, with the Eye as the reason - not the author',
-    rows()[0].source === 'novo' && rows()[0].asset_class === 'equity'
-      && /d_vix_vix3m/.test(rows()[0].thesis || '')
-      && /61% over 120 resolutions vs 50.4% across the book/.test(rows()[0].basis || ''),
-    JSON.stringify({ source: rows()[0].source, basis: rows()[0].basis }));
+  ok('...and it does NOT author a prediction in his name',
+    earned.predicted === false && rows().length === 0,
+    JSON.stringify({ predicted: earned.predicted, rows: rows().length }));
+  ok('...the alert carries the Eye as the reason and the rule record as its receipts',
+    feed1[0].asset_class === 'equity' && /d_vix_vix3m/.test(feed1[0].title || '')
+      && /61% over 120 resolutions vs 50.4% across the book/.test(feed1[0].receipts || ''),
+    JSON.stringify({ title: feed1[0].title, receipts: feed1[0].receipts }));
 
   reset();
   const thin = await P.onEquityFire(fire({ ts: 2, record: { resolutions: 8, hit_pct: 75.0, base_hit_pct: 50.4, base_n: 900 } }));
@@ -258,8 +298,11 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   reset();
   await P.onEquityFire(fire({ ts: 5 }));
   const refire = await P.onEquityFire(fire({ ts: 5 }));
-  ok('...and the same fire can never become a second call, however many passes report it',
-    refire.dup === true && rows().length === 1, JSON.stringify({ refire, rows: rows().length }));
+  /* The dedupe is now proved on the ALERT feed, not on a pred:log row — a cleared fire
+     publishes one alert and authors no prediction (see above). */
+  ok('...and the same fire can never surface twice, however many passes report it',
+    refire.dup === true && JSON.parse(S.get('novo:alerts:feed') || '[]').length === 1,
+    JSON.stringify({ refire, feed: JSON.parse(S.get('novo:alerts:feed') || '[]').length }));
 
   // ── 10. THE NEUTRAL BAND: measured, stamped, and not a free pass ──────────────────────────
   reset();
