@@ -86,8 +86,19 @@ async function askProd(q) {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ t, question: q, level: EVAL_LEVEL }),
   });
-  const j = await r.json();
-  return j.answer || j.error || '';
+  const j = await r.json().catch(() => null);
+  /* ⚠ NEVER HAND AN ERROR STRING TO THE PROSE SCORER. This used to `return j.answer || j.error`,
+     and NoVo's error copy is written in his own voice — so a dead API scored as VOICE. Measured
+     2026-09-11: every case came back "I am rate limited right now — give it a moment and ask
+     again." That is 14 words, first person, no jargon, opens immediately: it passes four of the
+     five checks and misses only contractions, so five rate-limited cases scored 5/25 — byte for
+     byte THE DOCUMENTED PASSING BASELINE at the top of this file. A total outage was
+     indistinguishable from a healthy run, in the one instrument that exists to notice voice
+     regressing. Throw instead, so a non-answer lands on the ERROR path and can never be scored. */
+  if (!r.ok || !j || !j.answer) {
+    throw new Error('no answer (HTTP ' + r.status + ')' + ((j && j.error) ? ': ' + j.error : ''));
+  }
+  return j.answer;
 }
 
 async function askLocal(q) {
@@ -120,11 +131,13 @@ async function askLocal(q) {
 
 (async () => {
   console.log(`voice eval — ${LOCAL ? 'LOCAL prompt (unshipped)' : 'PRODUCTION'}\n`);
-  let failed = 0, total = 0;
+  let failed = 0, total = 0, errors = 0;
   for (const c of CASES) {
     let text = '';
+    /* An errored case is NOT a missed check — it is an unmeasured one. Counting it as `failed`
+       while adding nothing to `total` is what printed "5/0 checks missed" on a fully dead run. */
     try { text = LOCAL ? await askLocal(c.q) : await askProd(c.q); }
-    catch (e) { console.log(`[${c.id}] ERROR ${e.message}`); failed++; continue; }
+    catch (e) { console.log(`[${c.id}] ERROR ${e.message}\n`); errors++; continue; }
     const s = score(text, c);
     const bad = Object.entries(s.checks).filter(([, v]) => !v).map(([k]) => k);
     total += Object.keys(s.checks).length;
@@ -133,6 +146,16 @@ async function askLocal(q) {
                 `I×${s.first} · contractions×${s.contractions} · jargon ${s.jargonPer100.toFixed(1)}/100w`);
     if (bad.length) console.log(`   MISSED: ${bad.join(' | ')}`);
     console.log(`   "${text.replace(/\s+/g, ' ').slice(0, 150)}…"\n`);
+  }
+  /* THE SCORE IS ONLY COMPARABLE TO THE BASELINE IF EVERY CASE ACTUALLY ANSWERED. Say so loudly
+     rather than printing a number that looks like the baseline — the whole defect this fixes was
+     a score that read as healthy when nothing had been measured at all. */
+  if (errors) {
+    console.log(`\n⚠ ${errors}/${CASES.length} cases NEVER PRODUCED AN ANSWER — this run is NOT ` +
+                `comparable to the 5/25 baseline. Fix the errors and re-run before reading the score.`);
+    if (total) console.log(`(of the ${CASES.length - errors} that did answer: ${failed}/${total} checks missed)`);
+    process.exitCode = 1;
+    return;
   }
   console.log(failed ? `${failed}/${total} checks missed` : `all ${total} checks passed`);
   process.exitCode = failed ? 1 : 0;
