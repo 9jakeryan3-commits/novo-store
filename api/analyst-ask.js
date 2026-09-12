@@ -616,6 +616,16 @@ async function gradeDueForecasts(r) {
       let c = null;
       try { c = typeof item === 'string' ? JSON.parse(item) : item; } catch (_) { continue; }
       if (!c || !c.asked_at) continue;
+      // Probe rows (fleet test traffic, marked at capture — see forecast.js) leave the queue ON
+      // SIGHT and count NOTHING: no n, no hit, no cens. The LREM is load-bearing, not tidiness:
+      // a skipped-but-kept row sits at the HEAD (writer LPUSHes, trim evicts the TAIL, this
+      // reads only the newest 50), so enough probes would fill the whole grading window and
+      // starve every real row behind them off the tail ungraded — cells stop growing, nothing
+      // errors. scripts/calib-grader-check.js holds all three properties.
+      if (c.source === 'probe') {
+        await r.lrem('calib:pending', 1, typeof item === 'string' ? item : JSON.stringify(item));
+        continue;
+      }
       // Anchor semantics interpreted in ONE place (forecast.js resolveAt): 'now' claims resolve
       // asked_at + horizon; 'next_open' claims resolve next-session-open + horizon, weekends and
       // holidays skipped by the shared calendar. A null (calendar exhausted) grades censored.
@@ -672,7 +682,8 @@ const CALIB_FWD_RE = /\b(tomorrow|monday|tuesday|wednesday|thursday|friday|next 
 // one exported truth both doors import -- because a hand-copied twin was the third instance of
 // the silently-drifting-mirror class on this codebase, and the fix for a class is one source,
 // never a more careful copy.
-const { validateForecast: validForecast, resolveAt: forecastResolveAt } = require('./_lib/forecast.js');
+const { validateForecast: validForecast, resolveAt: forecastResolveAt,
+        isProbeIdentity: _isProbeIdentity } = require('./_lib/forecast.js');
 
 
 
@@ -1692,7 +1703,9 @@ module.exports = async (req, res) => {
         try { claims = (JSON.parse(xtxt).claims || []).slice(0, 3); } catch (_) { claims = []; }
         let pushed = 0;
         for (const c of claims) {
-          const row = validForecast(c);
+          // Probe flag from the SESSION identity, door-controlled: the extraction JSON is model
+          // output, and a `source` field inside it must never mark (or unmark) a row.
+          const row = validForecast(c, { probe: _isProbeIdentity(email) });
           if (!row) continue;
           try { await r.lpush('calib:pending', JSON.stringify(row)); pushed++; } catch (_) {}
         }
@@ -1782,3 +1795,10 @@ module.exports = async (req, res) => {
 
 // Vercel: let this function stream its response instead of buffering it whole.
 module.exports.config = { supportsResponseStreaming: true };
+
+// For scripts/calib-grader-check.js ONLY: the grader must be exercisable against a mock KV,
+// because its worst failure mode is silent (a probe row that is never LREM'd sits at the HEAD
+// of calib:pending forever, the 50-row grading window fills with probes, real rows age off the
+// 500-cap tail ungraded, and cells stop growing with nothing erroring). Vercel routes on the
+// default export; this named property is invisible to it.
+module.exports.gradeDueForecasts = gradeDueForecasts;

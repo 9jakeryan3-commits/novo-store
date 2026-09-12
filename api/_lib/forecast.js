@@ -26,6 +26,24 @@ const TICKERS = ["SPY", "QQQ", "IWM"];
 const METRICS = ["spot_above", "spot_below"];
 const ANCHORS = ["now", "next_open"];
 
+// ── THE PROBE MARKER (Jake's go, 2026-09-11) ────────────────────────────────────────────────
+// The voice suite asked five innocuous questions; NoVo's ANSWERS voiced forward level reads and
+// the fallback capture logged them — so bucket 65 crossed its n>=10 publish floor carrying test
+// rows, on the record whose entire value is that every row is real. Rows are append-only and
+// test rows cannot be told from Jake's real asks after the fact, so the separation happens at
+// CAPTURE: both doors mark traffic from a probe identity, and the grader drops marked rows
+// without touching calib:cells. Nothing is deleted, nothing real is hidden.
+//
+// The identity, not the question, decides — an innocuous question is exactly what tripped this.
+// The eval seat is scripts/voice-eval.js's EVAL_EMAIL (voice-eval@…). The comp seat is Jake's
+// REAL seat and must never match: a marker there would start hiding his genuine forecasts,
+// which is why battery runs that could voice a forward read are restricted to the eval seat
+// (Jerni's standing harness rule, 09-11).
+const PROBE_IDENTITY_RE = /^voice-eval@/i;
+function isProbeIdentity(email) {
+  return PROBE_IDENTITY_RE.test(String(email || ""));
+}
+
 // ⚠ TWINNED ACROSS LANGUAGES with NoVo-Pulse/skills/market_calendar.py — JS cannot import it.
 // This is the minimal store-side copy: full-closure NYSE holidays only. Half-days need no entry:
 // a horizon landing after an early close finds no hist sample and grades CENSORED, which is the
@@ -99,8 +117,12 @@ function resolveAt(claim) {
 /**
  * THE validation. A forecast that cannot be machine-graded later never enters the ledger
  * (resolvability at capture, not at grade). Returns the canonical row, or null.
+ *
+ * `opts` is DOOR-CONTROLLED, never model-controlled: opts.probe marks the row source:'probe'.
+ * It is deliberately not read from `c` — an extraction JSON carrying source:'probe' must not
+ * let a real member forecast dodge the published record, so the claim object cannot mark itself.
  */
-function validateForecast(c) {
+function validateForecast(c, opts) {
   if (!c || typeof c !== "object") return null;
   const tk = String(c.ticker || "").toUpperCase();
   const conf = Number(c.confidence);
@@ -118,11 +140,14 @@ function validateForecast(c) {
   if (!isFinite(hz)) return null;
   if (anchor === "now" && (hz < 30 || hz > 390)) return null;
   if (anchor === "next_open" && (hz < 5 || hz > 390)) return null;
-  return {
+  const row = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     asked_at: Date.now(), claim: String(c.claim || "").slice(0, 200),
     confidence: conf, ticker: tk, metric: c.metric, level: lvl, horizon_min: hz, anchor,
   };
+  if (opts && opts.probe) row.source = "probe";
+  return row;
 }
 
-module.exports = { validateForecast, resolveAt, nextSessionOpen, BUCKETS, TICKERS, METRICS, ANCHORS, NYSE_HOLIDAYS };
+module.exports = { validateForecast, resolveAt, nextSessionOpen, isProbeIdentity,
+                   BUCKETS, TICKERS, METRICS, ANCHORS, NYSE_HOLIDAYS };

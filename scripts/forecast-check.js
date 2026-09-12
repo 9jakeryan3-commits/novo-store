@@ -27,5 +27,21 @@ t('now horizon 5 rejected', F.validateForecast({ claim: 'x', confidence: 55, tic
 t('bad anchor rejected', F.validateForecast({ claim: 'x', confidence: 55, ticker: 'QQQ', metric: 'spot_below', level: 700, horizon_min: 60, anchor: 'next_close' }), null);
 t('multi-day still rejected', F.validateForecast({ claim: 'x', confidence: 65, ticker: 'SPY', metric: 'spot_above', level: 769, horizon_min: 1440, anchor: 'next_open' }), null);
 
-console.log(f ? f + ' FAILURE(S)' : 'forecast v2 suite: ALL PASS (15)');
+// ── the probe marker (Jake's go, 2026-09-11): fleet test traffic must be separable ────────────
+// The voice suite's innocuous questions drew answers that tripped the fallback capture and wrote
+// scored forecasts into calib:cells — bucket 65 crossed its n>=10 publish floor carrying test
+// rows. The marker rides the canonical row; the grader drops marked rows without counting.
+const P = { claim: 'x', confidence: 65, ticker: 'SPY', metric: 'spot_above', level: 769, horizon_min: 60 };
+t('probe marker set by the door', F.validateForecast(P, { probe: true }).source, 'probe');
+t('no marker without opts', F.validateForecast(P).source, undefined);
+// The injection case: an extraction JSON carrying source:'probe' must NOT let a real member
+// forecast dodge the published record. The marker comes only from the door's opts argument.
+t('marker NOT settable from the claim object', F.validateForecast({ ...P, source: 'probe' }).source, undefined);
+t('falsy probe leaves the row unmarked', F.validateForecast(P, { probe: false }).source, undefined);
+t('isProbeIdentity: the eval seat', F.isProbeIdentity('voice-eval@novo-options.trade'), true);
+t('isProbeIdentity: env-shaped variants too', F.isProbeIdentity('VOICE-EVAL@novo-options.trade'), true);
+t('isProbeIdentity: a member is not', F.isProbeIdentity('member@example.com'), false);
+t('isProbeIdentity: empty and null are not', [F.isProbeIdentity(''), F.isProbeIdentity(null)], [false, false]);
+
+console.log(f ? f + ' FAILURE(S)' : 'forecast v2 suite: ALL PASS (23)');
 process.exit(f ? 1 : 0);

@@ -19,7 +19,7 @@ const { kv } = require("../_kv.js");
 
 const TICKERS = ["SPY", "QQQ", "IWM"];
 const okTicker = (t) => TICKERS.includes(String(t || "").toUpperCase()) ? String(t).toUpperCase() : null;
-const { validateForecast, resolveAt } = require("./forecast.js");
+const { validateForecast, resolveAt, isProbeIdentity } = require("./forecast.js");
 
 // One retry on a transient. A live test saw a single Yahoo pull fail while ten sequential and
 // twelve parallel ones succeeded — a blip, not rate limiting. Without the retry the analyst tells
@@ -1493,7 +1493,11 @@ function makeExecutors(ctx = {}) {
     if (!r) return { error: "calibration ledger unavailable" };
     // Validation lives in _lib/forecast.js -- the ONE copy; the fallback capture uses the same
     // function, so the two doors into the ledger can never enforce different rules again.
-    const row = validateForecast({ claim, confidence, ticker, metric, level, horizon_min, anchor });
+    // The probe flag comes from the SESSION identity, never from the model's arguments -- same
+    // reasoning as log_trader_prediction's email: a prompt must not be able to mark (or unmark)
+    // a row. Probe rows enter pending normally and the grader drops them uncounted.
+    const row = validateForecast({ claim, confidence, ticker, metric, level, horizon_min, anchor },
+                                 { probe: isProbeIdentity(ctx && ctx.email) });
     if (!row) {
       return { error: "not loggable: SPY/QQQ/IWM, metric spot_above|spot_below, confidence " +
                       "55/65/75/85/95, level > 0, anchor 'now' (horizon 30-390 min from now) or " +
