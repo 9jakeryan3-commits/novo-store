@@ -66,6 +66,73 @@ const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) =>
 const slugify = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')
   .replace(/^-+|-+$/g, '').slice(0, 70);
 
+/* ── LINKING THE STORY INTO THE FREE DATA (Jake: "link the site into The Daily Strike, any free
+   data that makes sense, land in the entries cleanly") ──────────────────────────────────────
+   A ticker named in a story has a free gamma page on this site; a macro word has a calendar; a
+   member of Congress has a disclosure tracker. Those are OUR pages, so linking them is internal
+   link equity AND a genuinely better read — a reader who hits "the 765 call wall" can go look at
+   the ladder that produced it.
+   ⚠ LINKED ONCE, FIRST MENTION ONLY, and never inside a word: a story with SPY linked nine times
+   reads as SEO spam, which is the opposite of the credibility this desk is for. The escaped body
+   is what gets linked, so no markup can arrive from the model. */
+const AUTOLINK = [
+  ['SPY', '/market-data/spy', 'the free SPY gamma map'],
+  ['QQQ', '/market-data/qqq', 'the free QQQ gamma map'],
+  ['IWM', '/market-data/iwm', 'the free IWM gamma map'],
+  ['VIX', '/vol', 'the volatility record'],
+  ['CPI', '/economic-calendar', 'the economic calendar'],
+  ['FOMC', '/economic-calendar', 'the economic calendar'],
+  ['max pain', '/tools/max-pain-calculator', 'the max pain calculator'],
+  ['expected move', '/tools/expected-move', 'the expected move calculator'],
+  ['gamma flip', '/learn/gamma-gex-dealer-positioning', 'what a gamma flip is'],
+];
+function autolink(escapedBody) {
+  let out = escapedBody;
+  for (const [term, href, title] of AUTOLINK) {
+    // word-boundaried, case-sensitive for tickers, first occurrence only
+    const re = new RegExp('(^|[\\s(\\[])(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?=[\\s.,;:)\\]]|$)');
+    const m = out.match(re);
+    if (!m) continue;
+    out = out.replace(re, '$1<a href="' + href + '" title="' + title
+      + '" style="color:var(--txt1,#eaf3ff);text-decoration:none;border-bottom:1px solid rgba(34,211,238,.45);">$2</a>');
+  }
+  return out;
+}
+
+/* ── THE HOUSE ADS (Jake: "make ads for the products we sell") ──────────────────────────────
+   Not a banner and not a box — the house rule bans both. These are hairline-separated blocks in
+   the desk's own voice that name what the reader just read and where the full version lives.
+   Colour-only CTA, per the standing treatment. Rotated by index so a reader scrolling the front
+   page does not see the same pitch three times. */
+const HOUSE_ADS = [
+  { eyebrow: 'The map this desk reads',
+    line: 'Every level in these stories — the flip, the walls, gravity, the expected move — is on the '
+        + 'Analyst dashboard, remapped every 60 seconds for SPY, QQQ and IWM.',
+    cta: 'See the Analyst desk', href: '/analyst' },
+  { eyebrow: 'Same map, on a live chart',
+    line: 'Trader streams the dealer levels onto a candle chart with an hourly structural audit, '
+        + 'saved layouts, and the levels drawn where price meets them.',
+    cta: 'See the Trader terminal', href: '/trader' },
+  { eyebrow: 'The 24/7 book',
+    line: 'Crypto expires every day at 08:00 UTC, so the pin repeats 365 times a year. The Crypto '
+        + 'Market Map carries dealer gamma, funding by venue and the vol surface across the majors.',
+    cta: 'See the Crypto map', href: '/crypto' },
+  { eyebrow: 'Ask the desk',
+    line: 'Dr. NoVo writes these pieces. On a subscription he answers your questions off the same '
+        + 'live book, with the sample size attached to every historical claim.',
+    cta: 'Meet Dr. NoVo', href: '/ai' },
+];
+function houseAd(i) {
+  const a = HOUSE_ADS[i % HOUSE_ADS.length];
+  return `<div style="margin:26px 0;padding:16px 0;border-top:1px solid var(--bdr,#2c2c30);
+    border-bottom:1px solid var(--bdr2,#1c1c20);max-width:78ch;">
+    <div style="font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
+      text-transform:uppercase;color:var(--txt3,#6e6e6e);">${a.eyebrow}</div>
+    <div style="font-size:14.5px;line-height:1.65;color:var(--txt2,#a8a8a8);margin:6px 0 8px;">${a.line}</div>
+    <a href="${a.href}" style="color:#22d3ee;font-weight:700;text-decoration:none;font-size:14px;">${a.cta} &rarr;</a>
+  </div>`;
+}
+
 /* "35 min ago" is the single strongest freshness signal a news front page has — every competitor
    leads with it. Computed server-side so it is in the HTML a crawler sees, not painted by JS. */
 function ago(ts) {
@@ -353,6 +420,52 @@ module.exports = async (req, res) => {
   if (req.method === 'POST') return writeStory(req, res);
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET or POST' });
 
+  /* ── THE MACHINERY AGGREGATORS ACTUALLY READ ────────────────────────────────────────────
+     Jake: "make The Daily Strike land on the news outlet map." An outlet is discovered through
+     its FEED and its news sitemap, not by hoping a crawler stumbles onto a page. Both are
+     served from THIS module rather than generated into /public, because either one disagreeing
+     with the index is worse than not having it — a feed that lists a story the site does not
+     serve is how an aggregator drops a publisher. */
+  const fmt = String((req.query && req.query.format) || '');
+  if (fmt === 'rss' || fmt === 'news-sitemap') {
+    const fidx = await readIndex();
+    if (fmt === 'rss') {
+      res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+      const its = fidx.slice(0, 50).map((s) =>
+        '<item><title>' + esc(s.headline) + '</title>'
+        + '<link>' + SITE + '/daily-strike/' + esc(s.slug) + '</link>'
+        + '<guid isPermaLink="true">' + SITE + '/daily-strike/' + esc(s.slug) + '</guid>'
+        + '<pubDate>' + new Date(s.publishedAt).toUTCString() + '</pubDate>'
+        + '<category>' + esc(s.kindLabel || 'Markets') + '</category>'
+        + '<dc:creator>Dr. NoVo</dc:creator>'
+        + (s.dek ? '<description>' + esc(s.dek) + '</description>' : '')
+        + '</item>').join('\n');
+      return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?>\n'
+        + '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" '
+        + 'xmlns:dc="http://purl.org/dc/elements/1.1/">\n<channel>\n'
+        + '<title>' + MASTHEAD + '</title>\n<link>' + SITE + '/daily-strike</link>\n'
+        + '<description>Market stories written by Dr. NoVo from the day&#39;s wire and NoVo&#39;s '
+        + 'own dealer-positioning data.</description>\n<language>en</language>\n'
+        + '<atom:link href="' + SITE + '/daily-strike/feed.xml" rel="self" type="application/rss+xml"/>\n'
+        + its + '\n</channel>\n</rss>');
+    }
+    // Google News reads only the last 48 hours. Sending older items is how a news sitemap gets
+    // ignored outright rather than partially honoured.
+    const cut = Date.now() - 48 * 3600 * 1000;
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+    const urls = fidx.filter((s) => s.publishedAt >= cut).slice(0, 1000).map((s) =>
+      '<url>\n<loc>' + SITE + '/daily-strike/' + esc(s.slug) + '</loc>\n'
+      + '<news:news><news:publication><news:name>' + MASTHEAD + '</news:name>'
+      + '<news:language>en</news:language></news:publication>'
+      + '<news:publication_date>' + new Date(s.publishedAt).toISOString() + '</news:publication_date>'
+      + '<news:title>' + esc(s.headline) + '</news:title></news:news>\n</url>').join('\n');
+    return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?>\n'
+      + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+      + 'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">\n' + urls + '\n</urlset>');
+  }
+
   const slug = String((req.query && req.query.slug) || '').replace(/[^a-z0-9-]/gi, '').slice(0, 90);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   // Short edge cache: a news front page whose timestamps are an hour stale reads as abandoned.
@@ -398,7 +511,8 @@ ${await regimeStrip()}
   <div class="ds-by">${esc(story.byline || 'Dr. NoVo')} &middot; ${when.toLocaleString('en-US',
       { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' })} ET
       &middot; ${esc(ago(story.publishedAt))}</div>
-  <div class="body" style="margin-top:16px;">${esc(story.body)}</div>
+  <div class="body" style="margin-top:16px;">${autolink(esc(story.body))}</div>
+  ${houseAd(story.kind === 'crypto' ? 2 : (story.publishedAt % 3))}
   <div class="ds-src">Written by Dr. NoVo, the AI market analyst at NoVo Options Trading, from the
     day's wire and our own dealer-positioning data.${(story.sources || []).length
       ? ` Reporting cited in this piece is the work of ${esc(story.sources.join(', '))} and is
@@ -419,13 +533,27 @@ ${await regimeStrip()}
   // ── the front page ──
   const items = await readIndex();
   const strip = await regimeStrip();
-  const head = `<script type="application/ld+json">${JSON.stringify({
+  /* NewsMediaOrganization, not a generic Organization — this is the schema that tells Google
+     the site IS a publication rather than a company that happens to have a blog, and it is what
+     a News listing is assessed against. The feed is declared in the head too: an aggregator that
+     lands on the front page should never have to guess where the feed lives. */
+  const head = `<link rel="alternate" type="application/rss+xml" title="${MASTHEAD}" href="${SITE}/daily-strike/feed.xml">
+<script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org', '@type': 'CollectionPage',
     name: `${MASTHEAD} — ${TAGLINE}`,
     description: 'Market stories written by Dr. NoVo from the day\'s wire and NoVo\'s own '
                + 'dealer-positioning data.',
     url: `${SITE}/daily-strike`, isAccessibleForFree: true,
-    publisher: { '@type': 'Organization', name: 'NoVo Options Trading', url: `${SITE}/` },
+    publisher: {
+      '@type': 'NewsMediaOrganization', name: MASTHEAD, url: `${SITE}/daily-strike`,
+      parentOrganization: { '@type': 'Organization', name: 'NoVo Options Trading', url: `${SITE}/` },
+      logo: { '@type': 'ImageObject', url: `${SITE}/novo-logo.png?v=1` },
+      diversityPolicy: `${SITE}/about`, ethicsPolicy: `${SITE}/about`,
+      masthead: `${SITE}/daily-strike`,
+    },
+    mainEntity: { '@type': 'ItemList', itemListElement: items.slice(0, 10).map((s, i) => ({
+      '@type': 'ListItem', position: i + 1, url: `${SITE}/daily-strike/${s.slug}`, name: s.headline,
+    })) },
   })}</script>`;
 
   const mast = `<div class="ds-mast"><a href="/daily-strike"><span class="ds-name">${MASTHEAD}</span>
@@ -443,8 +571,11 @@ ${await regimeStrip()}
   }
 
   const lead = items[0];
-  const rail = items.slice(1, 9);
-  const rest = items.slice(9, 33);
+  /* The sections used to start at index 9, so a desk with five stories rendered a hero and then
+     a hole where the page should be. Sections now take everything after the lead; the rail
+     repeating them is ordinary newsroom shape — CNBC's Latest rail repeats its own grid. */
+  const rail = items.slice(0, 8);
+  const rest = items.slice(1, 40);
   const bySec = {};
   for (const s of rest) (bySec[s.kindLabel || 'Markets'] = bySec[s.kindLabel || 'Markets'] || []).push(s);
 
@@ -457,23 +588,39 @@ ${await regimeStrip()}
       <div class="ds-by">Dr. NoVo &middot; ${esc(ago(lead.publishedAt))}${
         (lead.tickers && lead.tickers.length) ? ` &middot; ${esc(lead.tickers.join(' · '))}` : ''}</div>
     </div>
-    ${Object.keys(bySec).map((sec) => `<div class="ds-sec"><div class="ds-sech">${esc(sec)}</div>`
+    ${houseAd(1)}
+    ${Object.keys(bySec).map((sec, si) => `<div class="ds-sec"><div class="ds-sech">${esc(sec)}</div>`
       + bySec[sec].map((s) => `<div class="ds-item">
           <h3><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></h3>
           ${s.dek ? `<p class="ds-dek">${esc(s.dek)}</p>` : ''}
-          <div class="ds-by">Dr. NoVo &middot; ${esc(ago(s.publishedAt))}</div></div>`).join('')
-      + `</div>`).join('')}
+          <div class="ds-by">Dr. NoVo &middot; ${esc(ago(s.publishedAt))}${
+            (s.tickers && s.tickers.length) ? ` &middot; ${esc(s.tickers.join(' · '))}` : ''}</div></div>`).join('')
+      + `</div>` + (si === 0 ? houseAd(3) : '')).join('')}
   </div>
   <aside class="ds-rail">
     <h4>Latest from the desk</h4>
     ${rail.map((s) => `<div class="ds-rrow"><div class="ds-rt">${esc(ago(s.publishedAt))}</div>`
       + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
       || '<div class="ds-empty">More desks publish through the session.</div>'}
+    ${houseAd(0)}
+    <h4 style="margin-top:26px;">Free, no account</h4>
+    <div class="ds-rh" style="padding:6px 0 0;font-size:13px;line-height:2;">
+      <a href="/market-data/spy">SPY gamma map</a> &middot; <a href="/market-data/qqq">QQQ</a>
+      &middot; <a href="/market-data/iwm">IWM</a><br>
+      <a href="/economic-calendar">Economic calendar</a> &middot;
+      <a href="/congress">Congress trades</a><br>
+      <a href="/vol">Volatility record</a> &middot;
+      <a href="/positioning">Futures positioning</a><br>
+      <a href="/track-record">The scored record</a> &middot;
+      <a href="/tools/max-pain-calculator">Max pain</a>
+    </div>
+    ${houseAd(2)}
     <h4 style="margin-top:26px;">What this desk reads</h4>
     <div class="ds-rh" style="padding:4px 0 10px;color:var(--txt3,#6e6e6e);font-size:12.5px;line-height:1.6;">
       Every story here is written off live dealer positioning &mdash; the gamma flip, the walls,
       the expected move and the scored record behind them. The wire says what happened;
       <a href="/plans" style="color:#22d3ee;">the map says what it did</a>.
+      <br><br><a href="/daily-strike/feed.xml" style="color:var(--txt3,#6e6e6e);">RSS feed</a>
     </div>
   </aside></div>`;
 

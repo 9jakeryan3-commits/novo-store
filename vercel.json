@@ -1104,6 +1104,14 @@
       "destination": "/faq.html"
     },
     {
+      "source": "/news-sitemap.xml",
+      "destination": "/api/daily-strike?format=news-sitemap"
+    },
+    {
+      "source": "/daily-strike/feed.xml",
+      "destination": "/api/daily-strike?format=rss"
+    },
+    {
       "source": "/daily-strike/:slug",
       "destination": "/api/daily-strike?slug=:slug"
     },
