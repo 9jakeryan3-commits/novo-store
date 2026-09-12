@@ -1987,7 +1987,9 @@ function wirePanel(d, g){
               const prev = x.previous != null ? String(x.previous) : '';
               const cons = x.consensus != null ? String(x.consensus) : '';
               const tail = cons ? 'cons ' + cons : (prev ? 'prev ' + prev : '&mdash;');
-              return `<div class="kv"><span class="k">${String(x.date||'').slice(5)} ${x.time||''}`
+              /* Same date shape as the expiry rows above — they sat in one panel printing
+                 09/13 and 09-15, which reads as two feeds rather than one schedule. */
+              return `<div class="kv"><span class="k">${String(x.date||'').slice(5).replace('-','/')} ${x.time||''}`
                    + `<span class="lsub"> ${String(x.event||'').slice(0,46)}</span></span>`
                    + `<span class="v nu">${tail}</span></div>`;
             }).join('');
