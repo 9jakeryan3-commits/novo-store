@@ -2451,7 +2451,7 @@ function etfPanel(d){
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Spot ETF flows</h2>
     <span class="sub">${e.ticker||''} &middot; issuer-level &middot; daily net</span></div><div class="pb">
-    ${e.cumulative_usd!=null?`<div class="kv"><span class="k">Cumulative</span>
+    ${e.cumulative_usd!=null?`<div class="kv"><span class="k">Cumulative &middot; since inception</span>
       <span class="v ${e.cumulative_usd>=0?'up':'dn'}">${e.cumulative_usd>=0?'+':''}${money(e.cumulative_usd)}</span></div>`:''}
     <div style="margin-top:9px">${rows}</div>
     <div class="fnote">Creations and redemptions computed from the issuer's own assets and NAV —
