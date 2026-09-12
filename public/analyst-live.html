@@ -726,6 +726,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="lv-tile"><div class="k">Skew · near / far</div><div class="v" id="d-mm">—</div><div class="s" id="d-mm-s">near vs far expiry</div></div>
           <div class="lv-tile"><div class="k">Vanna exposure</div><div class="v" id="d-vanna">—</div><div class="s">how the hedge shifts on vol</div></div>
           <div class="lv-tile"><div class="k">Charm · per day</div><div class="v" id="d-charm">—</div><div class="s">delta bleeding into expiry</div></div>
+          <div class="lv-tile"><div class="k">Max pain</div><div class="v" id="d-mp">—</div><div class="s" id="d-mp-s">least payout at expiry</div></div>
+        </div>
+        <div id="d-term" style="display:none;padding-top:14px;">
+          <div class="fear-hd"><span class="fear-lbl">Term structure &middot; the expiry ladder</span></div>
+          <div id="d-term-rows" style="overflow-x:auto;"></div>
         </div>
         <div class="lv-fear" id="d-fear" style="padding-top:14px;">
           <div class="fear-hd"><span class="fear-lbl" id="fear-lbl">Fear gauge · VIX</span><span class="fear-tag" id="fear-tag">&mdash;</span></div>
@@ -946,6 +951,44 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var _vx = d.vanna_ex, _cx = d.charm_ex;
     $('d-vanna').textContent = (_vx == null) ? '—' : _usd(_vx);
     $('d-charm').textContent = (_cx == null) ? '—' : _usd(_cx);
+    // MAX PAIN + THE EXPIRY LADDER (Jake's go 09-12, roadmap items — analyst #5 and #2). Both
+    // read from the engine's own expiry_split — the same call the Trader's gex-matrix already
+    // serves — published on this payload as `max_pain` / `term`, display-scaled engine-side so
+    // the ladder can never disagree with the headline Net GEX above it. Absent-tolerant by
+    // contract: an engine publishing the older payload shape leaves the tile at — and the
+    // ladder hidden, never a fabricated zero.
+    if (d.max_pain != null && isFinite(+d.max_pain)) {
+      $('d-mp').textContent = _f(+d.max_pain);
+      var _mp0 = Array.isArray(d.term) && d.term.some(function(x){ return x && x.is_0dte; });
+      $('d-mp-s').textContent = (_mp0 ? '0DTE' : 'nearest expiry') + ' · least payout at expiry';
+    } else {
+      $('d-mp').textContent = '—';
+      $('d-mp-s').textContent = 'least payout at expiry';
+    }
+    var _tm = Array.isArray(d.term) ? d.term.filter(function(x){ return x && x.exp; }) : [];
+    var _tbox = $('d-term');
+    if (_tbox) {
+      if (_tm.length >= 2) {
+        $('d-term-rows').innerHTML = _tm.map(function(x){
+          var g = Number(x.net_gex);
+          return '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;white-space:nowrap;'
+            + 'border-bottom:1px solid rgba(255,255,255,0.06);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;">'
+            + '<span style="min-width:74px;color:var(--txt2);">' + _escH(String(x.exp).slice(5))
+            +   (x.is_0dte ? ' <b style="color:#22d3ee;">0DTE</b>' : '') + '</span>'
+            + '<span style="color:' + (isFinite(g) && g < 0 ? 'var(--red,#f43f5e)' : 'var(--grn,#10b981)') + ';">'
+            +   (isFinite(g) ? (g < 0 ? '−' : '+') + _usd(Math.abs(g)) : '—') + '</span>'
+            + '<span style="color:var(--txt3);">' + (x.share_pct != null ? Number(x.share_pct).toFixed(1) + '%' : '') + '</span>'
+            + '<span style="color:var(--txt3);">P/C ' + (x.pc_oi != null ? Number(x.pc_oi).toFixed(2) : '—') + '</span>'
+            + '<span style="color:var(--txt2);">MP ' + (x.max_pain != null ? _f(+x.max_pain) : '—') + '</span>'
+            + '</div>';
+        }).join('')
+        + '<div style="font-size:11px;color:var(--txt3);padding-top:6px;">net GEX per expiry · % of the whole book · '
+        + 'a max pain pooled across expiries describes no settlement that ever happens, so it is per expiry</div>';
+        _tbox.style.display = '';
+      } else {
+        _tbox.style.display = 'none';
+      }
+    }
     // gamma squeeze — HERO banner atop the dealer card (escalates in colour by state)
     var sq = d.squeeze, hero = $('d-sqz-hero');
     if (hero){
@@ -1202,6 +1245,14 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var guides = [];
     [[d.put_wall,'#fbbf24','PUT WALL'],[d.call_wall,'#fbbf24','CALL WALL'],[d.flip,'#22d3ee','0-GAMMA'],[d.spot,'rgba(234,243,255,0.92)','SPOT']]
       .forEach(function(g){ if(g[0]!=null && isFinite(+g[0])) guides.push({k:+g[0],color:g[1],label:g[2],y:yOfStrike(+g[0])}); });
+    // 1D EXPECTED-RANGE LINES (Jake's go 09-12, roadmap #6): the ±1σ band the options market
+    // prices for the day, drawn where it lives — on the strike ladder — instead of only as text
+    // in the tile above. Same guide mechanics as the walls, so the label collision-avoidance
+    // below covers these too. em_daily is dollars off the same payload the tile reads.
+    if(d.spot!=null && d.em_daily!=null && isFinite(+d.spot) && isFinite(+d.em_daily) && +d.em_daily>0){
+      guides.push({k:+d.spot + +d.em_daily, color:'#a78bfa', label:'EM HIGH', y:yOfStrike(+d.spot + +d.em_daily)});
+      guides.push({k:+d.spot - +d.em_daily, color:'#a78bfa', label:'EM LOW',  y:yOfStrike(+d.spot - +d.em_daily)});
+    }
     guides.forEach(function(g){ c.strokeStyle=g.color; c.setLineDash([2,2]); c.beginPath(); c.moveTo(plotL,g.y); c.lineTo(W-4,g.y); c.stroke(); });
     c.setLineDash([]); c.textAlign='left'; c.textBaseline='middle'; c.font='9px ui-monospace,Menlo,monospace';
     guides.slice().sort(function(a,b){ return a.y-b.y; }).forEach(function(g,idx,arr){
@@ -1403,11 +1454,27 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var dir = up>=50 ? 'up' : 'down';
     var pct = up>=50 ? up : (100-up);
     el.style.display='block';
+    // THE DAILY HALF (Jake's go 09-12, roadmap #6 / item 30): base_rate_daily has been computed
+    // per publish over hundreds of sessions and drawn NOWHERE while its intraday sibling above
+    // rendered from day one. Same contract as the hourly cell: the engine only sends it past the
+    // sample floor, so absent field = no line, never a fabricated one.
+    var bd = d && d.base_rate_daily, dl = '';
+    if (bd && bd.next_session && bd.next_session.up_rate != null){
+      var dup = Number(bd.next_session.up_rate), ddir = dup>=50?'up':'down', dpct = dup>=50?dup:(100-dup);
+      dl = '<div class="br-r" style="opacity:.85;">Next <b>session</b> it resolved <b>'+ddir+' '+dpct.toFixed(0)+'%</b> of the time'
+        + (bd.next_session.median!=null ? ' · median <b>'+(Number(bd.next_session.median)>=0?'+':'')+Number(bd.next_session.median).toFixed(2)+'%</b>' : '')
+        + (bd.next_range_median!=null ? ' · typical range <b>&plusmn;'+Number(bd.next_range_median).toFixed(2)+'%</b>' : '')
+        + '</div>';
+    }
     el.innerHTML = '<div class="br-k">This setup, historically</div>'
       + '<div class="br-r">Over the next hour it resolved <b>'+dir+' '+pct.toFixed(0)+'%</b> of the time'
       + ' · median <b>'+(md>=0?'+':'')+md.toFixed(3)+'%</b></div>'
+      + dl
       + '<div class="br-n">'+_escH(String(b.regime||''))+' · '+_escH(String(b.flip||'').replace(/_/g,' '))
-      + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions</div>';
+      + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions'
+      + (bd && bd.next_session && bd.next_session.up_rate != null
+          ? ' · daily n='+_escH(String(bd.next_session.n!=null?bd.next_session.n:(bd.n!=null?bd.n:'')))+' sessions' : '')
+      + '</div>';
   }
 
   /* The feed is plain text the engine wrote; it is escaped and shown as written. No parsing,
@@ -1625,7 +1692,15 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     if (rec && rec.enough && rec.correct_rate != null) {
       h += '<span class="bsc">Right <b>' + rec.correct_rate + '%</b> of the time over ' +
            '<b>' + rec.n + '</b> ' + horizon + '.' +
-           (rec.strength === 'inconclusive' ? ' Not yet a significant edge.' : '') + '</span>';
+           (rec.strength === 'inconclusive' ? ' Not yet a significant edge.' : '') +
+           /* THE DEFINITION OF "RIGHT" SHIPS WITH THE RATE (Jake's go, 09-12). rec.scored is the
+              ENGINE'S own grading-bands sentence — both axes, net AND range — rendered verbatim
+              from the payload, never re-typed here: these constants already live in three places
+              (track_record.py, the /track-record page, the SYSTEM prompt) and a fourth hand copy
+              is the mirrored-twin defect this codebase keeps refinding. A win rate without its
+              grading bands is an unfalsifiable number; with them it is a checkable one. */
+           (rec.scored ? ' <span style="opacity:.72;">' + _escH(String(rec.scored)) + '</span>' : '') +
+           '</span>';
     } else {
       h += '<span class="bsc">Record accruing&nbsp;&mdash; not enough scored calls to publish a rate yet.</span>';
     }
