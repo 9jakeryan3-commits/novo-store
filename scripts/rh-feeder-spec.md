@@ -32,13 +32,41 @@ depth capture rules further down stay written ONLY so a reopen starts from them.
    published age on every row (the source and timestamp ARE the fact — display inherits
    Jerni's register rules even though the display never speaks in NoVo's voice). Placement:
    beside the flow/tape family.
+   **CAPTURE CAP LIVES HERE, NOT IN THE PANEL (Yuri, 09-12):** news is unbounded-growth content
+   next to bounded siblings — 5 items on a quiet Tuesday, 200 on a Fed day. The feeder POSTs at
+   most **12 items per ticker per snapshot, newest-first by publish timestamp**, and the
+   snapshot carries `dropped: <n>` when the cap bound — a panel that truncates silently and a
+   feed that never carried the rest look identical from the member's side, and that is the
+   checks-that-cannot-fail shape. A cap is a spec line now or a re-capture later.
 3. **Filed facts · <ticker>** — the fundamentals card from `get_sec_filing_facts` /
    `get_financials`: a handful of primary-source lines (revenue, EPS, margins), each carrying
    its form type + filing date + period covered, per the phase-0 label requirements. If the
    feed lacks those labels, the card does not ship until a labeling answer exists — a filed
    number without its period is the units trap with authority.
+   **MOBILE FORM DECIDED UP FRONT (Yuri, 09-12): the rail body is 358px at a 390px viewport**
+   (measured, both dashboards), and form+date+period is a three-column shape. The card renders
+   STACKED on the phone — value line, then one muted provenance line ("10-Q · filed 09-04 ·
+   Q3 FY26") — never a squeezed table; retrofitting a table to 358px means redesigning it.
 Chat grounding (Jerni's tool, registers + forecast-laundering rule) proceeds in parallel —
 display and grounding are two consumers of one ingest, not one decision.
+
+## THE TWO-MOUTHS RULE (Jerni, 09-12 — third sighting of the class in one day: digest-vs-chat
+## on direction, map-vs-chat on max pain, and now card-vs-chat by construction):
+Display and chat are two mouths on one dataset and they DIVERGE BY DEFAULT — and here the
+member is looking at the card WHILE asking about the row on it. So:
+- **The card's labeling discipline is the FLOOR for the tool, never a parallel decision.**
+  Whatever a card must render (source+age on Wire; form+date+period on Filed facts), the
+  tool's output carries the same fields and the SYSTEM line requires them in prose. Where the
+  card says "Q3 FY26", he says "Q3" — never a bare figure.
+- **Fail-closed adapts per consumer:** a card REFUSES TO RENDER an unlabelable figure; a tool
+  cannot refuse to render, so it DECLINES TO SERVE the figure (or the SYSTEM line forbids the
+  phrasing class outright). Same principle, two mechanisms.
+- **A rendered P/E invites "is it cheap."** Display-approval makes the valuation-opinion
+  question MORE likely, not less — the public-seat line must cover valuation opinions, not
+  only forecasts. Comp seat unleashed as ever.
+- Consequence for sequencing: the forecast-restatement fix on the two SHIPPED tools rises in
+  urgency — search_news stops being an occasional lookup and starts feeding a rendered Wire
+  surface the moment these ship.
 
 ## Phase 0 — SAMPLES FIRST (one-time, blocks everything else)
 Before the chat tool or any renderer is built, capture ONE raw output of each and hand them to
