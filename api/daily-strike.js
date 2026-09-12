@@ -436,6 +436,21 @@ ${_CHROME.HEAD}
   .ds-acp{font-size:11.5px;color:var(--txt2,#a8a8a8);text-align:right;}
   .ds-acc{font-size:11.5px;font-weight:700;text-align:right;}
 
+  /* the room's call — the public ballot. CTAs are colour-only words per the standing treatment,
+     so these are not buttons with edges: they are the two words, in the two colours. */
+  .ds-pollq{font-size:13px;line-height:1.45;color:var(--txt2,#a8a8a8);margin:2px 0 9px;}
+  .ds-pollv{display:flex;gap:22px;padding:2px 0 4px;}
+  .ds-pb{background:none;border:0;padding:5px 0;margin:0;cursor:pointer;font:inherit;
+    font-size:14px;font-weight:800;letter-spacing:.02em;transition:opacity .12s ease;}
+  .ds-pb.ds-up{color:#10b981;} .ds-pb.ds-dn{color:#f59e0b;}
+  .ds-pb:hover{opacity:.72;}
+  .ds-pollr{padding-top:2px;}
+  .ds-pbar{display:flex;height:6px;background:rgba(255,255,255,.045);margin:6px 0 5px;}
+  .ds-pbar i{display:block;height:6px;transition:width .25s ease;}
+  #ds-pbull{background:#10b981;} #ds-pbear{background:#f59e0b;}
+  .ds-pnums{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;
+    font-size:12px;font-weight:700;}
+
   /* the calendar */
   .ds-carow{padding:8px 0;border-bottom:1px solid var(--bdr2,#1c1c20);}
   .ds-cad{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.14em;
@@ -451,6 +466,53 @@ ${crumbRow}
 ${inner}
 </div>
 ${_CHROME.FOOTER}${_CHROME.SCRIPT || ''}
+<script>
+/* The public ballot. Reads the tally on load, posts one vote on click. The server is the guard
+   (one vote per IP per UTC day); localStorage only hides the buttons for a reader who already
+   voted on this browser, so clearing it cannot buy a second vote. Every step is wrapped: a
+   missing element or a failed fetch must leave the page exactly as rendered. */
+(function () {
+  var root = document.getElementById('ds-poll');
+  if (!root) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'novo_poll_voted';
+  var day = function () { return new Date().toISOString().slice(0, 10); };
+
+  function paint(d) {
+    var bull = Number(d && d.bull) || 0, bear = Number(d && d.bear) || 0, tot = bull + bear;
+    if (!tot) return;                       // no votes yet: leave the ballot showing, not a 50/50 bar
+    var bp = Math.round((bull / tot) * 100);
+    $('ds-pbull').style.width = bp + '%';
+    $('ds-pbear').style.width = (100 - bp) + '%';
+    $('ds-pbt').textContent = '▲ ' + bp + '%';
+    $('ds-prt').textContent = (100 - bp) + '% ▼';
+    $('ds-pollr').hidden = false;
+    $('ds-pn').textContent = tot + (tot === 1 ? ' vote' : ' votes') + ' today · resets daily';
+  }
+
+  try { if (localStorage.getItem(KEY) === day()) $('ds-pollv').style.display = 'none'; } catch (e) {}
+
+  fetch('/api/sentiment', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d) paint(d); })
+    .catch(function () {});
+
+  Array.prototype.forEach.call(root.querySelectorAll('.ds-pb'), function (b) {
+    b.addEventListener('click', function () {
+      var side = b.getAttribute('data-side');
+      $('ds-pollv').style.display = 'none';
+      fetch('/api/sentiment', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ side: side })
+      }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d) paint(d);
+          try { localStorage.setItem(KEY, day()); } catch (e) {}
+        }).catch(function () {});
+    });
+  });
+})();
+</script>
 </body></html>`;
 }
 
@@ -793,6 +855,36 @@ function activePanel(t) {
   return rows ? `<h4 style="margin-top:26px;">On the move</h4>${rows}` : '';
 }
 
+/* ── THE ROOM'S CALL ──────────────────────────────────────────────────────────────────────────
+   Jake, 2026-09-12: "oh wait it is supposed to that is literally the sentiment vote for the
+   public add it i can click it now to show you."
+
+   I had excluded /api/sentiment because it answers {bull:0,bear:0}, reading it as a dead feed.
+   It is not a feed, it is a BALLOT — zero is its correct resting state, and the fix for an empty
+   poll is to show the vote control rather than a zeroed bar. The no-empty-panels rule still holds
+   for measurements; it never applied to something waiting on input.
+
+   Deliberately NOT server-rendered with a tally: this page is CDN-cached, and a count baked into
+   the HTML would be served stale to the next reader. The shell renders server-side, the numbers
+   hydrate client-side — same split /market-data already uses. One vote per IP per day is enforced
+   server-side; localStorage only hides the buttons, it is not the guard. */
+function pollPanel() {
+  return `<h4 style="margin-top:26px;">The room&rsquo;s call</h4>
+    <div class="ds-poll" id="ds-poll">
+      <div class="ds-pollq">Bullish or bearish into tomorrow?</div>
+      <div class="ds-pollv" id="ds-pollv">
+        <button type="button" class="ds-pb ds-up" data-side="bull">&#9650; Bullish</button>
+        <button type="button" class="ds-pb ds-dn" data-side="bear">Bearish &#9660;</button>
+      </div>
+      <div class="ds-pollr" id="ds-pollr" hidden>
+        <div class="ds-pbar"><i id="ds-pbull"></i><i id="ds-pbear"></i></div>
+        <div class="ds-pnums"><span class="ds-up" id="ds-pbt"></span><span class="ds-dn" id="ds-prt"></span></div>
+      </div>
+      <div class="ds-note" id="ds-pn">One vote per day.
+        <a href="/market-data">The free market map &rarr;</a></div>
+    </div>`;
+}
+
 function calPanel(c) {
   if (!c || !Array.isArray(c.events) || !c.events.length) return '';
   const rows = c.events.slice(0, 6).map((e) => {
@@ -1030,6 +1122,7 @@ ${await regimeStrip()}
         + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
       || '<div class="ds-empty">More desks publish through the session.</div>'}
     ${houseAd(0)}
+    ${pollPanel()}
     ${pulsePanel(free.pulse)}
     ${volPanel(free.internals)}
     ${shortVolPanel(free.internals)}
