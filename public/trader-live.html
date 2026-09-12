@@ -6481,7 +6481,10 @@ function _lvlStrengthApply(){
 function _lvlCollide(){
   try{
     if(window._lvlUsePL) return;   // % modes draw the ladder as price lines; this governs line-series tags
-    if(!(window.innerWidth>=769)) return;   // tags are desktop-only anyway
+    /* This used to return here because tags were desktop-only. They are not any more, and a phone
+       is where this matters MOST: the same 13px of label height covers more of a shorter axis, and
+       confluence puts four levels inside one label. Returning early would have shipped the tags as
+       an unreadable stack of overprinted boxes. */
     var items=[];
     for(var k in _novoLvlSeries){
       var px=(window._lvlPx&&window._lvlPx[k]); if(!(px>0)) continue;
@@ -7790,6 +7793,12 @@ async function loadNovoChart(){
     const _lvlTitle={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
       'EM_HI':'EM ▲','EM_LO':'EM ▼','MP':'MAX PAIN','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
       'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
+    /* NAME-only gate. It used to suppress the axis TAG as well, which meant a phone showed a
+       coloured line with no number anywhere on it — Jake, 2026-09-12: "add the price tags on the
+       levels like the price has. Not name label just prices so you can see exactly where it sits
+       on mobile too." The wall this guards against is fifteen NAMES, not fifteen prices: the
+       price scale already has room for a number at that y, and the number is the whole point of
+       drawing the line. Desktop keeps "VWAP 764.93"; a phone gets "764.93". */
     const _wantTitles = (window.innerWidth >= 769);
     // ── LEVELS, TradingView-style ────────────────────────────────────────────────────────────────────
     // A THIN SOLID segment starting at the bar that SET the level, running to the newest bar, not a dotted
@@ -7892,12 +7901,12 @@ async function loadNovoChart(){
           // Only levels inside the visible price range render a label, so the axis stays readable.
           // visible: set at CREATION so the rebuild path never births a series with the wrong
           // visibility, which is what used to justify calling _applyTogVis on every tick.
-          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:!!_wantTitles&&_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?((_lvlTitle[lbl]||lbl)+(window._lvlMerged&&window._lvlMerged[lbl]?' · '+window._lvlMerged[lbl].map(function(m){return _LVL_SHORT[m]||m;}).join(' · '):'')):''),autoscaleInfoProvider:function(){return null;}});
+          const s=_novoChart.addLineSeries({color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),priceLineVisible:false,lastValueVisible:_ctbTog.lvl&&!window._lvlUsePL,crosshairMarkerVisible:false,visible:_ctbTog.lvl&&!window._lvlUsePL,title:(_wantTitles?((_lvlTitle[lbl]||lbl)+(window._lvlMerged&&window._lvlMerged[lbl]?' · '+window._lvlMerged[lbl].map(function(m){return _LVL_SHORT[m]||m;}).join(' · '):'')):''),autoscaleInfoProvider:function(){return null;}});
           s.setData([{time:_anchor,value:v},{time:_lastT,value:v}]);
           _novoLvlSeries[lbl]=s; window._lvlPx[lbl]=v; window._lvlAnc[lbl]=_anchor;
         } else {
           // No candles at all (chart still loading) — a solid, not dotted, full-width line as the last resort.
-          _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),lineVisible:_ctbTog.lvl,axisLabelVisible:false,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
+          _novoLines[lbl]=_novoSeries.createPriceLine({price:v,color:c,lineWidth:1,lineStyle:((lbl==='EM_LO'||lbl==='EM_HI')?2:0),lineVisible:_ctbTog.lvl,axisLabelVisible:_ctbTog.lvl,title:(_wantTitles?(_lvlTitle[lbl]||lbl):'')});
         }
       });
       _novoLvlSig=_sig;
