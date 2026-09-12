@@ -95,6 +95,16 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   section { padding: 80px 0; }
   hr.divider { border: none; border-top: 1px solid var(--bdr); margin: 0; }
 
+
+  /* ── full-bleed sheet / strip, the homepage's figure ────────────────────────────────────────
+     Outside .container, between two dividers, so the dividers become its own hairlines.
+     ⚠ NOT calc(50% - 50vw): 100vw includes the vertical scrollbar and the PAGE scrolls sideways.
+     min-width holds it legible at 390px and the figure takes the overflow, so a phone swipes
+     across it rather than the page doing it. */
+  .eco-band { margin: 0; padding: 0; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .eco-band img { display: block; width: 100%; min-width: 860px; height: auto; }
+  @media (max-width: 860px) { .eco-band img { min-width: 780px; } }
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
@@ -677,6 +687,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
+
+<hr class="divider">
+
+<!-- ═══ THE DR. NoVo SHEET ══════════════════════════════════════════════════════════════════
+     Four real answers — one per desk plus a deep read — and the three rules he answers under,
+     which are the actual product. The aichat-fan below stays; this sits above it. -->
+<figure class="eco-band">
+  <img src="/screenshots/ai-sheet.webp?v=1" width="2600" height="1242" loading="lazy"
+       decoding="async" alt="Dr. NoVo answering on the Trader, the Analyst and the Crypto Map, and a deep read on a coin — with the rules he answers under: he cites what he read, he gives the sample size, and he says when he is wrong.">
+</figure>
 
 <hr class="divider">
 
