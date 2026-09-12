@@ -857,6 +857,62 @@ body.ctb-collapsed #ctb-collapse::before { content: '\25BE'; }
    visible was worth more. It was his call to make, not mine, and he had already made it. */
 body.ctb-collapsed #chart-header { display: none !important; }
 .ctb-hint { font-size: 10px; color: var(--txt3); letter-spacing: .4px; margin-left: 2px; }
+/* ══ THE HEADER LOST ITS THIRD ROW (Jake, 2026-09-12) ═══════════════════════════════════════
+   What used to be a 20-button strip is now three places chosen by how often each control is
+   touched: interval beside the symbol, overlays in the legend, everything else on a footer bar
+   under the chart. Hairlines only and no button borders, per the standing rule. */
+.hero-idrow { display: flex; align-items: baseline; gap: 8px; }
+.hero-pxwrap { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.spy-hero-r { display: flex; align-items: center; gap: 12px; }
+#ctb-tf { margin-top: 2px; }
+#ctb-tf .ctb-btn { padding: 2px 6px; font-size: 10.5px; }
+
+/* Capture actions read as ICONS beside the price — the words were carrying no weight the glyph
+   does not already carry, and the row they were on is gone. The label survives in the tooltip
+   and in the keyboard cheat sheet, so nothing became undiscoverable. */
+.ctb-icons .ctb-l { display: none; }
+.ctb-icons .ctb-btn { font-size: 13px; line-height: 1; padding: 4px 6px; }
+#ctb-acts { gap: 0; opacity: .75; transition: opacity .12s ease; }
+#ctb-acts:hover { opacity: 1; }
+
+/* ══ FOOTER BAR ════════════════════════════════════════════════════════════════════════════
+   Range left, drawing tools centre, settings right. One hairline above it and nothing else —
+   it is a shelf under the chart, not a panel. */
+#chart-footbar { display: flex; align-items: center; gap: 10px; padding: 5px 2px 0;
+  border-top: 1px solid var(--bdr2); margin-top: 6px; }
+#chart-footbar .cfb-l { flex: 1 1 0; display: flex; justify-content: flex-start; min-width: 0; }
+#chart-footbar .cfb-c { flex: 0 0 auto; display: flex; justify-content: center; }
+#chart-footbar .cfb-r { flex: 1 1 0; display: flex; justify-content: flex-end; }
+#ctb-range .ctb-btn { font-size: 10px; letter-spacing: .3px; padding: 3px 6px; }
+#chart-footbar .ctb-icons .ctb-btn { font-size: 14px; padding: 3px 7px; }
+
+/* ══ THE LEGEND IS THE OVERLAY CONTROL ═════════════════════════════════════════════════════
+   #chart-legend2 stays pointer-events:none so the chart keeps every drag and crosshair; only the
+   rows take the pointer back. Getting that backwards makes the whole chart un-draggable near the
+   top-left, which is exactly where the crosshair lives most. */
+#chart-legend2 .lg-rows { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0; margin-top: 3px; pointer-events: none; }
+#chart-legend2 .lg-row { pointer-events: auto; cursor: pointer; display: inline-flex;
+  align-items: center; gap: 5px; font-size: 10px; line-height: 1.6; padding: 0 2px;
+  border-radius: 3px; transition: background .12s ease, opacity .12s ease; }
+#chart-legend2 .lg-row:hover { background: rgba(255,255,255,.08); }
+#chart-legend2 .lg-row.off { opacity: .38; }
+#chart-legend2 .lg-row.off .lg-dot { background: var(--txt3) !important; }
+#chart-legend2 .lg-dot { width: 7px; height: 2px; border-radius: 1px; flex: 0 0 auto; }
+#chart-legend2 .lg-nm { color: var(--txt2); letter-spacing: .3px; }
+#chart-legend2 .lg-row.off .lg-nm { color: var(--txt3); }
+#chart-legend2 .lg-v { color: var(--txt1); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 768px) {
+  /* The footer scrolls rather than wrapping: a second row here would rebuild the exact height
+     problem the header row was removed to solve. */
+  #chart-footbar { gap: 6px; }
+  #chart-footbar .cfb-l, #chart-footbar .cfb-c { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #chart-footbar .cfb-l::-webkit-scrollbar, #chart-footbar .cfb-c::-webkit-scrollbar { height: 0; }
+  #ctb-range .ctb-btn, #chart-footbar .ctb-icons .ctb-btn { padding: 6px 8px; }
+  /* Phone: the stack is the same shape, just tighter. */
+  #chart-legend2 .lg-row { font-size: 9.5px; line-height: 1.5; }
+}
 /* THE CHART IS NOT A CARD, ON ANY SCREEN. First put inside the phone media block, which left the
    frame on every desktop — and Jake's objection was to the box, not to the box on small screens. */
 #novo-chart, #novo-chart2 { border: 0 !important; border-radius: 0 !important;
@@ -2636,18 +2692,20 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
         <!-- Ticker switcher (2026-08-30, Jake): click to flip the chart between the three mastered
              tickers, per-viewer, no restart. The selected pill is the chart you are looking at; the
              engine's own ticker still shows in the nav strip pill. Selection sticks in localStorage. -->
+        <!-- THE TOOLBAR ROW IS GONE (Jake, 2026-09-12: "the tool bar header needs to go
+             completely"). Its contents were not thinned, they were redistributed by how often
+             they are touched, the way a terminal does it: interval beside the symbol here,
+             overlays into the chart legend as toggleable lines, drawing tools and the range
+             selector onto a footer bar under the chart, everything else behind the gear. -->
         <div class="spy-hero-l">
-          <div class="tkr-pills" id="tkr-pills" role="tablist" aria-label="Chart ticker">
-            <button type="button" class="tkr-pill" data-tkr="SPY" role="tab">SPY</button>
-            <button type="button" class="tkr-pill" data-tkr="QQQ" role="tab">QQQ</button>
-            <button type="button" class="tkr-pill" data-tkr="IWM" role="tab">IWM</button>
+          <div class="hero-idrow">
+            <div class="tkr-pills" id="tkr-pills" role="tablist" aria-label="Chart ticker">
+              <button type="button" class="tkr-pill" data-tkr="SPY" role="tab">SPY</button>
+              <button type="button" class="tkr-pill" data-tkr="QQQ" role="tab">QQQ</button>
+              <button type="button" class="tkr-pill" data-tkr="IWM" role="tab">IWM</button>
+            </div>
+            <div class="spy-hero-sub">S&amp;P 500</div>
           </div>
-          <div class="spy-hero-sub">S&amp;P 500</div>
-        </div>
-        <!-- Chart toolbar lives IN the hero band (Jake: "tools landed in the wrong spot") — the
-             empty middle between the ticker switcher and the price. One line on desktop; on a
-             phone it wraps to its own full-width line under the ticker row. -->
-        <div id="chart-toolbar">
           <div class="ctb-group" id="ctb-tf" aria-label="Timeframe">
             <button type="button" class="ctb-btn" data-tf="1">1m</button>
             <button type="button" class="ctb-btn" data-tf="5">5m</button>
@@ -2656,35 +2714,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tf="1d">D</button>
             <button type="button" class="ctb-btn" data-tf="1w">W</button>
           </div>
-          <div class="ctb-sep"></div>
-          <!-- PHONE ONLY (2026-09-05, Jake: "the chart tools and stuff needs to go under a menu
-               on mobile its taking up all the chart view"). Timeframes deliberately stay OUT of
-               this menu — switching frame is the one control that gets used constantly, and
-               burying it would cost a tap on every use to save a row that is already paid for. -->
-          <button type="button" class="ctb-btn" id="ctb-more" aria-expanded="false"
-                  aria-controls="ctb-tools ctb-tog" title="Drawing tools and overlays">TOOLS</button>
-          <div class="ctb-sep"></div>
-          <div class="ctb-group" id="ctb-tools" aria-label="Drawing tools">
-            <button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;<span class="ctb-l">&nbsp;LEVEL</span></button>
-            <button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;<span class="ctb-l">&nbsp;TREND</span></button>
-            <button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low"><span class="ctb-s">Fib</span><span class="ctb-l">FIB</span></button>
-            <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#9678;<span class="ctb-l">&nbsp;MAGNET</span></button>
-            <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#10005;<span class="ctb-l">&nbsp;CLEAR</span></button>
-            <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
-            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;<span class="ctb-l">&nbsp;FULL</span></button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#9113;<span class="ctb-l">&nbsp;SHOT</span></button><button type="button" class="ctb-btn" id="ctb-pop" title="Pop the chart into its own window &mdash; drag it to another monitor">&#10697;<span class="ctb-l">&nbsp;POP</span></button><button type="button" class="ctb-btn" id="ctb-csv" title="Export the visible candles, VWAP and levels as CSV">&#8681;<span class="ctb-l">&nbsp;CSV</span></button><button type="button" class="ctb-btn" id="ctb-layout" title="Saved layouts &mdash; save and switch named setups">&#9636;<span class="ctb-l">&nbsp;LAYOUT</span></button>
-          </div>
-          <div class="ctb-sep"></div>
-          <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
-            <button type="button" class="ctb-btn" data-tog="vwap" title="VWAP curve">VWAP</button>
-            <button type="button" class="ctb-btn" data-tog="ema" title="EMA 9 / 21">EMA</button>
-            <button type="button" class="ctb-btn" data-tog="lvl" title="Session + dealer levels"><span class="ctb-s">LVLS</span><span class="ctb-l">LEVELS</span></button>
-            <button type="button" class="ctb-btn" data-tog="vol" title="Volume histogram"><span class="ctb-s">VOL</span><span class="ctb-l">VOLUME</span></button>
-            <button type="button" class="ctb-btn" data-tog="ha" title="Heikin Ashi candles"><span class="ctb-s">HA</span><span class="ctb-l">HEIKIN ASHI</span></button>
-            <button type="button" class="ctb-btn" data-tog="vp" title="Session volume profile — today's volume by price, POC in amber"><span class="ctb-s">VP</span><span class="ctb-l">VOLUME PROFILE</span></button><button type="button" class="ctb-btn" data-tog="gex" title="Dealer gamma by strike — the wall is the biggest bar"><span class="ctb-s">GEX</span><span class="ctb-l">GEX PROFILE</span></button>
-          </div>
-          <span id="ctb-hint" class="ctb-hint"></span>
         </div>
-        <div class="spy-hero-r"><div id="t-spy" class="spy-hero-px">—</div><div id="t-spy-chg" class="spy-hero-chg">—</div></div>
+        <div class="spy-hero-r">
+          <div class="hero-pxwrap">
+            <div id="t-spy" class="spy-hero-px">—</div>
+            <div id="t-spy-chg" class="spy-hero-chg">—</div>
+          </div>
+          <div class="ctb-group ctb-icons" id="ctb-acts" aria-label="Chart actions"><button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;<span class="ctb-l">&nbsp;FULL</span></button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#9113;<span class="ctb-l">&nbsp;SHOT</span></button><button type="button" class="ctb-btn" id="ctb-pop" title="Pop the chart into its own window &mdash; drag it to another monitor">&#10697;<span class="ctb-l">&nbsp;POP</span></button><button type="button" class="ctb-btn" id="ctb-csv" title="Export the visible candles, VWAP and levels as CSV">&#8681;<span class="ctb-l">&nbsp;CSV</span></button><button type="button" class="ctb-btn" id="ctb-layout" title="Saved layouts &mdash; save and switch named setups">&#9636;<span class="ctb-l">&nbsp;LAYOUT</span></button></div>
+        </div>
       </div>
       <!-- COLLAPSE THE TOOLBAR (Jake, 2026-09-08, drawing a chevron here on two screenshots:
            "can we add a arrow there and map the tool/chart header collapsible"). The toolbar is
@@ -2878,6 +2915,14 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <div style="margin:8px 14px 8px;">
         
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
+        <!-- THE FOOTER BAR. Range left, drawing tools centre, chart settings right - the
+             three things a chart needs within reach that are not the chart itself. This is the
+             row that replaced the header, not a second copy of it. -->
+        <div id="chart-footbar">
+          <div class="cfb-l"><div class="ctb-group" id="ctb-range" aria-label="Range"><button type="button" class="ctb-btn" data-range="1d" title="Show 1D">1D</button><button type="button" class="ctb-btn" data-range="5d" title="Show 5D">5D</button><button type="button" class="ctb-btn" data-range="1m" title="Show 1M">1M</button><button type="button" class="ctb-btn" data-range="3m" title="Show 3M">3M</button><button type="button" class="ctb-btn" data-range="6m" title="Show 6M">6M</button><button type="button" class="ctb-btn" data-range="ytd" title="Show YTD">YTD</button><button type="button" class="ctb-btn" data-range="1y" title="Show 1Y">1Y</button><button type="button" class="ctb-btn" data-range="all" title="Show ALL">ALL</button></div></div>
+          <div class="cfb-c"><div class="ctb-group ctb-icons" id="ctb-tools" aria-label="Drawing tools"><button type="button" class="ctb-btn" data-tool="h" title="Horizontal level — click a price">&#8213;<span class="ctb-l">&nbsp;LEVEL</span></button><button type="button" class="ctb-btn" data-tool="t" title="Trendline — click two points">&#9585;<span class="ctb-l">&nbsp;TREND</span></button><button type="button" class="ctb-btn" data-tool="f" title="Fib retracement — click a high, then a low"><span class="ctb-s">Fib</span><span class="ctb-l">FIB</span></button><button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#9678;<span class="ctb-l">&nbsp;MAGNET</span></button><button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#10005;<span class="ctb-l">&nbsp;CLEAR</span></button></div></div>
+          <div class="cfb-r"><div class="ctb-group ctb-icons"><button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button></div></div>
+        </div>
         <!-- The chart level legend moved to the "Chart Levels" panel (was card-novostatus) 2026-07-17 so it's readable. -->
       </div>
 
@@ -4669,6 +4714,8 @@ function _paintCtb(){
      three extra taps to reopen.
    The chart is told to re-measure after the fold changes, so it fills the row it just got
    back instead of waiting for the next resize event. */
+/* INERT since 2026-09-12: #chart-toolbar was removed, so the guard below returns immediately.
+   Left in place rather than excised in the same pass as a layout change; delete in a cleanup. */
 (function(){
   var tb=document.getElementById('chart-toolbar'), mb=document.getElementById('ctb-more');
   if(!tb||!mb) return;
@@ -4995,9 +5042,14 @@ document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
     try{ _c2Key=''; _c2Ranged=false; _c2Run(); }catch(_e){}   // the split pane follows the main TF
   });
 });
-document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    var k=b.getAttribute('data-tog'); _ctbTog[k]=!_ctbTog[k]; _ctbSave(); _paintCtb(); _applyTogVis();
+/* THE OVERLAY TOGGLES MOVED INTO THE CHART LEGEND (Jake, 2026-09-12). The body below used to be
+   an inline handler on #ctb-tog, which no longer exists; it is a named function now so the legend
+   rows and anything else drive EXACTLY the same side effects. Duplicating it was the alternative
+   and duplicated state handling is how two surfaces drift apart. */
+window._ctbToggle = function(k){
+  if(!k || !(k in _ctbTog)) return;
+  {
+    _ctbTog[k]=!_ctbTog[k]; _ctbSave(); _paintCtb(); _applyTogVis();
     // HA and VP change what is DRAWN, not a series' visibility — force a full setData repaint
     // (glitch-guard reset; _novoRanged stays latched so the viewer's pan/zoom is never fought).
     if(k==='ha'||k==='vp'||k==='gex'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
@@ -5006,7 +5058,55 @@ document.querySelectorAll('#ctb-tog .ctb-btn').forEach(function(b){
     // Drop the tip state; the next poll re-establishes it against the freshly-drawn series.
     if(k==='ha'){ _novoTipLive=false; _novoBarForming=false; _novoLastCandle=null; }
     if(k==='ha'||k==='vp'||k==='gex'){ try{ _c2Run(); }catch(_e){} }   // both panes must speak the same bar language (and profile)
+  }
+};
+/* One delegated listener, because the legend rows are re-rendered on every hover and per-element
+   listeners would be re-attached (or lost) on each paint. */
+document.addEventListener('click', function(ev){
+  try{
+    var r = ev.target && ev.target.closest && ev.target.closest('#chart-legend2 [data-tog]');
+    if(r){ ev.preventDefault(); ev.stopPropagation(); window._ctbToggle(r.getAttribute('data-tog')); }
+  }catch(_e){}
+});
+
+/* ── RANGE SELECTOR (Jake, 2026-09-12: "Bottom-left: a time range selector") ────────────────
+   Separate from the INTERVAL buttons and deliberately so: interval is the bar size, range is how
+   much of it you are looking at. TradingView keeps them apart for the same reason and a scalper
+   changes them for different reasons.
+
+   It sets the visible window on the time scale; it does not refetch. A range longer than the
+   loaded history simply shows everything there is, which is the honest outcome - it never claims
+   to show a year of 1-minute bars it does not have. */
+var _RANGE_DAYS = { '1d':1, '5d':5, '1m':22, '3m':66, '6m':132, 'ytd':0, '1y':252, 'all':-1 };
+window._ctbRange = null;
+function _applyRange(key){
+  var cs = (_ctbTog.ha && _novoHaC) ? _novoHaC : _novoViewC;
+  if(!cs || !cs.length || !window._novoChart) return;
+  _ctbRange = key;
+  try{
+    var ts = _novoChart.timeScale();
+    if(key === 'all'){ ts.fitContent(); _paintRange(); return; }
+    var last = cs[cs.length-1].time, first = cs[0].time;
+    var from;
+    if(key === 'ytd'){
+      var d = new Date(last*1000); from = Math.floor(Date.UTC(d.getUTCFullYear(),0,1)/1000);
+    } else {
+      var days = _RANGE_DAYS[key] || 1;
+      from = last - days*86400;
+    }
+    if(from < first) from = first;          // never ask for history we do not hold
+    ts.setVisibleRange({ from: from, to: last });
+    _novoRanged = true;                      // the viewer chose this window; polls must not fight it
+  }catch(_e){}
+  _paintRange();
+}
+function _paintRange(){
+  document.querySelectorAll('#ctb-range .ctb-btn').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-range') === _ctbRange);
   });
+}
+document.querySelectorAll('#ctb-range .ctb-btn').forEach(function(b){
+  b.addEventListener('click', function(){ _applyRange(b.getAttribute('data-range')); });
 });
 
 // ── Drawings ─────────────────────────────────────────────────────────────────────────────────
@@ -5739,14 +5839,31 @@ function _renderLegend2(bar){
     '  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>'+
     '  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'+
     '  <span class="dim">V '+_fmtVol(b.v)+'</span>';
-  // Second line: the overlay curves the chart draws are anonymous on hover without this (B11).
-  var mp=window._ovMaps, ind=[];
-  if(mp){
-    if(_ctbTog.vwap && mp.vwap && mp.vwap.has(b.time)) ind.push('<span style="color:#f59e0b">VWAP '+mp.vwap.get(b.time).toFixed(2)+'</span>');
-    if(_ctbTog.ema && mp.ema9 && mp.ema9.has(b.time)) ind.push('<span style="color:#f0f0ee">EMA9 '+mp.ema9.get(b.time).toFixed(2)+'</span>');
-    if(_ctbTog.ema && mp.ema21 && mp.ema21.has(b.time)) ind.push('<span style="color:#6b8cff">EMA21 '+mp.ema21.get(b.time).toFixed(2)+'</span>');
+  /* ── THE INDICATOR LEGEND IS THE OVERLAY CONTROL NOW (Jake, 2026-09-12) ──────────────────
+     Every overlay gets its own line carrying its name, its value at this bar when it has one,
+     and its on/off state — click the line to toggle it. This is what retired seven buttons from
+     the old toolbar row: a list you can read IS the control, so the same information does not
+     need to exist twice. An overlay that is off stays listed and dimmed rather than vanishing,
+     because a control you cannot find is worse than one that is merely quiet. */
+  var mp=window._ovMaps, rows=[];
+  function val(key,map,colour,label){
+    var v=(_ctbTog[key] && mp && map && map.has(b.time)) ? map.get(b.time).toFixed(2) : '';
+    rows.push('<span class="lg-row'+(_ctbTog[key]?'':' off')+'" data-tog="'+key+'" role="button" tabindex="0" '
+      +'title="Click to turn '+label+(_ctbTog[key]?' off':' on')+'">'
+      +'<i class="lg-dot" style="background:'+colour+'"></i>'
+      +'<span class="lg-nm">'+label+'</span>'
+      +(v?('<span class="lg-v">'+v+'</span>'):'')+'</span>');
   }
-  if(ind.length) _h+='<br><span style="font-size:10px">'+ind.join('  ·  ')+'</span>';
+  val('vwap', mp&&mp.vwap,  '#f59e0b', 'VWAP');
+  val('ema',  mp&&mp.ema9,  '#f0f0ee', 'EMA 9');
+  val('ema',  mp&&mp.ema21, '#6b8cff', 'EMA 21');
+  [['lvl','#22d3ee','Levels'],['vol','#8b93a7','Volume'],['ha','#8b93a7','Heikin Ashi'],
+   ['vp','#f59e0b','Volume profile'],['gex','#a78bfa','GEX profile']].forEach(function(t){
+    rows.push('<span class="lg-row'+(_ctbTog[t[0]]?'':' off')+'" data-tog="'+t[0]+'" role="button" tabindex="0" '
+      +'title="Click to turn '+t[2]+(_ctbTog[t[0]]?' off':' on')+'">'
+      +'<i class="lg-dot" style="background:'+t[1]+'"></i><span class="lg-nm">'+t[2]+'</span></span>');
+  });
+  if(rows.length) _h+='<div class="lg-rows">'+rows.join('')+'</div>';
   if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h;
     // Chip clears the legend whatever its line count (polish, 2026-09-01): with the indicator
     // line added the fixed top:27px chip sat ON the values — Jake's screenshot caught the overlap.
