@@ -713,3 +713,20 @@ nav { position: relative; }
    what it sets. Copied from polish.css verbatim — these two files are meant to agree, and the bug
    both halves of tonight's report share is that they had drifted. */
 nav .nvs-ss-wrap { border-top: 0 !important; padding-top: 0 !important; }
+
+/* ── THE HEADER IS CHROME, NOT PROSE (2026-09-12) ──────────────────────────────────────────
+   Jake: "options 101, 0dte guide and the journal all have a slightly layout differences ...
+   looks like the coin logo is lower and the plans and portal button are in a different
+   position, the headers move alittle when i go to these pages".
+
+   One inherited property caused all of it. The journal sets body{line-height:1.65} so article
+   prose reads well; every other page uses 1.6. At 16px that is 26.4px against 25.6px, and the
+   header inherits it — measured on the live pages at 1920:
+
+     /analyst   nav 114.39px   ticker 39px      logo y12
+     /journal   nav 115.09px   ticker 39.63px   logo y13
+
+   A 1px taller header on some pages is exactly the jump you see when navigating between them.
+   The prose leading is deliberate and stays; the header simply stops inheriting it. Pinned on
+   the chrome's own classes so it holds whatever a page does to its body typography. */
+.nav-inner, .nav-logo, .nav-actions, .ticker, .ticker-row { line-height: 1.6; }
