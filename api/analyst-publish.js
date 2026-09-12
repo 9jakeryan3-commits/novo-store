@@ -616,14 +616,18 @@ export default async function handler(req, res) {
     const r = kv();
     if (!r) return res.status(200).json({ ok: false, note: 'kv unavailable' });
     const g = (p) => p.catch(() => null);
-    const [nS, nQ, nI, ec] = await Promise.all([
+    const [nM, nS, nQ, nI, ec] = await Promise.all([
+      g(r.get('rh:news:MARKET')),
       g(r.get('rh:news:SPY')), g(r.get('rh:news:QQQ')), g(r.get('rh:news:IWM')),
       g(r.get('rh:earnings_calendar')),
     ]);
     const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
     res.setHeader('Cache-Control', 'private, max-age=120');
+    // MARKET is the pooled, de-duplicated wire across the breadth set (Jake, 09-12: "its market
+    // news not what the couple tickers have going on today"); the per-ticker keys stay so a
+    // reader can still narrow to the name they are looking at.
     return res.status(200).json({ ok: true,
-      wire: { SPY: J(nS), QQQ: J(nQ), IWM: J(nI) },
+      wire: { MARKET: J(nM), SPY: J(nS), QQQ: J(nQ), IWM: J(nI) },
       earnings: J(ec) });
   }
   // NoVo's unprompted lunch note, alone — so a chat surface can poll for it without pulling the

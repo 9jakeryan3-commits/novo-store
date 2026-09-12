@@ -592,9 +592,38 @@
 
   var _rhCache = null, _rhAt = 0;
   function _fillRh(root, tk) {
-    var wbox = root.querySelector('.tp-wire'), ebox = root.querySelector('.tp-earn');
-    if (!wbox && !ebox) return;
+    var wbox = root.querySelector('.tp-wire'), ebox = root.querySelector('.tp-earn'),
+        mbox = root.querySelector('.tp-mwire');
+    if (!wbox && !ebox && !mbox) return;
+    /* One row renderer for both wires — the market pool and the ticker list differ only in which
+       key they read and whether the row names the symbols it filed under. */
+    var wireRows = function (arts, showSyms, cap) {
+      return arts.slice(0, cap).map(function (a) {
+        var age = '';
+        try {
+          var hrs = Math.max(0, (Date.now() - Date.parse(a.published_at)) / 3600000);
+          age = hrs < 1 ? Math.round(hrs * 60) + 'm' : hrs < 48 ? Math.round(hrs) + 'h' : Math.round(hrs / 24) + 'd';
+        } catch (_e) { age = ''; }
+        var syms = (showSyms && a.symbols && a.symbols.length)
+          ? ' · ' + a.symbols.slice(0, 3).join(' · ') : '';
+        return '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+          + '<div style="font-size:12px;line-height:1.45">' + esc(a.title || '') + '</div>'
+          + '<div class="tp-meta" style="margin-top:2px">' + esc(a.publisher || '')
+          + (age ? ' · ' + age + ' ago' : '') + esc(syms) + '</div>'
+          + '</div>';
+      }).join('');
+    };
     var render = function (j) {
+      if (mbox) {
+        var m = j && j.wire && j.wire.MARKET;
+        var marts = (m && m.articles) || [];
+        mbox.innerHTML = marts.length
+          ? wireRows(marts, true, 20)
+            + (m.dropped ? '<div class="tp-meta" style="padding-top:6px">newest 20 shown · '
+                + Number(m.dropped) + ' more in the window</div>' : '')
+          : '<div class="tp-empty">The market wire has not refreshed yet — this is an empty read, '
+            + 'not a quiet tape.</div>';
+      }
       if (wbox) {
         var w = j && j.wire && j.wire[tk];
         var arts = (w && w.articles) || [];
@@ -602,17 +631,7 @@
           wbox.innerHTML = '<div class="tp-empty">No wire items for ' + esc(tk) + ' yet — the feed '
             + 'refreshes with the cloud feeder’s next pass.</div>';
         } else {
-          wbox.innerHTML = arts.slice(0, 12).map(function (a) {
-            var age = '';
-            try {
-              var hrs = Math.max(0, (Date.now() - Date.parse(a.published_at)) / 3600000);
-              age = hrs < 1 ? Math.round(hrs * 60) + 'm' : hrs < 48 ? Math.round(hrs) + 'h' : Math.round(hrs / 24) + 'd';
-            } catch (_e) { age = ''; }
-            return '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
-              + '<div style="font-size:12px;line-height:1.45">' + esc(a.title || '') + '</div>'
-              + '<div class="tp-meta" style="margin-top:2px">' + esc(a.publisher || '') + (age ? ' · ' + age + ' ago' : '') + '</div>'
-              + '</div>';
-          }).join('')
+          wbox.innerHTML = wireRows(arts, false, 12)
           + (w.dropped ? '<div class="tp-meta" style="padding-top:6px">newest 12 shown · ' + Number(w.dropped) + ' more in the window</div>' : '');
         }
       }
@@ -680,10 +699,15 @@
      with Yuri's placement review. One renderer, one data door, two dashboards. */
   function drawWire(el, state) {
     var tk = ticker(state);
-    var h = '<h2>' + esc(tk) + ' &middot; Wire &amp; earnings</h2>'
+    /* THE MARKET WIRE LEADS (Jake, 09-12: "its market news not what the couple tickers have
+       going on today"). The pooled, de-duplicated feed across the breadth set is the first
+       group; the ticker-scoped list stays as the second, for a reader working one name. */
+    var h = '<h2>Wire &amp; earnings</h2>'
       + '<span class="tp-sub">Headlines with their source and age &mdash; the attribution is the '
       + 'fact &mdash; and the upcoming reporters. No genre tag exists on this feed, so nothing '
       + 'here claims wire-vs-opinion; read the byline.</span>'
+      + '<div class="tp-grp">Market wire</div>'
+      + '<div class="tp-mwire"><div class="tp-empty">Loading the wire…</div></div>'
       + '<div class="tp-grp">Wire · ' + esc(tk) + '</div>'
       + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
       + '<div class="tp-grp">Earnings · upcoming</div>'
