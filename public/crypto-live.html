@@ -2405,6 +2405,36 @@ let _lastDrawn = null;
 // THE CARRY CURVE — crypto's yield curve, measured. Dated futures price holding each expiry
 // the way funding prices holding the perp; the OI-weighted annualised carry is the headline and
 // the convention is printed on the panel because an annualisation you can't check is decoration.
+// CROSS-VENUE FUNDING ARB (Jake's go 09-12 — the $79 seven, item 5, the PANEL reading; the
+// screener's sortable spread column ranks the book, this names the trade on THIS coin).
+// Which venue's longs are paying most (the short leg — you collect), which carry is cheapest
+// or negative (the long leg), the annualised spread, and that spread NET of putting both legs
+// on. The funding array is already the trusted set — same rows as the per-venue table,
+// quality-gated upstream, never blended — so a quarantined venue cannot appear as a leg.
+function arbPanel(d){
+  const fr=(d&&d.positioning&&d.positioning.funding)||[];
+  const rows=fr.filter(function(f){return f&&f.venue&&f.annualized_pct!=null;});
+  if(rows.length<2) return '';
+  const hi=rows.reduce(function(a,b){return b.annualized_pct>a.annualized_pct?b:a;});
+  const lo=rows.reduce(function(a,b){return b.annualized_pct<a.annualized_pct?b:a;});
+  const spread=hi.annualized_pct-lo.annualized_pct;
+  // Two legs, each entered and exited once: the disclosed round trip counts twice. Stated
+  // beside the gross figure because an arb quoted without its costs is a number pretending
+  // to be a trade — most days the honest net on a retail account is near zero or negative,
+  // and SHOWING that is the panel's value.
+  const cost=(d.round_trip_pct!=null)?d.round_trip_pct*2:null;
+  const net=(cost!=null)?spread-cost:null;
+  const pc=function(v){return v==null?'—':(v>=0?'+':'')+v.toFixed(2)+'%';};
+  return `<div class="panel"><div class="ph"><h2>Funding arb</h2>
+    <span class="sub">${rows.length} venues &middot; annualised &middot; trusted rows only</span></div><div class="pb">
+    <div class="kv"><span class="k">Collect &middot; short on</span><span class="v">${hi.venue} <span class="up">${pc(hi.annualized_pct)}</span></span></div>
+    <div class="kv"><span class="k">Carry &middot; long on</span><span class="v">${lo.venue} <span class="${lo.annualized_pct<0?'up':'nu'}">${pc(lo.annualized_pct)}</span></span></div>
+    <div class="kv"><span class="k">Gross spread</span><span class="v am">${spread.toFixed(2)} pts/yr</span></div>
+    <div class="kv"><span class="k">Net of costs &times;2 legs</span><span class="v ${net==null?'nu':(net>0?'up':'dn')}">${net==null?'—':pc(net)}</span></div>
+    <div class="fnote">Short the venue where longs pay most, long the cheapest carry; the difference
+    accrues while both legs sit. Net subtracts this coin's disclosed round-trip cost twice — one entry
+    and exit per leg. Funding flips sign without notice: a snapshot of the spread, not a lock on it.</div></div></div>`;
+}
 // SPOT-ETF ISSUER FLOWS (Jake's go 09-12 — the $79 seven, item 6). Creations and redemptions
 // computed from the ISSUER's own assets and NAV (IBIT→BTC, ETHA→ETH) — volume is not flow:
 // 76m IBIT shares can change hands without a single share being created. The collector has
@@ -2883,6 +2913,8 @@ function drawCoin(){
       <div style="font-size:10px;color:var(--txt4);margin-top:8px;line-height:1.5;font-family:var(--mono)">
         A published price for how crowded one side is. The gap between venues is the read.</div></div></div>`;
   }
+  // The trade that gap implies, named — legs, gross, and net of costs (Jake's go 09-12).
+  s+=arbPanel(d);
 
   // Breadth — structurally impossible on three tickers, so it is this map's own panel.
   s+=stablesPanel();
