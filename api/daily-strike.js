@@ -335,6 +335,17 @@ ${_CHROME.HEAD}
   .ds-rt{min-width:0;font-size:10px;opacity:.72;padding-top:0;}
   .ds-rh{font-size:14px;line-height:1.4;font-weight:600;}
   .ds-rrow:first-child .ds-rh{font-size:16px;line-height:1.3;}
+
+  /* ⚠ .ds-secnav IS A <nav>, AND THE SITE STYLES BARE nav{} (2026-09-12, Jake: "bug with the
+     daily strike page bar over the more menu"). The chrome CSS carries
+     nav{position:sticky;top:0;z-index:100;background:...;backdrop-filter:blur(8px)} — written for
+     the site header, but it matches EVERY nav element. So this section strip was silently a second
+     sticky bar at the same z-index as the header, and being later in the DOM it won the tie and
+     painted OVER the header's More panel. Measured with elementFromPoint across 55 points inside
+     the open panel: /analyst 0 covered, /daily-strike 5 covered, all by nav.ds-secnav.
+     polish.css already neutralises .crumbs for exactly this reason; this is the same treatment.
+     Its own hairline border-bottom is design and stays. */
+  .ds-secnav{position:static;top:auto;z-index:auto;background:none;backdrop-filter:none;}
 </style>
 </head>
 <body>
