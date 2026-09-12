@@ -2418,22 +2418,34 @@ function arbPanel(d){
   const hi=rows.reduce(function(a,b){return b.annualized_pct>a.annualized_pct?b:a;});
   const lo=rows.reduce(function(a,b){return b.annualized_pct<a.annualized_pct?b:a;});
   const spread=hi.annualized_pct-lo.annualized_pct;
-  // Two legs, each entered and exited once: the disclosed round trip counts twice. Stated
-  // beside the gross figure because an arb quoted without its costs is a number pretending
-  // to be a trade — most days the honest net on a retail account is near zero or negative,
-  // and SHOWING that is the panel's value.
-  const cost=(d.round_trip_pct!=null)?d.round_trip_pct*2:null;
-  const net=(cost!=null)?spread-cost:null;
   const pc=function(v){return v==null?'—':(v>=0?'+':'')+v.toFixed(2)+'%';};
+  // ⚠ NO NET LINE, DELIBERATELY (pulled same-night 09-12, Temi's live sweep). The first ship
+  // subtracted d.round_trip_pct×2 — but that figure is Robinhood's RETAIL SPOT markup, and the
+  // legs here are PERP venues where Robinhood offers nothing: a cost from a venue that is not
+  // in the trade. Worse, an ANNUALISED rate minus a ONE-TIME cost implies a one-year hold
+  // nothing on screen stated — 71 of 79 coins read as profitable arbs, +238% at the top, on a
+  // never-advice product. The perp venues' own taker/settlement costs are not in this payload;
+  // until the collector carries them, the honest panel is legs + gross, and the footnote says
+  // exactly what is missing. Do not re-add a net without a real per-venue cost AND a stated
+  // holding period.
+  if(hi.venue===lo.venue || !(spread>0)){
+    // Every trusted venue at the same rate: there is no cross-venue trade to name, and two
+    // identical legs render as an instruction nobody could place (5 coins live, 09-12).
+    return `<div class="panel"><div class="ph"><h2>Funding arb</h2>
+      <span class="sub">${rows.length} venues &middot; annualised &middot; trusted rows only</span></div><div class="pb">
+      <div class="fnote">No spread across venues today — every trusted venue is paying the same
+      rate, so there is no cross-venue position to name. The gap usually reopens with positioning.</div></div></div>`;
+  }
   return `<div class="panel"><div class="ph"><h2>Funding arb</h2>
     <span class="sub">${rows.length} venues &middot; annualised &middot; trusted rows only</span></div><div class="pb">
-    <div class="kv"><span class="k">Collect &middot; short on</span><span class="v">${hi.venue} <span class="up">${pc(hi.annualized_pct)}</span></span></div>
-    <div class="kv"><span class="k">Carry &middot; long on</span><span class="v">${lo.venue} <span class="${lo.annualized_pct<0?'up':'nu'}">${pc(lo.annualized_pct)}</span></span></div>
+    <div class="kv"><span class="k">Longs pay most on</span><span class="v">${hi.venue} <span class="up">${pc(hi.annualized_pct)}</span></span></div>
+    <div class="kv"><span class="k">Cheapest carry</span><span class="v">${lo.venue} <span class="${lo.annualized_pct<0?'up':'nu'}">${pc(lo.annualized_pct)}</span></span></div>
     <div class="kv"><span class="k">Gross spread</span><span class="v am">${spread.toFixed(2)} pts/yr</span></div>
-    <div class="kv"><span class="k">Net of costs &times;2 legs</span><span class="v ${net==null?'nu':(net>0?'up':'dn')}">${net==null?'—':pc(net)}</span></div>
-    <div class="fnote">Short the venue where longs pay most, long the cheapest carry; the difference
-    accrues while both legs sit. Net subtracts this coin's disclosed round-trip cost twice — one entry
-    and exit per leg. Funding flips sign without notice: a snapshot of the spread, not a lock on it.</div></div></div>`;
+    <div class="fnote">The classic capture is short where longs pay most, long the cheapest carry,
+    collecting the difference while both legs sit. Quoted annualised and GROSS — the fees and
+    settlement costs of the two perp legs are not in this data, so no net is printed; over short
+    holds those costs routinely eat a spread this size. Funding flips sign without notice: a
+    snapshot, not a lock.</div></div></div>`;
 }
 // SPOT-ETF ISSUER FLOWS (Jake's go 09-12 — the $79 seven, item 6). Creations and redemptions
 // computed from the ISSUER's own assets and NAV (IBIT→BTC, ETHA→ETH) — volume is not flow:
