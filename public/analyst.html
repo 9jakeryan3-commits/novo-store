@@ -138,6 +138,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   section { padding: 80px 0; }
   hr.divider { border: none; border-top: 1px solid var(--bdr); margin: 0; }
 
+
+  /* ── the product sheet, full-bleed under the hero ───────────────────────────────────────────
+     Same treatment as the homepage ecosystem sheet: edge to edge because it sits outside
+     .container, its own black ground meeting the page so the dividers read as its rules.
+     ⚠ THE SCROLLER IS NOT DECORATION: a 2,600px sheet at 390px is a legible-LOOKING smear.
+     min-width holds it readable and the figure takes the overflow, so a phone swipes across it
+     and the PAGE never scrolls sideways. */
+  .eco-band { margin: 0; padding: 0; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .eco-band img { display: block; width: 100%; min-width: 860px; height: auto; }
+  @media (max-width: 860px) { .eco-band img { min-width: 780px; } }
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
@@ -671,14 +682,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </section>
 
-<!-- ONE HOUSE strip -->
-<div style="background:rgba(34,211,238,0.05);border-top:1px solid rgba(34,211,238,0.2);border-bottom:1px solid rgba(34,211,238,0.2);padding:44px 0;text-align:center;">
-  <div class="container" style="max-width:760px;">
-    <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#22d3ee;margin-bottom:16px;">One Tool, One House</div>
-    <p style="font-size:clamp(20px,3vw,28px);font-weight:900;color:var(--txt1);line-height:1.25;margin:0 0 14px;letter-spacing:-0.5px;">The read and the trade, under one roof.</p>
-    <p style="font-size:15px;color:var(--txt2);line-height:1.75;margin:0 auto;max-width:640px;">NoVo Options Trading is one house &mdash; from your first read to the live tape. <b style="color:var(--txt1);">Analyst</b> is the read lane: the live dealer map and a desk's written read every session When you're ready to act on it, <b style="color:var(--txt1);">Trader</b> streams that read on a live candle chart, level by level &mdash; same house. Most tools hand you a map and stop there. NoVo Options Trading scores its own read and publishes the record.</p>
-  </div>
-</div>
+<!-- ═══ THE ANALYST SHEET ══════════════════════════════════════════════════════════
+     Replaces the blue ONE HOUSE strip that stood here (Jake, 2026-09-12: "Delete that blue banner
+     there from the analyst page and put the new mash up in its place"). Same slot as the sheets on
+     /trader and /crypto — directly under the hero — and the same full-bleed treatment as the
+     homepage: outside .container, between two dividers, so the dividers become its hairlines.
+     ⚠ THE FANNED ss-wrap SHOTS LOWER DOWN STAY. An earlier pass deleted them to make room for this
+     and Jake put them back: "I didnt want that put the ui shots back down there". They sit beside
+     their own copy and the sheet does not replace them — it goes ABOVE them. -->
+<hr class="divider">
+
+<figure class="eco-band">
+  <img src="/screenshots/analyst-sheet.webp?v=1" width="2600" height="2893" loading="lazy"
+       decoding="async" alt="The NoVo Analyst dealer map: gamma flip, call and put walls, gravity and the expected range, with the gamma profile, the flow tape and the 24/5 futures tape — and the written read, Congress filings and Dr. NoVo on a phone.">
+</figure>
+
+<hr class="divider">
 
 <!-- THE DEALER MAP — feature grid -->
 <!-- WHO IT'S FOR -->
