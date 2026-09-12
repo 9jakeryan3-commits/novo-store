@@ -1630,8 +1630,12 @@ function volRow(d,g){
   }
   if(d.skew){
     const sk=d.skew.skew_pts, puts=sk>0;
+    // Colour follows SIGN, matching every sibling cell in this row (24h, 7d, IV-vs-RV all render
+    // positive green / negative red). This cell used to invert that — +skew drawn red as "fear" —
+    // making it the one cell where the row's visual language lied (Temi 09-11; Jake: "make it
+    // correct"). The caption carries the reading; the colour now only carries the arithmetic.
     c.push(`<div class="mcell"><div class="mk">Skew &middot; near ATM</div>
-      <div class="mv ${puts?'dn':'up'}">${sk>0?'+':''}${sk.toFixed(1)}</div>
+      <div class="mv ${sk>=0?'up':'dn'}">${sk>=0?'+':''}${sk.toFixed(1)}</div>
       <div class="ms">${puts?'puts bid over calls':'calls bid over puts'}</div></div>`);
   }
   if(d.chg){
@@ -1875,7 +1879,7 @@ function termPanel(g){
     +`</div></div>`;
 }
 
-function skewPanel(g){
+function skewPanel(g,d){
   const c=(g&&g.skew_curve)||[]; if(c.length<4) return '';
   const pts=c.filter(r=>r[1]!=null||r[2]!=null);
   const ivs=pts.flatMap(r=>[r[1],r[2]]).filter(v=>v!=null);
@@ -1889,8 +1893,18 @@ function skewPanel(g){
   };
   const sx = (g.spot!=null && g.spot>=kmin && g.spot<=kmax)
     ? `<line x1="${X(g.spot)}" y1="2" x2="${X(g.spot)}" y2="98" stroke="var(--txt4)" stroke-width="0.6" stroke-dasharray="2 2"/>` : '';
+  // The two LEGS behind the skew number: published on every coin that renders this panel
+  // (measured across all 91 by Temi, 09-11) and drawn nowhere until now. They say whether a gap
+  // comes from cheap puts or expensive calls — AVAX at -13.9 is the case that earns the row.
+  // ⚠ NEVER derive the net from these two: skew_pts is computed BEFORE the legs are rounded to
+  // 1dp for the wire, so the subtraction can disagree with the published figure by 0.1. The net
+  // lives in the "Skew · near ATM" mcell; this row is the levels, neutral, not a direction.
+  const legs=(d&&d.skew&&d.skew.put_iv_pct!=null&&d.skew.call_iv_pct!=null)
+    ? `<div class="kv"><span class="k">Put IV / Call IV</span>`
+      +`<span class="v">${Number(d.skew.put_iv_pct).toFixed(1)}% / ${Number(d.skew.call_iv_pct).toFixed(1)}%</span></div>`
+    : '';
   return `<div class="panel"><div class="ph"><h2>IV skew</h2>`
-    +`<span class="sub">front book · by strike</span></div><div class="pb">`
+    +`<span class="sub">front book · by strike</span></div><div class="pb">${legs}`
     +`<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:150px">`
     +`${sx}${line(2,'var(--red)')}${line(1,'var(--green2)')}</svg>`
     +`<div class="fnote"><span style="color:var(--red)">puts</span> above `
@@ -2673,7 +2687,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g) + heatPanel(g));
+    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g,d) + heatPanel(g));
   }
   /* Flow reads the PERP payload (d), not the options book (g) - a coin with no chain can still
      have a tape, so this sits outside the if(g) that used to bury it. */

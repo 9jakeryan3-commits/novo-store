@@ -71,7 +71,9 @@ const RULES =
   'List every call that clears the bar - there is no quota, in either direction. Most passes '  +
   'clear nothing, and an empty list is the right answer then. Do not reach for one because the '  +
   'list looks empty, and do not stop at one if a second genuinely clears. '  +
-  'of the time and costs you nothing.\n\n' +
+  // This sentence shipped DECAPITATED in 9c96589ac -- the model received "of the time and costs
+  // you nothing." for all 280 asks (found by Jerni 2d3effb9, repaired on Jake's go, 09-11).
+  'Declining is right most of the time and costs you nothing.\n\n' +
   'DECLINE unless ALL of these hold:\n' +
   '- you can name the specific measurements that support it, with their numbers, from the data below\n' +
   '- the data actually carries directional information. A spread, a cost, a liquidity reading or a ' +

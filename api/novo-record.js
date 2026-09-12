@@ -23,6 +23,7 @@
  */
 const { novoRecord } = require("./_lib/predictions.js");
 const { funnel } = require("./_lib/funnel.js");
+const { kv } = require("./_kv.js");
 
 module.exports = async (req, res) => {
   const want = process.env.OPS_SECRET || process.env.ANALYST_PUBLISH_SECRET || "";
@@ -37,6 +38,34 @@ module.exports = async (req, res) => {
   if (!ok) return res.status(401).json({ error: "unauthorized" });
 
   try {
+    // ?calib=1 — the calibration ledger, observable again (Jake's go 09-11, item 20).
+    // f5e919c9c took the cells off every PUBLIC surface ("I never said to publish it anywhere"),
+    // which also removed the only external read path: nobody — including the person who asked
+    // for it — could verify that the probe marker (forecast.js source:'probe') actually lands
+    // on eval-seat rows, because calib:pending is read only inside the grader and calib:cells
+    // only by the chat's own calibBlock. This is an OPS read behind the same secret as the
+    // prediction record above, for the same reason: observability is not publication.
+    if (req.query && req.query.calib) {
+      const r = kv();
+      if (!r) return res.status(200).json({ ok: false, note: "kv unavailable" });
+      const [pendingRaw, cells, missesKept] = await Promise.all([
+        r.lrange("calib:pending", 0, 99).catch(() => []),
+        r.hgetall("calib:cells").catch(() => null),
+        r.llen("calib:misses").catch(() => null),
+      ]);
+      const pending = (pendingRaw || []).map((x) => {
+        try { return typeof x === "string" ? JSON.parse(x) : x; } catch (_) { return { unparsable: true }; }
+      });
+      res.setHeader("cache-control", "no-store");
+      return res.status(200).json({
+        ok: true,
+        pending,
+        probe_rows: pending.filter((c) => c && c.source === "probe").length,
+        cells: cells || {},
+        misses_kept: missesKept,
+        generated: Date.now(),
+      });
+    }
     const rec = await novoRecord();
     /* The funnel rides along on the same authenticated read. Jake's expected shape is a
        RATIO between stages, so the two only mean something side by side. */
