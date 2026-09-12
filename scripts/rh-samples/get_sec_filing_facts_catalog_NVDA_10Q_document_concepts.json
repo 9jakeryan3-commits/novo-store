@@ -1,0 +1,80 @@
+{
+  "data": {
+    "concepts": [
+      {
+        "concept": "DocumentFiscalPeriodFocus",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "DocumentFiscalYearFocus",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "DocumentPeriodEndDate",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "DocumentQuarterlyReport",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "DocumentTransitionReport",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "DocumentType",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      }
+    ],
+    "count": 6
+  },
+  "guide": "If a filtered call (concept_contains or axis_name_in) returns nothing relevant, retry once without filters before giving up. If the unfiltered catalog still has nothing relevant, say clearly that it isn't available in this filing rather than guessing further. When a question spans multiple filings, call this tool once per filing_id — GAAP tagging can differ year to year, so one filing's catalog shouldn't be assumed to apply to another. Page size is set upstream and not fixed — always pass next_offset back exactly as returned rather than guessing an increment, and stop once a response has no next_offset."
+}

@@ -1,0 +1,22 @@
+{
+  "data": {
+    "results": [
+      {
+        "symbol": "NVDA",
+        "period": "quarterly",
+        "financials": [
+          {"fiscal_year":2027,"fiscal_quarter":2,"period_end_date":"2026-07-26","revenue":"96221000000.000000","gross_profit":"72142000000.000000","net_income":"59688000000.000000","net_margin":"62.030000"},
+          {"fiscal_year":2027,"fiscal_quarter":1,"period_end_date":"2026-04-26","revenue":"81615000000.000000","gross_profit":"61157000000.000000","net_income":"58321000000.000000","net_margin":"71.460000"},
+          {"fiscal_year":2026,"fiscal_quarter":4,"period_end_date":"2026-01-25","revenue":"68127000000.000000","gross_profit":"51093000000.000000","net_income":"42960000000.000000","net_margin":"63.060000"},
+          {"fiscal_year":2026,"fiscal_quarter":3,"period_end_date":"2025-10-26","revenue":"57006000000.000000","gross_profit":"41849000000.000000","net_income":"31910000000.000000","net_margin":"55.980000"}
+        ]
+      }
+    ]
+  },
+  "guide": "results is positional — aligned one-to-one with the requested symbols, in order. A null entry means that symbol could not be resolved (invalid, delisted, or non-equity) or has no reported financials available; surface it as \"no data for X\" rather than dropping it silently. Within an entry, financials is most-recent-first. Tell quarterly from annual rows by fiscal_quarter (null for annual). Present null metric values as \"not available\", not zero. net_margin is already a percentage — do not multiply by 100.",
+  "_capture_meta": {
+    "tool": "get_financials",
+    "call_args": {"symbols": ["NVDA"], "period": "quarterly (default)", "limit": "4 (default)"},
+    "captured_at_utc": "2026-09-12T04:09Z"
+  }
+}

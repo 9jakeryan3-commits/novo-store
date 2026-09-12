@@ -1,0 +1,51 @@
+{
+  "data": {
+    "results": [
+      {
+        "symbol": "SPY",
+        "open": "764.690000",
+        "high": "766.370000",
+        "low": "763.600000",
+        "volume": "45512535.000000",
+        "overnight_volume": "0.000000",
+        "bounds": "regular",
+        "market_date": "2026-09-11",
+        "average_volume_2_weeks": "38964505.980735",
+        "average_volume": "38964505.980735",
+        "average_volume_30_days": "37069708.968600",
+        "high_52_weeks": "779.370000",
+        "high_52_weeks_date": "2026-08-13",
+        "low_52_weeks": "629.280000",
+        "low_52_weeks_date": "2026-03-30",
+        "float": null,
+        "market_cap": "806097428886.619995",
+        "pb_ratio": "5.520465",
+        "pe_ratio": "26.225605",
+        "shares_outstanding": "1054832116.000000",
+        "dividend_yield": "1.027500",
+        "dividend_per_share": "1.903520",
+        "distribution_frequency": "Quarterly",
+        "payable_date": "2026-07-31",
+        "ex_dividend_date": "2026-09-18",
+        "record_date": "2026-06-18",
+        "thirty_day_sec_yield": "0.950000",
+        "description": "SPY tracks a market cap-weighted index of US large- and mid-cap stocks selected by the S&P Committee.",
+        "ceo": "",
+        "headquarters_city": "",
+        "headquarters_state": "",
+        "sector": "Miscellaneous",
+        "industry": "Investment Trusts Or Mutual Funds",
+        "num_employees": null,
+        "year_founded": 1993,
+        "financial_status_indicator": "CB0",
+        "financial_status_description": ""
+      }
+    ]
+  },
+  "guide": "Symbols that did not resolve (delisted, invalid, non-equity) appear in not_found instead of results; surface them to the user as \"no data for X\" rather than ignoring them. Present nulls as \"not applicable\" rather than zero. Pair financial_status_indicator with financial_status_description — never surface the indicator code alone.",
+  "_capture_meta": {
+    "tool": "get_equity_fundamentals",
+    "call_args": {"symbols": ["SPY"], "bounds": "regular (default)"},
+    "captured_at_utc": "2026-09-12T04:09Z"
+  }
+}

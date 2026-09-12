@@ -1,0 +1,47 @@
+{
+  "data": {
+    "results": [
+      {"symbol":"SLMT","year":2026,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-13","timing":"am","verified":false}},
+      {"symbol":"HYFT","year":2027,"quarter":1,"eps":{"estimate":"-0.050000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"PLAY","year":2026,"quarter":2,"eps":{"estimate":"0.300000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"HAIN","year":2026,"quarter":4,"eps":{"estimate":"-0.030000","actual":null},"report":{"date":"2026-09-14","timing":"am","verified":true}},
+      {"symbol":"BIOX","year":2026,"quarter":4,"eps":{"estimate":"-0.060000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"RLGT","year":2026,"quarter":4,"eps":{"estimate":"0.090000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"ENGN","year":2026,"quarter":3,"eps":{"estimate":"-0.440000","actual":"-0.470000"},"report":{"date":"2026-09-14","timing":"am","verified":false}},
+      {"symbol":"RFIL","year":2026,"quarter":3,"eps":{"estimate":"0.200000","actual":null},"report":{"date":"2026-09-14","timing":"am","verified":true}},
+      {"symbol":"KMTS","year":2027,"quarter":1,"eps":{"estimate":"-0.620000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"YYAI","year":2026,"quarter":1,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":false}},
+      {"symbol":"YYAI","year":2026,"quarter":1,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":false}},
+      {"symbol":"PMI","year":2026,"quarter":2,"eps":{"estimate":"-1.500000","actual":"-3.050000"},"report":{"date":"2026-09-14","timing":"am","verified":false}},
+      {"symbol":"CODA","year":2026,"quarter":3,"eps":{"estimate":"0.120000","actual":null},"report":{"date":"2026-09-14","timing":"am","verified":true}},
+      {"symbol":"HITI","year":2026,"quarter":3,"eps":{"estimate":"0.010000","actual":null},"report":{"date":"2026-09-14","timing":"pm","verified":true}},
+      {"symbol":"COE","year":2026,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-15","timing":"am","verified":true}},
+      {"symbol":"EPM","year":2026,"quarter":4,"eps":{"estimate":"0.010000","actual":null},"report":{"date":"2026-09-15","timing":"pm","verified":true}},
+      {"symbol":"FPS","year":2026,"quarter":4,"eps":{"estimate":"0.230000","actual":null},"report":{"date":"2026-09-15","timing":"am","verified":true}},
+      {"symbol":"SLGB","year":2026,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-15","timing":"am","verified":false}},
+      {"symbol":"YYAI","year":2025,"quarter":4,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-15","timing":"am","verified":false}},
+      {"symbol":"VRA","year":2027,"quarter":2,"eps":{"estimate":"-0.080000","actual":null},"report":{"date":"2026-09-15","timing":"am","verified":true}},
+      {"symbol":"TCOM","year":2026,"quarter":2,"eps":{"estimate":"0.910000","actual":null},"report":{"date":"2026-09-15","timing":"pm","verified":true}},
+      {"symbol":"LOT","year":2026,"quarter":2,"eps":{"estimate":"-0.180000","actual":null},"report":{"date":"2026-09-15","timing":"am","verified":false}},
+      {"symbol":"PS","year":2026,"quarter":1,"eps":{"estimate":"0.110000","actual":null},"report":{"date":"2026-09-15","timing":"pm","verified":false}},
+      {"symbol":"AIIO","year":2026,"quarter":1,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-15","timing":"am","verified":false}},
+      {"symbol":"TBHC","year":2026,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-15","timing":"am","verified":false}},
+      {"symbol":"LEN","year":2026,"quarter":3,"eps":{"estimate":"1.300000","actual":null},"report":{"date":"2026-09-16","timing":"pm","verified":true}},
+      {"symbol":"ISPR","year":2026,"quarter":4,"eps":{"estimate":"0.010000","actual":null},"report":{"date":"2026-09-16","timing":"am","verified":true}},
+      {"symbol":"LUXE","year":2026,"quarter":4,"eps":{"estimate":"-0.140000","actual":null},"report":{"date":"2026-09-16","timing":"am","verified":true}},
+      {"symbol":"ALMU","year":2026,"quarter":4,"eps":{"estimate":"-0.070000","actual":null},"report":{"date":"2026-09-16","timing":"pm","verified":true}},
+      {"symbol":"STAI","year":2026,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-16","timing":"pm","verified":false}},
+      {"symbol":"STAI","year":2027,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-16","timing":"pm","verified":false}},
+      {"symbol":"KNDI","year":2025,"quarter":1,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-17","timing":"am","verified":false}},
+      {"symbol":"IPHA","year":2021,"quarter":2,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-17","timing":null,"verified":true}},
+      {"symbol":"CFSB","year":2026,"quarter":4,"eps":{"estimate":null,"actual":null},"report":{"date":"2026-09-17","timing":"pm","verified":false}},
+      {"symbol":"BRTX","year":2026,"quarter":2,"eps":{"estimate":"-0.150000","actual":null},"report":{"date":"2026-09-18","timing":"pm","verified":false}}
+    ]
+  },
+  "guide": "Each entry is one company's report event within the window, sorted ascending by report date. The window spans days from start_date (positive = forward, negative = look-back). Distinguish \"upcoming\" from \"already reported\" by eps.actual: null means not yet reported. When report.verified is false, present the date as tentative rather than confirmed. An empty results array means no reports fall in the window (with filter=high_market_cap, no high-market-cap names do) — not an error. This tool does NOT return an \"expected move\" — pair with options data for implied-volatility-based moves.",
+  "_capture_meta": {
+    "tool": "get_earnings_calendar",
+    "call_args": {"start_date": "2026-09-12 (default, today US/Eastern)", "days": "7 (default)"},
+    "captured_at_utc": "2026-09-12T04:09Z"
+  }
+}

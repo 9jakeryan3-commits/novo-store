@@ -1,0 +1,949 @@
+{
+  "data": {
+    "concepts": [
+      {
+        "concept": "AccountsPayableCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AccountsReceivableNetCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AccruedCustomerProgramsCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AccruedIncomeTaxesNoncurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AccruedLiabilitiesCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AcquisitionRelatedAndOtherCosts",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "ConsolidationItemsAxis"
+        ]
+      },
+      {
+        "concept": "AdditionalFinancialInformationDisclosureTextBlock",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AdditionalPaidInCapital",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "StatementEquityComponentsAxis"
+        ]
+      },
+      {
+        "concept": "AdjustmentsToAdditionalPaidInCapitalAcquisitionFairValueOfEquityAwardsAssumed",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "StatementEquityComponentsAxis"
+        ]
+      },
+      {
+        "concept": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "StatementEquityComponentsAxis"
+        ]
+      },
+      {
+        "concept": "AllocatedShareBasedCompensationExpense",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "ConsolidationItemsAxis"
+        ]
+      },
+      {
+        "concept": "AmendmentFlag",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AmortizationOfIntangibleAssets",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "Assets",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AssetsCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "FairValueByFairValueHierarchyLevelAxis",
+          "FinancialInstrumentAxis"
+        ]
+      },
+      {
+        "concept": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "FairValueByFairValueHierarchyLevelAxis",
+          "FinancialInstrumentAxis"
+        ]
+      },
+      {
+        "concept": "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "FairValueByFairValueHierarchyLevelAxis",
+          "FinancialInstrumentAxis"
+        ]
+      },
+      {
+        "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "AvailableForSaleSecuritiesDebtSecurities",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "FairValueByFairValueHierarchyLevelAxis",
+          "FinancialInstrumentAxis"
+        ]
+      },
+      {
+        "concept": "BasisOfAccountingPolicyPolicyTextBlock",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "BusinessCombinationConsiderationPayable",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CapitalExpendituresIncurredButNotYetPaid",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CashAndCashEquivalentsAtCarryingValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-26T00:00:00",
+            "end_date": "2025-01-26"
+          },
+          {
+            "period": "2025-07-27T00:00:00",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CashEquivalentsAtCarryingValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "FairValueByFairValueHierarchyLevelAxis",
+          "FinancialInstrumentAxis"
+        ]
+      },
+      {
+        "concept": "CityAreaCode",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CommercialPaper",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "DebtInstrumentAxis",
+          "LongtermDebtTypeAxis"
+        ]
+      },
+      {
+        "concept": "CommitmentsAndContingenciesDisclosureTextBlock",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CommonStockDividendsPerShareDeclared",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-04-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-04-26"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CommonStockSharesOutstanding",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-26T00:00:00",
+            "end_date": "2025-01-26"
+          },
+          {
+            "period": "2025-04-27T00:00:00",
+            "end_date": "2025-04-27"
+          },
+          {
+            "period": "2025-07-27T00:00:00",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-04-26T00:00:00",
+            "end_date": "2026-04-26"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "StatementEquityComponentsAxis"
+        ]
+      },
+      {
+        "concept": "CommonStockValue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ComprehensiveIncomeNetOfTax",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ConcentrationRiskPercentage1",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-01-27T00:00:00/2026-01-25T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "ConcentrationRiskByBenchmarkAxis",
+          "ConcentrationRiskByTypeAxis",
+          "MajorCustomersAxis",
+          "StatementBusinessSegmentsAxis",
+          "StatementGeographicalAxis"
+        ]
+      },
+      {
+        "concept": "ConsolidationPolicyTextBlock",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerAssetAndLiabilityTableTextBlock",
+        "is_text_block": true,
+        "periods": [
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiability",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-26T00:00:00",
+            "end_date": "2025-01-26"
+          },
+          {
+            "period": "2025-07-27T00:00:00",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityAdditions",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityAdditionsCustomerAdvances",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityCurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "NatureOfExpenseAxis"
+        ]
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityNoncurrent",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2026-01-25T00:00:00",
+            "end_date": "2026-01-25"
+          },
+          {
+            "period": "2026-07-26T00:00:00",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityRevenueRecognized",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityRevenueRecognizedFromCustomerAdvances",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "ContractWithCustomerLiabilityRevenueRecognizedOpeningBalanceAndCurrentPeriodAdditions",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": []
+      },
+      {
+        "concept": "CostOfRevenue",
+        "is_text_block": false,
+        "periods": [
+          {
+            "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-01-27",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+            "start_date": "2025-04-28",
+            "end_date": "2025-07-27"
+          },
+          {
+            "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-01-26",
+            "end_date": "2026-07-26"
+          },
+          {
+            "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+            "start_date": "2026-04-27",
+            "end_date": "2026-07-26"
+          }
+        ],
+        "axis_names": [
+          "NatureOfExpenseAxis"
+        ]
+      }
+    ],
+    "count": 309,
+    "next_offset": 50
+  },
+  "guide": "If a filtered call (concept_contains or axis_name_in) returns nothing relevant, retry once without filters before giving up. If the unfiltered catalog still has nothing relevant, say clearly that it isn't available in this filing rather than guessing further. When a question spans multiple filings, call this tool once per filing_id — GAAP tagging can differ year to year, so one filing's catalog shouldn't be assumed to apply to another. Page size is set upstream and not fixed — always pass next_offset back exactly as returned rather than guessing an increment, and stop once a response has no next_offset."
+}

@@ -1,0 +1,1049 @@
+{
+  "financial_concepts": {
+    "data": {
+      "facts": [
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "96221000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "46743000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "177837000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "90805000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "59688000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "26422000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "118010000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "45197000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareBasic",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "2.47",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareBasic",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "1.08",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareBasic",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "4.87",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareBasic",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "1.85",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareDiluted",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "2.46",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareDiluted",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "1.08",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareDiluted",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "4.85",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "EarningsPerShareDiluted",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [],
+          "decimals": 2,
+          "value": "1.84",
+          "char_value": "",
+          "unit": "iso4217:USD/xbrli:shares",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Assets",
+          "entity": "0001045810",
+          "period": "2026-07-26T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "320272000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Assets",
+          "entity": "0001045810",
+          "period": "2026-01-25T00:00:00",
+          "axises": [],
+          "decimals": -6,
+          "value": "206803000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "end_date": "2026-01-25"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementEquityComponentsAxis: RetainedEarningsMember"
+          ],
+          "decimals": -6,
+          "value": "59688000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementEquityComponentsAxis: RetainedEarningsMember"
+          ],
+          "decimals": -6,
+          "value": "26422000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementEquityComponentsAxis: RetainedEarningsMember"
+          ],
+          "decimals": -6,
+          "value": "118010000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "NetIncomeLoss",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementEquityComponentsAxis: RetainedEarningsMember"
+          ],
+          "decimals": -6,
+          "value": "45197000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: ComputeAndNetworkingSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "88299000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: GraphicsSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "7922000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember"
+          ],
+          "decimals": -6,
+          "value": "96221000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: ComputeAndNetworkingSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "41331000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: GraphicsSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "5412000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember"
+          ],
+          "decimals": -6,
+          "value": "46743000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: ComputeAndNetworkingSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "162850000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: GraphicsSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "14987000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember"
+          ],
+          "decimals": -6,
+          "value": "177837000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: ComputeAndNetworkingSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "80920000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember",
+            "StatementBusinessSegmentsAxis: GraphicsSegmentMember"
+          ],
+          "decimals": -6,
+          "value": "9885000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ConsolidationItemsAxis: OperatingSegmentsMember"
+          ],
+          "decimals": -6,
+          "value": "90805000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: US"
+          ],
+          "decimals": -6,
+          "value": "60074000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: US"
+          ],
+          "decimals": -6,
+          "value": "32897000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: US"
+          ],
+          "decimals": -6,
+          "value": "123843000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: US"
+          ],
+          "decimals": -6,
+          "value": "58582000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: TW"
+          ],
+          "decimals": -6,
+          "value": "26985000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: TW"
+          ],
+          "decimals": -6,
+          "value": "8902000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: TW"
+          ],
+          "decimals": -6,
+          "value": "38991000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: TW"
+          ],
+          "decimals": -6,
+          "value": "16550000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: ChinaIncludingHongKongMember"
+          ],
+          "decimals": -6,
+          "value": "7880000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: ChinaIncludingHongKongMember"
+          ],
+          "decimals": -6,
+          "value": "3985000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: ChinaIncludingHongKongMember"
+          ],
+          "decimals": -6,
+          "value": "12430000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: ChinaIncludingHongKongMember"
+          ],
+          "decimals": -6,
+          "value": "13644000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: OtherCountriesMember"
+          ],
+          "decimals": -6,
+          "value": "1282000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: OtherCountriesMember"
+          ],
+          "decimals": -6,
+          "value": "959000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: OtherCountriesMember"
+          ],
+          "decimals": -6,
+          "value": "2573000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "StatementGeographicalAxis: OtherCountriesMember"
+          ],
+          "decimals": -6,
+          "value": "2029000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: DataCenterMember"
+          ],
+          "decimals": -6,
+          "value": "89023000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: DataCenterMember"
+          ],
+          "decimals": -6,
+          "value": "41096000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: DataCenterMember"
+          ],
+          "decimals": -6,
+          "value": "164269000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: DataCenterMember"
+          ],
+          "decimals": -6,
+          "value": "80208000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: HyperscaleMember"
+          ],
+          "decimals": -6,
+          "value": "48710000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: HyperscaleMember"
+          ],
+          "decimals": -6,
+          "value": "24168000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: HyperscaleMember"
+          ],
+          "decimals": -6,
+          "value": "91761000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: HyperscaleMember"
+          ],
+          "decimals": -6,
+          "value": "46428000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: AICloudsIndustrialEnterpriseMember"
+          ],
+          "decimals": -6,
+          "value": "40313000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: AICloudsIndustrialEnterpriseMember"
+          ],
+          "decimals": -6,
+          "value": "16928000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: AICloudsIndustrialEnterpriseMember"
+          ],
+          "decimals": -6,
+          "value": "72508000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: AICloudsIndustrialEnterpriseMember"
+          ],
+          "decimals": -6,
+          "value": "33780000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-04-27T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: EdgeComputingMember"
+          ],
+          "decimals": -6,
+          "value": "7198000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-04-27",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-04-28T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: EdgeComputingMember"
+          ],
+          "decimals": -6,
+          "value": "5647000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-04-28",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: EdgeComputingMember"
+          ],
+          "decimals": -6,
+          "value": "13568000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "Revenues",
+          "entity": "0001045810",
+          "period": "2025-01-27T00:00:00/2025-07-27T00:00:00",
+          "axises": [
+            "ProductOrServiceAxis: EdgeComputingMember"
+          ],
+          "decimals": -6,
+          "value": "10597000000.00",
+          "char_value": "",
+          "unit": "iso4217:USD",
+          "start_date": "2025-01-27",
+          "end_date": "2025-07-27"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "AmendmentFlag",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "char_value": "false",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        }
+      ]
+    },
+    "guide": "Fetch known synonym/near-duplicate concept pairs together and cross-check for divergence — they can legitimately disagree (e.g. NetIncomeLoss with ProfitLoss, Revenues with RevenueFromContractWithCustomerExcludingAssessedTax). Not every similarly-named pair is the same failure mode: some are inconsistent tagging of the same thing (reconcile to one number, or flag the divergence if it's large); others are deliberately different scopes (e.g. DebtCurrent/LongTermDebt exclude finance leases, while LongTermDebtAndFinanceLeasesCurrent/LongTermDebtAndFinanceLeasesNoncurrent include them and will consistently run a few percent higher) — present those separately with what each includes rather than collapsing them into one number. A requested concept with no matching rows in the response simply does not exist for that filing — diff the concepts you requested against the concepts actually present before answering, and call get_sec_filing_facts_catalog if a load-bearing concept came back missing rather than answering off a partial set. Report a concept as not available rather than force-fitting a value that doesn't semantically match the question."
+  },
+  "document_concepts": {
+    "data": {
+      "facts": [
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "DocumentFiscalYearFocus",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "char_value": "2027",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "DocumentFiscalPeriodFocus",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "char_value": "Q2",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "DocumentType",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "char_value": "10-Q",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        },
+        {
+          "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62",
+          "concept": "DocumentPeriodEndDate",
+          "entity": "0001045810",
+          "period": "2026-01-26T00:00:00/2026-07-26T00:00:00",
+          "axises": [],
+          "char_value": "2026-07-26",
+          "start_date": "2026-01-26",
+          "end_date": "2026-07-26"
+        }
+      ]
+    },
+    "guide": "Fetch known synonym/near-duplicate concept pairs together and cross-check for divergence — they can legitimately disagree (e.g. NetIncomeLoss with ProfitLoss, Revenues with RevenueFromContractWithCustomerExcludingAssessedTax). Not every similarly-named pair is the same failure mode: some are inconsistent tagging of the same thing (reconcile to one number, or flag the divergence if it's large); others are deliberately different scopes (e.g. DebtCurrent/LongTermDebt exclude finance leases, while LongTermDebtAndFinanceLeasesCurrent/LongTermDebtAndFinanceLeasesNoncurrent include them and will consistently run a few percent higher) — present those separately with what each includes rather than collapsing them into one number. A requested concept with no matching rows in the response simply does not exist for that filing — diff the concepts you requested against the concepts actually present before answering, and call get_sec_filing_facts_catalog if a load-bearing concept came back missing rather than answering off a partial set. Report a concept as not available rather than force-fitting a value that doesn't semantically match the question."
+  },
+  "_capture_meta": {
+    "tool": "get_sec_filing_facts",
+    "filing_id": "c2acc89a-db67-49c6-a6d7-803a2cba3e62 (NVDA 10-Q filed 2026-08-26)",
+    "call_args_1": {
+      "concepts": [
+        "Revenues",
+        "NetIncomeLoss",
+        "EarningsPerShareBasic",
+        "EarningsPerShareDiluted",
+        "Assets",
+        "AmendmentFlag"
+      ]
+    },
+    "call_args_2": {
+      "concepts": [
+        "DocumentFiscalPeriodFocus",
+        "DocumentFiscalYearFocus",
+        "DocumentPeriodEndDate",
+        "DocumentType"
+      ]
+    },
+    "captured_at_utc": "2026-09-12T04:10Z"
+  }
+}

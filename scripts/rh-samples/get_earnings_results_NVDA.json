@@ -1,0 +1,20 @@
+{
+  "data": {
+    "results": [
+      {"symbol":"NVDA","year":2025,"quarter":4,"eps":{"estimate":"0.840000","actual":"0.890000"},"report":{"date":"2025-02-26","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2026,"quarter":1,"eps":{"estimate":"0.750000","actual":"0.960000"},"report":{"date":"2025-05-28","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2026,"quarter":2,"eps":{"estimate":"0.980000","actual":"1.040000"},"report":{"date":"2025-08-27","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2026,"quarter":3,"eps":{"estimate":"1.220000","actual":"1.300000"},"report":{"date":"2025-11-19","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2026,"quarter":4,"eps":{"estimate":"1.500000","actual":"1.620000"},"report":{"date":"2026-02-25","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2027,"quarter":1,"eps":{"estimate":"1.760000","actual":"1.870000"},"report":{"date":"2026-05-20","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2027,"quarter":2,"eps":{"estimate":"2.090000","actual":"2.220000"},"report":{"date":"2026-08-26","timing":"pm","verified":true}},
+      {"symbol":"NVDA","year":2027,"quarter":3,"eps":{"estimate":"2.340000","actual":null},"report":{"date":"2026-11-17","timing":"pm","verified":true}}
+    ]
+  },
+  "guide": "Entries are sorted ascending — historical quarters first, most recent / upcoming quarter last. Distinguish \"upcoming\" from \"reported\" by eps.actual: null means the company has not yet reported. For \"will earnings happen by date X\" questions, use report.date. When report.verified is false, present the date as tentative rather than confirmed. If upstream cannot resolve the symbol (typo, delisted, non-equity), the response carries an empty results array and the symbol appears in not_found — surface that as \"no data for X\" rather than treating it as a tool failure. This tool does NOT return an \"expected move\" — pair with options data for implied-volatility-based moves.",
+  "_capture_meta": {
+    "tool": "get_earnings_results",
+    "call_args": {"symbol": "NVDA"},
+    "captured_at_utc": "2026-09-12T04:09Z"
+  }
+}
