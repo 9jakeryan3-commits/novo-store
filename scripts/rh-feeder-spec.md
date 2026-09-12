@@ -24,7 +24,12 @@ Overwatch (`cdf11c4a`) — the consumers get designed against real shapes, not g
   feed flattens them, everything gets treated as the least reliable kind), and **headline vs
   body** if separable (the headline is a summary written for clicks). Jerni's three registers,
   09-12: his own measurement / a filing / a headline — and a headline is evidence something was
-  SAID, not that it is true. 🚨 The forecast-laundering rule binds the eventual tool: a forecast
+  SAID, not that it is true. ⚠ ATTRIBUTION IS ALREADY SOLVED IN THE SHIPPED STRINGS — match, do
+  not reinvent: tools.js:374 (`search_news`: "A HEADLINE IS NEVER A VERIFIED NUMBER: ATTRIBUTE
+  IT") and :353 (`search_x`: "TREAT POSTS AS WIRE COPY"). The RH tool uses THAT vocabulary so a
+  third surface does not invent a fourth. What those strings LACK — on shipped, any-seat tools,
+  today — is the forecast-restatement rule below; the fix lands there FIRST and RH inherits it.
+  🚨 The forecast-laundering rule binds the eventual tool: a forecast
   inside a news item is quotable ONLY as someone else's ("Goldman's target is 6,200"), never
   restated in his voice or with his confidence vocabulary ("6,200 looks likely") — his record
   exists because everything in it is graded, and a third party's call can never be. Probe once
