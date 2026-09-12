@@ -2671,7 +2671,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
             <button type="button" class="ctb-btn" data-tool="m" title="Measure — click two points">&#8596;<span class="ctb-l">&nbsp;MEASURE</span></button><button type="button" class="ctb-btn" data-tool="a" title="Price alert — click a price; flashes when crossed">&#9201;<span class="ctb-l">&nbsp;ALERT</span></button><button type="button" class="ctb-btn" id="ctb-magnet" title="Magnet — snap drawings to O/H/L/C">&#9678;<span class="ctb-l">&nbsp;MAGNET</span></button>
             <button type="button" class="ctb-btn" id="ctb-clear" title="Clear your drawings on this ticker">&#10005;<span class="ctb-l">&nbsp;CLEAR</span></button>
             <button type="button" class="ctb-btn" id="ctb-split" title="Split view &mdash; a second ticker beside this one">&#8863;<span class="ctb-l">&nbsp;SPLIT</span></button>
-            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;<span class="ctb-l">&nbsp;FULL</span></button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#9113;<span class="ctb-l">&nbsp;SHOT</span></button>
+            <button type="button" class="ctb-btn" id="ctb-scale" title="Canvas &amp; scale settings">&#9881;<span class="ctb-l">&nbsp;CANVAS</span></button><button type="button" class="ctb-btn" id="ctb-full" title="Fullscreen chart">&#9974;<span class="ctb-l">&nbsp;FULL</span></button><button type="button" class="ctb-btn" id="ctb-shot" title="Screenshot">&#9113;<span class="ctb-l">&nbsp;SHOT</span></button><button type="button" class="ctb-btn" id="ctb-pop" title="Pop the chart into its own window &mdash; drag it to another monitor">&#10697;<span class="ctb-l">&nbsp;POP</span></button><button type="button" class="ctb-btn" id="ctb-csv" title="Export the visible candles, VWAP and levels as CSV">&#8681;<span class="ctb-l">&nbsp;CSV</span></button><button type="button" class="ctb-btn" id="ctb-layout" title="Saved layouts &mdash; save and switch named setups">&#9636;<span class="ctb-l">&nbsp;LAYOUT</span></button>
           </div>
           <div class="ctb-sep"></div>
           <div class="ctb-group" id="ctb-tog" aria-label="Overlays">
@@ -6750,6 +6750,116 @@ function _scaleMenuRender(){
     }catch(_e){}
   });
 })();
+/* ── THE TERMINAL SET, first three (Jake's roadmap Trader $209, built 09-12): saved layouts,
+   CSV export, chart popout. All pure client — the state was already persisted per key, the
+   view is already stashed per poll, and the popout is this same page told to show one card. */
+(function(){
+  // POPOUT — open this page chart-only in its own window; drag it to another monitor.
+  // Boot half: when the flag is present, keep only the branch of the DOM that contains the
+  // chart card and hide every sibling on the path up. Programmatic rather than CSS because
+  // the page's container tree moves too often for a selector list to stay true (~100 commits
+  // in 3 days) — contains() cannot go stale the way an id list can. Background timers in the
+  // hidden panels keep running; a popout is a second read-only client and that is acceptable.
+  try{
+    if(new URLSearchParams(location.search).has('popout')){
+      var keep=document.getElementById('card-spy')||document.getElementById('novo-chart');
+      if(keep){
+        var n=keep;
+        while(n && n!==document.body){
+          var p=n.parentElement; if(!p) break;
+          for(var i=0;i<p.children.length;i++){
+            var s=p.children[i];
+            if(s!==n && !s.contains(keep)) s.style.display='none';
+          }
+          n=p;
+        }
+        var nc=document.getElementById('novo-chart');
+        if(nc) nc.style.height='calc(100vh - '+(nc.getBoundingClientRect().top+16)+'px)';
+        document.title='NoVo · chart';
+      }
+    }
+  }catch(_e){}
+  var pb=document.getElementById('ctb-pop');
+  if(pb) pb.addEventListener('click',function(){
+    try{ window.open(location.pathname+'?popout=1','novo_pop_'+Date.now(),
+      'width=1180,height=760,menubar=no,toolbar=no,location=no,status=no'); }catch(_e){}
+  });
+
+  // CSV — the pane as drawn: candles + VWAP joined on time, then the level set as label,value
+  // rows. Real download from a real page (the inert-download note elsewhere in this file is
+  // about the screenshot's data-URL TAB, which has no page identity — this one does).
+  var cb=document.getElementById('ctb-csv');
+  if(cb) cb.addEventListener('click',function(){
+    try{
+      var S=window._csvSnap;
+      if(!S||!S.candles||!S.candles.length){ alert('No chart data to export yet.'); return; }
+      var vw={}; (S.vwap||[]).forEach(function(p){ if(p&&p.time!=null) vw[p.time]=p.value; });
+      var rows=['time_utc,open,high,low,close'+((S.vwap&&S.vwap.length)?',vwap':'')];
+      S.candles.forEach(function(c){
+        if(!c) return;
+        var t=new Date((c.time)*1000).toISOString();
+        rows.push(t+','+c.open+','+c.high+','+c.low+','+c.close
+          +((S.vwap&&S.vwap.length)?(','+(vw[c.time]!=null?vw[c.time]:'')):''));
+      });
+      rows.push(''); rows.push('level,price');
+      for(var k in (S.levels||{})){ if(S.levels[k]!=null) rows.push((_LVL_TITLE[k]||k)+','+S.levels[k]); }
+      var blob=new Blob([rows.join('\r\n')],{type:'text/csv'});
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='novo_'+S.tkr+'_'+S.tf+'_'+new Date(S.at).toISOString().slice(0,16).replace(/[:T]/g,'-')+'.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ try{ URL.revokeObjectURL(a.href); a.remove(); }catch(_e){} },2000);
+    }catch(_e){}
+  });
+
+  // SAVED LAYOUTS — named snapshots of the four persisted state keys. Apply writes the keys
+  // and RELOADS: the toggles live in closures across this file, and a reload is the one apply
+  // path that cannot half-restore. Drawings are deliberately NOT part of a layout — they are
+  // per-ticker annotations (novo_draw_*), not workspace shape, and a layout switch must never
+  // eat someone's markup.
+  var LK='novo_layouts', KEYS=['novo_ctb','novo_desk','novo_trader_tkr','novo_magnet'];
+  function _lget(){ try{ return JSON.parse(localStorage.getItem(LK)||'{}'); }catch(_e){ return {}; } }
+  var lb=document.getElementById('ctb-layout'), lm=null;
+  function _lclose(){ if(lm){ lm.remove(); lm=null; } }
+  if(lb) lb.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    if(lm){ _lclose(); return; }
+    var L=_lget(), names=Object.keys(L).sort();
+    lm=document.createElement('div');
+    lm.style.cssText='position:absolute;z-index:400;background:#14161b;border:1px solid var(--bdr2);'
+      +'border-radius:7px;padding:6px;min-width:200px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.5)';
+    var r=lb.getBoundingClientRect();
+    lm.style.left=Math.max(8,r.left-40)+'px'; lm.style.top=(r.bottom+6+window.scrollY)+'px';
+    function row(html){ var d=document.createElement('div');
+      d.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:6px 8px;cursor:pointer;border-radius:5px;';
+      d.onmouseenter=function(){ d.style.background='rgba(255,255,255,.06)'; };
+      d.onmouseleave=function(){ d.style.background=''; };
+      d.innerHTML=html; lm.appendChild(d); return d; }
+    if(!names.length){ var e=row('<span style="opacity:.55">No saved layouts yet.</span>'); e.style.cursor='default'; }
+    names.forEach(function(nm){
+      var d=row('<span>'+nm.replace(/[<>&]/g,'')+'</span><b style="opacity:.4">×</b>');
+      d.addEventListener('click',function(e2){
+        if(e2.target && e2.target.tagName==='B'){
+          delete L[nm]; localStorage.setItem(LK,JSON.stringify(L)); _lclose(); return;
+        }
+        var snap=L[nm]||{};
+        KEYS.forEach(function(k2){
+          try{ if(snap[k2]==null) localStorage.removeItem(k2); else localStorage.setItem(k2,snap[k2]); }catch(_e){}
+        });
+        location.reload();
+      });
+    });
+    var sv=row('<span style="color:#22d3ee">＋ Save current as…</span>');
+    sv.addEventListener('click',function(){
+      var nm=(prompt('Name this layout:')||'').trim().slice(0,24);
+      if(!nm) return;
+      var snap={}; KEYS.forEach(function(k2){ try{ snap[k2]=localStorage.getItem(k2); }catch(_e){} });
+      var L2=_lget(); L2[nm]=snap; localStorage.setItem(LK,JSON.stringify(L2)); _lclose();
+    });
+    document.body.appendChild(lm);
+    setTimeout(function(){ document.addEventListener('click',function h(){ _lclose(); document.removeEventListener('click',h); }); },0);
+  });
+})();
 (function(){
   var b=document.getElementById('ctb-scale'); if(!b) return;
   b.addEventListener('click',function(ev){
@@ -7253,6 +7363,13 @@ async function loadNovoChart(){
       const _f2={}; for(const _lk in _lvls){ if(_keep[_lk]) _f2[_lk]=_lvls[_lk]; }
       _lvls=_f2; _lvlFromSrc={};
     }
+    // CSV EXPORT STASH (Jake's Trader terminal set, 09-12). The pane's view is let-scoped by
+    // design (see the drift history on this chart); the CSV button reads this snapshot rather
+    // than reaching into the closure. Refreshed every poll, so the export is always the pane
+    // as currently drawn — candles, VWAP, and the level set including MP.
+    try{ window._csvSnap={ tkr:_selTkr(), tf:_ctbTf, at:Date.now(),
+      candles:(_view&&_view.candles)||[], vwap:(_view&&_view.vwap)||[],
+      levels:JSON.parse(JSON.stringify(_lvls||{})) }; }catch(_e){}
     // Selected ticker ≠ engine ticker → the WS lane is silent for this chart; the hero price and
     // day-change render from this poll instead. prev_close is server-derived from the ticker's own
     // prior RTH session.
