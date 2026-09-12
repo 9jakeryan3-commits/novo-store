@@ -14,6 +14,32 @@ Order-book depth (item 1) is PARKED: no depth captures, no depth panel, and the
 broker-book licensing question that came with it is moot until Jake reopens it. The
 depth capture rules further down stay written ONLY so a reopen starts from them.
 
+## DISPLAY IS APPROVED (Jake, 09-12, superseding the grounding-only posture for THIS data
+## class): "using only the fundamentals, economic data and news is fine its low risk data and
+## we can go ahead and implement it into the product. SEC filings with the XBRL facts catalog,
+## financials, earnings results. low risk data usage. lets use it. nobody subscribing for that
+## stuff alone." So: these kinds render on the dashboards AND ground Dr. NoVo. The no-resell
+## line still governs the MOAT classes (depth, anything positioning-shaped) — this ruling is
+## scoped to fundamentals/news/economic data only.
+
+## DISPLAY SURFACES (pre-designed so the build is mechanical when samples land; Trader ⊇
+## Analyst — every one ships to BOTH in one batch):
+1. **Catalysts · earnings** — a second section under the existing "Catalysts · major US macro"
+   block (Desk note on trader, read card on analyst): upcoming earnings for the tracked names
+   from `get_earnings_calendar`, then actual-vs-estimate from `get_earnings_results` once
+   reported. Same row idiom as the macro block.
+2. **Wire · <ticker>** — recent headlines from `get_equity_news`, rendered WITH source name and
+   published age on every row (the source and timestamp ARE the fact — display inherits
+   Jerni's register rules even though the display never speaks in NoVo's voice). Placement:
+   beside the flow/tape family.
+3. **Filed facts · <ticker>** — the fundamentals card from `get_sec_filing_facts` /
+   `get_financials`: a handful of primary-source lines (revenue, EPS, margins), each carrying
+   its form type + filing date + period covered, per the phase-0 label requirements. If the
+   feed lacks those labels, the card does not ship until a labeling answer exists — a filed
+   number without its period is the units trap with authority.
+Chat grounding (Jerni's tool, registers + forecast-laundering rule) proceeds in parallel —
+display and grounding are two consumers of one ingest, not one decision.
+
 ## Phase 0 — SAMPLES FIRST (one-time, blocks everything else)
 Before the chat tool or any renderer is built, capture ONE raw output of each and hand them to
 Overwatch (`cdf11c4a`) — the consumers get designed against real shapes, not guesses:
