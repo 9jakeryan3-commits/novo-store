@@ -176,8 +176,16 @@ module.exports = async (req, res) => {
 // What this coin has behind the paywall - named, never valued. Tells a visitor what they
 // are missing without leaking any of it.
 function paidTeaser(code, c) {
+  // paid[] declares what a paying member actually GETS TODAY — a teaser, not a manifest, and
+  // never ahead of the product: rr25/bf25 are collected but have no panel yet, so they are NOT
+  // listed (declaring a withheld feature nobody can find after paying is copy-sells broken from
+  // the other side; they join when their panel ships). Entries appearing here are a copy change
+  // on the four pages that describe the free tier — grown DELIBERATELY 09-12 with the ETF-flows
+  // and vol-surface ships, in step with the marketing batch, not by drift.
   const has = [];
   if (c.gamma) has.push("gamma by strike, call and put walls, flip zone");
+  if (c.gamma && c.gamma.surface) has.push("the vol surface - IV across strike and expiry");
+  if (c.etf_flows) has.push("spot-ETF issuer flows, daily creations and redemptions");
   if (c.true_cost) has.push("what a round trip actually costs you on Robinhood");
   if (c.panels && c.panels.indexOf("oi_quadrant") >= 0) has.push("the price/open-interest regime read");
   has.push("history and percentiles");

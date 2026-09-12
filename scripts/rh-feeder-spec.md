@@ -17,7 +17,18 @@ depth capture rules further down stay written ONLY so a reopen starts from them.
 ## Phase 0 — SAMPLES FIRST (one-time, blocks everything else)
 Before the chat tool or any renderer is built, capture ONE raw output of each and hand them to
 Overwatch (`cdf11c4a`) — the consumers get designed against real shapes, not guesses:
-- `get_equity_news` for SPY and for one single name (shape of items, timestamps, source fields)
+- `get_equity_news` for SPY and for one single name — and for news, capture whether the feed
+  carries: **source name + publish timestamp** (these ARE the fact — "Reuters reported on Sept 9
+  that X" is checkable; bare "X" is a claim silently adopted), **item type** (wire vs press
+  release vs opinion — a PR is the company speaking, an opinion column is nobody's fact; if the
+  feed flattens them, everything gets treated as the least reliable kind), and **headline vs
+  body** if separable (the headline is a summary written for clicks). Jerni's three registers,
+  09-12: his own measurement / a filing / a headline — and a headline is evidence something was
+  SAID, not that it is true. 🚨 The forecast-laundering rule binds the eventual tool: a forecast
+  inside a news item is quotable ONLY as someone else's ("Goldman's target is 6,200"), never
+  restated in his voice or with his confidence vocabulary ("6,200 looks likely") — his record
+  exists because everything in it is graded, and a third party's call can never be. Probe once
+  the tool exists: a restated analyst target must NOT trip the calibration capture regexes.
 - `get_earnings_calendar` (window covered, fields per event)
 - `get_earnings_results` for a recent reporter (e.g. NVDA) — actual vs estimate fields
 - `get_equity_fundamentals` for SPY; `get_financials` for one name
