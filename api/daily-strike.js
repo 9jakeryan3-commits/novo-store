@@ -244,6 +244,8 @@ ${_CHROME.HEAD}
   .ds-cta a{color:#22d3ee;font-weight:700;text-decoration:none;}
   .ds-empty{padding:20px 0;color:var(--txt3,#6e6e6e);font-size:14px;line-height:1.7;}
 </style>
+</head>
+<body>
 ${_CHROME.HEADER}
 <div class="ds-wrap">
 ${inner}
