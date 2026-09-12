@@ -1909,6 +1909,35 @@ function skewPanel(g){
     +`Dashed line is spot.</div></div></div>`;
 }
 
+// THE VOL SURFACE (Jake's ruling 09-12: the GRID). IV over moneyness × expiry — the two 1-D
+// slices (ATM term structure, front-book skew curve) each show one axis; this is the panel
+// that shows WHERE THE SURFACE IS KINKED: a near expiry bid on downside while the back sits
+// flat is a colour discontinuity here and invisible in twelve crossing lines. The curve stays
+// as the detail view — the surface says where, the curve says how much. Colour scale is
+// PER-COIN (HYPE at 82 IV and BTC at 32 share no scale); a null cell renders EMPTY, never the
+// palette midpoint — a gap in a thin expiry is the market, not a zero.
+function surfacePanel(g){
+  const s=g&&g.surface; if(!s||!Array.isArray(s.expiries)||s.expiries.length<2||!Array.isArray(s.moneyness)) return '';
+  const vals=s.expiries.flatMap(function(e){return e.iv||[];}).filter(function(v){return v!=null;});
+  if(vals.length<8) return '';
+  const lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals), rng=(hi-lo)||1;
+  const body=s.expiries.map(function(e){
+    const d=e.days<1?(e.days*24).toFixed(0)+'h':e.days.toFixed(0)+'d';
+    const cells=(e.iv||[]).map(function(v,i){
+      if(v==null) return `<span class="hc" style="background:transparent"></span>`;
+      const a=(v-lo)/rng;
+      return `<span class="hc" style="background:rgba(167,139,250,${(0.08+a*0.80).toFixed(3)})" title="${(s.moneyness[i]*100).toFixed(1)}% · IV ${v.toFixed(1)}%"></span>`;
+    }).join('');
+    return `<div class="hrow"><span class="hlab">${d}</span><span class="hcells">${cells}</span></div>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Vol surface</h2>`
+    +`<span class="sub">IV · moneyness × expiry · ±20%</span></div><div class="pb">${body}`
+    +`<div class="fnote">Brighter is higher IV, scaled to this coin's own book. Columns run −20% to +20% of spot, `
+    +`left to right; spot is the centre column, nearest expiry the top row. An empty cell is an expiry with no `
+    +`contract priced there — a gap in the book, not a zero. A bright top row over a flat back is near-dated `
+    +`protection being bid: that kink is the read.</div>`
+    +`</div></div>`;
+}
 function heatPanel(g){
   const h=(g&&g.heatmap)||[]; if(!h.length) return '';
   const all=h.flatMap(e=>e.cells.map(c=>c[1])).filter(v=>v!=null);
@@ -2748,7 +2777,7 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g) + heatPanel(g));
+    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g) + surfacePanel(g) + heatPanel(g));
   }
   /* Flow reads the PERP payload (d), not the options book (g) - a coin with no chain can still
      have a tape, so this sits outside the if(g) that used to bury it. */
