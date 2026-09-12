@@ -860,15 +860,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
    still 72px of mostly-empty strip above a chart. Its contents went where they are read: identity
    and price up into the topbar, every control down onto the footer. The chart now starts directly
    under the intel strip. */
-#tb-quote { display: flex; align-items: baseline; gap: 10px; margin-left: auto; padding-right: 6px;
-  font-family: var(--font); white-space: nowrap; min-width: 0; }
-#tb-ohlc { font-size: 10.5px; color: var(--txt2); letter-spacing: .2px; overflow: hidden;
-  text-overflow: ellipsis; }
-#tb-ohlc b { color: var(--txt1); font-weight: 700; }
-#tb-ohlc .up { color: var(--grn); } #tb-ohlc .dn { color: var(--red); } #tb-ohlc .dim { color: var(--txt3); }
-.tb-px { font-size: 16px; font-weight: 800; color: var(--txt1); letter-spacing: .3px;
-  font-variant-numeric: tabular-nums; }
-.tb-chg { font-size: 11px; font-weight: 700; color: var(--txt2); font-variant-numeric: tabular-nums; }
+/* The readout sits OVER the chart, top-left, and is the only thing there: OHLC, price and change
+   on one line with the indicator stack beneath. pointer-events stays off for the block so the
+   chart keeps every drag and crosshair — only the chevron and the rows take the pointer back. */
+#chart-ov { position: absolute; top: 8px; left: 10px; z-index: 12; pointer-events: none;
+  font-family: var(--font); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#chart-ov .ov-top { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.ov-px { font-size: 17px; font-weight: 800; color: var(--txt1); letter-spacing: .2px;
+  font-variant-numeric: tabular-nums; line-height: 1.2; }
+.ov-chg { font-size: 11px; font-weight: 700; color: var(--txt2); font-variant-numeric: tabular-nums; }
 .tb-pills { margin-left: 10px; }
 .tb-pills .tkr-pill { font-size: 11.5px; padding: 2px 7px 3px; }
 /* Interval and range sit side by side on the footer left — same row, different question:
@@ -900,26 +900,26 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
    #chart-legend2 stays pointer-events:none so the chart keeps every drag and crosshair; only the
    rows take the pointer back. Getting that backwards makes the whole chart un-draggable near the
    top-left, which is exactly where the crosshair lives most. */
-#chart-legend2 .lg-head { pointer-events: none; display: flex; align-items: center; gap: 6px;
+#chart-legend3 .lg-head { pointer-events: none; display: flex; align-items: center; gap: 6px;
   margin-top: 2px; }
-#chart-legend2 .lg-chev { pointer-events: auto; cursor: pointer; color: var(--txt2);
+#chart-legend3 .lg-chev { pointer-events: auto; cursor: pointer; color: var(--txt2);
   font-size: 11px; line-height: 1; padding: 3px 7px; border-radius: 3px;
   background: rgba(255,255,255,.05);
   transition: color .12s ease, background .12s ease; }
-#chart-legend2 .lg-chev:hover { color: var(--txt1); background: rgba(255,255,255,.08); }
-#chart-legend2 .lg-count { font-size: 9.5px; color: var(--txt3); letter-spacing: .3px; }
-#chart-legend2 .lg-rows { display: flex; flex-direction: column; align-items: flex-start;
+#chart-legend3 .lg-chev:hover { color: var(--txt1); background: rgba(255,255,255,.08); }
+#chart-legend3 .lg-count { font-size: 9.5px; color: var(--txt3); letter-spacing: .3px; }
+#chart-legend3 .lg-rows { display: flex; flex-direction: column; align-items: flex-start;
   gap: 0; margin-top: 3px; pointer-events: none; }
-#chart-legend2 .lg-row { pointer-events: auto; cursor: pointer; display: inline-flex;
+#chart-legend3 .lg-row { pointer-events: auto; cursor: pointer; display: inline-flex;
   align-items: center; gap: 5px; font-size: 10px; line-height: 1.6; padding: 0 2px;
   border-radius: 3px; transition: background .12s ease, opacity .12s ease; }
-#chart-legend2 .lg-row:hover { background: rgba(255,255,255,.08); }
-#chart-legend2 .lg-row.off { opacity: .38; }
-#chart-legend2 .lg-row.off .lg-dot { background: var(--txt3) !important; }
-#chart-legend2 .lg-dot { width: 7px; height: 2px; border-radius: 1px; flex: 0 0 auto; }
-#chart-legend2 .lg-nm { color: var(--txt2); letter-spacing: .3px; }
-#chart-legend2 .lg-row.off .lg-nm { color: var(--txt3); }
-#chart-legend2 .lg-v { color: var(--txt1); font-weight: 700; font-variant-numeric: tabular-nums; }
+#chart-legend3 .lg-row:hover { background: rgba(255,255,255,.08); }
+#chart-legend3 .lg-row.off { opacity: .38; }
+#chart-legend3 .lg-row.off .lg-dot { background: var(--txt3) !important; }
+#chart-legend3 .lg-dot { width: 7px; height: 2px; border-radius: 1px; flex: 0 0 auto; }
+#chart-legend3 .lg-nm { color: var(--txt2); letter-spacing: .3px; }
+#chart-legend3 .lg-row.off .lg-nm { color: var(--txt3); }
+#chart-legend3 .lg-v { color: var(--txt1); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 900px) {
   /* Phone/narrow: the OHLC detail is the first thing to go — the price and the ticker are what
@@ -937,7 +937,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   #chart-footbar .cfb-l::-webkit-scrollbar, #chart-footbar .cfb-c::-webkit-scrollbar { height: 0; }
   #ctb-range .ctb-btn, #chart-footbar .ctb-icons .ctb-btn { padding: 6px 8px; }
   /* Phone: the stack is the same shape, just tighter. */
-  #chart-legend2 .lg-row { font-size: 9.5px; line-height: 1.5; }
+  #chart-legend3 .lg-row { font-size: 9.5px; line-height: 1.5; }
 }
 /* THE CHART IS NOT A CARD, ON ANY SCREEN. First put inside the phone media block, which left the
    frame on every desktop — and Jake's objection was to the box, not to the box on small screens. */
@@ -966,9 +966,8 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 #novo-chart.drawing { cursor: crosshair; }
 /* Pro overlays: OHLCV legend (top-left), NoVo read chip under it, ticker/frame watermark,
    and the switch veil. All pointer-events:none — the chart owns the mouse. */
-#chart-legend2 { position: absolute; top: 8px; left: 10px; z-index: 12; pointer-events: none;
-  font-family: var(--font); font-size: 11px; line-height: 1.5; color: var(--txt2);
-  text-shadow: 0 1px 3px rgba(0,0,0,.8); white-space: nowrap; }
+#chart-legend2 { font-size: 10.5px; line-height: 1.5; color: var(--txt2); white-space: nowrap; }
+#chart-legend3 { font-size: 11px; line-height: 1.5; color: var(--txt2); }
 #chart-legend2 b { color: var(--txt1); font-weight: 700; }
 #chart-legend2 .up { color: var(--grn); } #chart-legend2 .dn { color: var(--red); }
 #chart-legend2 .dim { color: var(--txt3); }
@@ -2641,14 +2640,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
          Activity Feed, and all three update sites write to it here, in place. Zero changes to the
          update logic. Side benefit: the feed's [CLEAR] wipes terminal-output.innerHTML, which used
          to destroy this row until the next STALKER tick; up here it survives. -->
-    <!-- Price, change and the bar's own OHLC, together. The OHLC used to float over the top-left
-         of the chart where it sat on the candles; beside the price is where it is actually read,
-         because they answer the same question one bar apart. -->
-    <div id="tb-quote">
-      <span id="tb-ohlc"></span>
-      <span id="t-spy" class="tb-px">&mdash;</span>
-      <span id="t-spy-chg" class="tb-chg">&mdash;</span>
-    </div>
     <div id="term-live-row" class="term-live-row halted">
       <span class="term-live-dot" style="background:#ef4444;"></span><span class="term-live-lbl" style="color:#ef4444;">Studying...</span><span class="term-live-ticker">SPY</span><span class="term-live-price" style="color:var(--txt3);">&mdash;</span>
     </div>
@@ -2923,8 +2914,20 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
            script tags don't retry — and the chart sat dead until an app restart. Same origin now;
            the watchdog below also re-injects it if it somehow still failed to arrive. -->
       <script src="/js/lightweight-charts-4.2.3.js"></script>
-      <div style="margin:8px 14px 8px;">
+      <div style="margin:8px 14px 8px;position:relative;">
         
+        <!-- THE WHOLE READOUT LIVES OVER THE CHART (Jake, 2026-09-12, arrow drawn from the topbar
+             quote straight down to here). OHLC, price and change on one line, the indicator legend
+             stacked under it, all collapsible. It reads where you are already looking instead of
+             making you travel to the top of the page for the number under your cursor. -->
+        <div id="chart-ov">
+          <div class="ov-top">
+            <span id="chart-legend2"></span>
+            <span id="t-spy" class="ov-px">&mdash;</span>
+            <span id="t-spy-chg" class="ov-chg">&mdash;</span>
+          </div>
+          <div id="chart-legend3"></div>
+        </div>
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
         <!-- THE FOOTER BAR. Range left, drawing tools centre, chart settings right - the
              three things a chart needs within reach that are not the chart itself. This is the
@@ -5058,7 +5061,9 @@ window._ctbToggle = function(k){
        when only a toggle did. Off-hours there is no next tick at all, so the row you just
        clicked kept its old state and the control looked broken. Caught by asserting on the
        row's .off class instead of on a variable the test could not see. */
-    try{ var _lg=document.getElementById('chart-legend2'); if(_lg) _lg.__h=null; _renderLegend2(); }catch(_e){}
+    try{ var _lg=document.getElementById('chart-legend2'); if(_lg) _lg.__h=null;
+         var _l3=document.getElementById('chart-legend3'); if(_l3) _l3.__h=null;
+         _renderLegend2(); }catch(_e){}
     // HA and VP change what is DRAWN, not a series' visibility — force a full setData repaint
     // (glitch-guard reset; _novoRanged stays latched so the viewer's pan/zoom is never fought).
     if(k==='ha'||k==='vp'||k==='gex'){ _svpData=null; _novoHasData=false; loadNovoChart(); }
@@ -5079,11 +5084,12 @@ document.addEventListener('click', function(ev){
       try{ localStorage.setItem('novo_lgd', open ? '0' : '1'); }catch(_e){}
       /* Force the next paint: _renderLegend2 skips when its html signature is unchanged, and the
          signature does not move when only localStorage did. */
-      try{ var el=document.getElementById('chart-legend2'); if(el) el.__h=null; }catch(_e){}
+      try{ var el=document.getElementById('chart-legend2'); if(el) el.__h=null;
+           var e3=document.getElementById('chart-legend3'); if(e3) e3.__h=null; }catch(_e){}
       try{ _renderLegend2(); }catch(_e){}
       return;
     }
-    var r = ev.target && ev.target.closest && ev.target.closest('#chart-legend2 [data-tog]');
+    var r = ev.target && ev.target.closest && ev.target.closest('#chart-legend3 [data-tog]');
     if(r){ ev.preventDefault(); ev.stopPropagation(); window._ctbToggle(r.getAttribute('data-tog')); }
   }catch(_e){}
 });
@@ -5864,9 +5870,7 @@ function _renderLegend2(bar){
     '  L <b>'+b.low.toFixed(2)+'</b>  C <b class="'+(up?'up':'dn')+'">'+b.close.toFixed(2)+'</b>'+
     '  <span class="'+(up?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'+
     '  <span class="dim">V '+_fmtVol(b.v)+'</span>';
-  try{ var _tb=document.getElementById('tb-ohlc');
-       if(_tb && _tb.__h!==_oh){ _tb.__h=_oh; _tb.innerHTML=_oh; } }catch(_e){}
-  var _h='';
+  var _h=_oh;
   /* ── THE INDICATOR LEGEND IS THE OVERLAY CONTROL NOW (Jake, 2026-09-12) ──────────────────
      Every overlay gets its own line carrying its name, its value at this bar when it has one,
      and its on/off state — click the line to toggle it. This is what retired seven buttons from
@@ -5901,16 +5905,22 @@ function _renderLegend2(bar){
   try{ _lgOpen = localStorage.getItem('novo_lgd') !== '0'; }catch(_e){}
   var _onCount = 0;
   ['vwap','ema','lvl','vol','ha','vp','gex'].forEach(function(k){ if(_ctbTog[k]) _onCount++; });
-  _h += '<div class="lg-head"><span class="lg-chev" id="lg-chev" role="button" tabindex="0" '
-     +  'title="'+(_lgOpen?'Collapse the indicator legend':'Show the indicator legend')+'">'
-     +  (_lgOpen?'\u25B4':'\u25BE')+'</span>'
-     +  (_lgOpen?'':'<span class="lg-count">'+_onCount+' on</span>')+'</div>';
-  if(rows.length && _lgOpen) _h+='<div class="lg-rows">'+rows.join('')+'</div>';
+
+  /* The stack renders into its OWN element so the OHLC line can sit inline beside the price
+     while the rows stack underneath. One innerHTML for both would force them into one flow. */
+  var _stack = '<div class="lg-head"><span class="lg-chev" id="lg-chev" role="button" tabindex="0" '
+     + 'title="'+(_lgOpen?'Collapse the indicator legend':'Show the indicator legend')+'">'
+     + (_lgOpen?'\u25B4':'\u25BE')+'</span>'
+     + (_lgOpen?'':'<span class="lg-count">'+_onCount+' on</span>')+'</div>'
+     + ((rows.length && _lgOpen) ? '<div class="lg-rows">'+rows.join('')+'</div>' : '');
+  try{ var _l3=document.getElementById('chart-legend3');
+       if(_l3 && _l3.__h!==_stack){ _l3.__h=_stack; _l3.innerHTML=_stack; } }catch(_e){}
   if(el.__h!==_h){ el.__h=_h; el.innerHTML=_h;
     // Chip clears the legend whatever its line count (polish, 2026-09-01): with the indicator
     // line added the fixed top:27px chip sat ON the values — Jake's screenshot caught the overlap.
     try{ var _ch=document.getElementById('novo-chip');
-      if(_ch){ var _ct=8+el.offsetHeight+4; if(_ch.__top!==_ct){ _ch.__top=_ct; _ch.style.top=_ct+'px'; } }
+      var _ov=document.getElementById('chart-ov');
+      if(_ch){ var _ct=8+((_ov&&_ov.offsetHeight)||el.offsetHeight)+4; if(_ch.__top!==_ct){ _ch.__top=_ct; _ch.style.top=_ct+'px'; } }
     }catch(_e){}
   }
 }
