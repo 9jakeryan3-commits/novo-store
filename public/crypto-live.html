@@ -2405,6 +2405,28 @@ let _lastDrawn = null;
 // THE CARRY CURVE — crypto's yield curve, measured. Dated futures price holding each expiry
 // the way funding prices holding the perp; the OI-weighted annualised carry is the headline and
 // the convention is printed on the panel because an annualisation you can't check is decoration.
+// SPOT-ETF ISSUER FLOWS (Jake's go 09-12 — the $79 seven, item 6). Creations and redemptions
+// computed from the ISSUER's own assets and NAV (IBIT→BTC, ETHA→ETH) — volume is not flow:
+// 76m IBIT shares can change hands without a single share being created. The collector has
+// written these every pass since the feed shipped; publish.py finally names the field 09-12.
+// Absent when the coin has no fund — coverage says nothing rather than an empty panel.
+function etfPanel(d){
+  const e=d&&d.etf_flows; if(!e||!e.days||!e.days.length) return '';
+  const mx=e.days.reduce(function(a,x){return Math.max(a,Math.abs(x.net_usd||0));},0)||1;
+  const rows=e.days.slice(-10).map(function(x){
+    const v=x.net_usd||0, w=Math.max(2,Math.abs(v)/mx*100);
+    return `<div class="brow"><span class="bn">${String(x.date||'').slice(5)}</span>
+      <span class="bbar"><i style="width:${w}%;background:${v>=0?'var(--green2)':'var(--red)'}"></i></span>
+      <span class="bv ${v>=0?'up':'dn'}">${v>=0?'+':''}${money(v)}</span></div>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Spot ETF flows</h2>
+    <span class="sub">${e.ticker||''} &middot; issuer-level &middot; daily net</span></div><div class="pb">
+    ${e.cumulative_usd!=null?`<div class="kv"><span class="k">Cumulative</span>
+      <span class="v ${e.cumulative_usd>=0?'up':'dn'}">${e.cumulative_usd>=0?'+':''}${money(e.cumulative_usd)}</span></div>`:''}
+    <div style="margin-top:9px">${rows}</div>
+    <div class="fnote">Creations and redemptions computed from the issuer's own assets and NAV —
+    volume is not flow; shares can change hands all day without one being created. As of ${e.as_of||''}.</div></div></div>`;
+}
 function basisPanel(d){
   const b=d&&d.basis; if(!b||!b.rows||!b.rows.length) return '';
   const rows=b.rows.filter(r=>r.oi_usd>1e6).slice(0,7).map(function(r){
@@ -2688,7 +2710,7 @@ function drawCoin(){
   }
   /* Flow reads the PERP payload (d), not the options book (g) - a coin with no chain can still
      have a tape, so this sits outside the if(g) that used to bury it. */
-  h += _sec('flow', turnoverPanel(g) + takerFlowPanel(d,g) + tapePanel(d) + basisPanel(d));
+  h += _sec('flow', turnoverPanel(g) + takerFlowPanel(d,g) + tapePanel(d) + basisPanel(d) + etfPanel(d));
   h += _sec('pos',  venuePanel(g) + exposures(g));
   h += _sec('hist', histPanel());
   if(pos&&(pos.funding.length||pos.open_interest.length)){
