@@ -224,10 +224,11 @@
 
     /* THE RECORD BEHIND THE READS (Jake's go 09-12, under the Trader-supersets rule — one
        shared drawer puts it on BOTH dashboards' History at once). The bias records ship WITH
-       the engine's own grading-bands sentence (rec.scored), rendered VERBATIM — both axes, net
-       AND range — never re-typed here: those constants already live in three places and a
-       fourth hand copy is the mirrored-twin defect this codebase keeps refinding. A win rate
-       without its grading bands is an unfalsifiable number; with them it is a checkable one. */
+       ⚠ THE GRADING BANDS ARE NOT RENDERED, AND THAT IS DELIBERATE (Jake, 09-12, pulling the
+       sentence the same day it shipped): the rate and its sample are the CLAIM — honest and
+       checkable — while the exact thresholds a call is graded against are METHOD, and the
+       method is not owed to the reader. `rec.scored` stays on the payload for the engine and
+       the chat; it does not go on a surface. Do not re-add it. */
     var bz = state && state.bias;
     if (bz && (bz.lean_record || bz.audit_record)) {
       h += '<div class="tp-grp">The record behind the reads</div>';
@@ -239,7 +240,6 @@
           h += '<div class="tp-claim">' + pr[0] + ': right <b>' + esc(String(rec.correct_rate))
             + '%</b> over <b>' + esc(String(rec.n)) + '</b> ' + pr[2] + '.'
             + (rec.strength === 'inconclusive' ? ' Not yet a significant edge.' : '')
-            + (rec.scored ? '<span class="tp-meta">' + esc(String(rec.scored)) + '</span>' : '')
             + '</div>';
         } else {
           h += '<div class="tp-empty">' + pr[0] + ': record accruing — not enough scored calls to publish a rate yet.</div>';
