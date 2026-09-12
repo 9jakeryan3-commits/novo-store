@@ -466,43 +466,6 @@
         + '<div class="tp-scale"><span>calm</span><span>fear</span></div>';
     }
 
-    /* TRADER SUPERSETS ANALYST (Jake, 09-12: "trader is analysts replacement for subs it has to
-       have everything and more"). Max pain + the expiry ladder land on the trader's Desk note,
-       read from the engine-PUBLISHED d.max_pain / d.term — never re-derived from expiry_split,
-       so the ladder and the headline can never disagree (the fields are display-scaled
-       engine-side, same convention as the headline Net GEX). PATH-GATED to /trader: analyst
-       renders both in its own dealer card, and a second copy there would be duplication, not
-       parity. Absent-tolerant like everything else: an older payload renders nothing extra. */
-    var _isTrader = (location.pathname.indexOf('/trader') === 0);
-    var d0 = forTicker(state);
-    var _busd = function (v) { v = Math.abs(Number(v) || 0);
-      return v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M'
-           : '$' + Math.round(v).toLocaleString(); };
-    if (_isTrader && d0 && d0.max_pain != null && isFinite(+d0.max_pain)) {
-      var _mp0 = Array.isArray(d0.term) && d0.term.some(function (x) { return x && x.is_0dte; });
-      h += '<div class="tp-grp">Max pain</div>'
-        + '<div class="tp-claim"><b>' + (+d0.max_pain).toFixed(2) + '</b>'
-        + '<span class="tp-meta">' + (_mp0 ? '0DTE' : 'nearest expiry')
-        + ' · least payout at expiry · drawn on the chart as MAX PAIN</span></div>';
-    }
-    if (_isTrader && d0 && Array.isArray(d0.term) && d0.term.filter(function (x) { return x && x.exp; }).length >= 2) {
-      h += '<div class="tp-grp">Term structure · the expiry ladder</div><div style="overflow-x:auto">';
-      d0.term.forEach(function (x) {
-        if (!x || !x.exp) return;
-        var g = Number(x.net_gex);
-        h += '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;white-space:nowrap;'
-          + 'border-bottom:1px solid rgba(255,255,255,0.06);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;">'
-          + '<span style="min-width:74px;opacity:.8">' + esc(String(x.exp).slice(5))
-          + (x.is_0dte ? ' <b style="color:#22d3ee">0DTE</b>' : '') + '</span>'
-          + '<span style="color:' + (isFinite(g) && g < 0 ? '#f43f5e' : '#34d399') + '">'
-          + (isFinite(g) ? (g < 0 ? '−' : '+') + _busd(g) : '—') + '</span>'
-          + '<span style="opacity:.6">' + (x.share_pct != null ? Number(x.share_pct).toFixed(1) + '%' : '') + '</span>'
-          + '<span style="opacity:.6">P/C ' + (x.pc_oi != null ? Number(x.pc_oi).toFixed(2) : '—') + '</span>'
-          + '<span style="opacity:.8">MP ' + (x.max_pain != null ? (+x.max_pain).toFixed(0) : '—') + '</span></div>';
-      });
-      h += '</div>';
-    }
-
     if (r && r.text) {
       /* STALE IS LABELLED, NOT HIDDEN. When the payload falls back to the most recent archived
          read rather than today's, the analyst says so in the heading - and a read presented as
@@ -519,75 +482,15 @@
         + 'here as they publish.</span>'
         + '<div class="tp-empty">Next read publishes before the bell.</div>';
     }
-    /* CATALYSTS (Jake, 09-12: "why aren't they in trader and analyst"). OUR OWN calendar feed
-       (/api/calendar — the same one the public /economic-calendar page and Dr. NoVo's macro
-       tool read), NOT the Robinhood lane: printing a licensed broker feed on a paid surface is
-       the resell shape Jake ruled out; this data is ours. Async fill into a placeholder so the
-       drawer stays synchronous; cached ten minutes because macro dates do not move by the poll. */
-    h += '<div class="tp-grp">Catalysts · major US macro</div>'
-      + '<div class="tp-cal"><div class="tp-empty">Loading the calendar…</div></div>';
-    /* Wire + Earnings lived HERE for a few hours on 09-12 and were PROMOTED to their own
-       'wire' surface the same morning (Jake: a feature Analyst shows as a tab, Trader shows as
-       a tab — never buried inside another one). drawWire owns them now; re-adding them here
-       would be duplication, not parity. */
-    /* RANKED STRIKES & BLIND SPOTS on trader (the LAST Analyst-only remainder after Tema's
-       09-12 parity correction; Jake's supersets rule). Same algorithm as analyst-live's
-       gex-rank card, same payload field (d0.profile {k,g}), rendered in this drawer's idiom.
-       The chart's heat overlay + pin/void lines stay the trader-native VISUAL; this is the
-       ranked LIST beside it. Trader-gated: analyst has its own card. */
-    if (_isTrader && d0 && Array.isArray(d0.profile)) {
-      var _pr = d0.profile.filter(function (r) { return r && isFinite(r.k) && isFinite(r.g); });
-      if (_pr.length >= 5) {
-        var _spot = Number(d0.spot) || 0;
-        var _ranked = _pr.slice().sort(function (a, b) { return Math.abs(b.g) - Math.abs(a.g); }).slice(0, 10);
-        var _top = Math.abs(_ranked[0].g) || 1;
-        h += '<div class="tp-grp">Ranked strikes</div>';
-        _ranked.forEach(function (r, i) {
-          var pct = _spot ? ((r.k / _spot - 1) * 100) : null;
-          h += '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">'
-            + '<span style="opacity:.45;min-width:16px">' + (i + 1) + '</span>'
-            + '<span style="min-width:44px">' + r.k + '</span>'
-            + '<span style="flex:1;height:6px;background:rgba(255,255,255,0.04)"><i style="display:block;height:6px;width:'
-            + Math.max(2, Math.abs(r.g) / _top * 100).toFixed(1) + '%;background:' + (r.g < 0 ? '#f43f5e' : '#10b981') + '"></i></span>'
-            + '<span style="opacity:.8">' + (r.g < 0 ? '−' : '+') + Math.round(Math.abs(r.g)).toLocaleString() + '</span>'
-            + '<span style="opacity:.5;min-width:52px;text-align:right">' + (pct == null ? '' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%') + '</span>'
-            + '</div>';
-        });
-        h += '<div class="tp-meta" style="padding-top:4px">ranked by absolute gamma — sign shown; a short-gamma strike matters as much and means the opposite</div>';
-        var _mags = _pr.map(function (r) { return Math.abs(r.g); }).sort(function (a, b) { return a - b; });
-        var _med = _mags[Math.floor(_mags.length / 2)] || 0;
-        var _heavy = _pr.filter(function (r) { return Math.abs(r.g) >= _med * 0.10; })
-                        .sort(function (a, b) { return a.k - b.k; });
-        var _steps = [];
-        for (var _s1 = 1; _s1 < _heavy.length; _s1++) _steps.push(_heavy[_s1].k - _heavy[_s1 - 1].k);
-        _steps.sort(function (a, b) { return a - b; });
-        var _medStep = _steps.length ? _steps[Math.floor(_steps.length / 2)] : 0;
-        var _gaps = [];
-        if (_medStep > 0) {
-          for (var _gi = 1; _gi < _heavy.length; _gi++) {
-            var _lo = _heavy[_gi - 1].k, _hi = _heavy[_gi].k, _w = _hi - _lo;
-            if (_w >= _medStep * 2) _gaps.push({ lo: _lo, hi: _hi, mid: (_lo + _hi) / 2, x: _w / _medStep });
-          }
-        }
-        _gaps.sort(function (a, b) { return Math.abs(a.mid - _spot) - Math.abs(b.mid - _spot); });
-        h += '<div class="tp-grp">Blind spots</div>';
-        if (_gaps.length) {
-          h += _gaps.slice(0, 3).map(function (g2) {
-            return '<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;">'
-              + '<b>' + g2.lo + '–' + g2.hi + '</b> <span class="tp-meta" style="display:inline">'
-              + g2.x.toFixed(1) + '× the usual strike gap</span></div>';
-          }).join('')
-          + '<div class="tp-meta" style="padding-top:4px">runs between strikes carrying real weight — a move through one has little to lean on</div>';
-        } else {
-          h += '<div class="tp-empty">No gap wider than twice this book’s usual strike spacing.</div>';
-        }
-      }
-    }
+    /* NOTHING ELSE BELONGS HERE (Jake, 09-12, on opening the tab to a strip of seven subtabs:
+       "the desk note tab is for the desk notes, that is it… only thing is the fear gauge,
+       same tab, it fits; everything else does not make sense"). Max pain, the expiry ladder,
+       ranked strikes and blind spots moved to the Structure surface; the macro catalysts
+       moved beside the earnings calendar on the Wire. The gauge stays because it frames the
+       read — it is the conditions the argument was made in, not a separate subject.
+       No novoSubtabs call: one subject is not a tab strip, and a strip over a single panel
+       is the furniture that made this tab unreadable. */
     el.innerHTML = h;
-    _fillCal(el.querySelector('.tp-cal'));
-    /* Groups become TABS — same pass history/flow/sweeps already run. This is what makes the
-       sections discoverable as tabs instead of buried in one scroll (Jake, 09-12). */
-    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
   var _rhCache = null, _rhAt = 0;
@@ -694,9 +597,9 @@
   }
 
   /* THE WIRE DRAWER (Jake's 09-12 display approval) — Wire + Earnings as their own TOP-LEVEL
-     surface. The analyst mounts this as its own tab; the trader carries the same two groups
-     inside the Desk note (whose groups render as subtabs), pending a rail-surface promotion
-     with Yuri's placement review. One renderer, one data door, two dashboards. */
+     surface on BOTH dashboards — a feature Analyst shows as a tab, Trader shows as a tab,
+     never buried inside another one. Carries the macro catalysts too, since a catalyst and
+     an earnings date are the same question. One renderer, one data door, two dashboards. */
   function drawWire(el, state) {
     var tk = ticker(state);
     /* THE MARKET WIRE LEADS (Jake, 09-12: "its market news not what the couple tickers have
@@ -711,13 +614,121 @@
       + '<div class="tp-grp">Wire · ' + esc(tk) + '</div>'
       + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
       + '<div class="tp-grp">Earnings · upcoming</div>'
-      + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>';
+      + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>'
+      /* CATALYSTS moved here off the Desk note (Jake, 09-12). It sits beside the earnings
+         calendar because the two are one subject — what is scheduled — and neither is a
+         read. OUR feed (/api/calendar, the same one /economic-calendar reads), never the
+         broker lane: printing a licensed feed on a paid surface is the resell shape. */
+      + '<div class="tp-grp">Catalysts · major US macro</div>'
+      + '<div class="tp-cal"><div class="tp-empty">Loading the calendar…</div></div>';
     el.innerHTML = h;
     _fillRh(el, tk);
+    _fillCal(el.querySelector('.tp-cal'));
     try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
-  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead, wire: drawWire };
+
+  /* ── STRUCTURE · the book by strike and by expiry ──────────────────────────────────────
+     Max pain, the expiry ladder, the ranked strikes and the blind spots between them. All
+     four rode into the Desk note during the 09-12 parity port and Jake pulled them on sight.
+     They belong together on their OWN surface because they are one subject — where the book
+     sits across strikes and dates — and none of them is a read. Renderers moved verbatim,
+     path gate dropped: this surface only mounts where it is wanted, so the mount is the gate.
+     Absent-tolerant like every other drawer: an older payload renders the empty line. */
+  function drawStructure(el, state) {
+    var tk = ticker(state);
+    var h = '<h2>' + esc(tk) + ' &middot; Structure</h2>'
+      + '<span class="tp-sub">Where the weight sits across strikes, where it settles by expiry, and the runs in between with nothing to lean on.</span>';
+    var d0 = forTicker(state);
+    var _busd = function (v) { v = Math.abs(Number(v) || 0);
+      return v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M'
+           : '$' + Math.round(v).toLocaleString(); };
+    if (d0 && d0.max_pain != null && isFinite(+d0.max_pain)) {
+      var _mp0 = Array.isArray(d0.term) && d0.term.some(function (x) { return x && x.is_0dte; });
+      h += '<div class="tp-grp">Max pain</div>'
+        + '<div class="tp-claim"><b>' + (+d0.max_pain).toFixed(2) + '</b>'
+        + '<span class="tp-meta">' + (_mp0 ? '0DTE' : 'nearest expiry')
+        + ' · least payout at expiry · drawn on the chart as MAX PAIN</span></div>';
+    }
+    if (d0 && Array.isArray(d0.term) && d0.term.filter(function (x) { return x && x.exp; }).length >= 2) {
+      h += '<div class="tp-grp">Term structure · the expiry ladder</div><div style="overflow-x:auto">';
+      d0.term.forEach(function (x) {
+        if (!x || !x.exp) return;
+        var g = Number(x.net_gex);
+        h += '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;white-space:nowrap;'
+          + 'border-bottom:1px solid rgba(255,255,255,0.06);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;">'
+          + '<span style="min-width:74px;opacity:.8">' + esc(String(x.exp).slice(5))
+          + (x.is_0dte ? ' <b style="color:#22d3ee">0DTE</b>' : '') + '</span>'
+          + '<span style="color:' + (isFinite(g) && g < 0 ? '#f43f5e' : '#34d399') + '">'
+          + (isFinite(g) ? (g < 0 ? '−' : '+') + _busd(g) : '—') + '</span>'
+          + '<span style="opacity:.6">' + (x.share_pct != null ? Number(x.share_pct).toFixed(1) + '%' : '') + '</span>'
+          + '<span style="opacity:.6">P/C ' + (x.pc_oi != null ? Number(x.pc_oi).toFixed(2) : '—') + '</span>'
+          + '<span style="opacity:.8">MP ' + (x.max_pain != null ? (+x.max_pain).toFixed(0) : '—') + '</span></div>';
+      });
+      h += '</div>';
+    }
+    /* RANKED STRIKES & BLIND SPOTS on trader (the LAST Analyst-only remainder after Tema's
+       09-12 parity correction; Jake's supersets rule). Same algorithm as analyst-live's
+       gex-rank card, same payload field (d0.profile {k,g}), rendered in this drawer's idiom.
+       The chart's heat overlay + pin/void lines stay the trader-native VISUAL; this is the
+       ranked LIST beside it. Trader-gated: analyst has its own card. */
+    if (d0 && Array.isArray(d0.profile)) {
+      var _pr = d0.profile.filter(function (r) { return r && isFinite(r.k) && isFinite(r.g); });
+      if (_pr.length >= 5) {
+        var _spot = Number(d0.spot) || 0;
+        var _ranked = _pr.slice().sort(function (a, b) { return Math.abs(b.g) - Math.abs(a.g); }).slice(0, 10);
+        var _top = Math.abs(_ranked[0].g) || 1;
+        h += '<div class="tp-grp">Ranked strikes</div>';
+        _ranked.forEach(function (r, i) {
+          var pct = _spot ? ((r.k / _spot - 1) * 100) : null;
+          h += '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">'
+            + '<span style="opacity:.45;min-width:16px">' + (i + 1) + '</span>'
+            + '<span style="min-width:44px">' + r.k + '</span>'
+            + '<span style="flex:1;height:6px;background:rgba(255,255,255,0.04)"><i style="display:block;height:6px;width:'
+            + Math.max(2, Math.abs(r.g) / _top * 100).toFixed(1) + '%;background:' + (r.g < 0 ? '#f43f5e' : '#10b981') + '"></i></span>'
+            + '<span style="opacity:.8">' + (r.g < 0 ? '−' : '+') + Math.round(Math.abs(r.g)).toLocaleString() + '</span>'
+            + '<span style="opacity:.5;min-width:52px;text-align:right">' + (pct == null ? '' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%') + '</span>'
+            + '</div>';
+        });
+        h += '<div class="tp-meta" style="padding-top:4px">ranked by absolute gamma — sign shown; a short-gamma strike matters as much and means the opposite</div>';
+        var _mags = _pr.map(function (r) { return Math.abs(r.g); }).sort(function (a, b) { return a - b; });
+        var _med = _mags[Math.floor(_mags.length / 2)] || 0;
+        var _heavy = _pr.filter(function (r) { return Math.abs(r.g) >= _med * 0.10; })
+                        .sort(function (a, b) { return a.k - b.k; });
+        var _steps = [];
+        for (var _s1 = 1; _s1 < _heavy.length; _s1++) _steps.push(_heavy[_s1].k - _heavy[_s1 - 1].k);
+        _steps.sort(function (a, b) { return a - b; });
+        var _medStep = _steps.length ? _steps[Math.floor(_steps.length / 2)] : 0;
+        var _gaps = [];
+        if (_medStep > 0) {
+          for (var _gi = 1; _gi < _heavy.length; _gi++) {
+            var _lo = _heavy[_gi - 1].k, _hi = _heavy[_gi].k, _w = _hi - _lo;
+            if (_w >= _medStep * 2) _gaps.push({ lo: _lo, hi: _hi, mid: (_lo + _hi) / 2, x: _w / _medStep });
+          }
+        }
+        _gaps.sort(function (a, b) { return Math.abs(a.mid - _spot) - Math.abs(b.mid - _spot); });
+        h += '<div class="tp-grp">Blind spots</div>';
+        if (_gaps.length) {
+          h += _gaps.slice(0, 3).map(function (g2) {
+            return '<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;">'
+              + '<b>' + g2.lo + '–' + g2.hi + '</b> <span class="tp-meta" style="display:inline">'
+              + g2.x.toFixed(1) + '× the usual strike gap</span></div>';
+          }).join('')
+          + '<div class="tp-meta" style="padding-top:4px">runs between strikes carrying real weight — a move through one has little to lean on</div>';
+        } else {
+          h += '<div class="tp-empty">No gap wider than twice this book’s usual strike spacing.</div>';
+        }
+      }
+    }
+    if (h.indexOf('tp-grp') < 0) {
+      h += '<div class="tp-empty">No strike ladder in this payload yet.</div>';
+    }
+    el.innerHTML = h;
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
+  }
+
+  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead,
+               wire: drawWire, structure: drawStructure };
 
   function mount(sel, kind) {
     styles();
