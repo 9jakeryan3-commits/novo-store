@@ -286,7 +286,8 @@ body[data-mtab="map"]  #body[data-view="coin"] > .panel[data-sec="gamma"],
 body[data-mtab="vol"]  #body[data-view="coin"] > .panel[data-sec="vol"],
 body[data-mtab="flow"] #body[data-view="coin"] > .panel[data-sec="flow"],
 body[data-mtab="pos"]  #body[data-view="coin"] > .panel[data-sec="pos"],
-body[data-mtab="hist"] #body[data-view="coin"] > .panel[data-sec="hist"] { display: block; }
+body[data-mtab="hist"] #body[data-view="coin"] > .panel[data-sec="hist"],
+body[data-mtab="wire"] #body[data-view="coin"] > .panel[data-sec="wire"] { display: block; }
 
 /* -- THE SECTION BAR -----------------------------------------------------------------------
    The same treatment as the analyst's, deliberately: small uppercase letterspaced type, one
@@ -1046,6 +1047,7 @@ tr:last-child td{border-bottom:none}
     <button type="button" data-cxtab="flow" onclick="cxMobTab('flow')">Flow</button>
     <button type="button" data-cxtab="pos" onclick="cxMobTab('pos')">Positioning</button>
     <button type="button" data-cxtab="hist" onclick="cxMobTab('hist')">History</button>
+    <button type="button" data-cxtab="wire" onclick="cxMobTab('wire')">Wire</button>
     <button type="button" data-cxtab="reads" onclick="cxMobTab('reads')">Live Reads</button>
     <button type="button" data-cxtab="screener" onclick="cxMobTab('screener')">Screener</button>
     <button type="button" data-cxtab="stats" onclick="cxMobTab('stats')">Stats</button>
@@ -1229,6 +1231,7 @@ tr:last-child td{border-bottom:none}
       <button type="button" data-mtab="pos" onclick="pickMore('pos')"><span aria-hidden="true">&#9707;</span>Positioning</button>
       <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
       <button type="button" data-mtab="hist" onclick="pickMore('hist')"><span aria-hidden="true">&#9719;</span>History</button>
+      <button type="button" data-mtab="wire" onclick="pickMore('wire')"><span aria-hidden="true">&#9202;</span>Wire</button>
 </div>
 <script>
 (function(){
@@ -1253,7 +1256,7 @@ tr:last-child td{border-bottom:none}
 
   /* The four views of one coin render. Named once; the reset above, the home rule below and the
      CSS filter all read from this list rather than each carrying its own copy. */
-  var CX_COIN_TABS = ['map', 'vol', 'flow', 'pos', 'hist'];
+  var CX_COIN_TABS = ['map', 'vol', 'flow', 'pos', 'hist', 'wire'];
   /* Picking a coin means "show me this coin". Arriving from the screener, the reads feed or a
      member surface, the tab showing names no section OF a coin - and the panel filter would then
      match nothing and paint a blank page. This puts the view back on the map in exactly that case
@@ -1278,7 +1281,7 @@ tr:last-child td{border-bottom:none}
          other three happen to match. Using the tab name directly made filled('map') match nothing,
          so BTC -- which has a gamma ladder -- was bounced off Map onto Flow. Caught by the band-A
          control before this shipped; keep that control on any change here. */
-      var SEC = { map: 'gamma', vol: 'vol', flow: 'flow', pos: 'pos', hist: 'hist' };
+      var SEC = { map: 'gamma', vol: 'vol', flow: 'flow', pos: 'pos', hist: 'hist', wire: 'wire' };
       /* :not([data-empty]) is what separates a real section from the placeholder. Testing for a
          .empty child instead would misfire: a POPULATED section can legitimately contain one --
          hist renders "no readings yet for X" inside a section that is otherwise real. */
@@ -1935,6 +1938,68 @@ function skewPanel(g){
 // as the detail view — the surface says where, the curve says how much. Colour scale is
 // PER-COIN (HYPE at 82 IV and BTC at 32 share no scale); a null cell renders EMPTY, never the
 // palette midpoint — a gap in a thin expiry is the market, not a zero.
+/* ---------------- THE WIRE: WHAT IS SCHEDULED -------------------------------------------------
+   Jake, 2026-09-12: crypto was the only dashboard with no Wire. Analyst's is earnings + catalysts
+   filled by novo-tape's _fillCal; crypto loads no novo-tape and has no earnings, so this is built
+   from what crypto actually has rather than ported from a surface with different data.
+
+   ONE SUBJECT: what is scheduled. Two sources, and the crypto-native one leads —
+     - THIS COIN'S OPTION EXPIRIES, off gamma.term. Dated, with days to run. A coin with no book
+       simply has none, and says so rather than borrowing the equity framing.
+     - THE MACRO CALENDAR, /api/calendar. Crypto trades straight through these 24/7, which is
+       exactly why they belong on a crypto surface and not only an equity one.
+   What it deliberately does NOT carry: token unlocks, halvings, upgrades, listings. We collect
+   none of it — I checked the collector rather than assuming — and a Wire that implied otherwise
+   would be inventing a feed. When unlocks are collected they belong here first. */
+let CAL = null, _calDone = false;
+function loadCal(){
+  if (_calDone) return; _calDone = true;
+  fetch('/api/calendar').then(function(r){ return r.json(); }).then(function(j){
+    CAL = j;
+    /* Repaint only if the member is standing on the Wire — the calendar lands after the first
+       render and a blank Wire that never fills is the failure this avoids. */
+    try { if (document.body.getAttribute('data-mtab') === 'wire') cxRender(); } catch (_e) {}
+  }).catch(function(){ /* absent stays absent; the panel says so rather than showing zero */ });
+}
+function wirePanel(d, g){
+  const term = (g && Array.isArray(g.term)) ? g.term.slice(0, 8) : [];
+  const evs  = (CAL && Array.isArray(CAL.events)) ? CAL.events.slice(0, 8) : [];
+  if (!term.length && !evs.length) return '';
+  const when = function(ms){
+    const dt = new Date(ms);
+    return dt.toISOString().slice(5, 10).replace('-', '/') + ' ' + String(dt.getUTCHours()).padStart(2, '0') + ':00';
+  };
+  let body = '';
+  if (term.length) {
+    body += `<div class="kv"><span class="k">Option expiries &middot; this coin</span><span class="v nu">${term.length}</span></div>`
+         +  term.map(function(e){
+              const dd = e.days < 1 ? (e.days * 24).toFixed(0) + 'h' : e.days.toFixed(e.days < 10 ? 1 : 0) + 'd';
+              return `<div class="kv"><span class="k">${when(e.e)} UTC<span class="lsub"> in ${dd}</span></span>`
+                   + `<span class="v nu">${e.atm_iv != null ? e.atm_iv.toFixed(1) + '% ATM' : '&mdash;'}</span></div>`;
+            }).join('');
+  } else {
+    body += `<div class="kv"><span class="k">Option expiries &middot; this coin</span><span class="v nu">none &mdash; no book</span></div>`;
+  }
+  if (evs.length) {
+    body += `<div class="kv" style="border-top:1px solid var(--bdr2);margin-top:10px;padding-top:12px">`
+         +  `<span class="k">Macro &middot; moves every asset</span><span class="v nu">${evs.length}</span></div>`
+         +  evs.map(function(x){
+              const prev = x.previous != null ? String(x.previous) : '';
+              const cons = x.consensus != null ? String(x.consensus) : '';
+              const tail = cons ? 'cons ' + cons : (prev ? 'prev ' + prev : '&mdash;');
+              return `<div class="kv"><span class="k">${String(x.date||'').slice(5)} ${x.time||''}`
+                   + `<span class="lsub"> ${String(x.event||'').slice(0,46)}</span></span>`
+                   + `<span class="v nu">${tail}</span></div>`;
+            }).join('');
+  }
+  return `<div class="panel"><div class="ph"><h2>Wire</h2>`
+       + `<span class="sub">what is scheduled &middot; expiries and macro</span></div><div class="pb">${body}`
+       + `<div class="fnote">Expiry times are the coin's own book, in UTC; crypto settles daily at 08:00 UTC and`
+       + ` the front expiry's hedging leaves the book with it. Macro dates are published releases &mdash; crypto`
+       + ` trades through them without a close, which is why they sit here rather than only on an equity desk.`
+       + ` Unlocks, upgrades and listings are not in this data and are not implied by its absence.</div></div></div>`;
+}
+
 function surfacePanel(g){
   const s=g&&g.surface; if(!s||!Array.isArray(s.expiries)||s.expiries.length<2||!Array.isArray(s.moneyness)) return '';
   const vals=s.expiries.flatMap(function(e){return e.iv||[];}).filter(function(v){return v!=null;});
@@ -2811,6 +2876,7 @@ function drawCoin(){
   h += _sec('flow', turnoverPanel(g) + takerFlowPanel(d,g) + tapePanel(d) + basisPanel(d) + etfPanel(d));
   h += _sec('pos',  venuePanel(g) + exposures(g));
   h += _sec('hist', histPanel());
+  h += _sec('wire', wirePanel(d, g));
   if(pos&&(pos.funding.length||pos.open_interest.length)){
     // CROWDING LADDER (2026-09-01). The percentile columns are MEASURED: history.py ranks each
     // reading against that coin's own sample history and publishes pct + n every pass. They were
@@ -2886,7 +2952,8 @@ function drawCoin(){
     vol:   'no options chain, so nothing prices vol across strikes or expiries for this coin',
     flow:  'no options tape, block prints or dated futures carrying this coin',
     pos:   'no funding or open-interest rows cleared the trust filter',
-    hist:  'nothing scored for this coin yet' };
+    hist:  'nothing scored for this coin yet',
+    wire:  'nothing scheduled is carried for this coin yet' };
   for (const _k in _EMPTY) {
     if (h.indexOf('data-sec="' + _k + '"') >= 0) continue;
     /* data-empty marks this as the PLACEHOLDER rather than a rendered section. cxTabHome reads it
@@ -3998,6 +4065,7 @@ window.addEventListener('hashchange', function(){
   };
 })();
 
+loadCal();   /* the Wire's macro half: one fetch per session, repaints only if the member is on the Wire */
 load();
 /* ---------------- LIVE GAMMA ----------------------------------------------------
    The pass runs on the order of ten minutes - measured 8-17, median ~11 across 77 intervals,
@@ -4335,6 +4403,8 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
       run: function () { try { window.cxMobTab('pos'); } catch (_e) {} } },
     { label: 'History — base rates and scored claims', group: 'View',
       run: function () { try { window.cxMobTab('hist'); } catch (_e) {} } },
+    { label: 'Wire — expiries and macro dates', group: 'View',
+      run: function () { try { window.cxMobTab('wire'); } catch (_e) {} } },
     { label: 'Daily rundown', group: 'View',
       run: function () { try { window.cxMobTab('read'); } catch (_e) {} } },
     { label: 'Settings', group: 'Page', run: function () { window.lvSettings(1); } },
