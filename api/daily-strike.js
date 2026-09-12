@@ -303,6 +303,20 @@ ${_CHROME.HEAD}
 
 /* ── 5. WIDTH — a 360px rail left a dead column on a 1920 screen ──────────────*/
 @media (min-width:1500px){ .ds-cols{ grid-template-columns:minmax(0,1fr) 400px; gap:56px; } }
+
+  /* The rail led with the clock, and five stories written in one pass all read "1 hour ago",
+     which says batch. They are five different DESKS — the thing this page is actually built on —
+     so the desk leads and the clock follows it. */
+  .ds-rrow{display:block;padding:13px 0;}
+  .ds-rmeta{display:flex;align-items:baseline;gap:9px;margin-bottom:5px;}
+  .ds-rk{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:700;color:#22d3ee;}
+  .ds-rk[data-k="earnings"]{color:#f59e0b;}
+  .ds-rk[data-k="crypto"]{color:#a78bfa;}
+  .ds-rk[data-k="level"]{color:#10b981;}
+  .ds-rt{min-width:0;font-size:10px;opacity:.72;padding-top:0;}
+  .ds-rh{font-size:14px;line-height:1.4;font-weight:600;}
+  .ds-rrow:first-child .ds-rh{font-size:16px;line-height:1.3;}
 </style>
 </head>
 <body>
@@ -613,8 +627,10 @@ ${await regimeStrip()}
     <a href="/plans">See the plans</a> &middot; <a href="/track-record">The scored record</a></div>
 </article></div>
 <aside class="ds-rail"><h4>More from the desk</h4>${more.map((s) =>
-  `<div class="ds-rrow"><div class="ds-rt">${esc(ago(s.publishedAt))}</div>`
-  + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
+  `<div class="ds-rrow"><div class="ds-rmeta">`
+        + `<span class="ds-rk" data-k="${esc(String(s.kind || 'markets'))}">${esc(s.kindLabel || 'Markets')}</span>`
+        + `<span class="ds-rt">${esc(ago(s.publishedAt))}</span></div>`
+        + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
   || '<div class="ds-empty">More desks publish through the session.</div>'}</aside></div>`;
     return res.status(200).send(_page(`${story.headline} | ${MASTHEAD}`,
       story.dek || String(story.body).slice(0, 155), `${SITE}/daily-strike/${slug}`, inner,
@@ -696,7 +712,6 @@ ${await regimeStrip()}
       <div class="ds-by">Dr. NoVo &middot; ${esc(ago(lead.publishedAt))}${
         (lead.tickers && lead.tickers.length) ? ` &middot; ${esc(lead.tickers.join(' · '))}` : ''}</div>
     </div>
-    ${houseAd(1)}
     <div class="ds-secs">
     ${secKeys.map((sec, si) => `<div class="ds-sec" id="${anchor(sec)}"><div class="ds-sech">${esc(sec)}</div>`
       + bySec[sec].map((s) => `<div class="ds-item">
@@ -705,12 +720,15 @@ ${await regimeStrip()}
           <div class="ds-by">Dr. NoVo &middot; ${esc(ago(s.publishedAt))}${
             (s.tickers && s.tickers.length) ? ` &middot; ${esc(s.tickers.join(' · '))}` : ''}</div></div>`).join('')
       + `</div>` + (si === 0 ? houseAd(3) : '')).join('')}
-    </div>
+    ${houseAd(1)}
+      </div>
   </div>
   <aside class="ds-rail">
     <h4>Latest from the desk</h4>
-    ${rail.map((s) => `<div class="ds-rrow"><div class="ds-rt">${esc(ago(s.publishedAt))}</div>`
-      + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
+    ${rail.map((s) => `<div class="ds-rrow"><div class="ds-rmeta">`
+        + `<span class="ds-rk" data-k="${esc(String(s.kind || 'markets'))}">${esc(s.kindLabel || 'Markets')}</span>`
+        + `<span class="ds-rt">${esc(ago(s.publishedAt))}</span></div>`
+        + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
       || '<div class="ds-empty">More desks publish through the session.</div>'}
     ${houseAd(0)}
     <h4 style="margin-top:26px;">Free, no account</h4>
