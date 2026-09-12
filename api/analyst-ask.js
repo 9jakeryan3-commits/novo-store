@@ -777,7 +777,14 @@ module.exports = async (req, res) => {
     // readout, not a question to interpret. Detected server-side on the VERIFIED email, so the
     // phrase is inert social engineering from any other seat: no command block, no unslimming,
     // and the tickets were never in that reader's grounding to begin with.
-    const alertsCmd = _isComp(email) && /\bnovo\s+alerts\b/i.test(String(question || ''));
+    //
+    // ⚠ WIDENED, NOT RENAMED (09-12). The feed is now Market Alerts, but "novo alerts" is the
+    // phrase Jake has actually typed since 09-05 and muscle memory outlives a rename. Dropping it
+    // for the new wording would break a standing command that works today, and the failure would
+    // be silent — the question falls through and gets ANSWERED as ordinary chat instead of
+    // executing. Both phrasings are accepted; neither is going away on its own.
+    const alertsCmd = _isComp(email)
+      && /\b(?:novo|market)\s+alerts\b/i.test(String(question || ''));
 
     let live = null, ctx = null, trackRec = null, liveSrc = 'none', calibCells = null, calibMisses = [];
     // What NoVo remembers about THIS reader — market interests and preferences they stated,

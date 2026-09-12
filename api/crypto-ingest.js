@@ -147,7 +147,8 @@ module.exports = async (req, res) => {
        reading the book and deciding for himself. Fire-and-forget and soft-failing: a declined
        pass, a model error or a timeout must never cost the snapshot ingest. */
     try { await require("./_lib/novo-calls.js").novoCryptoCalls(b); } catch (_) {}
-    // Dr. NoVo's Alerts: chain tickets whose rule has proven edge, surfaced; the firehose stays put.
+    // Market Alerts: chain tickets whose rule has proven edge, surfaced; the firehose stays put.
+    // The engine's fires, under the engine's name (Jake, 09-12) — not the analyst's.
     try { await require("./_lib/predictions.js").curateChainFires(b); } catch (_) {}
     /* THE GRADE JOIN. The engine already resolved these tickets against the price path; this
        attaches its verdict to the alerts we actually released. reconcile() then writes off any

@@ -1,8 +1,29 @@
-// api/_lib/alert-record.js — Dr. NoVo's ALERTS, graded as alerts.
+// api/_lib/alert-record.js — MARKET ALERTS: the ENGINE's edge-cleared fires, graded as alerts.
 //
-// Jake, 2026-09-11: "alerts are Dr. NoVo saying 'buy now' and should be graded alone as an alert
-// not a prediction." And: "Dr. NoVo gives both equities and crypto alerts ... alerts are comp only,
-// im the only comp, owner dashboard score tracking."
+// ⚠ RE-ATTRIBUTED 2026-09-12. This file used to open "Dr. NoVo's ALERTS" and quote Jake, 09-11:
+// "alerts are Dr. NoVo saying 'buy now' and should be graded alone as an alert not a prediction."
+// HE HAS SUPERSEDED THAT HIMSELF, 09-12:
+//
+//   "the alerts he brings forward is redundant with predictions they need to be merged and the
+//    alerts from the engine that show and maintain an edge get surfaced to comp seat in MARKET
+//    ALERTS (from the engine showing edge) rather than Dr. NoVo alerts. Dr. NoVo sees all alerts
+//    and live reads for his own predictions."
+//
+// THE BUSINESS MODEL THIS RESTORES: the engine produces the live reads, the alerts and the map
+// math — it did from the start, and it is the product. Dr. NoVo is the AI analyst who came AFTER;
+// he READS all of it and makes predictions from it. So:
+//
+//   * every row in this book cleared an ARITHMETIC edge gate on the engine's own base-rate table.
+//     No model call appears anywhere in the release path (predictions.js appendNovoFire). Calling
+//     them "Dr. NoVo's alerts" credited the analyst with the engine's work.
+//   * there is no longer any such thing as an alert he "brings forward". Anything HE originates is
+//     a PREDICTION and belongs in pred:log under his grade. One act, one denominator.
+//   * this book is therefore scored on the ENGINE's side of the owner dashboard, NOT inside his
+//     all-time grade.
+//
+// WHAT DID NOT CHANGE: the two books still must not share a denominator. That reasoning was always
+// about the CLAIM SHAPE, not about whose claim it was, so it survives the re-attribution intact —
+// see the next paragraph, which is the original and still correct.
 //
 // THIS IS THE SIBLING OF pred:log, NOT A BRANCH OF IT. An alert and a prediction are different
 // claims and must never share a denominator: a prediction is a forward statement about an outcome,

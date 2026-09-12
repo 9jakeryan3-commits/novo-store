@@ -837,7 +837,7 @@ export default async function handler(req, res) {
       const b = (await _bodyOf(req)) || {};
       const P = require('./_lib/predictions.js');
       const out = await P.makePrediction({ ...b, source: 'novo' });
-      /* Deliberately no longer auto-surfaces into Dr. NoVo's Alerts. Making a prediction and
+      /* Deliberately no longer auto-surfaces into Market Alerts. Making a prediction and
          approving an alert are two different judgements, and wiring them together meant anything
          that recorded a call also earned a place on the alerts page — no edge test, no bar. The
          alerts surface has one entrance now, and it is the edge gate. */

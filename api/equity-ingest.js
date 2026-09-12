@@ -45,8 +45,8 @@ module.exports = async (req, res) => {
     // freshness (as_of/received) and a labelled old record beats a vanished one.
     await r.set("equity:signals:live", payload, { ex: 604800 });
     /* Same grade join as the crypto side. recent_resolved carries the per-signal outcome the
-       engine's resolver wrote (hit / miss / flat / no_data); this attaches it to the equity alerts
-       Dr. NoVo actually released. */
+       engine's resolver wrote (hit / miss / flat / no_data); this attaches it to the equity Market
+       Alerts actually released — the engine's fires, graded on the engine's side (Jake, 09-12). */
     try {
       const AR = require("./_lib/alert-record.js");
       await AR.joinEquityResolutions(b.recent_resolved || []);

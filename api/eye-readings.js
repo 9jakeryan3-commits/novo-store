@@ -10,7 +10,7 @@
 // measurement and the sample it rests on. They are not calls, they carry no side, and none of them
 // is graded. That is what makes them shareable with members: the standing ruling on the private
 // equity desk is about the TICKETS (the directional fires, the buy/sell calls), which stay exactly
-// where they were — comp-gated, in Dr. NoVo's Alerts and the prediction record. The line is the
+// where they were — comp-gated, in Market Alerts and the prediction record. The line is the
 // one drawn on the crypto side on 2026-08-30 and quoted in get_chain_alerts: THE RESEARCH IS
 // SHAREABLE; THE TICKETS ARE NOT.
 //

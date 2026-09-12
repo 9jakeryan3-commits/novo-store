@@ -113,14 +113,25 @@
        The endpoint still returns it — this card just is not its home. */
     var dgHtml = '';
 
-    /* ── DR. NOVO'S ALERTS (comp seats; the key is ABSENT otherwise, same as predictions).
+    /* ── MARKET ALERTS (comp seats; the key is ABSENT otherwise, same as predictions).
        Curated by the grading: only fires from rules with proven out-of-sample edge reach this
        list — "we dont want those rapid fire hosing into that page we wont the good ones." The
        firehose stays on the map and in the chat tools. Hairlines only; the box ban is law. */
-    var nv = Array.isArray(d && d.novo_alerts) ? d.novo_alerts : null;
+    /* \u26a0 RENAMED FROM "DR. NoVo'S ALERTS" (Jake, 2026-09-12): "the alerts from the engine that show
+       and maintain an edge get surfaced to comp seat in Market Alerts (from the engine showing
+       edge) rather than Dr. NoVo alerts. Dr. NoVo sees all alerts and live reads for his own
+       predictions." Every fire here cleared an ARITHMETIC edge gate on the engine's own base-rate
+       table \u2014 no model call anywhere in the path \u2014 so the old name credited the analyst with the
+       engine's work and inverted the business model. The engine measures; he interprets.
+
+       Reads `market_alerts`, falling back to the old `novo_alerts`: this file is cached immutable
+       for a year, so the API ships both keys for one roll. Prefer the new one, never require it \u2014
+       a rename that can silently empty a paid panel is not worth a clean diff. */
+    var nv = Array.isArray(d && d.market_alerts) ? d.market_alerts
+           : (Array.isArray(d && d.novo_alerts) ? d.novo_alerts : null);
     var nvHtml = '';
     if (nv) {
-      nvHtml = '<div class="al-grp">Dr. NoVo\u2019s alerts \u00b7 edge-cleared only</div>'
+      nvHtml = '<div class="al-grp">Market alerts \u00b7 edge shown and held</div>'
         + (nv.length ? nv.map(function (x) {
             var ago = '';
             try { ago = new Date(x.ts).toLocaleString('en-US', { timeZone: 'America/New_York',
@@ -141,7 +152,7 @@
       return;
     }
     /* ⚠ TWO MARKERS OR NO TABS. novoSubtabs needs at least two .al-grp headings to build a strip.
-       "Dr. NoVo's alerts" was the only one; the member's own alerts sat under the panel's <h2> with
+       "Market alerts" (then "Dr. NoVo's alerts") was the only one; the member's own sat under the <h2> with
        no marker, so the panel had one group and got no sub-tabs — "you forgot to add internal tab
        to the alerts pages". A "Your alerts" marker leads the member's rows, giving the two tabs.
        (A non-comp seat has no Dr. NoVo group, so it stays one marker and correctly shows no tabs.) */

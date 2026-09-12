@@ -1,4 +1,10 @@
-// api/alert-score.js — the score for Dr. NoVo's ALERTS. Ops-gated, for the Owner Dashboard.
+// api/alert-score.js — the score for MARKET ALERTS. Ops-gated, for the Owner Dashboard.
+//
+// ⚠ THIS IS THE ENGINE'S SCORE, NOT DR. NoVo'S (Jake, 2026-09-12): the alerts surfaced to comp
+// seats are engine fires whose rule showed an edge and held it, so their hit rate belongs on the
+// engine's side of the dashboard — beside the map's own math — and must NEVER be folded into his
+// all-time grade. His grade is predictions, conversation calls, report bias and audit bias. See
+// _lib/alert-record.js for the re-attribution and the ruling that drove it.
 //
 // Jake, 2026-09-11: "alerts are comp only, im the only comp, owner dashboard score tracking."
 //

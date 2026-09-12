@@ -584,10 +584,13 @@ async function listPredictions(limit, assetClass, readsOnly) {
   };
 }
 
-// ── DR. NOVO'S ALERTS — the curated feed ─────────────────────────────────────────────────────
+// ── MARKET ALERTS — the curated feed ─────────────────────────────────────────────────────────
 // Jake, 2026-09-07: the private crypto and equity alerts get a UI surface — "a curated list
 // surfaced into the Alerts tab as Dr. NoVo's Alerts when edges are found we dont want those rapid
 // fire hosing into that page we wont the good ones. thats why everything is graded."
+// ⚠ RENAMED to Market Alerts on 09-12 — the quote above is kept verbatim as the origin of the
+// FEED, not of its name. These are the engine's edge-cleared fires; Dr. NoVo reads them, he does
+// not make them. See _lib/alert-record.js for the ruling.
 // The GRADING IS THE CURATOR: nothing enters this feed unless the rule that fired it has proven
 // out-of-sample edge at or above its own floor. The raw firehose stays where it is (the map's
 // feed, the chat tools); this list is only what cleared the bar.
@@ -597,10 +600,14 @@ const FEED_KEY = "novo:alerts:feed";
    rather than inferred later from a list length. */
 async function appendNovoFire(entry, grade) {
   try { await bump("released", 1); } catch (_) {}
-  /* THE ALERT IS ALSO RECORDED AS A GRADEABLE ALERT (Jake, 2026-09-11: alerts "should be graded
-     alone as an alert not a prediction"). The feed row below stays exactly what it was — prose for
-     the panel — while the numbers the engines grade against go to the alert book. Best-effort:
-     a bookkeeping failure must never cost a seat its alert. */
+  /* THE FIRE IS ALSO RECORDED AS A GRADEABLE MARKET ALERT. The feed row below stays exactly what
+     it was — prose for the panel — while the numbers the engines grade against go to the alert
+     book. Best-effort: a bookkeeping failure must never cost a seat its alert.
+     ⚠ THIS BOOK IS THE ENGINE'S, NOT DR. NoVo'S (Jake, 2026-09-12, superseding his 09-11 "graded
+     alone as an alert not a prediction" framing). Every entry reaching this function cleared the
+     edge gate above — arithmetic on the engine's own base-rate table, no model call — so it scores
+     on the engine's side. Anything Dr. NoVo originates is a PREDICTION and is already in pred:log
+     under his grade; there is no third category between them. See _lib/alert-record.js. */
   try {
     await require("./alert-record.js").recordRelease(Object.assign({}, entry, grade || {}));
   } catch (_) {}
@@ -738,11 +745,18 @@ async function curateChainFires(snap) {
 //                            hit rate with no baseline flatters or slanders itself depending on
 //                            which way the market happened to go.
 //
-// TWO DECISIONS, ONE BAR. Clearing it makes the fire one of Dr. NoVo's Alerts AND makes it a
-// recorded prediction; failing it leaves the fire exactly where it was — in the private
-// hash-chained equity record, chat-pull only, waiting to earn its way up. That is Jake's rule
-// stated as code: "when an edge is found in those alerts it is approved for Dr. NoVo's Alerts ...
-// as long as it holds an edge."
+// ONE DECISION, ONE BAR. Clearing it makes the fire a MARKET ALERT; failing it leaves the fire
+// exactly where it was — in the private hash-chained equity record, chat-pull only, waiting to
+// earn its way up. That is Jake's rule stated as code: "when an edge is found in those alerts it
+// is approved for [Market Alerts] ... as long as it holds an edge" — the bracket is the 09-12
+// rename; the sentence is his, from 09-07.
+//
+// ⚠ THIS SAID "TWO DECISIONS" AND MINTED A PREDICTION TOO. It no longer does: `onEquityFire` sets
+// `predicted = false` and writes only the alert. An engine fire clearing an arithmetic edge gate
+// is the ENGINE's claim, and recording it as Dr. NoVo's prediction credited him with work he did
+// not do — exactly the redundancy Jake named on 09-12 ("the alerts he brings forward is redundant
+// with predictions"). The behaviour was already right; this comment was still describing the old
+// shape, which is how the next reader re-introduces it.
 const EQ_MIN_RESOLUTIONS = 30;
 const EQ_MIN_EDGE_PP = 5;
 async function onEquityFire(fire) {

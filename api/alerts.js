@@ -109,7 +109,13 @@ module.exports = async (req, res) => {
         // equity calls -- the same split every other feature already honours.
         try { predictions = await require("./_lib/predictions.js")
           .listPredictions(40, app === "crypto" ? "crypto" : "equity"); } catch (_) {}
-        // Dr. NoVo's Alerts — the curated fires, same comp gate, same per-desk split.
+        /* MARKET ALERTS — the ENGINE's fires whose rule showed an edge and HELD it. Same comp
+           gate, same per-desk split.
+           ⚠ THESE ARE NOT DR. NoVo'S (Jake, 2026-09-12): "the alerts from the engine that show and
+           maintain an edge get surfaced to comp seat in Market Alerts (from the engine showing
+           edge) rather than Dr. NoVo alerts." Every fire here cleared an arithmetic edge gate on
+           the engine's own base-rate table — no model call is involved, so attributing them to the
+           analyst was crediting him with the engine's work. He READS them; he does not make them. */
         try { novo_alerts = await require("./_lib/predictions.js")
           .listNovoFires(app === "crypto" ? "crypto" : "equity", 20); } catch (_) {}
       }
@@ -135,7 +141,15 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
                                     ...(mine ? { my_predictions: mine } : {}),
                                     ...(predictions && !predictions.error ? { predictions } : {}),
-                                    ...(comp && Array.isArray(novo_alerts) ? { novo_alerts } : {}) });
+                                    /* BOTH KEYS, DELIBERATELY. `market_alerts` is the name now;
+                                       `novo_alerts` ships beside it as a transitional alias because
+                                       every .js on this site is cached immutable for a year, so a
+                                       member holding the previous novo-alerts.js would read the new
+                                       key as undefined and the whole group would VANISH with no
+                                       error — the silent-blank failure this codebase keeps paying
+                                       for. Drop the alias once the stamped bundle has rolled. */
+                                    ...(comp && Array.isArray(novo_alerts)
+                                        ? { market_alerts: novo_alerts, novo_alerts } : {}) });
     }
 
     if (req.method === "POST") {
