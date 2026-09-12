@@ -283,6 +283,7 @@ main{display:grid;grid-template-columns:206px 1fr 310px;min-height:0}
    #body with no sections at all - are never filtered into a blank page by a coin's tabs. */
 #body[data-view="coin"] > .panel { display: none; }
 body[data-mtab="map"]  #body[data-view="coin"] > .panel[data-sec="gamma"],
+body[data-mtab="vol"]  #body[data-view="coin"] > .panel[data-sec="vol"],
 body[data-mtab="flow"] #body[data-view="coin"] > .panel[data-sec="flow"],
 body[data-mtab="pos"]  #body[data-view="coin"] > .panel[data-sec="pos"],
 body[data-mtab="hist"] #body[data-view="coin"] > .panel[data-sec="hist"] { display: block; }
@@ -1041,6 +1042,7 @@ tr:last-child td{border-bottom:none}
        itself. -->
   <nav id="cx-tabs" aria-label="Sections">
     <button type="button" data-cxtab="map" onclick="cxMobTab('map')">Map</button>
+    <button type="button" data-cxtab="vol" onclick="cxMobTab('vol')">Vol</button>
     <button type="button" data-cxtab="flow" onclick="cxMobTab('flow')">Flow</button>
     <button type="button" data-cxtab="pos" onclick="cxMobTab('pos')">Positioning</button>
     <button type="button" data-cxtab="hist" onclick="cxMobTab('hist')">History</button>
@@ -1222,6 +1224,7 @@ tr:last-child td{border-bottom:none}
       <button type="button" data-mtab="predict" onclick="pickMore('predict')" hidden><span aria-hidden="true">&#9670;</span>Predictions</button>
       <button type="button" data-mtab="read" onclick="pickMore('read')"><span aria-hidden="true">&#9636;</span>Daily rundown</button>
       <button type="button" data-mtab="stats" onclick="pickMore('stats')"><span aria-hidden="true">&#9637;</span>Stats</button>
+      <button type="button" data-mtab="vol" onclick="pickMore('vol')"><span aria-hidden="true">&#8767;</span>Vol</button>
       <button type="button" data-mtab="flow" onclick="pickMore('flow')"><span aria-hidden="true">&#8644;</span>Flow</button>
       <button type="button" data-mtab="pos" onclick="pickMore('pos')"><span aria-hidden="true">&#9707;</span>Positioning</button>
       <button type="button" data-mtab="screener" onclick="pickMore('screener')"><span aria-hidden="true">&#9776;</span>Screener</button>
@@ -1250,7 +1253,7 @@ tr:last-child td{border-bottom:none}
 
   /* The four views of one coin render. Named once; the reset above, the home rule below and the
      CSS filter all read from this list rather than each carrying its own copy. */
-  var CX_COIN_TABS = ['map', 'flow', 'pos', 'hist'];
+  var CX_COIN_TABS = ['map', 'vol', 'flow', 'pos', 'hist'];
   /* Picking a coin means "show me this coin". Arriving from the screener, the reads feed or a
      member surface, the tab showing names no section OF a coin - and the panel filter would then
      match nothing and paint a blank page. This puts the view back on the map in exactly that case
@@ -1275,7 +1278,7 @@ tr:last-child td{border-bottom:none}
          other three happen to match. Using the tab name directly made filled('map') match nothing,
          so BTC -- which has a gamma ladder -- was bounced off Map onto Flow. Caught by the band-A
          control before this shipped; keep that control on any change here. */
-      var SEC = { map: 'gamma', flow: 'flow', pos: 'pos', hist: 'hist' };
+      var SEC = { map: 'gamma', vol: 'vol', flow: 'flow', pos: 'pos', hist: 'hist' };
       /* :not([data-empty]) is what separates a real section from the placeholder. Testing for a
          .empty child instead would misfire: a POPULATED section can legitimately contain one --
          hist renders "no readings yet for X" inside a section that is otherwise real. */
@@ -2793,7 +2796,15 @@ function drawCoin(){
         <span><i style="background:#f43f5e"></i>negative gamma</span>
         <span><i style="background:#f0f0ee"></i>spot</span>
         <span><i style="background:#f59e0b"></i>flip</span></div></div>`;
-    h = _sec('gamma', h + clockPanel(g,d) + termPanel(g) + skewPanel(g) + surfacePanel(g) + heatPanel(g));
+    /* TWO SUBJECTS, TWO TABS (Jake, 2026-09-12). Map had six panels under one name and the
+       sentence test needed an "and": "where dealer gamma sits AND what vol is priced across
+       strikes and expiries" — three panels each side. Map keeps dealer POSITIONING (the ladder
+       above, the heatmap, and what leaves the book at settlement); Vol takes what the book
+       CHARGES for vol (term, skew, surface). It also fixes the empty state: a coin with no
+       options book used to get one placeholder standing in for six panels' worth of absence,
+       where now it can be silent about gamma and silent about vol separately. */
+    h = _sec('gamma', h + clockPanel(g,d) + heatPanel(g))
+      + _sec('vol',   termPanel(g) + skewPanel(g) + surfacePanel(g));
   }
   /* Flow reads the PERP payload (d), not the options book (g) - a coin with no chain can still
      have a tape, so this sits outside the if(g) that used to bury it. */
@@ -2872,6 +2883,7 @@ function drawCoin(){
      distinguish those two is the [[a-null-result-must-earn-its-meaning]] shape, one screen up. */
   const _EMPTY = {
     gamma: 'no options chain in the book for this coin yet',
+    vol:   'no options chain, so nothing prices vol across strikes or expiries for this coin',
     flow:  'no options tape, block prints or dated futures carrying this coin',
     pos:   'no funding or open-interest rows cleared the trust filter',
     hist:  'nothing scored for this coin yet' };
@@ -4315,6 +4327,8 @@ window.addEventListener('resize',()=>{ if(SNAP && !SCREEN && !FEED && !TOK) draw
       run: function () { try { window.cxMobTab('screener'); } catch (_e) {} } },
     { label: 'Live reads — what the rules fired', group: 'View',
       run: function () { try { window.cxMobTab('reads'); } catch (_e) {} } },
+    { label: 'Vol — term structure, skew, surface', group: 'View',
+      run: function () { try { window.cxMobTab('vol'); } catch (_e) {} } },
     { label: 'Flow — tape, blocks, carry', group: 'View',
       run: function () { try { window.cxMobTab('flow'); } catch (_e) {} } },
     { label: 'Positioning — funding, OI, venues', group: 'View',

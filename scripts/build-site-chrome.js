@@ -51,9 +51,53 @@ let footer = slice('<div class="disclaimer">', '</body>', 'footer')
 // the inline blocks that define the header's handlers and re-emit them as SCRIPT; everything
 // else stays stripped, which keeps the comment above true.
 const CHROME_FNS = ['novoNavToggle', 'novoMoreToggle'];
-const script = (html.match(/<script>[\s\S]*?<\/script>/g) || [])
+const inlineChrome = (html.match(/<script>[\s\S]*?<\/script>/g) || [])
   .filter((b) => CHROME_FNS.some((f) => b.includes('function ' + f)))
   .join('\n');
+
+/* ⚠ AND THE SAME ARGUMENT REACHES THE EXTERNAL SCRIPTS (2026-09-12, Jake on /daily-strike: "header
+   is off and the page still needs work... appears half built compared to the rest").
+   The rule above — the header's own handlers are chrome, not page JS — was written for inline
+   blocks and stopped there, so every server-rendered page shipped the header's MARKUP with none of
+   the code that makes it work. Measured on the live page:
+
+     site-search.js   injects the search box INTO `.nav-inner`. Without it there is no search box at
+                      all, and — worse — the nav's children carry explicit `order:` values and a
+                      `::after{order:4;flex-basis:100%}` line-break, so removing the flex:1 search
+                      box silently re-flows the whole bar: Plans and the account icon land LEFT of
+                      the links and the logo drops to a second row. The header did not look
+                      unstyled, it looked REARRANGED, which is why it read as a different site.
+     ticker-live.js   drives `.tick`/`.t-name`/`.t-val`/`.t-chg`, which the header already ships.
+                      Without it the strip is frozen at BUILD time — a news front page quoting
+                      yesterday's prices, and the one defect here a reader would call a lie.
+     chat-widget.js   the site-wide Support bubble, present on every static page and absent here.
+     polish.js        the site-wide polish layer every other page runs.
+
+   ALLOWLIST, NOT AN UN-STRIP. The comment above stays true: page-specific JS still has no business
+   on a server-rendered page (np-form.js is a signup form that belongs to the marketing page and is
+   deliberately absent). Adding a script to the canonical page does NOT auto-ship it here; someone
+   has to decide it is chrome and name it. Tags are lifted VERBATIM so their ?v= stamps ride along —
+   build-site-chrome runs after stamp-assets in deploy.sh, so they are current by construction. */
+const CHROME_SRC = ['site-search.js', 'ticker-live.js', 'chat-widget.js', 'polish.js', 'ga-events.js'];
+const srcTags = (html.match(/<script[^>]*\bsrc="[^"]*"[^>]*><\/script>/g) || [])
+  .filter((t) => CHROME_SRC.some((n) => t.includes('/' + n)));
+
+const script = [inlineChrome, srcTags.join('\n')].filter(Boolean).join('\n');
+
+/* Generation-time proof, in the same spirit as the handler check below: if the header SHIPS a
+   surface, the code that drives it must ship too. These fire on the real defect — a header carrying
+   a ticker nothing updates, or a `.nav-inner` the search box never reaches — and they fail loudly
+   at build rather than quietly on a reader's screen. Deliberately keyed on what the HEADER contains,
+   so deleting a surface from the header retires its assertion instead of blocking the build. */
+const DRIVEN = [
+  ['class="ticker"', 'ticker-live.js', 'the market ticker would be frozen at build time'],
+  ['nav-inner', 'site-search.js', 'the nav would re-flow and ship no search box'],
+];
+for (const [marker, file, consequence] of DRIVEN) {
+  if (header.includes(marker) && !script.includes('/' + file)) {
+    throw new Error(`build-site-chrome: header ships "${marker}" but ${file} is not emitted — ${consequence}`);
+  }
+}
 // Generation-time proof the shipped header cannot call an undefined handler again: every on*
 // handler the HEADER names must be defined in what we emit.
 for (const m of header.matchAll(/on[a-z]+="(\w+)\(/g)) {

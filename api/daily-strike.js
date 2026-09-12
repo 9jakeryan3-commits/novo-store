@@ -178,11 +178,22 @@ ${_CHROME.HEAD}
   .ds-cv{font-size:15px;font-weight:800;color:var(--txt1,#eaf3ff);margin-top:3px;letter-spacing:-.2px;}
   .ds-cs{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;margin-top:2px;}
   .ds-up{color:#10b981;} .ds-dn{color:#f43f5e;} .ds-nu{color:var(--txt3,#6e6e6e);}
+  /* ⚠ TWO COLUMNS, BECAUSE THE MARKUP HAS TWO CHILDREN (Jake, 09-12: "doesnt present as a front
+     door... appears half built"). This declared THREE tracks at >=1500px while the markup only
+     ever emitted one div plus one aside, so on a 1920 screen the third 360px track rendered as a
+     dead band of empty space down the right-hand side. The page was not under-designed there —
+     (no backticks anywhere in this block: the whole page is one template literal, so a stray
+      backtick in a COMMENT ends the string and the next word is parsed as an identifier)
+     it was correctly drawing a column with nothing in it. The width now goes to the CONTENT
+     instead: the section bands below run 2-up once there is room, which fills the same space with
+     stories and cannot desync from the child count the way a hardcoded track list did. */
   .ds-cols{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:40px;align-items:start;}
-  /* Three columns once there is room: lead+sections, a second story column, then the rail.
-     A news page that stays a 760px ribbon on a 2560px monitor reads as a blog, not a desk. */
-  @media (min-width:1500px){.ds-cols{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) 360px;gap:44px;}}
+  @media (min-width:1500px){.ds-cols{gap:48px;}}
   @media (max-width:860px){.ds-cols{grid-template-columns:1fr;gap:22px;}}
+  /* The bands are the grid items, so a desk running two kinds of story fills the width and a desk
+     running one still reads as a column rather than a half-empty row. */
+  .ds-secs{display:grid;grid-template-columns:1fr;gap:0 44px;align-items:start;}
+  @media (min-width:1500px){.ds-secs{grid-template-columns:1fr 1fr;}}
   .ds-lead h2{font-size:clamp(24px,3.6vw,33px);line-height:1.16;letter-spacing:-.8px;margin:0 0 9px;}
   .ds-lead h2 a{color:var(--txt1,#eaf3ff);text-decoration:none;}
   .ds-lead h2 a:hover{color:#22d3ee;}
@@ -209,6 +220,19 @@ ${_CHROME.HEAD}
   .ds-sech{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.2em;
     text-transform:uppercase;color:var(--txt3,#6e6e6e);padding-bottom:8px;
     border-bottom:1px solid var(--bdr,#2c2c30);margin-bottom:2px;}
+  /* THE SECTION STRIP — the convention every other front door on this site already uses (the
+     Journal's THE ANGLE / OPTIONS / MARKET STRUCTURE row). Its absence was a real part of why
+     this read as half-built: a reader landing here had no idea the page HAD sections, because
+     the only way to discover them was to scroll. Hairline underneath, no boxes, colour-only
+     hover — the site's rule. Built from the sections that actually rendered, never a fixed list,
+     so it can never advertise a band that is not on the page. */
+  .ds-secnav{display:flex;flex-wrap:wrap;gap:0 26px;border-bottom:1px solid var(--bdr,#2c2c30);
+    margin-bottom:22px;padding-bottom:0;}
+  .ds-secnav a{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);text-decoration:none;padding:11px 0;
+    border-bottom:1px solid transparent;margin-bottom:-1px;}
+  .ds-secnav a:hover{color:#22d3ee;border-bottom-color:#22d3ee;}
+  @media (max-width:860px){.ds-secnav{gap:0 18px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;}}
   article h1{font-size:clamp(26px,3.4vw,40px);line-height:1.15;letter-spacing:-1.2px;max-width:22ch;
     color:var(--txt1,#eaf3ff);margin:0 0 10px;}
   article .lead{font-size:17.5px;line-height:1.65;color:var(--txt2,#a8a8a8);margin:0 0 16px;max-width:74ch;}
@@ -499,7 +523,12 @@ module.exports = async (req, res) => {
                    logo: { '@type': 'ImageObject', url: `${SITE}/novo-logo.png?v=1` } },
       isAccessibleForFree: true,
     });
-    const inner = `<div class="ds-mast"><a href="/daily-strike"><span class="ds-name">${MASTHEAD}</span>
+    /* Three levels on a story page, matching the rest of the site — and it is the crumb Google
+       reads for the article's place in the hierarchy, not decoration. */
+    const inner = `<nav class="crumbs" aria-label="Breadcrumb" style="max-width:none;padding:0 0 14px;">
+  <a href="/">Home</a><span class="sep">&rsaquo;</span><a href="/daily-strike">${MASTHEAD}</a>
+  <span class="sep">&rsaquo;</span><span class="cur">${esc(story.kindLabel || 'Markets')}</span></nav>
+<div class="ds-mast"><a href="/daily-strike"><span class="ds-name">${MASTHEAD}</span>
   <span class="ds-tag">${TAGLINE}</span></a>
   <span class="ds-live">${esc(ago(story.publishedAt))}</span></div>
 ${await regimeStrip()}
@@ -556,6 +585,14 @@ ${await regimeStrip()}
     })) },
   })}</script>`;
 
+  /* The breadcrumb every other page on this site carries. build-site-chrome deliberately stops the
+     header BEFORE the crumb because it is per-page — and this page, being server-rendered, simply
+     never rendered its own. `.crumbs` is styled in polish.css (which the chrome links), but its
+     1180px cap centres it, and this page runs full-bleed; the override lines it up with the
+     masthead's left edge instead of floating it in the middle of a wide screen. */
+  const crumbs = `<nav class="crumbs" aria-label="Breadcrumb" style="max-width:none;padding:0 0 14px;">`
+    + `<a href="/">Home</a><span class="sep">&rsaquo;</span><span class="cur">${MASTHEAD}</span></nav>`;
+
   const mast = `<div class="ds-mast"><a href="/daily-strike"><span class="ds-name">${MASTHEAD}</span>
   <span class="ds-tag">${TAGLINE}</span></a>
   <span class="ds-live">${items.length ? `<b>&bull;</b> updated ${esc(ago(items[0].publishedAt))}`
@@ -565,7 +602,7 @@ ${await regimeStrip()}
     return res.status(200).send(_page(`${MASTHEAD} — market news from the dealer's book | NoVo`,
       'Market stories written by Dr. NoVo from the day\'s wire and our own dealer-positioning data.',
       `${SITE}/daily-strike`,
-      mast + `<div class="ds-empty">The first story publishes shortly. ${MASTHEAD} is written by
+      crumbs + mast + `<div class="ds-empty">The first story publishes shortly. ${MASTHEAD} is written by
         Dr. NoVo off the day's wire and our own dealer-positioning data &mdash; the headline is the
         news, the book is the part nobody else prints.</div>`, head));
   }
@@ -579,7 +616,16 @@ ${await regimeStrip()}
   const bySec = {};
   for (const s of rest) (bySec[s.kindLabel || 'Markets'] = bySec[s.kindLabel || 'Markets'] || []).push(s);
 
-  const inner = mast + `<div class="ds-cols">
+  /* The section strip is built from the bands that ACTUALLY rendered, so it can never advertise a
+     section the page does not have — the newsroom version of a check that cannot fail. */
+  const secKeys = Object.keys(bySec);
+  const anchor = (s) => 'sec-' + String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const secnav = secKeys.length > 1
+    ? `<nav class="ds-secnav" aria-label="Sections">${secKeys
+        .map((s) => `<a href="#${anchor(s)}">${esc(s)}</a>`).join('')}</nav>`
+    : '';
+
+  const inner = crumbs + mast + secnav + `<div class="ds-cols">
   <div>
     <div class="ds-lead">
       ${lead.kindLabel ? `<div class="ds-kicker">${esc(lead.kindLabel)}</div>` : ''}
@@ -589,13 +635,15 @@ ${await regimeStrip()}
         (lead.tickers && lead.tickers.length) ? ` &middot; ${esc(lead.tickers.join(' · '))}` : ''}</div>
     </div>
     ${houseAd(1)}
-    ${Object.keys(bySec).map((sec, si) => `<div class="ds-sec"><div class="ds-sech">${esc(sec)}</div>`
+    <div class="ds-secs">
+    ${secKeys.map((sec, si) => `<div class="ds-sec" id="${anchor(sec)}"><div class="ds-sech">${esc(sec)}</div>`
       + bySec[sec].map((s) => `<div class="ds-item">
           <h3><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></h3>
           ${s.dek ? `<p class="ds-dek">${esc(s.dek)}</p>` : ''}
           <div class="ds-by">Dr. NoVo &middot; ${esc(ago(s.publishedAt))}${
             (s.tickers && s.tickers.length) ? ` &middot; ${esc(s.tickers.join(' · '))}` : ''}</div></div>`).join('')
       + `</div>` + (si === 0 ? houseAd(3) : '')).join('')}
+    </div>
   </div>
   <aside class="ds-rail">
     <h4>Latest from the desk</h4>
