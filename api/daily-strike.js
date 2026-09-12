@@ -243,6 +243,66 @@ ${_CHROME.HEAD}
     font-size:14.5px;line-height:1.7;color:var(--txt2,#a8a8a8);}
   .ds-cta a{color:#22d3ee;font-weight:700;text-decoration:none;}
   .ds-empty{padding:20px 0;color:var(--txt3,#6e6e6e);font-size:14px;line-height:1.7;}
+
+  /* ── VISUAL PASS (Tema, 2026-09-12) — Jake: "the page is bland as hell ... this needs to
+     compete with the best financial markets news outlet online." The bones were fine; what read
+     flat was one accent colour on everything and the regime strip — the only thing here no other
+     outlet can print — set as small grey text. ──────────────────────────────────────────── */
+/* ── 1. THE REGIME STRIP IS THE SIGNATURE ─────────────────────────────────────
+   This is the one thing on the page no other outlet can print, and it was set as
+   small grey text. Price becomes display-weight; the regime carries the colour. */
+.ds-cell{ padding:15px 20px 15px 0; border-top:2px solid var(--bdr2,#1c1c20); }
+.ds-cell:has(.ds-up){ border-top-color:#10b981; }
+.ds-cell:has(.ds-dn){ border-top-color:#f59e0b; }
+.ds-ck{ font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--txt3,#6e6e6e); }
+.ds-cv{
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  font-size:clamp(26px,2.2vw,34px); font-weight:700; letter-spacing:-1px; line-height:1.04;
+  margin:7px 0 6px; color:var(--txt1,#eaf3ff); font-variant-numeric:tabular-nums;
+}
+.ds-cs{ font-size:12.5px; line-height:1.5; font-variant-numeric:tabular-nums; }
+.ds-cs.ds-up .rg{ color:#10b981; font-weight:700; }
+.ds-cs.ds-dn .rg{ color:#f59e0b; font-weight:700; }
+.ds-cs .flip{ color:var(--txt2,#a8a8a8); }
+
+/* ── 2. SECTION RHYTHM ────────────────────────────────────────────────────────
+   Four sections all in the same grey is most of why the page reads monotone.
+   Coloured on a single-side rule, the same device the journal cards already use. */
+.ds-sech{ font-size:10.5px; letter-spacing:.22em; border-top:2px solid var(--bdr2,#1c1c20); padding-top:9px; }
+.ds-secs .ds-sec:nth-of-type(1) .ds-sech{ color:#f59e0b; border-top-color:#f59e0b; }
+.ds-secs .ds-sec:nth-of-type(2) .ds-sech{ color:#a78bfa; border-top-color:#a78bfa; }
+.ds-secs .ds-sec:nth-of-type(3) .ds-sech{ color:#10b981; border-top-color:#10b981; }
+.ds-secs .ds-sec:nth-of-type(4) .ds-sech{ color:#22d3ee; border-top-color:#22d3ee; }
+
+/* the section nav should show where you are, not read as a grey word list */
+.ds-secnav a{ position:relative; padding:12px 0 13px; font-size:11px; letter-spacing:.16em; }
+.ds-secnav a:hover{ color:var(--txt1,#eaf3ff); }
+.ds-secnav a::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:#22d3ee; transform:scaleX(0); transition:transform .14s ease;
+}
+.ds-secnav a:hover::after{ transform:scaleX(1); }
+
+/* ── 3. HIERARCHY — the lead barely out-weighed the rail ──────────────────────*/
+.ds-lead h1, .ds-lead h2{
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  font-size:clamp(30px,3.3vw,44px); font-weight:700; letter-spacing:-1.1px; line-height:1.09;
+  margin:0 0 13px;
+}
+.ds-lead .ds-dek{ font-size:17px; line-height:1.6; max-width:60ch; }
+.ds-dek{ color:var(--txt2,#a8a8a8); }
+.ds-by{ font-size:11.5px; letter-spacing:.03em; margin-top:13px; }
+
+/* ── 4. THE RAIL — five identical rows read as a batch dump, not a desk ───────*/
+.ds-rrow{ padding:13px 0; align-items:baseline; }
+.ds-rrow:last-child{ border-bottom:0; }
+.ds-rt{ min-width:64px; letter-spacing:.08em; font-variant-numeric:tabular-nums; }
+.ds-rh{ font-size:14px; line-height:1.42; font-weight:600; }
+.ds-rrow:first-child .ds-rh{ font-size:16px; line-height:1.32; }
+.ds-rrow:hover .ds-rh{ color:#22d3ee; }
+
+/* ── 5. WIDTH — a 360px rail left a dead column on a 1920 screen ──────────────*/
+@media (min-width:1500px){ .ds-cols{ grid-template-columns:minmax(0,1fr) 400px; gap:56px; } }
 </style>
 </head>
 <body>
@@ -432,7 +492,7 @@ async function regimeStrip() {
     const word = t.regime ? (long ? 'dealers dampen' : 'dealers amplify') : 'regime unknown';
     return `<div class="ds-cell"><div class="ds-ck">${esc(t.ticker)}</div>`
       + `<div class="ds-cv">${t.spot != null ? esc(String(t.spot)) : '—'}</div>`
-      + `<div class="ds-cs ${cls}">${word}${t.flip != null ? ` · flip ${esc(String(t.flip))}` : ''}</div></div>`;
+      + `<div class="ds-cs ${cls}"><span class="rg">${word}</span>${t.flip != null ? ` · <span class="flip">flip ${esc(String(t.flip))}</span>` : ''}</div></div>`;
   }).join('');
   const when = lv.asof ? ago(lv.asof) : '';
   return `<div class="ds-strip">${cells}<div class="ds-cell"><div class="ds-ck">The book</div>`
