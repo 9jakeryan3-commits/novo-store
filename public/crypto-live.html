@@ -1706,8 +1706,13 @@ function histPanel(){
       +`<span class="lsub"> n=${b.n.toLocaleString()}${thin?' · thin':''}</span></span>`
       +`<span class="v ${strong?'up':(weak?'dn':'')}">${r.toFixed(1)}%</span></div>`;
   }).join('');
-  return `<div class="panel"><div class="ph"><h2>This setup, historically</h2>`
-    +`<span class="sub">scored claims, not backtest</span></div><div class="pb">${rows}`
+  // "This setup" claimed a per-coin scope the data never had: the rates are pooled by claim
+  // KIND across the whole book (byte-identical render on BTC/LINK/BILL/FLR proved it), and the
+  // pooling is deliberate — it is the only reason n reaches five figures, and per-coin slices
+  // would put single-digit n under the panel's own "a rate without one is not evidence" rule.
+  // So the heading moved to match the data, not the data to match the heading (Temi, 09-11).
+  return `<div class="panel"><div class="ph"><h2>Across the book, historically</h2>`
+    +`<span class="sub">every scored claim, all coins · not backtest</span></div><div class="pb">${rows}`
     +`<div class="fnote">Every claim is written down before its horizon passes and scored when it does. `
     +`The sample size is on every line - a rate without one is not evidence.</div></div></div>`;
 }
@@ -2273,6 +2278,10 @@ function drawScreener(){
     const on = SCR_SORT===c[0];
     return `<th class="${c[2]?'num':''}" data-sort="${c[0]}" style="cursor:pointer;${on?'color:var(--cx)':''}">${c[1]}${on?(SCR_DIR<0?' ▾':' ▴'):''}</th>`;
   }).join('');
+  // 1st/2nd/3rd/21st… — a literal 'th' rendered "22th" on 27 of every 100 percentile values.
+  // Same defect the engine fixed at main.py:469 (b83eb63); swept fleet-wide 09-11.
+  const ordSuf=function(n){ n=Math.abs(Math.round(n)); const t=n%10, h=n%100;
+    return t===1&&h!==11?'st':t===2&&h!==12?'nd':t===3&&h!==13?'rd':'th'; };
   const body = rows.map(function(r){
     return `<tr data-c="${r.asset}" style="cursor:pointer">
       <td><b>${r.asset}</b> <span style="color:var(--txt4);font-size:10px">${r.band}</span></td>
@@ -2281,7 +2290,7 @@ function drawScreener(){
       <td class="num">${r.cost==null?'—':r.cost.toFixed(2)+'%'}</td>
       <td class="num" title="${r.fLo!=null?`${r.fLo.toFixed(2)}% to ${r.fHi.toFixed(2)}% annualised across ${r.venues} venues`:''}">${r.fSpread==null?'—':r.fSpread.toFixed(2)+'pt'}</td>
       <td class="num">${r.oi?money(r.oi):'—'}</td>
-      <td class="num ${r.oiPct!=null&&(r.oiPct>=90||r.oiPct<=10)?'am':''}" title="${r.oiN?r.oiN+' logged readings':''}">${r.oiPct==null?'—':r.oiPct.toFixed(0)+'th'}</td>
+      <td class="num ${r.oiPct!=null&&(r.oiPct>=90||r.oiPct<=10)?'am':''}" title="${r.oiN?r.oiN+' logged readings':''}">${r.oiPct==null?'—':r.oiPct.toFixed(0)+ordSuf(r.oiPct)}</td>
       <td class="num">${r.liq?money(r.liq):'—'}</td>
       <td class="num ${r.gex==null?'':(r.gex>=0?'up':'dn')}">${r.gex==null?'—':money(r.gex)}</td></tr>`;
   }).join('');

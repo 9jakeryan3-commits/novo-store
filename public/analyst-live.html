@@ -851,6 +851,11 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 
 <script>
 (function(){
+  /* 1st/2nd/3rd/21st/22nd/23rd — a literal 'th' suffix renders "22th"/"93th" on 27 of every 100
+     percentile values. Same defect the engine fixed at main.py:469 (b83eb63); this is the
+     store-side sweep of the shape (sites: skew pct label, fear gauge). */
+  function _ordSuf(n){ n = Math.abs(Math.round(n)); var t = n % 10, h = n % 100;
+    return t === 1 && h !== 11 ? 'st' : t === 2 && h !== 12 ? 'nd' : t === 3 && h !== 13 ? 'rd' : 'th'; }
   /* Same as the crypto map: the ticker survives a reload, hash first so a shared link opens
      on the index the sender meant. Read BEFORE the token-strip replaceState below. */
   var TICK_KEY = 'novo_analyst_ticker';
@@ -929,9 +934,9 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       var sp=d.skew_pts, _p=(d.skew_pct==null?null:Number(d.skew_pct)), _skc='', _sklbl;
       $('d-sk').textContent=(sp>=0?'+':'')+sp.toFixed(1)+' pts';
       if (_p==null){ _sklbl=(sp>=1.5?'puts bid':sp<=-1?'calls bid':'balanced'); }
-      else if (_p>=80){ _skc='amb'; _sklbl='steep for '+CUR+' · '+_p+'th pct — wider hour typical'; }
-      else if (_p<=20){ _sklbl='flat for '+CUR+' · '+_p+'th pct — quieter hour typical'; }
-      else { _sklbl='middling for '+CUR+' · '+_p+'th pct'; }
+      else if (_p>=80){ _skc='amb'; _sklbl='steep for '+CUR+' · '+_p+_ordSuf(_p)+' pct — wider hour typical'; }
+      else if (_p<=20){ _sklbl='flat for '+CUR+' · '+_p+_ordSuf(_p)+' pct — quieter hour typical'; }
+      else { _sklbl='middling for '+CUR+' · '+_p+_ordSuf(_p)+' pct'; }
       $('d-sk').className='v '+_skc;
       $('d-sk-s').textContent = _sklbl+(d.atm_iv?('  ·  IV '+d.atm_iv+'%'):'');
     } else { $('d-sk').textContent='—'; $('d-sk').className='v'; $('d-sk-s').textContent=''; }
@@ -1301,7 +1306,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     box.style.display = '';
     var lbl = $('fear-lbl'); if (lbl) lbl.textContent = 'Fear gauge · ' + sym;
     $('fear-vix').textContent = sym + ' ' + val.toFixed(1);
-    $('fear-pct').textContent = pct + 'th pct · 1yr';
+    $('fear-pct').textContent = pct + _ordSuf(pct) + ' pct · 1yr';
     // Color aligned to the SERVER's tag bands (very-low/low <=35 calm, normal <=65, elevated/high >65), so the
     // pill text and its color never imply different severities.
     var col = pct <= 35 ? '#10b981' : pct <= 65 ? '#f59e0b' : '#f43f5e';
