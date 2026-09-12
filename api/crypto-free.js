@@ -189,6 +189,6 @@ function paidTeaser(code, c) {
   if (c.true_cost) has.push("what a round trip actually costs you on Robinhood");
   if (c.panels && c.panels.indexOf("oi_quadrant") >= 0) has.push("the price/open-interest regime read");
   has.push("history and percentiles");
-  has.push("NoVo, who reads this map and the equity dealer map");
+  has.push("Dr. NoVo, who reads this map and the equity dealer map");
   return has;
 }
