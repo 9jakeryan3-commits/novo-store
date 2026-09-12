@@ -1321,20 +1321,9 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
 .term-err{padding:4px 0;font-size:10.5px;color:var(--red);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
 .term-validator{padding:4px 0;font-size:10.5px;color:var(--cyn);border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;}
 
-/* ── Analysis Feed Sections ── */
-.intel-report-title{font-size:14px;font-weight:900;color:var(--txt1);letter-spacing:-0.5px;margin-bottom:2px;font-family:var(--font);}
-.intel-report-sub{font-size:10px;color:var(--txt3);margin-bottom:14px;font-family:var(--sans);}
-.intel-section{margin-bottom:12px;}
-.intel-section-lbl{font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;color:var(--txt3);display:block;padding:8px 0 6px;border-bottom:1px solid var(--bdr);margin-top:14px;margin-bottom:8px;font-family:var(--sans);}
-.intel-section-body{font-size:12px;color:var(--txt2);line-height:1.8;font-family:var(--sans);}
-.intel-bias{display:inline-block;padding:3px 14px;border-radius:4px;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:1.5px;border:1px solid;}
-.intel-bias-bear{color:var(--red);border-color:rgba(244,63,94,.5);background:rgba(244,63,94,.08);}
-.intel-bias-bull{color:var(--grn);border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.08);}
-.intel-bias-neut{color:var(--txt2);border-color:var(--bdr);background:rgba(255,255,255,.03);}
-.intel-levels{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:4px;}
-.intel-lvl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 9px;background:rgba(255,255,255,.02);border-left:2px solid var(--bdr);}
-.intel-lvl-k{font-family:var(--sans);font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.3px;}
-.intel-lvl-v{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--txt1);white-space:nowrap;}
+/* ── Analysis Feed Sections ── the rules moved to /js/novo-feed.js, alongside the renderer that
+   writes these classes, so the markup and its styling cannot drift apart. #intel-output below
+   is the PANE and stays here. */
 
 /* ═══ SCROLLBARS ════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -3772,88 +3761,18 @@ function connectTelemetry(){
     if(data.intel_text&&intelDisplay){
       if(intelDisplay.dataset.raw!==data.intel_text){
         intelDisplay.dataset.raw=data.intel_text;
-        const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        function colorize(t){
-          t=t.replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--txt1);font-weight:700;">$1</strong>');
-          t=t.replace(/(\$[\d,]+\.?\d*|[-+]?\d+\.?\d*%)/g,'<span style="color:var(--cyn);font-weight:600;">$1</span>');
-          // (inline green/red/amber sentiment-word coloring removed 2026-07-13 — single colored words mid-sentence
-          //  read tacky; the prose stays clean neutral text, with bold emphasis + cyan numbers only.)
-          return t;
-        }
-        const lines=stripEmoji(data.intel_text).split('\n');
-        let html='';
-        let i=0;
-        // Section header: line (stripped of **) has ALL-CAPS label before first colon
-        const _DESK_LABELS=['THE READ','STRUCTURAL POSTURE','WHAT TO WATCH','WHAT CHANGED','WHAT IT MEANS','KEY LEVELS','THE OPEN','THE CLOSE','THE WEEK AHEAD','THE SETUP','THE TAKEAWAY'];
-        function isSHdr(line){
-          const s=line.replace(/\*\*/g,'').trim();
-          if(_DESK_LABELS.indexOf(s.toUpperCase())>=0) return true;   // standalone desk-note label, no colon
-          const ci=s.indexOf(':');
-          if(ci<3||ci>30) return false;
-          const lbl=s.slice(0,ci);
-          return /^[A-Z]/.test(lbl)&&lbl===lbl.toUpperCase();
-        }
-        function parseSHdr(line){
-          const s=line.replace(/\*\*/g,'').trim();
-          const ci=s.indexOf(':');
-          if(ci<0) return {label:s.trim(), body:''};
-          return {label:s.slice(0,ci).trim(), body:s.slice(ci+1).trim()};
-        }
-        // Title block
-        while(i<lines.length){
-          const l=lines[i];
-          if(!l.trim()){i++;break;}
-          if(isSHdr(l)) break;
-          if(i===0) html+=`<div class="intel-report-title">${esc(l.trim().replace(/^\[+\s*/,'').replace(/\s*\]+$/,''))}</div>`;
-          else html+=`<div class="intel-report-sub">${esc(l.trim())}</div>`;
-          i++;
-        }
-        // Section blocks
-        while(i<lines.length){
-          const l=lines[i];
-          if(!l.trim()){i++;continue;}
-          if(isSHdr(l)){
-            const {label,body}=parseSHdr(l);
-            const U=label.toUpperCase();
-            const bodyLines=[];
-            if(body) bodyLines.push(body);
-            i++;
-            while(i<lines.length&&lines[i].trim()&&!isSHdr(lines[i])){
-              bodyLines.push(lines[i].trim());
-              i++;
-            }
-            const rawBody=bodyLines.join(' ');
-            let bodyHtml;
-            if(U.indexOf('PATTERN')>=0){
-              // Observed Patterns: always render as a sentiment-colored pill (green if bullish-
-              // leaning, red if bearish-leaning) so BOTH directions get the box — not just text
-              // that happens to start with a bias word. Checked before the bias branch below.
-              const bt=rawBody.trim();
-              const cls=/BEAR/i.test(bt)?'intel-bias-bear':/BULL/i.test(bt)?'intel-bias-bull':'intel-bias-neut';
-              bodyHtml=`<span class="intel-bias ${cls}">${esc(bt)}</span>`;
-            } else if(U.indexOf('BIAS')>=0 || /^(BULLISH|BEARISH|NEUTRAL)\b/i.test(rawBody.trim())){
-              const bt=rawBody.trim();
-              const cls=/BEAR/i.test(bt)?'intel-bias-bear':/BULL/i.test(bt)?'intel-bias-bull':'intel-bias-neut';
-              bodyHtml=`<span class="intel-bias ${cls}">${esc(bt)}</span>`;
-            } else if(U.indexOf('LEVEL')>=0){
-              const items=rawBody.split(/[,;]+/).map(function(x){return x.trim();}).filter(Boolean);
-              let cells='';
-              items.forEach(function(it){
-                const m=it.match(/^(.*?)[\s:]+([\d][\d.,]*)$/);
-                if(m){cells+=`<div class="intel-lvl"><span class="intel-lvl-k">${esc(m[1].trim())}</span><span class="intel-lvl-v">${esc(m[2].trim())}</span></div>`;}
-                else{cells+=`<div class="intel-lvl"><span class="intel-lvl-k">${esc(it)}</span><span class="intel-lvl-v"></span></div>`;}
-              });
-              bodyHtml=`<div class="intel-levels">${cells}</div>`;
-            } else {
-              bodyHtml=colorize(esc(rawBody));
-            }
-            html+=`<div class="intel-section"><div class="intel-section-lbl">${esc(label)}</div><div class="intel-section-body">${bodyHtml}</div></div>`;
-          } else {
-            html+=`<div class="intel-section-body">${colorize(esc(l))}</div>`;
-            i++;
-          }
-        }
-        intelDisplay.innerHTML=html;
+        /* THE PARSE MOVED to /js/novo-feed.js (Jake, 09-12, with both dashboards open:
+           "quality of display must match look at analysis feed in trade vs analyst, analyst
+           sucks"). It lived HERE, inside a websocket onmessage handler, which is precisely
+           why Analyst never had it — unreachable from anywhere else, so that surface did the
+           cheapest thing that works and printed the same string into a bare <pre>.
+           One module, two dashboards. Output was verified byte-identical to the block this
+           replaces, on the real payload, before the swap — so this pane did not change.
+           The dedup guard above and the scroll below stay: they are about the PANE, not the
+           parse. */
+        if (window.novoFeed) window.novoFeed.mount(intelDisplay, data.intel_text);
+        else intelDisplay.textContent = data.intel_text;   // module missing: raw text beats blank
+
         const _la=intelDisplay.parentElement;
         _la.scrollTop=_la.scrollHeight;
       }
@@ -8446,6 +8365,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-predict.js?v=02a934ba"></script>
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <script src="/js/novo-futures.js?v=3e879719"></script>
+<script src="/js/novo-feed.js?v=f1d26292"></script>
 <script src="/js/novo-tape.js?v=dc1692c1"></script>
 <script src="/js/novo-congress.js?v=bde9c75a"></script>
 <script>

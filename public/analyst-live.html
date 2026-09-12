@@ -1485,13 +1485,33 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   function renderAnalysisFeed(d){
     var el = document.getElementById('afeed-card'); if (!el) return;
     var t = d && d.intel;
+    /* THIS WAS A BARE <pre> OF THE RAW ENGINE STRING. Jake, 09-12, with both dashboards open:
+       "quality of display must match look at analysis feed in trade vs analyst, analyst sucks."
+       He was right and the gap was not small — Trader parsed this same string into a title, a
+       sentiment pill, a grid of level cards and prose, while this printed it as a log file:
+       "MACRO BIAS      : NEUTRAL", colons hanging in mid-air, every level on one run-on line.
+       Neither surface was wrong about the DATA; the parse simply lived inside Trader's websocket
+       handler where nothing else could reach it, so this card did the cheapest thing that worked.
+       Both now call /js/novo-feed.js, which is that exact parse, moved and verified to emit
+       byte-identical HTML first. `wide` is the only difference: this card is full-width, so the
+       level grid runs four across instead of the rail's two.
+       The <pre> survives as the fallback — if the module fails to load, raw text beats blank. */
     el.innerHTML = '<h2>Analysis feed <span style="font-size:11px;color:var(--txt3);font-weight:400;">'
       + 'what the engine is saying, as it says it</span></h2>'
-      + (t ? '<pre class="afeed-body">' + _escH(String(t)) + '</pre>'
+      + (t ? '<div class="afeed-render"></div>'
            : '<div style="color:var(--txt3);font-size:13px;line-height:1.6;">Nothing on the feed '
              + 'right now. The hourly structural audit and the overnight ES brief land here as '
              + 'they are written &mdash; an empty feed means none has been written since the last '
              + 'restart, not that the engine is quiet.</div>');
+    if (t) {
+      var box = el.querySelector('.afeed-render');
+      /* If the module is missing the card would otherwise be an empty div where a read should be,
+         which is the silent-blank failure this dashboard has shipped twice. Fall back to the
+         <pre> the card used to be: uglier than the render, infinitely better than nothing. */
+      if (!(window.novoFeed && window.novoFeed.mount(box, String(t), { wide: true })) && box) {
+        box.innerHTML = '<pre class="afeed-body">' + _escH(String(t)) + '</pre>';
+      }
+    }
   }
 
   function renderTapeFlow(d){
@@ -2301,6 +2321,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <!-- The Trader's own Futures and tape modules, unchanged. Same code, same payload, same panel. -->
 <script src="/js/novo-futures.js?v=3e879719"></script>
+<script src="/js/novo-feed.js?v=f1d26292"></script>
 <script src="/js/novo-tape.js?v=dc1692c1"></script>
 <script src="/js/novo-congress.js?v=bde9c75a"></script>
 <script>
