@@ -17,7 +17,7 @@ const T = new Map();   // hashes (tallies)
 require.cache[KV_PATH] = { id: KV_PATH, filename: KV_PATH, loaded: true,
   exports: { kv: () => ({ async get(k) { return S.has(k) ? S.get(k) : null; },
                           async set(k, v) { S.set(k, v); },
-                          // the alert record (api/_lib/alert-record.js) rides appendNovoFire
+                          // the alert record (api/_lib/alert-record.js) rides appendMarketAlert
                           async rpush(k, v) { const l = H.get(k) || []; l.push(v); H.set(k, l); return l.length; },
                           async hincrby(k, f, by) { const h = T.get(k) || {}; h[f] = Number(h[f] || 0) + by; T.set(k, h); return h[f]; },
                           async hgetall(k) { return T.get(k) || null; } }) } };
@@ -166,7 +166,7 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
      'direction') could never pass again. Rewritten to check what the gate is now FOR: the right
      reading becomes an alert, the wrong ones become nothing, and his prediction book is untouched. */
   const sel = await P.selectCryptoPredictions(SNAP);
-  const fires = await P.listNovoFires('crypto', 25);
+  const fires = await P.listMarketAlerts('crypto', 25);
   ok('the selector promotes ONLY the reading with real edge on a real denominator',
     sel.made === 1 && fires.length === 1 && fires[0].symbol === 'BTC',
     JSON.stringify({ made: sel.made, fires: fires.map((f) => f.symbol + ':' + f.kind) }));
@@ -180,7 +180,7 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
     JSON.stringify(fires[0].receipts));
   const again = await P.selectCryptoPredictions(SNAP);
   ok('...and the same reading can never become a second alert',
-    again.made === 0 && (await P.listNovoFires('crypto', 25)).length === 1, JSON.stringify(again));
+    again.made === 0 && (await P.listMarketAlerts('crypto', 25)).length === 1, JSON.stringify(again));
 
   // ── 7. per-desk: crypto calls at the crypto desk, equities on the equity side ──────────────
   /* This used to lean on the selector having written a crypto row. It no longer writes any (the
@@ -240,8 +240,8 @@ const FRIDAY_15ET = Date.UTC(2026, 8, 4, 19, 0, 0);
   ok('...and the same ticket can never surface twice',
     cur2.kept === 0 && JSON.parse(S.get('novo:alerts:feed')).length === 1,
     JSON.stringify(cur2));
-  const eqOnly = await P.listNovoFires('equity');
-  const cxOnly = await P.listNovoFires('crypto');
+  const eqOnly = await P.listMarketAlerts('equity');
+  const cxOnly = await P.listMarketAlerts('crypto');
   ok('the feed splits per desk like everything else',
     eqOnly.length === 0 && cxOnly.length === 1,
     JSON.stringify({ equity: eqOnly.length, crypto: cxOnly.length }));

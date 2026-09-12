@@ -102,7 +102,7 @@ module.exports = async (req, res) => {
       /* NoVo Unleashed: the prediction record, COMP SEATS ONLY — the same server-side gate the
          tools carry. Everyone else gets comp:false and no predictions key at all: absence, not an
          empty list, so the page can tell "not yours to see" from "none yet". */
-      let comp = false, predictions, novo_alerts;
+      let comp = false, predictions, market_alerts;
       try { comp = require("./_lib/comp.js").isComp(email); } catch (_) {}
       if (comp) {
         // Per desk: the crypto dashboard reads NoVo's crypto calls, the equity dashboards his
@@ -116,8 +116,8 @@ module.exports = async (req, res) => {
            edge) rather than Dr. NoVo alerts." Every fire here cleared an arithmetic edge gate on
            the engine's own base-rate table — no model call is involved, so attributing them to the
            analyst was crediting him with the engine's work. He READS them; he does not make them. */
-        try { novo_alerts = await require("./_lib/predictions.js")
-          .listNovoFires(app === "crypto" ? "crypto" : "equity", 20); } catch (_) {}
+        try { market_alerts = await require("./_lib/predictions.js")
+          .listMarketAlerts(app === "crypto" ? "crypto" : "equity", 20); } catch (_) {}
       }
       /* READS ARE FOR EVERYONE (Jake, 2026-09-07): "predictions tab is viewable to all but only
          the reads predictions are viewable and predictions are not usable outside comp seat".
@@ -141,15 +141,17 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, ...out, digest, digest_log, comp,
                                     ...(mine ? { my_predictions: mine } : {}),
                                     ...(predictions && !predictions.error ? { predictions } : {}),
-                                    /* BOTH KEYS, DELIBERATELY. `market_alerts` is the name now;
-                                       `novo_alerts` ships beside it as a transitional alias because
-                                       every .js on this site is cached immutable for a year, so a
-                                       member holding the previous novo-alerts.js would read the new
-                                       key as undefined and the whole group would VANISH with no
-                                       error — the silent-blank failure this codebase keeps paying
-                                       for. Drop the alias once the stamped bundle has rolled. */
-                                    ...(comp && Array.isArray(novo_alerts)
-                                        ? { market_alerts: novo_alerts, novo_alerts } : {}) });
+                                    /* ONE KEY. A `novo_alerts` alias shipped here for one deploy as
+                                       cache insurance — every .js is immutable for a year, so a
+                                       stale bundle reading a renamed key would silently empty the
+                                       group. It is gone because the insurance was against a risk
+                                       that does not exist here: this panel is comp-gated and Jake
+                                       is the only comp seat, so the only reader who could hold a
+                                       stale bundle is the one person who can reload. Carrying his
+                                       name on the wire to protect an empty set was the tail wagging
+                                       the dog. The client still tolerates the old key; the server
+                                       no longer speaks it. */
+                                    ...(comp && Array.isArray(market_alerts) ? { market_alerts } : {}) });
     }
 
     if (req.method === "POST") {

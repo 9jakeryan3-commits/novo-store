@@ -14,7 +14,7 @@
 // he READS all of it and makes predictions from it. So:
 //
 //   * every row in this book cleared an ARITHMETIC edge gate on the engine's own base-rate table.
-//     No model call appears anywhere in the release path (predictions.js appendNovoFire). Calling
+//     No model call appears anywhere in the release path (predictions.js appendMarketAlert). Calling
 //     them "Dr. NoVo's alerts" credited the analyst with the engine's work.
 //   * there is no longer any such thing as an alert he "brings forward". Anything HE originates is
 //     a PREDICTION and belongs in pred:log under his grade. One act, one denominator.
@@ -169,7 +169,7 @@ async function _settle(r, a) {
 /**
  * Record an alert at the moment it is RELEASED to a comp seat.
  *
- * Called from appendNovoFire — the single chokepoint every released alert passes through, equity
+ * Called from appendMarketAlert — the single chokepoint every released alert passes through, equity
  * and crypto alike. Recording anywhere else would grade one asset class and silently miss the other.
  *
  * ⚠ THE NUMBERS ARE THE POINT. The feed row stores the alert as PROSE ("BUY DRAFT at $0.0017...
@@ -230,7 +230,7 @@ async function recordRelease(entry) {
     await _save(r, list);
 
     /* RELEASED IS COUNTED AT RELEASE, not inferred later from a list length — the same reasoning
-       appendNovoFire already applies to its own funnel counter. This is the number every other
+       appendMarketAlert already applies to its own funnel counter. This is the number every other
        number in the scoreboard has to reconcile against. */
     try {
       await r.hincrby(TALLY, "released", 1);

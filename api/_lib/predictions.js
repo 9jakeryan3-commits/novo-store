@@ -598,7 +598,7 @@ const FEED_KEY = "novo:alerts:feed";
 /* Every fire that reaches this function has cleared the edge gate and is being shown to comp
    seats — that is Jake's "released comp seat alerts" stage, counted at the moment of release
    rather than inferred later from a list length. */
-async function appendNovoFire(entry, grade) {
+async function appendMarketAlert(entry, grade) {
   try { await bump("released", 1); } catch (_) {}
   /* THE FIRE IS ALSO RECORDED AS A GRADEABLE MARKET ALERT. The feed row below stays exactly what
      it was — prose for the panel — while the numbers the engines grade against go to the alert
@@ -620,7 +620,7 @@ async function appendNovoFire(entry, grade) {
   l.push({ ts: Date.now(), ...entry });
   try { await r.set(FEED_KEY, JSON.stringify(l.slice(-100)), { ex: 60 * 24 * 3600 }); } catch (_) {}
 }
-async function listNovoFires(assetClass, limit) {
+async function listMarketAlerts(assetClass, limit) {
   const r = kv();
   if (!r) return [];
   let l = null;
@@ -704,7 +704,7 @@ async function curateChainFires(snap) {
       let seen = null;
       try { seen = await r.get(seenKey); } catch (_) {}
       if (seen) continue;
-      await appendNovoFire({
+      await appendMarketAlert({
         asset_class: "crypto", symbol: String(t.asset_code || "").toUpperCase(),
         kind: t.kind, title: String(t.claim || (t.kind + " fired")).slice(0, 200),
         horizon_min: Number(t.horizon_min) || null,
@@ -801,7 +801,7 @@ async function onEquityFire(fire) {
   /* Same correction as the crypto gate above: this promotes an earned alert, it does not
      author a prediction for him. See _lib/novo-calls.js for the calls that are actually his. */
   const predicted = false;
-  await appendNovoFire({
+  await appendMarketAlert({
     asset_class: "equity", symbol: fire.symbol, kind: fire.rule,
     title: fire.symbol + " " + side + " — " + (fire.reading || fire.rule),
     horizon_min: hm, receipts: receipts,
@@ -887,7 +887,7 @@ async function selectCryptoPredictions(snap) {
          predictions.js has never contained a model call. 95 graded rows, every one "up", every one
          cost_anomaly, 33.7% — a threshold cannot have a bad week, it has a number.
          His own calls now come from _lib/novo-calls.js, where he actually reads the book. */
-      await appendNovoFire({ asset_class: "crypto", symbol: sym, kind: f.kind,
+      await appendMarketAlert({ asset_class: "crypto", symbol: sym, kind: f.kind,
         title: sym + " " + side + " within " + (hm >= 60 ? Math.round(hm / 60) + "h" : hm + "m"),
         horizon_min: hm,
         receipts: rate.hit_rate + "% over " + rate.n_cells + " coin-days vs "
@@ -1063,5 +1063,5 @@ module.exports = { novoRecord, ruleOf, makePrediction, listPredictions, evaluate
                    makeUserPrediction, listUserPredictions,
                    BTC_NEUTRAL_PCT, BTC_NEUTRAL_PROV,
                    onEquityFire,
-                   appendNovoFire, listNovoFires, curateChainFires,
+                   appendMarketAlert, listMarketAlerts, curateChainFires,
                    evaluateEquityPredictions, evaluateCryptoPredictions };
