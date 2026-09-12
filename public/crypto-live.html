@@ -1697,16 +1697,32 @@ function histPanel(){
   // the crypto map had the numbers in the snapshot and showed them nowhere.
   const br=(SNAP&&SNAP.health&&SNAP.health.base_rates)||[];
   if(!br.length) return '';
+  /* ⚠ EVERY LIVE KIND NEEDS AN ENTRY, INCLUDING THE SIDE-SPLIT ONES. base_rates() splits two
+     kinds per predicted side and ships `kind_side` — funding_extreme_longs_paying /
+     _shorts_paying, oi_quadrant_up / _down (the documented fix: pooled funding_extreme was
+     hiding a 44.6% wrong-way side). This map was never extended, so four of six rows fell
+     through to `||b.kind` and printed the INTERNAL RULE IDENTIFIER on a paid surface —
+     "funding_extreme_shorts_paying" both reads as broken and teaches the method: it names the
+     rule, says it is split by side, and hands over the key to track it by (Temi, 09-12, under
+     Jake's stop-explaining-the-method rule). KINDLABEL near the feed had the split entries and
+     this map did not — two maps over one vocabulary, which is how one drifted. */
   const label={gamma_damp:'Gamma dampening into the 08:00 UTC expiry',
-               gamma_pin:'Gamma pin into the 08:00 UTC expiry (retired rule)',
                oi_quadrant:'Price / open-interest regime',
+               oi_quadrant_up:'Price / open-interest regime · price up',
+               oi_quadrant_down:'Price / open-interest regime · price down',
                funding_extreme:'Funding at an extreme',
+               funding_extreme_longs_paying:'Funding at an extreme · longs paying',
+               funding_extreme_shorts_paying:'Funding at an extreme · shorts paying',
                cost_anomaly:'Cost-to-trade anomaly'};
   const rows=br.filter(function(b){return b && b.n;}).map(function(b){
+    /* A SILENT FALLBACK IS WHAT LET THIS RUN FOR WEEKS. `||b.kind` renders an unmapped kind as
+       its raw identifier, so a collector change downstream looks like working copy. An unmapped
+       kind is now DROPPED — the panel loses a row and nobody is handed an internal name. */
+    if(!label[b.kind]) return '';
     const r=b.hit_rate, strong=r>=55, weak=r<=45;
     // n is the honesty. A rate without one is a number pretending to be evidence.
     const thin=b.n<30;
-    return `<div class="kv"><span class="k">${label[b.kind]||b.kind}`
+    return `<div class="kv"><span class="k">${label[b.kind]}`
       +`<span class="lsub"> n=${b.n.toLocaleString()}${thin?' · thin':''}</span></span>`
       +`<span class="v ${strong?'up':(weak?'dn':'')}">${r.toFixed(1)}%</span></div>`;
   }).join('');
