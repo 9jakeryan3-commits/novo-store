@@ -73,11 +73,26 @@
     '.novo-congress .cg-empty{padding:22px 0;font-size:13px;color:var(--txt3,#6e6e6e)}',
     '@media (max-width:560px){.novo-congress .cg-row{grid-template-columns:56px 1fr}'
       + '.novo-congress .cg-side{grid-column:2;justify-self:start}}',
+    // search boxes — hairline only, no box fill (house rule)
+    '.novo-congress .cg-search{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 8px}',
+    '.novo-congress .cg-q{flex:1;min-width:130px;background:none;border:0;border-bottom:1px solid '
+      + 'var(--bdr,#2c2c30);color:var(--txt1,#f0f0ee);font-family:inherit;font-size:12px;'
+      + 'padding:5px 2px;outline:none}',
+    '.novo-congress .cg-q:focus{border-bottom-color:var(--cyn,#22d3ee)}',
+    '.novo-congress .cg-q::placeholder{color:var(--txt3,#6e6e6e)}',
+    // by-member list
+    '.novo-congress .cg-mlist{display:flex;flex-direction:column}',
+    '.novo-congress .cg-mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;'
+      + 'padding:8px 0;border-bottom:1px solid var(--bdr2,#1c1c20)}',
+    '.novo-congress .cg-mwho{font-size:13px;color:var(--txt1,#f0f0ee);font-weight:600}',
+    '.novo-congress .cg-mstat{font-size:11.5px;color:var(--txt3,#6e6e6e);white-space:nowrap;font-family:var(--font,ui-monospace),monospace}',
+    '.novo-congress .cg-mstat .cg-buy{color:var(--grn,#10b981)}',
+    '.novo-congress .cg-mstat .cg-sell{color:var(--red,#f43f5e)}',
   ].join('');
 
   var root = null;
   var DATA = null;
-  var state = { side: '', stocks: true };
+  var state = { side: '', stocks: true, member: '', ticker: '', sort: '', view: 'filings' };
   var loading = false;
 
   function styles() {
@@ -127,14 +142,54 @@
           + lag.median + ' days</b> (p90 ' + lag.p90 + ', longest ' + lag.max + ')' : '')
       + '. Amounts are the ranges members file &mdash; a few file an exact figure instead.</div>');
 
-    // filters
+    // SEARCH — the two boxes the competitors lead with, over data we already hold. Client-side
+    // over the loaded window (member also narrows server-side on submit for the full window).
+    h.push('<div class="cg-search">'
+      + '<input type="text" class="cg-q" data-q="member" placeholder="Find a member" value="' + esc(state.member) + '">'
+      + '<input type="text" class="cg-q" data-q="ticker" placeholder="Find a ticker" value="' + esc(state.ticker) + '">'
+      + '</div>');
+
+    // filters + sort + view toggle
     h.push('<div class="cg-filters">'
       + '<button type="button" data-side="" aria-pressed="' + (state.side === '') + '">All</button>'
       + '<button type="button" data-side="buy" aria-pressed="' + (state.side === 'buy') + '">Buys</button>'
       + '<button type="button" data-side="sell" aria-pressed="' + (state.side === 'sell') + '">Sells</button>'
       + '<button type="button" data-stocks="' + (state.stocks ? '0' : '1') + '" aria-pressed="'
         + (!state.stocks) + '">Include funds &amp; bonds</button>'
+      + '<button type="button" data-sort="' + (state.sort === 'lag' ? '' : 'lag') + '" aria-pressed="'
+        + (state.sort === 'lag') + '">' + (state.sort === 'lag' ? 'Newest first' : 'Slowest to file') + '</button>'
+      + '<button type="button" data-view="' + (state.view === 'members' ? 'filings' : 'members') + '" aria-pressed="'
+        + (state.view === 'members') + '">' + (state.view === 'members' ? 'By filing' : 'By member') + '</button>'
       + '</div>');
+
+    // BY-MEMBER VIEW — aggregation the flat list could not show. Counts filings, never dollars
+    // (the amount is a band; summing bands invents a figure nobody filed), so a card says how
+    // OFTEN a member filed and across how many names, not how much.
+    if (state.view === 'members') {
+      var mem = (DATA.members || []).filter(function (m) {
+        return !state.member || m.member.toLowerCase().indexOf(state.member.toLowerCase()) >= 0;
+      });
+      if (!mem.length) {
+        h.push('<div class="cg-empty">No members match this filter.</div>');
+      } else {
+        h.push('<div class="cg-mlist">' + mem.map(function (m) {
+          return '<div class="cg-mrow">'
+            + '<div class="cg-mwho">' + esc(m.member)
+              + (m.state_district ? ' <span class="cg-sub">' + esc(m.state_district) + '</span>' : '') + '</div>'
+            + '<div class="cg-mstat">'
+              + '<span class="cg-buy">' + m.buys + ' buy' + (m.buys === 1 ? '' : 's') + '</span> · '
+              + '<span class="cg-sell">' + m.sells + ' sell' + (m.sells === 1 ? '' : 's') + '</span> · '
+              + esc(String(m.names)) + ' name' + (m.names === 1 ? '' : 's') + '</div>'
+            + '</div>';
+        }).join('') + '</div>');
+        h.push('<div class="cg-foot">Ranked by number of filings in the window, not by dollars — '
+          + 'disclosed amounts are ranges, so a sum would be a figure nobody filed. Tap a member '
+          + 'name in the search to see their filings.</div>');
+        root.innerHTML = h.join('');
+        wire();
+        return;
+      }
+    }
 
     /* The tally counts FILINGS. Never dollars - see the band note at the top of this file. */
     if (DATA.top && DATA.top.length) {
@@ -145,6 +200,12 @@
     }
 
     var rows = DATA.rows || [];
+    /* Ticker search narrows client-side over the loaded window — instant, no round trip. Member
+       search rides the fetch (server narrows the whole window), so it is not re-applied here. */
+    if (state.ticker) {
+      var tq = state.ticker.toUpperCase();
+      rows = rows.filter(function (r) { return String(r.ticker || '').indexOf(tq) >= 0; });
+    }
     if (!rows.length) {
       h.push('<div class="cg-empty">No disclosures match this filter.</div>');
     } else {
@@ -183,21 +244,53 @@
     h.push('<div class="cg-foot">' + foot.join(' ') + '</div>');
 
     root.innerHTML = h.join('');
+    wire();
+  }
 
+  /* One definition of what every control does, called from both the list view and the by-member
+     view's early return. A filter/sort/view change that alters the server query calls load();
+     a ticker search narrows the loaded window client-side and only needs a re-render. */
+  function wire() {
     root.querySelectorAll('.cg-filters button').forEach(function (b) {
       b.addEventListener('click', function () {
-        if (b.hasAttribute('data-stocks')) state.stocks = b.getAttribute('data-stocks') === '1';
-        else state.side = b.getAttribute('data-side') || '';
-        load();
+        if (b.hasAttribute('data-stocks')) { state.stocks = b.getAttribute('data-stocks') === '1'; load(); }
+        else if (b.hasAttribute('data-sort')) { state.sort = b.getAttribute('data-sort') || ''; load(); }
+        else if (b.hasAttribute('data-view')) { state.view = b.getAttribute('data-view') || 'filings'; render(); }
+        else { state.side = b.getAttribute('data-side') || ''; load(); }
       });
     });
+    root.querySelectorAll('.cg-q').forEach(function (inp) {
+      // ticker filters live (client-side); member submits on Enter/blur (server-side, full window)
+      inp.addEventListener('input', function () {
+        if (inp.getAttribute('data-q') === 'ticker') { state.ticker = inp.value.trim(); reRenderKeepFocus(inp); }
+      });
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && inp.getAttribute('data-q') === 'member') { state.member = inp.value.trim(); load(); }
+      });
+      inp.addEventListener('blur', function () {
+        if (inp.getAttribute('data-q') === 'member' && inp.value.trim() !== state.member) {
+          state.member = inp.value.trim(); load();
+        }
+      });
+    });
+  }
+
+  /* A client-side ticker keystroke re-renders, which would drop focus from the box the user is
+     typing in. Re-render, then restore the caret so typing is uninterrupted. */
+  function reRenderKeepFocus(inp) {
+    var q = inp.getAttribute('data-q'), pos = inp.selectionStart;
+    render();
+    var again = root.querySelector('.cg-q[data-q="' + q + '"]');
+    if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (_e) {} }
   }
 
   function load() {
     loading = true;
     render();
     var q = '/api/congress?limit=120&stocks=' + (state.stocks ? '1' : '0')
-      + (state.side ? '&side=' + state.side : '');
+      + (state.side ? '&side=' + state.side : '')
+      + (state.member ? '&member=' + encodeURIComponent(state.member) : '')
+      + (state.sort ? '&sort=' + state.sort : '');
     return fetch(q, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; })

@@ -31,6 +31,8 @@ module.exports = async function handler(req, res) {
   const ticker = String(req.query.ticker || '').trim().toUpperCase();
   const side = String(req.query.side || '').trim().toLowerCase();
   const stocksOnly = req.query.stocks !== '0';
+  const member = String(req.query.member || '').trim().toLowerCase();   // substring, case-insensitive
+  const sort = String(req.query.sort || '').trim().toLowerCase();       // '' (newest) | 'lag'
 
   let rows = [];
   let unreadable = 0;
@@ -67,14 +69,43 @@ module.exports = async function handler(req, res) {
         statutory_limit: 45, dates_inconsistent: inconsistent }
     : null;
 
+  // The by-member tally is built from the same pre-slice, pre-member-filter set the ticker tally
+  // uses, so "who is filing most" describes the whole window rather than the current search — a
+  // reader searching one member still sees the honest field they are searching within. Counts
+  // FILINGS, never dollars, for the same reason `top` does: the amount is a band.
+  let memberBase = rows;
+  if (stocksOnly) memberBase = memberBase.filter((x) => x.ticker && x.asset_code === 'ST');
+  if (side === 'buy' || side === 'sell') memberBase = memberBase.filter((x) => x.type === side);
+  const mtally = {};
+  for (const x of memberBase) {
+    const name = x.member || 'Unknown';
+    const m = (mtally[name] = mtally[name] || { member: name, state_district: x.state_district || null,
+      buys: 0, sells: 0, filings: 0, tickers: new Set() });
+    if (x.type === 'buy') m.buys++; else if (x.type === 'sell') m.sells++;
+    m.filings++;
+    if (x.ticker) m.tickers.add(x.ticker);
+  }
+  const members = Object.values(mtally)
+    .map((m) => ({ member: m.member, state_district: m.state_district,
+      buys: m.buys, sells: m.sells, filings: m.filings, names: m.tickers.size }))
+    .sort((a, b) => b.filings - a.filings).slice(0, 20);
+
   let out = rows;
   if (stocksOnly) out = out.filter((x) => x.ticker && x.asset_code === 'ST');
   if (ticker) out = out.filter((x) => x.ticker === ticker);
   if (side === 'buy' || side === 'sell') out = out.filter((x) => x.type === side);
+  if (member) out = out.filter((x) => String(x.member || '').toLowerCase().includes(member));
 
-  // newest disclosure first - this is a filing feed, so it orders by when it became public
-  out.sort((a, b) => String(b.notification_date || '').localeCompare(String(a.notification_date || ''))
-                  || String(b.transaction_date || '').localeCompare(String(a.transaction_date || '')));
+  if (sort === 'lag') {
+    // Slowest disclosures first — the rows most likely to be misread as news. A null lag (a
+    // filing whose dates we could not pair) sorts LAST rather than pretending to be 0.
+    out.sort((a, b) => (Number.isFinite(b.lag_days) ? b.lag_days : -Infinity)
+                     - (Number.isFinite(a.lag_days) ? a.lag_days : -Infinity));
+  } else {
+    // newest disclosure first - this is a filing feed, so it orders by when it became public
+    out.sort((a, b) => String(b.notification_date || '').localeCompare(String(a.notification_date || ''))
+                    || String(b.transaction_date || '').localeCompare(String(a.transaction_date || '')));
+  }
 
   const total = out.length;
   /* ⚠ THE TALLY IS COMPUTED BEFORE THE SLICE. Computing it after meant the "top names" strip
@@ -111,6 +142,7 @@ module.exports = async function handler(req, res) {
     count: out.length,
     total_matching: total,
     top,
+    members,
     rows: out,
     updated: meta ? meta.last_run : null,
     meta,
