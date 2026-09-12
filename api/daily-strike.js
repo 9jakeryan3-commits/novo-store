@@ -171,7 +171,7 @@ ${_CHROME.HEAD}
   /* THE REGIME STRIP — our data on a news page. Nobody else's front page can carry this. */
   .ds-strip{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--bdr,#2c2c30);
     margin-bottom:22px;}
-  .ds-cell{flex:1 1 150px;padding:11px 14px 11px 0;border-right:1px solid var(--bdr2,#1c1c20);}
+  .ds-cell{flex:1 1 150px;padding:11px 14px 11px 0;}
   .ds-cell:last-child{border-right:0;}
   .ds-ck{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--txt3,#6e6e6e);}
