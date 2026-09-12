@@ -1,0 +1,14 @@
+{
+  "_capture_meta": {
+    "tool": "mcp__RH_NoVo__get_crypto_account_onboarding_info",
+    "arguments": {},
+    "captured_at_utc": "2026-09-12T17:47Z",
+    "note": "No parameters. Not market data — account-provisioning status only. Captured per the task's blanket sampling instruction for crypto-capable tools."
+  },
+  "raw_response": {
+    "data": {
+      "already_onboarded": true
+    },
+    "guide": "If already_onboarded is true, the user already has a crypto account, so no new signup is needed — do NOT present a link (the signup link cannot create or re-activate an account when one already exists). Tell them they already have a crypto account; do not claim it is active or ready to trade. If they say they still cannot trade crypto, their account may be deactivated, which is a separate reactivation flow this tool does not cover — direct them to Robinhood support rather than the link. Otherwise, send onboarding_url to the user as a tappable link, and tell them they must log in to their Robinhood account at the link to review and sign the crypto user agreement. After they sign, their crypto account(s) are provisioned — this tool does not create the account or sign on the user's behalf. Signing provisions crypto accounts for all of the user's eligible brokerage accounts, so a user who has an agentic brokerage account also gets an agentic crypto account. Once the user confirms they have finished, call get_accounts again with a fresh request to pick up the new crypto account before retrying; do not reuse a prior get_accounts result, as the account does not exist until the user completes this flow."
+  }
+}

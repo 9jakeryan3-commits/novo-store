@@ -1,0 +1,18 @@
+{
+  "_capture_meta": {
+    "tool": "mcp__RH_NoVo__get_crypto_orders",
+    "arguments": {
+      "rhs_account_number": "423584523"
+    },
+    "captured_at_utc": "2026-09-12T17:47Z",
+    "note": "No filters applied (no symbol/state/date bounds) — first page, newest-first. Result is empty: no crypto order history on this account. This is account order history, not market data; captured per the task's blanket sampling instruction for crypto-capable read tools. NOT called for BTC/ETH/SOL individually since the account has zero orders regardless of symbol filter."
+  },
+  "raw_response": {
+    "data": {
+      "rhs_account_number": "423584523",
+      "crypto_account_number": "311267503043",
+      "results": []
+    },
+    "guide": "For the headline answer to \"is this order still working?\", use state_group ('open' vs 'closed'); raw state has finer granularity if the user asks why. For the fill price the user cares about, use average_price (VWAP across fills). cumulative_quantity vs quantity tells \"how much filled?\"; canceled_quantity only appears on partial-fill-then-cancel paths. Asset symbol is currency_code; pair UUID is currency_pair_id. For current market, call get_crypto_quotes with the pair symbol (construct as currency_code + \"-USD\" for USD-quoted pairs, or look up via get_currency_pairs) — get_crypto_quotes takes the symbol, NOT currency_pair_id. initiator_type tells how the order was placed (app / API / recurring / agent) — surface it when the agent didn't place this order. Per-fill executions[] are omitted from list responses to keep the page sized for an agent's context window; pass order_id to retrieve a single order with executions populated. Present currency_code, side, type, state, quantity (or cumulative_quantity when partially filled), average_price once filled, created_at, and id when cancellation may follow. When presenting multiple orders, add a Fee column when any order on the page carries fee or fee_rate. Every order on this page belongs to the account echoed in rhs_account_number / crypto_account_number."
+  }
+}

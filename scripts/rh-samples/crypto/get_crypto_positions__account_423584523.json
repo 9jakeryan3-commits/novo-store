@@ -1,0 +1,16 @@
+{
+  "_capture_meta": {
+    "tool": "mcp__RH_NoVo__get_crypto_positions",
+    "arguments": {
+      "rhs_account_number": "423584523"
+    },
+    "captured_at_utc": "2026-09-12T17:47Z",
+    "note": "423584523 is the sole agentic_allowed=true account on this login (nickname 'Agentic', limited_margin, option_level_3). Result is empty: no open crypto positions held. This is a read of the account's OWN holdings, not general market data — it has no direct bearing on the 90-coin crypto-free product, but is captured per the task's blanket sampling instruction for crypto-capable read tools."
+  },
+  "raw_response": {
+    "data": {
+      "results": []
+    },
+    "guide": "Sellable quantity: use `quantity_transferable`, not `quantity` — `quantity_transferable` is the amount available to sell right now (already nets out open sell orders, pending withdrawals, holds, quarantine, and instant-funds restrictions); `quantity` only subtracts pending withdrawals. The two are equal in the common case but diverge when there are open sells or unsettled instant buys. Asset name comes from currency.code; for current price, call get_crypto_quotes with the pair symbol (construct as `currency.code + \"-USD\"` for USD-quoted pairs, or look up via get_currency_pairs) — note that get_crypto_quotes takes the symbol, NOT currency_pair_id. For per-unit average buy price, sum direct_cost_basis and sum direct_quantity across all cost_bases entries (multi-entry rows appear after forks like BCH/BSV) and divide — the average only covers direct purchases. When sum(direct_quantity) is materially less than quantity, the rest came from transfers, rewards, or forks with no captured cost basis; surface that the average buy price applies only to a subset of the units. The intraday_* fields isolate today's portion when the user asks about today specifically. Suppress cost_bases when not asked. No market price here — for current value or P&L, multiply the get_crypto_quotes result by quantity."
+  }
+}

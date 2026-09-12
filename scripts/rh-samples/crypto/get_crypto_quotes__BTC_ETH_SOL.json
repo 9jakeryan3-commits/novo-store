@@ -1,0 +1,53 @@
+{
+  "_capture_meta": {
+    "tool": "mcp__RH_NoVo__get_crypto_quotes",
+    "arguments": {
+      "symbols": ["BTC-USD", "ETH-USD", "SOL-USD"]
+    },
+    "captured_at_utc": "2026-09-12T17:47:17Z",
+    "note": "rhs_account_number omitted, so pricing reflects the caller's own user-level routing (per the tool's guide: market-maker routing if the caller has no crypto account). routing field in each result shows 'Exchange Routing' was actually applied."
+  },
+  "raw_response": {
+    "data": {
+      "results": [
+        {
+          "symbol": "BTCUSD",
+          "id": "3d961844-d360-45fc-989b-f6fca761d511",
+          "bid_price": "77221.18",
+          "bid_time": "2026-09-12T13:47:16.982-04:00",
+          "ask_price": "77221.19",
+          "ask_time": "2026-09-12T13:47:16.982-04:00",
+          "mark_price": "77221.185",
+          "open_price": "77261.785",
+          "routing": "Exchange Routing",
+          "updated_at": "2026-09-12T13:47:16.982-04:00"
+        },
+        {
+          "symbol": "ETHUSD",
+          "id": "76637d50-c702-4ed1-bcb5-5b0732a81f48",
+          "bid_price": "2525.56",
+          "bid_time": "2026-09-12T13:47:16.631-04:00",
+          "ask_price": "2525.47",
+          "ask_time": "2026-09-12T13:47:16.631-04:00",
+          "mark_price": "2525.515",
+          "open_price": "2512.94",
+          "routing": "Exchange Routing",
+          "updated_at": "2026-09-12T13:47:16.631-04:00"
+        },
+        {
+          "symbol": "SOLUSD",
+          "id": "0cdc8c93-fbda-462f-94b7-26353d87a009",
+          "bid_price": "102.0653",
+          "bid_time": "2026-09-12T13:47:16.815-04:00",
+          "ask_price": "102.067",
+          "ask_time": "2026-09-12T13:47:16.815-04:00",
+          "mark_price": "102.06615",
+          "open_price": "101.61835",
+          "routing": "Exchange Routing",
+          "updated_at": "2026-09-12T13:47:16.815-04:00"
+        }
+      ]
+    },
+    "guide": "Current price: prefer mark_price when both sides of the book are populated; if mark_price is zero, fall back to the most recent of bid_time / ask_time and quote the side that updated last. Drop bid or ask when zero — the book is unavailable on that side. Use updated_at to judge freshness; if it is more than a few seconds stale, phrase as \"as of <time>\" rather than \"current\". open_price is the previous close — in continuous crypto the midnight boundary price is the prior day's close. That boundary is midnight in the request timezone (the 'timezone' parameter), or US Eastern when none is supplied; response timestamps carry that same timezone's offset, so quote \"as of\" times in it directly. For change vs the previous close, compute (mark_price - open_price) / open_price. The response symbol comes back unhyphenated (e.g. 'BTCUSD'); the canonical form from get_currency_pairs is hyphenated ('BTC-USD') — strip the hyphen to cross-reference. bid/ask/mark reflect the execution routing reported in routing: the supplied account's routing when rhs_account_number was given, otherwise the caller's user-level routing (market maker routing when the caller has no crypto account). This is informational; place_order routing is selected per account at order time."
+  }
+}
