@@ -1454,27 +1454,17 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     var dir = up>=50 ? 'up' : 'down';
     var pct = up>=50 ? up : (100-up);
     el.style.display='block';
-    // THE DAILY HALF (Jake's go 09-12, roadmap #6 / item 30): base_rate_daily has been computed
-    // per publish over hundreds of sessions and drawn NOWHERE while its intraday sibling above
-    // rendered from day one. Same contract as the hourly cell: the engine only sends it past the
-    // sample floor, so absent field = no line, never a fabricated one.
-    var bd = d && d.base_rate_daily, dl = '';
-    if (bd && bd.next_session && bd.next_session.up_rate != null){
-      var dup = Number(bd.next_session.up_rate), ddir = dup>=50?'up':'down', dpct = dup>=50?dup:(100-dup);
-      dl = '<div class="br-r" style="opacity:.85;">Next <b>session</b> it resolved <b>'+ddir+' '+dpct.toFixed(0)+'%</b> of the time'
-        + (bd.next_session.median!=null ? ' · median <b>'+(Number(bd.next_session.median)>=0?'+':'')+Number(bd.next_session.median).toFixed(2)+'%</b>' : '')
-        + (bd.next_range_median!=null ? ' · typical range <b>&plusmn;'+Number(bd.next_range_median).toFixed(2)+'%</b>' : '')
-        + '</div>';
-    }
+    // ⚠ #d-br IS RETIRED — the :2123 rule (`#anlg-card, .d-br { display:none !important }`,
+    // "History owns it") beats the inline display above, so NOTHING written here is visible.
+    // The daily base rate (item 30) shipped into this element on 09-12 and painted nowhere —
+    // "computed and drawn nowhere" recreated inside the fix (caught by Junie the same night).
+    // It renders in js/novo-tape.js beside its intraday sibling on the History tab. Add nothing
+    // here without first un-retiring the element, which would resurrect the analogue table too.
     el.innerHTML = '<div class="br-k">This setup, historically</div>'
       + '<div class="br-r">Over the next hour it resolved <b>'+dir+' '+pct.toFixed(0)+'%</b> of the time'
       + ' · median <b>'+(md>=0?'+':'')+md.toFixed(3)+'%</b></div>'
-      + dl
       + '<div class="br-n">'+_escH(String(b.regime||''))+' · '+_escH(String(b.flip||'').replace(/_/g,' '))
-      + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions'
-      + (bd && bd.next_session && bd.next_session.up_rate != null
-          ? ' · daily n='+_escH(String(bd.next_session.n!=null?bd.next_session.n:(bd.n!=null?bd.n:'')))+' sessions' : '')
-      + '</div>';
+      + ' · vol '+_escH(String(b.vix||''))+'  —  n='+b.n+' across '+b.sessions+' sessions</div>';
   }
 
   /* The feed is plain text the engine wrote; it is escaped and shown as written. No parsing,
@@ -2300,7 +2290,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <!-- The Trader's own Futures and tape modules, unchanged. Same code, same payload, same panel. -->
 <script src="/js/novo-futures.js?v=3e879719"></script>
-<script src="/js/novo-tape.js?v=987c2122"></script>
+<script src="/js/novo-tape.js?v=48ffadb4"></script>
 <script src="/js/novo-congress.js?v=03247de3"></script>
 <script>
   /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip

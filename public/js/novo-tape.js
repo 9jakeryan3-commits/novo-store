@@ -201,6 +201,27 @@
          + 'once it clears its sample floor, so this is thin history rather than a missing feed.</div>';
     }
 
+    /* THE DAILY HALF (Jake's go 09-12, roadmap #6 / item 30) — and its placement lesson. The
+       first ship rendered this into analyst-live's #d-br, which the :2123 retirement rule kills
+       with display:none !important ("History owns it") — so "computed and drawn nowhere" was
+       fixed by drawing it somewhere nothing can show (Junie 3e951315, same night). It lives HERE
+       because here is where the base-rate story lives, beside its intraday sibling above, and
+       the analogue-table retirement stays exactly as decided. Same sample-floor contract: the
+       engine omits a thin cell, so absence renders nothing extra rather than an apology. */
+    var bd = d && d.base_rate_daily;
+    if (bd && bd.next_session && bd.next_session.up_rate != null) {
+      var dup = Number(bd.next_session.up_rate), ddir = dup >= 50 ? 'up' : 'down',
+          dpct = dup >= 50 ? dup : (100 - dup),
+          dmd = bd.next_session.median, drng = bd.next_range_median;
+      h += '<div class="tp-claim">Next <b>session</b> it resolved <b>' + esc(ddir) + ' '
+         + dpct.toFixed(0) + '%</b> of the time'
+         + (dmd != null ? ' · median <b>' + (Number(dmd) >= 0 ? '+' : '') + Number(dmd).toFixed(2) + '%</b>' : '')
+         + (drng != null ? ' · typical range <b>±' + Number(drng).toFixed(2) + '%</b>' : '')
+         + '<span class="tp-meta">open to close, same setup'
+         + (bd.next_session.n != null ? ' — n=' + num(bd.next_session.n) : (bd.n != null ? ' — n=' + num(bd.n) : ''))
+         + (bd.sessions != null ? ' across ' + num(bd.sessions) + ' sessions' : '') + '</span></div>';
+    }
+
     var a = (state && state.analogues_by && state.analogues_by[tk])
          || (tk === 'SPY' ? (state && state.analogues) : null);
     /* `.analogues` IS THE LIST. `.rows` is the corpus row COUNT, and reading it here was the bug:
