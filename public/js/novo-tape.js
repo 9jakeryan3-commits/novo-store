@@ -526,18 +526,10 @@
        drawer stays synchronous; cached ten minutes because macro dates do not move by the poll. */
     h += '<div class="tp-grp">Catalysts · major US macro</div>'
       + '<div class="tp-cal"><div class="tp-empty">Loading the calendar…</div></div>';
-    /* WIRE + EARNINGS (Jake's 09-12 display approval — RH fundamentals/news/economic data on
-       the product). Two more GROUPS, which the subtabs pass below turns into visible TABS on
-       this surface. Data comes from /api/analyst-publish?rh=1 (token-gated), fed by the cloud
-       feeder through the ops ingest door — this module never touches the RH MCP. Rendering
-       rules from the spec: every Wire row carries publisher + age (the source and timestamp
-       ARE the fact; the feed has no wire/PR/opinion tag, so nothing here may imply one);
-       earnings has its own slice + cap with LABELED truncation, never contending with the
-       macro block's six slots. */
-    h += '<div class="tp-grp">Wire · ' + esc(tk) + '</div>'
-      + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
-      + '<div class="tp-grp">Earnings · upcoming</div>'
-      + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>';
+    /* Wire + Earnings lived HERE for a few hours on 09-12 and were PROMOTED to their own
+       'wire' surface the same morning (Jake: a feature Analyst shows as a tab, Trader shows as
+       a tab — never buried inside another one). drawWire owns them now; re-adding them here
+       would be duplication, not parity. */
     /* RANKED STRIKES & BLIND SPOTS on trader (the LAST Analyst-only remainder after Tema's
        09-12 parity correction; Jake's supersets rule). Same algorithm as analyst-live's
        gex-rank card, same payload field (d0.profile {k,g}), rendered in this drawer's idiom.
@@ -593,9 +585,8 @@
     }
     el.innerHTML = h;
     _fillCal(el.querySelector('.tp-cal'));
-    _fillRh(el, tk);
     /* Groups become TABS — same pass history/flow/sweeps already run. This is what makes the
-       new features discoverable as tabs instead of buried in one scroll (Jake, 09-12). */
+       sections discoverable as tabs instead of buried in one scroll (Jake, 09-12). */
     try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 

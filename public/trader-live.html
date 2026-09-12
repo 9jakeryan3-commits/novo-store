@@ -446,7 +446,7 @@ body {
    display:contents is the trap here: the element vanishes but its CHILDREN stay, so the usual
    "is it hidden" glance at the element itself says yes while the page says otherwise. */
 #col-alerts, #col-digest, #col-predict, #col-readings, #col-futures,
-#col-history, #col-flow, #col-sweeps, #col-read, #col-congress { display: none !important; }
+#col-history, #col-flow, #col-sweeps, #col-read, #col-congress, #col-wire { display: none !important; }
 
 #col-capital { order: 1; }
 #col-feed    { order: 2; border-right: 1px solid var(--bdr); }
@@ -529,6 +529,7 @@ body {
   body[data-desk="futures"] #col-futures { display: block !important; }
   body[data-desk="history"] #col-history { display: block !important; }
   body[data-desk="congress"] #col-congress { display: block !important; }
+  body[data-desk="wire"] #col-wire { display: block !important; }
   body[data-desk="flow"] #col-flow { display: block !important; }
   body[data-desk="sweeps"] #col-sweeps { display: block !important; }
   body[data-desk="alerts"] #col-alerts { display: block !important; }
@@ -593,6 +594,9 @@ body {
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
   body[data-desk="congress"] #col-congress { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
+    width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
+    background: var(--bg); border-left: 1px solid var(--bdr); }
+  body[data-desk="wire"] #col-wire { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
     width: 400px; overflow-y: auto; padding: 14px 16px 24px; z-index: 39;
     background: var(--bg); border-left: 1px solid var(--bdr); }
   body[data-desk="flow"] #col-flow { position: fixed; top: var(--desk-top, 48px); right: 44px; bottom: 0;
@@ -1534,6 +1538,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   #col-futures.mob-active,
   #col-history.mob-active,
   #col-congress.mob-active,
+  #col-wire.mob-active,
   #col-flow.mob-active,
   #col-sweeps.mob-active,
   #col-read.mob-active { display: block !important; overflow-y: auto; padding: 14px 12px 72px; }
@@ -2971,6 +2976,10 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <!-- CONGRESS (14). House periodic transaction reports. Same js/novo-congress.js the Analyst
        mounts - one module, two dashboards, so the two cannot drift apart. -->
   <div id="col-congress" class="col"><div id="col-congress-body"></div></div>
+  <!-- WIRE (15). Headlines with publisher + age, and the earnings calendar — RH-fed through the
+       hourly cloud feeder, rendered by js/novo-tape.js's wire drawer. Its own surface per Jake's
+       09-12 rule: Trader carries everything Analyst has as a TAB, never buried in another one. -->
+  <div id="col-wire" class="col"><div id="col-wire-body"></div></div>
   <div id="col-flow" class="col"><div id="col-flow-body"></div></div>
   <div id="col-sweeps" class="col"><div id="col-sweeps-body"></div></div>
   <div id="col-read" class="col"><div id="col-read-body"></div></div>
@@ -3049,6 +3058,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
   <button type="button" data-desk="futures" onclick="deskOpen('futures')">Futures</button>
   <button type="button" data-desk="history" onclick="deskOpen('history')">History</button>
   <button type="button" data-desk="congress" onclick="deskOpen('congress')">Congress</button>
+  <button type="button" data-desk="wire" onclick="deskOpen('wire')">Wire</button>
   <button type="button" data-desk="flow" onclick="deskOpen('flow')">Options flow</button>
   <button type="button" data-desk="sweeps" onclick="deskOpen('sweeps')">Sweeps & blocks</button>
   <button type="button" data-desk="alerts" onclick="deskOpen('alerts')">Alerts</button>
@@ -3110,6 +3120,7 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
       <button type="button" data-tab="9" onclick="pickMore(9)"><span class="mm-ico">&#9650;</span>Futures</button>
       <button type="button" data-tab="14" onclick="pickMore(14)"><span aria-hidden="true">&#9638;</span>Congress</button>
       <button type="button" data-tab="10" onclick="pickMore(10)"><span class="mm-ico">&#9719;</span>History</button>
+      <button type="button" data-tab="15" onclick="pickMore(15)"><span class="mm-ico">&#9634;</span>Wire</button>
 </div>
 
 
@@ -3869,7 +3880,7 @@ function connectTelemetry(){
    Opens over the bar, closes on a pick, on a second tap, or on any tap outside it. The More
    button lights up whenever the tab you are ON lives inside the menu — without that, choosing
    Readings leaves the whole bar looking unselected and the app looks like it lost your place. */
-var MORE_TABS = [3, 7, 8, 9, 10, 11, 12, 13, 14];
+var MORE_TABS = [3, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 function toggleMoreMenu(force){
   var m = document.getElementById('more-menu'), b = document.getElementById('mob-more');
   if (!m || !b) return;
@@ -3912,6 +3923,7 @@ var DESK = {
   digest:   [6,  '#col-digest-body',   function(){ window.novoDigest && window.novoDigest.mount('#col-digest-body', { app: 'trader', example: 'Send me a daily digest on SPY.', openChat: function(){ switchMobileTab(4); } }); }],
   predict:  [7,  '#col-predict-body',  function(){ window.novoPredict && window.novoPredict.mount('#col-predict-body', { app: 'trader' }); }],
   congress: [14, '#col-congress-body', function(){ window.novoCongress && window.novoCongress.mount('#col-congress-body'); }],
+  wire: [15, '#col-wire-body', function(){ window.novoTape && window.novoTape.mount('#col-wire-body', 'wire'); }],
 };
 /* WHERE THE DESK STARTS, measured rather than assumed. The rail and every desk column hang off
    --desk-top, which is the real bottom edge of the header block (topbar + the market intel strip).
@@ -4023,7 +4035,8 @@ function switchMobileTab(idx) {
     document.getElementById('col-flow'),     // 11 OPTIONS FLOW (volume, undirected)
     document.getElementById('col-sweeps'),   // 12 SWEEPS & BLOCKS (the print tape)
     document.getElementById('col-read'),     // 13 THE READ (published read + fear gauge)
-    document.getElementById('col-congress')  // 14 CONGRESS (House disclosures, filed not live)
+    document.getElementById('col-congress'), // 14 CONGRESS (House disclosures, filed not live)
+    document.getElementById('col-wire')      // 15 WIRE (headlines + earnings, RH-fed hourly)
   ];
   cols.forEach((c, i) => { if (c) c.classList.toggle('mob-active', i === idx); });
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('mob-active', Number(t.dataset.tab) === idx));
@@ -4049,7 +4062,8 @@ function switchMobileTab(idx) {
   /* One mount per tab, refreshed on every later arrival. novoTape shares a single live-state
      fetch across all three, so arriving at a second tab does not re-fetch. */
   [[10, 'history', '#col-history-body'], [11, 'flow', '#col-flow-body'],
-   [12, 'sweeps', '#col-sweeps-body'], [13, 'read', '#col-read-body']].forEach(function (t) {
+   [12, 'sweeps', '#col-sweeps-body'], [13, 'read', '#col-read-body'],
+   [15, 'wire', '#col-wire-body']].forEach(function (t) {
     if (idx !== t[0]) return;
     setTimeout(function(){
       try {
@@ -8417,7 +8431,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-predict.js?v=02a934ba"></script>
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <script src="/js/novo-futures.js?v=3e879719"></script>
-<script src="/js/novo-tape.js?v=c4e6bcdc"></script>
+<script src="/js/novo-tape.js?v=4d7409c0"></script>
 <script src="/js/novo-congress.js?v=03247de3"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
