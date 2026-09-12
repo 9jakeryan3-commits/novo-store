@@ -538,6 +538,59 @@
       + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
       + '<div class="tp-grp">Earnings · upcoming</div>'
       + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>';
+    /* RANKED STRIKES & BLIND SPOTS on trader (the LAST Analyst-only remainder after Tema's
+       09-12 parity correction; Jake's supersets rule). Same algorithm as analyst-live's
+       gex-rank card, same payload field (d0.profile {k,g}), rendered in this drawer's idiom.
+       The chart's heat overlay + pin/void lines stay the trader-native VISUAL; this is the
+       ranked LIST beside it. Trader-gated: analyst has its own card. */
+    if (_isTrader && d0 && Array.isArray(d0.profile)) {
+      var _pr = d0.profile.filter(function (r) { return r && isFinite(r.k) && isFinite(r.g); });
+      if (_pr.length >= 5) {
+        var _spot = Number(d0.spot) || 0;
+        var _ranked = _pr.slice().sort(function (a, b) { return Math.abs(b.g) - Math.abs(a.g); }).slice(0, 10);
+        var _top = Math.abs(_ranked[0].g) || 1;
+        h += '<div class="tp-grp">Ranked strikes</div>';
+        _ranked.forEach(function (r, i) {
+          var pct = _spot ? ((r.k / _spot - 1) * 100) : null;
+          h += '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">'
+            + '<span style="opacity:.45;min-width:16px">' + (i + 1) + '</span>'
+            + '<span style="min-width:44px">' + r.k + '</span>'
+            + '<span style="flex:1;height:6px;background:rgba(255,255,255,0.04)"><i style="display:block;height:6px;width:'
+            + Math.max(2, Math.abs(r.g) / _top * 100).toFixed(1) + '%;background:' + (r.g < 0 ? '#f43f5e' : '#10b981') + '"></i></span>'
+            + '<span style="opacity:.8">' + (r.g < 0 ? '−' : '+') + Math.round(Math.abs(r.g)).toLocaleString() + '</span>'
+            + '<span style="opacity:.5;min-width:52px;text-align:right">' + (pct == null ? '' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%') + '</span>'
+            + '</div>';
+        });
+        h += '<div class="tp-meta" style="padding-top:4px">ranked by absolute gamma — sign shown; a short-gamma strike matters as much and means the opposite</div>';
+        var _mags = _pr.map(function (r) { return Math.abs(r.g); }).sort(function (a, b) { return a - b; });
+        var _med = _mags[Math.floor(_mags.length / 2)] || 0;
+        var _heavy = _pr.filter(function (r) { return Math.abs(r.g) >= _med * 0.10; })
+                        .sort(function (a, b) { return a.k - b.k; });
+        var _steps = [];
+        for (var _s1 = 1; _s1 < _heavy.length; _s1++) _steps.push(_heavy[_s1].k - _heavy[_s1 - 1].k);
+        _steps.sort(function (a, b) { return a - b; });
+        var _medStep = _steps.length ? _steps[Math.floor(_steps.length / 2)] : 0;
+        var _gaps = [];
+        if (_medStep > 0) {
+          for (var _gi = 1; _gi < _heavy.length; _gi++) {
+            var _lo = _heavy[_gi - 1].k, _hi = _heavy[_gi].k, _w = _hi - _lo;
+            if (_w >= _medStep * 2) _gaps.push({ lo: _lo, hi: _hi, mid: (_lo + _hi) / 2, x: _w / _medStep });
+          }
+        }
+        _gaps.sort(function (a, b) { return Math.abs(a.mid - _spot) - Math.abs(b.mid - _spot); });
+        h += '<div class="tp-grp">Blind spots</div>';
+        if (_gaps.length) {
+          h += _gaps.slice(0, 3).map(function (g2) {
+            return '<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;">'
+              + '<b>' + g2.lo + '–' + g2.hi + '</b> <span class="tp-meta" style="display:inline">'
+              + g2.x.toFixed(1) + '× the usual strike gap</span></div>';
+          }).join('')
+          + '<div class="tp-meta" style="padding-top:4px">runs between strikes carrying real weight — a move through one has little to lean on</div>';
+        } else {
+          h += '<div class="tp-empty">No gap wider than twice this book’s usual strike spacing.</div>';
+        }
+      }
+    }
     el.innerHTML = h;
     _fillCal(el.querySelector('.tp-cal'));
     _fillRh(el, tk);
