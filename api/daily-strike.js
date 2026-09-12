@@ -217,7 +217,7 @@ ${_CHROME.HEAD}
   .ds-lead h2 a:hover{color:#22d3ee;}
   .ds-lead .ds-dek{font-size:16.5px;line-height:1.6;color:var(--txt2,#a8a8a8);margin:0 0 8px;max-width:70ch;}
   .ds-kicker{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.18em;
-    text-transform:uppercase;color:#22d3ee;margin-bottom:7px;}
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-bottom:7px;}
   .ds-item{padding:15px 0;border-top:1px solid var(--bdr2,#1c1c20);}
   .ds-item h3{font-size:17.5px;line-height:1.34;letter-spacing:-.25px;margin:0 0 5px;}
   .ds-item h3 a{color:var(--txt1,#eaf3ff);text-decoration:none;}
@@ -249,7 +249,7 @@ ${_CHROME.HEAD}
   .ds-secnav a{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--txt3,#6e6e6e);text-decoration:none;padding:11px 0;
     border-bottom:1px solid transparent;margin-bottom:-1px;}
-  .ds-secnav a:hover{color:#22d3ee;border-bottom-color:#22d3ee;}
+  .ds-secnav a:hover{color:var(--txt1,#eaf3ff);border-bottom-color:var(--txt1,#eaf3ff);}
   @media (max-width:860px){.ds-secnav{gap:0 18px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;}}
   article h1{font-size:clamp(26px,3.4vw,40px);line-height:1.15;letter-spacing:-1.2px;max-width:22ch;
     color:var(--txt1,#eaf3ff);margin:0 0 10px;}
@@ -287,17 +287,19 @@ ${_CHROME.HEAD}
    Four sections all in the same grey is most of why the page reads monotone.
    Coloured on a single-side rule, the same device the journal cards already use. */
 .ds-sech{ font-size:10.5px; letter-spacing:.22em; border-top:2px solid var(--bdr2,#1c1c20); padding-top:9px; }
-.ds-secs .ds-sec:nth-of-type(1) .ds-sech{ color:#f59e0b; border-top-color:#f59e0b; }
-.ds-secs .ds-sec:nth-of-type(2) .ds-sech{ color:#a78bfa; border-top-color:#a78bfa; }
-.ds-secs .ds-sec:nth-of-type(3) .ds-sech{ color:#10b981; border-top-color:#10b981; }
-.ds-secs .ds-sec:nth-of-type(4) .ds-sech{ color:#22d3ee; border-top-color:#22d3ee; }
+/* Section headings were coloured by POSITION - amber/violet/green/cyan on nth-of-type 1..4 -
+   which was decoration twice over: the colours said nothing, and position does not even identify
+   a section (the desks that publish vary by day, so nth-of-type(2) was only sometimes crypto).
+   Headings are ink now; the one colour left names the product it belongs to, and it is keyed on
+   the section's own id so it cannot drift onto another desk. */
+.ds-secs .ds-sec[id="sec-crypto"] .ds-sech{ color:#a78bfa; border-top-color:#a78bfa; }
 
 /* the section nav should show where you are, not read as a grey word list */
 .ds-secnav a{ position:relative; padding:12px 0 13px; font-size:11px; letter-spacing:.16em; }
 .ds-secnav a:hover{ color:var(--txt1,#eaf3ff); }
 .ds-secnav a::after{
   content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
-  background:#22d3ee; transform:scaleX(0); transition:transform .14s ease;
+  background:var(--txt1,#eaf3ff); transform:scaleX(0); transition:transform .14s ease;
 }
 .ds-secnav a:hover::after{ transform:scaleX(1); }
 
@@ -327,11 +329,11 @@ ${_CHROME.HEAD}
      so the desk leads and the clock follows it. */
   .ds-rrow{display:block;padding:13px 0;}
   .ds-rmeta{display:flex;align-items:baseline;gap:9px;margin-bottom:5px;}
+  /* The desk label is carried by the letterspaced caps and the weight; only the crypto desk
+     keeps a colour, because that colour names a product. */
   .ds-rk{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
-    text-transform:uppercase;font-weight:700;color:#22d3ee;}
-  .ds-rk[data-k="earnings"]{color:#f59e0b;}
+    text-transform:uppercase;font-weight:700;color:var(--txt3,#6e6e6e);}
   .ds-rk[data-k="crypto"]{color:#a78bfa;}
-  .ds-rk[data-k="level"]{color:#10b981;}
   .ds-rt{min-width:0;font-size:10px;opacity:.72;padding-top:0;}
   .ds-rh{font-size:14px;line-height:1.4;font-weight:600;}
   .ds-rrow:first-child .ds-rh{font-size:16px;line-height:1.3;}
@@ -357,7 +359,7 @@ ${_CHROME.HEAD}
   .ds-bq{display:flex;align-items:baseline;gap:8px;text-decoration:none;
     font-variant-numeric:tabular-nums;}
   .ds-bqe{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.2em;
-    text-transform:uppercase;color:#22d3ee;align-self:center;margin-right:4px;}
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);align-self:center;margin-right:4px;}
   .ds-bqn{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--txt3,#6e6e6e);}
   .ds-bqp{font-size:14px;font-weight:700;color:var(--txt1,#eaf3ff);}
@@ -372,7 +374,7 @@ ${_CHROME.HEAD}
   /* sectors */
   .ds-datasec{margin-top:34px;}
   .ds-datah{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.22em;
-    text-transform:uppercase;color:#22d3ee;border-top:2px solid #22d3ee;padding-top:9px;
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);border-top:2px solid var(--bdr2,#1c1c20);padding-top:9px;
     margin-bottom:4px;}
   .ds-secbars{margin-top:2px;}
   .ds-secrow{display:grid;grid-template-columns:150px minmax(60px,1fr) 62px 118px;gap:12px;
@@ -398,9 +400,9 @@ ${_CHROME.HEAD}
   .ds-pulse{display:flex;align-items:baseline;gap:10px;margin:2px 0 7px;}
   .ds-pv{font-family:"Space Grotesk",system-ui,sans-serif;font-size:30px;font-weight:700;
     letter-spacing:-1px;color:var(--txt1,#eaf3ff);font-variant-numeric:tabular-nums;}
-  .ds-pl{font-size:12.5px;font-weight:700;color:#22d3ee;letter-spacing:.04em;}
+  .ds-pl{font-size:12.5px;font-weight:700;color:var(--txt1,#eaf3ff);letter-spacing:.04em;}
   .ds-meter{height:5px;background:rgba(255,255,255,.045);margin-bottom:11px;}
-  .ds-meter i{display:block;height:5px;background:#22d3ee;}
+  .ds-meter i{display:block;height:5px;background:var(--txt2,#a8a8a8);}
   .ds-frow{display:grid;grid-template-columns:66px 1fr 74px;gap:9px;align-items:center;
     padding:4px 0;font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#6e6e6e);}
@@ -412,7 +414,7 @@ ${_CHROME.HEAD}
   /* the vix curve */
   .ds-curve{display:flex;align-items:flex-end;gap:14px;padding:8px 0 2px;height:82px;}
   .ds-cg{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1;}
-  .ds-cg i{display:block;width:100%;background:linear-gradient(180deg,#22d3ee,rgba(34,211,238,.22));}
+  .ds-cg i{display:block;width:100%;background:linear-gradient(180deg,var(--txt2,#a8a8a8),rgba(168,168,168,.2));}
   .ds-cg b{font-size:11.5px;font-weight:700;color:var(--txt1,#eaf3ff);margin-top:5px;
     font-variant-numeric:tabular-nums;}
   .ds-cg em{font-family:var(--mono,ui-monospace),monospace;font-style:normal;font-size:9px;
@@ -424,7 +426,7 @@ ${_CHROME.HEAD}
   .ds-svk{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.14em;
     color:var(--txt2,#a8a8a8);}
   .ds-svb{display:block;height:5px;background:rgba(255,255,255,.045);}
-  .ds-svb i{display:block;height:5px;background:#a78bfa;}
+  .ds-svb i{display:block;height:5px;background:var(--txt2,#a8a8a8);}
   .ds-svv{font-size:12px;font-weight:700;color:var(--txt1,#eaf3ff);text-align:right;}
   .ds-svl{grid-column:1/-1;font-size:11px;color:var(--txt3,#6e6e6e);margin:-3px 0 3px;}
 
@@ -456,7 +458,7 @@ ${_CHROME.HEAD}
   /* the calendar */
   .ds-carow{padding:8px 0;border-bottom:1px solid var(--bdr2,#1c1c20);}
   .ds-cad{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.14em;
-    text-transform:uppercase;color:#22d3ee;}
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);}
   .ds-cae{font-size:12.5px;line-height:1.4;color:var(--txt1,#eaf3ff);margin:2px 0 1px;}
   .ds-cav{font-family:var(--mono,ui-monospace),monospace;font-size:10px;color:var(--txt3,#6e6e6e);}
 </style>
