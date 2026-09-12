@@ -3093,7 +3093,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
   }
   function finishAnswer(d, _qel, el){
     if (!d || !d.ok){
-      var em = (d && d.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
+      var em = (d && d.error) || "I came back with nothing usable there — ask me again.", _et = Date.now();
       if (el) el.remove();
       add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
       return;
@@ -3439,13 +3439,13 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
         if (chkEl) chkEl.remove();
         if (errObj || !doneObj){
           if (ansEl) ansEl.remove();
-          var em = (errObj && errObj.error) || 'Dr. NoVo is unavailable right now.', _et = Date.now();
+          var em = (errObj && errObj.error) || "The connection dropped before I finished that answer. Nothing was saved — ask again and I'll start over.", _et = Date.now();
           add('', em, _et); TURNS.push({ r: 'novo', x: em, t: _et }); saveTurns(); pinTop(_qel);
         } else {
           doneObj.__q = q; finishAnswer(doneObj, _qel, ansEl);
         }
       }
-    } catch(e){ _stopThinking(); add('', 'Dr. NoVo is unavailable right now.', Date.now()); pinTop(_qel); }
+    } catch(e){ _stopThinking(); add('', "I couldn't reach the desk just then. Check your connection and ask again — your question wasn't sent.", Date.now()); pinTop(_qel); }
     busy = false; document.getElementById('novo-ask-go').disabled = false;
   };
 })();
