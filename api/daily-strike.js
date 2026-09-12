@@ -356,6 +356,8 @@ ${_CHROME.HEAD}
     border-top:1px solid var(--bdr2,#1c1c20);border-bottom:1px solid var(--bdr,#2c2c30);}
   .ds-bq{display:flex;align-items:baseline;gap:8px;text-decoration:none;
     font-variant-numeric:tabular-nums;}
+  .ds-bqe{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:#22d3ee;align-self:center;margin-right:4px;}
   .ds-bqn{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--txt3,#6e6e6e);}
   .ds-bqp{font-size:14px;font-weight:700;color:var(--txt1,#eaf3ff);}
@@ -746,10 +748,18 @@ const _num = (v) => (v == null || v === '' || isNaN(Number(v)) ? null : Number(v
 const _sign = (n) => (n > 0 ? 'ds-up' : n < 0 ? 'ds-dn' : 'ds-nu');
 const _pct = (n) => (_num(n) == null ? '—' : (n > 0 ? '+' : '') + Number(n).toFixed(2) + '%');
 
-/* ── THE RIBBON ───────────────────────────────────────────────────────────────────────────────
-   The row every financial front page opens with. /api/quotes keys by display name and returns
-   price as a preformatted string, chg as a number — read, do not reformat the price. */
-const BOARD = ['S&P 500', 'Nasdaq', 'Dow', 'Russell', 'VIX', '10Y', 'Dollar', 'Gold', 'Crude', 'BTC'];
+/* ── THE MACRO ROW ────────────────────────────────────────────────────────────────────────────
+   ⚠ THIS ROW EXISTS TO NOT REPEAT THE TAPE. The site-wide ticker sits directly above it on every
+   page and already carries SPY, VIX, S&P 500, Nasdaq, Russell, Gold, Crude and BTC. The first
+   version of this ribbon listed ten instruments, SEVEN of which the tape was already showing two
+   inches higher — the same numbers twice, stacked, which is the one thing a real front page never
+   does. So it carries only what the tape does not: the Dow, the 10-year and the dollar — index,
+   rates and FX, the three legs a markets desk wants beside a story and the tape omits.
+
+   Keep this list disjoint from the ticker's. If a symbol is added to the tape, drop it here.
+   /api/quotes keys by display name and returns price as a preformatted string and chg as a
+   number — read the price, do not reformat it. */
+const BOARD = ['Dow', '10Y', 'Dollar'];
 function boardRibbon(q) {
   if (!q || typeof q !== 'object') return '';
   const cells = BOARD.filter((k) => q[k] && q[k].price != null).map((k) => {
@@ -758,7 +768,9 @@ function boardRibbon(q) {
       + `<span class="ds-bqp">${esc(String(v.price))}</span>`
       + `<span class="ds-bqc ${_sign(_num(v.chg))}">${esc(_pct(v.chg))}</span></a>`;
   }).join('');
-  return cells ? `<div class="ds-board" aria-label="Markets">${cells}</div>` : '';
+  return cells
+    ? `<div class="ds-board" aria-label="Macro"><span class="ds-bqe">Also on the desk</span>${cells}</div>`
+    : '';
 }
 
 /* ── SECTORS ──────────────────────────────────────────────────────────────────────────────────
