@@ -36,12 +36,19 @@ const KINDS = {
 };
 
 module.exports = async (req, res) => {
-  const want = process.env.OPS_SECRET || process.env.ANALYST_PUBLISH_SECRET || "";
-  if (!want) return res.status(503).json({ error: "not configured" });
+  // Two doors' worth of keys: the ops secret (fleet, this box), and RH_INGEST_SECRET — a
+  // purpose-minted token for the CLOUD FEEDER routine only (09-12). Separate on purpose: the
+  // feeder's credential opens exactly this one write door and can be rotated in Vercel without
+  // touching anything else. Timing-safe per candidate, length-first (timingSafeEqual throws on
+  // length mismatch, which would itself be an oracle).
+  const _crypto = require("crypto");
+  const candidates = [process.env.OPS_SECRET, process.env.ANALYST_PUBLISH_SECRET,
+                      process.env.RH_INGEST_SECRET].filter(Boolean);
+  if (!candidates.length) return res.status(503).json({ error: "not configured" });
   const got = req.headers["x-ops-secret"]
     || String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-  const ok = got.length === want.length
-    && require("crypto").timingSafeEqual(Buffer.from(got), Buffer.from(want));
+  const ok = candidates.some((want) => got.length === want.length
+    && _crypto.timingSafeEqual(Buffer.from(got), Buffer.from(want)));
   if (!ok) return res.status(401).json({ error: "unauthorized" });
 
   const r = kv();
