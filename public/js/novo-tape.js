@@ -222,6 +222,31 @@
          + (bd.sessions != null ? ' across ' + num(bd.sessions) + ' sessions' : '') + '</span></div>';
     }
 
+    /* THE RECORD BEHIND THE READS (Jake's go 09-12, under the Trader-supersets rule — one
+       shared drawer puts it on BOTH dashboards' History at once). The bias records ship WITH
+       the engine's own grading-bands sentence (rec.scored), rendered VERBATIM — both axes, net
+       AND range — never re-typed here: those constants already live in three places and a
+       fourth hand copy is the mirrored-twin defect this codebase keeps refinding. A win rate
+       without its grading bands is an unfalsifiable number; with them it is a checkable one. */
+    var bz = state && state.bias;
+    if (bz && (bz.lean_record || bz.audit_record)) {
+      h += '<div class="tp-grp">The record behind the reads</div>';
+      [['Premarket', bz.lean_record, 'sessions, open to close'],
+       ['Hourly', bz.audit_record, 'hours']].forEach(function (pr) {
+        var rec = pr[1];
+        if (!rec) return;
+        if (rec.enough && rec.correct_rate != null) {
+          h += '<div class="tp-claim">' + pr[0] + ': right <b>' + esc(String(rec.correct_rate))
+            + '%</b> over <b>' + esc(String(rec.n)) + '</b> ' + pr[2] + '.'
+            + (rec.strength === 'inconclusive' ? ' Not yet a significant edge.' : '')
+            + (rec.scored ? '<span class="tp-meta">' + esc(String(rec.scored)) + '</span>' : '')
+            + '</div>';
+        } else {
+          h += '<div class="tp-empty">' + pr[0] + ': record accruing — not enough scored calls to publish a rate yet.</div>';
+        }
+      });
+    }
+
     var a = (state && state.analogues_by && state.analogues_by[tk])
          || (tk === 'SPY' ? (state && state.analogues) : null);
     /* `.analogues` IS THE LIST. `.rows` is the corpus row COUNT, and reading it here was the bug:
@@ -439,6 +464,43 @@
         + '<span class="tp-ft" style="color:' + col + '">' + esc(tag) + '</span></div>'
         + '<div class="tp-meter"><i style="left:' + pct + '%"></i></div>'
         + '<div class="tp-scale"><span>calm</span><span>fear</span></div>';
+    }
+
+    /* TRADER SUPERSETS ANALYST (Jake, 09-12: "trader is analysts replacement for subs it has to
+       have everything and more"). Max pain + the expiry ladder land on the trader's Desk note,
+       read from the engine-PUBLISHED d.max_pain / d.term — never re-derived from expiry_split,
+       so the ladder and the headline can never disagree (the fields are display-scaled
+       engine-side, same convention as the headline Net GEX). PATH-GATED to /trader: analyst
+       renders both in its own dealer card, and a second copy there would be duplication, not
+       parity. Absent-tolerant like everything else: an older payload renders nothing extra. */
+    var _isTrader = (location.pathname.indexOf('/trader') === 0);
+    var d0 = forTicker(state);
+    var _busd = function (v) { v = Math.abs(Number(v) || 0);
+      return v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M'
+           : '$' + Math.round(v).toLocaleString(); };
+    if (_isTrader && d0 && d0.max_pain != null && isFinite(+d0.max_pain)) {
+      var _mp0 = Array.isArray(d0.term) && d0.term.some(function (x) { return x && x.is_0dte; });
+      h += '<div class="tp-grp">Max pain</div>'
+        + '<div class="tp-claim"><b>' + (+d0.max_pain).toFixed(2) + '</b>'
+        + '<span class="tp-meta">' + (_mp0 ? '0DTE' : 'nearest expiry')
+        + ' · least payout at expiry · drawn on the chart as MAX PAIN</span></div>';
+    }
+    if (_isTrader && d0 && Array.isArray(d0.term) && d0.term.filter(function (x) { return x && x.exp; }).length >= 2) {
+      h += '<div class="tp-grp">Term structure · the expiry ladder</div><div style="overflow-x:auto">';
+      d0.term.forEach(function (x) {
+        if (!x || !x.exp) return;
+        var g = Number(x.net_gex);
+        h += '<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;white-space:nowrap;'
+          + 'border-bottom:1px solid rgba(255,255,255,0.06);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;">'
+          + '<span style="min-width:74px;opacity:.8">' + esc(String(x.exp).slice(5))
+          + (x.is_0dte ? ' <b style="color:#22d3ee">0DTE</b>' : '') + '</span>'
+          + '<span style="color:' + (isFinite(g) && g < 0 ? '#f43f5e' : '#34d399') + '">'
+          + (isFinite(g) ? (g < 0 ? '−' : '+') + _busd(g) : '—') + '</span>'
+          + '<span style="opacity:.6">' + (x.share_pct != null ? Number(x.share_pct).toFixed(1) + '%' : '') + '</span>'
+          + '<span style="opacity:.6">P/C ' + (x.pc_oi != null ? Number(x.pc_oi).toFixed(2) : '—') + '</span>'
+          + '<span style="opacity:.8">MP ' + (x.max_pain != null ? (+x.max_pain).toFixed(0) : '—') + '</span></div>';
+      });
+      h += '</div>';
     }
 
     if (r && r.text) {

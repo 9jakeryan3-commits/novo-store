@@ -6236,15 +6236,15 @@ function _ghostWalls(){
 }
 // Level colours + axis titles — script scope, shared by BOTH panes (they were locals inside
 // loadNovoChart until the split-parity build needed them in _c2Load too).
-const _LVL_COLOR={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7'};
+const _LVL_COLOR={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7','MP':'#d946ef'};
 const _LVL_TITLE={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
-  'EM_HI':'EM ▲','EM_LO':'EM ▼','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
+  'EM_HI':'EM ▲','EM_LO':'EM ▼','MP':'MAX PAIN','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
   'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
 // Axis-tag priority (B11): confluence is the chart's highest-signal state and, with 14 tags on one
 // axis, its least legible. When two tags fall within a label height, keep the higher-priority one's
 // axis label and drop the other's (the line stays; only its number hides). Dealer structure outranks
 // session levels; VWAP sits between.
-const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
+const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'MP':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
   'PMH':4,'PML':4,'ORH':4,'ORL':4,'AHH':3,'AHL':3,'YDH':3,'YDL':3};
 // ── LEVEL ANCHORS (2026-09-02, Jake: "dealer levels can run full, session levels at the bar
 // that made them") ───────────────────────────────────────────────────────────────
@@ -6262,7 +6262,7 @@ const _LVL_PRIO={'FLIP':10,'CW':9,'PW':9,'GRAV':8,'VWAP':7,'EM_HI':6,'EM_LO':6,
 // to the active frame's grid (the drawing tools' _snapT) so an anchor always lands on a real bar
 // rather than injecting a phantom column, and clamped to the loaded window so a level established
 // before the left edge simply starts at it.
-const _LVL_FULLW={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1};
+const _LVL_FULLW={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1,MP:1};
 function _lvlAnchorFor(lbl, from, firstT){
   try{
     if(_LVL_FULLW[lbl]) return firstT;
@@ -6276,7 +6276,7 @@ function _lvlAnchorFor(lbl, from, firstT){
   }catch(_e){ return firstT; }
 }
 // B12: short badge names for merged-confluence titles and event markers.
-const _LVL_SHORT={'FLIP':'FLIP','CW':'CW','PW':'PW','GRAV':'GRAV','VWAP':'VWAP','EM_HI':'EM▲','EM_LO':'EM▼',
+const _LVL_SHORT={'FLIP':'FLIP','CW':'CW','PW':'PW','GRAV':'GRAV','VWAP':'VWAP','EM_HI':'EM▲','EM_LO':'EM▼','MP':'MP',
   'PMH':'PMH','PML':'PML','ORH':'ORH','ORL':'ORL','AHH':'AHH','AHL':'AHL','YDH':'PDH','YDL':'PDL'};
 function _hexA(hex,a){ var h=hex.replace('#',''); if(h.length!==6) return hex;
   return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')'; }
@@ -7237,8 +7237,19 @@ async function loadNovoChart(){
     // noise across years of bars — only the live dealer structure survives the zoom-out.
     try{ _renderRankExpiry(d); }catch(_e){}
     let _lvls=d.levels||{}, _lvlFromSrc=d.level_from||{};
+    // MAX PAIN ON THE CHART (Jake's go 09-12, Trader-supersets rule — "the chart edits"). The
+    // same-day settlement strike as a full-width level beside the walls and the flip. Read from
+    // the payload's OWN expiry_split 0DTE row — the identical engine figure the 0DTE chip and
+    // the analyst headline carry (a strike, no scaling, so no second source of truth). Absent
+    // when today has no 0DTE expiry: a level from yesterday's settlement would be a lie drawn
+    // in fuchsia. Split panes skip it — their board feed carries no expiry data.
+    try{
+      var _es=(d.expiry_split&&d.expiry_split.expiries)||[], _e0=null;
+      for(var _ei=0;_ei<_es.length;_ei++){ if(_es[_ei]&&_es[_ei].is_0dte){ _e0=_es[_ei]; break; } }
+      if(_e0&&_e0.max_pain!=null&&isFinite(+_e0.max_pain)) _lvls.MP=+_e0.max_pain;
+    }catch(_e){}
     if(_ctbTf==='1d'||_ctbTf==='1w'){
-      const _keep={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1};
+      const _keep={FLIP:1,CW:1,PW:1,GRAV:1,EM_HI:1,EM_LO:1,MP:1};
       const _f2={}; for(const _lk in _lvls){ if(_keep[_lk]) _f2[_lk]=_lvls[_lk]; }
       _lvls=_f2; _lvlFromSrc={};
     }
@@ -7504,12 +7515,12 @@ async function loadNovoChart(){
     // FLIP/CW/PW/GRAV are the engine's own dealer levels (the ones _level_trigger fires on) — cyan for the
     // gamma flip, dark blue for the gravity magnet (a blue pair with the flip), green/red for the walls.
     // Opening Range is light pink; After-Hours purple; Prior-Day near-white.
-    const lc={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7'};
+    const lc={'VWAP':'#f59e0b','ORH':'#f9a8d4','ORL':'#f9a8d4','PMH':'#facc15','PML':'#facc15','AHH':'#a78bfa','AHL':'#a78bfa','YDH':'#e5e7eb','YDL':'#e5e7eb','FLIP':'#22d3ee','CW':'#34d399','PW':'#f43f5e','GRAV':'#3b82f6','EM_HI':'#8b93a7','EM_LO':'#8b93a7','MP':'#d946ef'};
     // In-pane level titles, TradingView-style, so the chart can carry its own legend and the Chart
     // Levels panel is not the only place to read a number off. DESKTOP ONLY: fifteen titles on a phone
     // chart is not a legend, it is a wall, and the panel still shows them there.
     const _lvlTitle={'VWAP':'VWAP','FLIP':'FLIP','CW':'CALL WALL','PW':'PUT WALL','GRAV':'GRAVITY',
-      'EM_HI':'EM ▲','EM_LO':'EM ▼','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
+      'EM_HI':'EM ▲','EM_LO':'EM ▼','MP':'MAX PAIN','ORH':'OR HIGH','ORL':'OR LOW','PMH':'PM HIGH','PML':'PM LOW',
       'AHH':'AH HIGH','AHL':'AH LOW','YDH':'PD HIGH','YDL':'PD LOW'};
     const _wantTitles = (window.innerWidth >= 769);
     // ── LEVELS, TradingView-style ────────────────────────────────────────────────────────────────────
@@ -8289,7 +8300,7 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-predict.js?v=02a934ba"></script>
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <script src="/js/novo-futures.js?v=3e879719"></script>
-<script src="/js/novo-tape.js?v=48ffadb4"></script>
+<script src="/js/novo-tape.js?v=5e6ca7a5"></script>
 <script src="/js/novo-congress.js?v=03247de3"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
