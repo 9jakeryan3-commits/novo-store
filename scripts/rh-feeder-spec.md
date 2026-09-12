@@ -28,6 +28,14 @@ depth capture rules further down stay written ONLY so a reopen starts from them.
    block (Desk note on trader, read card on analyst): upcoming earnings for the tracked names
    from `get_earnings_calendar`, then actual-vs-estimate from `get_earnings_results` once
    reported. Same row idiom as the macro block.
+   **OWN SLICE, OWN CAP, LABELED TRUNCATION (Junie, 09-12, measured):** the macro block is
+   hard-capped at 6 with no sort of its own and no "+N more" — merging a second event class
+   into that container makes the six slots CONTENDED, and a busy earnings week silently pushes
+   macro releases off the card (today's payload already drops 2 of 8 invisibly). Earnings gets
+   its own slice and cap, and any truncation is labeled ("next 6 of 14") — silent truncation on
+   a catalysts card is the failure the reader cannot detect. Cadence is also NOT inherited:
+   the macro block fetches once at boot because macro dates do not move; earnings (and
+   especially Wire) age faster and carry their own refresh.
 2. **Wire · <ticker>** — recent headlines from `get_equity_news`, rendered WITH source name and
    published age on every row (the source and timestamp ARE the fact — display inherits
    Jerni's register rules even though the display never speaks in NoVo's voice). Placement:
@@ -47,6 +55,9 @@ depth capture rules further down stay written ONLY so a reopen starts from them.
    (measured, both dashboards), and form+date+period is a three-column shape. The card renders
    STACKED on the phone — value line, then one muted provenance line ("10-Q · filed 09-04 ·
    Q3 FY26") — never a squeezed table; retrofitting a table to 358px means redesigning it.
+   **PLACEMENT CORRECTION (Junie, 09-12):** Wire and Filed facts are TICKER-SCOPED; the read
+   card is not (and already runs 3,257px tall on a phone). Both belong with the per-ticker
+   panel family on each dashboard, never inside the read card.
 Chat grounding (Jerni's tool, registers + forecast-laundering rule) proceeds in parallel —
 display and grounding are two consumers of one ingest, not one decision.
 
