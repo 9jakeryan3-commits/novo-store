@@ -519,7 +519,43 @@
         + 'here as they publish.</span>'
         + '<div class="tp-empty">Next read publishes before the bell.</div>';
     }
+    /* CATALYSTS (Jake, 09-12: "why aren't they in trader and analyst"). OUR OWN calendar feed
+       (/api/calendar — the same one the public /economic-calendar page and Dr. NoVo's macro
+       tool read), NOT the Robinhood lane: printing a licensed broker feed on a paid surface is
+       the resell shape Jake ruled out; this data is ours. Async fill into a placeholder so the
+       drawer stays synchronous; cached ten minutes because macro dates do not move by the poll. */
+    h += '<div class="tp-grp">Catalysts · major US macro</div>'
+      + '<div class="tp-cal"><div class="tp-empty">Loading the calendar…</div></div>';
     el.innerHTML = h;
+    _fillCal(el.querySelector('.tp-cal'));
+  }
+
+  var _calCache = null, _calAt = 0;
+  function _fillCal(box) {
+    if (!box) return;
+    var render = function (j) {
+      var evs = (j && j.events) || [];
+      var today = new Date().toISOString().slice(0, 10);
+      var up = evs.filter(function (e) { return e && e.date >= today; }).slice(0, 6);
+      if (!up.length) {
+        box.innerHTML = '<div class="tp-empty">No major US releases in the loaded window.</div>';
+        return;
+      }
+      box.innerHTML = up.map(function (e) {
+        return '<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;">'
+          + '<span style="min-width:96px;opacity:.65;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">'
+          + esc(String(e.date).slice(5)) + ' ' + esc(e.time || '') + ' ET</span>'
+          + '<span style="flex:1">' + esc(e.event || '') + '</span>'
+          + (e.consensus ? '<span style="opacity:.6">est ' + esc(String(e.consensus)) + '</span>'
+             : (e.previous ? '<span style="opacity:.5">prev ' + esc(String(e.previous)) + '</span>' : ''))
+          + '</div>';
+      }).join('');
+    };
+    if (_calCache && Date.now() - _calAt < 600000) { render(_calCache); return; }
+    fetch('/api/calendar', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) { _calCache = j; _calAt = Date.now(); } render(j || _calCache); })
+      .catch(function () { render(_calCache); });
   }
 
   var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead };

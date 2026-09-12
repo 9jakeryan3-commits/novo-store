@@ -776,7 +776,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <!-- today's read (full-width prose) -->
-    <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div></div>
+    <div class="lv-card lv-read"><h2 id="read-h">Today's read</h2><div id="read-t" class="rt">—</div><div id="read-b" class="rb"></div>
+      <!-- CATALYSTS (Jake 09-12): OUR calendar feed beside the read that frames the day — same
+           /api/calendar the public page and Dr. NoVo's macro tool use; never the RH feed. -->
+      <div style="margin-top:14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);">Catalysts &middot; major US macro</div>
+      <div id="read-cal" style="margin-top:4px;"><span style="color:var(--txt3);font-size:12px;">Loading the calendar&hellip;</span></div></div>
 
     <!-- ALERTS. Jake, 2026-09-07: "we need an Alerts tab to self manage these alerts", and then
          "all 3 get this alerts tab". The card itself now lives in /js/novo-alerts.js and is mounted
@@ -861,6 +865,27 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      store-side sweep of the shape (sites: skew pct label, fear gauge). */
   function _ordSuf(n){ n = Math.abs(Math.round(n)); var t = n % 10, h = n % 100;
     return t === 1 && h !== 11 ? 'st' : t === 2 && h !== 12 ? 'nd' : t === 3 && h !== 13 ? 'rd' : 'th'; }
+  /* CATALYSTS beside the read (Jake 09-12). OUR /api/calendar — never the RH feed on a paid
+     surface. One fetch at boot; macro dates do not move by the minute. */
+  (function(){
+    var box = document.getElementById('read-cal'); if (!box) return;
+    fetch('/api/calendar', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        var evs = (j && j.events) || [], today = new Date().toISOString().slice(0,10);
+        var up = evs.filter(function(e){ return e && e.date >= today; }).slice(0, 6);
+        if (!up.length){ box.innerHTML = '<span style="color:var(--txt3);font-size:12px;">No major US releases in the loaded window.</span>'; return; }
+        var esc2 = function(s){ return String(s).replace(/[<>&]/g, function(c){ return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;'; }); };
+        box.innerHTML = up.map(function(e){
+          return '<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12px;">'
+            + '<span style="min-width:96px;color:var(--txt3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace">'
+            + esc2(String(e.date).slice(5)) + ' ' + esc2(e.time || '') + ' ET</span>'
+            + '<span style="flex:1;color:var(--txt2)">' + esc2(e.event || '') + '</span>'
+            + (e.consensus ? '<span style="color:var(--txt3)">est ' + esc2(e.consensus) + '</span>'
+               : (e.previous ? '<span style="color:var(--txt4)">prev ' + esc2(e.previous) + '</span>' : ''))
+            + '</div>';
+        }).join('');
+      }).catch(function(){ box.innerHTML = '<span style="color:var(--txt3);font-size:12px;">Calendar unavailable right now.</span>'; });
+  })();
   /* Same as the crypto map: the ticker survives a reload, hash first so a shared link opens
      on the index the sender meant. Read BEFORE the token-strip replaceState below. */
   var TICK_KEY = 'novo_analyst_ticker';
@@ -2290,7 +2315,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <!-- The Trader's own Futures and tape modules, unchanged. Same code, same payload, same panel. -->
 <script src="/js/novo-futures.js?v=3e879719"></script>
-<script src="/js/novo-tape.js?v=5e6ca7a5"></script>
+<script src="/js/novo-tape.js?v=8ecaa80b"></script>
 <script src="/js/novo-congress.js?v=03247de3"></script>
 <script>
   /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip
