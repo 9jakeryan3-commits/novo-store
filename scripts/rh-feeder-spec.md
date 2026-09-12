@@ -157,3 +157,28 @@ terms/licensing question DISTINCT from the settled data-licensing posture. Flagg
 - Consumers are separate approvals: the depth panel is Yuri's lane review; the Dr. NoVo
   fundamentals tool is Jerni's lane review (SYSTEM-prompt adjacent). Nothing member-visible
   ships from this data without Overwatch applying it under those reviews.
+
+---
+
+## THE DAILY STRIKE — the publishing schedule (Jake's go, 2026-09-12)
+
+NoVo's public market-news outlet at `/daily-strike`, written server-side by `api/daily-strike.js`.
+Cloud routines TRIGGER desks; they never write. Five routines, all on Jake's account:
+
+| when (UTC) | desk(s) | days | why that hour |
+|---|---|---|---|
+| 13:05 | `open`, `wire` | Mon–Fri | ~25 min before the US bell — the book is set, the wire has the overnight |
+| 16:45 | `level` | Mon–Fri | midday, after the open's structure has either held or broken |
+| 20:35 | `close`, `earnings` | Mon–Fri | just after the bell: what the book said vs what happened, then the reporters ahead |
+| 08:40 | `crypto` | **daily** | just after the 08:00 UTC Deribit expiry — the settlement that repeats 365×/yr |
+| :20 hourly | (the wire feeder) | daily | refreshes `rh:news:MARKET`, which every desk writes from |
+
+**Rules that bind every publishing routine:**
+- They are PUBLISHERS, not writers. The prompt, the five editorial rules and the refusals all
+  live server-side; a routine that "helps" by writing copy is the one thing that breaks this.
+- `{"ok":false}` is a LEGITIMATE no-publish (no wire, no book) — a desk that writes anyway is
+  inventing the news. Report it; never retry into a story.
+- A 422 is the source check refusing a wire piece that named no publisher. Correct behaviour.
+- Every run VERIFIES: the slug on the front page AND in `/news-sitemap.xml`. A successful publish
+  missing from the news sitemap is a failure worth shouting about — Google News reads only 48h,
+  so a silent gap there is invisible until the listing is gone.
