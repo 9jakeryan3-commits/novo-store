@@ -346,6 +346,102 @@ ${_CHROME.HEAD}
      polish.css already neutralises .crumbs for exactly this reason; this is the same treatment.
      Its own hairline border-bottom is design and stays. */
   .ds-secnav{position:static;top:auto;z-index:auto;background:none;backdrop-filter:none;}
+
+  /* ══ THE DATA DESK ══════════════════════════════════════════════════════════════════════
+     Terminal density, house rules intact: hairlines only, no boxes, no filled tiles. Every
+     measure is a BAR, because a bar is a rule with a length and reads at a glance. */
+
+  /* the ribbon */
+  .ds-board{display:flex;flex-wrap:wrap;gap:0 34px;padding:11px 0 13px;margin:0 0 20px;
+    border-top:1px solid var(--bdr2,#1c1c20);border-bottom:1px solid var(--bdr,#2c2c30);}
+  .ds-bq{display:flex;align-items:baseline;gap:8px;text-decoration:none;
+    font-variant-numeric:tabular-nums;}
+  .ds-bqn{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--txt3,#6e6e6e);}
+  .ds-bqp{font-size:14px;font-weight:700;color:var(--txt1,#eaf3ff);}
+  .ds-bqc{font-size:11.5px;font-weight:700;}
+  .ds-bq:hover .ds-bqp{color:#22d3ee;}
+
+  /* shared colour + note */
+  .ds-up{color:#10b981;} .ds-dn{color:#f59e0b;} .ds-nu{color:var(--txt3,#6e6e6e);}
+  .ds-note{font-size:11.5px;line-height:1.55;color:var(--txt3,#6e6e6e);margin-top:9px;}
+  .ds-note a{color:#22d3ee;text-decoration:none;}
+
+  /* sectors */
+  .ds-datasec{margin-top:34px;}
+  .ds-datah{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.22em;
+    text-transform:uppercase;color:#22d3ee;border-top:2px solid #22d3ee;padding-top:9px;
+    margin-bottom:4px;}
+  .ds-secbars{margin-top:2px;}
+  .ds-secrow{display:grid;grid-template-columns:150px minmax(60px,1fr) 62px 118px;gap:12px;
+    align-items:center;padding:7px 0;border-bottom:1px solid var(--bdr2,#1c1c20);
+    font-variant-numeric:tabular-nums;}
+  .ds-secn{font-size:13px;font-weight:600;color:var(--txt1,#eaf3ff);}
+  .ds-sece{display:block;font-family:var(--mono,ui-monospace),monospace;font-style:normal;
+    font-size:9.5px;letter-spacing:.14em;color:var(--txt3,#6e6e6e);}
+  .ds-secb{display:block;height:6px;background:rgba(255,255,255,.045);}
+  .ds-secb i{display:block;height:6px;}
+  .ds-secb i.ds-up{background:#10b981;} .ds-secb i.ds-dn{background:#f59e0b;}
+  .ds-secb i.ds-nu{background:var(--txt3,#6e6e6e);}
+  .ds-secv{font-size:12.5px;font-weight:700;text-align:right;}
+  .ds-secl{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;
+    color:var(--txt3,#6e6e6e);text-align:right;}
+  .ds-secl b{font-weight:700;}
+  @media (max-width:900px){
+    .ds-secrow{grid-template-columns:112px minmax(40px,1fr) 56px;}
+    .ds-secl{display:none;}
+  }
+
+  /* market pulse */
+  .ds-pulse{display:flex;align-items:baseline;gap:10px;margin:2px 0 7px;}
+  .ds-pv{font-family:"Space Grotesk",system-ui,sans-serif;font-size:30px;font-weight:700;
+    letter-spacing:-1px;color:var(--txt1,#eaf3ff);font-variant-numeric:tabular-nums;}
+  .ds-pl{font-size:12.5px;font-weight:700;color:#22d3ee;letter-spacing:.04em;}
+  .ds-meter{height:5px;background:rgba(255,255,255,.045);margin-bottom:11px;}
+  .ds-meter i{display:block;height:5px;background:#22d3ee;}
+  .ds-frow{display:grid;grid-template-columns:66px 1fr 74px;gap:9px;align-items:center;
+    padding:4px 0;font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#6e6e6e);}
+  .ds-fk{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ds-fb{display:block;height:3px;background:rgba(255,255,255,.045);}
+  .ds-fb i{display:block;height:3px;background:var(--txt3,#6e6e6e);}
+  .ds-fl{text-align:right;color:var(--txt2,#a8a8a8);}
+
+  /* the vix curve */
+  .ds-curve{display:flex;align-items:flex-end;gap:14px;padding:8px 0 2px;height:82px;}
+  .ds-cg{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1;}
+  .ds-cg i{display:block;width:100%;background:linear-gradient(180deg,#22d3ee,rgba(34,211,238,.22));}
+  .ds-cg b{font-size:11.5px;font-weight:700;color:var(--txt1,#eaf3ff);margin-top:5px;
+    font-variant-numeric:tabular-nums;}
+  .ds-cg em{font-family:var(--mono,ui-monospace),monospace;font-style:normal;font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--txt3,#6e6e6e);}
+
+  /* short volume */
+  .ds-svrow{display:grid;grid-template-columns:40px 1fr 46px;gap:9px;align-items:center;
+    padding:6px 0;font-variant-numeric:tabular-nums;}
+  .ds-svk{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.14em;
+    color:var(--txt2,#a8a8a8);}
+  .ds-svb{display:block;height:5px;background:rgba(255,255,255,.045);}
+  .ds-svb i{display:block;height:5px;background:#a78bfa;}
+  .ds-svv{font-size:12px;font-weight:700;color:var(--txt1,#eaf3ff);text-align:right;}
+  .ds-svl{grid-column:1/-1;font-size:11px;color:var(--txt3,#6e6e6e);margin:-3px 0 3px;}
+
+  /* on the move */
+  .ds-acrow{display:grid;grid-template-columns:46px 1fr 56px 54px;gap:8px;align-items:baseline;
+    padding:7px 0;border-bottom:1px solid var(--bdr2,#1c1c20);font-variant-numeric:tabular-nums;}
+  .ds-acs{font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;
+    color:var(--txt1,#eaf3ff);letter-spacing:.06em;}
+  .ds-acn{font-size:11.5px;color:var(--txt3,#6e6e6e);overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;}
+  .ds-acp{font-size:11.5px;color:var(--txt2,#a8a8a8);text-align:right;}
+  .ds-acc{font-size:11.5px;font-weight:700;text-align:right;}
+
+  /* the calendar */
+  .ds-carow{padding:8px 0;border-bottom:1px solid var(--bdr2,#1c1c20);}
+  .ds-cad{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:#22d3ee;}
+  .ds-cae{font-size:12.5px;line-height:1.4;color:var(--txt1,#eaf3ff);margin:2px 0 1px;}
+  .ds-cav{font-family:var(--mono,ui-monospace),monospace;font-size:10px;color:var(--txt3,#6e6e6e);}
 </style>
 </head>
 <body>
@@ -545,6 +641,174 @@ async function regimeStrip() {
     + `<div class="ds-cs ds-nu"><a href="/plans" style="color:#22d3ee;text-decoration:none;">see the full map →</a></div></div></div>`;
 }
 
+/* ══ THE DATA DESK ════════════════════════════════════════════════════════════════════════════
+   Jake, 2026-09-12: "it needs a real financial news outline design and layout. We have sooo much
+   market data and a lot of free info and data we provide without subscription. The Daily Strike
+   should utilize all tools and design possible, like the Bloomberg and others."
+
+   What makes a terminal-grade front page is not decoration, it is DENSITY OF REAL NUMBERS. Every
+   feed below is already published free elsewhere on this site (/market-data renders the same six),
+   so nothing here leaks paid dealer data onto a public page — the standing rule on that surface.
+
+   ⚠ NOTHING IS INVENTED AND NOTHING IS FAKED. Each panel returns '' when its feed is missing or
+   empty, so a dead feed removes its panel instead of rendering a zeroed one — a gauge reading 0
+   looks like data, which is worse than an absent panel. /api/sentiment is deliberately NOT wired:
+   it currently answers {bull:0,bear:0}, and that is exactly the panel this rule exists to stop. */
+
+const _FEED_UA = { 'User-Agent': 'NoVo-DailyStrike (+https://novo-options.trade)' };
+
+/* Every one of these is an await on a network, so every one carries a deadline. A slow upstream
+   must cost this page a missing panel, never a hung render. */
+async function _feed(path, ms = 2500) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  try {
+    const r = await fetch(SITE + path, { headers: _FEED_UA, signal: ac.signal });
+    return r.ok ? await r.json() : null;
+  } catch (_) {
+    return null;
+  } finally { clearTimeout(timer); }
+}
+
+/* In parallel: the whole board costs one round trip, not six. All are CDN-cached upstream
+   (60s on quotes, 5 min on the slower ones), so this is a cache read in the common case. */
+async function freeData() {
+  const [quotes, heat, trend, cal, pulse, internals] = await Promise.all([
+    _feed('/api/quotes'), _feed('/api/heatmap'), _feed('/api/trending'),
+    _feed('/api/calendar'), _feed('/api/market-pulse'), _feed('/api/market-internals'),
+  ]);
+  return { quotes, heat, trend, cal, pulse, internals };
+}
+
+const _num = (v) => (v == null || v === '' || isNaN(Number(v)) ? null : Number(v));
+const _sign = (n) => (n > 0 ? 'ds-up' : n < 0 ? 'ds-dn' : 'ds-nu');
+const _pct = (n) => (_num(n) == null ? '—' : (n > 0 ? '+' : '') + Number(n).toFixed(2) + '%');
+
+/* ── THE RIBBON ───────────────────────────────────────────────────────────────────────────────
+   The row every financial front page opens with. /api/quotes keys by display name and returns
+   price as a preformatted string, chg as a number — read, do not reformat the price. */
+const BOARD = ['S&P 500', 'Nasdaq', 'Dow', 'Russell', 'VIX', '10Y', 'Dollar', 'Gold', 'Crude', 'BTC'];
+function boardRibbon(q) {
+  if (!q || typeof q !== 'object') return '';
+  const cells = BOARD.filter((k) => q[k] && q[k].price != null).map((k) => {
+    const v = q[k];
+    return `<a class="ds-bq" href="/market-data"><span class="ds-bqn">${esc(k)}</span>`
+      + `<span class="ds-bqp">${esc(String(v.price))}</span>`
+      + `<span class="ds-bqc ${_sign(_num(v.chg))}">${esc(_pct(v.chg))}</span></a>`;
+  }).join('');
+  return cells ? `<div class="ds-board" aria-label="Markets">${cells}</div>` : '';
+}
+
+/* ── SECTORS ──────────────────────────────────────────────────────────────────────────────────
+   The heatmap every terminal carries, as ranked bars rather than filled tiles: the house rule
+   bans boxes, and a bar sorted best-to-worst answers "what led today" faster than a grid anyway.
+   Bar length is scaled to the largest absolute move on the day, so the strongest bar is always
+   full width and the shape stays readable on a flat tape. */
+function sectorBand(h) {
+  if (!h || !Array.isArray(h.sectors) || !h.sectors.length) return '';
+  const secs = h.sectors.filter((s) => _num(s.chg) != null);
+  if (!secs.length) return '';
+  const max = Math.max(...secs.map((s) => Math.abs(Number(s.chg)))) || 1;
+  const rows = secs.slice().sort((a, b) => Number(b.chg) - Number(a.chg)).map((s) => {
+    const c = Number(s.chg);
+    const w = Math.max(2, Math.round((Math.abs(c) / max) * 100));
+    const best = (s.stocks || []).filter((x) => _num(x.chg) != null)
+      .sort((a, b) => Number(b.chg) - Number(a.chg))[0];
+    return `<div class="ds-secrow"><span class="ds-secn">${esc(s.label)}`
+      + `<i class="ds-sece">${esc(s.etf || '')}</i></span>`
+      + `<span class="ds-secb"><i class="${_sign(c)}" style="width:${w}%"></i></span>`
+      + `<span class="ds-secv ${_sign(c)}">${esc(_pct(c))}</span>`
+      + `<span class="ds-secl">${best ? esc(best.sym) + ' <b class="' + _sign(Number(best.chg))
+        + '">' + esc(_pct(best.chg)) + '</b>' : ''}</span></div>`;
+  }).join('');
+  return `<div class="ds-datasec"><div class="ds-datah" data-c="sectors">Sectors today</div>`
+    + `<div class="ds-secbars">${rows}</div>`
+    + `<div class="ds-note">Eleven S&amp;P sectors by their tracking ETF, ranked, with the day&rsquo;s `
+    + `strongest name in each. <a href="/market-data">The full free market map &rarr;</a></div></div>`;
+}
+
+/* ── THE RAIL PANELS ──────────────────────────────────────────────────────────────────────── */
+
+function pulsePanel(p) {
+  if (!p || !p.pulse || _num(p.pulse.score) == null) return '';
+  const s = Number(p.pulse.score);
+  const facs = (Array.isArray(p.factors) ? p.factors : []).filter((f) => _num(f.score) != null);
+  return `<h4 style="margin-top:26px;">Market pulse</h4>`
+    + `<div class="ds-pulse"><span class="ds-pv">${esc(String(s))}</span>`
+    + `<span class="ds-pl">${esc(String(p.pulse.label || ''))}</span></div>`
+    + `<div class="ds-meter"><i style="width:${Math.max(0, Math.min(100, s))}%"></i></div>`
+    + facs.map((f) => `<div class="ds-frow"><span class="ds-fk">${esc(f.key)}</span>`
+      + `<span class="ds-fb"><i style="width:${Math.max(0, Math.min(100, Number(f.score)))}%"></i></span>`
+      + `<span class="ds-fl">${esc(f.label || '')}</span></div>`).join('')
+    + (_num(p.putCall) != null
+      ? `<div class="ds-note">Put/call ${esc(Number(p.putCall).toFixed(2))}`
+        + (_num(p.momentum) != null ? ` &middot; momentum ${esc(String(p.momentum))}` : '') + `</div>` : '');
+}
+
+/* The VIX curve. `shape` is the word the desk uses; front_vs_3m is the number under it. */
+function volPanel(mi) {
+  const t = mi && mi.termStructure;
+  if (!t) return '';
+  const legs = [['VIX9D', '9d'], ['VIX', '30d'], ['VIX3M', '3m'], ['VIX6M', '6m']]
+    .filter(([k]) => _num(t[k]) != null);
+  if (legs.length < 2) return '';
+  const vals = legs.map(([k]) => Number(t[k]));
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = (hi - lo) || 1;
+  return `<h4 style="margin-top:26px;">The VIX curve</h4>`
+    + `<div class="ds-curve">${legs.map(([k, lbl]) => {
+      const v = Number(t[k]);
+      return `<span class="ds-cg"><i style="height:${18 + Math.round(((v - lo) / span) * 40)}px"></i>`
+        + `<b>${esc(v.toFixed(2))}</b><em>${esc(lbl)}</em></span>`;
+    }).join('')}</div>`
+    + `<div class="ds-note">${esc(String(t.shape || ''))}`
+    + (_num(t.front_vs_3m) != null ? ` &middot; front vs 3m ${esc(_pct(t.front_vs_3m))}` : '')
+    + ` &middot; <a href="/vol">the volatility record &rarr;</a></div>`;
+}
+
+/* Short volume is ours, free, and genuinely unusual on a news page — it is the one number here
+   a reader cannot get from a generic finance portal. */
+function shortVolPanel(mi) {
+  const sv = mi && mi.shortVolume;
+  if (!sv) return '';
+  const rows = ['SPY', 'QQQ', 'IWM'].filter((k) => sv[k] && _num(sv[k].short_pct) != null).map((k) => {
+    const d = sv[k];
+    return `<div class="ds-svrow"><span class="ds-svk">${esc(k)}</span>`
+      + `<span class="ds-svb"><i style="width:${Math.max(0, Math.min(100, Number(d.short_pct)))}%"></i></span>`
+      + `<span class="ds-svv">${esc(Number(d.short_pct).toFixed(1))}%</span>`
+      + `<span class="ds-svl">${esc(String(d.label || ''))}</span></div>`;
+  }).join('');
+  if (!rows) return '';
+  return `<h4 style="margin-top:26px;">Short volume</h4>${rows}`
+    + `<div class="ds-note">Share of the day&rsquo;s tape printed short, against its own `
+    + `${esc(String((sv.SPY && sv.SPY.n) || ''))}-session history.</div>`;
+}
+
+function activePanel(t) {
+  if (!t || !Array.isArray(t.stocks) || !t.stocks.length) return '';
+  const rows = t.stocks.filter((s) => s.sym).slice(0, 8).map((s) => `<div class="ds-acrow">`
+    + `<span class="ds-acs">${esc(s.sym)}</span>`
+    + `<span class="ds-acn">${esc(String(s.name || '').replace(/,? Inc\.?$/i, ''))}</span>`
+    + `<span class="ds-acp">${_num(s.price) != null ? esc(Number(s.price).toFixed(2)) : '—'}</span>`
+    + `<span class="ds-acc ${_sign(_num(s.chg))}">${esc(_pct(s.chg))}</span></div>`).join('');
+  return rows ? `<h4 style="margin-top:26px;">On the move</h4>${rows}` : '';
+}
+
+function calPanel(c) {
+  if (!c || !Array.isArray(c.events) || !c.events.length) return '';
+  const rows = c.events.slice(0, 6).map((e) => {
+    const d = new Date(String(e.date) + 'T12:00:00Z');
+    const day = isNaN(d) ? String(e.date || '')
+      : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+    return `<div class="ds-carow"><div class="ds-cad">${esc(day)}`
+      + `${e.time ? ` &middot; ${esc(String(e.time))}` : ''}</div>`
+      + `<div class="ds-cae">${esc(String(e.event || ''))}</div>`
+      + `<div class="ds-cav">${e.consensus != null ? 'cons ' + esc(String(e.consensus)) + ' &middot; ' : ''}`
+      + `${e.previous != null ? 'prev ' + esc(String(e.previous)) : ''}</div></div>`;
+  }).join('');
+  return `<h4 style="margin-top:26px;">On the calendar</h4>${rows}`
+    + `<div class="ds-note"><a href="/economic-calendar">The full calendar &rarr;</a></div>`;
+}
+
 /* ── THE READER ───────────────────────────────────────────────────────────────────────────── */
 module.exports = async (req, res) => {
   if (req.method === 'POST') return writeStory(req, res);
@@ -733,7 +997,11 @@ ${await regimeStrip()}
         .map((s) => `<a href="#${anchor(s)}">${esc(s)}</a>`).join('')}</nav>`
     : '';
 
-  const inner = crumbs + mast + secnav + `<div class="ds-cols">
+  /* The free board. Fetched once, in parallel, after the stories are already in hand — a slow
+     upstream costs a panel, never the page. */
+  const free = await freeData();
+
+  const inner = crumbs + mast + boardRibbon(free.quotes) + secnav + `<div class="ds-cols">
   <div>
     <div class="ds-lead">
       ${lead.kindLabel ? `<div class="ds-kicker">${esc(lead.kindLabel)}</div>` : ''}
@@ -752,6 +1020,7 @@ ${await regimeStrip()}
       + `</div>` + (si === 0 ? houseAd(3) : '')).join('')}
     ${houseAd(1)}
       </div>
+    ${sectorBand(free.heat)}
   </div>
   <aside class="ds-rail">
     <h4>Latest from the desk</h4>
@@ -761,6 +1030,11 @@ ${await regimeStrip()}
         + `<div class="ds-rh"><a href="/daily-strike/${esc(s.slug)}">${esc(s.headline)}</a></div></div>`).join('')
       || '<div class="ds-empty">More desks publish through the session.</div>'}
     ${houseAd(0)}
+    ${pulsePanel(free.pulse)}
+    ${volPanel(free.internals)}
+    ${shortVolPanel(free.internals)}
+    ${activePanel(free.trend)}
+    ${calPanel(free.cal)}
     <h4 style="margin-top:26px;">Free, no account</h4>
     <div class="ds-rh" style="padding:6px 0 0;font-size:13px;line-height:2;">
       <a href="/market-data/spy">SPY gamma map</a> &middot; <a href="/market-data/qqq">QQQ</a>
