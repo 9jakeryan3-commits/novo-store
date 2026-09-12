@@ -165,6 +165,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   section { padding: 80px 0; }
   hr.divider { border: none; border-top: 1px solid var(--bdr); margin: 0; }
 
+
+  /* ── the product sheet, full-bleed under the hero ───────────────────────────────────────────
+     Same treatment as the homepage ecosystem sheet. Edge to edge because it sits outside
+     .container; its own black ground meets the page so the two dividers read as its rules.
+     ⚠ THE SCROLLER IS NOT DECORATION: this is a 2,600px sheet, and at 390px it would render as a
+     legible-LOOKING smear. min-width holds it at a readable size and the figure takes the
+     overflow, so a phone swipes across it and the PAGE never scrolls sideways. */
+  .eco-band { margin: 0; padding: 0; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .eco-band img { display: block; width: 100%; min-width: 860px; height: auto; }
+  @media (max-width: 860px) { .eco-band img { min-width: 780px; } }
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
@@ -678,15 +689,7 @@ nav { position: relative; }
 }
 </style>
 
-    <div class="hero-mashup">
-      <div class="hm-back"><img src="/screenshots/trader-live-desk.webp?v=7" width="1920" height="1052" alt="The Trader terminal &mdash; the SPY chart with every dealer level drawn on the candles, under the intel strip carrying net GEX and its percentile rank, how much of the book is 0DTE and where it pins, vanna and charm &mdash; beside the Three Books rail: SPY, QQQ and IWM dealer structure side by side, each with net GEX, the gamma flip, the call and put walls, gravity, the expected move, put/call skew and the market-maker fast-slow split" loading="eager" fetchpriority="high" decoding="async"></div>
-      <div class="hm-fan">
-        <div class="hm-card" style="transform:rotate(-11deg);z-index:4;"><img src="/screenshots/trader-live-chart.webp?v=5" width="501" height="1044" alt="Trader on a phone &mdash; the chart tab with the SPY / QQQ / IWM switcher and the timeframe row, and the Market Intel sheet pulled up over it: every chart level from VWAP and the gamma flip to the walls and the expected move, the session&rsquo;s highs and lows, then VIX, macro, retail state, relative volume, tape imbalance, net GEX with its percentile rank, the 0DTE share and its pin, vanna and charm" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(0deg) translateY(14px);z-index:3;margin-left:-46px;"><img src="/screenshots/trader-live-analysis.webp?v=4" width="501" height="1044" alt="Trader on a phone &mdash; the Alerts tab &mdash; &lsquo;The Line&rsquo; firing on SPY level breaks, each with what holds, what breaks and what to watch, above the member&rsquo;s own armed alerts and Dr. NoVo&rsquo;s edge-cleared ones" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(11deg) translateY(14px);z-index:2;margin-left:-46px;"><img src="/screenshots/trader-live-drnovo.webp?v=3" width="501" height="1044" alt="Trader on a phone &mdash; the Dr. NoVo tab answering a request for a deep read: a bifurcated market called in plain English, the structural shifts since yesterday with the walls that moved, and an IWM read down to its flip, walls, gravity, ATM IV and expected move &mdash; with the tools he checked named above the answer" loading="lazy" decoding="async"></div>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:18px auto 34px;">The dashboard and the phone app &mdash; the whole dealer map, drawn on the tape as it moves.</p>
+
 
 
     <p style="margin-top:44px;">Trader keeps the map on the tape &mdash; every dealer level recomputed and redrawn as it moves, the structural audit rerun at the top of every hour, and all of it laid over the candles instead of listed in a table you have to translate onto your own chart.</p>
@@ -702,6 +705,21 @@ nav { position: relative; }
 </section>
 
 <!-- STATS -->
+<hr class="divider">
+
+<!-- ═══ THE TRADER SHEET ══════════════════════════════════════════════════
+     Replaces the fanned hero mosaic that stood here (Jake, 2026-09-12: "we will replace the basic
+     ui shot we currently have with these... these must be wider for a desktop.. just like you did
+     the homepage one it scrolls side to side on a phone and is nice").
+     Composed from REAL captures — the type is laid out by a browser and every screen is one of
+     Jake's shots, so nothing on it claims a number the product does not produce. -->
+<figure class="eco-band">
+  <img src="/screenshots/trader-sheet.webp?v=1" width="2600" height="2763" loading="lazy"
+       decoding="async" alt="NoVo Trader: the dealer map drawn on the candles with the analysis rail beside it, the analysis feed, the desk panels and the volume profile — and the same chart, panel menu and Dr. NoVo on a phone.">
+</figure>
+
+<hr class="divider">
+
 <div class="stats">
   <div class="container">
     <div class="stats-grid">

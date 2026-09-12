@@ -96,6 +96,17 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
   section { padding: 80px 0; }
   hr.divider { border: none; border-top: 1px solid var(--bdr); margin: 0; }
 
+
+  /* ── the product sheet, full-bleed under the hero ───────────────────────────────────────────
+     Same treatment as the homepage ecosystem sheet. Edge to edge because it sits outside
+     .container; its own black ground meets the page so the two dividers read as its rules.
+     ⚠ THE SCROLLER IS NOT DECORATION: this is a 2,600px sheet, and at 390px it would render as a
+     legible-LOOKING smear. min-width holds it at a readable size and the figure takes the
+     overflow, so a phone swipes across it and the PAGE never scrolls sideways. */
+  .eco-band { margin: 0; padding: 0; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .eco-band img { display: block; width: 100%; min-width: 860px; height: auto; }
+  @media (max-width: 860px) { .eco-band img { min-width: 780px; } }
   /* ── Nav ── */
   nav { position: sticky; top: 0; z-index: 100; background: rgba(18,19,22,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--bdr); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; max-width: 1200px; margin: 0 auto; }
@@ -726,15 +737,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 
-    <div class="hero-mashup">
-      <div class="hm-back"><img src="/screenshots/crypto-map-desk.webp?v=3" width="1920" height="1055" alt="The Crypto Market Map &mdash; SOL&rsquo;s dealer gamma by strike with net GEX and its regime, the call wall, gamma flip, max pain, spot and put wall each with its distance, the gamma-regime gauge, near-ATM skew and the 24-hour and 7-day moves, over the gamma histogram by strike &mdash; beside what a round trip actually costs and how that ranks against every coin, the 24-hour liquidations by venue, and where the flush landed price by price" loading="lazy" decoding="async"></div>
-      <div class="hm-fan">
-        <div class="hm-card" style="transform:rotate(-11deg) translateY(14px);z-index:4;"><img src="/screenshots/crypto-phone-map.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC dealer gamma by strike: net GEX with its regime, the call wall, max pain, gamma flip, spot and put wall each with its distance, the chain open interest behind them, then DVOL against its own five years, the one-day expected move, implied versus realised, and near-ATM skew" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(0deg);z-index:3;margin-left:-46px;"><img src="/screenshots/crypto-phone-flow.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC taker-flow gamma over 24 hours: what makers actually took on, measured from screen prints, against what the standing book says by convention &mdash; the two disagreeing, sized against net GEX, with what takers bought and sold, the number of prints measured, and the maker-short to maker-long ladder by strike" loading="lazy" decoding="async"></div>
-        <div class="hm-card" style="transform:rotate(11deg) translateY(14px);z-index:2;margin-left:-46px;"><img src="/screenshots/crypto-phone-positioning.webp?v=1" width="501" height="900" alt="The Crypto Market Map on a phone &mdash; BTC across four books that disagree: OKX, the US-listed ETF, and Deribit coin-margined and USDC, each with its own net GEX, flip and max pain &mdash; then the book&rsquo;s dollar delta, vanna and charm, and funding per venue ranked against each venue&rsquo;s own history, never blended" loading="lazy" decoding="async"></div>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--txt3);text-align:center;margin:18px auto 34px;">The map on a desk and in a pocket &mdash; every book, every venue, and the on-chain surface beside them.</p>
+
     <div class="hero-chips" aria-label="What the crypto map shows"><span class="hero-chip">Gamma by strike</span><span class="hero-chip">Gamma flip</span><span class="hero-chip">Call/put walls</span><span class="hero-chip">Settlement clock</span><span class="hero-chip">Expected move</span><span class="hero-chip">Implied vs realized</span><span class="hero-chip">Near-ATM skew</span><span class="hero-chip">Funding by venue</span><span class="hero-chip">Dated-futures carry</span><span class="hero-chip">Positioning percentiles</span><span class="hero-chip">Block tape</span><span class="hero-chip">Taker-flow gamma</span><span class="hero-chip">Realized liquidations</span><span class="hero-chip">Dry powder</span><span class="hero-chip">Whole-book screener</span><span class="hero-chip">Liquidation flow</span><span class="hero-chip">Price/OI regime</span><span class="hero-chip">Cost to trade</span><span class="hero-chip">Gamma heatmap</span><span class="hero-chip">Vanna &amp; charm</span><span class="hero-chip">ETF books</span><span class="hero-chip">On-chain liquidity</span><span class="hero-chip">Pool depth</span><span class="hero-chip">Wallet flow</span><span class="hero-chip">Base rates</span><span class="hero-chip">Live readings</span><span class="hero-chip">Daily rundown</span><span class="hero-chip">ETF flows</span><span class="hero-chip">Vol surface</span><span class="hero-chip">Funding spread</span></div>
 
     <div class="hero-cta">
@@ -755,6 +758,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 
 <!-- COVERAGE STATS -->
+<hr class="divider">
+
+<!-- ═══ THE CRYPTO MAP SHEET ══════════════════════════════════════════════════
+     Replaces the fanned hero mosaic that stood here (Jake, 2026-09-12: "we will replace the basic
+     ui shot we currently have with these... these must be wider for a desktop.. just like you did
+     the homepage one it scrolls side to side on a phone and is nice").
+     Composed from REAL captures — the type is laid out by a browser and every screen is one of
+     Jake's shots, so nothing on it claims a number the product does not produce. -->
+<figure class="eco-band">
+  <img src="/screenshots/crypto-sheet.webp?v=1" width="2600" height="1857" loading="lazy"
+       decoding="async" alt="The NoVo Crypto Market Map: a coin&rsquo;s dealer gamma by strike with its walls and flip, term structure and the gamma heatmap, taker-flow gamma and the block tape, and the whole-book screener — with the same map, screener and written rundown on a phone.">
+</figure>
+
+<hr class="divider">
+
 <section class="stats">
   <div class="container">
     <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);text-align:center;">
