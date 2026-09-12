@@ -865,7 +865,12 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
    chart keeps every drag and crosshair — only the chevron and the rows take the pointer back. */
 #chart-ov { position: absolute; top: 8px; left: 10px; z-index: 12; pointer-events: none;
   font-family: var(--font); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
-#chart-ov .ov-top { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+/* PRICE GETS ITS OWN ROW (Jake, 2026-09-12: "make the price stay at the top in its own row the
+   rest below it"). Sharing a line with the OHLC readout ran both off the right edge of a phone —
+   the price, the one number that must always be legible, was the half that got clipped. */
+#chart-ov .ov-price { display: flex; align-items: baseline; gap: 8px; white-space: nowrap;
+  line-height: 1.15; }
+#chart-legend2 { display: block; }
 .ov-px { font-size: 17px; font-weight: 800; color: var(--txt1); letter-spacing: .2px;
   font-variant-numeric: tabular-nums; line-height: 1.2; }
 .ov-chg { font-size: 11px; font-weight: 700; color: var(--txt2); font-variant-numeric: tabular-nums; }
@@ -888,11 +893,19 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 /* ══ FOOTER BAR ════════════════════════════════════════════════════════════════════════════
    Range left, drawing tools centre, settings right. One hairline above it and nothing else —
    it is a shelf under the chart, not a panel. */
+/* ONE ROW THAT SCROLLS (Jake: "need to be able to scroll that bottom tool bar left and right").
+   The three cells were flex 1/0/1, so on a phone the left cell collapsed to nothing and took the
+   interval and range buttons off-screen with it — they were not missing, they were stranded in a
+   box too narrow to show them. The bar is a single scrolling track now and every group keeps its
+   natural width; justification is what a wide screen gets, not what a narrow one is forced into. */
 #chart-footbar { display: flex; align-items: center; gap: 10px; padding: 5px 2px 0;
-  border-top: 1px solid var(--bdr2); margin-top: 6px; }
-#chart-footbar .cfb-l { flex: 1 1 0; display: flex; align-items: center; justify-content: flex-start; min-width: 0; }
-#chart-footbar .cfb-c { flex: 0 0 auto; display: flex; justify-content: center; }
-#chart-footbar .cfb-r { flex: 1 1 0; display: flex; align-items: center; justify-content: flex-end; }
+  border-top: 1px solid var(--bdr2); margin-top: 6px;
+  overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; }
+#chart-footbar::-webkit-scrollbar { height: 0; }
+#chart-footbar .cfb-l { flex: 0 0 auto; display: flex; align-items: center; }
+#chart-footbar .cfb-c { flex: 0 0 auto; display: flex; align-items: center; margin: 0 auto; }
+#chart-footbar .cfb-r { flex: 0 0 auto; display: flex; align-items: center; }
 #ctb-range .ctb-btn { font-size: 10px; letter-spacing: .3px; padding: 3px 6px; }
 #chart-footbar .ctb-icons .ctb-btn { font-size: 14px; padding: 3px 7px; }
 
@@ -922,20 +935,24 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 #chart-legend3 .lg-v { color: var(--txt1); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 900px) {
-  /* Phone/narrow: the OHLC detail is the first thing to go — the price and the ticker are what
-     a small screen needs, and the same numbers are one hover away on the chart. */
-  #tb-ohlc { display: none; }
-  .tb-px { font-size: 14px; }
+  /* Phone/narrow: the price keeps its size because it is the number you look at; the OHLC line
+     and the indicator stack shrink instead. The stack's open/closed state is the VIEWER's — it is
+     read from novo_lgd and is the same on a phone as on a desktop. This does not force it closed:
+     a width-triggered default would silently overwrite a choice the viewer already made. */
+  .ov-px { font-size: 15px; }
+  #chart-legend2 { font-size: 9px; letter-spacing: 0; }
   .tb-pills { margin-left: 4px; }
   .tb-pills .tkr-pill { font-size: 11px; padding: 2px 5px 3px; }
 }
 @media (max-width: 768px) {
   /* The footer scrolls rather than wrapping: a second row here would rebuild the exact height
      problem the header row was removed to solve. */
-  #chart-footbar { gap: 6px; }
-  #chart-footbar .cfb-l, #chart-footbar .cfb-c { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  #chart-footbar .cfb-l::-webkit-scrollbar, #chart-footbar .cfb-c::-webkit-scrollbar { height: 0; }
-  #ctb-range .ctb-btn, #chart-footbar .ctb-icons .ctb-btn { padding: 6px 8px; }
+  /* Phone: nothing is centred and nothing is pushed right — the groups run left to right in
+     order and the bar scrolls. Centring inside a scroll track hides the left end on first paint. */
+  #chart-footbar { gap: 8px; }
+  #chart-footbar .cfb-c { margin: 0; }
+  #ctb-range .ctb-btn, #chart-footbar .ctb-icons .ctb-btn { padding: 7px 9px; }
+  #chart-footbar #ctb-tf .ctb-btn { padding: 7px 9px; }
   /* Phone: the stack is the same shape, just tighter. */
   #chart-legend3 .lg-row { font-size: 9.5px; line-height: 1.5; }
 }
@@ -2921,11 +2938,11 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
              stacked under it, all collapsible. It reads where you are already looking instead of
              making you travel to the top of the page for the number under your cursor. -->
         <div id="chart-ov">
-          <div class="ov-top">
-            <span id="chart-legend2"></span>
+          <div class="ov-price">
             <span id="t-spy" class="ov-px">&mdash;</span>
             <span id="t-spy-chg" class="ov-chg">&mdash;</span>
           </div>
+          <span id="chart-legend2"></span>
           <div id="chart-legend3"></div>
         </div>
         <div id="novo-chart" style="height:340px;width:100%;border-radius:7px;overflow:hidden;border:1px solid var(--bdr2);background:rgba(0,0,0,0.25);box-shadow:0 1px 6px rgba(0,0,0,0.25);"></div>
@@ -4750,8 +4767,17 @@ function _paintCtb(){
    fits, un-fold it, and oscillate. Cached once, the comparison is monotone in the available width,
    so it settles. */
 (function(){
+  /* ⚠ THIS GUARD USED TO RETURN, AND THAT BROKE THE WHOLE PHONE LAYOUT (2026-09-12).
+     #chart-toolbar was deleted, so `if (!tb) return` fired on every load — and the things that
+     live BELOW it in this same IIFE are not toolbar code at all: buildChartSheet() (the Market
+     Intel pull-up), sizeChartToPhone(), and the card-read/card-line relocation. Mobile lost all
+     three at once and read as "nothing fits".
+     I checked that the guard EXISTED and concluded the dead code would self-disable cleanly. It
+     did. What I never checked was what else the guard was standing in front of. A guard written
+     for one function had accreted unrelated setup behind it over time.
+     The fold machinery at the bottom is now gated on its own, where it belongs. */
   var tb = document.getElementById('chart-toolbar');
-  if (!tb || !window.ResizeObserver) return;
+  var _canFold = !!(tb && window.ResizeObserver);
   var NAT = 0, lastW = -1, busy = false;
 
   function natural(){
@@ -4899,7 +4925,14 @@ function _paintCtb(){
     // Where the pane sits when the column is at rest — so a mid-scroll resize does not size the
     // chart against a scrolled-away position.
     var topAtRest = c.getBoundingClientRect().top + col.scrollTop;
-    var h = Math.round(floorY - topAtRest - CHART_PEEK);
+    /* ⚠ RESERVE THE FOOTER BAR (2026-09-12). The sizer measures from the chart's top down to the
+       sheet, and the footer bar lives BELOW the chart inside the same card — so without this the
+       chart takes the whole budget and the bar is pushed underneath the fixed sheet, where it is
+       unreachable. Measured rather than a constant: the row's height moves with the touch-target
+       padding, which is itself different on a phone. */
+    var _fb = document.getElementById('chart-footbar');
+    var _fbH = _fb ? Math.ceil(_fb.getBoundingClientRect().height) + 8 : 0;
+    var h = Math.round(floorY - topAtRest - CHART_PEEK - _fbH);
     if (h < CHART_MIN) h = CHART_MIN;
     // Only touch the DOM when the number actually changed: this dispatches a resize, and
     // re-entering on our own event is how a sizer becomes a loop.
@@ -5012,15 +5045,16 @@ function _paintCtb(){
   /* The observer's early-out compares against what fit() actually measures. Left on
      tb.clientWidth it would skip the recompute in exactly the case this fix exists for: the rail
      rewraps, the toolbar's own width is unchanged, and nothing re-runs. */
-  new ResizeObserver(function(){
-    // Width only. Folding changes the bar's HEIGHT, which would re-enter this observer forever.
-    if (availWidth() === lastW) return;
+  if (_canFold) {
+    new ResizeObserver(function(){
+      // Width only. Folding changes the bar's HEIGHT, which would re-enter this observer forever.
+      if (availWidth() === lastW) return;
+      fit();
+    }).observe(tb);
     fit();
-  }).observe(tb);
-
-  fit();
-  // Fonts change every button's width, so the first measurement is only provisional.
-  try { document.fonts.ready.then(function(){ NAT = 0; fit(); }); } catch (_e) {}
+    // Fonts change every button's width, so the first measurement is only provisional.
+    try { document.fonts.ready.then(function(){ NAT = 0; fit(); }); } catch (_e) {}
+  }
 })();
 
 document.querySelectorAll('#ctb-tf .ctb-btn').forEach(function(b){
