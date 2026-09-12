@@ -2423,14 +2423,14 @@ function arbPanel(d){
   // subtracted d.round_trip_pct×2 — but that figure is Robinhood's RETAIL SPOT markup, and the
   // legs here are PERP venues where Robinhood offers nothing: a cost from a venue that is not
   // in the trade. Worse, an ANNUALISED rate minus a ONE-TIME cost implies a one-year hold
-  // nothing on screen stated — 71 of 79 coins read as profitable arbs, +238% at the top, on a
+  // nothing on screen stated — 71 of 90 coins read as profitable arbs, +238% at the top, on a
   // never-advice product. The perp venues' own taker/settlement costs are not in this payload;
   // until the collector carries them, the honest panel is legs + gross, and the footnote says
   // exactly what is missing. Do not re-add a net without a real per-venue cost AND a stated
   // holding period.
   if(hi.venue===lo.venue || !(spread>0)){
     // Every trusted venue at the same rate: there is no cross-venue trade to name, and two
-    // identical legs render as an instruction nobody could place (5 coins live, 09-12).
+    // identical legs render as an instruction nobody could place (90 coins live, 09-12).
     return `<div class="panel"><div class="ph"><h2>Funding arb</h2>
       <span class="sub">${rows.length} venues &middot; annualised &middot; trusted rows only</span></div><div class="pb">
       <div class="fnote">No spread across venues today — every trusted venue is paying the same
