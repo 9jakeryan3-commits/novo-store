@@ -53,6 +53,15 @@ node scripts/sync-track-record.js
 # extracted markup carries the current ?v= hashes and the current numbers.
 node scripts/build-site-chrome.js
 
+# Two dead surfaces shipped in ONE day (09-11) while smoke stayed green: a parse error in an
+# inline <script> kills the whole block, the page still returns 200 with a full-size body, and
+# the GET-only smoke below cannot tell a live page from a corpse. Both outages were caught by
+# people. This compiles every inline block in-process (vm.Script — the spawn-per-block version
+# blew a 120s budget and was pulled; this one does the full corpus in ~2s), AFTER the generators
+# so generated pages are covered too. Sabotage-tested on the real defect: fails 3a1e6c50b's
+# analyst-live.html at the exact line, passes bb1f4e5d9's fix.
+node scripts/inline-js-check.js
+
 # lastmod is read from git, so the commit that ships a content change also moves the
 # dates the sitemap records -- meaning the sitemap is always exactly one commit behind
 # and would block every single deploy. When the ONLY thing regeneration touched is the
