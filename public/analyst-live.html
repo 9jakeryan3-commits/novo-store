@@ -666,6 +666,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" data-lvtab="read" onclick="lvMobTab('read')">Desk Note</button>
       <button type="button" data-lvtab="congress" onclick="lvMobTab('congress')">Congress</button>
       <button type="button" data-lvtab="history" onclick="lvMobTab('history')">History</button>
+      <button type="button" data-lvtab="wire" onclick="lvMobTab('wire')">Wire</button>
       <button type="button" data-lvtab="alerts" onclick="lvMobTab('alerts')">Alerts</button>
       <button type="button" data-lvtab="digest" onclick="lvMobTab('digest')">Digest</button>
       <button type="button" data-lvtab="predict" onclick="lvMobTab('predict')" hidden>Predictions</button>
@@ -806,6 +807,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="lv-card lv-afeed" id="afeed-card"></div>
     <div class="lv-card lv-futures" id="futures-card"></div>
     <div class="lv-card lv-history" id="history-card"></div>
+    <!-- WIRE & EARNINGS (Jake's 09-12 display approval) — its own top-level tab, mounted from
+         novo-tape's wire drawer on first open, same pattern as History below. -->
+    <div class="lv-card lv-wire" id="wire-card"></div>
     <!-- CONGRESS. House periodic transaction reports, read straight from the Clerk. Same
          module the Trader mounts (js/novo-congress.js) - one panel, two dashboards. It is a
          DISCLOSURE feed, not flow: members have 45 days to file and the median gap measured
@@ -2104,6 +2108,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
 body[data-mtab="afeed"] #dash > .lv-afeed { display: block; }
 body[data-mtab="futures"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-futures):not(.lv-foot) { display: none; }
   body[data-mtab="history"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-history):not(.lv-foot) { display: none; }
+  body[data-mtab="wire"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-wire):not(.lv-foot) { display: none; }
+  body[data-mtab="wire"] #dash > .lv-wire { display: block; }
   body[data-mtab="congress"] #dash > *:not(.lv-top):not(.lv-tabs):not(.lv-congress):not(.lv-foot) { display: none; }
   /* ...and switched back on for their own tab, against the desktop default above. */
   body[data-mtab="futures"] #dash > .lv-futures { display: block; }
@@ -2315,7 +2321,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
 <script src="/js/novo-readings.js?v=9b6205cd"></script>
 <!-- The Trader's own Futures and tape modules, unchanged. Same code, same payload, same panel. -->
 <script src="/js/novo-futures.js?v=3e879719"></script>
-<script src="/js/novo-tape.js?v=8ecaa80b"></script>
+<script src="/js/novo-tape.js?v=82348ff9"></script>
 <script src="/js/novo-congress.js?v=03247de3"></script>
 <script>
   /* The strip mounts on load; the tab mounts on first open. novoReadings.open is what the strip
@@ -2505,6 +2511,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
       <button type="button" data-mtab="futures" onclick="pickMore('futures')"><span aria-hidden="true">&#9650;</span>Futures</button>
       <button type="button" data-mtab="congress" onclick="pickMore('congress')"><span aria-hidden="true">&#9638;</span>Congress</button>
       <button type="button" data-mtab="history" onclick="pickMore('history')"><span aria-hidden="true">&#9719;</span>History</button>
+      <button type="button" data-mtab="wire" onclick="pickMore('wire')"><span aria-hidden="true">&#9634;</span>Wire</button>
 </div>
 <script>
 (function(){
@@ -2593,6 +2600,13 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
         try {
           if (!window._lvHistMounted && window.novoTape) {
             window.novoTape.mount('#history-card', 'history'); window._lvHistMounted = 1;
+          } else if (window.novoTape) { window.novoTape.refresh(); }
+        } catch (_e) {}
+      }
+      if (which === 'wire') {
+        try {
+          if (!window._lvWireMounted && window.novoTape) {
+            window.novoTape.mount('#wire-card', 'wire'); window._lvWireMounted = 1;
           } else if (window.novoTape) { window.novoTape.refresh(); }
         } catch (_e) {}
       }

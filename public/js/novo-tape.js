@@ -526,8 +526,80 @@
        drawer stays synchronous; cached ten minutes because macro dates do not move by the poll. */
     h += '<div class="tp-grp">Catalysts · major US macro</div>'
       + '<div class="tp-cal"><div class="tp-empty">Loading the calendar…</div></div>';
+    /* WIRE + EARNINGS (Jake's 09-12 display approval — RH fundamentals/news/economic data on
+       the product). Two more GROUPS, which the subtabs pass below turns into visible TABS on
+       this surface. Data comes from /api/analyst-publish?rh=1 (token-gated), fed by the cloud
+       feeder through the ops ingest door — this module never touches the RH MCP. Rendering
+       rules from the spec: every Wire row carries publisher + age (the source and timestamp
+       ARE the fact; the feed has no wire/PR/opinion tag, so nothing here may imply one);
+       earnings has its own slice + cap with LABELED truncation, never contending with the
+       macro block's six slots. */
+    h += '<div class="tp-grp">Wire · ' + esc(tk) + '</div>'
+      + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
+      + '<div class="tp-grp">Earnings · upcoming</div>'
+      + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>';
     el.innerHTML = h;
     _fillCal(el.querySelector('.tp-cal'));
+    _fillRh(el, tk);
+    /* Groups become TABS — same pass history/flow/sweeps already run. This is what makes the
+       new features discoverable as tabs instead of buried in one scroll (Jake, 09-12). */
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
+  }
+
+  var _rhCache = null, _rhAt = 0;
+  function _fillRh(root, tk) {
+    var wbox = root.querySelector('.tp-wire'), ebox = root.querySelector('.tp-earn');
+    if (!wbox && !ebox) return;
+    var render = function (j) {
+      if (wbox) {
+        var w = j && j.wire && j.wire[tk];
+        var arts = (w && w.articles) || [];
+        if (!arts.length) {
+          wbox.innerHTML = '<div class="tp-empty">No wire items for ' + esc(tk) + ' yet — the feed '
+            + 'refreshes with the cloud feeder’s next pass.</div>';
+        } else {
+          wbox.innerHTML = arts.slice(0, 12).map(function (a) {
+            var age = '';
+            try {
+              var hrs = Math.max(0, (Date.now() - Date.parse(a.published_at)) / 3600000);
+              age = hrs < 1 ? Math.round(hrs * 60) + 'm' : hrs < 48 ? Math.round(hrs) + 'h' : Math.round(hrs / 24) + 'd';
+            } catch (_e) { age = ''; }
+            return '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+              + '<div style="font-size:12px;line-height:1.45">' + esc(a.title || '') + '</div>'
+              + '<div class="tp-meta" style="margin-top:2px">' + esc(a.publisher || '') + (age ? ' · ' + age + ' ago' : '') + '</div>'
+              + '</div>';
+          }).join('')
+          + (w.dropped ? '<div class="tp-meta" style="padding-top:6px">newest 12 shown · ' + Number(w.dropped) + ' more in the window</div>' : '');
+        }
+      }
+      if (ebox) {
+        var ev = (j && j.earnings && j.earnings.events) || [];
+        var today = new Date().toISOString().slice(0, 10);
+        var up = ev.filter(function (e) { return e && e.date && e.date >= today; })
+                   .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+        if (!up.length) {
+          ebox.innerHTML = '<div class="tp-empty">No upcoming reporters in the loaded window.</div>';
+        } else {
+          var shown = up.slice(0, 6);
+          ebox.innerHTML = shown.map(function (e) {
+            return '<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11.5px;white-space:nowrap;">'
+              + '<span style="min-width:86px;opacity:.65;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">'
+              + esc(String(e.date).slice(5)) + ' ' + esc(e.timing || '') + '</span>'
+              + '<span style="flex:1"><b>' + esc(e.symbol || '') + '</b>'
+              + (e.quarter ? ' <span style="opacity:.55">Q' + esc(String(e.quarter)) + (e.year ? ' FY' + esc(String(e.year)) : '') + '</span>' : '') + '</span>'
+              + (e.eps_actual != null ? '<span style="opacity:.8">EPS ' + esc(String(e.eps_actual)) + (e.eps_estimate != null ? ' <span style="opacity:.5">est ' + esc(String(e.eps_estimate)) + '</span>' : '') + '</span>'
+                 : (e.eps_estimate != null ? '<span style="opacity:.6">est ' + esc(String(e.eps_estimate)) + '</span>' : ''))
+              + '</div>';
+          }).join('')
+          + (up.length > shown.length ? '<div class="tp-meta" style="padding-top:6px">next 6 of ' + up.length + '</div>' : '');
+        }
+      }
+    };
+    if (_rhCache && Date.now() - _rhAt < 300000) { render(_rhCache); return; }
+    fetch('/api/analyst-publish?rh=1&t=' + encodeURIComponent(tok()), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.ok) { _rhCache = j; _rhAt = Date.now(); } render(j && j.ok ? j : _rhCache); })
+      .catch(function () { render(_rhCache); });
   }
 
   var _calCache = null, _calAt = 0;
@@ -558,7 +630,26 @@
       .catch(function () { render(_calCache); });
   }
 
-  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead };
+  /* THE WIRE DRAWER (Jake's 09-12 display approval) — Wire + Earnings as their own TOP-LEVEL
+     surface. The analyst mounts this as its own tab; the trader carries the same two groups
+     inside the Desk note (whose groups render as subtabs), pending a rail-surface promotion
+     with Yuri's placement review. One renderer, one data door, two dashboards. */
+  function drawWire(el, state) {
+    var tk = ticker(state);
+    var h = '<h2>' + esc(tk) + ' &middot; Wire &amp; earnings</h2>'
+      + '<span class="tp-sub">Headlines with their source and age &mdash; the attribution is the '
+      + 'fact &mdash; and the upcoming reporters. No genre tag exists on this feed, so nothing '
+      + 'here claims wire-vs-opinion; read the byline.</span>'
+      + '<div class="tp-grp">Wire · ' + esc(tk) + '</div>'
+      + '<div class="tp-wire"><div class="tp-empty">Loading the wire…</div></div>'
+      + '<div class="tp-grp">Earnings · upcoming</div>'
+      + '<div class="tp-earn"><div class="tp-empty">Loading the calendar…</div></div>';
+    el.innerHTML = h;
+    _fillRh(el, tk);
+    try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
+  }
+
+  var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead, wire: drawWire };
 
   function mount(sel, kind) {
     styles();

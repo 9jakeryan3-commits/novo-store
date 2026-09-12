@@ -30,7 +30,8 @@ const KINDS = {
   fundamentals: { ttl: 7 * 86400,  ticker: true  },   // get_equity_fundamentals / get_financials
   earnings:     { ttl: 7 * 86400,  ticker: true  },   // get_earnings_results (actual vs estimate)
   filing_facts: { ttl: 30 * 86400, ticker: true  },   // get_sec_filing_facts extracts
-  news:         { ttl: 86400,      ticker: true  },   // get_equity_news items (grounding only)
+  news:         { ttl: 86400,      ticker: true  },   // get_equity_news items (display + grounding)
+  earnings_calendar: { ttl: 86400, ticker: false },   // get_earnings_calendar — market-wide, not per-ticker
   index_vol:    { ttl: 86400,      ticker: false },   // get_index_quotes witness (VIX/VXN/RVX)
 };
 

@@ -599,6 +599,33 @@ export default async function handler(req, res) {
     }
     return res.status(200).json(state);
   }
+  // THE RH DISPLAY DOOR (Jake's 09-12 display approval: fundamentals/news/economic data render
+  // on the product). The Wire tab and the Earnings section read HERE — never the Robinhood MCP
+  // directly (product code cannot; the connector is account-bound through agent sessions) and
+  // never the ops ingest door (that one is for writers). Same token + Analyst entitlement as
+  // ?live: Trader includes Analyst so both paid dashboards pass, and a crypto-only token gets
+  // the same honest 402. Data arrives via the cloud feeder through /api/rh-ingest; this door
+  // only reshapes the rh:* keys for panels. Absent keys return null fields — the panels render
+  // their absent state, never a fabricated empty.
+  if (req.method === 'GET' && req.query && 'rh' in req.query) {
+    const email = _verifyToken(req.query.t || String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, ''));
+    if (!email) return res.status(401).json({ error: 'unauthorized' });
+    if (!(await _analystEnt(email))) {
+      return res.status(402).json({ error: 'NoVo Analyst is a separate subscription.', subscribe: '/plans' });
+    }
+    const r = kv();
+    if (!r) return res.status(200).json({ ok: false, note: 'kv unavailable' });
+    const g = (p) => p.catch(() => null);
+    const [nS, nQ, nI, ec] = await Promise.all([
+      g(r.get('rh:news:SPY')), g(r.get('rh:news:QQQ')), g(r.get('rh:news:IWM')),
+      g(r.get('rh:earnings_calendar')),
+    ]);
+    const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
+    res.setHeader('Cache-Control', 'private, max-age=120');
+    return res.status(200).json({ ok: true,
+      wire: { SPY: J(nS), QQQ: J(nQ), IWM: J(nI) },
+      earnings: J(ec) });
+  }
   // NoVo's unprompted lunch note, alone — so a chat surface can poll for it without pulling the
   // whole dealer state. Same token + entitlement gate as ?live: the note quotes dealer levels, so
   // it is a paid-Analyst artifact and a crypto-only token correctly gets 402 (the client treats
