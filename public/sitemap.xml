@@ -986,6 +986,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://novo-options.trade/daily-strike</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://novo-options.trade/developers</loc>
     <lastmod>2026-09-12</lastmod>
     <priority>0.8</priority>
@@ -7502,11 +7507,6 @@
   </url>
   <url>
     <loc>https://novo-options.trade/market-holidays</loc>
-    <lastmod>2026-09-12</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/news</loc>
     <lastmod>2026-09-12</lastmod>
     <priority>0.8</priority>
   </url>
