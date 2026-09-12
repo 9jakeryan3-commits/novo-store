@@ -145,6 +145,24 @@ function ago(ts) {
 }
 
 function _page(title, desc, canon, inner, extraHead) {
+  /* THE BREADCRUMB ROW IS CHROME, NOT BODY (2026-09-12, Jake: "now fix the daily strike header it
+     moves like those 3 did"). Every other page renders .crumbs in polish.css's standard 1180px
+     centred container, directly under the ticker. This page ran it inside .ds-wrap with an inline
+     style:none override so it lined up with the full-bleed masthead - a defensible look in
+     isolation, and the reason the whole chrome block jumped on navigation. Measured at 1920:
+
+       every other page   crumbs y153  x363  w1180
+       /daily-strike      crumbs y175  x56   w1793     <- 22px lower and full width
+
+     So the crumb is hoisted out of the full-bleed wrapper and its inline override dropped, which
+     puts the row in the same place site-wide. Done here, at the one point every route passes
+     through, rather than at each caller - the 404 path has no crumb and is simply left alone. */
+  let crumbRow = '';
+  const _cm = inner.match(/^\s*<nav class="crumbs"[\s\S]*?<\/nav>/);
+  if (_cm) {
+    crumbRow = _cm[0].replace(/\s+style="[^"]*"/, '').trim();
+    inner = inner.slice(_cm[0].length);
+  }
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
@@ -321,6 +339,7 @@ ${_CHROME.HEAD}
 </head>
 <body>
 ${_CHROME.HEADER}
+${crumbRow}
 <div class="ds-wrap">
 ${inner}
 </div>
