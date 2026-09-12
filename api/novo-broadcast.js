@@ -24,7 +24,7 @@
 const crypto = require('crypto');
 const { kv } = require('./_kv');
 const { vertex, answerText } = require('./_vertex.js');
-const { SYSTEM, recordClaimAudit, provenanceAudit, missBlock, calibBlock } =
+const { SYSTEM, recordClaimAudit, provenanceAudit, missBlock } =
   require('./_lib/analyst-brain.js');
 const { nowBlock } = require('./_clock.js');
 
@@ -186,10 +186,12 @@ async function publicGrounding() {
      A new field appearing upstream cannot leak here, because this names what it keeps rather than
      what it drops — a whitelist, not a blacklist. If that list ever needs to grow, it is a
      pricing decision, not a refactor. */
-  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, cells, rawMisses] = await Promise.all([
+  // calib:cells deliberately NOT read here since 09-11 -- see the calibration note at the
+  // prompt assembly below. The misses list stays.
+  const [rawLive, rawPub, rawCtx, rawCs, rawTrack, rawMisses] = await Promise.all([
     g(r.get('analyst:live_levels')), g(r.get('public:levels')), g(r.get('analyst:context')),
     g(r.get('crypto:map:live')), g(r.get('novo:track_record')),
-    g(r.hgetall('calib:cells')), g(r.lrange('calib:misses', 0, 4)),
+    g(r.lrange('calib:misses', 0, 4)),
   ]);
   const J = (x) => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } };
   const PUBLIC_FIELDS = (snap) => {
@@ -220,7 +222,7 @@ async function publicGrounding() {
                   chain_tokens: (cs.chain || []).length, breadth: cs.breadth };
   }
   const misses = Array.isArray(rawMisses) ? rawMisses.map(J).filter(Boolean) : null;
-  return { live, liveSrc, ctx, cryptoInv, trackRec: J(rawTrack), cells, misses };
+  return { live, liveSrc, ctx, cryptoInv, trackRec: J(rawTrack), misses };
 }
 
 async function generate(prompt, temp, maxTok) {
@@ -280,7 +282,12 @@ module.exports = async (req, res) => {
 
     let now = '';
     try { now = nowBlock(null, 'equity') || ''; } catch (_) {}
-    const calib = calibBlock(g.cells) || '';
+    // CALIBRATION AWARENESS STAYS OUT OF POST DRAFTS (Jake, 2026-09-11: "I never said to publish
+    // it anywhere"). calibBlock in the CHAT is feedback to NoVo himself; here it grounds text
+    // written for public accounts, so a draft could quote the curve verbatim — a publication
+    // path. The misses stay: owning a wrong call by name is the honesty device, distinct from
+    // serving an unaudited hit-rate curve.
+    const calib = '';
     const miss = missBlock(g.misses) || '';
     const voice = pick(VOICES);
 

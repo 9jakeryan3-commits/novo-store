@@ -122,9 +122,8 @@ module.exports = async (req, res) => {
   // on every engine publish, so it revalidates in a minute and serves stale only while refreshing.
   res.setHeader("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=600");
   if (!r) return res.status(200).json({ ok: false, note: "unavailable" });
-  let snap = null, ch = null, calib = null;
+  let snap = null, ch = null;
   try { snap = await r.get(KEY); } catch (_) { snap = null; }
-  try { calib = await r.hgetall('calib:cells'); } catch (_) { calib = null; }
   // Crypto is additive: if this read fails the equity record still serves whole.
   try { ch = await r.get("crypto:map:history"); } catch (_) { ch = null; }
   if (typeof snap === "string") { try { snap = JSON.parse(snap); } catch (_) { snap = null; } }
@@ -156,27 +155,14 @@ module.exports = async (req, res) => {
             "report per predicted side with the market's own drift beside them.",
     };
   }
-  // THE CALIBRATION CELL (2026-09-05). Whether NoVo's own confidence words mean what they say:
-  // every voiced forward level read is logged at ask time (resolvable by construction), graded
-  // against the same public level history everyone can read, and reported per confidence bucket.
-  // Published from day one, including the thin state -- a curve that only appears once it is
-  // flattering would be the opposite of the point. Unresolved (market closed over the horizon,
-  // promotion gaps) is counted, never silently dropped.
-  if (calib && Object.keys(calib).length) {
-    const cells = {};
-    for (const b of ['55', '65', '75', '85', '95']) {
-      const n = Number(calib[b + ':n'] || 0), hit = Number(calib[b + ':hit'] || 0);
-      const cens = Number(calib[b + ':cens'] || 0);
-      if (n || cens) cells[b] = { n, hits: hit, rate: n ? Math.round(1000 * hit / n) / 10 : null,
-                                  unresolved: cens, stated: Number(b) };
-    }
-    if (Object.keys(cells).length) {
-      snap.calibration = { cells,
-        note: 'Stated confidence vs measured outcome, per bucket, on machine-gradable level ' +
-              'claims (spot vs level at a stated horizon, SPY/QQQ/IWM). n under 10 is a count, ' +
-              'not a curve. `unresolved` claims had no gradable sample at the horizon and are ' +
-              'counted rather than dropped.' };
-    }
-  }
+  // THE CALIBRATION CELLS COME OFF THIS PAYLOAD (Jake, 2026-09-11: "I never said to publish it
+  // anywhere"). The 09-05 block here attached calib:cells "from day one, including the thin
+  // state" -- but publication itself was agent-built, never Jake's call, and the day that
+  // surfaced, bucket 65 crossed its n>=10 floor carrying voice-suite rows (captured before the
+  // probe marker existed -- see _lib/forecast.js -- so they cannot be told apart retroactively).
+  // The LOOP IS INTACT: capture and grading still run, calib:cells keeps accumulating, and the
+  // chat still reads it back as calibBlock -- that feedback is the point of the loop. What
+  // stopped is only the serving of the curve on a public surface. If Jake ever says publish,
+  // this is where the block goes back, behind his word and a clean-rows answer.
   return res.status(200).json(snap);
 };
