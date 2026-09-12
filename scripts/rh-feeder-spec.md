@@ -9,14 +9,19 @@ sources. This job feeds GROUNDING and WITNESS material through the one ops door,
 `POST /api/rh-ingest` (x-ops-secret from `NoVo-Pulse/.env` → ANALYST_PUBLIC… use
 `OPS_SECRET || ANALYST_PUBLISH_SECRET`, read programmatically, never printed).
 
+## SCOPE (narrowed by Jake, 09-12): NEWS + ECONOMIC/FUNDAMENTALS DATA ONLY — "just do number 2".
+Order-book depth (item 1) is PARKED: no depth captures, no depth panel, and the
+broker-book licensing question that came with it is moot until Jake reopens it. The
+depth capture rules further down stay written ONLY so a reopen starts from them.
+
 ## Phase 0 — SAMPLES FIRST (one-time, blocks everything else)
-Before any renderer or chat tool is built, capture ONE raw output of each and hand them to
+Before the chat tool or any renderer is built, capture ONE raw output of each and hand them to
 Overwatch (`cdf11c4a`) — the consumers get designed against real shapes, not guesses:
-- `get_equity_price_book` for SPY
+- `get_equity_news` for SPY and for one single name (shape of items, timestamps, source fields)
+- `get_earnings_calendar` (window covered, fields per event)
+- `get_earnings_results` for a recent reporter (e.g. NVDA) — actual vs estimate fields
 - `get_equity_fundamentals` for SPY; `get_financials` for one name
-- `get_earnings_results` for a recent reporter (e.g. NVDA)
 - `get_sec_filing_facts` for one filing (plus the catalog call that found it)
-- `get_index_quotes` for VIX/VXN/RVX (do they exist there? which symbols resolve?)
 
 **CAPTURE THE LABELS, NOT JUST THE VALUES (Jerni, 09-12).** Every provenance failure of 09-11/12
 was a number arriving without the thing that makes it true — a rate without its units, a figure
@@ -38,7 +43,7 @@ mislabeled tool string is how provenance fabrication starts. And fundamentals in
 editorializing ("is it cheap") — on public seats that is the advice boundary, and the guard must
 cover it, not just forecasting.
 
-**Depth-specific capture rules (Yuri, 09-12) — free at phase 0, unrecoverable later:**
+**Depth-specific capture rules (Yuri, 09-12) — PARKED with item 1; kept so a reopen starts here:**
 1. **Two clocks per snapshot**: the venue's own timestamp AND our receive time, separately.
    One clock makes staleness unanswerable forever; two makes it arithmetic (NOW before AGE).
 2. **Log the polling gap ACHIEVED, not intended.** At snapshot cadence nobody can observe a
@@ -54,14 +59,13 @@ cover it, not just forecasting.
 terms/licensing question DISTINCT from the settled data-licensing posture. Flagged once (Yuri
 09-12); his risk call.
 
-## Recurring job (after shapes settle; cadence per kind)
-1. **depth** — `get_equity_price_book` SPY/QQQ/IWM → compact to top-of-book + a few levels per
-   side + imbalance summary → POST kind=depth per ticker. RTH cadence: with each run.
-2. **earnings / filing_facts / fundamentals** — daily, names surfaced by the earnings calendar
+## Recurring job (after shapes settle; cadence per kind — SCOPE: news + economic only)
+1. **earnings / filing_facts / fundamentals** — daily, names surfaced by the earnings calendar
    plus SPY/QQQ/IWM constituents Jake cares about → POST per ticker.
-3. **index_vol** — VIX/VXN/RVX quotes → POST kind=index_vol; the ops cross-check compares them
-   to the engine's own fear-gauge values and reports drift to Overwatch WITH both numbers.
-4. **news** — only when a consumer exists; grounding-only, never republished.
+2. **news** — `get_equity_news`, grounding-only, never republished → POST per ticker; cadence
+   with each run during RTH, daily off-hours.
+3. PARKED with item 1: depth (`get_equity_price_book`) and the index_vol witness — the ingest
+   door keeps both kinds so unparking is a spec change, not a code change.
 
 ## Rules that bind this job
 - Read tools only. NEVER call place_/cancel_/exercise_ tools — trading is Jake's own flow.
