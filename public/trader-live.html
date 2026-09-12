@@ -6983,7 +6983,6 @@ function _scaleMenuRender(){
     lm.style.cssText='position:absolute;z-index:400;background:#14161b;border:1px solid var(--bdr2);'
       +'border-radius:7px;padding:6px;min-width:200px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.5)';
     var r=lb.getBoundingClientRect();
-    lm.style.left=Math.max(8,r.left-40)+'px'; lm.style.top=(r.bottom+6+window.scrollY)+'px';
     function row(html){ var d=document.createElement('div');
       d.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:6px 8px;cursor:pointer;border-radius:5px;';
       d.onmouseenter=function(){ d.style.background='rgba(255,255,255,.06)'; };
@@ -7010,7 +7009,21 @@ function _scaleMenuRender(){
       var snap={}; KEYS.forEach(function(k2){ try{ snap[k2]=localStorage.getItem(k2); }catch(_e){} });
       var L2=_lget(); L2[nm]=snap; localStorage.setItem(LK,JSON.stringify(L2)); _lclose();
     });
+    /* PLACE IT AFTER IT IS IN THE DOM, because placing it needs its SIZE (Jake, 2026-09-12).
+       This used to hard-code `top = r.bottom + 6`: always below the button. #ctb-layout lives in
+       the footer bar, which is the last row of the window, so "below" is off the bottom edge —
+       the menu opened with its lower half outside the viewport and the save row clipped. Nothing
+       scrolls it back into view either; it is position:absolute on <body> under a chart that owns
+       the full height. Flip above the trigger when the space below cannot hold it, and clamp to
+       the viewport on both axes so a long layout name cannot push it off the right edge. */
     document.body.appendChild(lm);
+    var vw=document.documentElement.clientWidth, vh=document.documentElement.clientHeight;
+    var mw=lm.offsetWidth, mh=lm.offsetHeight;
+    var top = (vh - r.bottom >= mh + 10) ? (r.bottom + 6) : (r.top - mh - 6);
+    if(top < 8) top = 8;                              // taller than the space either way: pin it visible
+    if(top + mh > vh - 8) top = Math.max(8, vh - mh - 8);
+    lm.style.top  = (top + window.scrollY) + 'px';
+    lm.style.left = Math.max(8, Math.min(r.left - 40, vw - mw - 8)) + 'px';
     setTimeout(function(){ document.addEventListener('click',function h(){ _lclose(); document.removeEventListener('click',h); }); },0);
   });
 })();
