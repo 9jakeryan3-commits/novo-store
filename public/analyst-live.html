@@ -1158,7 +1158,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   function renderGexRank(d){
     var box = $('gex-rank'); if(!box) return;
     var rows = (d && d.profile) ? d.profile.filter(function(r){ return r && isFinite(r.k) && isFinite(r.g); }) : [];
-    if(rows.length < 5){ box.innerHTML = '<div class="gr-empty">No strike ladder in this payload.</div>'; return; }
+    if(rows.length < 5){ box.innerHTML = '<div class="gr-empty">Not enough strikes published yet to draw the ladder.</div>'; return; }
     var spot = Number(d.spot) || 0;
 
     var ranked = rows.slice().sort(function(a,b){ return Math.abs(b.g) - Math.abs(a.g); }).slice(0,10);
@@ -1415,7 +1415,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     else if (lean==='puts'){ $('f-lean').textContent='Puts'+(lp!=null?' '+(100-lp)+'%':''); $('f-lean').className='v red'; }
     else if (lean==='balanced'){ $('f-lean').textContent='Balanced'; $('f-lean').className='v'; }
     else { $('f-lean').textContent='Building…'; $('f-lean').className='v'; }
-    $('f-lean-s').textContent = (lp!=null ? 'flow, last ~60s' : 'first read — no delta yet');
+    $('f-lean-s').textContent = (lp!=null ? 'flow, last ~60s' : 'first reading — nothing to compare yet');
     $('f-pc').textContent = (fl.pc_ratio!=null? Number(fl.pc_ratio).toFixed(2) : '—');
     $('f-pc').className = 'v ' + (fl.pc_ratio!=null ? (fl.pc_ratio>=1.2?'red':fl.pc_ratio<=0.7?'grn':'') : '');
     $('f-cv').textContent = fl.call_vol!=null ? Number(fl.call_vol).toLocaleString() : '—';
