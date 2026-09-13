@@ -282,7 +282,7 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/trader/sw.js
     if(b||standalone())return b;
     b=document.createElement('button');
     b.id='novoInstall'; b.textContent='⤓  Install App';
-    b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#1a4a8a,#2a5298);color:#f0f0ee;border:none;padding:11px 16px;border-radius:8px;font:600 12px/1 var(--sans,system-ui);letter-spacing:1px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';
+    b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#1a4a8a,#2a5298);color:#f0f0ee;border:none;padding:11px 16px;font:600 12px/1 var(--sans,system-ui);letter-spacing:1px;cursor:pointer;display:none';
     b.onclick=async function(){ if(!dp)return; dp.prompt(); try{await dp.userChoice;}catch(e){} dp=null; b.style.display='none'; };
     (document.body||document.documentElement).appendChild(b);
     return b;
@@ -7188,11 +7188,16 @@ function _scaleMenuRender(){
     if(lm){ _lclose(); return; }
     var L=_lget(), names=Object.keys(L).sort();
     lm=document.createElement('div');
+    /* ⚠ THE OVERLAY CARVE-OUT, and it is the only reason a border survives here. This menu
+       floats over the chart, so it has to end somewhere or it reads as text spilled onto the
+       candles. It keeps ONE HAIRLINE and loses the rest: the 24px drop shadow is gone (a shadow
+       is the box, drawn softly) and the radius comes down. The solid fill against --bg does the
+       separating that the shadow used to. */
     lm.style.cssText='position:absolute;z-index:400;background:#14161b;border:1px solid var(--bdr2);'
-      +'border-radius:7px;padding:6px;min-width:200px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.5)';
+      +'border-radius:3px;padding:6px;min-width:200px;font-size:12px';
     var r=lb.getBoundingClientRect();
     function row(html){ var d=document.createElement('div');
-      d.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:6px 8px;cursor:pointer;border-radius:5px;';
+      d.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:6px 8px;cursor:pointer;';
       d.onmouseenter=function(){ d.style.background='rgba(255,255,255,.06)'; };
       d.onmouseleave=function(){ d.style.background=''; };
       d.innerHTML=html; lm.appendChild(d); return d; }
