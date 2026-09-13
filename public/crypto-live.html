@@ -86,7 +86,7 @@ button { border: 0; }
 }
 /* Anything a finger or cursor can act on says so. Declared once, here, rather than left to
    each component to remember - which is how 102 of 123 of them came to say nothing. */
-a, button, input, select, summary, [role="button"], .coin, .lv-mini, .nf-btn, .dlink {
+a, button, input, select, summary, [role="button"], .coin, .nf-btn, .dlink {
   transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
               color var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease),
               transform var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease);
@@ -195,11 +195,6 @@ header{display:flex;align-items:center;gap:16px;padding:9px 16px;border-bottom:1
 #body.swap>.panel:nth-child(4){animation-delay:.10s}
 #body.swap>.panel:nth-child(5){animation-delay:.13s}
 #body.swap>.panel:nth-child(n+6){animation-delay:.16s}
-.lv-sess{color:var(--txt3);font-size:12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
-/* The status reads long on a desktop bar and short on a phone one; the pill beside it
-   already says LIVE, so 'updated ... ago' is 140px saying what 'ago' says. */
-.lv-sess .sm{display:none}
-.lv-sess b{color:var(--txt2);font-weight:700}
 /* ⚠ THE AUTO MARGIN MOVES TO THE HINT, it does not get added to it. .lv-gear carried
    margin-left:auto, which pushes the GEAR to the far right and leaves every earlier item — the
    keyboard hint included — parked where the content ended. That is the gap Jake drew an arrow
@@ -393,9 +388,6 @@ body[data-mtab="wire"] #body[data-view="coin"] > .panel[data-sec="wire"] { displ
 #sym{font-family: var(--display);font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
 #px{font-family:var(--mono);font-size:19px;color:var(--txt2);line-height:1}
 #headmeta{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
-.bookbtn{font-family:var(--mono);font-size:10px;padding:3px 8px;
- background:var(--panel);color:var(--txt3);border-radius:3px;cursor:pointer}
-.bookbtn.on{color:var(--cx)}
 
 /* The level ladder. The Analyst dashboard states levels as a rail of rows - label, a plain
    English meaning, the price, and the distance from spot - with spot boxed in the middle.
@@ -579,10 +571,6 @@ tr:last-child td{border-bottom:none}
     .lv-brand img{height:22px}
     header{gap:10px;padding:8px 12px}
     .lv-status{gap:9px}
-    .lv-sess{font-size:11px}
-    .lv-sess .lg{display:none}
-    .lv-sess .sm{display:inline}
-    /* the word costs more width than it earns once the bar is this tight */
     .lv-gear{padding:7px 10px;font-size:13px}
     .lv-gear .gl{display:none}
     /* ⚠ THE CHIPS GO ABOVE THE PRICE, not beside it. #headmeta is margin-left:auto in a flex row,
@@ -975,7 +963,6 @@ tr:last-child td{border-bottom:none}
   .lv-live{font-size:9.5px;letter-spacing:1.4px;gap:5px}
   .lv-live .dot{width:7px;height:7px}
   .lv-status{gap:8px}
-  .lv-sess{font-size:10.5px}
   .lv-gear{padding:6px 8px}
 }
 /* Touch sizing for the two fixed pieces. It has to live at the END of the sheet: both
