@@ -133,6 +133,24 @@ if [ -n "$(git status --porcelain)" ]; then
   echo "!! uncommitted changes -- commit before deploying:"; git status --short; exit 1
 fi
 
+# ── COMMENT STRIP ────────────────────────────────────────────────────────────────────────────
+# Comments are ~42% of trader-live.html and do NOT compress away: the bundle goes 610 KB -> 451 KB
+# raw, 209 KB -> 141 KB gzip. They stay in SOURCE -- half of them are bug post-mortems and the only
+# record of why this code is shaped as it is -- so the strip applies to the UPLOAD only and is undone
+# the moment the deploy exits, by any path.
+#
+# ⚠ ORDER IS LOAD-BEARING: this mutates the working tree, and it goes AFTER the clean-tree check
+# above so there is nothing uncommitted to lose at the moment it runs.
+#
+# ⚠ AND THE RESTORE IS NOT `git checkout -- public/`, deliberately. The clean tree is a fact about
+# ONE INSTANT; the deploy then runs 60-90s while up to five agent sessions write into public/. A
+# blanket checkout would silently destroy anything saved in that window, printing nothing about what
+# it discarded. restore-after-strip.js writes back SAVED BYTES and refuses any file whose hash no
+# longer matches what the stripper wrote -- that file is somebody else's edit. Shown to decline a
+# concurrent edit before being wired in, not merely documented as safe.
+trap 'node scripts/restore-after-strip.js || true' EXIT INT TERM
+node scripts/strip-for-deploy.js || exit 1
+
 git fetch -q origin master
 LOCAL=$(git rev-parse HEAD); REMOTE=$(git rev-parse origin/master)
 if [ "$LOCAL" != "$REMOTE" ]; then
