@@ -35,23 +35,27 @@ const ok = (n, c, d) => { checks++; if (c) return console.log('  PASS  ' + n);
 /* Accepted, with the reason. A rounded corner on a PHOTO is a photo corner, not a container box —
    the ban is about panels, cards and buttons. Anything not listed here is a failure, so a new box
    cannot be absorbed silently; it has to be argued for in this list. */
-/* ⚠ KEYED ON THE DECLARATION, NOT ON THE FILE — and that is the fix for a real miss.
-   These exemptions were scoped to analyst-live.html, so the BYTE-IDENTICAL code in
-   crypto-live.html and js/novo-chat.js kept failing. The guard built to catch three-copy drift
-   had the three-copy problem itself: an exemption argued once only covered one copy, and the
-   other two read as violations forever.
-   Left as it was, the next person under deploy pressure sweeps them — and doing so would UNDO
-   e531f078f, where Jerni deliberately kept the radius while removing the border four hours
-   earlier, with the reason in the commit message. A guard that cries wolf eventually gets obeyed.
-   Matching on content keeps the drift protection: if any copy diverges, its declaration stops
-   matching the fragment and fires. Fragments are deliberately long enough to identify ONE
-   element — `border-radius:4px` alone would exempt half the estate. Found by Temi, who checked
-   all three copies were identical before arguing the exemption. */
-const ALLOW = [
-  { has: 'max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in',
-    why: 'sent-image thumbnail — a rounded PHOTO corner, no border, no shadow' },
-  { has: 'height:34px;width:auto;max-width:84px;border-radius:4px',
-    why: 'attached-image preview in the composer — photo corner' },
+/* ⚠ EXACT DECLARATIONS, NOT FILENAMES AND NOT SUBSTRINGS. Two separate bugs lived here.
+   1. These exemptions were scoped to analyst-live.html, so the BYTE-IDENTICAL code in
+      crypto-live.html and js/novo-chat.js failed forever. The guard built to catch three-copy
+      drift had the three-copy problem itself -- an exemption argued once covered one copy.
+      Temi refused to sweep the four it flagged, checked all three copies were identical, and
+      found e531f078f in the history where the radius was deliberately kept and the border
+      removed. Sweeping them would have undone a four-hour-old ruling. A guard that cries wolf
+      eventually gets obeyed, and the obedient sweep is the regression.
+   2. My first repair matched a SUBSTRING, which exempted anything APPENDED to the declaration:
+      adding box-shadow to the approved overlay did not fire. An exemption that grows with the
+      code it exempts is a check that cannot fail. EXACT equality means any edit -- however
+      small -- drops out of the allowlist and has to be argued again, which is the property the
+      header above already asks for.
+   Both halves shown to discriminate: shadow added to the overlay fires, border added to a photo
+   corner fires, restored state green. const ALLOW = [
+  { is: 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in;',
+    why: 'sent-image thumbnail - a rounded PHOTO corner, no border, no shadow' },
+  { is: 'height:34px;width:auto;max-width:84px;border-radius:4px;display:block;',
+    why: 'attached-image preview in the composer - photo corner' },
+  { is: 'position:absolute;z-index:400;background:#14161b;border:1px solid var(--bdr2);',
+    why: 'layouts menu - floating overlay over live content, hairline boundary per the .termpop ruling' },
 ];
 
 function scan(src) {
@@ -94,7 +98,7 @@ for (const f of present) {
   const rel = path.basename(f);
   const hits = scan(fs.readFileSync(f, 'utf8'));
   for (const h of hits) {
-    const allowed = ALLOW.some(a => h.css.includes(a.has));   // content, not file -- see ALLOW
+    const allowed = ALLOW.some(a => a.is === h.css);          // EXACT, not substring -- see ALLOW
     if (allowed) continue;
     found++;
     ok(`${rel}:${h.line} — ${h.why.join(' + ')}`, false, h.css.replace(/\s+/g, ' ').slice(0, 110) + '…');
