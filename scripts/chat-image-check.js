@@ -34,12 +34,27 @@ const path = require("path");
 const FILES = ["analyst-live.html", "crypto-live.html", "js/novo-chat.js"]
   .map((f) => path.join(__dirname, "..", "public", f));
 
-function extract(file) {
-  const h = fs.readFileSync(file, "utf8");
-  const start = h.indexOf("  function saveTurns(){");
-  if (start < 0) { console.error("could not find saveTurns in " + file); process.exit(1); }
+/* A MISSING FUNCTION IS A FINDING, NOT A CRASH. This used to process.exit on the first copy that
+   lacked something, so the copies after it were never checked at all -- and the run read as one
+   broken file rather than as "two of three have the fix". Since drift between the three copies is
+   the entire defect class this suite exists for, it has to REPORT the gap and keep going. */
+function one(h, file, decl) {
+  const start = h.indexOf(decl);
+  if (start < 0) return null;
   const end = h.indexOf("\n  }", start) + 4;
   return h.slice(start, end).replace(/\r\n/g, "\n");
+}
+
+/* Both functions, because saveTurns CALLS releaseOldImages. Extracting only saveTurns left the
+   helper out of the sandbox's scope and every copy died on a ReferenceError -- a suite that goes
+   red for a reason that has nothing to do with the behaviour it is checking. */
+function extract(file) {
+  const h = fs.readFileSync(file, "utf8");
+  const rel = one(h, file, "  function releaseOldImages(){");
+  const sav = one(h, file, "  function saveTurns(){");
+  if (!sav) return { miss: "saveTurns" };
+  if (!rel) return { miss: "releaseOldImages" };
+  return { src: rel + "\n" + sav };
 }
 
 let fails = 0;
@@ -67,13 +82,23 @@ function build(fnSrc, quotaAfter) {
   // state hung off it (the _warned flag) survives between saves. Rebuilding per call would reset
   // that flag and make a working guard look broken -- which it did, on the first run of this file.
   const turnsRef = [];
+  /* releaseOldImages reaches for the log node. There is no DOM here, and its whole body sits in a
+     try/catch, so WITHOUT a stub it would throw on document and be swallowed -- the release would
+     silently not happen and this suite would report a pass for a function that never ran.
+     getElementById returning null is the honest stand-in: the DOM half no-ops and the turn-object
+     half still runs, which is the half a sandbox can test. Nodes and placeholders are covered
+     separately against a real browser. */
+  const document = { getElementById: () => null };
   const saveTurns = new Function(
-    "localStorage", "CHAT_KEY", "CHAT_MAX", "TURNS", "add",
+    "localStorage", "CHAT_KEY", "CHAT_MAX", "TURNS", "add", "document",
     fnSrc + "; return saveTurns;"
-  )(localStorage, "novo_ask_log", 40, turnsRef, add);
+  )(localStorage, "novo_ask_log", 40, turnsRef, add, document);
   return {
     store, added,
     stats: () => ({ writes, rejected }),
+    // The LIVE array, not a copy. releaseOldImages mutates TURNS in place, and that mutation is
+    // the whole point of it -- what goes to localStorage was already trimmed before the fix.
+    turns: turnsRef,
     run: (turns) => { turnsRef.length = 0; turnsRef.push.apply(turnsRef, turns); return saveTurns(); },
   };
 }
@@ -83,6 +108,26 @@ const turnsWith = (n, imgs) => Array.from({ length: n }, (_, i) => (
   i < imgs ? { r: "you", x: "q" + i, t: i, img: BIG } : { r: "novo", x: "a" + i, t: i }));
 
 function runAll(fnSrc) {
+  /* ⚠ THIS SECTION EXISTS BECAUSE THE SUITE PASSED WITHOUT IT. Sabotage-tested 2026-09-12 by
+     gutting releaseOldImages to `if (1) return;` in a real copy: every other check below still
+     passed. They are all about what reaches localStorage, and saveTurns ALREADY trimmed that with
+     TURNS.slice(-CHAT_MAX) long before this fix existed. The leak was in the in-memory TURNS array,
+     which nothing here looked at -- so the fix was unasserted and a regression would have been
+     invisible. The control matters as much as the assertion: a releaseOldImages that dropped
+     EVERY image would satisfy the first check on its own. */
+  console.log("\n=== 0. in-memory retention: old images released, recent ones kept ===");
+  {
+    const h = build(fnSrc, 1e9);
+    h.run(turnsWith(45, 45));                   // 45 turns, all with images; CHAT_MAX is 40
+    const old = h.turns.slice(0, 5).filter((t) => t.img).length;    // outside the window
+    const recent = h.turns.slice(-40).filter((t) => t.img).length;  // inside it
+    check("images outside the window are released", old === 0, "still holding=" + old);
+    check("images inside the window are untouched", recent === 40, "kept=" + recent + "/40");
+    check("no turn was dropped, only its image", h.turns.length === 45, "turns=" + h.turns.length);
+    check("every turn still has its text", h.turns.filter((t) => t.x).length === 45,
+          "with text=" + h.turns.filter((t) => t.x).length);
+  }
+
   console.log("\n=== 1. plenty of room: everything persists, images included ===");
   {
     const h = build(fnSrc, 1e9);
@@ -152,9 +197,28 @@ function runAll(fnSrc) {
   }
 }
 
+/* ⚠ A HARD FLOOR, NOT A COMMENT. This suite covered ONE of three copies until 2026-09-12 and read
+   green the entire time; the chat lives in three files and a guard that quietly checks one of them
+   is the same defect it exists to catch. If a copy is added, raise this. If one disappears, that is
+   a finding, not a convenience. */
+const FLOOR = 3;
+if (FILES.length < FLOOR) {
+  console.error("\n  FAIL  corpus -- " + FILES.length + " chat surface(s), floor is " + FLOOR);
+  console.error("        A shrinking corpus passes quietly. Fix the list or lower the floor on purpose.\n");
+  process.exit(1);
+}
+console.log("  corpus: " + FILES.length + " chat surfaces (floor " + FLOOR + ")");
+
 for (const f of FILES) {
+  if (!fs.existsSync(f)) { console.error("\n  FAIL  missing chat surface: " + f + "\n"); process.exit(1); }
   console.log("\n########## " + path.basename(f) + " ##########");
-  runAll(extract(f));
+  const ex = extract(f);
+  if (ex.miss) {
+    check(ex.miss + " is present in this copy", false,
+          "this copy has not received the fix - the remaining copies are still checked below");
+    continue;
+  }
+  runAll(ex.src);
 }
 console.log(fails ? "\n" + fails + " FAILED\n" : "\nOK - all " + FILES.length + " chat surfaces pass\n");
 process.exit(fails ? 1 : 0);

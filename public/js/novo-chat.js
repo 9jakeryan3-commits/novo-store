@@ -467,7 +467,10 @@
     if (img){
       var im = document.createElement('img'); im.src = img; im.alt = 'image you sent';
       im.style.cssText = 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in;';
-      im.onclick = function(){ try { window.open(img, '_blank'); } catch(_){} };
+      // this.src, NOT img: capturing the base64 string here kept a THIRD copy alive for the life
+      // of the handler, so releasing the turn object and the node still freed nothing.
+      im.onclick = function(){ try { window.open(this.src, '_blank'); } catch(_){} };
+      if (ts) im.setAttribute('data-turn-t', String(ts));
       d.appendChild(im);
     }
     if (ts) {
@@ -857,7 +860,29 @@
   //   3. text only          4. say so once, visibly -- never swallow it
   // The bound is load-bearing: Safari in private mode throws on ANY setItem, so "drop one more and
   // retry" without a cap would discard the entire history chasing a write that can never land.
+  function releaseOldImages(){
+    try {
+      var cut = TURNS.length - CHAT_MAX;
+      if (cut <= 0) return;
+      var log = document.getElementById('novo-ask-log');
+      for (var i = 0; i < cut; i++){
+        var m = TURNS[i];
+        if (!m || !m.img) continue;
+        var t = m.t;
+        delete m.img;                                  // copy 1: the turn object
+        if (!log || !t) continue;
+        var im = log.querySelector('img[data-turn-t="' + String(t) + '"]');
+        if (!im) continue;
+        var note = document.createElement('span');
+        note.className = 'src';
+        note.textContent = '(chart not kept)';
+        note.title = 'Older images are released so a long session stays fast. The conversation is unchanged.';
+        if (im.parentNode) im.parentNode.replaceChild(note, im);   // copies 2 and 3 go with the node
+      }
+    } catch(_e){}
+  }
   function saveTurns(){
+      releaseOldImages();
       try { if (window.novoChatSync) window.novoChatSync.push(CHAT_SCOPE, TURNS); } catch(_e){}
     var put = function(rows){
       localStorage.setItem(CHAT_KEY, JSON.stringify({ t: Date.now(), turns: rows }));
