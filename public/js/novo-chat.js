@@ -466,7 +466,7 @@
     // reads as a reply to nothing: you cannot tell which chart you sent, or whether it sent at all.
     if (img){
       var im = document.createElement('img'); im.src = img; im.alt = 'image you sent';
-      im.style.cssText = 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;border:1px solid rgba(128,128,128,.35);cursor:zoom-in;';
+      im.style.cssText = 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in;';
       im.onclick = function(){ try { window.open(img, '_blank'); } catch(_){} };
       d.appendChild(im);
     }
@@ -554,7 +554,7 @@
       if (!ys.length || ys.length !== xs.length || ys.length > 60) return null;
       for (var i = 0; i < ys.length; i++) if (!isFinite(ys[i])) return null;
       var wrap = document.createElement('div');
-      wrap.style.cssText = 'margin:10px 0;padding:10px 12px;border:1px solid rgba(128,128,128,.25);border-radius:10px;';
+      wrap.style.cssText = 'margin:10px 0;padding:10px 12px;border-top:1px solid rgba(128,128,128,.25);';
       if (spec.title){
         var t = document.createElement('div'); t.textContent = String(spec.title).slice(0, 80);
         t.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:.4px;opacity:.75;margin-bottom:6px;';
@@ -774,7 +774,7 @@
     var ch = document.getElementById('novo-ask-imgchip');
     if (!ch){
       ch = document.createElement('div'); ch.id = 'novo-ask-imgchip';
-      ch.style.cssText = 'font-size:11px;padding:4px 9px;margin:5px 0 0;border:1px solid rgba(128,128,128,.4);border-radius:10px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;opacity:.9;';
+      ch.style.cssText = 'font-size:11px;padding:4px 9px;margin:5px 0 0;border:0;display:inline-flex;gap:8px;align-items:center;cursor:pointer;opacity:.9;';
       ch.title = 'remove the attached image';
       ch.onclick = clearAttach;
       qi.form.parentNode.insertBefore(ch, qi.form.nextSibling);

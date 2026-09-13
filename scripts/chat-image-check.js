@@ -18,9 +18,20 @@
 const fs = require("fs");
 const path = require("path");
 
-// Both chat surfaces are hand-copied twins, so BOTH are checked. A fix that lands in one and not
-// the other is the most productive defect shape in this estate.
-const FILES = ["analyst-live.html", "crypto-live.html"]
+// All THREE chat surfaces are hand-copied twins, so ALL THREE are checked. A fix that lands in one
+// and not the others is the most productive defect shape in this estate.
+//
+// ⚠ js/novo-chat.js WAS MISSING FROM THIS LIST UNTIL 2026-09-12, and that is worse than not having
+// the check: a guard reporting green over an unguarded file buys confidence it has not earned. The
+// Trader dashboard's copy could have drifted on every assertion below and this suite stayed green.
+//
+// ⚠ AND IT IS NOT GENERATED, whatever older notes say. There is no generator in the tree, no script
+// writes this file, and `git log -S build_chat_module` across all branches returns nothing — it was
+// never committed, so "regenerate and diff" has nothing to regenerate with. novo-chat.js's own
+// header is the authority: a ONE-TIME mechanical extraction, after which "a chat fix goes in three
+// places". Verified 2026-09-12: all three files extract saveTurns to a byte-identical 1,039 chars,
+// which is what makes one FILES list able to cover them.
+const FILES = ["analyst-live.html", "crypto-live.html", "js/novo-chat.js"]
   .map((f) => path.join(__dirname, "..", "public", f));
 
 function extract(file) {
@@ -145,5 +156,5 @@ for (const f of FILES) {
   console.log("\n########## " + path.basename(f) + " ##########");
   runAll(extract(f));
 }
-console.log(fails ? "\n" + fails + " FAILED\n" : "\nOK - both chat surfaces pass\n");
+console.log(fails ? "\n" + fails + " FAILED\n" : "\nOK - all " + FILES.length + " chat surfaces pass\n");
 process.exit(fails ? 1 : 0);

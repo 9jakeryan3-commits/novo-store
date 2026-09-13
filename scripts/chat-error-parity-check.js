@@ -53,6 +53,36 @@ T.push(['the three messages are distinct from each other', () =>
 T.push(['every message tells the reader what to do next', () =>
   Object.values(MESSAGES).every((m) => /ask again|ask me again|check your connection/i.test(m))]);
 
+/* ── RUNTIME STYLE PARITY ──────────────────────────────────────────────────────────────────────
+   Widened 2026-09-12 beyond error copy, because the same three-copy drift was found in the chat's
+   RUNTIME STYLES and nothing could see it: debox-check.js asserts against CSS files and markup,
+   and these are strings assembled in JS. Measured that day — the debox pass had landed on
+   analyst-live.html ONLY, while the Trader and Crypto copies still carried the full boxes it
+   removed on three separate elements (the image thumbnail, the Checking line, the pill).
+
+   novo-chat.js is chat-ONLY, so every style string in it must exist in both HTML copies. The HTML
+   files legitimately carry others (page chrome), which is why the check is one-directional. */
+const norm = (s) => s.replace(/\s+/g, ' ').trim();
+const styles = (f) => {
+  const re = /cssText\s*=\s*(['"`])([\s\S]*?)\1/g;
+  const out = []; let m;
+  while ((m = re.exec(src[f]))) out.push(norm(m[2]));
+  return out;
+};
+const TRADER = styles('public/js/novo-chat.js');
+const IN_ANALYST = new Set(styles('public/analyst-live.html'));
+const IN_CRYPTO = new Set(styles('public/crypto-live.html'));
+
+T.push(['the chat module actually has runtime styles to compare', () => TRADER.length > 0]);
+T.push(['every chat runtime style exists in analyst-live.html', () =>
+  TRADER.every((s) => IN_ANALYST.has(s))]);
+T.push(['every chat runtime style exists in crypto-live.html', () =>
+  TRADER.every((s) => IN_CRYPTO.has(s))]);
+/* The standing rule is hairlines only — a single-side separator stays, a four-sided box does not.
+   `border:` with a width sets all four; `border-top:` and `border:0` are fine. */
+T.push(['no chat runtime style builds a four-sided box', () =>
+  TRADER.every((s) => !/(^|;)\s*border\s*:\s*[^;0]/.test(s))]);
+
 let pass = 0;
 for (const [name, fn] of T) {
   let ok = false, err = '';
