@@ -1034,6 +1034,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 #chart-footbar::-webkit-scrollbar { height: 0; }
 /* No :disabled rule existed for these, so a disabled control was indistinguishable from a live
    one — which is worse than the dialog it replaces. */
+/* The layout-name field. No box: a single hairline under the text, which takes the product's
+   accent on focus so the affordance is colour alone. It replaces a native prompt(), which could
+   not be styled, blocked the event loop, and froze the tape behind a modal. */
+.lay-name { background: none; border: 0; border-bottom: 1px solid var(--bdr);
+  color: var(--txt1); font: inherit; letter-spacing: inherit; width: 100%;
+  padding: 1px 0 2px; outline: none; transition: border-color .12s ease; }
+.lay-name::placeholder { color: var(--txt3); }
+.lay-name:focus { border-bottom-color: var(--trd); }
 .ctb-btn:disabled { opacity: .38; cursor: not-allowed; }
 .ctb-btn:disabled:hover { background: none; color: inherit; }
 /* CHAT ACCENT — scoped to #novo-ask exactly as analyst-live and crypto-live do it
@@ -7162,12 +7170,49 @@ function _scaleMenuRender(){
     /* The one create-action among a list of selections, so colour is doing real work here and it
        stays a CTA — colour only, no box. It just wears the Trader's green instead of the Analyst's
        cyan, which told the reader nothing on this page. */
-    var sv=row('<span style="color:var(--trd)">＋ Save current as…</span>');
-    sv.addEventListener('click',function(){
-      var nm=(prompt('Name this layout:')||'').trim().slice(0,24);
-      if(!nm) return;
-      var snap={}; KEYS.forEach(function(k2){ try{ snap[k2]=localStorage.getItem(k2); }catch(_e){} });
-      var L2=_lget(); L2[nm]=snap; localStorage.setItem(LK,JSON.stringify(L2)); _lclose();
+    var SV_HTML='<span style="color:var(--trd)">\uFF0B Save current as\u2026</span>';
+    var sv=row(SV_HTML);
+    sv.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(sv.querySelector('input')) return;           // already editing
+      sv.innerHTML='';
+      var inp=document.createElement('input');
+      inp.type='text'; inp.maxLength=24; inp.className='lay-name';
+      inp.placeholder='Name this layout';
+      inp.setAttribute('aria-label','Name this layout');
+      sv.appendChild(inp);
+      inp.focus();
+
+      var done=false;
+      function restore(){ if(done) return; done=true; sv.innerHTML=SV_HTML; }
+      function commit(){
+        var nm=(inp.value||'').trim().slice(0,24);
+        if(!nm){ restore(); return; }                  // empty name is a cancel, not an error
+        var snap={}; KEYS.forEach(function(k2){ try{ snap[k2]=localStorage.getItem(k2); }catch(_e){} });
+        var L2=_lget(); L2[nm]=snap;
+        try{ localStorage.setItem(LK,JSON.stringify(L2)); }catch(_e){}
+        done=true; _lclose();
+      }
+
+      /* ⚠ stopPropagation ON EVERY KEY, not just the two handled here. This page has a
+         site-wide keyboard layer plus its own document-level handlers; js/novo-keys.js and the
+         handler at the bottom of this file both already ignore events from inputs, but the
+         Escape listener beside traderSettings does NOT — so without this, Escape would close
+         this field AND the settings panel in one press. */
+      inp.addEventListener('keydown',function(e){
+        e.stopPropagation();
+        if(e.key==='Enter'){ e.preventDefault(); commit(); }
+        else if(e.key==='Escape'){ e.preventDefault(); restore(); }
+      });
+
+      /* BLUR CANCELS, DELIBERATELY, and there was no existing convention on this page to
+         follow — it has no other blur handlers. The menu already dismisses on any outside
+         click, so committing on blur would silently save a half-typed name every time someone
+         clicked away to check something. Cancelling loses a name that takes two seconds to
+         retype; committing leaves junk in a persistent list the member then has to clean up.
+         The recoverable failure is the right one to choose. */
+      inp.addEventListener('blur', restore);
+      inp.addEventListener('click', function(e){ e.stopPropagation(); });
     });
     /* PLACE IT AFTER IT IS IN THE DOM, because placing it needs its SIZE (Jake, 2026-09-12).
        This used to hard-code `top = r.bottom + 6`: always below the button. #ctb-layout lives in
