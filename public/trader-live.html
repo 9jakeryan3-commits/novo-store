@@ -9,6 +9,12 @@
 <link rel="icon" href="/icon-trader-192.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon-trader.png?v=3">
 <link rel="manifest" href="/trader-live.webmanifest">
+<!-- ⚠ BLOCKING, AND ABOVE THE AUTH BLOCK ON PURPOSE. novo_live_t is read ~20 lines below and
+     the handshake fires on DOMContentLoaded; every other /js/ module on this page loads around
+     line 8700, which is thousands of lines too late to own a credential. One request before
+     first paint is the price of there being exactly one place that decides whether a member
+     keeps their session. -->
+<script src="/js/novo-token.js"></script>
 <!-- Inter and Space Grotesk, the same link the marketing pages use. Geist Mono stays SELF-HOSTED
      below: it is this dashboard's body face and a third-party round trip for the text a trader
      reads every tick is a cost worth avoiding. -->
@@ -34,10 +40,10 @@
   var qs = new URLSearchParams(location.search);
   var TOKEN = qs.get('t');
   if (TOKEN) {
-    try { localStorage.setItem('novo_live_t', TOKEN); } catch(_){}
+    NovoToken.set(TOKEN);
     history.replaceState(null, '', '/trader/live' + (location.hash || ''));
   }
-  if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
+  if (!TOKEN) { TOKEN = NovoToken.get(); }
 
   window.NOVO_API = '';
   window.NOVO_WS = '';
@@ -66,6 +72,7 @@
     el.innerHTML = html;
   }
 
+  var _authRetryTimer = null;   // the transient-401 retry; ONE timer, cleared before set
   var _handshakeAt = 0;
   /* WHY THE TOKEN IS GONE, so the second handshake does not overwrite the first one's answer.
      The 401 path nulls TOKEN and paints "Your session expired"; any later novoHandshake()
@@ -96,12 +103,47 @@
                         _hsAc ? { cache: 'no-store', signal: _hsAc.signal } : { cache: 'no-store' });
       } finally { if (_hsTm) clearTimeout(_hsTm); }
       if (r.status === 401) {
-        try { localStorage.removeItem('novo_live_t'); } catch(_){}
-        TOKEN = null;
-        _sessionExpired = true;
-        gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Your session expired</div>'
-           + '<a href="/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
-        return false;
+        /* ⚠ novo_live_t IS SHARED BY ALL THREE DASHBOARDS on this origin, so this branch used to
+           sign a member out of the Analyst and the Crypto Map by deleting the key unconditionally
+           — and anyone with two dashboards open is a bundle subscriber. Found by Temi in the
+           crypto lane, verified here by Overwatch.
+
+           A 401 IS NOT PROOF THE SESSION ENDED. These endpoints answer IDENTITY on 401 and
+           ENTITLEMENT on 402/503, so a lapsed subscriber never reaches here. verifyToken returns
+           null for a bad signature, an expired x, OR NO SECRET CONFIGURED — so a deploy that
+           briefly loses ANALYST_LIVE_SECRET 401s all three dashboards at once, and the old code
+           answered that by destroying every member's credential estate-wide.
+
+           The DECISION now lives in novo-token.js, once, for all three hosts — not a decoder
+           each host wraps in its own `if`, which is how three copies drift. The UI stays here,
+           because the right degrade differs per layout. */
+        switch (NovoToken.onAuthFailure(TOKEN)) {
+          case 'expired':
+            // The module has already cleared it. Tearing down is correct and the message is true.
+            TOKEN = null;
+            _sessionExpired = true;
+            gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Your session expired</div>'
+               + '<a href="/portal" style="color:#22d3ee">Sign in again &rarr;</a></div>');
+            return false;
+
+          default:  /* 'transient' — good credential, refused upstream. */
+            /* KEEP TOKEN, and do NOT touch _sessionExpired: it is a ONE-WAY LATCH (see the
+               !TOKEN branch above), so setting it here would make a passing server fault
+               permanent for this tab. Say something true instead of sending a paying member to
+               re-authenticate over a fault that is not theirs. */
+            gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Reconnecting\u2026</div>'
+               + '<div style="opacity:.75;max-width:34ch;margin:0 auto">Your sign-in is still valid. '
+               + 'The dashboard could not verify it just now and is retrying automatically.</div></div>');
+            /* THE FIRST-LOAD CASE NEEDS ITS OWN TIMER. Normally the pollers drive novoReauth,
+               but they are only started BY a successful handshake — so a fault on the very first
+               one has nothing running to retry it. One owned timer, per the arm contract the
+               rest of this file keeps; novoReauth debounces the rest. */
+            try { clearTimeout(_authRetryTimer); } catch(_e){}
+            _authRetryTimer = setTimeout(function(){
+              try { if (window.novoReauth) window.novoReauth(); } catch(_e){}
+            }, 8000);
+            return false;
+        }
       }
       if (r.status === 402) {
         gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">'
