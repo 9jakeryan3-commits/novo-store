@@ -49,7 +49,8 @@ const ok = (n, c, d) => { checks++; if (c) return console.log('  PASS  ' + n);
       small -- drops out of the allowlist and has to be argued again, which is the property the
       header above already asks for.
    Both halves shown to discriminate: shadow added to the overlay fires, border added to a photo
-   corner fires, restored state green. const ALLOW = [
+   corner fires, restored state green. */
+const ALLOW = [
   { is: 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in;',
     why: 'sent-image thumbnail - a rounded PHOTO corner, no border, no shadow' },
   { is: 'height:34px;width:auto;max-width:84px;border-radius:4px;display:block;',
