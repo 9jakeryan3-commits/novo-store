@@ -716,7 +716,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- HERO: chart | dealer positioning (balanced two-up) -->
     <div class="lv-grid">
       <div class="lv-card" style="display:flex;flex-direction:column;"><h2 id="chart-h">SPY · Session &amp; dealer levels</h2><img id="chart" class="chart" alt="SPY session chart with dealer levels">
-        <h2 style="padding-top:18px;">Gamma profile by strike</h2>
+        <h2 style="padding-top:18px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+          <span id="prof-h">Gamma profile by strike</span>
+          <!-- ONE SERIES AT A TIME, AND THE UNIT IS ALWAYS ON SCREEN. Delta exposure is in
+               SHARES; gamma, vanna and charm are in DOLLARS. Drawing them together against one
+               axis would put two different units on the same scale and invite a comparison that
+               means nothing. A selector keeps each series on its own scale and names it. -->
+          <span id="prof-series" style="display:flex;gap:9px;font-size:9px;letter-spacing:1.4px;font-weight:600;"></span>
+          <span id="prof-unit" style="font-size:9px;letter-spacing:.6px;color:var(--txt3);font-weight:400;"></span>
+        </h2>
         <div id="prof-wrap" style="position:relative;flex:1;min-height:210px;"><canvas id="profile" height="200" style="position:absolute;inset:0;width:100%;height:100%;"></canvas></div>
         <!-- RANKED GEX + BLIND SPOTS. Both read the ladder the profile canvas already draws, so
              this adds no payload and no request: `profile` ships as [{k,g}] per strike and until now
@@ -1221,6 +1229,53 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     box.innerHTML = h;
   }
 
+  /* THE FOUR SERIES THE LADDER CAN CARRY. `g` has always shipped; d/v/c arrive with the engine
+     change that stopped summing them away. Each names its own UNIT because they are not the
+     same kind of number: delta exposure is SHARES, the other three are DOLLARS, and charm is a
+     per-DAY rate. A reader who compares a vanna bar with a delta bar has been misled by the
+     chart, not by their own carelessness — so only one is ever drawn, and it says what it is. */
+  var PROF_SERIES = [
+    { k:'g', label:'GAMMA',  unit:'dealer gamma, $ per 1% move' },
+    { k:'d', label:'DELTA',  unit:'dealer delta, shares' },
+    { k:'v', label:'VANNA',  unit:'dealer vanna, $ per vol point' },
+    { k:'c', label:'CHARM',  unit:'dealer charm, $ of delta per day' }
+  ];
+  var PROF_PICK = 'g', _PROF_D = null;
+
+  function _profHas(d, key){
+    return !!(d && d.profile && d.profile.some(function(r){ return r && isFinite(r[key]); }));
+  }
+  /* An engine publishing the older [{k,g}] payload has no d/v/c at all. Rather than draw an
+     empty panel for a series that cannot exist, the selector only offers what is on the wire
+     and silently falls back to gamma — the same absent-tolerance the max-pain tile uses. */
+  function _profSeries(d){
+    return _profHas(d, PROF_PICK) ? PROF_PICK : 'g';
+  }
+  function _paintSeriesToggle(d, active){
+    var box = $('prof-series'); if(!box) return;
+    var avail = PROF_SERIES.filter(function(s){ return s.k==='g' || _profHas(d, s.k); });
+    // One live series is not a choice; hide the control rather than show a lone dead label.
+    box.style.display = avail.length > 1 ? 'flex' : 'none';
+    box.innerHTML = avail.map(function(s){
+      var on = (s.k === active);
+      return '<span data-ser="' + s.k + '" style="cursor:pointer;color:' +
+             (on ? '#22d3ee' : 'var(--txt3)') + ';">' + s.label + '</span>';
+    }).join('');
+    var cur = PROF_SERIES.filter(function(s){ return s.k === active; })[0];
+    var hd = $('prof-h'), un = $('prof-unit');
+    if(hd) hd.textContent = (cur ? cur.label.charAt(0) + cur.label.slice(1).toLowerCase() : 'Gamma') + ' profile by strike';
+    if(un) un.textContent = cur ? cur.unit : '';
+  }
+  (function(){
+    var box = $('prof-series'); if(!box) return;
+    box.addEventListener('click', function(e){
+      var t = e.target && e.target.getAttribute && e.target.getAttribute('data-ser');
+      if(!t || t === PROF_PICK) return;
+      PROF_PICK = t;
+      if(_PROF_D) drawProfile(_PROF_D);
+    });
+  })();
+
   function drawProfile(d){
     var cv = $('profile');
     if(!cv || !d.profile || !d.profile.length) { if(cv){var c0=cv.getContext('2d');cv.width=cv.offsetWidth;c0.clearRect(0,0,cv.width,cv.height);} return; }
@@ -1230,14 +1285,21 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     // taller, which handed the wrapper more leftover, which grew the canvas again -- it reached ~900px
     // and was still climbing. Out of flow the wrapper depends only on the flex leftover, so the loop
     // cannot close. Display size is the CSS inset:0, so style.height must NOT be set here.
+    _PROF_D = d;                       // the toggle redraws without waiting for the next poll
+    var SER = _profSeries(d);          // falls back to gamma when the engine ships no greeks
+    _paintSeriesToggle(d, SER);
     var _wrap = cv.parentNode;
     var dpr = window.devicePixelRatio||1, W = cv.offsetWidth,
         H = Math.max(210, (_wrap && _wrap.clientHeight) || 220);
     cv.width = W*dpr; cv.height = H*dpr;
     var c = cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
-    var rows = d.profile.slice().sort(function(a,b){ return a.k-b.k; });
+    // Rows WITHOUT the chosen series are dropped rather than drawn at zero: a strike whose
+    // greeks could not be computed is unknown, and a zero-length bar reads as "no exposure here".
+    var rows = d.profile.filter(function(r){ return r && isFinite(r.k) && isFinite(r[SER]); })
+                        .sort(function(a,b){ return a.k-b.k; });
+    if(!rows.length){ return; }
     var n = rows.length;
-    var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.g)||0; })) || 1;
+    var maxAbs = Math.max.apply(null, rows.map(function(r){ return Math.abs(r[SER])||0; })) || 1;
     var padT=10, padB=16, axisW=46;                // left gutter reserved for strike-price labels
     var plotL = axisW, plotW = W - axisW - 6, mid = plotL + plotW*0.5;
     var rowH = (H-padT-padB)/n, bh = Math.max(2, rowH - 1.5);
@@ -1251,10 +1313,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     }
     // gamma bars (green = net long gamma / positive, red = net short)
     rows.forEach(function(r,i){
-      var yy = yOfIndex(i) - bh/2;
-      var w = (Math.abs(r.g)/maxAbs) * (plotW*0.46);
-      c.fillStyle = r.g>=0 ? 'rgba(52,211,153,0.78)' : 'rgba(248,113,113,0.78)';
-      if (r.g>=0) c.fillRect(mid, yy, w, bh); else c.fillRect(mid-w, yy, w, bh);
+      var yy = yOfIndex(i) - bh/2, val = r[SER];
+      var w = (Math.abs(val)/maxAbs) * (plotW*0.46);
+      c.fillStyle = val>=0 ? 'rgba(52,211,153,0.78)' : 'rgba(248,113,113,0.78)';
+      if (val>=0) c.fillRect(mid, yy, w, bh); else c.fillRect(mid-w, yy, w, bh);
     });
     // zero-GEX centerline
     c.strokeStyle='rgba(255,255,255,0.28)'; c.setLineDash([3,3]); c.beginPath(); c.moveTo(mid,padT); c.lineTo(mid,H-padB); c.stroke(); c.setLineDash([]);
