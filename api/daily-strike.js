@@ -1015,7 +1015,7 @@ ${await regimeStrip()}
   ${story.kindLabel ? `<div class="ds-kicker">${esc(story.kindLabel)}</div>` : ''}
   <h1>${esc(story.headline)}</h1>
   ${story.dek ? `<p class="lead">${esc(story.dek)}</p>` : ''}
-  <div class="ds-by">${esc(story.byline || 'Dr. NoVo at NoVo Options Trading LLC')} &middot; ${when.toLocaleString('en-US',
+  <div class="ds-by">${esc(story.byline || 'Dr. NoVo')} at NoVo Options Trading LLC &middot; ${when.toLocaleString('en-US',
       { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' })} ET
       &middot; ${esc(ago(story.publishedAt))}</div>
   <div class="body" style="margin-top:16px;">${autolink(esc(story.body))}</div>

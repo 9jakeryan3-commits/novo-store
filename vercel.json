@@ -568,6 +568,10 @@
       "destination": "https://novo-pulse.up.railway.app/admin"
     },
     {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
       "source": "/trader",
       "destination": "/trader.html"
     },
