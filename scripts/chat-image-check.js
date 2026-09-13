@@ -54,9 +54,39 @@ function extract(file) {
   const sav = one(h, file, "  function saveTurns(){");
   if (!sav) return { miss: "saveTurns" };
   if (!rel) return { miss: "releaseOldImages" };
-  return { src: rel + "\n" + sav };
+  return { src: rel + "\n" + sav, rel: rel, raw: h };
 }
 
+/* ⚠ THE SANDBOX CANNOT SEE HALF OF THIS FIX, AND THE HALF IT CANNOT SEE IS THE HALF THAT LEAKS.
+   A pasted chart is retained THREE ways per turn: the base64 on the turn object, the same string
+   as the <img> src, and a third copy captured by the onclick closure. Section 0 runs against a
+   document stub, so it only ever proves the FIRST one is released -- and a port that adds
+   releaseOldImages and nothing else passes it while freeing nothing:
+
+     onclick closing over `img`   -> the handler holds the string for the life of the node, and the
+                                     heap shows the array entry and the src released while still
+                                     holding megabytes
+     no data-turn-t on the <img>  -> the querySelector matches nothing, so the node is never
+                                     replaced: the turn object loses its image while the picture
+                                     stays on screen
+
+   Sabotage-tested 2026-09-12 -- with the suite otherwise green, removing data-turn-t passed, and
+   restoring the capturing onclick passed. Both are source-text facts, so they are asserted as
+   source text rather than pretended to be behaviour. */
+function domWiring(file, raw) {
+  const name = path.basename(file);
+  const capture = /im\.onclick\s*=\s*function\(\)\s*\{[^}]*window\.open\(\s*img\b/.test(raw);
+  const thisSrc = /im\.onclick\s*=\s*function\(\)\s*\{[^}]*window\.open\(\s*this\.src\b/.test(raw);
+  const tagged = /im\.setAttribute\(\s*['"]data-turn-t['"]/.test(raw);
+  const queried = /img\[data-turn-t=/.test(raw);
+  check("onclick reads this.src, not a captured string   [" + name + "]", thisSrc && !capture,
+        capture ? "closes over img - that closure is the third copy" : (thisSrc ? "ok" : "no onclick found"));
+  check("the <img> carries data-turn-t                   [" + name + "]", tagged,
+        tagged ? "ok" : "without it releaseOldImages can never find the node it must replace");
+  check("releaseOldImages looks the node up by that tag  [" + name + "]", queried);
+}
+
+const donors = new Map();
 let fails = 0;
 function check(name, cond, detail) {
   console.log((cond ? "  PASS  " : "  FAIL  ") + name + (detail ? "   [" + detail + "]" : ""));
@@ -219,6 +249,23 @@ for (const f of FILES) {
     continue;
   }
   runAll(ex.src);
+  console.log("\n=== 6. DOM wiring the sandbox cannot reach ===");
+  domWiring(f, ex.raw);
+  donors.set(path.basename(f), ex.rel);
+}
+
+/* ⚠ COPYING FROM A COPY THAT HAS ALREADY DRIFTED PROPAGATES THE DRIFT, AND EVERY PER-FILE CHECK
+   ABOVE STILL GOES GREEN -- three identical-and-wrong copies pass every parity check there is.
+   Temi's habit, added after porting this fix into crypto-live: assert the donors agree BEFORE
+   trusting any of them. The three copies are meant to be byte-identical; if they are not, one of
+   them received a fix the others did not, which is the entire defect class this suite exists for. */
+console.log("\n########## all copies agree ##########");
+{
+  const names = [...donors.keys()];
+  const sizes = names.map((n) => n + "=" + donors.get(n).length);
+  const first = donors.get(names[0]);
+  const same = names.every((n) => donors.get(n) === first);
+  check("releaseOldImages is byte-identical across all copies", names.length > 0 && same, sizes.join("  "));
 }
 console.log(fails ? "\n" + fails + " FAILED\n" : "\nOK - all " + FILES.length + " chat surfaces pass\n");
 process.exit(fails ? 1 : 0);
