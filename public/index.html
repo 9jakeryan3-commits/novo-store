@@ -335,7 +335,19 @@ j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefo
      computes to width 0 and renders nothing -- silently, only on hover. /crypto
      could drop this border because /crypto has no a.feature:hover. */
   .feature { display: flex; gap: 14px; border-radius: 8px; padding: 20px; }
-  .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  /* ⚠ SYSTEM SYMBOL FONTS FIRST, AND IT IS WORTH 83 KB ON THE FRONT DOOR.
+     Google's css2 splits Inter by unicode-range and the browser fetches only the subsets whose
+     glyphs actually render. Five of these six icons are emoji and already come from the system
+     emoji font at zero cost. The sixth is ₿ (U+20BF, the crypto card) — the ONLY latin-ext glyph
+     on the site — and that one character pulled Inter's latin-ext subset: 83 KB, 49% of this
+     page's font weight, on the heaviest page a stranger meets first.
+     Preferring the system symbol stack makes ₿ render the way its five siblings already do.
+     'Inter' stays late so a system genuinely missing the glyph still gets one rather than tofu —
+     it is simply never reached on any OS that has ₿, which is all of them since ~2017.
+     Measured by Tema 09-12: / 171 KB of fonts vs 69 KB elsewhere, same css2 link, same weights. */
+  .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol',
+                 'Noto Sans Symbols 2', system-ui, 'Inter', sans-serif; }
   a.feature { color: inherit; }
   a.feature:hover { border-color: var(--blue); }
   .feature h3 { font-size: 14px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; }

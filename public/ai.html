@@ -694,7 +694,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      Four real answers — one per desk plus a deep read — and the three rules he answers under,
      which are the actual product. The aichat-fan below stays; this sits above it. -->
 <figure class="eco-band">
-  <img src="/screenshots/ai-sheet.webp?v=1" width="2600" height="1242" loading="lazy"
+  <!-- ⚠ EAGER, LIKE THE PLANS STRIP AND UNLIKE THE OTHER THREE SHEETS. This one sits at y=1040,
+       which is below a 900px fold and ABOVE a 1080px or 1440px one — i.e. above the fold on most
+       desktops. Left lazy it is the /plans bug (deferring the fetch of the LCP element) for every
+       viewport taller than ~1040px. The analyst, trader and crypto sheets stay lazy: they sit at
+       y=1513-1714 and are genuinely below the fold at all three heights, not accidentally so.
+       Measured by Tema 09-12 at 900 / 1080 / 1440. -->
+  <img src="/screenshots/ai-sheet.webp?v=1" width="2600" height="1242" fetchpriority="high"
        decoding="async" alt="Dr. NoVo answering on the Trader, the Analyst and the Crypto Map, and a deep read on a coin — with the rules he answers under: he cites what he read, he gives the sample size, and he says when he is wrong.">
 </figure>
 
