@@ -83,6 +83,42 @@ T.push(['every chat runtime style exists in crypto-live.html', () =>
 T.push(['no chat runtime style builds a four-sided box', () =>
   TRADER.every((s) => !/(^|;)\s*border\s*:\s*[^;0]/.test(s))]);
 
+/* ── THE ACCENT CONTRACT ───────────────────────────────────────────────────────────────────────
+   green = Trader, cyan = Analyst, violet = Crypto Map. Those three MEAN a product, so a chat
+   accent is a product claim and every dashboard has to make its own.
+
+   Trader did not, until 2026-09-12. It fell through to the #22d3ee baked into the module and wore
+   the ANALYST product's colour — and because cyan on a dark dashboard looks designed, it read as
+   deliberate rather than missing. That is why the second assertion matters more than the first:
+   a host that forgets is findable, but a DEFAULT that is itself a product colour makes forgetting
+   invisible. A default must fail to ink, never to a product.
+
+   ⚠ SCOPED TO --askacc DELIBERATELY. The focus ring stays cyan on all three dashboards on purpose
+   — a focus ring is a system affordance saying "the keyboard is here", which means the same thing
+   everywhere, so product-tracking it would make it LESS informative. Yuri's `--focus` token will
+   legitimately hold #22d3ee. A blanket "no product hex anywhere" assertion would go red on that
+   correct change, and a guard that fires on a right answer is one people learn to override. */
+const PRODUCT_COLOURS = { '#34d399': 'Trader', '#22d3ee': 'Analyst', '#a78bfa': 'Crypto Map' };
+const HOSTS = ['public/trader-live.html', 'public/analyst-live.html', 'public/crypto-live.html'];
+const decl = (f) => {
+  const code = fs.readFileSync(path.join(ROOT, f), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '');   // prose mentions the token too
+  return /--askacc\s*:\s*([^;}]+)/.exec(code);
+};
+for (const h of HOSTS) {
+  T.push([path.basename(h) + ' declares its own --askacc', () => !!decl(h)]);
+}
+T.push(['every host accent is one of the three product colours', () =>
+  HOSTS.every((h) => { const d = decl(h); return d && PRODUCT_COLOURS[d[1].trim().toLowerCase()]; })]);
+T.push(['no --askacc FALLBACK is a product colour (a default must fail to ink)', () =>
+  FILES.every((f) => {
+    const re = /var\(\s*--askacc\s*,([^)]*)\)/g;
+    let m; while ((m = re.exec(src[f]))) {
+      if (PRODUCT_COLOURS[m[1].trim().toLowerCase()]) return false;
+    }
+    return true;
+  })]);
+
 let pass = 0;
 for (const [name, fn] of T) {
   let ok = false, err = '';

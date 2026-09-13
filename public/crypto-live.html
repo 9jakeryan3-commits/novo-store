@@ -665,7 +665,7 @@ tr:last-child td{border-bottom:none}
     position:relative;scroll-behavior:smooth;overscroll-behavior:contain}
   #novo-ask #novo-ask-pad{flex:0 0 auto}
   #novo-ask .m{font-size:13.5px;line-height:1.65;color:var(--txt1,var(--txt1));white-space:pre-wrap;align-self:stretch}
-  #novo-ask .m.you{align-self:flex-end;max-width:min(78%,560px); color:var(--txt1);font-weight:600;color:var(--askacc,#22d3ee);padding:2px 0}
+  #novo-ask .m.you{align-self:flex-end;max-width:min(78%,560px); color:var(--txt1);font-weight:600;color:var(--askacc,currentColor);padding:2px 0}
   #novo-ask .m .when{margin-left:9px;font-size:10.5px;font-weight:600;color:var(--txt3,var(--txt3));
     white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.02em;vertical-align:baseline}
   #novo-ask .m.you .when{color:rgba(226,214,255,.62)}
@@ -684,12 +684,12 @@ tr:last-child td{border-bottom:none}
   #novo-ask .quick button:hover{color:var(--txt1)}
   #novo-ask form{display:flex;gap:8px;padding:11px;border-top:1px solid var(--bdr,var(--bdr))}
   #novo-ask input{flex:1; padding:10px 12px;color:var(--txt1);font-size:13.5px;outline:none;background:transparent;border:0;border-bottom:1px solid var(--bdr,#22303f);outline:0;border-radius:0}
-  #novo-ask input:focus{border-bottom-color:var(--askacc,#22d3ee)}
+  #novo-ask input:focus{border-bottom-color:var(--askacc,currentColor)}
   /* Dropped a vestigial color:#04121a from the rule below - it was the text colour for a fill
      this button no longer has, and it sat before a later color:var(--askacc) that overrides it.
      Harmless today, and exactly the shape that becomes an invisible control the moment someone
      tidies the winning declaration away. 1.02:1 on this background if it ever won. */
-  #novo-ask button.go{font-weight:800;padding:0 15px;cursor:pointer;background:none;border:0;color:var(--askacc,#22d3ee);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+  #novo-ask button.go{font-weight:800;padding:0 15px;cursor:pointer;background:none;border:0;color:var(--askacc,currentColor);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
   #novo-ask button.go:disabled{opacity:.45;cursor:default}
 
   /* ── chat, upgraded: full-screen on mobile, a thread that reads like a product ── */
@@ -711,7 +711,7 @@ tr:last-child td{border-bottom:none}
   #novo-ask .x:hover{color:#eaf3ff}
   #novo-ask form{padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px));gap:9px;align-items:center}
   #novo-ask input{padding:11px 13px;font-size:14px;background:transparent;border:0;border-bottom:1px solid var(--bdr,#22303f);outline:0;border-radius:0}
-  #novo-ask button.go{padding:0 18px;height:41px;font-size:14px;background:none;border:0;color:var(--askacc,#22d3ee);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+  #novo-ask button.go{padding:0 18px;height:41px;font-size:14px;background:none;border:0;color:var(--askacc,currentColor);padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
   /* The empty-thread welcome: an intro with a headline, and suggestion chips that look like an
      invitation rather than a settings list. They leave with the first message; the one-line quick
      row above the composer carries suggestions from then on. */
@@ -727,7 +727,7 @@ tr:last-child td{border-bottom:none}
     #novo-ask{left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
       border-radius:0;border:0}
     #novo-ask header{padding-top:calc(13px + env(safe-area-inset-top,0px))}
-    #novo-ask .m.you{max-width:86%;color:var(--askacc,#22d3ee);padding:2px 0}
+    #novo-ask .m.you{max-width:86%;color:var(--askacc,currentColor);padding:2px 0}
     #novo-ask .m:not(.you):not(.think){max-width:96%;padding:2px 0}
     html.novo-ask-lock, html.novo-ask-lock body{overflow:hidden;overscroll-behavior:none}
   }
@@ -743,7 +743,7 @@ tr:last-child td{border-bottom:none}
  color:var(--txt2,#9fb6d1);font-size:11.5px;line-height:1;cursor:pointer;padding:6px 9px;
  margin-right:6px;white-space:nowrap;border:0}
   #novo-ask .lvl:hover{color:#eaf3ff;}
-  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;color:var(--askacc,#22d3ee)}
+  #novo-ask .lvl[aria-pressed="true"]{color:#0b1118;color:var(--askacc,currentColor)}
   /* Go deeper: the answer is short by default now, so the way back to the desk report has to be
      one tap rather than knowing the phrase "deep read". */
   #novo-ask .deeper{background:none; color:var(--txt2,#9fb6d1);font-size:11.5px;cursor:pointer;padding:4px 9px;margin:2px 0 0;border:0}
@@ -753,8 +753,8 @@ tr:last-child td{border-bottom:none}
   #novo-ask .term{border-bottom:1px dotted var(--askacc);cursor:help;text-underline-offset:2px}
   #novo-ask .term:hover,#novo-ask .term:focus{color:#eaf3ff;border-bottom-style:solid;outline:none}
   .termpop{position:fixed;z-index:2147483647;background:#0d1620;color:#dce9f7;
-    border:1px solid var(--askacc,#22d3ee);border-radius:10px;padding:9px 11px;font-size:13px;
-    line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+    border:1px solid var(--askacc,currentColor);border-radius:6px;padding:9px 11px;font-size:13px;
+    line-height:1.5}
   @media (max-width:720px){ #novo-ask .lvl{font-size:11px;padding:5px 7px;background:none;border:0} }
   #novo-ask.max{z-index:101;left:0;right:0;top:0;bottom:0;transform:none;width:100vw;height:100dvh;
     border-radius:0;border:0}
@@ -3894,7 +3894,7 @@ window.addEventListener('hashchange', function(){
     fi.onchange = function(){ if (fi.files && fi.files[0]) ingestImage(fi.files[0]); fi.value = ''; };
     var bt = document.createElement('button'); bt.type = 'button'; bt.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'; bt.setAttribute('aria-label','Attach an image');
     bt.title = 'Attach a chart image, or just paste one';
-    bt.style.cssText = 'background:none;border:0;cursor:pointer;padding:0 8px;color:var(--askacc,#22d3ee);display:inline-flex;align-items:center;';
+    bt.style.cssText = 'background:none;border:0;cursor:pointer;padding:0 8px;color:var(--askacc,currentColor);display:inline-flex;align-items:center;';
     bt.onclick = function(){ fi.click(); };
     qi.form.insertBefore(bt, qi);
     qi.form.appendChild(fi);
