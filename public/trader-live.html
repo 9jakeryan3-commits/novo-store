@@ -632,17 +632,16 @@ body {
     letter-spacing: .12em; text-transform: uppercase; padding: 10px 0; cursor: pointer;
     white-space: nowrap; transition: color .12s ease; }
   #desk-rail button:hover { color: var(--txt1); }
-  #desk-rail button.on { color: var(--trd); }
-  /* SHIPPED DARK, AND FAIL-CLOSED. The Greeks panel is wired in all six places the desk
-     requires, but novo-tape.js does not carry its view yet — Junie's renderer moves in when
-     the engine publishes per-strike VEX/CHEX. mount() is already a safe no-op for an unknown
-     view (`if (!el || !DRAW[kind]) return;`) so nothing throws — but a rail button that opens
-     a blank column is worse than no button, so the button stays hidden until the view is
-     proven present. HIDDEN IS THE DEFAULT, not the fallback: if the reveal never runs, or
-     runs and fails, a member sees exactly what they see today. Turning it on is one line
-     once novoTape can answer whether it has the view. */
+  #desk-rail button.on { color: var(--trd); }   /* was Analyst cyan on the Trader's own rail */
+  /* FAIL-CLOSED. The Greeks panel is wired in all six places the desk requires, and its button
+     is revealed only when novoTape.has('greeks') answers true — which it now does, since
+     a87c6fdae registered drawGreeks. HIDDEN REMAINS THE DEFAULT rather than the fallback: an
+     older cached novo-tape.js without has(), a module that fails to load, or any throw in the
+     reveal all leave a member seeing exactly what they saw before. Because the RULE is what
+     makes the button appear, the rule itself is asserted in a live page — a selector that
+     matched nothing would have hidden this forever once the view landed. */
   #desk-rail button[data-desk="greeks"] { display: none; }
-  body.has-greeks #desk-rail button[data-desk="greeks"] { display: block; }   /* was Analyst cyan on the Trader's own rail */
+  body.has-greeks #desk-rail button[data-desk="greeks"] { display: block; }
   /* THERE IS NO #desk-panel. It was an empty div holding the panel's frame, from a first
      design where the columns would be moved INTO it. They never were - reparenting them would
      have broken the mobile tabs that share the same nodes - so each column positions itself into
@@ -8871,6 +8870,15 @@ var _todayLive=null;   // ALWAYS today's live P&L (realized + open mark-to-marke
 <script src="/js/novo-feed.js?v=f1d26292"></script>
 <script src="/js/novo-fetch.js?v=1"></script>
 <script src="/js/novo-tape.js?v=223fb71e"></script>
+<script>
+/* Reveal the Greeks rail button only once the module can ANSWER that the view exists.
+   novoTape.has() is the reason this is a question rather than a guess: before it, finding out
+   meant mounting into a detached div and reading the return value, which left a permanent
+   entry in the module's MOUNTS list being redrawn on every poll. Still fail-closed — any
+   throw, any older novo-tape without has(), and the button simply stays hidden. */
+try { if (window.novoTape && window.novoTape.has && window.novoTape.has('greeks'))
+        document.body.classList.add('has-greeks'); } catch (_e) {}
+</script>
 <script src="/js/novo-congress.js?v=7d62b67a"></script>
 <script>
   // The panel is created once, on the first reveal, and re-focused on every one after. Creating it
