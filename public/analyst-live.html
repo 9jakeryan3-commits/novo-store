@@ -624,6 +624,10 @@ which Jake explicitly carved out. */
     .wm-1 { font-size: 20px; } .wm-2 { font-size: 8.5px; letter-spacing: 1.9px; margin-top: 3px; }
   }
 </style>
+<!-- Shared credential + deadline modules. Blocking and in <head> deliberately: the auth block
+     below runs at parse time and calls NovoToken.get() directly, so both must already exist. -->
+<script src="/js/novo-token.js?v=1"></script>
+<script src="/js/novo-fetch.js?v=1"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -897,8 +901,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   var TOKEN = null, STATE = null, CUR = tickFromHash() || tickStored() || "SPY";
   var qs = new URLSearchParams(location.search);
   // token from URL (magic link) → persist; else from storage
-  if (qs.get('t')) { TOKEN = qs.get('t'); try{ localStorage.setItem('novo_live_t', TOKEN); }catch(_){}; history.replaceState(null,'', '/analyst/live' + (location.hash || '')); }
-  if (!TOKEN) { try { TOKEN = localStorage.getItem('novo_live_t'); } catch(_){} }
+  if (qs.get('t')) { TOKEN = qs.get('t'); NovoToken.set(TOKEN); history.replaceState(null,'', '/analyst/live' + (location.hash || '')); }
+  if (!TOKEN) { TOKEN = NovoToken.get(); }
   var $ = function(id){ return document.getElementById(id); };
   var _escH = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
@@ -1063,7 +1067,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   async function loadGammaHeat(tk){
     if(!TOKEN) return;
     try{
-      var r = await fetch('/api/analyst-publish?hist=1&ticker='+encodeURIComponent(tk)+'&t='+encodeURIComponent(TOKEN), {cache:'no-store'});
+      var r = await NovoFetch.json('/api/analyst-publish?hist=1&ticker='+encodeURIComponent(tk)+'&t='+encodeURIComponent(TOKEN), {cache:'no-store'});
       if(!r.ok) return;
       var d = await r.json();
       GHIST = (d && d.snapshots) || []; GHIST_TK = tk;
@@ -1392,7 +1396,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   // close. BTC (24/7 crypto), the Dollar index and the 10Y cash yield were pulled — only clean 24/5 futures here.
   async function loadRibbon(){
     try {
-      var r = await fetch('/api/quotes', { cache: 'no-store' }); if (!r.ok) return;
+      var r = await NovoFetch.json('/api/quotes', { cache: 'no-store' }); if (!r.ok) return;
       var d = await r.json(), order = ['S&P 500','Nasdaq','Dow','Russell','Gold','Crude'];
       var html = order.filter(function(n){ return d[n]; }).map(function(n){
         var q = d[n], up = (q.chg || 0) >= 0;
@@ -1779,12 +1783,42 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   }
 
   var _everShown = false;
-  function _neverBlank(){ if(!_everShown){ showLogin(); _everShown = true; } }   // first-load failure → show login, not a blank page
+  /* ONLY THE FIRST FAILURE MAY TAKE OVER THE SCREEN. On a first load there is nothing to lose,
+     so a failure shows the login rather than a blank page. Once the dashboard has painted,
+     a later failure must leave it standing — a blip on one re-poll is not a reason to throw a
+     full-screen login over live data. _everShown is that guard, and it is why the deadline fix
+     below can route a stall through here safely: a stall on poll #400 now rejects and lands in
+     the catch, where before it simply hung. (Same discrimination trader makes on _handshakeAt.) */
+  function _neverBlank(msg){
+    if (_everShown) return;
+    showLogin(); _everShown = true;
+    if (msg) { var lm = document.getElementById('lmsg'); if (lm) lm.textContent = msg; }
+  }
   async function poll(){
     if (!TOKEN) { showLogin(); _everShown = true; return; }
     try {
-      var r = await fetch('/api/analyst-publish?live=1&t='+encodeURIComponent(TOKEN), { cache:'no-store' });
-      if (r.status===401) { try{ localStorage.removeItem('novo_live_t'); }catch(_){}; TOKEN=null; showLogin(); _everShown = true; return; }
+      // NovoFetch.json, not bare NovoFetch: the deadline has to cover the BODY. fetch() resolves on
+      // headers, so a body that stalls mid-stream used to hang the await below FOREVER — and because
+      // _pollGuarded's finally never ran, _polling stayed latched and EVERY later tick returned at the
+      // in-flight guard. One stall killed polling for the life of the page. 12s is the default and
+      // must stay under the 15s cadence below, or two polls overlap — the thing the guard prevents.
+      var r = await NovoFetch.json('/api/analyst-publish?live=1&t='+encodeURIComponent(TOKEN), { cache:'no-store' });
+      if (r.status===401) {
+        /* A 401 IS NOT PROOF THE CREDENTIAL IS BAD. verifyToken returns null for a bad signature,
+           an expired payload AND a server with no secret configured — the status cannot tell them
+           apart. A rotated signing secret, or a deploy that briefly lost it, 401s a token whose
+           expiry is still hours away. Wiping it on sight signed the member out of a seat that was
+           still valid, and out of the other two dashboards too, since all three share this key.
+           The payload carries its own expiry and is readable without the secret, so the client can
+           tell: only a genuinely expired token is destroyed. */
+        if (NovoToken.onAuthFailure(TOKEN) === 'expired') {
+          TOKEN = null; _everShown = false;
+          _neverBlank('That session expired. Sign in again to pick up where you left off.');
+        } else {
+          _neverBlank('Can’t reach the desk right now — your sign-in is still good. Retrying.');
+        }
+        return;
+      }
       if (r.status===402) {
         // Signed in, but their subscription doesn't include Analyst (e.g. crypto-only).
         showLogin(); _everShown = true;
@@ -1825,7 +1859,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   // Enable-alerts button — signed-in members only; stays hidden until Web Push is configured server-side (VAPID).
   (function(){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)) return;
-    function tok(){try{return localStorage.getItem('novo_live_t')||'';}catch(_){return '';}}
+    function tok(){ return NovoToken.get() || ''; }
     /* ⚠ ONE VAPID FLOW, AND IT IS NOT HERE ANY MORE. The subscribe path moved to
        /js/novo-push.js so the crypto and trader dashboards use the same one — Jake, 2026-09-07:
        "analyst has the VAPID keys and technique to do it in all 3". These stay as thin delegates
@@ -3414,7 +3448,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
   // storage key it persists to instead, which is what the push-notification code already does.
   function tok(){
     try { var u = new URLSearchParams(location.search).get('t'); if (u) return u; } catch(_){}
-    try { return localStorage.getItem('novo_live_t') || ''; } catch(_){ return ''; }
+    return NovoToken.get() || '';
   }
   window.novoAsk = async function(q, opts){
     q = (q||'').trim(); if (!q || busy) return;
@@ -3452,10 +3486,17 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
       var _body = { question: q, app: 'analyst', t: tok() || null, history: hist, surface: 'equity', stream: true,
                     level: LEVEL || undefined, deep: opts.deep || undefined };
       if (PENDIMG) { _body.image = PENDIMG; clearAttach(); }
-      var r = await fetch('/api/analyst-ask', {
+      /* BARE NovoFetch here, NOT NovoFetch.json — and that is deliberate. This endpoint streams:
+         it flushes SSE headers with a `start` event and then writes tokens for as long as the
+         answer takes, which the reader below consumes incrementally. A deadline covering the body
+         would abort every long answer mid-sentence. Bare NovoFetch clears its timer once the
+         headers land, so this bounds only the wait for the server to START answering. 25s rather
+         than the 12s default because a cold start precedes that first flush, and a false abort
+         here costs the member their question. */
+      var r = await NovoFetch('/api/analyst-ask', {
         method:'POST', headers:{'content-type':'application/json'},
         body: JSON.stringify(_body)
-      });
+      }, 25000);
       var ctype = (r.headers.get('content-type') || '');
       if (ctype.indexOf('text/event-stream') < 0) {
         var d = await r.json();
