@@ -271,7 +271,7 @@ ${_CHROME.HEAD}
    small grey text. Price becomes display-weight; the regime carries the colour. */
 .ds-cell{ padding:15px 20px 15px 0; border-top:2px solid var(--bdr2,#1c1c20); }
 .ds-cell:has(.ds-up){ border-top-color:#10b981; }
-.ds-cell:has(.ds-dn){ border-top-color:#f59e0b; }
+.ds-cell:has(.ds-dn){ border-top-color:#f43f5e; }
 .ds-ck{ font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--txt3,#6e6e6e); }
 .ds-cv{
   font-family:"Space Grotesk",system-ui,sans-serif;
@@ -280,7 +280,7 @@ ${_CHROME.HEAD}
 }
 .ds-cs{ font-size:12.5px; line-height:1.5; font-variant-numeric:tabular-nums; }
 .ds-cs.ds-up .rg{ color:#10b981; font-weight:700; }
-.ds-cs.ds-dn .rg{ color:#f59e0b; font-weight:700; }
+.ds-cs.ds-dn .rg{ color:#f43f5e; font-weight:700; }
 .ds-cs .flip{ color:var(--txt2,#a8a8a8); }
 
 /* ── 2. SECTION RHYTHM ────────────────────────────────────────────────────────
@@ -367,7 +367,7 @@ ${_CHROME.HEAD}
   .ds-bq:hover .ds-bqp{color:#22d3ee;}
 
   /* shared colour + note */
-  .ds-up{color:#10b981;} .ds-dn{color:#f59e0b;} .ds-nu{color:var(--txt3,#6e6e6e);}
+  .ds-up{color:#10b981;} .ds-dn{color:#f43f5e;} .ds-nu{color:var(--txt3,#6e6e6e);}
   .ds-note{font-size:11.5px;line-height:1.55;color:var(--txt3,#6e6e6e);margin-top:9px;}
   .ds-note a{color:#22d3ee;text-decoration:none;}
 
@@ -385,7 +385,7 @@ ${_CHROME.HEAD}
     font-size:9.5px;letter-spacing:.14em;color:var(--txt3,#6e6e6e);}
   .ds-secb{display:block;height:6px;background:rgba(255,255,255,.045);}
   .ds-secb i{display:block;height:6px;}
-  .ds-secb i.ds-up{background:#10b981;} .ds-secb i.ds-dn{background:#f59e0b;}
+  .ds-secb i.ds-up{background:#10b981;} .ds-secb i.ds-dn{background:#f43f5e;}
   .ds-secb i.ds-nu{background:var(--txt3,#6e6e6e);}
   .ds-secv{font-size:12.5px;font-weight:700;text-align:right;}
   .ds-secl{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;
@@ -446,12 +446,12 @@ ${_CHROME.HEAD}
   .ds-pollv{display:flex;gap:22px;padding:2px 0 4px;}
   .ds-pb{background:none;border:0;padding:5px 0;margin:0;cursor:pointer;font:inherit;
     font-size:14px;font-weight:800;letter-spacing:.02em;transition:opacity .12s ease;}
-  .ds-pb.ds-up{color:#10b981;} .ds-pb.ds-dn{color:#f59e0b;}
+  .ds-pb.ds-up{color:#10b981;} .ds-pb.ds-dn{color:#f43f5e;}
   .ds-pb:hover{opacity:.72;}
   .ds-pollr{padding-top:2px;}
   .ds-pbar{display:flex;height:6px;background:rgba(255,255,255,.045);margin:6px 0 5px;}
   .ds-pbar i{display:block;height:6px;transition:width .25s ease;}
-  #ds-pbull{background:#10b981;} #ds-pbear{background:#f59e0b;}
+  #ds-pbull{background:#10b981;} #ds-pbear{background:#f43f5e;}
   .ds-pnums{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;
     font-size:12px;font-weight:700;}
 
