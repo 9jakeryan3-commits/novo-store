@@ -155,10 +155,10 @@
   // fixed number is wrong the moment the font or the copy changes. Try longest first, take
   // the first that actually fits the box it is sitting in.
   var PLACEHOLDERS = [
-    'Search dealer levels, 0DTE, gamma, coins and tools…',
-    'Search dealer levels, 0DTE, coins…',
-    'Search gamma, 0DTE, coins…',
-    'Search gamma…'
+    'Search dealer levels, news, coins, 0DTE and tools…',
+    'Search dealer levels, news, coins…',
+    'Search news, 0DTE, coins…',
+    'Search news…'
   ];
   /* THE BADGES STEAL THE PLACEHOLDER'S ROOM, so the two are chosen TOGETHER — longest label with
      the longest placeholder that still fits, then the short badge form, rather than picking a
