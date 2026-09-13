@@ -24,6 +24,10 @@ gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
      bare ref means no future edit to this module ever reaches a returning visitor. The
      stamper maintains the content hash from here on. -->
 <script src="/js/novo-token.js?v=1"></script>
+<!-- Same reasoning, same placement: the deadline logic was a THIRD copy. _cmFetch, _tfetch
+     and (until today) nothing at all on analyst. The module is _tfetch's shape almost
+     verbatim, carrying the post-mortem for the 09-02 freeze Jake reported. -->
+<script src="/js/novo-fetch.js?v=1"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link rel="manifest" href="/crypto-live.webmanifest">
 <title>Crypto Market Map · NoVo</title>
@@ -3186,21 +3190,19 @@ function _mapDegrade(msg){
 // _cmSeq is the same idea as _novoGen on the chart: capture it, and refuse to paint if the
 // world moved on. The busy flag carries its own deadline so it can never latch.
 var _cmBusy = false, _cmBusyAt = 0, _cmSeq = 0;
-function _cmFetch(url, ms){
-  var ac = ('AbortController' in window) ? new AbortController() : null;
-  var tm = ac ? setTimeout(function(){ try{ ac.abort(); }catch(_){} }, ms || 20000) : null;
-  var o = { cache: 'no-store' };
-  if (ac) o.signal = ac.signal;
-  // The deadline must cover the BODY, not just the headers — clear it only once the JSON is
-  // actually in hand, which is the half the original trader-live bug got wrong.
-  return fetch(url, o).then(function(r){
-    return r.text().then(function(t){
-      if (tm) clearTimeout(tm);
-      return { ok: r.ok, status: r.status, _text: t,
-               json: function(){ return JSON.parse(t); } };
-    });
-  }, function(e){ if (tm) clearTimeout(tm); throw e; });
-}
+/* Delegates to novo-fetch.js. This body used to be a hand-rolled copy of the same deadline, and
+   the fleet had three of them - here, _tfetch in trader, and nothing at all on analyst until
+   today. The module is _tfetch's shape almost verbatim and carries the post-mortem for the
+   2026-09-02 freeze, so it is the better-documented copy as well as the shared one.
+   Kept as a named wrapper rather than replacing the call sites: load() owns _cmBusy and _cmSeq,
+   and those are the parts that stop overlapping loads painting an older map over a newer one.
+   They are unaffected and should stay that way.
+   ⚠ ARGUMENT ORDER. NovoFetch.json(url, opts, ms) takes the deadline THIRD; _cmFetch takes it
+   SECOND. Passing ms straight through would hand it in as `opts` and silently fall back to the
+   module's 12s default - no error, just a shorter deadline than the map's payload wants.
+   One real difference, in the module's favour: it clears the timer when r.text() REJECTS as well
+   as when it resolves. This version left the timer armed on a body-read failure. */
+function _cmFetch(url, ms){ return NovoFetch.json(url, null, ms || 20000); }
 async function load(){
   var _now = Date.now();
   // 60s is well past any legitimate load and stops a single hung request wedging the loop.
