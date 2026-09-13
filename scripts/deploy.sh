@@ -62,6 +62,14 @@ node scripts/build-site-chrome.js
 # analyst-live.html at the exact line, passes bb1f4e5d9's fix.
 node scripts/inline-js-check.js
 
+# Doubled carriage returns. trader-live.html was corrupted TWICE in one day and it COMPOUNDS: an
+# editor writing CRLF over lines already ending in CR yields \r\r\n, .gitattributes strips exactly
+# one \r per line on commit, and the blob lands corrupted rather than rejected -- so the existing
+# guard halves the damage and hides it. The file grew 566,757 -> 597,681 bytes across two cycles,
+# every byte of it shipped to members, with the real 17-line edit buried under 8,700 lines of diff
+# noise nobody can review. Repairing it by hand did not hold; this is the mechanical version.
+node scripts/crlf-check.js
+
 # lastmod is read from git, so the commit that ships a content change also moves the
 # dates the sitemap records -- meaning the sitemap is always exactly one commit behind
 # and would block every single deploy. When the ONLY thing regeneration touched is the
