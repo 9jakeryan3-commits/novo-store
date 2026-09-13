@@ -2,3 +2,7 @@
 .env*
 node_modules/
 package-lock.json
+
+# Run artifact from scripts/novo-multiturn-eval.js — live answers, including comp-seat calls.
+# Kept on disk so --regrade can re-score a grader fix without another live run; never committed.
+.multiturn-transcripts.json
