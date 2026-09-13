@@ -11,8 +11,25 @@
  *   inline-js-check  walks public/*.html — this page has no static file
  *   the deploy smoke is GET-only, so a broken page answers 200 with a full-size body and certifies
  *
- * Run it before committing api/daily-strike.js:  node scripts/check-daily-strike.js
+ * Run it:  node scripts/check-daily-strike.js
  * Add --self-test to prove the checker can fail before believing that it passed.
+ *
+ * ⚠ RUN IT POST-DEPLOY, NOT PRE-DEPLOY, and the reason is subtle enough to write down.
+ * This has two halves: a local render and a fetch of the live page. Run BEFORE deploying, those
+ * two halves are checking two DIFFERENT COMMITS — the local render is the new code (and only its
+ * empty-state branch, see below), while the live fetch certifies the previous deploy. A tag
+ * imbalance introduced into the lead/rail/sections template would pass both and ship: local never
+ * executes that template, and the live page is still the old one. That is the exact branch the
+ * 2026-09-12 header bug lived in. Run AFTER the build stamp has verified production is this
+ * commit and both halves describe the code in hand. (Overwatch, 2026-09-12; wired into the smoke
+ * block of deploy.sh, after the stamp check, not next to inline-js-check.)
+ *
+ * ⚠ api/daily-strike.js CANNOT BE LOADED LOCALLY WITHOUT THE TWO SHIMS BELOW. It uses `import` at
+ * the top, so Node auto-detects it as an ES module even though package.json is commonjs, and then
+ * calls require() and assigns module.exports at top level — both undefined in ESM scope. It only
+ * runs in production because Vercel's bundler rewrites it. Any future local test of this file (or
+ * of api/analyst-publish.js or api/subscribe.js, the other two hybrids — 3 of 81 files in api/)
+ * needs the same globalThis.require / globalThis.module shims, with the resolver based at api/.
  */
 const path = require('path');
 
