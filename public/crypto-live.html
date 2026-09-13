@@ -115,8 +115,15 @@ a{color:var(--cyan)}
 .lv-login h1{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:0 0 14px}
 .lv-login .accent{color:var(--cx)}
 .lv-login p{color:var(--txt2);line-height:1.6;margin:0 0 24px}
+  /* Bottom stop is violet-500, not violet-600. Dark text on a 180deg ramp never sits on
+     either STOP: these glyphs cover rows 13-30 of a 43px button, so they only ever see the
+     middle of the ramp, and measuring the endpoints answers a question nobody asked.
+     Measured on the rendered button, the worst row under the glyphs read 4.09:1 against
+     violet-600 - under the 4.5:1 AA wants at 14px. Darkening the text cannot fix it: pure
+     black tops out at 4.45:1 against that row, so the ramp is the only lever. #8b5cf6 puts
+     the worst row at 5.12:1. Same change, same reason, on .cx-install further down. */
 .lv-btn{display:inline-block;padding:12px 26px;border-radius:9px;border:0;
-  background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#120a24;font-weight:800;
+  background:linear-gradient(180deg,#a78bfa,#8b5cf6);color:#120a24;font-weight:800;
   font-size:14px;text-decoration:none}
 .lv-msg{margin-top:16px;font-size:12.5px;color:var(--red);min-height:18px}
 
@@ -584,8 +591,11 @@ tr:last-child td{border-bottom:none}
   /* Two pieces of fixed furniture that did not know about each other: measured 16x32px of
      overlap at 390px. Below 640px the install pill goes ABOVE the ask bubble instead of
      beside it, which is the only arrangement that fits. */
+  /* violet-500 bottom stop - same fix and same measurement as .lv-btn above. The glyphs
+     cover rows 9-24 of a 34px pill and never reach either stop. 4.11:1 -> 5.15:1 on the
+     rendered pill; even the pill's extreme bottom edge now clears AA at 4.60:1. */
   .cx-install{position:fixed;bottom:16px;left:16px;z-index:9998;border:none;cursor:pointer;
-    background:linear-gradient(180deg,#a78bfa,#7c3aed);color:#12091f;
+    background:linear-gradient(180deg,#a78bfa,#8b5cf6);color:#12091f;
     padding:11px 16px;border-radius:var(--r-2);font:700 12px/1 var(--sans);
     letter-spacing:.5px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
   .cx-install[hidden]{display:none}
