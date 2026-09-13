@@ -126,7 +126,11 @@ button { border: 0; }
   .lv-login p { color: var(--txt2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
   .lv-login form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .lv-login input { flex: 1; min-width: 220px; padding: 12px 14px; border-radius: 9px; border: 1px solid #2c2c30; background: #111113; color: #f0f0ee; font-size: 14px; }
-  .lv-login button { padding: 12px 22px; border-radius: 9px; border: 0; background: linear-gradient(180deg,#22d3ee,#3b82f6); color: #04121a; font-weight: 800; font-size: 14px; cursor: pointer; }
+  /* `.lv-login button` DELETED — it was a gradient-filled rounded pill (the box the ban is about,
+     minus its border) and it matched NOTHING: the panel's only CTA is the <a href="/portal"> below,
+     which already ships the correct treatment (no fill, no radius, no outline, cyan word). Verified
+     by rendering the signed-out state, not by grep; `#lmsg` only ever receives links. If a real
+     button is ever added here, style it like that anchor. */
   .lv-msg { font-size: 13px; min-height: 18px; margin-top: 14px; }
   /* topbar */
   .lv-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--bdr); padding: 4px 2px 14px; margin-bottom: 16px; }
@@ -351,9 +355,9 @@ which Jake explicitly carved out. */
   .dm-row.k-grav:before { background:#3b82f6; }
   .dm-row.k-pw:before   { background:#f43f5e; }
   .dm-row.is-spot { background:rgba(34,211,238,.10); border-color:rgba(34,211,238,.38); }
-  .dm-row.is-spot:before { background:#22d3ee; width:11px; height:11px; left:-16px; }
-  .dm-row.is-spot .dm-v { font-size:23px; color:#22d3ee; }
-  .dm-row.is-spot .dm-k { color:#22d3ee; }
+  .dm-row.is-spot:before { background:rgba(234,243,255,0.92); width:11px; height:11px; left:-16px; }
+  .dm-row.is-spot .dm-v { font-size:23px; color:rgba(234,243,255,0.92); }
+  .dm-row.is-spot .dm-k { color:rgba(234,243,255,0.92); }
   .dm-regime .rg-g { font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:var(--txt2); }
   /* 5 tiles in 2 columns orphaned the last one. Expected move spans the row instead — it has the
      longest subtitle, so it gains the room it was wrapping in, and no tile is left stranded. */
@@ -1808,7 +1812,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   (function(){
     var dp=null;
     function standalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
-    function pill(){var b=document.getElementById('novoInstall');if(b||standalone())return b;b=document.createElement('button');b.id='novoInstall';b.textContent='⤓  Install App';b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:linear-gradient(180deg,#22d3ee,#3b82f6);color:#04121a;border:none;padding:11px 16px;border-radius:9px;font:700 12px/1 var(--sans,system-ui);letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.5);display:none';b.onclick=async function(){if(!dp)return;dp.prompt();try{await dp.userChoice;}catch(e){}dp=null;b.style.display='none';};document.body.appendChild(b);return b;}
+    function pill(){var b=document.getElementById('novoInstall');if(b||standalone())return b;b=document.createElement('button');b.id='novoInstall';b.textContent='⤓  Install App';b.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;background:#17171a;color:#f0f0ee;border:none;padding:11px 16px;font:700 12px/1 var(--sans,system-ui);letter-spacing:.5px;cursor:pointer;display:none';b.onclick=async function(){if(!dp)return;dp.prompt();try{await dp.userChoice;}catch(e){}dp=null;b.style.display='none';};document.body.appendChild(b);return b;}
     window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;var b=pill();if(b&&!standalone())b.style.display='block';});
     window.addEventListener('appinstalled',function(){var b=document.getElementById('novoInstall');if(b)b.style.display='none';});
   })();
@@ -1826,7 +1830,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     function mkBtn(){
       if(document.getElementById('novoNotif'))return;
       var b=document.createElement('button');b.id='novoNotif';b.textContent='◉ Enable alerts';
-      b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#17171a;color:#f0f0ee;border:1px solid #22d3ee;border-radius:9px;padding:9px 14px;font:700 13px var(--sans,system-ui);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+      b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:9999;background:#17171a;color:#f0f0ee;border:0;padding:9px 14px;font:700 13px var(--sans,system-ui);cursor:pointer';
       b.onclick=async function(){b.disabled=true;b.textContent='Enabling…';var ok=await subscribe();if(ok){b.textContent='◉ Alerts on';setTimeout(function(){b.remove();},1800);}else{b.disabled=false;b.textContent='◉ Enable alerts';}};
       document.body.appendChild(b);
     }
@@ -2862,7 +2866,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     // reads as a reply to nothing: you cannot tell which chart you sent, or whether it sent at all.
     if (img){
       var im = document.createElement('img'); im.src = img; im.alt = 'image you sent';
-      im.style.cssText = 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;border:1px solid rgba(128,128,128,.35);cursor:zoom-in;';
+      im.style.cssText = 'display:block;margin:6px 0 0;max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in;';
       im.onclick = function(){ try { window.open(img, '_blank'); } catch(_){} };
       d.appendChild(im);
     }
@@ -2950,7 +2954,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
       if (!ys.length || ys.length !== xs.length || ys.length > 60) return null;
       for (var i = 0; i < ys.length; i++) if (!isFinite(ys[i])) return null;
       var wrap = document.createElement('div');
-      wrap.style.cssText = 'margin:10px 0;padding:10px 12px;border:1px solid rgba(128,128,128,.25);border-radius:10px;';
+      wrap.style.cssText = 'margin:10px 0;padding:10px 12px;border-top:1px solid rgba(128,128,128,.25);';
       if (spec.title){
         var t = document.createElement('div'); t.textContent = String(spec.title).slice(0, 80);
         t.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:.4px;opacity:.75;margin-bottom:6px;';
@@ -3170,7 +3174,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
     var ch = document.getElementById('novo-ask-imgchip');
     if (!ch){
       ch = document.createElement('div'); ch.id = 'novo-ask-imgchip';
-      ch.style.cssText = 'font-size:11px;padding:4px 9px;margin:5px 0 0;border:1px solid rgba(128,128,128,.4);border-radius:10px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;opacity:.9;';
+      ch.style.cssText = 'font-size:11px;padding:4px 9px;margin:5px 0 0;border:0;display:inline-flex;gap:8px;align-items:center;cursor:pointer;opacity:.9;';
       ch.title = 'remove the attached image';
       ch.onclick = clearAttach;
       qi.form.parentNode.insertBefore(ch, qi.form.nextSibling);
