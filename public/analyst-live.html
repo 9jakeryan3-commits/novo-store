@@ -103,7 +103,10 @@ button { border: 0; }
     --bdr2:  #242428;   /* card borders -- quieter than --bdr */
     --txt1:  #f0f0ee;   /* headline text */
     --txt2:  #a8a8a8;   /* body text */
-    --txt3:  #6e6e6e;   /* muted labels */
+    --txt3:  #8f8f8f;   /* muted labels. Was #6e6e6e = 3.70-3.90:1 on this page's three grounds,
+                            under the 4.5:1 AA bar for normal text, on 48 measured elements at 8-12px
+                            (no large-text allowance applies at those sizes). #8f8f8f measures
+                            5.83-6.15:1 and keeps txt1 > txt2 > txt3 intact. */
   }
   body {
   /* ⚠ TABULAR FIGURES ARE THE DEFAULT ON A DATA DASHBOARD, and this became load-bearing the
@@ -247,7 +250,7 @@ button { border: 0; }
     outline: 2px solid #22d3ee; outline-offset: 2px; border-radius: 8px; }
   .lv-card, .lv-tile, .dm-row { transition: border-color var(--dur-2) var(--ease),
     background-color var(--dur-2) var(--ease); }
-  .lv-live.closed { color: #6e6e6e; } .lv-live.closed .dot { background: #6e6e6e; box-shadow: none; animation: none; }
+  .lv-live.closed { color: var(--txt3); } .lv-live.closed .dot { background: var(--txt3); box-shadow: none; animation: none; }
   .lv-sess { color: var(--txt3); font-size: 12.5px; }
   /* Status sits on the right edge. It used to trail the wordmark on the left while the ticker tabs held
      the right side; once those were removed the row was brand-left / empty-right. Grouping the badge and
@@ -1278,7 +1281,10 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
       c.fillStyle=g.color; c.fillText(txt, plotL+5, ly);
     });
     // polarity labels
-    c.fillStyle='#6e6e6e'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
+    /* CANVAS TEXT IS INVISIBLE TO EVERY DOM CONTRAST TOOL — it is painted, not an element, so a
+       walker over getComputedStyle cannot see it and will report the page clean. Tracked to the
+       same value as --txt3 by hand for that reason. */
+    c.fillStyle='#8f8f8f'; c.font='9px sans-serif'; c.textAlign='left'; c.textBaseline='alphabetic';
     c.fillText('← net short gamma', plotL+2, H-4); c.textAlign='right'; c.fillText('net long gamma →', W-4, H-4);
   }
 
