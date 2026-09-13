@@ -58,6 +58,66 @@
     return w.fetch(url, o).finally(function () { w.clearTimeout(timer); });
   }
 
+  /* ⚠ novoFetch() ABOVE PROTECTS HEADERS ONLY, AND THAT IS DELIBERATE — BUT IT IS NOT ENOUGH FOR
+     A POLL. `.finally(clearTimeout)` runs when the FETCH promise settles, which is when headers
+     arrive. From that instant the request is unprotected, so `await r.json()` sits outside the
+     deadline and a body that stalls mid-stream still hangs forever. That is a CDN or proxy dying
+     mid-response, or a mobile connection dropping after the first packet — not an exotic case.
+
+     Junie caught this against a real server that writes 200, calls flushHeaders(), then never
+     sends a body. My own tests passed because my stub never resolved AT ALL — a headers stall —
+     so they could not see the half of the deadline that was missing. A test that cannot produce
+     the defect cannot find it.
+
+     ⚠ SO WHY NOT JUST MOVE THE clearTimeout? Because /api/analyst-ask is a STREAMING SSE POST
+     that reads its body incrementally for as long as the answer takes. A deadline armed through
+     the body would abort every long chat answer mid-stream. Headers-only is CORRECT for that
+     call and wrong for a poll that reads to completion. Hence two deadlines with different
+     names, rather than one that is subtly wrong for somebody. */
+  /* ⚠ THIS IS _tfetch's SHAPE, DELIBERATELY AND ALMOST VERBATIM. My first version invented a
+     fresh one — `.finally(clearTimeout)` on the fetch promise plus `res.json()` — which is
+     EXACTLY the pre-419f81c2c trader code, i.e. the bug Jake reported on 2026-09-02:
+
+         "it freezes after its been minimized then reopened. this cant happen"
+
+     live price, dead candles, a stuck "slow connection — retrying" veil, 18 minutes after a
+     restore. A minimised window's resumed connection stalls mid-BODY; the headers had long since
+     landed, so the timer was already cleared and `await r.json()` hung forever.
+
+     Junie caught that I was about to consolidate three wrappers onto a regression. Both existing
+     wrappers had independently converged on drain-the-body-inside-the-deadline, and `_tfetch`
+     carries a fourteen-line post-mortem explaining why. **It was worth reading before rewriting.**
+
+     Two properties here are load-bearing and neither is obvious:
+       - r.text() then JSON.parse, not r.json(): the body is fully drained INSIDE the deadline and
+         the timer clears only once it is in hand.
+       - the {ok,status,headers,json()} shim, with headers exposed on 2026-09-04 because the pull
+         path reads X-Novo-As-Of. Omitting it silently gave the wrapper no .headers, the read threw,
+         and the caller fell back to the engine on EVERY poll — "a pull architecture that never
+         actually pulled." Returning a real Response instead would cost trader and crypto a
+         property they were bug-fixed into having.
+
+     Keeping the shape identical is also what lets trader and crypto migrate with zero call-site
+     changes, which is the whole point of consolidating. */
+  novoFetch.json = function (url, opts, ms) {
+    var ac = new w.AbortController();
+    var limit = (typeof ms === 'number' && ms > 0) ? ms : DEFAULT_MS;
+    var timer = w.setTimeout(function () { try { ac.abort(); } catch (_) {} }, limit);
+    var clr = function () { if (timer) { w.clearTimeout(timer); timer = null; } };
+    var o = { cache: 'no-store' };
+    if (opts) for (var k in opts) if (Object.prototype.hasOwnProperty.call(opts, k)) o[k] = opts[k];
+    o.signal = ac.signal;
+    return w.fetch(url, o).then(function (r) {
+      return r.text().then(function (t) {
+        clr();
+        return {
+          ok: r.ok, status: r.status, headers: r.headers,
+          json: function () { return JSON.parse(t); }
+        };
+      }, function (e) { clr(); throw e; });
+    }, function (e) { clr(); throw e; });
+  };
+
   novoFetch.timedOut = timedOut;
   novoFetch.DEFAULT_MS = DEFAULT_MS;
   w.NovoFetch = novoFetch;

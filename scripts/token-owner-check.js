@@ -55,7 +55,7 @@ if (process.argv.includes('--self-test')) {
     ["/* we used to call removeItem('novo_live_t') here */", 0, 'IN A COMMENT -- must not fire'],
     ["// removeItem('novo_live_t')", 0, 'line comment -- must not fire'],
     ["localStorage.getItem('novo_live_t')", 0, 'reading is allowed'],
-    ['NovoToken.clearIfExpired()', 0, 'the sanctioned path'],
+    ['NovoToken.onAuthFailure()', 0, 'the sanctioned path'],
   ];
   let bad = 0;
   for (const [src, want, why] of cases) {
@@ -83,7 +83,7 @@ if (offenders.length) {
   console.error('   That key is shared by all three dashboards. A spurious 401 -- a rotated');
   console.error('   ANALYST_LIVE_SECRET -- hits every endpoint at once, so one tab wipes the');
   console.error('   credential for the rest and the member cannot retry.');
-  console.error('   Use NovoToken.clearIfExpired(), which clears only when the token itself says so.');
+  console.error('   Use NovoToken.onAuthFailure(), which clears only when the token itself says so.');
   process.exit(1);
 }
 console.log('OK  ' + KEY + ' is deleted only by ' + OWNER);
