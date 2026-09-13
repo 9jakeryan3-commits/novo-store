@@ -318,6 +318,16 @@ button { border: 0; }
      near-identical greens today and that is fine — the point is that they can move apart
      without tearing each other out. --cyn stays for the chart's FLIP level, where cyan is the
      swatch-to-line mapping and carries information, not decoration. */
+  /* FOCUS IS SYSTEM AFFORDANCE, NOT PRODUCT IDENTITY (2026-09-12). The ring was
+     var(--cyn) — the Analyst's colour — on the Trader's page, which read as the same
+     borrowed-lane defect as the desk rail. It is not. A focus ring tells the reader "the
+     keyboard is here", and that means the same thing on all three dashboards, so ONE focus
+     colour across them is correct and product-tracking it would make focus less informative.
+     The fix is the name, not the hex: --focus is the same pixels as --cyn today, but focus no
+     longer moves by accident if the Analyst's cyan is ever retuned. Same split as --trd/--grn.
+     Changing the HUE is a separate, measured piece of work: WCAG 2.2 focus-appearance wants
+     3:1 against every adjacent surface, not one. */
+  --focus: #22d3ee;
   --trd:   #34d399;
   --cyn:   #22d3ee;
   --blu-d: rgba(168,174,187,.12);
@@ -688,16 +698,22 @@ body {
    opposite things: you could not tell an empty off-hours field from a dashboard that had not answered
    yet. Until real values arrive every slot shimmers; after that a dash means genuinely absent. */
 @keyframes novoskel { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
-body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .tb-px, body.skel .tb-chg {
+/* .ov-px/.ov-chg, NOT .tb-px/.tb-chg. The price classes were renamed when the readout moved
+   into the chart overlay and this rule was not followed across, so the skeleton stopped
+   covering the one number it most needs to cover: on a slow load the price showed a bare
+   em-dash instead of a shimmer. Both commits that caused it were individually correct —
+   the defect lived in the edge between them, which is why an orphan sweep found it and no
+   diff could have. */
+body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .ov-px, body.skel .ov-chg {
   color: transparent !important;
   background-image: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.10) 37%, rgba(255,255,255,.04) 63%);
   background-size: 400% 100%;
   animation: novoskel 1.4s var(--ease) infinite;
   border-radius: 5px; display: inline-block; min-width: 58px;
 }
-body.skel .tb-px { min-width: 92px; }
+body.skel .ov-px { min-width: 92px; }
 @media (prefers-reduced-motion: reduce){
-  body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .tb-px, body.skel .tb-chg {
+  body.skel .dv, body.skel .bar-val, body.skel .kpi-v, body.skel .ov-px, body.skel .ov-chg {
     animation: none !important; }
 }
 .nvf-dn { animation: novoflash-dn .55s var(--ease); border-radius: 4px; }
@@ -708,7 +724,7 @@ button, .cmd-btn, .cmd-links a, .tab, .lv-mini { transition: background-color va
   border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease); }
 button:active, .cmd-btn:active, .cmd-links a:active { transform: translateY(1px); }
 button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
-  outline: 2px solid var(--cyn, #22d3ee); outline-offset: 2px; border-radius: 8px; }
+  outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
 
 @media (prefers-reduced-motion: reduce){
   /* The flash degrades to a static tint rather than disappearing — someone who asked the OS to stop
@@ -797,7 +813,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   background: currentColor;  }
 
 
-.spy-hero-tkr { font-family: var(--font); font-size: 15px; font-weight: 900; letter-spacing: 2px; color: var(--txt1); }
 /* The ticker switcher. Same type as the old static ticker text so the hero reads the same at rest;
    the selected pill is bright with a cyan underline, the other two are muted but obviously clickable. */
 .tkr-pills { display: flex; gap: 4px; }
@@ -1104,8 +1119,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 #card-read { display: none; }
 .spy-hero-sub { font-family: var(--sans); font-size: 8px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--txt4, #555); }
 
-.spy-hero-px { font-family: var(--font); font-size: 21px; font-weight: 700; letter-spacing: -.6px; line-height: 1; color: var(--txt1); }
-.spy-hero-chg { font-family: var(--font); font-size: 11px; font-weight: 600; color: var(--txt3); }
 
 /* color helpers */
 .cblue  { color: var(--txt1) !important; }
@@ -1130,7 +1143,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
   padding: 4px 7px; width: 100%; border-radius: 6px;
   transition: border-color .15s, box-shadow .15s;
 }
-.inp:focus { outline: none; border-color: var(--cyn);  }
+.inp:focus { outline: none; border-color: var(--focus);  }
 input.inp[type=number] { -moz-appearance: textfield; appearance: textfield; }
 input.inp[type=number]::-webkit-outer-spin-button,
 input.inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -2231,9 +2244,6 @@ tbody tr:hover td { background: rgba(168,174,187,.05); }
      gets the height (it shares row 1 with the P&L chart, so the only way to make JUST the
      SPY chart taller is to give back its own card's chrome). */
 
-  #card-spy .spy-hero-px { font-size: 19px; line-height: 1.1; }
-  #card-spy .spy-hero-chg { font-size: 10.5px; }
-  #card-spy .spy-hero-tkr { font-size: 13px; }
   #card-spy .tkr-pill { font-size: 12px; padding: 2px 6px 3px; letter-spacing: 1px; }
   #card-spy > div[style*="margin:8px"] { margin: 4px 12px 4px !important; }
   #card-spy #novo-chart-legend { padding: 4px 2px 0 !important; }
