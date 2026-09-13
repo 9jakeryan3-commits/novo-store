@@ -98,7 +98,18 @@
          property they were bug-fixed into having.
 
      Keeping the shape identical is also what lets trader and crypto migrate with zero call-site
-     changes, which is the whole point of consolidating. */
+     changes, which is the whole point of consolidating.
+
+     ⚠ ARGUMENT ORDER IS A TRAP WHEN PORTING A TWO-ARG WRAPPER. This takes the deadline THIRD:
+
+         NovoFetch.json(url, opts, ms)      <- here
+         _cmFetch(url, ms)                  <- crypto's, deadline SECOND
+         _tfetch(u, ms, init)               <- trader's, deadline SECOND
+
+     Passing `ms` straight through from either hands it in as `opts` and silently falls back to
+     the 12s default — no error, no warning, just a shorter deadline than the caller wanted. On a
+     map payload that is a timeout the porter never asked for and will not see in a diff. Found by
+     Temi while migrating _cmFetch. Check the slot, not the count. */
   novoFetch.json = function (url, opts, ms) {
     var ac = new w.AbortController();
     var limit = (typeof ms === 'number' && ms > 0) ? ms : DEFAULT_MS;
