@@ -278,12 +278,25 @@ smoke "https://novo-options.trade/analyst"          5000
 smoke "https://novo-options.trade/crypto"           5000
 smoke "https://novo-options.trade/track-record"     5000
 smoke "https://novo-options.trade/api/track-record" 200  '"ok"'
+# /daily-strike is server-rendered, so smoke() cannot judge it: on 09-12 it shipped with <head>
+# opened and never closed and answered 200 with a full-size body. This asserts document STRUCTURE
+# -- doctype, head closed, body, tag balance -- on the rendered string.
+#
+# ⚠ IT RUNS HERE, POST-DEPLOY, AND THE POSITION IS THE POINT. Run before deploying, it renders the
+# NEW code locally (which without KV creds takes the empty-state branch only) and then fetches the
+# OLD code's full page -- so a tag imbalance introduced into the lead/rail/sections template passes
+# every control and ships. Run after, both halves are this commit: local covers the empty-state
+# branch, the live fetch covers the full one. Same reason the rest of the smoke lives down here.
+if ! node scripts/check-daily-strike.js; then
+  SMOKE_FAIL="${SMOKE_FAIL}
+!!   /daily-strike rendered a malformed document -- see the structural findings above"
+fi
 if [ -n "$SMOKE_FAIL" ]; then
   echo "!! DEPLOY LANDED ($LOCAL) BUT SMOKE FAILED:$SMOKE_FAIL"
   echo "!! the alias is already serving this commit -- fix forward or revert; re-running deploy changes nothing"
   exit 1
 fi
-echo "OK  smoke: 7/7 surfaces answering with real bodies"
+echo "OK  smoke: 7/7 surfaces answering with real bodies + /daily-strike structurally whole"
 
 # -- IndexNow -----------------------------------------------------------------
 # Tell Bing/Yandex/Seznam/Naver what changed. Best effort, and deliberately AFTER the
