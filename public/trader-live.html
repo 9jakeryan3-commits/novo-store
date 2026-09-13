@@ -40,10 +40,10 @@
   var qs = new URLSearchParams(location.search);
   var TOKEN = qs.get('t');
   if (TOKEN) {
-    NovoToken.set(TOKEN);
+    if (window.NovoToken) NovoToken.set(TOKEN);   // absent module handled at the handshake
     history.replaceState(null, '', '/trader/live' + (location.hash || ''));
   }
-  if (!TOKEN) { TOKEN = NovoToken.get(); }
+  if (!TOKEN) { TOKEN = window.NovoToken ? NovoToken.get() : null; }
 
   window.NOVO_API = '';
   window.NOVO_WS = '';
@@ -104,6 +104,25 @@
      subscription is live that they never had access. Measured 628ms -> 5522ms, 2026-09-08. */
   var _sessionExpired = false;
   window.novoHandshake = async function(){
+    /* ⚠ THE MODULE IS A HARD DEPENDENCY AND ITS ABSENCE USED TO BE SILENT AND TOTAL. If
+       /js/novo-token.js does not load — a deploy that ships this file before the module, a CDN
+       blip, a bad ?v= hash — then NovoToken is undefined, the capture block above throws a
+       ReferenceError, and everything after it in that script never runs. Measured by serving the
+       module as a 404: ReferenceError at +0.4s, a cascading "NOVO_WS is not defined" at +0.6s,
+       the skeleton shimmering at 3s / 8s / 14s / 22s, price stuck on an em-dash, AND NO GATE AT
+       ALL. A member saw a dashboard that looked like it was loading, forever.
+
+       That is the same silent-failure class as the stalled handshake fixed just above it, so it
+       gets the same answer: say something true and actionable. Deliberately NOT a localStorage
+       fallback — the reason this module exists is that token policy in the host is what let one
+       dashboard delete a credential the other two shared, and re-adding a host-side copy to
+       survive a missing module would rebuild the bug to protect against a deploy error. */
+    if (!window.NovoToken) {
+      gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Something didn\u2019t load</div>'
+         + '<div style="opacity:.75;max-width:34ch;margin:0 auto">Reload the page. Your sign-in is '
+         + 'unaffected.</div></div>');
+      return false;
+    }
     if (!TOKEN) {
       if (_sessionExpired) return false;   // the specific message is already on screen
       gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Sign in to open the Trader dashboard</div>'
