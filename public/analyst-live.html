@@ -1236,7 +1236,12 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      chart, not by their own carelessness — so only one is ever drawn, and it says what it is. */
   var PROF_SERIES = [
     { k:'g', label:'GAMMA',  unit:'dealer gamma, $ per 1% move' },
-    { k:'d', label:'DELTA',  unit:'dealer delta, shares' },
+    /* NOT "dealer delta". Gamma, vanna and charm are dealer-signed (+calls / -puts, the net-GEX
+       convention). Delta is NOT: the chain's delta already carries its own sign, so the engine
+       sums it raw, and calculate_greek_exposure calls the result "the book's aggregate directional
+       exposure" -- open interest, not the dealer side of it. Labelling it dealer delta would tell
+       a member they are looking at dealer positioning when they are looking at the whole book. */
+    { k:'d', label:'DELTA',  unit:'net delta of open interest, shares — not dealer-signed' },
     { k:'v', label:'VANNA',  unit:'dealer vanna, $ per vol point' },
     { k:'c', label:'CHARM',  unit:'dealer charm, $ of delta per day' }
   ];
