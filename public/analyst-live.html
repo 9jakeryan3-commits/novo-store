@@ -1854,8 +1854,15 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
      Deliberately NOT a localStorage fallback. The reason this module exists is that token policy
      living in the host is what let one dashboard delete a credential the other two shared;
      re-adding a host-side copy to survive a missing module would rebuild that bug in order to
-     protect against a deploy error. Fail loudly instead of degrading into the thing we removed. */
-  if (!window.NovoToken) {
+     protect against a deploy error. Fail loudly instead of degrading into the thing we removed.
+
+     BOTH modules, not just the token one. Measured 2026-09-12 with novo-fetch.js withheld and
+     novo-token.js served: nothing throws, because every NovoFetch call sits inside a try — so the
+     page degraded to the login gate with an EMPTY message, which reads as "you are signed out"
+     to a member whose credential is perfectly fine. Zero uncaught exceptions the whole time.
+     A reference inside a function is not safe just because it cannot crash the page; it can still
+     produce a silent lie. Temi's finding, on the crypto map. */
+  if (!window.NovoToken || !window.NovoFetch) {
     _neverBlank('Something didn’t load. Reload the page — your sign-in is unaffected.');
     return;
   }
