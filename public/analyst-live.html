@@ -901,8 +901,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   var TOKEN = null, STATE = null, CUR = tickFromHash() || tickStored() || "SPY";
   var qs = new URLSearchParams(location.search);
   // token from URL (magic link) → persist; else from storage
-  if (qs.get('t')) { TOKEN = qs.get('t'); NovoToken.set(TOKEN); history.replaceState(null,'', '/analyst/live' + (location.hash || '')); }
-  if (!TOKEN) { TOKEN = NovoToken.get(); }
+  if (qs.get('t')) { TOKEN = qs.get('t'); if (window.NovoToken) NovoToken.set(TOKEN); history.replaceState(null,'', '/analyst/live' + (location.hash || '')); }
+  if (!TOKEN) { TOKEN = window.NovoToken ? NovoToken.get() : null; }
   var $ = function(id){ return document.getElementById(id); };
   var _escH = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   function showLogin(){ $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); }
@@ -1811,7 +1811,8 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
            still valid, and out of the other two dashboards too, since all three share this key.
            The payload carries its own expiry and is readable without the secret, so the client can
            tell: only a genuinely expired token is destroyed. */
-        if (NovoToken.onAuthFailure(TOKEN) === 'expired') {
+        var _verdict = window.NovoToken ? NovoToken.onAuthFailure(TOKEN) : 'transient';
+        if (_verdict === 'expired') {
           TOKEN = null; _everShown = false;
           _neverBlank('That session expired. Sign in again to pick up where you left off.');
         } else {
@@ -1841,6 +1842,23 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
     else if(TOKEN){ startPolling(); }   // back to visible → resume + an immediate refresh
   });
 
+  /* ⚠ THE MODULE IS A HARD DEPENDENCY AND ITS ABSENCE USED TO BE SILENT AND TOTAL. If
+     /js/novo-token.js does not load — this file deployed ahead of the module, a CDN blip, a bad
+     ?v= hash — then NovoToken is undefined and the capture block near the top throws a
+     ReferenceError, killing everything after it in that script. A blocking tag in <head> does not
+     protect against this: a 404 does not stop parsing, it just leaves the global undefined.
+     Measured on this page by serving the module as a 404: ReferenceError, NEITHER the login nor
+     the dashboard shown, a skeleton still shimmering, 139 characters of visible text and no
+     message of any kind. A member saw a page that looked like it was loading, forever.
+
+     Deliberately NOT a localStorage fallback. The reason this module exists is that token policy
+     living in the host is what let one dashboard delete a credential the other two shared;
+     re-adding a host-side copy to survive a missing module would rebuild that bug in order to
+     protect against a deploy error. Fail loudly instead of degrading into the thing we removed. */
+  if (!window.NovoToken) {
+    _neverBlank('Something didn’t load. Reload the page — your sign-in is unaffected.');
+    return;
+  }
   if (!TOKEN) showLogin(); else { startPolling(); }
 })();
 </script>
@@ -1859,7 +1877,7 @@ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window
   // Enable-alerts button — signed-in members only; stays hidden until Web Push is configured server-side (VAPID).
   (function(){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)) return;
-    function tok(){ return NovoToken.get() || ''; }
+    function tok(){ return (window.NovoToken ? NovoToken.get() : null) || ''; }
     /* ⚠ ONE VAPID FLOW, AND IT IS NOT HERE ANY MORE. The subscribe path moved to
        /js/novo-push.js so the crypto and trader dashboards use the same one — Jake, 2026-09-07:
        "analyst has the VAPID keys and technique to do it in all 3". These stay as thin delegates
@@ -3448,7 +3466,7 @@ body[data-mtab="map"]  #dash > .lv-afeed { display: none; }
   // storage key it persists to instead, which is what the push-notification code already does.
   function tok(){
     try { var u = new URLSearchParams(location.search).get('t'); if (u) return u; } catch(_){}
-    return NovoToken.get() || '';
+    return (window.NovoToken ? NovoToken.get() : null) || '';
   }
   window.novoAsk = async function(q, opts){
     q = (q||'').trim(); if (!q || busy) return;
