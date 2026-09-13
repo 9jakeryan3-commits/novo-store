@@ -13,6 +13,17 @@ function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
 gtag('js',new Date());gtag('config','G-4EMKLHBB6F');})();
 </script>
 <meta charset="utf-8">
+<!-- THE OWNER OF THE SESSION CREDENTIAL, loaded blocking and early on purpose. novo_live_t is
+     ONE localStorage key shared by all three dashboards, so the decision about whether a 401
+     destroys it cannot live in three places - it already did, and all three got it wrong the
+     same way. My own fix went to this file alone and achieved nothing: the bug still fired
+     from analyst and trader, which delete the same key, and now it LOOKED addressed. Placed
+     with the other modules at ~1200 this would load after the auth block has already run. -->
+<!-- ?v=1 is REQUIRED on a new ref, not decoration: scripts/stamp-assets.js exits 1 on any
+     unversioned /js or /css reference, because they are served immutable for a year and a
+     bare ref means no future edit to this module ever reaches a returning visitor. The
+     stamper maintains the content hash from here on. -->
+<script src="/js/novo-token.js?v=1"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link rel="manifest" href="/crypto-live.webmanifest">
 <title>Crypto Market Map · NoVo</title>
@@ -3199,18 +3210,6 @@ async function load(){
   try { return await _loadInner(_mine); }
   finally { _cmBusy = false; }
 }
-/* The comp-seat token is base64url(JSON).hmac — the payload is plain JSON carrying the expiry
-   `x`, readable here with no secret at all, because the signature exists to stop forgery, not to
-   hide the contents. Returns null if it cannot be read, which callers must treat as "assume
-   spent" rather than "assume valid". */
-function _tokExp(t){
-  try{
-    var p = String(t||'').split('.')[0].replace(/-/g,'+').replace(/_/g,'/');
-    while(p.length % 4) p += '=';
-    var o = JSON.parse(atob(p));
-    return (o && typeof o.x === 'number') ? o.x : null;
-  }catch(_){ return null; }
-}
 async function _loadInner(_mine){
   if(!TOKEN){ showLogin(); return; }
   /* SHOW THE SHELL WHILE THE FIRST PAYLOAD IS IN FLIGHT. _cmFetch allows 20s, and until this
@@ -3247,9 +3246,17 @@ async function _loadInner(_mine){
        secret self-heals instead of stranding a paying member who must fetch a fresh link. If `x`
        HAS passed the old behaviour is correct and untouched — that is a real expiry, the message
        is accurate, and clearing it is right. */
-    var _x = _tokExp(TOKEN);
-    if(_x === null || _x <= Date.now()){
-      try{ localStorage.removeItem('novo_live_t'); }catch(_){}
+    /* The POLICY lives in novo-token.js, not here. This file used to own an identical copy of it,
+       which is how three dashboards ended up with three subtly different ideas of "expired" - and
+       the one place they agreed was the bug. onAuthFailure() clears the key itself when the verdict
+       is 'expired', so there is no removeItem in this file any more; scripts/token-owner-check.js
+       enforces that and names any file that reaches for the key directly.
+       If the module is somehow absent, treat it as transient and keep the credential. That is NOT
+       the module's "unreadable counts as expired" rule reversed - that rule is about a token that
+       can never start working, whereas a missing MODULE says nothing about the token, and a reload
+       fetches it again. Keeping is recoverable; clearing is not. */
+    var _verdict = (window.NovoToken ? NovoToken.onAuthFailure(TOKEN) : 'transient');
+    if(_verdict === 'expired'){
       TOKEN=null; showLogin('That session expired. Sign in again from the member portal.'); return;
     }
     if(_mapShown){ _mapDegrade('401 with an unexpired token - signing secret, not the session'); return; }
@@ -3797,8 +3804,8 @@ window.addEventListener('hashchange', function(){
     if (!u || !u.cta || !u.cta.href) return null;
     var box = document.createElement('div');
     box.className = 'novo-upsell';
-    box.style.cssText = 'margin:9px 0 3px;padding:12px 14px;border:1px solid rgba(34,211,238,.42);'
-      + 'border-radius:12px;background:linear-gradient(180deg,rgba(34,211,238,.075),rgba(34,211,238,.02));';
+    box.style.cssText = 'margin:9px 0 3px;padding:12px 14px;border-top:1px solid rgba(34,211,238,.42);'
+      + '';
 
     function line(txt, css){
       var e = document.createElement('div');

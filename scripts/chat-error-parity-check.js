@@ -80,8 +80,23 @@ T.push(['every chat runtime style exists in crypto-live.html', () =>
   TRADER.every((s) => IN_CRYPTO.has(s))]);
 /* The standing rule is hairlines only — a single-side separator stays, a four-sided box does not.
    `border:` with a width sets all four; `border-top:` and `border:0` are fine. */
-T.push(['no chat runtime style builds a four-sided box', () =>
-  TRADER.every((s) => !/(^|;)\s*border\s*:\s*[^;0]/.test(s))]);
+/* ⚠ THIS ASSERTION USED TO READ `TRADER.every(...)` — it checked ONE of the three copies and
+   assumed the other two, which is the exact defect this whole file exists to catch. Proven blind
+   2026-09-12: a four-sided box injected into crypto-live.html ONLY passed the suite clean, because
+   the box check read novo-chat.js and the parity check is one-directional (trader -> others), so a
+   style existing only in an HTML copy was invisible to both. It found the real one the moment it
+   was widened: the chat's upsell card, crypto-only, a four-sided border plus a 12px radius plus a
+   gradient fill — a box AND a filled CTA, against two standing rules, unseen by a guard I had just
+   shipped and sabotage-tested three ways.
+
+   ⚠ AND THE REGEX HAD A FALSE POSITIVE: /border\s*:\s*[^;0]/ matches `border:none`, which is the
+   OPPOSITE of a box. It flagged analyst-live's `border:none` CTA while missing crypto's real one —
+   wrong in both directions at once. `none` and `0` are both exempt now. */
+const FOUR_SIDED = /(^|;)\s*border\s*:\s*(?!\s*(none|0)\b)[^;]/i;
+const ALL_STYLES = FILES.flatMap((f) => styles(f));
+T.push(['no chat runtime style builds a four-sided box, IN ANY COPY', () =>
+  ALL_STYLES.every((s) => !FOUR_SIDED.test(s))]);
+T.push(['border:none is not mistaken for a box', () => !FOUR_SIDED.test('background:none;border:none;padding:4px')]);
 
 /* ── THE ACCENT CONTRACT ───────────────────────────────────────────────────────────────────────
    green = Trader, cyan = Analyst, violet = Crypto Map. Those three MEAN a product, so a chat
