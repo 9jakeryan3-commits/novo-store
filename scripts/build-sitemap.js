@@ -159,6 +159,12 @@ for (const abs of walk(PUB)) {
 for (const r of vercel.rewrites || []) {
   if (typeof r.destination !== 'string') continue;
   if (/[(:*?]/.test(r.source)) continue;
+  // ⚠ A FEED IS NOT A PAGE. The literal rewrites include /daily-strike/feed.xml, which is RSS -
+  // nothing a reader lands on. It was being listed here as a page, and because the search index
+  // is built FROM this sitemap, the index then held an RSS document as a searchable result,
+  // titled "Not found — The Daily Strike". Sitemaps list pages; feeds are discovered from the
+  // <link rel="alternate"> in the head.
+  if (/\.(xml|json|txt)$/i.test(r.source)) continue;
   if (!r.destination.startsWith('/api/')) continue;
   if (redirects.has(r.source) || entries.has(r.source)) continue;
   const apiFile = 'api/' + r.destination.split('?')[0].replace(/^\/api\//, '') + '.js';
@@ -173,6 +179,53 @@ for (const r of vercel.rewrites || []) {
 // So ask the hub what it links to. Best-effort by design: a failed fetch logs and leaves the
 // rest of the sitemap intact, because losing the whole file over one HTTP error is far worse
 // than shipping without the archive for one build.
+/* THE DAILY STRIKE STORIES have the same problem as the archive detail pages, from the other
+   direction: /daily-strike/:slug is a PARAMETERISED rewrite, so the loop above skips it, and the
+   stories are rendered from KV rather than files, so walking public/ cannot see them either.
+   The result was a live news section whose articles existed, were linked from its own front page,
+   and appeared in NOWHERE this build produces — not the sitemap, and therefore not the search
+   index, which is built from it. Measured on a real story before this change:
+
+     live page 200 · in news-sitemap.xml yes · in sitemap.xml NO · in search index NO
+
+   So Google News could find our stories and our own site search could not, on a section that
+   publishes several pieces a day and grows daily.
+
+   The stories ARE already enumerated correctly, by api/daily-strike.js, at /news-sitemap.xml.
+   Harvesting that is better than re-deriving the list: one source of truth, and it carries each
+   story's own publication date, so lastmod means what it should rather than "the day we built".
+   Same failure posture as the archive harvest below — a partial list beats no list, and an
+   unreachable source warns instead of emptying the sitemap. */
+const strikeUrls = (() => {
+  const src = process.env.NOVO_STORE_URL || ORIGIN;
+  const out = [];
+  try {
+    const xml = execSync(
+      'curl -sS --max-time 25 -A novo-build ' + JSON.stringify(src + '/news-sitemap.xml'),
+      { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }
+    );
+    const re = /<loc>\s*(?:https?:\/\/[^<\/]+)?(\/daily-strike\/[A-Za-z0-9._-]+)\s*<\/loc>/g;
+    let m;
+    const seen = new Set();
+    while ((m = re.exec(xml))) {
+      if (/\.(xml|json)$/i.test(m[1]) || seen.has(m[1])) continue;
+      seen.add(m[1]);
+      // the slug leads with the publication date, the same convention the desk notes use
+      const d = m[1].match(/\/(\d{4}-\d{2}-\d{2})-/);
+      out.push([m[1], d ? d[1] : today]);
+    }
+    if (out.length) console.log('  daily strike: ' + out.length + ' stories');
+    else console.warn('  ! news-sitemap.xml reachable but listed no stories');
+  } catch (e) {
+    console.warn('  ! daily strike stories NOT added (' + e.message.split('\n')[0] + ')');
+  }
+  return out;
+})();
+for (const [u, lm] of strikeUrls) {
+  if (redirects.has(u) || entries.has(u)) continue;
+  entries.set(u, { lastmod: lm, priority: '0.6' });
+}
+
 const archiveUrls = (() => {
   const src = process.env.NOVO_STORE_URL || ORIGIN;
   const get = (u) => execSync(

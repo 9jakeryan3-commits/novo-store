@@ -991,9 +991,29 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://novo-options.trade/daily-strike/feed.xml</loc>
-    <lastmod>2026-09-13</lastmod>
-    <priority>0.7</priority>
+    <loc>https://novo-options.trade/daily-strike/2026-09-12-hot-cpi-pushes-rate-hike-fears-as-spy-clings-to-long-gamma</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/daily-strike/2026-09-12-hotter-inflation-and-war-headlines-cross-a-quiet-crypto-tape</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/daily-strike/2026-09-12-oracle-s-print-passes-as-spy-and-qqq-edge-above-flip-lines</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/daily-strike/2026-09-12-spy-holds-764-17-gamma-flip-as-hot-cpi-pushes-rate-hike-odds</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://novo-options.trade/daily-strike/2026-09-12-spy-holds-flip-at-764-17-as-inflation-data-drives-late-volatility</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://novo-options.trade/developers</loc>
@@ -7514,11 +7534,6 @@
     <loc>https://novo-options.trade/market-holidays</loc>
     <lastmod>2026-09-12</lastmod>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://novo-options.trade/news-sitemap.xml</loc>
-    <lastmod>2026-09-13</lastmod>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://novo-options.trade/options-101</loc>
