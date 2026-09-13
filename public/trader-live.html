@@ -5290,6 +5290,49 @@ document.addEventListener('click', function(ev){
   }catch(_e){}
 });
 
+/* KEYBOARD OPERABILITY FOR THE SAME CONTROLS (2026-09-12). Every one of them is a
+   <span role="button" tabindex="0">, so it takes Tab focus and a screen reader announces it as a
+   button — but a span does NOT synthesise a click from Enter or Space the way a real <button>
+   does. Only the click listener above existed, so all three were focusable and inert: reachable
+   by keyboard, announced as actionable, and doing nothing when actioned. That is worse than not
+   being focusable at all, because it invites the press and then swallows it.
+
+   Measured before fixing (focus, press, read state) with a real <button> in the footer as a
+   positive control:
+     legend row  focusable ok, ENTER no-op, SPACE no-op
+     chevron     focusable ok, ENTER no-op
+     CONTROL     real <button> ENTER moved the timeframe 1 -> 1w
+
+   This dispatches a click rather than re-implementing either action, so the keyboard and the
+   mouse can never drift apart — the handler above stays the single implementation. Space needs
+   preventDefault or it scrolls the page under the chart. */
+document.addEventListener('keydown', function(ev){
+  try{
+    if(ev.key !== 'Enter' && ev.key !== ' ' && ev.key !== 'Spacebar') return;
+    if(ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    var t = ev.target && ev.target.closest
+          && ev.target.closest('#lg-chev, #chart-legend3 [data-tog]');
+    if(!t) return;
+    ev.preventDefault(); ev.stopPropagation();
+
+    /* ⚠ AND PUT THE FOCUS BACK. Activating either control re-renders the legend, which destroys
+       the very element that was focused — measured: document.activeElement was BODY immediately
+       after the press. So a keyboard user could toggle ONE indicator and was then dumped to the
+       top of the page, unable to reach the next row without tabbing the whole way back. Enter
+       working and focus surviving are two different fixes; the first is useless without the
+       second.
+       Re-query by identity rather than holding the old node, because the node is gone. Mouse
+       users are unaffected either way: the page rings on :focus-visible, so a restored focus
+       after a click draws nothing. */
+    var again = t.id ? ('#' + t.id)
+              : ('#chart-legend3 [data-tog="' + t.getAttribute('data-tog') + '"]');
+    t.click();
+    setTimeout(function(){
+      try{ var n = document.querySelector(again); if(n) n.focus(); }catch(_e){}
+    }, 0);
+  }catch(_e){}
+});
+
 /* ── RANGE SELECTOR (Jake, 2026-09-12: "Bottom-left: a time range selector") ────────────────
    Separate from the INTERVAL buttons and deliberately so: interval is the bar size, range is how
    much of it you are looking at. TradingView keeps them apart for the same reason and a scalper
