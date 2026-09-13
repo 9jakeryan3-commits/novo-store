@@ -73,6 +73,29 @@
   }
 
   var _authRetryTimer = null;   // the transient-401 retry; ONE timer, cleared before set
+
+  /* A HANDSHAKE THAT FAILS WITHOUT A STATUS CODE USED TO SAY NOTHING AT ALL. Both silent exits
+     below — `if (!r.ok) return false` and the catch — returned into DOMContentLoaded, which only
+     starts the page on true. So a stalled API left the member looking at an empty frame forever:
+     Temi measured 892 chars at 6s and the same 892 at 22s, no message ever, despite this file
+     having deadlines on everything. The deadline fired correctly; nothing was listening.
+
+     ⚠ IT MUST NOT SPEAK WHEN THE PAGE IS ALREADY LIVE. novoHandshake is also called by
+     novoReauth long after first paint, and a full-screen gate over a working dashboard would
+     turn a passing blip into a blackout. _handshakeAt is the discriminator: 0 means no handshake
+     has EVER succeeded, so there is nothing on screen to protect. Once it is set, the stale chip
+     and the reconnect ladder already own the degraded state and this stays quiet. */
+  function _handshakeStall(why){
+    if (_sessionExpired) return;   // a truer and more actionable message is already up
+    if (_handshakeAt) return;      // page is live; do not black out a working dashboard
+    gate('<div><div style="font-size:17px;font-weight:700;margin-bottom:10px">Still connecting\u2026</div>'
+       + '<div style="opacity:.75;max-width:36ch;margin:0 auto">The live feed is slow to answer. '
+       + 'This keeps retrying \u2014 nothing is wrong with your account.</div></div>');
+    try { clearTimeout(_authRetryTimer); } catch(_e){}
+    _authRetryTimer = setTimeout(function(){
+      try { if (window.novoReauth) window.novoReauth(); } catch(_e){}
+    }, 6000);
+  }
   var _handshakeAt = 0;
   /* WHY THE TOKEN IS GONE, so the second handshake does not overwrite the first one's answer.
      The 401 path nulls TOKEN and paints "Your session expired"; any later novoHandshake()
@@ -151,7 +174,7 @@
            + '<a href="/trader" style="color:#22d3ee">See Trader &rarr;</a></div>');
         return false;
       }
-      if (!r.ok) { return false; }
+      if (!r.ok) { _handshakeStall('http-' + r.status); return false; }
 
       var d = await r.json();   // body is small and same-origin; the abort above still covers the
                                 // socket if it stalls before this resolves (the timer is cleared in
@@ -164,6 +187,9 @@
       var g = document.getElementById('gate'); if (g) g.remove();
       return true;
     } catch (e) {
+      /* AbortError here is our own 12s deadline firing, not a network fault — but from the
+         member's side they are the same thing and want the same sentence. */
+      _handshakeStall((e && e.name === 'AbortError') ? 'timeout' : 'network');
       return false;
     }
   };
