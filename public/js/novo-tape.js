@@ -752,8 +752,189 @@
     try { window.novoSubtabs && window.novoSubtabs.apply(el, { marker: '.tp-grp', key: 'tape' }); } catch (_e) {}
   }
 
+  /* ── THE GREEKS LADDER ────────────────────────────────────────────────────────────────────
+     One number per strike, drawn as bars off a midline. `g` has always shipped; d/v/c arrive
+     with the engine change that stopped summing them away (NoVo-Pulse 525be0b).
+
+     A VIEW OF ITS OWN RATHER THAN A BLOCK INSIDE drawStructure. Analyst does not mount
+     'structure' and should not have to: mounting it to reach this would drag max pain and the
+     expiry ladder onto a surface that never asked for them — a product change smuggled in by an
+     implementation choice. Both hosts mount 'greeks' directly; the rail button on trader reveals
+     itself off novoTape.has('greeks').
+
+     ⚠ ONE SERIES AT A TIME, AND THE UNIT IS ALWAYS ON SCREEN. These are not the same kind of
+     number. Delta exposure is SHARES; gamma, vanna and charm are DOLLARS; charm is a per-DAY
+     rate. Two units on one axis is a comparison that means nothing, and on the trader rail this
+     is load-bearing beyond labelling — the panel sits beside a chart whose whole vocabulary is
+     dollars-of-gamma, so a shares axis appearing unannounced would be read against it. */
+  var GK_SERIES = [
+    { k: 'g', label: 'GAMMA', unit: 'dealer gamma, $ per 1% move' },
+    /* NOT "dealer delta". Gamma, vanna and charm are dealer-signed (+calls / -puts, the net-GEX
+       convention). Delta is not: the chain's delta already carries its own sign, so the engine
+       sums it raw and calculate_greek_exposure calls the result the BOOK'S aggregate directional
+       exposure — all open interest, not the dealer's half. Labelling it dealer delta would tell a
+       member they are looking at dealer positioning when they are looking at the whole book. */
+    { k: 'd', label: 'DELTA', unit: 'net delta of open interest, shares — not dealer-signed' },
+    { k: 'v', label: 'VANNA', unit: 'dealer vanna, $ per vol point' },
+    { k: 'c', label: 'CHARM', unit: 'dealer charm, $ of delta per day' }
+  ];
+  var GK_PICK = 'g';
+
+  /* ⚠ THE HOSTS DO NOT AGREE ON WHERE THE SELECTED TICKER LIVES, and for this view that is not
+     cosmetic — a per-strike ladder drawn for the wrong symbol is wrong in a way nothing on screen
+     would reveal. trader sets _selTkr(); ANALYST stores 'novo_analyst_ticker'; ticker() above
+     reads 'novo_tkr' and otherwise falls back to state.exec_ticker, which is the engine's own
+     execution symbol rather than the one the member picked. On analyst that fallback is what you
+     get, so switching ticker would leave this panel showing SPY while the page showed QQQ.
+
+     This EXTENDS ticker() rather than changing it: existing views keep their current behaviour
+     exactly. Whether drawHistory should also follow the analyst ticker is a real question about
+     those panels, and it is not mine to answer by editing a shared resolver underneath them —
+     raised separately. */
+  function gkTicker(state) {
+    try { if (typeof _selTkr === 'function') return _selTkr(); } catch (_) {}
+    try { var a = localStorage.getItem('novo_analyst_ticker'); if (a) return String(a).toUpperCase(); } catch (_) {}
+    return ticker(state);
+  }
+
+  function gkFor(state) {
+    if (!state) return null;
+    var tk = gkTicker(state), arr = state.indices || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker === tk) return arr[i];
+    return arr[0] || null;
+  }
+
+  function gkHas(d0, key) {
+    return !!(d0 && Array.isArray(d0.profile) &&
+              d0.profile.some(function (r) { return r && isFinite(r[key]); }));
+  }
+
+  function gkPaint(cv, d0, ser) {
+    if (!cv || !d0 || !Array.isArray(d0.profile)) return 0;
+    /* ⚠ ROWS LACKING THE CHOSEN SERIES ARE DROPPED, NOT DRAWN AT ZERO. A strike whose greeks
+       could not be computed is UNKNOWN; a zero-length bar reads as "no exposure at this strike",
+       which is a claim the payload never made. Same decision that refused coarser rounding on the
+       wire, where it would have manufactured false zeros at exactly the thin strikes that matter. */
+    var rows = d0.profile.filter(function (r) { return r && isFinite(r.k) && isFinite(r[ser]); })
+                         .sort(function (a, b) { return a.k - b.k; });
+    var wrap = cv.parentNode;
+    var dpr = window.devicePixelRatio || 1;
+    var W = cv.offsetWidth || (wrap && wrap.clientWidth) || 320;
+    var H = Math.max(200, (wrap && wrap.clientHeight) || 240);
+    cv.width = W * dpr; cv.height = H * dpr;
+    var c = cv.getContext('2d'); c.scale(dpr, dpr); c.clearRect(0, 0, W, H);
+    var n = rows.length;
+    if (!n) return 0;
+
+    var maxAbs = Math.max.apply(null, rows.map(function (r) { return Math.abs(r[ser]) || 0; })) || 1;
+    var padT = 10, padB = 16, axisW = 46;
+    var plotL = axisW, plotW = W - axisW - 6, mid = plotL + plotW * 0.5;
+    var rowH = (H - padT - padB) / n, bh = Math.max(2, rowH - 1.5);
+
+    function yOfIndex(i) { return padT + (n - 1 - i) * rowH + rowH / 2; }
+    function yOfStrike(k) {
+      if (k <= rows[0].k) return yOfIndex(0);
+      if (k >= rows[n - 1].k) return yOfIndex(n - 1);
+      for (var i = 0; i < n - 1; i++) {
+        if (k >= rows[i].k && k <= rows[i + 1].k) {
+          var t = (k - rows[i].k) / ((rows[i + 1].k - rows[i].k) || 1);
+          return yOfIndex(i) + t * (yOfIndex(i + 1) - yOfIndex(i));
+        }
+      }
+      return yOfIndex(n - 1);
+    }
+
+    rows.forEach(function (r, i) {
+      var yy = yOfIndex(i) - bh / 2, val = r[ser];
+      var w = (Math.abs(val) / maxAbs) * (plotW * 0.46);
+      c.fillStyle = val >= 0 ? 'rgba(52,211,153,0.78)' : 'rgba(248,113,113,0.78)';
+      if (val >= 0) c.fillRect(mid, yy, w, bh); else c.fillRect(mid - w, yy, w, bh);
+    });
+
+    c.strokeStyle = 'rgba(255,255,255,0.28)'; c.setLineDash([3, 3]);
+    c.beginPath(); c.moveTo(mid, padT); c.lineTo(mid, H - padB); c.stroke(); c.setLineDash([]);
+
+    c.font = '9.5px ui-monospace,SFMono-Regular,Menlo,monospace';
+    c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillStyle = '#5b708c';
+    var minK = rows[0].k, maxK = rows[n - 1].k, rng = (maxK - minK) || 1;
+    var raw = rng / 6, pw = Math.pow(10, Math.floor(Math.log10(raw))), mm = raw / pw;
+    var stepK = (mm < 1.5 ? 1 : mm < 3.5 ? 2 : mm < 7.5 ? 5 : 10) * pw;
+    for (var kk = Math.ceil(minK / stepK) * stepK; kk <= maxK + 0.001; kk += stepK) {
+      c.fillText(kk.toFixed(0), axisW - 6, yOfStrike(kk));
+    }
+
+    var guides = [];
+    [[d0.put_wall, '#fbbf24', 'PUT WALL'], [d0.call_wall, '#fbbf24', 'CALL WALL'],
+     [d0.flip, '#22d3ee', '0-GAMMA'], [d0.spot, 'rgba(234,243,255,0.92)', 'SPOT']]
+      .forEach(function (g) {
+        if (g[0] != null && isFinite(+g[0])) guides.push({ k: +g[0], color: g[1], label: g[2], y: yOfStrike(+g[0]) });
+      });
+    if (d0.spot != null && d0.em_daily != null && isFinite(+d0.spot) && isFinite(+d0.em_daily) && +d0.em_daily > 0) {
+      guides.push({ k: +d0.spot + +d0.em_daily, color: '#a78bfa', label: 'EM HIGH', y: yOfStrike(+d0.spot + +d0.em_daily) });
+      guides.push({ k: +d0.spot - +d0.em_daily, color: '#a78bfa', label: 'EM LOW', y: yOfStrike(+d0.spot - +d0.em_daily) });
+    }
+    guides.forEach(function (g) {
+      c.strokeStyle = g.color; c.setLineDash([2, 2]);
+      c.beginPath(); c.moveTo(plotL, g.y); c.lineTo(W - 4, g.y); c.stroke();
+    });
+    c.setLineDash([]); c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.font = '9px ui-monospace,Menlo,monospace';
+    guides.slice().sort(function (a, b) { return a.y - b.y; }).forEach(function (g, idx, arr) {
+      var ly = g.y; if (idx > 0 && ly < arr[idx - 1]._ly + 11) ly = arr[idx - 1]._ly + 11; g._ly = ly;
+      var txt = g.label + ' ' + g.k.toFixed(2), tw = c.measureText(txt).width;
+      c.fillStyle = 'rgba(7,11,18,0.74)'; c.fillRect(plotL + 3, ly - 6, tw + 5, 12);
+      c.fillStyle = g.color; c.fillText(txt, plotL + 5, ly);
+    });
+    return n;
+  }
+
+  function drawGreeks(el, state) {
+    var d0 = gkFor(state), tk = gkTicker(state);
+    /* An engine publishing the older [{k,g}] payload has no d/v/c at all, and DEX in particular
+       may be absent on its own. Offer only what is on the wire and fall back to gamma, rather
+       than draw an empty panel for a series that cannot exist. */
+    var avail = GK_SERIES.filter(function (s) { return s.k === 'g' || gkHas(d0, s.k); });
+    var active = gkHas(d0, GK_PICK) ? GK_PICK : 'g';
+    var cur = GK_SERIES.filter(function (s) { return s.k === active; })[0] || GK_SERIES[0];
+    var title = cur.label.charAt(0) + cur.label.slice(1).toLowerCase();
+
+    var h = '<h2>' + esc(tk) + ' &middot; ' + esc(title) + ' by strike</h2>'
+          + '<span class="tp-sub">' + esc(cur.unit) + '</span>';
+    // A lone series is not a choice — show no control rather than one dead label.
+    if (avail.length > 1) {
+      h += '<div class="tp-grp" style="display:flex;gap:10px;letter-spacing:1.4px">'
+         + avail.map(function (s) {
+             return '<span data-gk="' + s.k + '" style="cursor:pointer;color:'
+                  + (s.k === active ? '#22d3ee' : 'var(--txt3,#8f8f8f)') + '">' + s.label + '</span>';
+           }).join('')
+         + '</div>';
+    }
+    h += '<div class="gk-wrap" style="position:relative;height:240px;margin-top:6px">'
+       + '<canvas class="gk-cv" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>';
+    el.innerHTML = h;
+
+    /* Delegated and wired ONCE. refresh() re-runs every view on each poll and this rebuilds
+       innerHTML, so a handler attached per draw would stack one listener per poll on a dashboard
+       that is left open all day. */
+    if (!el._gkWired) {
+      el._gkWired = 1;
+      el.addEventListener('click', function (e) {
+        var t = e.target && e.target.getAttribute && e.target.getAttribute('data-gk');
+        if (!t || t === GK_PICK) return;
+        GK_PICK = t;
+        drawGreeks(el, STATE);
+      });
+    }
+
+    var drawn = gkPaint(el.querySelector('.gk-cv'), d0, active);
+    if (!drawn) {
+      el.querySelector('.gk-wrap').innerHTML =
+        '<div class="tp-empty">No strikes published for this reading yet.</div>';
+    }
+  }
+
   var DRAW = { history: drawHistory, flow: drawFlow, sweeps: drawSweeps, read: drawRead,
-               wire: drawWire, structure: drawStructure };
+               wire: drawWire, structure: drawStructure, greeks: drawGreeks };
 
   function mount(sel, kind) {
     styles();
@@ -771,5 +952,22 @@
       return d;
     });
   }
-  window.novoTape = { mount: mount, refresh: refresh };
+  /* A HOST MUST BE ABLE TO ASK. Trader's rail button is hidden until the greeks view exists,
+     and without this the only way to find out was to mount into a detached div and inspect the
+     result — which runs a real fetch and renders a real panel just to answer a yes/no. */
+  function has(kind) { return !!(kind && DRAW[kind]); }
+
+  /* ADOPT THE STATE THE HOST ALREADY HAS, instead of fetching a second copy of it.
+     load() exists because a tab can open with nothing in hand. But analyst-live already polls
+     /api/analyst-publish?live=1 every 15s and holds the identical payload, so a view mounted on
+     its main surface would otherwise either issue a duplicate request per poll or sit stale
+     between tab switches. Neither is acceptable for a panel that is always on screen.
+     Pass the WHOLE payload, not a per-ticker slice — every view resolves its own ticker. */
+  function adopt(state) {
+    if (!state) return;
+    STATE = state;
+    MOUNTS.forEach(function (m) { try { DRAW[m[1]](m[0], STATE); } catch (_e) {} });
+  }
+
+  window.novoTape = { mount: mount, refresh: refresh, has: has, adopt: adopt };
 })();
