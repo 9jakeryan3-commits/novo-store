@@ -27,29 +27,29 @@
     '.novo-futures{padding:4px 2px}',
     '.novo-futures h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
       + 'font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
-    '.novo-futures .fx-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);'
+    '.novo-futures .fx-sub{font-size:11px;font-weight:500;color:var(--txt3,#8f8f8f);'
       + 'letter-spacing:.06em;margin-left:8px;text-transform:none}',
     '.novo-futures .fx-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
-      + 'letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:18px 0 2px;'
+      + 'letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin:18px 0 2px;'
       + 'padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
     /* the live tape: a two-column list, not a grid of tiles */
     '.novo-futures .fx-q{display:flex;align-items:baseline;justify-content:space-between;gap:12px;'
       + 'padding:10px 0;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-futures .fx-grp + .fx-q{border-top:0}',
     '.novo-futures .fx-n{font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;'
-      + 'letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+      + 'letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#8f8f8f)}',
     '.novo-futures .fx-v{font-family:var(--mono,ui-monospace),monospace;font-size:15px;'
       + 'font-weight:700;color:var(--txt1,#f0f0ee);font-variant-numeric:tabular-nums}',
     '.novo-futures .fx-c{font-family:var(--mono,ui-monospace),monospace;font-size:11.5px;'
       + 'font-weight:700;margin-left:8px;font-variant-numeric:tabular-nums}',
-    '.novo-futures .up{color:#34d399}.novo-futures .dn{color:#f43f5e}.novo-futures .flat{color:var(--txt3,#6e6e6e)}',
+    '.novo-futures .up{color:#34d399}.novo-futures .dn{color:#f43f5e}.novo-futures .flat{color:var(--txt3,#8f8f8f)}',
     /* the reads */
     '.novo-futures .fx-read{padding:14px 0;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-futures .fx-grp + .fx-read{border-top:0}',
     '.novo-futures .fx-sess{font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
       + 'font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--txt1,#f0f0ee)}',
     '.novo-futures .fx-when{font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
-      + 'letter-spacing:.06em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-left:8px}',
+      + 'letter-spacing:.06em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin-left:8px}',
     '.novo-futures .fx-bias{font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
       + 'font-weight:800;letter-spacing:.12em;margin-left:8px}',
     '.novo-futures .fx-body{font-size:12.5px;color:var(--txt2,#a8a8a8);line-height:1.6;margin-top:7px;'
@@ -59,7 +59,7 @@
       + 'letter-spacing:.1em;text-transform:uppercase;color:var(--acc,#34d399);background:none;'
       + 'border:0;padding:6px 0 0;cursor:pointer}',
     '.novo-futures .fx-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
-    '.novo-futures .fx-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:16px;'
+    '.novo-futures .fx-how{font-size:11.5px;color:var(--txt3,#8f8f8f);line-height:1.6;margin-top:16px;'
       + 'padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
   ].join('');
 
@@ -99,7 +99,7 @@
     var m = String(text || '').match(/MACRO BIAS\s*:\s*([A-Z]+)/i);
     return m ? m[1].toUpperCase() : '';
   }
-  var BIAS_C = { BULLISH: '#34d399', BEARISH: '#f43f5e', NEUTRAL: 'var(--txt3,#6e6e6e)' };
+  var BIAS_C = { BULLISH: '#34d399', BEARISH: '#f43f5e', NEUTRAL: 'var(--txt3,#8f8f8f)' };
 
   var root = null, QUOTES = null;
 

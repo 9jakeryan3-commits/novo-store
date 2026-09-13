@@ -23,7 +23,7 @@
     /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): no full boxes, hairline line-breaks only. */
     '.novo-alerts{padding:4px 2px}',
     '.novo-alerts h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
-    '.novo-alerts .al-n{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.06em;margin-left:8px;text-transform:none}',
+    '.novo-alerts .al-n{font-size:11px;font-weight:500;color:var(--txt3,#8f8f8f);letter-spacing:.06em;margin-left:8px;text-transform:none}',
     '.novo-alerts .al-route{font-size:12.5px;line-height:1.55;padding:10px 0;margin:0 0 4px;border-bottom:1px solid var(--bdr2,#242428);color:var(--txt2,#a8a8a8)}',
     '.novo-alerts .al-route.warn{color:#fbbf24}',
     '.novo-alerts .al-enable{display:inline-block;margin-top:9px;background:#f59e0b;color:#17150c;border:0;border-radius:8px;font:inherit;font-size:12.5px;font-weight:800;padding:9px 14px;cursor:pointer;min-height:38px}',
@@ -35,14 +35,14 @@
     '.novo-alerts .al-what b{display:block;font-size:13.5px;color:var(--txt1,#f0f0ee);font-weight:700}',
     /* Both BLOCK. They are spans inside a span, so without this the note runs straight on from the
        meta line -- "20H LEFTwatching the sweep" -- which textContent is perfectly happy with. */
-    '.novo-alerts .al-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;color:var(--txt3,#6e6e6e);letter-spacing:.05em;text-transform:uppercase;margin-top:3px}',
+    '.novo-alerts .al-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;color:var(--txt3,#8f8f8f);letter-spacing:.05em;text-transform:uppercase;margin-top:3px}',
     '.novo-alerts .al-note{display:block;font-size:12px;color:var(--txt2,#a8a8a8);margin-top:3px}',
-    '.novo-alerts .al-x{flex:0 0 auto;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt3,#6e6e6e);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:7px 11px;cursor:pointer;min-height:34px}',
+    '.novo-alerts .al-x{flex:0 0 auto;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt3,#8f8f8f);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:7px 11px;cursor:pointer;min-height:34px}',
     '.novo-alerts .al-x:hover{border-color:#f43f5e;color:#f43f5e}',
     '.novo-alerts .al-x[disabled]{opacity:.5;cursor:default}',
     '.novo-alerts .al-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
-    '.novo-alerts .al-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:18px 0 2px;padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
-    '.novo-alerts .al-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
+    '.novo-alerts .al-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin:18px 0 2px;padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
+    '.novo-alerts .al-how{font-size:11.5px;color:var(--txt3,#8f8f8f);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-alerts .al-how em{color:var(--txt2,#a8a8a8);font-style:normal}'
   ].join('');
 

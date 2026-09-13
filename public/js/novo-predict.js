@@ -19,30 +19,30 @@
     /* BOXES AND BORDERS ARE BANNED (Jake, 2026-09-07): no full boxes, hairline line-breaks only. */
     '.novo-predict{padding:4px 2px}',
     '.novo-predict h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
-    '.novo-predict .pd-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);letter-spacing:.06em;margin-left:8px;text-transform:none}',
+    '.novo-predict .pd-sub{font-size:11px;font-weight:500;color:var(--txt3,#8f8f8f);letter-spacing:.06em;margin-left:8px;text-transform:none}',
     /* the score row — the headline is the RECORD, not any single call */
     '.novo-predict .pd-score{display:flex;flex-wrap:wrap;gap:18px;padding:2px 0 12px;border-bottom:1px solid var(--bdr2,#242428)}',
     '.novo-predict .pd-cell .v{font-family:var(--mono,ui-monospace),monospace;font-size:20px;font-weight:700;color:var(--txt1,#f0f0ee)}',
-    '.novo-predict .pd-cell .k{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-top:2px}',
-    '.novo-predict .pd-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:16px 0 2px}',
+    '.novo-predict .pd-cell .k{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin-top:2px}',
+    '.novo-predict .pd-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin:16px 0 2px}',
     /* rows — hairlines, never boxes */
     '.novo-predict .pd-row{padding:12px 0;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-predict .pd-grp + .pd-row{border-top:0}',
     '.novo-predict .pd-what{font-size:13.5px;color:var(--txt1,#f0f0ee);font-weight:700}',
-    '.novo-predict .pd-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-top:3px}',
+    '.novo-predict .pd-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin-top:3px}',
     '.novo-predict .pd-thesis{display:block;font-size:12px;color:var(--txt2,#a8a8a8);margin-top:4px;line-height:1.5}',
     '.novo-predict .pd-hit{color:#34d399;font-weight:800}',
     '.novo-predict .pd-miss{color:#f43f5e;font-weight:800}',
     '.novo-predict .pd-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
-    '.novo-predict .pd-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
+    '.novo-predict .pd-how{font-size:11.5px;color:var(--txt3,#8f8f8f);line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr2,#242428)}',
     /* the head-to-head: two columns and one hairline. No boxes. */
     '.novo-predict .pd-vs{display:flex;align-items:flex-end;gap:14px;padding:2px 0 14px;border-bottom:1px solid var(--bdr2,#242428)}',
     '.novo-predict .pd-vs-side{display:flex;flex-direction:column;gap:2px;flex:1 1 0}',
-    '.novo-predict .pd-vs-k{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+    '.novo-predict .pd-vs-k{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#8f8f8f)}',
     '.novo-predict .pd-vs-v{font-family:var(--mono,ui-monospace),monospace;font-size:26px;font-weight:800;color:var(--txt1,#f0f0ee);line-height:1;font-variant-numeric:tabular-nums}',
-    '.novo-predict .pd-vs-n{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
-    '.novo-predict .pd-vs-mid{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4,#555);padding-bottom:4px}',
-    '.novo-predict .pd-vs-note{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.55;padding:10px 0 0}'
+    '.novo-predict .pd-vs-n{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3,#8f8f8f)}',
+    '.novo-predict .pd-vs-mid{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt4,#7f7f89);padding-bottom:4px}',
+    '.novo-predict .pd-vs-note{font-size:11.5px;color:var(--txt3,#8f8f8f);line-height:1.55;padding:10px 0 0}'
   ].join('');
 
   function styles() {
@@ -187,7 +187,7 @@
       h += '<div class="pd-grp">Void — could not be graded</div>';
       h += voided.map(function (p) {
         return '<div class="pd-row"><span class="pd-what">' + esc(describe(p))
-          + ' → <span style="color:var(--txt3,#6e6e6e);font-weight:800">VOID</span></span>'
+          + ' → <span style="color:var(--txt3,#8f8f8f);font-weight:800">VOID</span></span>'
           + '<span class="pd-meta">' + esc((p.outcome && p.outcome.reason) || '') + '</span></div>';
       }).join('');
     }

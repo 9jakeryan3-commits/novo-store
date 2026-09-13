@@ -30,10 +30,10 @@
     '.novo-congress{padding:4px 2px}',
     '.novo-congress h2{margin:0 0 4px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
       + 'font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
-    '.novo-congress .cg-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);'
+    '.novo-congress .cg-sub{font-size:11px;font-weight:500;color:var(--txt3,#8f8f8f);'
       + 'letter-spacing:.06em;margin-left:8px;text-transform:none}',
     /* the lag banner: the most important sentence on the panel, so it sits above the data */
-    '.novo-congress .cg-lag{font-size:12px;line-height:1.55;color:var(--txt3,#6e6e6e);'
+    '.novo-congress .cg-lag{font-size:12px;line-height:1.55;color:var(--txt3,#8f8f8f);'
       + 'padding:10px 0 12px;border-bottom:1px solid var(--bdr2,#242428);margin-bottom:2px}',
     '.novo-congress .cg-lag b{color:var(--txt2,#a8a8a8);font-weight:600}',
     /* filters: words you click, per the CTA rule - no fill, no border, no box */
@@ -41,36 +41,36 @@
       + 'border-bottom:1px solid var(--bdr2,#242428)}',
     '.novo-congress .cg-filters button{background:none;border:0;border-radius:0;padding:0;'
       + 'cursor:pointer;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;'
-      + 'letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#6e6e6e)}',
+      + 'letter-spacing:.12em;text-transform:uppercase;color:var(--txt3,#8f8f8f)}',
     '.novo-congress .cg-filters button[aria-pressed="true"]{color:var(--txt1,#eaf3ff)}',
     '.novo-congress .cg-filters button:hover{color:var(--txt1,#eaf3ff)}',
     /* the tally strip */
     '.novo-congress .cg-top{display:flex;flex-wrap:wrap;gap:5px 16px;padding:11px 0;'
       + 'border-bottom:1px solid var(--bdr2,#242428);font-family:var(--mono,ui-monospace),monospace;'
-      + 'font-size:10.5px;letter-spacing:.06em;color:var(--txt3,#6e6e6e)}',
+      + 'font-size:10.5px;letter-spacing:.06em;color:var(--txt3,#8f8f8f)}',
     '.novo-congress .cg-top .t-k{color:var(--txt2,#a8a8a8);font-weight:600}',
     /* rows */
     '.novo-congress .cg-row{display:grid;grid-template-columns:64px 1fr auto;gap:4px 12px;'
       + 'align-items:baseline;padding:11px 0;border-bottom:1px solid var(--bdr2,#242428)}',
     '.novo-congress .cg-tk{font-family:var(--mono,ui-monospace),monospace;font-size:12.5px;'
       + 'font-weight:700;letter-spacing:.04em;color:var(--txt1,#eaf3ff)}',
-    '.novo-congress .cg-tk.none{color:var(--txt3,#6e6e6e);font-weight:500;font-size:11px}',
+    '.novo-congress .cg-tk.none{color:var(--txt3,#8f8f8f);font-weight:500;font-size:11px}',
     '.novo-congress .cg-who{font-size:13px;color:var(--txt2,#a8a8a8);min-width:0}',
-    '.novo-congress .cg-who .cg-asset{display:block;font-size:11.5px;color:var(--txt3,#6e6e6e);'
+    '.novo-congress .cg-who .cg-asset{display:block;font-size:11.5px;color:var(--txt3,#8f8f8f);'
       + 'margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
     '.novo-congress .cg-side{font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
       + 'letter-spacing:.14em;text-transform:uppercase}',
     '.novo-congress .cg-side.buy{color:var(--green,#10b981)}',
     '.novo-congress .cg-side.sell{color:var(--red,#f43f5e)}',
-    '.novo-congress .cg-side.exchange{color:var(--txt3,#6e6e6e)}',
+    '.novo-congress .cg-side.exchange{color:var(--txt3,#8f8f8f)}',
     '.novo-congress .cg-meta{grid-column:2 / -1;font-family:var(--mono,ui-monospace),monospace;'
-      + 'font-size:10.5px;letter-spacing:.05em;color:var(--txt3,#6e6e6e)}',
+      + 'font-size:10.5px;letter-spacing:.05em;color:var(--txt3,#8f8f8f)}',
     '.novo-congress .cg-meta .cg-lagpill{color:var(--txt2,#a8a8a8)}',
     '.novo-congress .cg-meta .cg-stale{color:var(--amber,#f0a63c)}',
     '.novo-congress .cg-foot{padding:14px 0 2px;font-size:11.5px;line-height:1.6;'
-      + 'color:var(--txt3,#6e6e6e)}',
+      + 'color:var(--txt3,#8f8f8f)}',
     '.novo-congress .cg-foot a{color:var(--txt2,#a8a8a8)}',
-    '.novo-congress .cg-empty{padding:22px 0;font-size:13px;color:var(--txt3,#6e6e6e)}',
+    '.novo-congress .cg-empty{padding:22px 0;font-size:13px;color:var(--txt3,#8f8f8f)}',
     '@media (max-width:560px){.novo-congress .cg-row{grid-template-columns:56px 1fr}'
       + '.novo-congress .cg-side{grid-column:2;justify-self:start}}',
     // search boxes — hairline only, no box fill (house rule)
@@ -79,13 +79,13 @@
       + 'var(--bdr,#2c2c30);color:var(--txt1,#f0f0ee);font-family:inherit;font-size:12px;'
       + 'padding:5px 2px;outline:none}',
     '.novo-congress .cg-q:focus{border-bottom-color:var(--cyn,#22d3ee)}',
-    '.novo-congress .cg-q::placeholder{color:var(--txt3,#6e6e6e)}',
+    '.novo-congress .cg-q::placeholder{color:var(--txt3,#8f8f8f)}',
     // by-member list
     '.novo-congress .cg-mlist{display:flex;flex-direction:column}',
     '.novo-congress .cg-mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;'
       + 'padding:8px 0;border-bottom:1px solid var(--bdr2,#1c1c20)}',
     '.novo-congress .cg-mwho{font-size:13px;color:var(--txt1,#f0f0ee);font-weight:600}',
-    '.novo-congress .cg-mstat{font-size:11.5px;color:var(--txt3,#6e6e6e);white-space:nowrap;font-family:var(--font,ui-monospace),monospace}',
+    '.novo-congress .cg-mstat{font-size:11.5px;color:var(--txt3,#8f8f8f);white-space:nowrap;font-family:var(--font,ui-monospace),monospace}',
     '.novo-congress .cg-mstat .cg-buy{color:var(--grn,#10b981)}',
     '.novo-congress .cg-mstat .cg-sell{color:var(--red,#f43f5e)}',
   ].join('');

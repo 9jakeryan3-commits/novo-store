@@ -26,7 +26,7 @@
     '#novo-desk .nd-x{margin-left:auto;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt2,#a8a8a8);border-radius:9px;font:inherit;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;min-height:36px}',
     '#novo-desk .nd-x:hover{color:var(--txt1,#f0f0ee)}',
     '#novo-desk .nd-b{padding:14px 16px 26px}',
-    '#novo-desk .nd-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:26px 0 4px;padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
+    '#novo-desk .nd-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin:26px 0 4px;padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
     '#novo-desk .nd-grp:first-child{margin-top:0;padding-top:0;border-top:0}',
     /* :first-child does not match the first HEADING, because an empty digest slot sits in front of
        it -- so the panel opened with a hairline hanging above "Reading the market", attached to
@@ -44,13 +44,13 @@
     '#novo-desk .nd-row:active{background:rgba(255,255,255,.03)}',
     '@media (hover:hover){#novo-desk .nd-row:hover b{color:#fff}}',
     '#novo-desk .nd-row b{display:block;font-size:13.5px;color:var(--txt1,#f0f0ee);font-weight:700;margin-bottom:2px}',
-    '#novo-desk .nd-row span{display:block;font-size:12px;color:var(--txt3,#6e6e6e);line-height:1.5}',
+    '#novo-desk .nd-row span{display:block;font-size:12px;color:var(--txt3,#8f8f8f);line-height:1.5}',
     '#novo-desk .nd-say{color:var(--txt2,#a8a8a8);font-style:italic}',
     '#novo-desk .nd-card{padding:13px 2px 4px}',
     '#novo-desk .nd-card b{display:block;font-size:13.5px;color:var(--txt1,#f0f0ee);margin-bottom:3px}',
-    '#novo-desk .nd-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-top:3px}',
+    '#novo-desk .nd-meta{display:block;font-family:var(--mono,ui-monospace),monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin-top:3px}',
     '#novo-desk .nd-note{display:block;font-size:12px;color:var(--txt2,#a8a8a8);margin-top:4px;line-height:1.5}',
-    '#novo-desk .nd-stop{margin-top:10px;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt3,#6e6e6e);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:8px 12px;cursor:pointer;min-height:36px}',
+    '#novo-desk .nd-stop{margin-top:10px;background:none;border:1px solid var(--bdr,#2c2c30);color:var(--txt3,#8f8f8f);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;padding:8px 12px;cursor:pointer;min-height:36px}',
     '#novo-desk .nd-stop:hover{border-color:#f43f5e;color:#f43f5e}',
     /* ⚠ NO SIZING HERE. The button carries the page's own .lvl class, the same one Plain English
        uses, so each dashboard styles it exactly like the control it sits beside -- which is what

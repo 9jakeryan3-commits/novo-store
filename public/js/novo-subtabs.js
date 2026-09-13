@@ -35,13 +35,13 @@
       + 'border-bottom:1px solid var(--bdr2,#242428)}',
     '.nst-bar button{background:none;border:0;border-radius:0;padding:0 0 7px;margin-bottom:-9px;'
       + 'cursor:pointer;font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
-      + 'letter-spacing:.14em;text-transform:uppercase;color:var(--txt3,#6e6e6e);'
+      + 'letter-spacing:.14em;text-transform:uppercase;color:var(--txt3,#8f8f8f);'
       + 'border-bottom:1px solid transparent;white-space:nowrap}',
     '.nst-bar button:hover{color:var(--txt1,#eaf3ff)}',
     '.nst-bar button[aria-selected="true"]{color:var(--txt1,#eaf3ff);'
       + 'border-bottom-color:var(--askacc,#22d3ee)}',
     /* the count rides along quietly - it is the reason to click the tab */
-    '.nst-bar button .nst-n{color:var(--txt3,#6e6e6e);margin-left:6px;font-size:9.5px}',
+    '.nst-bar button .nst-n{color:var(--txt3,#8f8f8f);margin-left:6px;font-size:9.5px}',
     '.nst-bar button[aria-selected="true"] .nst-n{color:var(--txt2,#a8a8a8)}',
     '.nst-pane[hidden]{display:none!important}',
     /* the group's own heading is redundant once its name is the tab */

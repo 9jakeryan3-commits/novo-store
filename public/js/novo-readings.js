@@ -33,10 +33,10 @@
     '.novo-readbar .rb-body{flex:1 1 auto;min-width:0;max-width:100%}',
     '.novo-readbar .rb-line{display:block;width:100%;white-space:nowrap;overflow:hidden;'
       + 'text-overflow:ellipsis;font-size:12.5px;color:var(--txt2,#a8a8a8);line-height:1.55}',
-    '.novo-readbar .rb-line + .rb-line{color:var(--txt3,#6e6e6e);font-size:11.5px}',
+    '.novo-readbar .rb-line + .rb-line{color:var(--txt3,#8f8f8f);font-size:11.5px}',
     '.novo-readbar .rb-t{font-family:var(--mono,ui-monospace),monospace;font-weight:700;color:var(--txt1,#f0f0ee)}',
     '.novo-readbar .rb-k{font-family:var(--mono,ui-monospace),monospace;font-size:9.5px;'
-      + 'letter-spacing:.06em;text-transform:uppercase;color:var(--txt4,#555)}',
+      + 'letter-spacing:.06em;text-transform:uppercase;color:var(--txt4,#7f7f89)}',
     '.novo-readbar .rb-more{flex:0 0 auto;font-family:var(--mono,ui-monospace),monospace;'
       + 'font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc,#34d399);white-space:nowrap}',
     '@media(max-width:768px){.novo-readbar .rb-line + .rb-line{display:none}}',
@@ -44,19 +44,19 @@
     '.novo-readings{padding:4px 2px}',
     '.novo-readings h2{margin:0 0 12px;font-family:var(--mono,ui-monospace),monospace;font-size:11px;'
       + 'font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2,#a8a8a8)}',
-    '.novo-readings .rd-sub{font-size:11px;font-weight:500;color:var(--txt3,#6e6e6e);'
+    '.novo-readings .rd-sub{font-size:11px;font-weight:500;color:var(--txt3,#8f8f8f);'
       + 'letter-spacing:.06em;margin-left:8px;text-transform:none}',
     '.novo-readings .rd-grp{font-family:var(--mono,ui-monospace),monospace;font-size:10px;'
-      + 'letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin:18px 0 2px;'
+      + 'letter-spacing:.16em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin:18px 0 2px;'
       + 'padding-top:14px;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-readings .rd-row{padding:12px 0;border-top:1px solid var(--bdr2,#242428)}',
     '.novo-readings .rd-grp + .rd-row{border-top:0}',
     '.novo-readings .rd-claim{font-size:13.5px;color:var(--txt1,#f0f0ee);line-height:1.55}',
     '.novo-readings .rd-t{font-family:var(--mono,ui-monospace),monospace;font-weight:800}',
     '.novo-readings .rd-meta{display:block;font-family:var(--mono,ui-monospace),monospace;'
-      + 'font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#6e6e6e);margin-top:4px}',
+      + 'font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3,#8f8f8f);margin-top:4px}',
     '.novo-readings .rd-fire{color:#34d399;font-weight:800}',
-    '.novo-readings .rd-armed{color:var(--txt3,#6e6e6e);font-weight:800}',
+    '.novo-readings .rd-armed{color:var(--txt3,#8f8f8f);font-weight:800}',
     '.novo-readings .rd-unknown{color:#fbbf24;font-weight:800}',
     '.novo-readings .rd-empty{font-size:13px;color:var(--txt2,#a8a8a8);line-height:1.6;padding:4px 0 2px}',
     /* A fault notice, not decoration - amber and above the read, because the thing it is warning
@@ -64,7 +64,7 @@
        separator on these surfaces. */
     '.novo-readings .rd-stale{font-size:12.5px;line-height:1.6;color:var(--amber,#f59e0b);'
       + 'padding:9px 0 10px;border-bottom:1px solid var(--bdr2,#242424);margin-bottom:12px}',
-    '.novo-readings .rd-how{font-size:11.5px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:16px;'
+    '.novo-readings .rd-how{font-size:11.5px;color:var(--txt3,#8f8f8f);line-height:1.6;margin-top:16px;'
       + 'padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
   ].join('');
 
@@ -117,7 +117,7 @@
       return '<span class="rb-line"><span class="rb-t">' + esc(r.ticker) + '</span> '
         + '<span class="rb-k">' + esc(KINDLABEL[r.kind] || r.kind) + '</span> &middot; '
         + esc(r.claim || '')
-        + ' <span style="color:var(--txt4,#555)">&middot; ' + esc(ago(r.ts_utc)) + '</span></span>';
+        + ' <span style="color:var(--txt4,#7f7f89)">&middot; ' + esc(ago(r.ts_utc)) + '</span></span>';
     }).join('');
     el.innerHTML = '<span class="rb-ico">◈</span><span class="rb-body">' + lines + '</span>'
       + '<span class="rb-more">' + rs.length + ' reading' + (rs.length === 1 ? '' : 's')
@@ -226,10 +226,10 @@
       + 'font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-left:10px}',
     '.novo-rundown .rd-body{font-size:14px;color:var(--txt1,#f0f0ee);line-height:1.75;'
       + 'white-space:pre-wrap;overflow-wrap:anywhere;padding:12px 0 2px}',
-    '.novo-rundown .rd-rec{font-size:12px;color:var(--txt3,#6e6e6e);line-height:1.6;margin-top:16px;'
+    '.novo-rundown .rd-rec{font-size:12px;color:var(--txt3,#8f8f8f);line-height:1.6;margin-top:16px;'
       + 'padding-top:12px;border-top:1px solid var(--bdr2,#242428)}'
   ].join('');
-  var BIAS_C = { BULLISH: '#34d399', BEARISH: '#f43f5e', NEUTRAL: 'var(--txt3,#6e6e6e)' };
+  var BIAS_C = { BULLISH: '#34d399', BEARISH: '#f43f5e', NEUTRAL: 'var(--txt3,#8f8f8f)' };
 
   function mountCrypto(sel) {
     styles();
