@@ -119,9 +119,12 @@ a{color:var(--cyan)}
      either STOP: these glyphs cover rows 13-30 of a 43px button, so they only ever see the
      middle of the ramp, and measuring the endpoints answers a question nobody asked.
      Measured on the rendered button, the worst row under the glyphs read 4.09:1 against
-     violet-600 - under the 4.5:1 AA wants at 14px. Darkening the text cannot fix it: pure
-     black tops out at 4.45:1 against that row, so the ramp is the only lever. #8b5cf6 puts
-     the worst row at 5.12:1. Same change, same reason, on .cx-install further down. */
+     violet-600 - under the 4.5:1 AA wants at 14px. Darkening the text is not the way out:
+     pure black against that row reads 4.45:1 off the rendered pixel and 4.54:1 off an
+     idealised lerp of the same ramp. It STRADDLES the 4.5 line, so no reading of it can
+     be relied on - and the generous one clears by 0.04, which any change to the padding,
+     the height or the font metrics would erase. Black buys no headroom. The ramp does:
+     #8b5cf6 puts the worst row at 5.12:1. Same change, same reason, on .cx-install further down. */
 .lv-btn{display:inline-block;padding:12px 26px;border-radius:9px;border:0;
   background:linear-gradient(180deg,#a78bfa,#8b5cf6);color:#120a24;font-weight:800;
   font-size:14px;text-decoration:none}
