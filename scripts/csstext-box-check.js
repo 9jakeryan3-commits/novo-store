@@ -35,9 +35,23 @@ const ok = (n, c, d) => { checks++; if (c) return console.log('  PASS  ' + n);
 /* Accepted, with the reason. A rounded corner on a PHOTO is a photo corner, not a container box —
    the ban is about panels, cards and buttons. Anything not listed here is a failure, so a new box
    cannot be absorbed silently; it has to be argued for in this list. */
+/* ⚠ KEYED ON THE DECLARATION, NOT ON THE FILE — and that is the fix for a real miss.
+   These exemptions were scoped to analyst-live.html, so the BYTE-IDENTICAL code in
+   crypto-live.html and js/novo-chat.js kept failing. The guard built to catch three-copy drift
+   had the three-copy problem itself: an exemption argued once only covered one copy, and the
+   other two read as violations forever.
+   Left as it was, the next person under deploy pressure sweeps them — and doing so would UNDO
+   e531f078f, where Jerni deliberately kept the radius while removing the border four hours
+   earlier, with the reason in the commit message. A guard that cries wolf eventually gets obeyed.
+   Matching on content keeps the drift protection: if any copy diverges, its declaration stops
+   matching the fragment and fires. Fragments are deliberately long enough to identify ONE
+   element — `border-radius:4px` alone would exempt half the estate. Found by Temi, who checked
+   all three copies were identical before arguing the exemption. */
 const ALLOW = [
-  { file: 'analyst-live.html', has: 'border-radius:4px', why: 'attached-image preview thumbnail — photo corner' },
-  { file: 'analyst-live.html', has: 'border-radius:8px;cursor:zoom-in', why: 'sent-image thumbnail — photo corner' },
+  { has: 'max-width:min(240px,60%);width:auto;border-radius:8px;cursor:zoom-in',
+    why: 'sent-image thumbnail — a rounded PHOTO corner, no border, no shadow' },
+  { has: 'height:34px;width:auto;max-width:84px;border-radius:4px',
+    why: 'attached-image preview in the composer — photo corner' },
 ];
 
 function scan(src) {
@@ -80,7 +94,7 @@ for (const f of present) {
   const rel = path.basename(f);
   const hits = scan(fs.readFileSync(f, 'utf8'));
   for (const h of hits) {
-    const allowed = ALLOW.some(a => a.file === rel && h.css.includes(a.has));
+    const allowed = ALLOW.some(a => h.css.includes(a.has));   // content, not file -- see ALLOW
     if (allowed) continue;
     found++;
     ok(`${rel}:${h.line} — ${h.why.join(' + ')}`, false, h.css.replace(/\s+/g, ' ').slice(0, 110) + '…');
