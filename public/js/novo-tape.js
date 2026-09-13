@@ -809,7 +809,7 @@
               d0.profile.some(function (r) { return r && isFinite(r[key]); }));
   }
 
-  function gkPaint(cv, d0, ser) {
+  function gkPaint(cv, d0, ser, serLabel) {
     if (!cv || !d0 || !Array.isArray(d0.profile)) return 0;
     /* ⚠ ROWS LACKING THE CHOSEN SERIES ARE DROPPED, NOT DRAWN AT ZERO. A strike whose greeks
        could not be computed is UNKNOWN; a zero-length bar reads as "no exposure at this strike",
@@ -885,6 +885,18 @@
       c.fillStyle = 'rgba(7,11,18,0.74)'; c.fillRect(plotL + 3, ly - 6, tw + 5, 12);
       c.fillStyle = g.color; c.fillText(txt, plotL + 5, ly);
     });
+
+    /* THE ORIENTATION CAPTIONS, AND THEY FOLLOW THE SERIES. The inline version this replaces
+       said "net short gamma" / "net long gamma" unconditionally, which was fine while gamma was
+       the only thing it could draw and would have been wrong on every other series the moment a
+       selector appeared. Naming the series keeps the cue and removes the lie.
+       CANVAS TEXT IS INVISIBLE TO EVERY DOM CONTRAST TOOL — it is painted, not an element, so a
+       walker over getComputedStyle cannot see it and will report the page clean. Tracked to the
+       same value as --txt3 by hand for that reason. */
+    var _sl = String(serLabel || '').toLowerCase() || 'exposure';
+    c.fillStyle = '#8f8f8f'; c.font = '9px sans-serif'; c.textBaseline = 'alphabetic';
+    c.textAlign = 'left'; c.fillText('← net short ' + _sl, plotL + 2, H - 4);
+    c.textAlign = 'right'; c.fillText('net long ' + _sl + ' →', W - 4, H - 4);
     return n;
   }
 
@@ -926,7 +938,7 @@
       });
     }
 
-    var drawn = gkPaint(el.querySelector('.gk-cv'), d0, active);
+    var drawn = gkPaint(el.querySelector('.gk-cv'), d0, active, cur.label);
     if (!drawn) {
       el.querySelector('.gk-wrap').innerHTML =
         '<div class="tp-empty">No strikes published for this reading yet.</div>';
