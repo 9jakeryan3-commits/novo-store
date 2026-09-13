@@ -168,7 +168,32 @@
   function load(force) {
     if (STATE && !force) return Promise.resolve(STATE);
     if (PENDING) return PENDING;
-    PENDING = fetch('/api/analyst-publish?live=1&t=' + encodeURIComponent(tok()), { cache: 'no-store' })
+    /* ⚠ PENDING WAS A PERMANENT LATCH ON A STALL. A rejection clears it through the catch below;
+       a STALL never rejects, so the final .then never ran, PENDING stayed set, and every later
+       load() handed back the same dead promise. mount() and refresh() both await it, so one
+       stalled response killed every tape view for the life of the page — History and Wire on
+       analyst, all six on trader. Measured by Junie against real sockets, replaying this exact
+       logic: body stall + bare fetch -> requests=1 settled=0, PENDING stuck; with a deadline ->
+       requests=4 settled=4, recovers.
+
+       The fix has to be a DEADLINE, not a tidier catch: if the fetch never settles then no
+       .then, .catch or .finally on it ever runs, so there is no handler that could clear the
+       latch. NovoFetch.json carries an AbortController and drains the body inside it.
+
+       ⚠ DEADLINE IS THE THIRD ARGUMENT — NovoFetch.json(url, opts, ms). _tfetch and _cmFetch
+       both take it SECOND, so porting by shape hands `ms` in as `opts` and silently falls back
+       to the 12s default. Check the slot, not the count.
+
+       Guarded, because this module is mounted by hosts that may not carry NovoFetch: the
+       fallback is the old behaviour rather than a ReferenceError that would kill the module
+       outright. trader-live.html now loads novo-fetch.js so the fallback should never fire
+       there or on analyst — it exists so that a host which forgets the dependency degrades to
+       today's bug instead of to a dead panel. */
+    var _u = '/api/analyst-publish?live=1&t=' + encodeURIComponent(tok());
+    var _req = (window.NovoFetch && window.NovoFetch.json)
+      ? window.NovoFetch.json(_u, { cache: 'no-store' }, 12000)
+      : fetch(_u, { cache: 'no-store' });
+    PENDING = _req
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; })
       .then(function (d) { STATE = d; PENDING = null; return d; });
