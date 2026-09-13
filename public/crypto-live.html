@@ -41,7 +41,18 @@ button { border: 0; }
 :root{
   --navy:#0e0e10; --navy2:#17171a; --panel:#111113; --sunk:#0b0b0d;
   --bdr:#2c2c30; --bdr2:#242428;
-  --txt1:#f0f0ee; --txt2:#a8a8a8; --txt3:#6e6e6e; --txt4:#565660;
+  /* MEASURED, NOT CHOSEN. --txt3 and --txt4 failed WCAG AA as shipped. Rendered on the live map:
+     --txt4 (#565660) came back between 2.47:1 and 2.74:1 across ~540 elements - every .bandhead,
+     .mk, .rs-k and .bv - and --txt3 (#6e6e6e) between 3.70:1 and 3.90:1 across ~28, including the
+     inactive tab buttons. AA wants 4.5:1 for body text and none of it is large enough to qualify
+     for the 3.0:1 allowance. The replacements are solved for, not picked: #7f7f89 is the darkest
+     grey clearing 4.5:1 against --navy2 (#17171a), the lightest surface either token lands on, and
+     reads 4.51:1 there; #8f8f8f sits above it at 5.53:1 so the order txt1>txt2>txt3>txt4 survives.
+     The tiers are necessarily closer together now - on a near-black theme the AA floor is high, so
+     the usable range below --txt2 is narrow. That is the cost of the standard, not a design drift.
+     --txt3 holds the same value on the other two dashboards and fails there identically; that is
+     their lane, so it is reported rather than changed here. */
+  --txt1:#f0f0ee; --txt2:#a8a8a8; --txt3:#8f8f8f; --txt4:#7f7f89;
   --green:#10b981; --green2:#34d399; --red:#f43f5e; --amber:#f59e0b; --cyan:#22d3ee;
   /* purple is this product's accent. --amber stays semantic (medium confidence / warn). */
   --cx:#a78bfa; --cx-deep:#7c3aed; --cx-line:rgba(167,139,250,.30);
@@ -579,14 +590,7 @@ tr:last-child td{border-bottom:none}
     letter-spacing:.5px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
   .cx-install[hidden]{display:none}
   .cx-install:hover{filter:brightness(1.07)}
-  @media (max-width:640px){ /* ⚠ THIS BUTTON HAD NO COLOUR AT ALL. Its constructor comments that "look lives in the sheet, not
-    here" — and the sheet only ever set position, so it fell through to a UA default and rendered at
-    **1.03:1** against the page: an install CTA that is there, hittable, and invisible. Measured in
-    the 09-12 contrast sweep, which is also why it survived every visual pass — nobody can see a
-    thing they cannot see. Violet is the crypto product's own colour and clears AA at 7.31:1.
-    Colour only, per the CTA rule: no fill, no border, no box — the UA button chrome is stripped
-    because a button is a word you click. */
- .cx-install{bottom:70px;left:12px;color:var(--cx);background:none;border:0;font:inherit;cursor:pointer} }
+  @media (max-width:640px){ .cx-install{bottom:70px;left:12px} }
   /* In-flow header control, not a floating dock. */
   #novo-ask-bubble.open{color:#eaf3ff}
   #novo-ask-bubble{position:static;margin-left:14px;flex:0 0 auto;z-index:auto;display:flex;align-items:center;gap:9px;
@@ -2103,7 +2107,7 @@ function drawGamma(g){
     x.fillStyle=s.dg>=0?'rgba(16,185,129,.78)':'rgba(244,63,94,.78)';
     if(s.dg>=0) x.fillRect(zero,y,w,barH); else x.fillRect(zero-w,y,w,barH);
   }
-  x.font='9px "Space Grotesk",sans-serif'; x.textAlign='right'; x.fillStyle='#565660';
+  x.font='9px "Space Grotesk",sans-serif'; x.textAlign='right'; x.fillStyle='#7f7f89';
   const step=Math.max(1,Math.ceil(band.length/18));
   band.forEach((s,i)=>{if(i%step)return;
     x.fillText(s.k>=1000?Math.round(s.k).toLocaleString():s.k.toPrecision(4),padL-8,yOf(s.k)+3);});
